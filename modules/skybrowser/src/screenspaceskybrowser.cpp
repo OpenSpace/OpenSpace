@@ -185,13 +185,13 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
         _wwtBorderColor = randomBorderColor();
     }
 
-    _useRadiusAzimuthElevation.onChange(
+    _placement.useRadiusAzimuthElevation.onChange(
         [this]() {
             std::for_each(
                 _displayCopies.begin(),
                 _displayCopies.end(),
                 [this](std::unique_ptr<Vec3Property>& copy) {
-                    if (_useRadiusAzimuthElevation) {
+                    if (_placement.useRadiusAzimuthElevation) {
                         *copy = sphericalToRae(cartesianToSpherical(copy->value()));
 
                     }
@@ -374,7 +374,7 @@ void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
     for (size_t i = 0; i < _displayCopies.size(); i++) {
         if (_showDisplayCopies[i]->value()) {
             glm::vec3 coordinates = _displayCopies[i]->value();
-            if (_useRadiusAzimuthElevation) {
+            if (_placement.useRadiusAzimuthElevation) {
                 coordinates = sphericalToCartesian(raeToSpherical(coordinates));
             }
             glm::mat4 localRotation = glm::mat4(1.f);

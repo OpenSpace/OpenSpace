@@ -251,7 +251,7 @@ void ScreenSpaceRenderableRenderable::initializeGL() {
     _renderable->initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec4 bg = _backgroundColor;
+        glm::vec4 bg = _color.backgroundColor;
         glClearColor(bg.r, bg.g, bg.b, bg.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

@@ -59,13 +59,11 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RenderDuringBlackoutInfo = {
-        "RenderDuringBlackout",
-        "Render during blackout",
-        "If true, this screen space renderable is going to ignore the global blackout "
-        "factor from the Render Engine and will always render at full opacity. If false, "
-        "it will adhere to the factor and fade out like the rest of the 3D rendering.",
-        Property::Visibility::User
+    const PropertyOwner::PropertyOwnerInfo PlacementInfo = {
+        "Placement",
+        "Placement",
+        "Properties to determine where the screen space object will be placed on the "
+        "screen."
     };
 
     constexpr Property::PropertyInfo UseRadiusAzimuthElevationInfo = {
@@ -77,13 +75,6 @@ namespace {
         "whereas the radius azimuth elevation are most useful in a planetarium "
         "environment.",
         Property::Visibility::NoviceUser
-    };
-
-    constexpr Property::PropertyInfo UsePerspectiveProjectionInfo = {
-        "UsePerspectiveProjection",
-        "Use perspective projection",
-        "Determines whetether the z/radius values affects the size of the plane or not.",
-        Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo CartesianPositionInfo = {
@@ -102,21 +93,38 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ScaleInfo = {
-        "Scale",
-        "Scale value",
-        "A scale factor for the plane that can be used to increase or decrease the "
-        "visual size. The default size is determined separately for each screen space "
-        "renderable type and may for example be affected by the size of an image being "
-        "displayed.",
+    const PropertyOwner::PropertyOwnerInfo BorderInfo = {
+        "Border",
+        "Border",
+        "Properties to control the look of the border surrounding the screen space "
+        "object."
+    };
+
+    constexpr Property::PropertyInfo BorderWidthInfo = {
+        "Width",
+        "Border width",
+        "The width of the border.",
         Property::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo LocalRotationInfo = {
-        "Rotation",
-        "Local rotation",
-        "An Euler rotation (x, y, z) to apply to the screen space object.",
-        Property::Visibility::User
+    constexpr Property::PropertyInfo BorderColorInfo = {
+        "Color",
+        "Border color",
+        "The color of the border.",
+        Property::Visibility::NoviceUser
+    };
+
+    constexpr Property::PropertyInfo BorderFeatherInfo = {
+        "Feather",
+        "Border feather",
+        "If this value is enabled and a border width is set, the border will be rendered "
+        "as a feathered border rather than a hard corner."
+    };
+
+    const PropertyOwner::PropertyOwnerInfo ColorInfo = {
+        "Color",
+        "Color",
+        "Properties to control the color of the screen space object."
     };
 
     constexpr Property::PropertyInfo MultiplyColorInfo = {
@@ -136,6 +144,40 @@ namespace {
         Property::Visibility::User
     };
 
+    constexpr Property::PropertyInfo GammaOffsetInfo = {
+        "GammaOffset",
+        "Gamma correction offset",
+        "Sets the gamma correction of the texture that is applied in addition to the "
+        "global gamma value.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo RenderDuringBlackoutInfo = {
+        "RenderDuringBlackout",
+        "Render during blackout",
+        "If true, this screen space renderable is going to ignore the global blackout "
+        "factor from the Render Engine and will always render at full opacity. If false, "
+        "it will adhere to the factor and fade out like the rest of the 3D rendering.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo ScaleInfo = {
+        "Scale",
+        "Scale value",
+        "A scale factor for the plane that can be used to increase or decrease the "
+        "visual size. The default size is determined separately for each screen space "
+        "renderable type and may for example be affected by the size of an image being "
+        "displayed.",
+        Property::Visibility::NoviceUser
+    };
+
+    constexpr Property::PropertyInfo LocalRotationInfo = {
+        "Rotation",
+        "Local rotation",
+        "An Euler rotation (x, y, z) to apply to the screen space object.",
+        Property::Visibility::User
+    };
+
     constexpr Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
@@ -150,35 +192,6 @@ namespace {
         "If enabled, the object will be rotated to face the camera position. Any local "
         "rotation is then applied after this rotation.",
         Property::Visibility::NoviceUser
-    };
-
-    constexpr Property::PropertyInfo GammaOffsetInfo = {
-        "GammaOffset",
-        "Gamma correction offset",
-        "Sets the gamma correction of the texture that is applied in addition to the "
-        "global gamma value.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo BorderWidthInfo = {
-        "BorderWidth",
-        "Border width",
-        "The width of the border.",
-        Property::Visibility::NoviceUser
-    };
-
-    constexpr Property::PropertyInfo BorderColorInfo = {
-        "BorderColor",
-        "Border color",
-        "The color of the border.",
-        Property::Visibility::NoviceUser
-    };
-
-    constexpr Property::PropertyInfo BorderFeatherInfo = {
-        "BorderFeather",
-        "Border feather",
-        "If this value is enabled and a border width is set, the border will be rendered "
-        "as a feathered border rather than a hard corner."
     };
 
     float wrap(float value, float min, float max) {
@@ -246,9 +259,6 @@ namespace {
         // [[codegen::verbatim(GammaOffsetInfo.description)]]
         std::optional<float> gammaOffset;
 
-        // [[codegen::verbatim(UsePerspectiveProjectionInfo.description)]]
-        std::optional<bool> usePerspectiveProjection;
-
         // [[codegen::verbatim(MultiplyColorInfo.description)]]
         std::optional<glm::vec3> multiplyColor [[codegen::color()]];
 
@@ -312,39 +322,57 @@ std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
     : PropertyOwner({ "" })
     , _enabled(EnabledInfo, true)
+    , _placement {
+        .owner = PropertyOwner(PlacementInfo),
+        .useRadiusAzimuthElevation = BoolProperty(UseRadiusAzimuthElevationInfo, false),
+        .cartesian = Vec3Property(
+            CartesianPositionInfo,
+            glm::vec3(0.f, 0.f, -2.f),
+            glm::vec3(-4.f, -4.f, -10.f),
+            glm::vec3(4.f, 4.f, 0.f)
+        ),
+        .rae = Vec3Property(
+            RadiusAzimuthElevationInfo,
+            glm::vec3(2.f, 0.f, 0.f),
+            glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
+            glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
+        )
+    }
+    , _border {
+        .owner = PropertyOwner(BorderInfo),
+        .width = FloatProperty(BorderWidthInfo, 0.f, 0.f, 1000.f),
+        .color = Vec3Property(
+            BorderColorInfo,
+            glm::vec3(0.f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        .feather = BoolProperty(BorderFeatherInfo, false)
+    }
+    , _color {
+        .owner = PropertyOwner(ColorInfo),
+        .multiplyColor = Vec3Property(
+            MultiplyColorInfo,
+            glm::vec3(1.f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        . backgroundColor = Vec4Property(
+            BackgroundColorInfo,
+            glm::vec4(0.f),
+            glm::vec4(0.f),
+            glm::vec4(1.f)
+        ),
+        .gammaOffset = FloatProperty(GammaOffsetInfo, 0.f, -1.f, 10.f)
+    }
     , _renderDuringBlackout(RenderDuringBlackoutInfo, false)
-    , _usePerspectiveProjection(UsePerspectiveProjectionInfo, false)
-    , _useRadiusAzimuthElevation(UseRadiusAzimuthElevationInfo, false)
     , _faceCamera(FaceCameraInfo, true)
-    , _cartesianPosition(
-        CartesianPositionInfo,
-        glm::vec3(0.f, 0.f, -2.f),
-        glm::vec3(-4.f, -4.f, -10.f),
-        glm::vec3(4.f, 4.f, 0.f)
-    )
-    , _raePosition(
-        RadiusAzimuthElevationInfo,
-        glm::vec3(2.f, 0.f, 0.f),
-        glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
-        glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
-    )
+    , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
     , _localRotation(
         LocalRotationInfo,
         glm::vec3(0.f),
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
-    )
-    , _borderWidth(BorderWidthInfo, 0.f, 0.f, 1000.f)
-    , _borderColor(BorderColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _borderFeather(BorderFeatherInfo, false)
-    , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
-    , _gammaOffset(GammaOffsetInfo, 0.f, -1.f, 10.f)
-    , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _backgroundColor(
-        BackgroundColorInfo,
-        glm::vec4(0.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
     )
     , _delete(DeleteInfo)
 {
@@ -361,68 +389,74 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
 
-    _renderDuringBlackout = p.renderDuringBlackout.value_or(_renderDuringBlackout);
-    addProperty(_renderDuringBlackout);
-
-    _useRadiusAzimuthElevation =
-        p.useRadiusAzimuthElevation.value_or(_useRadiusAzimuthElevation);
-    addProperty(_useRadiusAzimuthElevation);
-
-    _usePerspectiveProjection =
-        p.usePerspectiveProjection.value_or(_usePerspectiveProjection);
-    addProperty(_usePerspectiveProjection);
-
-    _faceCamera = p.faceCamera.value_or(_faceCamera);
-    addProperty(_faceCamera);
-
-    if (_useRadiusAzimuthElevation) {
-        _raePosition = p.radiusAzimuthElevation.value_or(_raePosition);
-    }
-    else {
-        _cartesianPosition = p.cartesianPosition.value_or(_cartesianPosition);
-    }
-    addProperty(_cartesianPosition);
-    addProperty(_raePosition);
-
-    // Setting spherical/euclidean onchange handler
-    _useRadiusAzimuthElevation.onChange([this]() {
-        if (_useRadiusAzimuthElevation) {
-            _raePosition = sphericalToRae(cartesianToSpherical(_cartesianPosition));
-        }
-        else {
-            _cartesianPosition = sphericalToCartesian(raeToSpherical(_raePosition));
-        }
-    });
-
-    _gammaOffset = p.gammaOffset.value_or(_gammaOffset);
-    addProperty(_gammaOffset);
-
-    _scale = p.scale.value_or(_scale);
-    addProperty(_scale);
-
-    _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
-    _multiplyColor.setViewOption(Property::ViewOptions::Color);
-    addProperty(_multiplyColor);
-
-    _backgroundColor = p.backgroundColor.value_or(_backgroundColor);
-    _backgroundColor.setViewOption(Property::ViewOptions::Color);
-    addProperty(_backgroundColor);
-
     _opacity = p.opacity.value_or(_opacity);
     addProperty(Fadeable::_opacity);
     addProperty(Fadeable::_fade);
 
+    //
+    // Placement
+    //
+    _placement.useRadiusAzimuthElevation =
+        p.useRadiusAzimuthElevation.value_or(_placement.useRadiusAzimuthElevation);
+    _placement.useRadiusAzimuthElevation.onChange([this]() {
+        if (_placement.useRadiusAzimuthElevation) {
+            _placement.rae = sphericalToRae(cartesianToSpherical(_placement.cartesian));
+        }
+        else {
+            _placement.cartesian = sphericalToCartesian(raeToSpherical(_placement.rae));
+        }
+    });
+    _placement.owner.addProperty(_placement.useRadiusAzimuthElevation);
+
+    _placement.cartesian = p.cartesianPosition.value_or(_placement.cartesian);
+    _placement.owner.addProperty(_placement.cartesian);
+
+    _placement.rae = p.radiusAzimuthElevation.value_or(_placement.rae);
+    _placement.owner.addProperty(_placement.rae);
+    addPropertySubOwner(_placement.owner);
+
+
+    //
+    // Border
+    //
+    _border.color = p.borderColor.value_or(_border.color);
+    _border.color.setViewOption(Property::ViewOptions::Color);
+    _border.owner.addProperty(_border.color);
+
+    _border.feather = p.borderFeather.value_or(_border.feather);
+    _border.owner.addProperty(_border.feather);
+
+    _border.width = p.borderWidth.value_or(_border.width);
+    _border.owner.addProperty(_border.width);
+    addPropertySubOwner(_border.owner);
+
+
+    //
+    // Color
+    //
+    _color.multiplyColor = p.multiplyColor.value_or(_color.multiplyColor);
+    _color.multiplyColor.setViewOption(Property::ViewOptions::Color);
+    _color.owner.addProperty(_color.multiplyColor);
+
+    _color.backgroundColor = p.backgroundColor.value_or(_color.backgroundColor);
+    _color.backgroundColor.setViewOption(Property::ViewOptions::Color);
+    _color.owner.addProperty(_color.backgroundColor);
+
+    _color.gammaOffset = p.gammaOffset.value_or(_color.gammaOffset);
+    _color.owner.addProperty(_color.gammaOffset);
+    addPropertySubOwner(_color.owner);
+
+    _renderDuringBlackout = p.renderDuringBlackout.value_or(_renderDuringBlackout);
+    addProperty(_renderDuringBlackout);
+
+    _faceCamera = p.faceCamera.value_or(_faceCamera);
+    addProperty(_faceCamera);
+
+    _scale = p.scale.value_or(_scale);
+    addProperty(_scale);
+
     _localRotation = p.rotation.value_or(_localRotation);
     addProperty(_localRotation);
-
-    _borderColor = p.borderColor.value_or(_borderColor);
-    _borderColor.setViewOption(Property::ViewOptions::Color);
-    addProperty(_borderColor);
-
-    addProperty(_borderFeather);
-
-    _borderWidth = p.borderWidth.value_or(_borderWidth);
-    addProperty(_borderWidth);
 
     if (p.tag.has_value()) {
         if (std::holds_alternative<std::string>(*p.tag)) {
@@ -490,7 +524,7 @@ bool ScreenSpaceRenderable::isEnabled() const {
 }
 
 bool ScreenSpaceRenderable::isUsingRaeCoords() const {
-    return _useRadiusAzimuthElevation;
+    return _placement.useRadiusAzimuthElevation;
 }
 
 bool ScreenSpaceRenderable::isFacingCamera() const {
@@ -502,9 +536,9 @@ void ScreenSpaceRenderable::setEnabled(bool isEnabled) {
 }
 
 float ScreenSpaceRenderable::depth() {
-    return _useRadiusAzimuthElevation ?
-        _raePosition.value().x :
-        cartesianToSpherical(_cartesianPosition).x;
+    return _placement.useRadiusAzimuthElevation ?
+        _placement.rae.value().x :
+        cartesianToSpherical(_placement.cartesian).x;
 }
 
 float ScreenSpaceRenderable::scale() const {
@@ -555,7 +589,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 }
 
 glm::vec2 ScreenSpaceRenderable::screenSpacePosition() {
-    return glm::vec2(_cartesianPosition.value());
+    return glm::vec2(_placement.cartesian.value());
 }
 
 glm::vec2 ScreenSpaceRenderable::screenSpaceDimensions() {
@@ -587,20 +621,20 @@ void ScreenSpaceRenderable::translate(glm::vec2 translation, glm::vec2 position)
         glm::mat4(1.f),
         glm::vec3(translation, 0.f)
     );
-    const glm::vec4 origin = glm::vec4(position, _cartesianPosition.value().z, 1.f);
-    _cartesianPosition = translationMatrix * origin;
+    const glm::vec4 origin = glm::vec4(position, _placement.cartesian.value().z, 1.f);
+    _placement.cartesian = translationMatrix * origin;
 }
 
 void ScreenSpaceRenderable::setCartesianPosition(const glm::vec3& position) {
-    _cartesianPosition = position;
+    _placement.cartesian = position;
 }
 
 void ScreenSpaceRenderable::setRaeFromCartesianPosition(const glm::vec3& position) {
-    _raePosition = cartesianToRae(position);
+    _placement.rae = cartesianToRae(position);
 }
 
 glm::vec3 ScreenSpaceRenderable::raePosition() const {
-    return _raePosition;
+    return _placement.rae;
 }
 
 glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
@@ -620,9 +654,9 @@ glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
 glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
     glm::mat4 rotation = glm::mat4(1.f);
     if (_faceCamera) {
-        const glm::vec3 translation = _useRadiusAzimuthElevation ?
-            sphericalToCartesian(raeToSpherical(_raePosition)) :
-            _cartesianPosition;
+        const glm::vec3 translation = _placement.useRadiusAzimuthElevation ?
+            sphericalToCartesian(raeToSpherical(_placement.rae)) :
+            _placement.cartesian;
 
         rotation = glm::inverse(glm::lookAt(
             glm::vec3(0.f),
@@ -646,9 +680,9 @@ glm::vec3 ScreenSpaceRenderable::cartesianToRae(const glm::vec3& cartesian) cons
 }
 
 glm::mat4 ScreenSpaceRenderable::translationMatrix() {
-    const glm::vec3 translation = _useRadiusAzimuthElevation ?
-        sphericalToCartesian(raeToSpherical(_raePosition)) :
-        _cartesianPosition;
+    const glm::vec3 translation = _placement.useRadiusAzimuthElevation ?
+        sphericalToCartesian(raeToSpherical(_placement.rae)) :
+        _placement.cartesian;
 
     return glm::translate(glm::mat4(1.f), translation);
 }
@@ -662,11 +696,11 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     _shader->activate();
     // Calculate the border from pixels to UV coordinates
     const glm::vec2 borderUV = glm::vec2(
-        _borderWidth / static_cast<float>(_objectSize.x),
-        _borderWidth / static_cast<float>(_objectSize.y)
+        _border.width / static_cast<float>(_objectSize.x),
+        _border.width / static_cast<float>(_objectSize.y)
     );
 
-    _shader->setUniform(_uniformCache.color, _multiplyColor);
+    _shader->setUniform(_uniformCache.color, _color.multiplyColor);
     _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(
         _uniformCache.blackoutFactor,
@@ -675,11 +709,11 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     _shader->setUniform(_uniformCache.hue, renderData.hue);
     _shader->setUniform(_uniformCache.value, renderData.value);
     _shader->setUniform(_uniformCache.saturation, renderData.saturation);
-    _shader->setUniform(_uniformCache.gamma, renderData.gamma + _gammaOffset);
-    _shader->setUniform(_uniformCache.backgroundColor, _backgroundColor);
+    _shader->setUniform(_uniformCache.gamma, renderData.gamma + _color.gammaOffset);
+    _shader->setUniform(_uniformCache.backgroundColor, _color.backgroundColor);
     _shader->setUniform(_uniformCache.borderWidth, borderUV);
-    _shader->setUniform(_uniformCache.borderColor, _borderColor);
-    _shader->setUniform(_uniformCache.borderFeather, _borderFeather);
+    _shader->setUniform(_uniformCache.borderColor, _border.color);
+    _shader->setUniform(_uniformCache.borderFeather, _border.feather);
     _shader->setUniform(_uniformCache.useAcceleratedRendering, useAcceleratedRendering);
     _shader->setUniform(
         _uniformCache.mvpMatrix,
