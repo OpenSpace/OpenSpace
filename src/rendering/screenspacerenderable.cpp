@@ -116,7 +116,7 @@ namespace {
 
     constexpr Property::PropertyInfo BorderFeatherInfo = {
         "Feather",
-        "Border feather",
+        "Feather",
         "If this value is enabled and a border width is set, the border will be rendered "
         "as a feathered border rather than a hard corner."
     };
@@ -164,7 +164,7 @@ namespace {
 
     constexpr Property::PropertyInfo ScaleInfo = {
         "Scale",
-        "Scale value",
+        "Scale",
         "A scale factor for the plane that can be used to increase or decrease the "
         "visual size. The default size is determined separately for each screen space "
         "renderable type and may for example be affected by the size of an image being "
@@ -176,14 +176,6 @@ namespace {
         "Rotation",
         "Local rotation",
         "An Euler rotation (x, y, z) to apply to the screen space object.",
-        Property::Visibility::User
-    };
-
-    constexpr Property::PropertyInfo DeleteInfo = {
-        "Delete",
-        "Delete",
-        "If this property is triggered, this screen space plane is removed from the "
-        "scene.",
         Property::Visibility::User
     };
 
