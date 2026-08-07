@@ -120,7 +120,7 @@ if (UNIX AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_definitions(D_GNU_SOURCE)
 endif ()
 
-add_subdirectory(ext)
+add_subdirectory(ext EXCLUDE_FROM_ALL)
 add_subdirectory(src)
 
 add_subdirectory(support/coding/codegen)
