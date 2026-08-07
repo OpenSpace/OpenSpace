@@ -143,31 +143,28 @@ protected:
         // Radius, azimuth, elevation, where azimuth is relative to negative y axis and
         // elevation is angle from plane with normal z
         Vec3Property rae;
+
+        FloatProperty scale;
+        // Local rotation (roll, pitch, yaw)
+        Vec3Property localRotation;
     } _placement;
 
     struct {
         PropertyOwner owner;
-        FloatProperty width;
-        Vec3Property color;
-        BoolProperty feather;
-    } _border;
-
-    struct {
-        PropertyOwner owner;
-
         Vec3Property multiplyColor;
         Vec4Property backgroundColor;
         FloatProperty gammaOffset;
-    } _color;
+
+        struct {
+            PropertyOwner owner;
+            FloatProperty width;
+            Vec3Property color;
+            BoolProperty feather;
+        } border;
+    } _style;
 
     BoolProperty _renderDuringBlackout;
     BoolProperty _faceCamera;
-
-    FloatProperty _scale;
-    // Local rotation (roll, pitch, yaw)
-    Vec3Property _localRotation;
-
-    TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
 

@@ -121,17 +121,18 @@ namespace {
         "as a feathered border rather than a hard corner."
     };
 
-    const PropertyOwner::PropertyOwnerInfo ColorInfo = {
-        "Color",
-        "Color",
-        "Properties to control the color of the screen space object."
+    const PropertyOwner::PropertyOwnerInfo StyleInfo = {
+        "Style",
+        "Style",
+        "Properties to control the visual style of the screen space object, such as "
+        "gamma settings, borders, and background colors."
     };
 
     constexpr Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply color",
         "If set, the plane's texture is multiplied with this color. Useful for applying "
-        "a color grayscale images.",
+        "a color to grayscale images.",
         Property::Visibility::User
     };
 
@@ -336,21 +337,17 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
             glm::vec3(2.f, 0.f, 0.f),
             glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
             glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
+        ),
+        .scale = FloatProperty(ScaleInfo, 0.25f, 0.f, 2.f),
+        .localRotation = Vec3Property(
+            LocalRotationInfo,
+            glm::vec3(0.f),
+            glm::vec3(-glm::pi<float>()),
+            glm::vec3(glm::pi<float>())
         )
     }
-    , _border {
-        .owner = PropertyOwner(BorderInfo),
-        .width = FloatProperty(BorderWidthInfo, 0.f, 0.f, 1000.f),
-        .color = Vec3Property(
-            BorderColorInfo,
-            glm::vec3(0.f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .feather = BoolProperty(BorderFeatherInfo, false)
-    }
-    , _color {
-        .owner = PropertyOwner(ColorInfo),
+    , _style {
+        .owner = PropertyOwner(StyleInfo),
         .multiplyColor = Vec3Property(
             MultiplyColorInfo,
             glm::vec3(1.f),
@@ -363,18 +360,21 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
             glm::vec4(0.f),
             glm::vec4(1.f)
         ),
-        .gammaOffset = FloatProperty(GammaOffsetInfo, 0.f, -1.f, 10.f)
+        .gammaOffset = FloatProperty(GammaOffsetInfo, 0.f, -1.f, 10.f),
+        .border = {
+            .owner = PropertyOwner(BorderInfo),
+            .width = FloatProperty(BorderWidthInfo, 0.f, 0.f, 1000.f),
+            .color = Vec3Property(
+                BorderColorInfo,
+                glm::vec3(0.f),
+                glm::vec3(0.f),
+                glm::vec3(1.f)
+            ),
+            .feather = BoolProperty(BorderFeatherInfo, false)
+        }
     }
     , _renderDuringBlackout(RenderDuringBlackoutInfo, false)
     , _faceCamera(FaceCameraInfo, true)
-    , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
-    , _localRotation(
-        LocalRotationInfo,
-        glm::vec3(0.f),
-        glm::vec3(-glm::pi<float>()),
-        glm::vec3(glm::pi<float>())
-    )
-    , _delete(DeleteInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -413,50 +413,47 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
     _placement.rae = p.radiusAzimuthElevation.value_or(_placement.rae);
     _placement.owner.addProperty(_placement.rae);
+
+    _placement.scale = p.scale.value_or(_placement.scale);
+    _placement.owner.addProperty(_placement.scale);
+
+    _placement.localRotation = p.rotation.value_or(_placement.localRotation);
+    _placement.owner.addProperty(_placement.localRotation);
+
     addPropertySubOwner(_placement.owner);
 
-
     //
-    // Border
+    // Style
     //
-    _border.color = p.borderColor.value_or(_border.color);
-    _border.color.setViewOption(Property::ViewOptions::Color);
-    _border.owner.addProperty(_border.color);
+    _style.multiplyColor = p.multiplyColor.value_or(_style.multiplyColor);
+    _style.multiplyColor.setViewOption(Property::ViewOptions::Color);
+    _style.owner.addProperty(_style.multiplyColor);
 
-    _border.feather = p.borderFeather.value_or(_border.feather);
-    _border.owner.addProperty(_border.feather);
+    _style.backgroundColor = p.backgroundColor.value_or(_style.backgroundColor);
+    _style.backgroundColor.setViewOption(Property::ViewOptions::Color);
+    _style.owner.addProperty(_style.backgroundColor);
 
-    _border.width = p.borderWidth.value_or(_border.width);
-    _border.owner.addProperty(_border.width);
-    addPropertySubOwner(_border.owner);
+    _style.gammaOffset = p.gammaOffset.value_or(_style.gammaOffset);
+    _style.owner.addProperty(_style.gammaOffset);
 
+    _style.border.width = p.borderWidth.value_or(_style.border.width);
+    _style.border.owner.addProperty(_style.border.width);
 
-    //
-    // Color
-    //
-    _color.multiplyColor = p.multiplyColor.value_or(_color.multiplyColor);
-    _color.multiplyColor.setViewOption(Property::ViewOptions::Color);
-    _color.owner.addProperty(_color.multiplyColor);
+    _style.border.color = p.borderColor.value_or(_style.border.color);
+    _style.border.color.setViewOption(Property::ViewOptions::Color);
+    _style.border.owner.addProperty(_style.border.color);
 
-    _color.backgroundColor = p.backgroundColor.value_or(_color.backgroundColor);
-    _color.backgroundColor.setViewOption(Property::ViewOptions::Color);
-    _color.owner.addProperty(_color.backgroundColor);
+    _style.border.feather = p.borderFeather.value_or(_style.border.feather);
+    _style.border.owner.addProperty(_style.border.feather);
+    _style.owner.addPropertySubOwner(_style.border.owner);
 
-    _color.gammaOffset = p.gammaOffset.value_or(_color.gammaOffset);
-    _color.owner.addProperty(_color.gammaOffset);
-    addPropertySubOwner(_color.owner);
+    addPropertySubOwner(_style.owner);
 
     _renderDuringBlackout = p.renderDuringBlackout.value_or(_renderDuringBlackout);
     addProperty(_renderDuringBlackout);
 
     _faceCamera = p.faceCamera.value_or(_faceCamera);
     addProperty(_faceCamera);
-
-    _scale = p.scale.value_or(_scale);
-    addProperty(_scale);
-
-    _localRotation = p.rotation.value_or(_localRotation);
-    addProperty(_localRotation);
 
     if (p.tag.has_value()) {
         if (std::holds_alternative<std::string>(*p.tag)) {
@@ -473,20 +470,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
             throw ghoul::MissingCaseException();
         }
     }
-
-    _delete.onChange([this](){
-        std::string script =
-            "openspace.removeScreenSpaceRenderable('" + identifier() + "');";
-        // No sync or send because this is already inside a Lua script that was triggered
-        // when this triggerProperty was pressed in the gui, therefor it has already been
-        // synced and sent to the connected nodes and peers
-        global::scriptEngine->queueScript({
-            .code = std::move(script),
-            .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
-            .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No
-        });
-    });
-    addProperty(_delete);
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable() {}
@@ -542,7 +525,7 @@ float ScreenSpaceRenderable::depth() {
 }
 
 float ScreenSpaceRenderable::scale() const {
-    return _scale;
+    return _placement.scale;
 }
 
 void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
@@ -582,7 +565,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
     glm::mat4 scale = glm::scale(
         glm::mat4(1.f),
-        glm::vec3(_scale.value(), textureRatio * _scale, 1.f)
+        glm::vec3(_placement.scale.value(), textureRatio * _placement.scale, 1.f)
     );
 
     return scale;
@@ -595,7 +578,7 @@ glm::vec2 ScreenSpaceRenderable::screenSpacePosition() {
 glm::vec2 ScreenSpaceRenderable::screenSpaceDimensions() {
     const float ratio =
         static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y);
-    return glm::vec2(2.f * _scale * ratio, 2.f * _scale);
+    return glm::vec2(2.f * _placement.scale * ratio, 2.f * _placement.scale);
 }
 
 glm::vec2 ScreenSpaceRenderable::upperRightCornerScreenSpace() {
@@ -665,9 +648,9 @@ glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
         ));
     }
 
-    const float roll = _localRotation.value().x;
-    const float pitch = _localRotation.value().y;
-    const float yaw = _localRotation.value().z;
+    const float roll = _placement.localRotation.value().x;
+    const float pitch = _placement.localRotation.value().y;
+    const float yaw = _placement.localRotation.value().z;
     return rotation * glm::mat4(glm::quat(glm::vec3(pitch, yaw, roll)));
 }
 
@@ -696,11 +679,11 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     _shader->activate();
     // Calculate the border from pixels to UV coordinates
     const glm::vec2 borderUV = glm::vec2(
-        _border.width / static_cast<float>(_objectSize.x),
-        _border.width / static_cast<float>(_objectSize.y)
+        _style.border.width / static_cast<float>(_objectSize.x),
+        _style.border.width / static_cast<float>(_objectSize.y)
     );
 
-    _shader->setUniform(_uniformCache.color, _color.multiplyColor);
+    _shader->setUniform(_uniformCache.color, _style.multiplyColor);
     _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(
         _uniformCache.blackoutFactor,
@@ -709,11 +692,11 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     _shader->setUniform(_uniformCache.hue, renderData.hue);
     _shader->setUniform(_uniformCache.value, renderData.value);
     _shader->setUniform(_uniformCache.saturation, renderData.saturation);
-    _shader->setUniform(_uniformCache.gamma, renderData.gamma + _color.gammaOffset);
-    _shader->setUniform(_uniformCache.backgroundColor, _color.backgroundColor);
+    _shader->setUniform(_uniformCache.gamma, renderData.gamma + _style.gammaOffset);
+    _shader->setUniform(_uniformCache.backgroundColor, _style.backgroundColor);
     _shader->setUniform(_uniformCache.borderWidth, borderUV);
-    _shader->setUniform(_uniformCache.borderColor, _border.color);
-    _shader->setUniform(_uniformCache.borderFeather, _border.feather);
+    _shader->setUniform(_uniformCache.borderColor, _style.border.color);
+    _shader->setUniform(_uniformCache.borderFeather, _style.border.feather);
     _shader->setUniform(_uniformCache.useAcceleratedRendering, useAcceleratedRendering);
     _shader->setUniform(
         _uniformCache.mvpMatrix,
