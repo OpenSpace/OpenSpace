@@ -59,6 +59,13 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    constexpr Property::PropertyInfo TypeInfo = {
+        "Type",
+        "Type",
+        "The type of the screenspace renderable.",
+        Property::Visibility::AdvancedUser
+    };
+
     const PropertyOwner::PropertyOwnerInfo PlacementInfo = {
         "Placement",
         "Placement",
@@ -315,6 +322,7 @@ std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
     : PropertyOwner({ "" })
     , _enabled(EnabledInfo, true)
+    , _renderableType(TypeInfo)
     , _placement {
         .owner = PropertyOwner(PlacementInfo),
         .useRadiusAzimuthElevation = BoolProperty(UseRadiusAzimuthElevationInfo, false),
@@ -377,6 +385,11 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     if (p.name.has_value()) {
         setGuiName(*p.name);
     }
+
+    // Type for UI
+    _renderableType = p.type;
+    _renderableType.setReadOnly(true);
+    addProperty(_renderableType);
 
     _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);

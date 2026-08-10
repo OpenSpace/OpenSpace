@@ -28,7 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
-#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -134,6 +134,7 @@ protected:
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
 
     BoolProperty _enabled;
+    StringProperty _renderableType;
 
     struct {
         PropertyOwner owner;
