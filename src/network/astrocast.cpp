@@ -687,6 +687,12 @@ void Astrocast::sendScript(std::string script) {
         return;
     }
 
+    if (script.find(".astrocast.") != std::string::npos) {
+        // Do not send scripts that are related to astrocast since the host could for
+        // example disconnect any client that sends such a script
+        return;
+    }
+
     datamessagestructures::ScriptMessage sm = {
         ._script = std::move(script)
     };
