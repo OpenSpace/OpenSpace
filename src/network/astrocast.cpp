@@ -126,7 +126,7 @@ namespace {
             timelineMessage._keyframes.push_back(kfMessage);
         }
 
-        // Case 2: Send one keyframe to represent the curernt time. If time jumped this
+        // Case 2: Send one keyframe to represent the current time. If time jumped this
         // frame, this is represented in the keyframe
         if (timeline.nKeyframes() == 0) {
             datamessagestructures::TimeKeyframe kfMessage;

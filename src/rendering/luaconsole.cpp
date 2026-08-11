@@ -323,7 +323,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 _shouldBeSynchronized = !_shouldBeSynchronized;
             }
             else if (modifierControl) {
-                // Only allow this toggle if a AstrocastConnection exists
+                // Only allow this toggle if an AstrocastConnection exists
                 if (_shouldSendToRemote) {
                     _shouldSendToRemote = false;
                 }
