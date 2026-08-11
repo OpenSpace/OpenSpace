@@ -289,7 +289,7 @@ namespace {
 } // namespace
 
 namespace openspace {
-    
+
 Astrocast::Astrocast()
     : PropertyOwner({ "Astrocast", "Astrocast" })
     , _password(PasswordInfo)
@@ -687,6 +687,9 @@ void Astrocast::sendScript(std::string script) {
         return;
     }
 
+    // @TODO (anden88 2026-08-11): This is a temporary solution to avoid sending scripts
+    // that are related to astrocast. Proabbly what we want is to have the JavaScript
+    // API functions take additional parameters that sets the sync flags
     if (script.find(".astrocast.") != std::string::npos) {
         // Do not send scripts that are related to astrocast since the host could for
         // example disconnect any client that sends such a script
