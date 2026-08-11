@@ -130,19 +130,6 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     identifier = makeUniqueIdentifier(identifier);
     setIdentifier(identifier);
 
-    addProperty(_key);
-    _triggerKey.onChange([this]() {
-        const KeyWithModifier key = stringToKey(_key);
-        CefKeyEvent k = EventHandler::toCefKeyEvent(key);
-
-        k.type = KEYEVENT_KEYDOWN;
-        _browserInstance->sendKeyEvent(k);
-
-        k.type = KEYEVENT_KEYUP;
-        _browserInstance->sendKeyEvent(k);
-    });
-    addProperty(_triggerKey);
-
     _url = p.url.value_or(_url);
     _url.onChange([this]() { _isUrlDirty = true; });
     addProperty(_url);
@@ -158,6 +145,19 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 
     _reload.onChange([this]() { _browserInstance->reloadBrowser(); });
     addProperty(_reload);
+
+    addProperty(_key);
+    _triggerKey.onChange([this]() {
+        const KeyWithModifier key = stringToKey(_key);
+        CefKeyEvent k = EventHandler::toCefKeyEvent(key);
+
+        k.type = KEYEVENT_KEYDOWN;
+        _browserInstance->sendKeyEvent(k);
+
+        k.type = KEYEVENT_KEYUP;
+        _browserInstance->sendKeyEvent(k);
+    });
+    addProperty(_triggerKey);
 
     _useAcceleratedRendering = WebBrowserModule::canUseAcceleratedRendering();
 
