@@ -182,7 +182,7 @@ namespace {
     constexpr Property::PropertyInfo LocalRotationInfo = {
         "Rotation",
         "Local rotation",
-        "An Euler rotation (x, y, z) to apply to the screen space object.",
+        "An Euler rotation (roll, pitch, yaw) to apply to the screen space object.",
         Property::Visibility::User
     };
 
