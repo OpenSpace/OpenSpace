@@ -60,9 +60,11 @@ namespace {
     // Gonna do some UTF-like magic once we reach 255 to introduce a second byte or so
     static constexpr uint8_t ProtocolVersion = 7;
 
+    BooleanType(ShouldLogError);
+
     class ConnectionLostError final : public ghoul::RuntimeError {
     public:
-        explicit ConnectionLostError(bool shouldLogError_ = true)
+        explicit ConnectionLostError(ShouldLogError shouldLogError_ = ShouldLogError::Yes)
             : ghoul::RuntimeError("Astrocast connection lost", "Astrocast")
             , shouldLogError(shouldLogError_)
         {}
@@ -688,7 +690,7 @@ void Astrocast::sendScript(std::string script) {
     }
 
     // @TODO (anden88 2026-08-11): This is a temporary solution to avoid sending scripts
-    // that are related to astrocast. Proabbly what we want is to have the JavaScript
+    // that are related to astrocast. Probably what we want is to have the JavaScript
     // API functions take additional parameters that sets the sync flags
     if (script.find(".astrocast.") != std::string::npos) {
         // Do not send scripts that are related to astrocast since the host could for
@@ -873,14 +875,14 @@ bool Astrocast::isConnectedOrConnecting() const {
 }
 
 Astrocast::Message Astrocast::receiveMessage() {
-    // Header consists of...
+    // (anden88 2026-08-12): Must match the header protocol in the Wormhole server
+    // https://github.com/OpenSpace/Wormhole/blob/6de7100157755111d938a6cbfacfe3be9cefbe85/src/wormhole.ts#L220-L224
     constexpr size_t HeaderSize =
         2 * sizeof(char) + // OS
         sizeof(uint8_t) +  // Protocol version
         sizeof(uint8_t) +  // Message type
         sizeof(uint32_t);  // message size
 
-    // Create basic buffer for receiving first part of messages
     std::vector<char> headerBuffer(HeaderSize);
     std::vector<char> messageBuffer;
 
@@ -889,7 +891,7 @@ Astrocast::Message Astrocast::receiveMessage() {
         // The `get` call is blocking until something happens, so we might end up here if
         // the socket properly closed or if the loading legitimately failed
         if (_shouldDisconnect) {
-            throw ConnectionLostError(false);
+            throw ConnectionLostError(ShouldLogError::No);
         }
         else {
             LERROR("Failed to read header from socket. Disconnecting");

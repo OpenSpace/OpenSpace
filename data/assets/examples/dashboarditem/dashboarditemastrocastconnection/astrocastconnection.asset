@@ -1,5 +1,5 @@
 -- Basic
--- This example adds a dashboard item that shows the status of the Astrocast.
+-- This example adds a dashboard item that shows the status of the Astrocast connection.
 
 local Item = {
   Identifier = "DashboardItemAstrocast_Example",
