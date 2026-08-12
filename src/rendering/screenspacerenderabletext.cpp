@@ -162,7 +162,7 @@ void ScreenSpaceRenderableText::updateFramebuffer() {
         ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(bbox.x, bbox.y, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGB,
+            .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
         ghoul::opengl::Texture::SamplerInit {}
