@@ -121,19 +121,19 @@ namespace {
         Type sourceType;
 
         // [[codegen::verbatim(SourceNodeIdentifierInfo.description)]]
-        std::optional<std::string> sourceNodeIdentifier;
+        std::optional<std::string> sourceNodeIdentifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(ReferenceTypeInfo.description)]]
         Type referenceType;
 
         // [[codegen::verbatim(ReferenceNodeIdentifierInfo.description)]]
-        std::optional<std::string> referenceNodeIdentifier;
+        std::optional<std::string> referenceNodeIdentifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(DestinationTypeInfo.description)]]
         Type destinationType;
 
         // [[codegen::verbatim(DestinationNodeIdentifierInfo.description)]]
-        std::optional<std::string> destinationNodeIdentifier;
+        std::optional<std::string> destinationNodeIdentifier [[codegen::identifier()]];
     };
 } // namespace
 #include "dashboarditemangle_codegen.cpp"

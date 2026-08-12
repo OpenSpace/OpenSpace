@@ -221,10 +221,10 @@ namespace {
             glm::vec3 size;
 
             // [[codegen::verbatim(NumberOfRayCastingStepsInfo.description)]]
-            std::optional<float> steps;
+            std::optional<float> steps [[codegen::greater(0.f)]];
 
             // [[codegen::verbatim(DownscaleVolumeRenderingInfo.description)]]
-            std::optional<float> downscale;
+            std::optional<float> downscale [[codegen::inrange(0.f, 1.f)]];
         };
         Volume volume;
 
@@ -243,7 +243,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableGalaxy::Documentation() {
-    return codegen::doc<Parameters>("galaxy_renderable_galaxy");
+    return codegen::doc<Parameters>(
+        "galaxy_renderable_galaxy",
+        Renderable::Documentation()
+    );
 }
 
 RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)

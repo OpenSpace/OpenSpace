@@ -1,0 +1,10 @@
+--- a/ext/mold/src/core/md_os.h
++++ b/ext/mold/src/core/md_os.h
+@@ -19,6 +19,10 @@ extern "C" {
+ str_t   md_path_cwd(void);
+ 
++// Gets the directory containing the running executable (with trailing slash).
++// Returns a non-owning reference to a shared static string buffer.
++str_t   md_path_exe_dir(void);
++
+ str_t   md_path_make_canonical(str_t path, struct md_allocator_i* alloc);

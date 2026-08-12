@@ -66,9 +66,9 @@ namespace {
 /**
  * Request to be the host for this session.
  */
-[[codegen::luawrap]] void requestHostship() {
+[[codegen::luawrap]] void requestHostship(std::optional<std::string> hostPassword) {
     if (global::windowDelegate->isMaster()) {
-        global::parallelPeer->requestHostship();
+        global::parallelPeer->requestHostship(hostPassword);
     }
 }
 

@@ -31,6 +31,7 @@ class DocumentationEngine;
 class ScriptEngine;
 
 void registerCoreClasses(DocumentationEngine& engine);
+void registerCoreSchemas(DocumentationEngine& engine);
 void registerCoreClasses(ScriptEngine& engine);
 
 } // namespace openspace

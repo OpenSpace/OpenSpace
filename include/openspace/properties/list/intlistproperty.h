@@ -43,6 +43,8 @@ public:
     using TemplateProperty<std::vector<int>>::operator std::vector<int>;
     using TemplateProperty<std::vector<int>>::operator=;
 
+    static nlohmann::json Schema();
+
 private:
     std::vector<int> toValue(lua_State* state) const override final;
 };

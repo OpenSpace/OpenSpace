@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DEFERREDCASTER___H
-#define __OPENSPACE_CORE___DEFERREDCASTER___H
+#ifndef __OPENSPACE_CORE___DEFERREDCASTER___H__
+#define __OPENSPACE_CORE___DEFERREDCASTER___H__
 
 #include <filesystem>
 
@@ -72,4 +72,4 @@ public:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___DEFERREDCASTER___H
+#endif // __OPENSPACE_CORE___DEFERREDCASTER___H__

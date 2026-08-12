@@ -1,0 +1,49 @@
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/globe")
+
+
+
+local data = asset.resource({
+  Name = "Mercury - Not So Sleepy Hollow",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_layers_not_so_sleepy_hollow",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Not_So_Sleepy_Hollow",
+  Name = "Not So Sleepy Hollow [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Not_So_Sleepy_Hollow_texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Not_So_Sleepy_Hollow",
+  Name = "Not So Sleepy Hollow [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Not_So_Sleepy_Hollow_heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "Mercury Not So Sleepy Hollow [Local]",
+  Description = [[A local layer for Not So Sleepy Hollow.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

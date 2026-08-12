@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/venus/globe"
+    },
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/venus/atmosphere"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Venus",
+        "position": [
+          4614235.18373939,
+          -3868851.3582573887,
+          -804340.8088896238
+        ],
+        "pitch": 1.481457526001915,
+        "up": [
+          0.6307282943466711,
+          0.7708353323253417,
+          -0.08941313745428531
+        ],
+        "yaw": -0.0545058559393493,
+        "timestamp": "2026 MAY 24 12:44:05"
+      }
+    },
+    {
+      "type": "wait",
+      "value": 5
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

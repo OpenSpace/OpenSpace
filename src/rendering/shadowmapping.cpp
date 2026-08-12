@@ -116,6 +116,7 @@ void Shadowee::removeShadower(const Shadower* shadower) {
     auto it = std::find(_shadowers.begin(), _shadowers.end(), shadower);
     if (it != _shadowers.end()) {
         _shadowers.erase(it);
+        _isShadowersDirty = true;
     }
 }
 

@@ -2,7 +2,7 @@ local speck = asset.resource({
   Name = "Stars Speck Files",
   Type = "HttpSynchronization",
   Identifier = "stars_du",
-  Version = 6
+  Version = 7
 })
 
 local sunspeck = asset.resource({

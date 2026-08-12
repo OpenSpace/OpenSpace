@@ -44,7 +44,10 @@ namespace {
 namespace openspace {
 
 Documentation MultiRotation::Documentation() {
-    return codegen::doc<Parameters>("base_rotation_multi");
+    return codegen::doc<Parameters>(
+        "base_rotation_multi",
+        Rotation::Documentation()
+    );
 }
 
 MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary)
@@ -74,6 +77,7 @@ void MultiRotation::update(const UpdateData& data) {
     for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {
         rot->update(data);
     }
+    Rotation::update(data);
 }
 
 glm::dmat3 MultiRotation::matrix(const UpdateData& data) const {

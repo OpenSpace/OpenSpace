@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE__WINDOWDELEGATE___H__
-#define __OPENSPACE_CORE__WINDOWDELEGATE___H__
+#ifndef __OPENSPACE_CORE___WINDOWDELEGATE___H__
+#define __OPENSPACE_CORE___WINDOWDELEGATE___H__
 
 #include <ghoul/glm.h>
 #include <vector>
@@ -138,4 +138,4 @@ struct WindowDelegate {
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE__WINDOWDELEGATE___H__
+#endif // __OPENSPACE_CORE___WINDOWDELEGATE___H__

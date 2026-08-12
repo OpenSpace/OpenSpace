@@ -40,7 +40,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableTexturePlane::Documentation() {
-    return codegen::doc<Parameters>("iswa_renderable_textureplane");
+    return codegen::doc<Parameters>(
+        "iswa_renderable_textureplane",
+        RenderableTextureCygnet::Documentation()
+    );
 }
 
 RenderableTexturePlane::RenderableTexturePlane(const ghoul::Dictionary& dictionary)

@@ -29,6 +29,8 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/properties/property.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
@@ -377,6 +379,10 @@ void PropertyOwner::removePropertySubOwner(PropertyOwner* owner) {
             "PropertyOwner with name '{}' not found for removal", owner->identifier()
         ));
         return;
+    }
+
+    for (Property* prop : (*it)->propertiesRecursive()) {
+        global::renderEngine->scene()->removePropertyInterpolation(prop);
     }
 
     // Notify the change so the UI can update

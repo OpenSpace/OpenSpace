@@ -100,7 +100,7 @@ namespace {
         std::optional<std::variant<std::vector<std::string>, std::string>> tag;
 
         // [[codegen::verbatim(RenderableTypeInfo.description)]]
-        std::optional<std::string> type;
+        std::optional<std::string> type [[codegen::private()]];
 
         // Fragile! Keep in sync with documentation
         enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderBinMode {

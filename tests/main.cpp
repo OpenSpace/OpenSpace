@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
     FileSys.registerPathToken("${BASE}", base);
 
     *global::configuration = loadConfigurationFromFile(configFile, "");
-    global::openSpaceEngine->registerPathTokens();
+    registerPathTokens(*global::configuration);
     global::openSpaceEngine->initialize();
 
     ghoul::logging::LogManager::deinitialize();

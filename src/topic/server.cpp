@@ -33,7 +33,6 @@
 #include <openspace/topic/serverinterface.h>
 #include <openspace/topic/topics/authorizationtopic.h>
 #include <openspace/topic/topics/actionkeybindtopic.h>
-#include <openspace/topic/topics/bouncetopic.h>
 #include <openspace/topic/topics/camerapathtopic.h>
 #include <openspace/topic/topics/cameratopic.h>
 #include <openspace/topic/topics/documentationtopic.h>
@@ -98,6 +97,7 @@ Server::Server()
     global::callback::preSync->emplace_back([this]() {
         using K = CallbackHandle;
         using V = CallbackFunction;
+        // Loop over all registered callbacks and call them
         for (const std::pair<K, V>& it : _preSyncCallbacks) {
             it.second();
         }
@@ -131,7 +131,6 @@ void Server::initialize(const ghoul::Dictionary& configuration) {
     // Add the topics to the topic factory
     fTopic->registerClass<ActionKeybindTopic>("actionsKeybinds");
     fTopic->registerClass<AuthorizationTopic>("authorize");
-    fTopic->registerClass<BounceTopic>("bounce");
     fTopic->registerClass<CameraTopic>("camera");
     fTopic->registerClass<CameraPathTopic>("cameraPath");
     fTopic->registerClass<DocumentationTopic>("documentation");
@@ -311,7 +310,9 @@ void Server::passDataToTopic(const std::string& topicType,
 {
     for (const ConnectionData& connectionData : _connections) {
         if (Topic* topic = connectionData.connection->findTopicByType(topicType)) {
-            topic->handleJson(jsonData);
+            if (!topic->isDone()) {
+                topic->sendData(jsonData);
+            }
         }
     }
 }

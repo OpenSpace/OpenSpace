@@ -58,7 +58,7 @@ int main(int, char** argv) {
     FileSys.registerPathToken("${BASE}", base);
 
     *global::configuration = loadConfigurationFromFile(configFile.string(), "");
-    openspace::global::openSpaceEngine->registerPathTokens();
+    registerPathTokens(*global::configuration);
 
     // Now that we have the tokens we can initialize the engine
     global::openSpaceEngine->initialize();
@@ -66,6 +66,7 @@ int main(int, char** argv) {
     // Print out the documentation to the documentation folder
     // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
     DocEng.writeJsonDocumentation();
+    DocEng.writeJsonSchema();
 
     global::openSpaceEngine->deinitialize();
 

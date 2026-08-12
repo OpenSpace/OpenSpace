@@ -49,7 +49,10 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
-    return codegen::doc<Parameters>("core_screenspaceframebuffer");
+    return codegen::doc<Parameters>(
+        "core_screenspaceframebuffer",
+        ScreenSpaceRenderable::Documentation()
+    );
 }
 
 ScreenSpaceRenderableFramebuffer::ScreenSpaceRenderableFramebuffer(

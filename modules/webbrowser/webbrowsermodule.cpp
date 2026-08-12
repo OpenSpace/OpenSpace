@@ -99,7 +99,7 @@ namespace {
         std::optional<bool> updateBrowserBetweenRenderables;
 
         // [[codegen::verbatim(BrowserUpdateIntervalInfo.description)]]
-        std::optional<float> browserUpdateInterval;
+        std::optional<float> browserUpdateInterval [[codegen::greaterequal(0.f)]];
 
         // If this value is set to `true`, it is possible to remote debug the CEF browser
         // through port 8088. If it is set to `false` (the default), the remote debugging
@@ -156,6 +156,11 @@ WebBrowserModule::~WebBrowserModule() {}
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     ZoneScoped;
+
+    // Remove any previously existing cache folder
+    if (std::filesystem::exists(absPath("${BIN}/cefcache"))) {
+        std::filesystem::remove_all(absPath("${BIN}/cefcache"));
+    }
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

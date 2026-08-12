@@ -1,0 +1,38 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/mars/globe"
+    },
+    {
+      "type": "asset",
+      "value": "scene/solarsystem/planets/mars/atmosphere"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Mars",
+        "position": [
+          2386042.6091640694,
+          -4865430.526110386,
+          7196442.921799672
+        ],
+        "pitch": 7.311811813513805e-7,
+        "up": [
+          0.9473495897840283,
+          0.30032561892712556,
+          -0.11105528961770686
+        ],
+        "timestamp": "2026 MAY 24 12:44:57"
+      }
+    },
+    {
+      "type": "wait",
+      "value": 5
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

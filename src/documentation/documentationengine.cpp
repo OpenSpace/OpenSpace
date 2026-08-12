@@ -113,7 +113,6 @@ namespace {
     constexpr std::string_view HelpKey = "help";
     constexpr std::string_view FileKey = "file";
     constexpr std::string_view LineKey = "line";
-    constexpr std::string_view LibraryKey = "library";
     constexpr std::string_view FullNameKey = "fullName";
     constexpr std::string_view FunctionsKey = "functions";
     constexpr std::string_view SourceLocationKey = "sourceLocation";
@@ -304,6 +303,7 @@ DocumentationEngine& DocumentationEngine::ref() {
     if (_instance == nullptr) {
         _instance = new DocumentationEngine;
         registerCoreClasses(*_instance);
+        registerCoreSchemas(*_instance);
     }
     return *_instance;
 }
@@ -317,8 +317,6 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
     for (const LuaLibrary& l : libraries) {
         nlohmann::json library;
         std::string libraryName = l.name;
-        // Keep the library key for backwards compatability
-        library[LibraryKey] = libraryName;
         library[NameKey] = libraryName;
         std::string os = std::string(OpenSpaceScriptingKey);
         library[FullNameKey] =
@@ -336,7 +334,7 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
         sortJson(library[FunctionsKey], NameKey);
         json.push_back(library);
 
-        sortJson(json, LibraryKey);
+        sortJson(json, NameKey);
     }
     return json;
 }
@@ -496,6 +494,150 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
     result[NameKey] = EventsTitle;
     result[DataKey] = data;
     return result;
+}
+
+void DocumentationEngine::writeJsonSchema() {
+    // Properties schema
+    auto mergeDefs = [](nlohmann::json& target, const nlohmann::json& source) {
+        for (const auto& [key, value] : source.items()) {
+            if (target.contains(key)) {
+                ghoul_assert(
+                    target[key] == value,
+                    std::format(
+                        "Conflicting $def '{}': existing definition '{}' differs from "
+                        "incomming definition '{}'. Each $def name must be unique and/or "
+                        "identical across all property schemas.",
+                        key, target[key].get<std::string>(), value.get<std::string>()
+                    )
+                );
+                // identical, skip
+                continue;
+            }
+            target[key] = value;
+        }
+    };
+
+    nlohmann::json defs;
+    nlohmann::json anyProperty = nlohmann::json::array();
+    nlohmann::json anyPropertyMetaData = nlohmann::json::array();
+
+    for (const nlohmann::json& propertySchema : _propertySchemas) {
+        // Add any global $defs
+        if (propertySchema.contains("$defs")) {
+            mergeDefs(defs, propertySchema["$defs"]);
+        }
+
+        // Add property typedef
+        if (propertySchema.contains("typedefs")) {
+            // @TODO (anden88 2026-05-04): Should we guard for duplicate typeNames?
+            for (const auto& [typeName, typeDef] : propertySchema["typedefs"].items()) {
+                defs[typeName] = typeDef;
+                anyProperty.push_back({
+                    { "$ref", std::format("#/$defs/{}", typeName) }
+                });
+
+                // We also store the union of all properties final metadata shapes under
+                // AnyPropertyMetaData this enables validation of the SubscriptionTopic,
+                // otherwise the metaData shape would be defined as a plain JSON object
+
+                // Add a named metaData def for this type so AnyPropertyMetaData generates
+                // readable names like DoubleListPropertyMetaData
+                const std::string metaDataName = std::format("{}MetaData", typeName);
+                defs[metaDataName] = typeDef["properties"]["metaData"];
+                anyPropertyMetaData.push_back({
+                    { "$ref", std::format("#/$defs/{}", metaDataName) }
+                });
+            }
+        }
+    }
+
+    defs["AnyPropertyMetaData"] = { { "anyOf", anyPropertyMetaData } };
+    defs["AnyProperty"] = { { "anyOf", anyProperty } };
+    defs["PropertyOwner"] = nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "identifier": { "type": "string" },
+            "guiName": { "type": "string" },
+            "description": { "type": "string" },
+            "properties": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/AnyProperty" }
+            },
+            "subowners": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/PropertyOwner" }
+            },
+            "tags": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "uri": { "type": "string" }
+          },
+          "additionalProperties": false,
+          "required": [
+            "identifier",
+            "guiName",
+            "description",
+            "properties",
+            "subowners",
+            "tags",
+            "uri"
+          ]
+        }
+    )");
+    defs["JsonValue"] = nlohmann::json::parse(R"(
+        {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "boolean" },
+            {
+              "type": "array",
+              "items": { "$ref": "#/$defs/JsonValue" }
+            },
+            {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/JsonValue" }
+            },
+            { "type": "null" }
+          ]
+        }
+    )");
+
+    nlohmann::json propertiesJson;
+    propertiesJson["$schema"] = "https://json-schema.org/draft/2020-12/schema";
+    propertiesJson["$defs"] = defs;
+    // Generating a TypeScript .ts file will always create a default interface. We use a
+    // dummy interface since all other properties and types are defined in $defs and does
+    // not show up in the generated output ts file
+    propertiesJson["title"] = "DummyInterface";
+    propertiesJson["additionalProperties"] = false;
+    const std::filesystem::path propertiesPath =
+        absPath("${BASE}/support/types/properties.json");
+    std::ofstream propertiesFile = std::ofstream(propertiesPath);
+
+    if (!propertiesFile.good()) {
+        throw ghoul::RuntimeError(std::format(
+            "Could not open properties file: '{}'", propertiesPath
+        ));
+    }
+    propertiesFile << propertiesJson.dump(2);
+
+    for (Schema& schema : _schemas) {
+        const std::string file = std::format(
+            "{}/support/types/{}.json", "${BASE}", schema.id
+        );
+        std::filesystem::path path = absPath(file);
+        std::ofstream out = std::ofstream(path);
+        if (out) {
+            // Add which schema version we're targeting, see
+            // https://json-schema.org/understanding-json-schema/reference/schema#schema
+            schema.schema["$schema"] = "https://json-schema.org/draft/2020-12/schema";
+            out << schema.schema.dump(2);
+            out << '\n';
+        }
+    }
 }
 
 nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
@@ -733,6 +875,32 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
             _documentations.push_back(std::move(documentation));
         }
     }
+}
+
+void DocumentationEngine::addSchema(Schema schema) {
+    if (schema.id.empty()) {
+        _schemas.push_back(std::move(schema));
+    }
+    else {
+        auto it = std::find_if(
+            _schemas.begin(),
+            _schemas.end(),
+            [schema](const Schema& s) { return schema.id == s.id; }
+        );
+
+        if (it != _schemas.end()) {
+            throw ghoul::RuntimeError(std::format(
+                "Duplicate Schema with id '{}'", schema.id
+            ));
+        }
+        else {
+            _schemas.push_back(std::move(schema));
+        }
+    }
+}
+
+void DocumentationEngine::addPropertySchema(const nlohmann::json& schema) {
+    _propertySchemas.push_back(schema);
 }
 
 std::vector<Documentation> DocumentationEngine::documentations() const {

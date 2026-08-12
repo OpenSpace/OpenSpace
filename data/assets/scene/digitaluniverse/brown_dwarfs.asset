@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Brown Dwarf Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_brown_dwarfs_speck",
-  Version = 2
+  Version = 3
 })
 
 
@@ -61,7 +61,7 @@ local Object = {
       they are so dim in optical light. However, they appear brighter in infrared light.
       Colors: We represent these objects as exaggeratged points and they are either red
       for L type objects, Maroon for T type, and purple for Y type objects. Census:
-      2,196 objects.]]
+      2,729 objects.]]
   }
 }
 

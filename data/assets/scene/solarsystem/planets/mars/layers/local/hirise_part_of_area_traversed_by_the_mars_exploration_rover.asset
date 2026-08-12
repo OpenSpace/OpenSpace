@@ -1,0 +1,49 @@
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
+
+
+
+local data = asset.resource({
+  Name = "HiRISE Part of Area Traversed by the Mars Exploration",
+  Type = "HttpSynchronization",
+  Identifier = "mars_hirise_part_of_area_traversed_by_the_mars_exploration_rover",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Part_of_Area_Traversed_by_the_Mars_Exploration",
+  Name = "Part of Area Traversed by the Mars Exploration [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Part_of_Area_Traversed_by_the_Mars_Exploration",
+  Name = "Part of Area Traversed by the Mars Exploration [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "HiRISE Part of Area Traversed by the Mars Exploration [Local]",
+  Description = [[A local layer for Part of Area Traversed by the Mars Exploration from the HiRISE instrument.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

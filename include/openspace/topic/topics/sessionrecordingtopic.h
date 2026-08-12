@@ -31,13 +31,17 @@
 
 namespace openspace {
 
+struct Schema;
+
 class SessionRecordingTopic : public Topic {
 public:
-    SessionRecordingTopic();
+    SessionRecordingTopic() = default;
     ~SessionRecordingTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
+
+    static openspace::Schema Schema();
 
 private:
     static constexpr int UnsetOnChangeHandle = -1;

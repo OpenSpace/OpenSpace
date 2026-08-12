@@ -29,6 +29,8 @@
 
 namespace openspace {
 
+struct Schema;
+
 class DocumentationTopic : public Topic {
 public:
     DocumentationTopic() = default;
@@ -36,6 +38,8 @@ public:
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
+
+    static openspace::Schema Schema();
 };
 
 } // namespace openspace

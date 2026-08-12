@@ -22,16 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___ERRORLOGTOPIC____H__
-#define __OPENSPACE_CORE___ERRORLOGTOPIC____H__
+#ifndef __OPENSPACE_CORE___ERRORLOGTOPIC___H__
+#define __OPENSPACE_CORE___ERRORLOGTOPIC___H__
 
 #include <openspace/topic/topics/topic.h>
 
 #include <ghoul/logging/loglevel.h>
+#include <optional>
 
 namespace ghoul::logging { class Log; }
 
 namespace openspace {
+
+struct Schema;
 
 class ErrorLogTopic : public Topic {
 public:
@@ -41,19 +44,34 @@ public:
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
+    static openspace::Schema Schema();
+
 private:
     /**
      * Creates a log object and register it to the `LogManager`, does nothing if an active
      * log already exists.
      */
-    void createLog(ghoul::logging::LogLevel logLevel);
+    void createLog();
+
+    void flushQueuedMessages();
 
     bool _isSubscribedTo = false;
+    std::optional<int> _dataCallbackHandle;
 
     /// Non-owning but we remove the log from LogManager on destruction
     ghoul::logging::Log* _log = nullptr;
+    std::vector<nlohmann::json> _queuedMessages;
+    std::mutex _queuedMessagesMutex;
+
+    struct {
+        bool isTimeStamping = true;
+        bool isDateStamping = true;
+        bool isCategoryStamping = true;
+        bool isLogLevelStamping = true;
+        ghoul::logging::LogLevel logLevel = ghoul::logging::LogLevel::AllLogging;
+    } _logSettings;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___ERRORLOGTOPIC____H__
+#endif // __OPENSPACE_CORE___ERRORLOGTOPIC___H__

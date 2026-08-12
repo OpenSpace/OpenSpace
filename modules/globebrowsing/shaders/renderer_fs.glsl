@@ -34,6 +34,7 @@
 in Data {
   vec4 position;
   vec2 texCoords;
+  float isSkirt;
   vec3 ellipsoidNormalCameraSpace;
   vec3 levelWeights;
   vec3 positionCameraSpace;
@@ -201,6 +202,14 @@ uniform float opacity;
 Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(0.3, 0.3, 0.3, 1.0);
+
+  // Skirts are vertical walls that hide gaps between neighboring tiles. They sit below
+  // the surface and are occluded while the globe is opaque, but once the globe is faded
+  // they become visible as stretched edges. Drop the skirt fragments when the globe is
+  // transparent
+  if (opacity < 1.0 && in_data.isSkirt > 0.0) {
+    discard;
+  }
 
   vec3 normal = normalize(in_data.ellipsoidNormalCameraSpace);
 

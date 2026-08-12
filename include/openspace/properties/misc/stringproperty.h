@@ -45,6 +45,8 @@ public:
     operator std::string_view();
     operator std::string_view() const;
 
+    static nlohmann::json Schema();
+
 private:
     std::string toValue(lua_State* state) const override final;
 };

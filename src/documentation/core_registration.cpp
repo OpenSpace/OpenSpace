@@ -42,6 +42,40 @@
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/properties/list/doublelistproperty.h>
+#include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/matrix/dmat2property.h>
+#include <openspace/properties/matrix/dmat3property.h>
+#include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/matrix/mat2property.h>
+#include <openspace/properties/matrix/mat3property.h>
+#include <openspace/properties/matrix/mat4property.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/longproperty.h>
+#include <openspace/properties/scalar/shortproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
+#include <openspace/properties/scalar/ulongproperty.h>
+#include <openspace/properties/scalar/ushortproperty.h>
+#include <openspace/properties/vector/dvec2property.h>
+#include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/vector/dvec4property.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/ivec3property.h>
+#include <openspace/properties/vector/ivec4property.h>
+#include <openspace/properties/vector/uvec2property.h>
+#include <openspace/properties/vector/uvec3property.h>
+#include <openspace/properties/vector/uvec4property.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/colormappingcomponent.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
@@ -66,6 +100,27 @@
 #include <openspace/util/timerange.h>
 #include <openspace/topic/server.h>
 #include <openspace/topic/serverinterface.h>
+#include <openspace/topic/topics/actionkeybindtopic.h>
+#include <openspace/topic/topics/authorizationtopic.h>
+#include <openspace/topic/topics/camerapathtopic.h>
+#include <openspace/topic/topics/cameratopic.h>
+#include <openspace/topic/topics/documentationtopic.h>
+#include <openspace/topic/topics/downloadeventtopic.h>
+#include <openspace/topic/topics/enginemodetopic.h>
+#include <openspace/topic/topics/errorlogtopic.h>
+#include <openspace/topic/topics/eventtopic.h>
+#include <openspace/topic/topics/flightcontrollertopic.h>
+#include <openspace/topic/topics/getpropertytopic.h>
+#include <openspace/topic/topics/luascripttopic.h>
+#include <openspace/topic/topics/missiontopic.h>
+#include <openspace/topic/topics/profiletopic.h>
+#include <openspace/topic/topics/propertytreetopic.h>
+#include <openspace/topic/topics/sessionrecordingtopic.h>
+#include <openspace/topic/topics/setpropertytopic.h>
+#include <openspace/topic/topics/subscriptiontopic.h>
+#include <openspace/topic/topics/timetopic.h>
+#include <openspace/topic/topics/triggerpropertytopic.h>
+#include <openspace/topic/topics/versiontopic.h>
 
 namespace openspace {
 
@@ -83,7 +138,7 @@ void registerCoreClasses(DocumentationEngine& engine) {
     engine.addDocumentation(Scale::Documentation());
     engine.addDocumentation(SceneGraphNode::Documentation());
     engine.addDocumentation(ScreenSpaceRenderable::Documentation());
-    engine.addDocumentation(Task::documentation());
+    engine.addDocumentation(Task::Documentation());
     engine.addDocumentation(TimeRange::Documentation());
     engine.addDocumentation(Translation::Documentation());
     engine.addDocumentation(TimeFrame::Documentation());
@@ -94,6 +149,71 @@ void registerCoreClasses(DocumentationEngine& engine) {
     engine.addDocumentation(Path::Documentation());
     engine.addDocumentation(ServerInterface::Documentation());
     engine.addDocumentation(Server::Documentation());
+}
+
+void registerCoreSchemas(DocumentationEngine& engine) {
+    engine.addSchema(ActionKeybindTopic::Schema());
+    engine.addSchema(AuthorizationTopic::Schema());
+    engine.addSchema(CameraPathTopic::Schema());
+    engine.addSchema(CameraTopic::Schema());
+    engine.addSchema(DocumentationTopic::Schema());
+    engine.addSchema(DownloadEventTopic::Schema());
+    engine.addSchema(EngineModeTopic::Schema());
+    engine.addSchema(ErrorLogTopic::Schema());
+    engine.addSchema(EventTopic::Schema());
+    engine.addSchema(FlightControllerTopic::Schema());
+    engine.addSchema(GetPropertyTopic::Schema());
+    engine.addSchema(LuaScriptTopic::Schema());
+    engine.addSchema(MissionTopic::Schema());
+    engine.addSchema(ProfileTopic::Schema());
+    engine.addSchema(PropertyTreeTopic::Schema());
+    engine.addSchema(SessionRecordingTopic::Schema());
+    engine.addSchema(SetPropertyTopic::Schema());
+    engine.addSchema(SubscriptionTopic::Schema());
+    engine.addSchema(TimeTopic::Schema());
+    engine.addSchema(TriggerPropertyTopic::Schema());
+    engine.addSchema(VersionTopic::Schema());
+
+    // Properties
+    // List
+    engine.addPropertySchema(DoubleListProperty::Schema());
+    engine.addPropertySchema(IntListProperty::Schema());
+    engine.addPropertySchema(StringListProperty::Schema());
+    // Matrix
+    engine.addPropertySchema(DMat2Property::Schema());
+    engine.addPropertySchema(DMat3Property::Schema());
+    engine.addPropertySchema(DMat4Property::Schema());
+    engine.addPropertySchema(Mat2Property::Schema());
+    engine.addPropertySchema(Mat3Property::Schema());
+    engine.addPropertySchema(Mat4Property::Schema());
+    // Misc
+    engine.addPropertySchema(OptionProperty::Schema());
+    engine.addPropertySchema(SelectionProperty::Schema());
+    engine.addPropertySchema(StringProperty::Schema());
+    engine.addPropertySchema(TriggerProperty::Schema());
+    // Scalar
+    engine.addPropertySchema(BoolProperty::Schema());
+    engine.addPropertySchema(DoubleProperty::Schema());
+    engine.addPropertySchema(FloatProperty::Schema());
+    engine.addPropertySchema(IntProperty::Schema());
+    engine.addPropertySchema(LongProperty::Schema());
+    engine.addPropertySchema(ShortProperty::Schema());
+    engine.addPropertySchema(UIntProperty::Schema());
+    engine.addPropertySchema(ULongProperty::Schema());
+    engine.addPropertySchema(UShortProperty::Schema());
+    // Vector
+    engine.addPropertySchema(DVec2Property::Schema());
+    engine.addPropertySchema(DVec3Property::Schema());
+    engine.addPropertySchema(DVec4Property::Schema());
+    engine.addPropertySchema(IVec2Property::Schema());
+    engine.addPropertySchema(IVec3Property::Schema());
+    engine.addPropertySchema(IVec4Property::Schema());
+    engine.addPropertySchema(UVec2Property::Schema());
+    engine.addPropertySchema(UVec3Property::Schema());
+    engine.addPropertySchema(UVec4Property::Schema());
+    engine.addPropertySchema(Vec2Property::Schema());
+    engine.addPropertySchema(Vec3Property::Schema());
+    engine.addPropertySchema(Vec4Property::Schema());
 }
 
 // NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just

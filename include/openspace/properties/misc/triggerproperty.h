@@ -71,6 +71,10 @@ public:
     void trigger();
 
     std::string jsonValue() const override final;
+
+    std::string stringValue() const override final;
+
+    static nlohmann::json Schema();
 };
 
 } // namespace openspace

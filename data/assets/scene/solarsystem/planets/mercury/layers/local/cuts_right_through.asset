@@ -1,0 +1,49 @@
+local mercuryAsset = asset.require("scene/solarsystem/planets/mercury/globe")
+
+
+
+local data = asset.resource({
+  Name = "Mercury - Cuts right through",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_layers_cuts_right_through",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Cuts_Right_Through",
+  Name = "Cuts Right Through [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Cuts_texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Cuts_Right_Through",
+  Name = "Cuts Right Through [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Cuts_heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(mercuryAsset.Mercury.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "Mercury Cuts right through [Local]",
+  Description = [[A local layer for Cuts right through.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

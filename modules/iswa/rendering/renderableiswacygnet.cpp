@@ -79,7 +79,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableIswaCygnet::Documentation() {
-    return codegen::doc<Parameters>("iswa_renderable_iswacygnet");
+    return codegen::doc<Parameters>(
+        "iswa_renderable_iswacygnet",
+        Renderable::Documentation()
+    );
 }
 
 RenderableIswaCygnet::RenderableIswaCygnet(const ghoul::Dictionary& dictionary)

@@ -54,6 +54,16 @@ signals:
     void selectionChanged(std::optional<std::string> selection);
 
 private:
+    // Convert string into proper path depending on format: full path, relative path or
+    // variable expansion path (i.e ${...})
+    std::optional<std::filesystem::path> unrollPath(const std::string& pathString);
+
+    // Determines if a file, with or without file extension, exists for the given path
+    std::optional<std::filesystem::path> validatePath(const std::filesystem::path& p);
+
+    // Extracts GUI text from the path
+    std::string guiText(std::filesystem::path path);
+
     std::filesystem::path _userPath;
     std::string _userHeader;
     std::filesystem::path _hardCodedPath;

@@ -18,7 +18,7 @@ openspace.createDirectory(savePathBase, true);
 
 local Downloads = {
   SDO = {
-    BaseUrl = "http://liu-se.cdn.openspaceproject.com/files/solarsystem/missions/sdo/colortables/v1_v1/",
+    BaseUrl = "https://liu-se.cdn.openspaceproject.com/files/solarsystem/missions/sdo/colortables/1/",
     Files = {
       "AIA-94.txt",
       "AIA-131.txt",
@@ -27,14 +27,13 @@ local Downloads = {
       "AIA-211.txt",
       "AIA-304.txt",
       "AIA-335.txt",
-      "AIA-1311.txt",
       "AIA-1600.txt",
       "AIA-1700.txt",
       "AIA-4500.txt"
     }
   },
   STEREO_A = {
-    BaseUrl = "http://liu-se.cdn.openspaceproject.com/files/solarsystem/missions/stereo_a/colortables/v1_v1/",
+    BaseUrl = "https://liu-se.cdn.openspaceproject.com/files/solarsystem/missions/stereo_a/colortables/1/",
     Files = {
       "EUVI-A-171.txt"
     }
@@ -49,31 +48,72 @@ for _, spacecraft in pairs(Downloads) do
   end
 end
 
--- Each entry below downloads images for one instrument. Images are only available for the
--- duration of each mission. If no images are found for a given time range, the 
--- Helioviewer API will return a message indicating this. It is safe to run this task 
+-- Each task below downloads images for one instrument. Images are only available for the
+-- duration of each mission. If no images are found for a given time range, the
+-- Helioviewer API will return a message indicating this. It is safe to run this task
 -- multiple times or with different time ranges for the same instrument.
-return {
+
+
+local spacecrafts = {
   {
-    Type = "HelioviewerDownloadTask",
     Name = "SDO",
-    SourceId = 10,
-    Instrument = "AIA-171",
-    ColorMap = savePathBase .. "AIA-171.txt",
-    StartTime = "2024-05-06T00:00:00.000Z",
-    EndTime = "2024-05-14T00:00:00.000Z",
-    TimeStep = 60 * 60, -- Download an image every hour
-    OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/sdo/aia-171"
+    Instruments = {
+      { Name = "AIA-94", Id = 8 },
+      { Name = "AIA-131", Id = 9 },
+      { Name = "AIA-171", Id = 10 },
+      { Name = "AIA-193", Id = 11 },
+      { Name = "AIA-211", Id = 12 },
+      { Name = "AIA-304", Id = 13 },
+      { Name = "AIA-335", Id = 14 },
+      { Name = "AIA-1600", Id = 15 },
+      { Name = "AIA-1700", Id = 16 },
+      { Name = "AIA-4500", Id = 17 }
+    }
   },
   {
-    Type = "HelioviewerDownloadTask",
-    Name = "STEREO",
-    SourceId = 20,
-    Instrument = "EUVI-A 171",
-    ColorMap = savePathBase .. "EUVI-A-171.txt",
-    StartTime = "2024-05-06T00:00:00.000Z",
-    EndTime = "2024-05-14T00:00:00.000Z",
-    TimeStep = 60 * 60, -- Download an image every hour
-    OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/stereo/euvi-a-171"
+    Name = "STEREO-A",
+    Instruments = {
+      { Name = "EUVI-A-171", Id = 20 }
+    }
   }
 }
+
+-- Define date ranges to download for. Add or modify entries as needed. Each entry will
+-- download data for all instruments in the date range. OBS! Prefer shorter time ranges as
+-- the Helioviewer caps the number of images at 1000 per request, if you need a longer
+-- time range, split it into multiple entries here.
+local dateRanges = {
+  {
+    StartTime = "2024-05-06T00:00:00.000Z",
+    EndTime = "2024-05-14T00:00:00.000Z"
+  }
+  -- Add more date ranges as needed:
+  -- {
+  --   StartTime = "2024-05-14T00:00:00.000Z",
+  --   EndTime = "2024-05-21T00:00:00.000Z"
+  -- }
+}
+
+local timeStep = 60 * 60 -- Download an image every hour. Adjust as needed.
+
+-- Generate download tasks for all spacecraft instruments and all date ranges
+local tasks = {}
+for _, spacecraft in ipairs(spacecrafts) do
+  for _, instrument in ipairs(spacecraft.Instruments) do
+    for _, dateRange in ipairs(dateRanges) do
+      table.insert(tasks, {
+        Type = "HelioviewerDownloadTask",
+        Name = spacecraft.Name,
+        SourceId = instrument.Id,
+        Instrument = instrument.Name,
+        ColorMap = openspace.absPath(savePathBase .. instrument.Name .. ".txt"),
+        StartTime = dateRange.StartTime,
+        EndTime = dateRange.EndTime,
+        TimeStep = timeStep,
+        OutputFolder = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/" .. string.lower(spacecraft.Name) .. "/" .. string.lower(instrument.Name))
+      })
+    end
+  end
+end
+
+return tasks

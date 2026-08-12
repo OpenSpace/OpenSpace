@@ -75,7 +75,7 @@ private:
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewProjectionTransform, colorStart, colorEnd,
         activeColor, targetInFieldOfViewColor, intersectionStartColor,
-        intersectionEndColor, squareColor, interpolation) _uniformCache;
+        intersectionEndColor, squareColor, interpolation, opacity) _uniformCache;
 
     bool _simplifyBounds = false;
 

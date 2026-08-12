@@ -52,6 +52,7 @@ struct SizeMappingComponent : public PropertyOwner {
     OptionProperty parameterOption;
     FloatProperty scaleFactor;
     BoolProperty isRadius;
+    BoolProperty invertScale;
 };
 
 } // namespace openspace

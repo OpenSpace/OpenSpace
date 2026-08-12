@@ -24,7 +24,7 @@
 
 # Returns whether the application located at 'path' is a default application or not
 function (get_application_attribute_default path result)
-  set(${result} OFF PARENT_SCOPE)
+  set(${result} ON PARENT_SCOPE)
   if (EXISTS "${path}/include.cmake")
     unset(DEFAULT_APPLICATION)
     include(${path}/include.cmake)

@@ -1,0 +1,49 @@
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
+
+
+
+local data = asset.resource({
+  Name = "HiRISE Olympus Mons - Fissue and Channel",
+  Type = "HttpSynchronization",
+  Identifier = "mars_hirise_olympus_mons-fissue_and_channel",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Olympus_Mons",
+  Name = "Olympus Mons [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Olympus_Mons-Fissure_and_Channel-17N127W_Texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Olympus_Mons",
+  Name = "Olympus Mons [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Olympus_Mons-Fissure_and_Channel-17N127W_Heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "HiRISE Fissue and Channel on Olympus Mons [Local]",
+  Description = [[A local layer for Fissue and Channel on Olympus Mons from the HiRISE instrument.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

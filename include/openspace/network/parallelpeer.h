@@ -36,6 +36,7 @@
 #include <deque>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <thread>
 
 namespace openspace {
@@ -54,7 +55,7 @@ public:
     void setName(std::string name);
     bool isHost();
     const std::string& hostName();
-    void requestHostship();
+    void requestHostship(std::optional<std::string> hostPassword = std::nullopt);
     void resignHostship();
     void setPassword(std::string password);
     void setHostPassword(std::string hostPassword);

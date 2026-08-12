@@ -1,0 +1,49 @@
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
+
+
+
+local data = asset.resource({
+  Name = "HiRISE Plains West of Juventae Chasma - Light-toned Layering",
+  Type = "HttpSynchronization",
+  Identifier = "mars_hirise_plains_west_of_juventae_chasma-light_toned_layering",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Juventae_Chasma",
+  Name = "Juventae Chasma [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Light-toned_Layering_in_Plains_West_of_Juventae_Chasma_Texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Juventae_Chasma",
+  ame = "Juventae Chasma [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Light-toned_Layering_in_Plains_West_of_Juventae_Chasma_Heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "HiRISE Light-toned Layering in Plains West of Juventae Chasma [Local]",
+  Description = [[A local layer for Light-toned Layering in Plains West of Juventae Chasma from the HiRISE instrument.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

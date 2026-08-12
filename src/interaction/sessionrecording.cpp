@@ -674,6 +674,12 @@ SessionRecording loadSessionRecording(const std::filesystem::path& filename) {
 void saveSessionRecording(const std::filesystem::path& filename,
                           const SessionRecording& sessionRecording, DataMode dataMode)
 {
+    ghoul_assert(!std::filesystem::exists(filename), "filename must not exist");
+
+    // Create the intermediate folders if the filename contains multiple subfolders
+    std::filesystem::path folder = filename.parent_path();
+    std::filesystem::create_directories(folder);
+
     std::ofstream file = std::ofstream(filename, std::ios::binary);
     if (!file.good()) {
         throw ghoul::RuntimeError(std::format("Could not save recording '{}'", filename));

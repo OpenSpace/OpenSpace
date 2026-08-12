@@ -168,6 +168,13 @@ namespace {
 #include "renderablemultiresvolume_codegen.cpp"
 
 namespace openspace {
+    
+Documentation RenderableMultiresVolume::Documentation() {
+    return codegen::doc<Parameters>(
+        "multiresvolume_renderable_multiresvolume",
+        Renderable::Documentation()
+    );
+}
 
 RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dictionary)
     :  Renderable(dictionary)

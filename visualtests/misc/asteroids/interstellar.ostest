@@ -3,15 +3,7 @@
   "commands": [
     {
       "type": "asset",
-      "value": "scene/solarsystem/interstellar/oumuamua.asset"
-    },
-    {
-      "type": "asset",
-      "value": "scene/solarsystem/interstellar/c-2019_q4_borisov.asset"
-    },
-    {
-      "type": "asset",
-      "value": "scene/solarsystem/interstellar/3i_atlas.asset"
+      "value": "scene/solarsystem/interstellar/interstellar.asset"
     },
     {
       "type": "navigationstate",

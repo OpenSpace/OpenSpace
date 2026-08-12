@@ -189,7 +189,10 @@ namespace {
 namespace openspace {
 
 Documentation KeplerTranslation::Documentation() {
-    return codegen::doc<Parameters>("space_transform_kepler");
+    return codegen::doc<Parameters>(
+        "space_transform_kepler",
+        Translation::Documentation()
+    );
 }
 
 KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)

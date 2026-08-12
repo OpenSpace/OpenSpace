@@ -1,4 +1,3 @@
-asset.require("./trail")
 local transforms = asset.require("./transforms")
 local coreKernels = asset.require("spice/core")
 

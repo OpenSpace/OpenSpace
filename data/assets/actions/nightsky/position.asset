@@ -30,8 +30,8 @@ local Equator = {
   Identifier = "os.nightsky.position.Equator",
   Name = "Jump to the Equator",
   Command = [[
-    local _, long, _ = openspace.globebrowsing.geoPositionForCamera(false);
-    openspace.navigation.jumpToGeo("Earth", 0.0001, long, 500);
+    local pos = openspace.globebrowsing.geoPositionForCamera(false);
+    openspace.navigation.jumpToGeo("Earth", 0.0001, pos[2], 500);
     local script = 'local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")openspace.action.triggerAction("os.nightsky.LookUp");openspace.setPropertyValueSingle("RenderEngine.GlobalBlackout.Factor", 0, wait)'
     local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")
     openspace.scheduleScript(script, wait + 0.1)

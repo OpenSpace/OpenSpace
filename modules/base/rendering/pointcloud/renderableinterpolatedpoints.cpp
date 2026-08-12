@@ -158,10 +158,10 @@ namespace {
 
         struct Interpolation {
             // [[codegen::verbatim(InterpolationValueInfo.description)]]
-            std::optional<float> value;
+            std::optional<float> value [[codegen::inrange(0.f, 1.f)]];
 
             // [[codegen::verbatim(InterpolationSpeedInfo.description)]]
-            std::optional<float> speed;
+            std::optional<float> speed [[codegen::greater(0.f)]];
 
             // [[codegen::verbatim(UseSplineInfo.description)]]
             std::optional<bool> useSplineInterpolation;

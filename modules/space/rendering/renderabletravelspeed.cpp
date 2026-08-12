@@ -275,7 +275,6 @@ void RenderableTravelSpeed::reinitiateTravel() {
 void RenderableTravelSpeed::update(const UpdateData& data) {
     if (_initiationTime == -1.0) {
         _initiationTime = data.time.j2000Seconds();
-        _arrivalTime = _initiationTime + _travelTime;
     }
 
     SceneGraphNode* sourceNode = parent();
@@ -292,16 +291,20 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     _travelTime = glm::length(targetPosition) / _travelSpeed;
     _directionVector = glm::normalize(targetPosition);
 
+    // Keep arrival time in sync with travel time
+    _arrivalTime = _initiationTime + _travelTime;
+
     const double currentTime = data.time.j2000Seconds();
-    // Unless we've reached the target
-    if (_initiationTime < currentTime && _arrivalTime > currentTime) {
-        _timeSinceStart = currentTime - _initiationTime;
-        updateVertexData();
-    }
-    else {
-        // In case we've reached the target
+
+    if (currentTime >= _arrivalTime || currentTime < _initiationTime) {
+        // Wrapped past the target (or time went backwards); restart
         reinitiateTravel();
     }
+
+    _timeSinceStart = glm::clamp(
+        currentTime - _initiationTime, 0.0, _travelTime
+    );
+    updateVertexData();
 }
 
 void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {

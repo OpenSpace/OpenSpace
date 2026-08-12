@@ -42,7 +42,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableTextureCygnet::Documentation() {
-    return codegen::doc<Parameters>("iswa_renderable_texturecygnet");
+    return codegen::doc<Parameters>(
+        "iswa_renderable_texturecygnet",
+        RenderableIswaCygnet::Documentation()
+    );
 }
 
 RenderableTextureCygnet::RenderableTextureCygnet(const ghoul::Dictionary& dictionary)

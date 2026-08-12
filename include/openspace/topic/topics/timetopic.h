@@ -31,6 +31,7 @@
 #include <vector>
 
 namespace openspace {
+struct Schema;
 
 class TimeTopic : public Topic {
 public:
@@ -39,6 +40,8 @@ public:
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
+
+    static openspace::Schema Schema();
 
 private:
     static constexpr int UnsetOnChangeHandle = -1;

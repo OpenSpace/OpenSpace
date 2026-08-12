@@ -43,6 +43,7 @@ namespace ghoul::modelgeometry { class ModelGeometry; }
 namespace openspace {
 
 class LightSource;
+struct LuaLibrary;
 
 class RenderableModel : public Renderable, public Shadower {
 public:
@@ -59,6 +60,7 @@ public:
     void update(const UpdateData& data) override;
 
     static openspace::Documentation Documentation();
+    static LuaLibrary luaLibrary();
 
 private:
     enum class AnimationMode {
@@ -138,6 +140,19 @@ private:
     Renderable::RenderBin _originalRenderBin;
 
     ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
+
+    /**
+     * Transformation defined by translation, rotation and scale.
+     */
+    struct NodeTransform {
+        ghoul::mm_unique_ptr<Translation> translation;
+        ghoul::mm_unique_ptr<Rotation> rotation;
+        ghoul::mm_unique_ptr<Scale> scale;
+    };
+    std::map<std::string, NodeTransform> _customNodeTransforms;
+    bool _replaceWithCustomNodeTransforms = false;
+    PropertyOwner _customNodeTransformsOwner;
+    std::vector<PropertyOwner> _nodeTransformOwners;
 };
 
 } // namespace openspace

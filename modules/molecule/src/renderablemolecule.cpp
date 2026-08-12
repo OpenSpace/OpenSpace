@@ -198,10 +198,10 @@ namespace {
     // If no trajectory file is provided only the structural information is shown.
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
         // [[codegen::verbatim(MoleculeFileInfo.description)]]
-        std::string moleculeFile;
+        std::filesystem::path moleculeFile;
 
         // [[codegen::verbatim(TrajectoryFileInfo.description)]]
-        std::optional<std::string> trajectoryFile;
+        std::optional<std::filesystem::path> trajectoryFile;
 
         // [[codegen::verbatim(CoarseGrainedInfo.description)]]
         std::optional<bool> coarseGrained;
@@ -285,7 +285,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableMolecule::Documentation() {
-    return codegen::doc<Parameters>("molecule_renderable_molecule");
+    return codegen::doc<Parameters>(
+        "molecule_renderable_molecule",
+        Renderable::Documentation()
+    );
 }
 
 RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
@@ -305,11 +308,13 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
 
     Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _moleculeFile = p.moleculeFile;
+    _moleculeFile = p.moleculeFile.string();
     _moleculeFile.setReadOnly(true);
     addProperty(_moleculeFile);
 
-    _trajectoryFile = p.trajectoryFile.value_or(_trajectoryFile);
+    if (p.trajectoryFile.has_value()) {
+        _trajectoryFile = p.trajectoryFile->string();
+    }
     _trajectoryFile.setReadOnly(true);
     addProperty(_trajectoryFile);
 

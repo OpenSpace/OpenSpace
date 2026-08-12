@@ -1,0 +1,49 @@
+local marsAsset = asset.require("scene/solarsystem/planets/mars/globe")
+
+
+
+local data = asset.resource({
+  Name = "HiRISE Elyisum Mons - Unusual Depression",
+  Type = "HttpSynchronization",
+  Identifier = "mars_hirise_elysium_mons-unusual_depression",
+  Version = 1
+})
+
+
+local ColorLayer = {
+  Identifier = "Elyisum_Mons",
+  Name = "Elyisum Mons [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Unusual_Depression_Near_Elysium_Mons_Texture.vrt",
+  BlendMode = "Color"
+}
+
+local HeightLayer = {
+  Identifier = "Elyisum_Mons",
+  Name = "Elyisum Mons [Local]",
+  Enabled = asset.enabled,
+  ZIndex = 65,
+  FilePath = data .. "Unusual_Depression_Near_Elysium_Mons_Heightmap.vrt"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+  openspace.globebrowsing.addLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "HeightLayers", HeightLayer)
+  openspace.globebrowsing.deleteLayer(marsAsset.Mars.Identifier, "ColorLayers", ColorLayer)
+end)
+
+
+
+asset.meta = {
+  Name = "HiRISE Unusual Depression in Elyisum Mons [Local]",
+  Description = [[A local layer for Unusual Depression in Elyisum Mons from the HiRISE instrument.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

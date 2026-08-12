@@ -71,7 +71,7 @@ Documentation RenderableSphereImageLocal::Documentation() {
 
 RenderableSphereImageLocal::RenderableSphereImageLocal(
                                                       const ghoul::Dictionary& dictionary)
-    : RenderableSphere(dictionary)
+    : RenderableSphere(dictionary, { .shouldUpdateIfDisabled = true })
     , _texturePath(TextureInfo)
     , _textureIsDirty(_enabled)
 {

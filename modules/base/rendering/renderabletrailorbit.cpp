@@ -111,15 +111,16 @@ namespace {
             [[codegen::annotation("A valid date in ISO 8601 format")]];
 
         // [[codegen::verbatim(PeriodInfo.description)]]
-        double period;
+        double period [[codegen::greater(0.0)]];
 
         // [[codegen::verbatim(ResolutionInfo.description)]]
-        int resolution;
+        int resolution [[codegen::greater(1)]];
     };
 } // namespace
 #include "renderabletrailorbit_codegen.cpp"
 
 namespace openspace {
+
 // This class is using a VBO ring buffer + a constantly updated point as follows:
 // Structure of the array with a _resolution of 16. FF denotes the floating position that
 // is updated every frame:

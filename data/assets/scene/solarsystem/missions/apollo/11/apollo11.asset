@@ -31,7 +31,7 @@ local Apollo11Position = {
   Parent = moonAsset.Moon.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "1969 JUL 19 19:38:29.183",
+    Start = "1969 JUL 20 19:10:25.183",
     End = "1969 JUL 22 04:55:35.183"
   },
   Transform = {
@@ -52,11 +52,6 @@ local Apollo11Position = {
 local Apollo11Model = {
   Identifier = "Apollo11",
   Parent = Apollo11Position.Identifier,
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = "1969 JUL 19 19:38:29.183",
-    End = "1969 JUL 22 04:55:35.183"
-  },
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -94,7 +89,7 @@ local Apollo11MoonTrail = {
       Frame = coreKernels.Frame.Moon
     },
     Color = { 0.18, 0.51, 0.75 },
-    StartTime = "1969 JUL 19 19:38:29.183",
+    StartTime = "1969 JUL 20 19:10:25.183",
     EndTime = "1969 JUL 22 04:55:35.183",
     SampleInterval = 60,
     EnableFade = false
@@ -173,7 +168,7 @@ local Apollo11LemDescentModel = {
   Parent = Apollo11LemPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "1969 JUL 19 19:38:29.183",
+    Start = "1969 JUL 20 19:10:25.183",
     End = "1969 JUL 20 20:17:40.0"
   },
   Transform = {
@@ -208,7 +203,7 @@ local Apollo11LemLandedModel = {
   Parent = Apollo11LemPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "1969 JUL 20 20:17:40.0"
+    Start = "1969 JUL 20 19:10:25.183"
   },
   Transform = {
     Scale = {

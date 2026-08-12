@@ -118,7 +118,7 @@ namespace {
     // case the shadow cylinder indicates the areas in which there is darkness.
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
-        std::optional<int> numberOfPoints;
+        std::optional<int> numberOfPoints [[codegen::greaterequal(0)]];
 
         // [[codegen::verbatim(ShadowLengthInfo.description)]]
         std::optional<float> shadowLength;
@@ -134,7 +134,7 @@ namespace {
         Terminator terminatorType;
 
         // [[codegen::verbatim(LightSourceInfo.description)]]
-        std::string lightSource;
+        std::string lightSource [[codegen::identifier()]];
 
         // [[codegen::verbatim(ObserverInfo.description)]]
         std::string observer;
@@ -154,7 +154,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableShadowCylinder::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderable_shadowcylinder");
+    return codegen::doc<Parameters>(
+        "spacecraftinstruments_renderable_shadowcylinder",
+        Renderable::Documentation()
+    );
 }
 
 RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)

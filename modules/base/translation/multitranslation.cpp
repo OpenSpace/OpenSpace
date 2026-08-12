@@ -43,7 +43,10 @@ namespace {
 namespace openspace {
 
 Documentation MultiTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_translation_multi");
+    return codegen::doc<Parameters>(
+        "base_translation_multi",
+        Translation::Documentation()
+    );
 }
 
 MultiTranslation::MultiTranslation(const ghoul::Dictionary& dictionary)
@@ -74,6 +77,7 @@ void MultiTranslation::update(const UpdateData& data) {
     for (const ghoul::mm_unique_ptr<Translation>& translation : _translations) {
         translation->update(data);
     }
+    Translation::update(data);
 }
 
 glm::dvec3 MultiTranslation::position(const UpdateData& data) const {

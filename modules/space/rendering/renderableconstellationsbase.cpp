@@ -77,7 +77,7 @@ namespace {
         std::optional<std::filesystem::path> namesFile;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greater(0.f)]];
 
         // A list of constellations (given as abbreviations) to show. If empty or
         // excluded, all constellations will be shown.
@@ -93,7 +93,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableConstellationsBase::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_constellationsbase");
+    return codegen::doc<Parameters>(
+        "space_renderable_constellationsbase",
+        Renderable::Documentation()
+    );
 }
 
 RenderableConstellationsBase::RenderableConstellationsBase(

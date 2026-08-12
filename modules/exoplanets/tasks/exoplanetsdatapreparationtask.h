@@ -46,7 +46,7 @@ public:
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
-    static Documentation documentation();
+    static openspace::Documentation Documentation();
 
     /**
      * The exoplanet file includes a set of commented lines in the beginning. This

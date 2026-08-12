@@ -1,0 +1,29 @@
+-- Stereo
+-- This example shows how to create a textured plane in 3D space, where the texture is
+-- from the internet though two web URLs. to create a stereo image. The two different
+-- images will be used for the left and right eyes, respectively, when OpenSpace is used
+-- with stereo rendering.
+
+local Node = {
+  Identifier = "RenderablePlaneImageOnline_Example_Stereo",
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 3.0E11,
+    URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg",
+    RightURL = "http://data.openspaceproject.com/examples/renderableplaneimageonline_2.jpg",
+    Billboard = true
+  },
+  GUI = {
+    Name = "RenderablePlaneImageOnline - Stereo",
+    Path = "/Examples"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

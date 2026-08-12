@@ -74,10 +74,10 @@ namespace {
         std::filesystem::path texture;
 
         // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size;
+        std::optional<float> size [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(WidthInfo.description)]]
-        std::optional<float> width [[codegen::inrange(0.0, 1.0)]];
+        std::optional<float> width [[codegen::inrange(0.f, 1.f)]];
     };
 } // namespace
 #include "renderabledisc_codegen.cpp"
@@ -85,7 +85,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableDisc::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_disc");
+    return codegen::doc<Parameters>(
+        "base_renderable_disc",
+        Renderable::Documentation()
+    );
 }
 
 RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)

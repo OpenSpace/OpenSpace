@@ -604,6 +604,7 @@ LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::BindJoystickButton,
             codegen::lua::ClearJoystickButton,
             codegen::lua::JoystickButton,
+            codegen::lua::UnbindJoystick,
             codegen::lua::AddGlobalRotation,
             codegen::lua::AddLocalRotation,
             codegen::lua::AddTruckMovement,

@@ -310,7 +310,7 @@ namespace {
         // consisting of star magnitude and insert index for later sorting and slicing of
         // LOD cache
         const float mag = starValues[PosSize];
-        node.magOrder.insert(node.magOrder.end(), std::make_pair(mag, node.numStars));
+        node.magOrder.insert(node.magOrder.end(), std::pair(mag, node.numStars));
         node.numStars++;
 
         // If LOD is growing too large then sort it and resize to [chunk size] to avoid

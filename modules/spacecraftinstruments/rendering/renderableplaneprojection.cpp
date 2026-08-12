@@ -78,7 +78,7 @@ namespace {
 
         // The image that is used on this plane before any image is loaded from the
         // `ImageSequencer`.
-        std::optional<std::string> texture;
+        std::optional<std::filesystem::path> texture;
     };
 } // namespace
 #include "renderableplaneprojection_codegen.cpp"
@@ -86,7 +86,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderablePlaneProjection::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_renderable_planeprojection");
+    return codegen::doc<Parameters>(
+        "spacecraftinstruments_renderable_planeprojection",
+        Renderable::Documentation()
+    );
 }
 
 RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dictionary)
@@ -98,7 +101,7 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
     _defaultTarget = p.defaultTarget.value_or(_defaultTarget);
 
     if (p.texture.has_value()) {
-        _texturePath = absPath(*p.texture);
+        _texturePath = *p.texture;
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     }
 }

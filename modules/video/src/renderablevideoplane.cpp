@@ -48,15 +48,11 @@ namespace {
 namespace openspace {
 
 Documentation RenderableVideoPlane::Documentation() {
-    openspace::Documentation doc = codegen::doc<Parameters>(
+    return codegen::doc<Parameters>(
         "video_renderable_videoplane",
-        RenderablePlane::Documentation()
+        RenderablePlane::Documentation(),
+        VideoPlayer::Documentation()
     );
-
-    openspace::Documentation vp = VideoPlayer::Documentation();
-    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
-
-    return doc;
 }
 
 RenderableVideoPlane::RenderableVideoPlane(const ghoul::Dictionary& dictionary)

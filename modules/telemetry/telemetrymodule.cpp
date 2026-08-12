@@ -108,7 +108,7 @@ namespace {
         std::optional<std::string> ipAddress;
 
         // [[codegen::verbatim(PortInfo.description)]]
-        std::optional<int> port;
+        std::optional<int> port [[codegen::inrange(1, 65535)]];
 
         enum class
         [[codegen::map(openspace::TelemetryModule::AngleCalculationMode)]]

@@ -24,9 +24,9 @@
 
 import argparse
 import os
-import pathlib
-from AssetValidation import runAssetValidation
 import re
+from assetvalidation import runAssetValidation
+from pathlib import Path
 
 
 # Helper func because argparse does not handle boolean values nicely
@@ -49,13 +49,6 @@ def setupArgparse():
   """
 
   parser = argparse.ArgumentParser()
-  parser.add_argument(
-    "-d", "--dir",
-    dest="dir",
-    type=str,
-    help="Specifies the OpenSpace directory in which to run the validation",
-    required=True
-  )
 
   parser.add_argument(
     "-f", "--filter",
@@ -68,9 +61,18 @@ def setupArgparse():
   parser.add_argument(
     "-v", "--verbose",
     dest="verbose",
-    help="Prints verbose output",
+    help="Prints verbose output to console",
     required=False,
     default=False,
+  )
+
+  parser.add_argument(
+    "-l", "--logLevel",
+    dest="logLevel",
+    help="Sets the log level of the reported messages. Can be one of 'DEBUG', 'INFO', " \
+    "'WARNING', 'ERROR', or 'CRITICAL'",
+    required=False,
+    default="WARNING"
   )
 
   parser.add_argument(
@@ -93,6 +95,17 @@ def setupArgparse():
     type=int
   )
 
+  parser.add_argument(
+    "-t", "--timeout",
+    dest="timeout",
+    help="Timeout in seconds for loading a single asset. If OpenSpace does not finish "
+         "loading within this time the asset is skipped and validation continues with "
+         "the next one. Defaults to 180 seconds (3 minutes).",
+    required=False,
+    default=180,
+    type=int
+  )
+
   args = parser.parse_args()
   return args
 
@@ -102,18 +115,21 @@ args = setupArgparse()
 args.verbose = str2bool(args.verbose)
 args.startOS = str2bool(args.startOS)
 
+# Finding the root OpenSpace folder
+rootDir = Path(__file__).resolve().parents[2]
+
 # Find the exectuable location and its name
 if os.name == "nt":
   # Windows
-  executable = f"{args.dir}/bin/RelWithDebInfo/OpenSpace.exe"
+  executable = rootDir / "bin" / "RelWithDebInfo" / "OpenSpace.exe"
 else:
   # Linux/Mac
-  executable = f"{args.dir}/bin/OpenSpace"
+  executable = rootDir / "bin" / "OpenSpace"
 
-if not os.path.exists(executable):
+if not executable.exists():
   raise FileNotFoundError(f"Could not find OpenSpace executable at '{executable}'")
 
-files = list(pathlib.Path(f"{args.dir}/data/").rglob("*.asset"))
+files = list(Path(rootDir / "data" / "assets").rglob("*.asset"))
 if args.filter:
   p = re.compile(args.filter)
   files = [x for x in files if re.search(p, str(x))]
@@ -123,4 +139,4 @@ if args.filter:
 files.sort()
 files = files[args.startAt:]
 
-runAssetValidation(files, executable, args)
+runAssetValidation(files, executable, rootDir, args)

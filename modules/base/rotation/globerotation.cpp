@@ -111,7 +111,7 @@ namespace {
         double longitude [[codegen::inrange(-180.0, 180.0)]];
 
         // [[codegen::verbatim(AngleInfo.description)]]
-        std::optional<double> angle;
+        std::optional<double> angle [[codegein::inrange(0.0, 360.0)]];
 
         // [[codegen::verbatim(UseHeightmapInfo.description)]]
         std::optional<bool> useHeightmap;
@@ -125,7 +125,10 @@ namespace {
 namespace openspace {
 
 Documentation GlobeRotation::Documentation() {
-    return codegen::doc<Parameters>("base_rotation_globe");
+    return codegen::doc<Parameters>(
+        "base_rotation_globe",
+        Rotation::Documentation()
+    );
 }
 
 GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)

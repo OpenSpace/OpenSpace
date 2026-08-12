@@ -50,6 +50,8 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
+    static openspace::Documentation Documentation();
+
 private:
     using Line = std::vector<LinePoint>;
 

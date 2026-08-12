@@ -29,12 +29,16 @@
 
 namespace openspace {
 
+struct Schema;
+
 class AuthorizationTopic : public Topic {
 public:
     explicit AuthorizationTopic();
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
+
+    static openspace::Schema Schema();
 
 private:
     bool authorize(const std::string& key);

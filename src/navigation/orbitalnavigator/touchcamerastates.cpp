@@ -30,6 +30,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
+    using namespace openspace;
     constexpr std::string_view _loggerCat = "TouchCameraStates";
 
     double validAngleDiff(double lastAngle, double currentAngle) {
@@ -44,16 +45,48 @@ namespace {
             return currentAngle - lastAngle;
         }
     }
+
+    glm::dvec2 normalizeByAspectRatio(glm::dvec2 vec) {
+        const glm::vec2 windowSize =
+            glm::vec2(global::windowDelegate->currentWindowSize());
+
+        const float aspectRatio = windowSize.x / windowSize.y;
+        return glm::dvec2(vec.x * aspectRatio, vec.y);
+    };
+
+    double computeFramewiseRollFactor(const glm::dvec2& centroid,
+                                      const std::vector<TouchInputHolder>& touchPoints,
+                                      const std::vector<TouchInput>& lastProcessed)
+    {
+        double rollFactor = 0.0;
+        for (const TouchInputHolder& touchPoint : touchPoints) {
+            // Find the last processed touch point corresponding to this one
+            const auto it = std::find_if(
+                lastProcessed.begin(),
+                lastProcessed.end(),
+                [&touchPoint](const TouchInput& input) {
+                    return touchPoint.holdsInput(input);
+                }
+            );
+
+            if (it == lastProcessed.end()) {
+                continue;
+            }
+
+            const TouchInput& lastTouchPoint = *it;
+
+            float firstAngle = lastTouchPoint.angleToPos(centroid);
+            float currentAngle = touchPoint.latestInput().angleToPos(centroid);
+            rollFactor += validAngleDiff(firstAngle, currentAngle);
+        }
+        return rollFactor;
+     };
 } // namespace
 
 namespace openspace {
 
 TouchCameraStates::TouchCameraStates(double sensitivity, double velocityScaleFactor)
     : OrbitalCameraStates(sensitivity, velocityScaleFactor)
-    , _pinchInputs({
-        TouchInputHolder(TouchInput(0, 0, glm::vec2(0.f), 0.0)),
-        TouchInputHolder(TouchInput(0, 0, glm::vec2(0.f), 0.0))
-    })
 {}
 
 TouchCameraStates::~TouchCameraStates() {}
@@ -66,8 +99,6 @@ void TouchCameraStates::updateVelocitiesFromInput(const TouchInputState& touchSt
 
     UpdateStates updateStates = computeVelocities(touchPoints, lastProcessed);
     updateVelocities(std::move(updateStates), deltaTime);
-
-    resetAfterInput();
 }
 
 OrbitalCameraStates::UpdateStates
@@ -93,94 +124,78 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
     LDEBUG(std::format("Interpreted interaction: {}", interactionNames.at(action)));
 #endif // TOUCH_DEBUG_MODE
 
-    const TouchInputHolder& currentInput = touchPoints.at(0);
+    const TouchInputHolder& currentInput = touchPoints[0];
 
-    const glm::vec2 windowSize = glm::vec2(global::windowDelegate->currentWindowSize());
-    const float aspectRatio = windowSize.x / windowSize.y;
+    const TouchInput& startFinger0 = touchPoints[0].firstInput();
+    const TouchInput& endFinger0 = touchPoints[0].latestInput();
 
     switch (action) {
         case InteractionType::Rotation: {
             // Add rotation velocity
-            constexpr glm::dvec2 Scale = glm::dvec2(5.0);
-            updateVelocities.globalRotation = Scale * _sensitivity * -glm::dvec2(
-                currentInput.speedX(),
-                currentInput.speedY()
+            glm::dvec2 diff = normalizeByAspectRatio(
+                glm::dvec2(endFinger0.pos - startFinger0.pos)
             );
+            constexpr glm::dvec2 Scale = glm::dvec2(3.0);
+            updateVelocities.globalRotation = _sensitivity * Scale * -diff;
             break;
         }
         case InteractionType::Pinch: {
-            // Add zooming velocity - dependent on distance difference between contact
-            // points this/first frame
-            const TouchInput& startFinger0 = _pinchInputs[0].firstInput();
-            const TouchInput& startFinger1 = _pinchInputs[1].firstInput();
-            const glm::dvec2 startVec0 = glm::dvec2(
-                startFinger0.pos.x * aspectRatio,
-                startFinger0.pos.y
-            );
-            const glm::dvec2 startVec1 = glm::dvec2(
-                startFinger1.pos.x * aspectRatio,
-                startFinger1.pos.y
-            );
-            double distToCentroidStart = glm::length(startVec0 - startVec1) / 2.0;
+            // Add zooming velocity
+            ghoul_assert(touchPoints.size() > 1, "Pinch needs at least two touch points");
 
-            const TouchInput& endFinger0 = _pinchInputs[0].latestInput();
-            const TouchInput& endFinger1 = _pinchInputs[1].latestInput();
-            const glm::dvec2 endVec0 = glm::dvec2(
-                endFinger0.pos.x * aspectRatio,
-                endFinger0.pos.y
+            const TouchInput& startFinger1 = touchPoints[1].firstInput();
+            const TouchInput& endFinger1 = touchPoints[1].latestInput();
+
+            glm::dvec2 diffStart = normalizeByAspectRatio(
+                glm::dvec2(startFinger0.pos - startFinger1.pos)
             );
-            const glm::dvec2 endVec1 = glm::dvec2(
-                endFinger1.pos.x * aspectRatio,
-                endFinger1.pos.y
+            glm::dvec2 diffEnd = normalizeByAspectRatio(
+                glm::dvec2(endFinger0.pos - endFinger1.pos)
             );
-            double distToCentroidEnd = glm::length(endVec0 - endVec1) / 2.0;
+            double zoomFactor = glm::length(diffEnd) - glm::length(diffStart);
 
-            double zoomFactor = distToCentroidEnd - distToCentroidStart;
+            constexpr double ZoomScale = 5.0;
+            updateVelocities.zoom = _sensitivity * ZoomScale * zoomFactor;
 
-            const double Scale = 100.0;
-            updateVelocities.zoom = Scale * zoomFactor * _sensitivity;
+            // Also apply rolling of fingers as part of the zooming gesture, so we can
+            // orient the view while zooming. Look at the difference since last frame
+            double rollFactor =
+                computeFramewiseRollFactor(_centroid, touchPoints, lastProcessed);
 
+            constexpr double RollScale = 50.0;
+            updateVelocities.globalRoll = _sensitivity * RollScale * -rollFactor;
             break;
         }
         case InteractionType::Roll: {
-            // Add global roll rotation velocity
+            // Apply global rotation velocity
+
+            // Note that with a pure roll gesture was detected, we don't want to zoom, and
+            // we check the total rotation since the first touch point so we can keep
+            // rolling when a gesture is being held
+
             double rollFactor = 0.0;
             for (const TouchInputHolder& touchPoint : touchPoints) {
-                const auto it = std::find_if(
-                    lastProcessed.begin(),
-                    lastProcessed.end(),
-                    [&touchPoint](const TouchInput& input) {
-                        return touchPoint.holdsInput(input);
-                    }
-                );
-
-                if (it == lastProcessed.end()) {
-                    continue;
-                }
-
-                const TouchInput& point = *it;
-                float lastAngle = point.angleToPos(_centroid);
+                float firstAngle = touchPoint.firstInput().angleToPos(_centroid);
                 float currentAngle = touchPoint.latestInput().angleToPos(_centroid);
-                rollFactor += validAngleDiff(lastAngle, currentAngle);
+                rollFactor += validAngleDiff(firstAngle, currentAngle);
             }
-            double avgRollFactor = rollFactor / static_cast<double>(touchPoints.size());
 
-            const double Scale = 100.0;
-            updateVelocities.globalRoll = Scale * -avgRollFactor * _sensitivity;
+            constexpr double Scale = 0.5;
+            updateVelocities.globalRoll = _sensitivity * Scale * -rollFactor;
             break;
         }
         case InteractionType::Pan: {
             // Add local rotation velocity
-            const glm::dvec2 Scale = glm::dvec2(10.0);
+            ghoul_assert(touchPoints.size() > 1, "Pan needs at least two touch points");
 
-            // @TODO (2026-03-11, emmbr) Update scaling and gesture. Panning is currently
-            // triggered using a three-finger gesture, which is often reserved for other
-            // windows-related interaction, so I could not test it
-            updateVelocities.localRotation = _sensitivity * Scale * glm::dvec2(
-                currentInput.speedX(),
-                currentInput.speedY()
+            // Here we don't use the difference between the first and current position,
+            // but instead the speed of the movement, to allow for more responsive panning
+            glm::dvec2 speed = normalizeByAspectRatio(
+                glm::dvec2(currentInput.speedX(), currentInput.speedY())
             );
 
+            constexpr glm::dvec2 Scale = glm::dvec2(0.8);
+            updateVelocities.localRotation = _sensitivity * Scale * speed;
             break;
         }
         case InteractionType::None:
@@ -199,12 +214,10 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
 
     if (inputs.size() != lastProcessed.size() || inputs.empty() || lastProcessed.empty()) {
         // Not a valid gesture. Probably just a tap.
-        // @TODO (2026-03-11, emmbr) This code prevents a crash from happening, but
-        // ideally we should instead change the code below so this check is not needed
         return InteractionType::None;
     }
 
-    // A one finger gesture is always interpreted as a rotation
+    // A one-finger gesture is always interpreted as a rotation
     if (inputs.size() == 1) {
         return InteractionType::Rotation;
     }
@@ -219,35 +232,103 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
     }
     _centroid /= static_cast<float>(inputs.size());
 
-    // See if the distance between fingers changed - used in pan interpretation
-    double dist = 0.0;
-    double lastDist = 0.0;
-    TouchInput distInput = inputs[0].latestInput();
-    for (const TouchInputHolder& inputHolder : inputs) {
-        const TouchInput& latestInput = inputHolder.latestInput();
-        dist += glm::length(glm::dvec2(latestInput.pos) - glm::dvec2(distInput.pos));
-        distInput = latestInput;
+    // Two fingers: Pinch and pan
+    if (inputs.size() == 2) {
+        // Compare movement direction of first two fingers
+        const TouchInput& current0 = inputs[0].latestInput();
+        const TouchInput& current1 = inputs[1].latestInput();
+
+        const TouchInput& first0 = inputs[0].firstInput();
+        const TouchInput& first1 = inputs[1].firstInput();
+
+        glm::vec2 dir0 = current0.pos - first0.pos;
+        glm::vec2 dir1 = current1.pos - first1.pos;
+
+        // Check distance between the fingers
+        float dist = glm::length(current1.pos - current0.pos);
+        float distStart = glm::length(first1.pos - first0.pos);
+        float distanceDiff = std::abs(dist - distStart);
+
+        // Check that both fingers are moving - otherwise, dot products would be nan
+        constexpr float MoveEpsilon = 0.01f;
+        bool isFingerMoving0 = glm::length(dir0) > MoveEpsilon;
+        bool isFingerMoving1 = glm::length(dir1) > MoveEpsilon;
+        bool areBothFingersMoving = isFingerMoving0 && isFingerMoving1;
+
+        // Pinch: movement in opposite directions (checked against the centroid)
+
+        // Normalize directions relative to centroid
+        glm::vec2 toCentroid0 = glm::normalize(_centroid - current0.pos);
+        glm::vec2 toCentroid1 = glm::normalize(_centroid - current1.pos);
+
+        float dot0 = isFingerMoving0 ? glm::dot(glm::normalize(dir0), toCentroid0) : 0.f;
+        float dot1 = isFingerMoving1 ? glm::dot(glm::normalize(dir1), toCentroid1) : 0.f;
+
+        // Check if both moving toward or away from centroid (opposite directions)
+        constexpr float OppositeThreshold = 0.3f;
+        if ((dot0 > OppositeThreshold && dot1 > OppositeThreshold) ||
+            (dot0 < -OppositeThreshold && dot1 < -OppositeThreshold))
+        {
+            return InteractionType::Pinch;
+        }
+
+        // Pan: movement in same direction
+
+        // Check if the vectors point in the same direction, by simply checking the dot
+        // product between the direction vectors (dot product is 1 => exactly the same)
+        constexpr float SameThreshold = 0.3f;
+        constexpr float InterpretPanDistance = 0.2f;
+
+        if (areBothFingersMoving && distanceDiff < InterpretPanDistance) {
+            float dot = glm::dot(glm::normalize(dir0), glm::normalize(dir1));
+            if (std::abs(dot - 1.f) < SameThreshold) {
+                return InteractionType::Pan;
+            }
+        }
     }
-    distInput = lastProcessed[0];
-    for (const TouchInput& p : lastProcessed) {
-        lastDist += glm::length(glm::dvec2(p.pos) - glm::dvec2(distInput.pos));
-        distInput = p;
-    }
 
-    const float InterpretPanDistance = 0.015f;
+    // Rolling may use two fingers or more
 
-    float avgDistance = static_cast<float>(std::abs(dist - lastDist));
+    // We have roll if one finger is still, or the total roll angles around the centroid
+    // is over a given threshold (all fingers are moving)
 
-    // If average distance between 3 fingers are constant we have panning
-    if (avgDistance < InterpretPanDistance && inputs.size() == 3) {
-        return InteractionType::Pan;
-    }
-
-    // Find the slowest moving finger - used in roll interpretation
+    // 1) Find the slowest moving finger - to find potentially still fingers
     double minDiff = 1000.0;
+    for (const TouchInputHolder& inputHolder : inputs) {
+        if (!inputHolder.isMoving()) {
+            minDiff = 0.0;
+            // Found a still finger, no need to continue
+            break;
+        }
 
-    // Find if all fingers angles are high - used in roll interpretation
-    double rollFactor = 0.0;
+        const auto it = std::find_if(
+            lastProcessed.cbegin(),
+            lastProcessed.cend(),
+            [&inputHolder](const TouchInput& input) {
+                return inputHolder.holdsInput(input);
+            }
+        );
+
+        if (it != lastProcessed.cend()) {
+            const glm::vec2 d = inputHolder.latestInput().pos - it->pos;
+            minDiff = std::min(minDiff, static_cast<double>(std::abs(d.x + d.y)));
+        }
+    }
+
+    constexpr float InputStillThreshold = 0.0005f;
+    bool hasStillFinger = std::abs(minDiff) < InputStillThreshold;
+    if (hasStillFinger) {
+        return InteractionType::Roll;
+    }
+
+    // 2: All fingers are rotating around a stationary centroid
+    constexpr float CentroidStillThreshold = 0.0018f;
+    float normalizedCentroidDist = glm::distance(_centroid, lastCentroid);
+    normalizedCentroidDist /= static_cast<float>(inputs.size());
+    bool isCentroidStill = normalizedCentroidDist < CentroidStillThreshold;
+
+    bool allFingersRotating = true;
+    constexpr float RollAngleThreshold = 0.025f;
 
     for (const TouchInputHolder& inputHolder : inputs) {
         const auto it = std::find_if(
@@ -261,67 +342,23 @@ TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inp
         if (it == lastProcessed.cend()) {
             continue;
         }
-        const TouchInput& latestInput = inputHolder.latestInput();
-        const TouchInput& prevInput = *it;
 
-        // Compute diff for slowest moving finger
-        const glm::vec2 d = latestInput.pos - prevInput.pos;
-        const double diff = d.x + d.y;
-        if (!inputHolder.isMoving()) {
-            minDiff = 0.0;
-        }
-        else if (std::abs(diff) < std::abs(minDiff)) {
-            minDiff = diff;
-        }
-
-        // Compute roll factor, as the difference in angle to centroid between frames
-        float lastAngle = prevInput.angleToPos(_centroid);
+        float lastAngle = it->angleToPos(_centroid);
         float currentAngle = inputHolder.latestInput().angleToPos(_centroid);
+        double angleDiff = validAngleDiff(lastAngle, currentAngle);
 
-        double res = validAngleDiff(lastAngle, currentAngle);
-
-        const float RollAngleThreshold = 0.025f;
-        if (std::abs(res) < RollAngleThreshold) {
-            rollFactor = 1000.0; // @TODO: Figure out this magic number
-        }
-        else {
-            rollFactor += res;
+        if (std::abs(angleDiff) < RollAngleThreshold) {
+            // Found a finger that is not rolling, no need to continue
+            allFingersRotating = false;
+            break;
         }
     }
 
-    float normalizedCentroidDist = glm::distance(_centroid, lastCentroid);
-    normalizedCentroidDist /= static_cast<float>(inputs.size());
-
-    const float InputStillThreshold = 0.0005f;
-    const float CentroidStillThreshold = 0.0018f;
-
-    // We have roll if one finger is still, or the total roll angles around the centroid
-    // is over RollAngleThreshold (CentroidStillThreshold is used to avoid
-    // misinterpretations)
-    if (std::abs(minDiff) < InputStillThreshold ||
-        (std::abs(rollFactor) < 100.0 && normalizedCentroidDist < CentroidStillThreshold))
-    {
+    if (allFingersRotating && isCentroidStill) {
         return InteractionType::Roll;
     }
-    else {
-        // Check for pinch gesture
-        const bool isSameInput0 = _pinchInputs[0].holdsInput(inputs[0].latestInput());
-        const bool isSameInput1 = _pinchInputs[1].holdsInput(inputs[1].latestInput());
-        if (isSameInput0 && isSameInput1) {
-            _pinchInputs[0].tryAddInput(inputs[0].latestInput());
-            _pinchInputs[1].tryAddInput(inputs[1].latestInput());
-        }
-        else {
-            _pinchInputs[0] = TouchInputHolder(inputs[0].latestInput());
-            _pinchInputs[1] = TouchInputHolder(inputs[1].latestInput());
-        }
-        return InteractionType::Pinch;
-    }
-}
 
-void TouchCameraStates::resetAfterInput() {
-    _pinchInputs[0].clearInputs();
-    _pinchInputs[1].clearInputs();
+    return InteractionType::None;
 }
 
 } // namespace openspace

@@ -50,7 +50,10 @@ namespace {
 namespace openspace {
 
 Documentation StaticTranslation::Documentation() {
-    return codegen::doc<Parameters>("base_translation_static");
+    return codegen::doc<Parameters>(
+        "base_translation_static",
+        Translation::Documentation()
+    );
 }
 
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)

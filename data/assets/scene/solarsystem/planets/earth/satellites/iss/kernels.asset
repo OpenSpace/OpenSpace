@@ -5,15 +5,14 @@ local kernels = asset.resource({
   Version = 1
 })
 
-local tle = asset.resource({
-  Name = "Satellite TLE Data (ISS)",
+local csv = asset.resource({
+  Name = "Satellite CSV Data (ISS)",
   Type = "UrlSynchronization",
-  Identifier = "satellite_tle_data_iss",
-  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=25544&FORMAT=tle",
+  Identifier = "satellite_csv_data_iss",
+  Url = "https://liu-se.relay.openspaceproject.com/celestrak?CATNR=25544&FORMAT=csv",
   Filename = "ISS.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
-
 
 local ID = {
   ISS = "ISS"
@@ -26,11 +25,11 @@ local Frame = {
 local kernelFile
 asset.onInitialize(function()
   -- In order to get the orientation of the ISS correctly, we need to have its position
-  -- available as a SPICE object. We don't want to just convert the TLE file once as we
+  -- available as a SPICE object. We don't want to just convert the CSV file once as we
   -- want it to update with every startup.
-  -- For this reason we convert the TLE file into a type 10 SPICE kernel and since we are
+  -- For this reason we convert the CSV file into a type 10 SPICE kernel and since we are
   -- already doing that, we can also get a more accurate position for free, too
-  local translation, kernel = openspace.space.tleToSpiceTranslation(tle .. "ISS.txt")
+  local translation, kernel = openspace.space.csvToSpiceTranslation(csv .. "ISS.txt")
   kernelFile = kernel -- Store the path for the deinitialize function
 
   openspace.spice.loadKernel(kernelFile)

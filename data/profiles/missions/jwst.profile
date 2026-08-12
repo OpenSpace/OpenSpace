@@ -5,7 +5,7 @@
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/layers/colorlayers/viirs_noaa20_temporal.asset",
     "scene/solarsystem/planets/earth/satellites/satellites",
-    "scene/solarsystem/planets/earth/satellites/misc/hubble_trail",
+    "scene/solarsystem/planets/earth/satellites/hubble/trail",
     "scene/solarsystem/planets/earth/lagrange_points/lagrange_points",
     "scene/solarsystem/telescopes/jwst/jwst",
     "scene/solarsystem/telescopes/jwst/trail",

@@ -25,6 +25,7 @@
 #include <modules/multiresvolume/multiresvolumemodule.h>
 
 #include <modules/multiresvolume/rendering/renderablemultiresvolume.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
@@ -43,6 +44,12 @@ void MultiresVolumeModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableMultiresVolume>("RenderableMultiresVolume");
+}
+
+std::vector<Documentation> MultiresVolumeModule::documentations() const {
+    return {
+        RenderableMultiresVolume::Documentation()
+    };
 }
 
 } // namespace openspace

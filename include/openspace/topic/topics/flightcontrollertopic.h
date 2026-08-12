@@ -31,6 +31,8 @@
 
 namespace openspace {
 
+struct Schema;
+
 class FlightControllerTopic : public Topic {
 public:
     FlightControllerTopic();
@@ -39,29 +41,13 @@ public:
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
-    void engageAutopilot(const nlohmann::json &json);
-    void disengageAutopilot() const;
-    void handleAutopilot(const nlohmann::json &json);
+    static openspace::Schema Schema();
 
 private:
-    void connect();
     void disconnect();
     void processInputState(const nlohmann::json& json);
-    void setFocusNodes();
-    void updateView(const nlohmann::json& json) const;
-    void changeFocus(const nlohmann::json& json) const;
-    void setRenderableEnabled(const nlohmann::json& json) const;
-    void processLua(const nlohmann::json& json);
-    void setFriction(const nlohmann::json& json) const;
-    void setFriction(bool roll, bool rotation, bool zoom) const;
-    void setFriction(bool all) const;
 
     bool _isDone = false;
-    bool _autopilotEngaged = false;
-    nlohmann::json _payload;
-    nlohmann::json _focusNodes;
-    nlohmann::json _allNodes;
-    nlohmann::json _interestingTimes;
 
     WebsocketInputState _inputState;
 };

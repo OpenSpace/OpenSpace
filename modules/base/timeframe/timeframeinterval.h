@@ -27,6 +27,7 @@
 
 #include <openspace/scene/timeframe.h>
 
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 
@@ -43,9 +44,11 @@ public:
 private:
     BoolProperty _hasStart;
     DoubleProperty _start;
+    TriggerProperty _jumpToStart;
 
     BoolProperty _hasEnd;
     DoubleProperty _end;
+    TriggerProperty _jumpToEnd;
 };
 
 } // namespace openspace

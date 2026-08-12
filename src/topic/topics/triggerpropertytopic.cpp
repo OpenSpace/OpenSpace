@@ -24,9 +24,9 @@
 
 #include <openspace/topic/topics/triggerpropertytopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <stdexcept>
@@ -58,6 +58,34 @@ void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
 
 bool TriggerPropertyTopic::isDone() const {
     return true;
+}
+
+Schema TriggerPropertyTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "title": "TriggerPropertyTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "trigger" },
+            "topicPayload": {
+              "type": "object",
+              "properties": {
+                "property": {
+                  "type": "string",
+                  "description": "Property URI to trigger"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["property"]
+            },
+            "data": { "type": "null" }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "triggerpropertytopic", schema };
 }
 
 } // namespace openspace

@@ -84,6 +84,8 @@ private:
     void updateBuffers();
     void threadedSegmentCalculations(int threadId, const UpdateData& data);
 
+    double _lastTimestamp = std::numeric_limits<double>::min();
+
     const int _nThreads = 0;
     std::vector<int> _threadIds;
     std::vector<int> _orbitsPerThread;

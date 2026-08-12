@@ -1,0 +1,49 @@
+{
+  "profile": "nightsky",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [
+          1266870.4669270976,
+          -4530817.606449327,
+          4307620.03901477
+        ],
+        "pitch": 1.5707963204063,
+        "up": [
+          -0.9630610045214416,
+          -0.2692833110092255,
+          4.29514673827569e-09
+        ],
+        "timestamp": "2023 APR 14 01:46:47"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.CardinalDirectionSphere.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "action",
+      "value": "os.nightsky.LookingWest"
+    },
+    {
+      "type": "action",
+      "value": "os.nightsky.LevelHorizonPitch"
+    },
+    {
+      "type": "action",
+      "value": "os.FadeDownTrails"
+    },
+    {
+      "type": "wait",
+      "value": 20
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

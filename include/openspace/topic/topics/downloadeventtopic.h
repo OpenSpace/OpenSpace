@@ -32,12 +32,16 @@
 
 namespace openspace {
 
+struct Schema;
+
 class DownloadEventTopic : public Topic {
 public:
     ~DownloadEventTopic() override;
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
+
+    static openspace::Schema Schema();
 
 private:
     bool _isSubscribedTo = false;

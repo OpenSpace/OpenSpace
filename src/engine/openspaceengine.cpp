@@ -274,33 +274,6 @@ OpenSpaceEngine::OpenSpaceEngine()
 
 OpenSpaceEngine::~OpenSpaceEngine() {}
 
-void OpenSpaceEngine::registerPathTokens() {
-    LTRACE("OpenSpaceEngine::initialize(begin)");
-
-    // Registering Path tokens. If the BASE path is set, it is the only one that will
-    // overwrite the default path of the cfg directory
-    using T = std::string;
-    for (const std::pair<const T, T>& path : global::configuration->pathTokens) {
-        std::string fullKey = std::format("${{{}}}", path.first);
-        LDEBUG(std::format("Registering path '{}': {}", fullKey, path.second));
-
-        const bool overrideBase = (fullKey == "${BASE}");
-        if (overrideBase) {
-            LINFO(std::format("Overriding base path with '{}'", path.second));
-        }
-
-        const bool overrideTemporary = (fullKey == "${TEMPORARY}");
-
-        using Override = ghoul::filesystem::FileSystem::Override;
-        FileSys.registerPathToken(
-            std::move(fullKey),
-            path.second,
-            Override(overrideBase || overrideTemporary)
-        );
-    }
-    LTRACE("OpenSpaceEngine::initialize(end)");
-}
-
 void OpenSpaceEngine::initialize() {
     ZoneScoped;
 
@@ -1058,6 +1031,9 @@ void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
     if (!std::filesystem::exists(absPath("${USER_CONFIG}"))) {
         std::filesystem::create_directories(absPath("${USER_CONFIG}"));
     }
+    if (!std::filesystem::exists(absPath("${USER_SCRIPTS}"))) {
+        std::filesystem::create_directories(absPath("${USER_SCRIPTS}"));
+    }
     if (!std::filesystem::is_directory(absPath("${USER_WEBPANELS}"))) {
         std::filesystem::create_directories(absPath("${USER_WEBPANELS}"));
     }
@@ -1677,17 +1653,17 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
 #endif // WIN32
 
         ghoul::lua::push(s, f);
-        lua_setglobal(s, "filename");
+        lua_setglobal(s, "Filename");
 
         std::filesystem::path basename = f.filename();
         ghoul::lua::push(s, std::move(basename));
-        lua_setglobal(s, "basename");
+        lua_setglobal(s, "Basename");
 
         std::string extension = f.extension().string();
         extension = ghoul::toLowerCase(extension);
 
         ghoul::lua::push(s, extension);
-        lua_setglobal(s, "extension");
+        lua_setglobal(s, "Extension");
 
         int callStatus = lua_pcall(s, 0, 1, 0);
         if (callStatus != LUA_OK) {
@@ -1827,6 +1803,23 @@ void OpenSpaceEngine::removeModeChangeCallback(CallbackHandle handle) {
 }
 
 LuaLibrary OpenSpaceEngine::luaLibrary() {
+    std::vector<std::filesystem::path> scripts;
+    // Adding the core scripts
+    scripts.push_back(absPath("${SCRIPTS}/core_scripts.lua"));
+
+    // Add user defined scripts
+    if (FileSys.hasRegisteredToken("${USER_SCRIPTS}")) {
+        std::vector<std::filesystem::path> userFiles = ghoul::filesystem::walkDirectory(
+            absPath("${USER_SCRIPTS}"),
+            ghoul::filesystem::Recursive::Yes,
+            ghoul::filesystem::Sorted::Yes,
+            [](const std::filesystem::path& p) {
+                return p.extension() == ".lua" && std::filesystem::is_directory(p);
+            }
+        );
+        scripts.insert(scripts.end(), userFiles.begin(), userFiles.end());
+    }
+
     return {
         "",
         {
@@ -1848,11 +1841,10 @@ LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::LoadJson,
             codegen::lua::ResolveShortcut,
             codegen::lua::VramInUse,
-            codegen::lua::RamInUse
+            codegen::lua::RamInUse,
+            codegen::lua::ComputerName
         },
-        {
-            absPath("${SCRIPTS}/core_scripts.lua")
-        }
+        std::move(scripts)
     };
 }
 

@@ -14,10 +14,6 @@ local ID = {
   Nereid = "NEREID"
 }
 
-local Frame = {
-  Nereid = coreKernels.Frame.Nereid
-}
-
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "nep101xl-802.bsp")
@@ -28,4 +24,3 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("ID", ID)
-asset.export("Frame", Frame)

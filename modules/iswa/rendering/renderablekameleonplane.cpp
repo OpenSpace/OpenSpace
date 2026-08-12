@@ -355,7 +355,7 @@ void RenderableKameleonPlane::readFieldlinePaths(const std::filesystem::path& in
         std::string partName = fullName.substr(0, fullName.find_last_of("-"));
         for (auto it = fieldlines.begin(); it != fieldlines.end(); it++) {
             _fieldlines.addOption(it.key());
-            _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
+            _fieldlineState[i] = std::tuple<std::string, std::string, bool>(
                 partName + "/" + it.key(),
                 it->get<std::string>(),
                 false

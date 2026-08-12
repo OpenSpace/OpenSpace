@@ -267,7 +267,7 @@ namespace {
         std::filesystem::path sourceFolder [[codegen::directory()]];
 
         // [[codegen::verbatim(ColorTablePathInfo.description)]]
-        std::string colorTablePath;
+        std::filesystem::path colorTablePath;
 
         // [[codegen::verbatim(GoesEnergyBinsInfo.description)]]
         std::optional<int> energyBin;
@@ -281,7 +281,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableFluxNodes::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_fluxnodes");
+    return codegen::doc<Parameters>(
+        "space_renderable_fluxnodes",
+        Renderable::Documentation()
+    );
 }
 
 RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
@@ -343,7 +346,7 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _colorTablePath = p.colorTablePath;
+    _colorTablePath = p.colorTablePath.string();
     _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.value());
     _colorTableRange = p.colorTableRange.value_or(_colorTableRange);
 

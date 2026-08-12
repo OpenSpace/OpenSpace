@@ -123,7 +123,7 @@ namespace {
         std::optional<Unit> unit;
 
         // [[codegen::verbatim(ColorsInfo.description)]]
-        std::optional<std::vector<glm::vec3>> colors;
+        std::optional<std::vector<glm::vec3>> colors [[codegen::color()]];
     };
 } // namespace
 #include "renderableconstellationlines_codegen.cpp"

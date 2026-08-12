@@ -8,10 +8,6 @@ asset.require("./colorlayers/messenger_hiw_sweden", false)
 asset.require("./colorlayers/messenger_loi_sweden", false)
 asset.require("./colorlayers/messenger_shade_sweden", false)
 
--- The Sweden server does not have these maps, use the Utah server for now
-asset.require("./colorlayers/messenger_mdr_utah", false)
-asset.require("./colorlayers/messenger_mp3_utah", false)
-
 
 
 asset.meta = {

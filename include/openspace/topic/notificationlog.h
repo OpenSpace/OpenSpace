@@ -76,4 +76,4 @@ private:
 
 } // namespace ghoul::logging
 
-#endif // __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
+#endif // __OPENSPACE_CORE___NOTIFICATIONLOG___H__

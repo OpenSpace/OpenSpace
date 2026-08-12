@@ -4,7 +4,7 @@ local guiCustomization = asset.require("customization/gui")
 
 
 -- Select which commit hashes to use for the UI frontend
-local frontendHash = "8a61a097b2631c34bf927b96fc5e60ac620d30e1"
+local frontendHash = "cae2a043ab028151bac9c5b4189701c14ec485f9"
 
 -- The name of the file to download from the server
 local frontendFile = "frontend.zip"
@@ -17,7 +17,7 @@ local frontend = asset.resource({
 })
 
 
-local showcomposerHash = "9071d8bc80d16dc1e081017e02297915563f0a64"
+local showcomposerHash = "5aa159ca506b108e469856c14040362f5d587ee0"
 local showcomposerFile = "showcomposer.zip"
 
 local showcomposer = asset.resource({

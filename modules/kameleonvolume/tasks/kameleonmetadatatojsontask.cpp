@@ -40,14 +40,14 @@ namespace {
         std::filesystem::path input;
 
         // The JSON file to export data into.
-        std::string output [[codegen::annotation("A valid filepath")]];
+        std::filesystem::path output [[codegen::mustexist(false)]];
     };
 } // namespace
 #include "kameleonmetadatatojsontask_codegen.cpp"
 
 namespace openspace {
 
-Documentation KameleonMetadataToJsonTask::documentation() {
+Documentation KameleonMetadataToJsonTask::Documentation() {
     return codegen::doc<Parameters>("kameleon_task_metadatatojson");
 }
 
@@ -55,8 +55,8 @@ KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
                                                       const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _inputPath = absPath(p.input);
-    _outputPath = absPath(p.output);
+    _inputPath = p.input;
+    _outputPath = p.output;
 }
 
 std::string KameleonMetadataToJsonTask::description() {

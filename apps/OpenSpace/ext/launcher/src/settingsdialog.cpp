@@ -204,9 +204,11 @@ void SettingsDialog::createWidgets() {
 
         QLabel* conf = new QLabel("Property Visibility");
         conf->setToolTip(
+            "<html><div style=\"width: 300px;\">"
             "This setting sets the default visibility for properties in the application. "
             "Note that these values are ordered, so all properties shown as a 'Novice "
             "User' are also visible when selecting 'User', etc."
+            "</div></html>"
         );
         layout->addWidget(conf, 9, 0);
 
@@ -305,7 +307,6 @@ void SettingsDialog::createWidgets() {
             "All",
             "NewYork",
             "Sweden",
-            "Utah",
             "None"
         });
         _layerServer->setCurrentText("All");

@@ -43,7 +43,7 @@ namespace {
     // texture, based on a provided OpenGL texture name.
     struct [[codegen::Dictionary(ScreenSpaceDebugPlane)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
-        std::optional<int> texture;
+        std::optional<int> texture [[codegen::greaterequal(0)]];
     };
 } // namespace
 #include "screenspacedebugplane_codegen.cpp"
@@ -51,7 +51,10 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceDebugPlane::Documentation() {
-    return codegen::doc<Parameters>("debugging_screenspace_debugplane");
+    return codegen::doc<Parameters>(
+        "debugging_screenspace_debugplane",
+        ScreenSpaceRenderable::Documentation()
+    );
 }
 
 ScreenSpaceDebugPlane::ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary)

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_CORE___TOUCH_MARKER___H__
-#define __OPENSPACE_MODULE_CORE___TOUCH_MARKER___H__
+#ifndef __OPENSPACE_CORE___TOUCH_MARKER___H__
+#define __OPENSPACE_CORE___TOUCH_MARKER___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -67,4 +67,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_CORE___TOUCH_MARKER___H__
+#endif // __OPENSPACE_CORE___TOUCH_MARKER___H__

@@ -138,6 +138,8 @@ public:
     void setLuaValue(lua_State* state) override final;
     std::string stringValue() const override final;
 
+    static nlohmann::json Schema();
+
 private:
     nlohmann::json generateAdditionalJsonDescription() const override final;
     int toValue(lua_State* state) const override final;

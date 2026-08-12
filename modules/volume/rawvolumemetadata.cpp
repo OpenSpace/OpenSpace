@@ -33,7 +33,7 @@
 namespace {
     struct [[codegen::Dictionary(RawVolumeMetaData)]] Parameters {
         // Specifies the number of grid cells in each dimension.
-        glm::ivec3 dimensions;
+        glm::ivec3 dimensions [[codegen::greaterequal(glm::ivec3(0))]];
 
         // Specifies the unit used to specity the domain.
         std::optional<std::string> domainUnit;
@@ -47,7 +47,7 @@ namespace {
         // Specifies the time on the format YYYY-MM-DDTHH:MM:SS.000Z.
         std::optional<std::string> time;
 
-        // Specifies the unit used to specity the value.
+        // Specifies the unit used to specify the value.
         std::optional<std::string> valueUnit;
 
         // Specifies the minimum value stored in the volume.

@@ -53,7 +53,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
         // [[codegen::verbatim(SourceFolderInfo.description)]]
-        std::string sourceFolder;
+        std::filesystem::path sourceFolder [[codegen::directory()]];
 
         // If set to `true` the images are only loaded when it is about to be shown
         // instead of preloading them.
@@ -73,20 +73,14 @@ Documentation RenderablePlaneTimeVaryingImage::Documentation() {
 
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
                                                       const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary)
+    : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
     , _sourceFolder(SourceFolderInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _sourceFolder = p.sourceFolder;
-    if (!std::filesystem::is_directory(absPath(_sourceFolder))) {
-        LERROR(std::format(
-            "Time varying image, '{}' is not a valid directory", _sourceFolder.value()
-        ));
-    }
-
-    addProperty(_sourceFolder);
+    _sourceFolder = p.sourceFolder.string();
     _sourceFolder.onChange([this]() { _texture = loadTexture(); });
+    addProperty(_sourceFolder);
 
     _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
     if (_isLoadingLazily) {

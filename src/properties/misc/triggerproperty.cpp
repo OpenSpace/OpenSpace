@@ -49,7 +49,36 @@ void TriggerProperty::trigger() {
 }
 
 std::string TriggerProperty::jsonValue() const {
-    return "true";
+    return "null";
+}
+
+std::string TriggerProperty::stringValue() const {
+    return "nil";
+}
+
+nlohmann::json TriggerProperty::Schema() {
+    nlohmann::json metaData = Property::MetaDataSchema();
+    metaData["properties"]["type"] = { { "const", "TriggerProperty" } };
+    metaData["required"].push_back("type");
+    nlohmann::json sharedDefs = ExtractDefs(metaData);
+
+    nlohmann::json typeDef = nlohmann::json::parse(R"(
+        {
+          "type": "object",
+          "properties": {
+            "uri": { "type": "string" },
+            "value": { "type": "null" }
+          },
+          "additionalProperties": false,
+          "required": ["metaData", "uri", "value"]
+        }
+    )");
+    typeDef["properties"]["metaData"] = metaData;
+
+    nlohmann::json schema;
+    schema["$defs"] = sharedDefs;
+    schema["typedefs"]["TriggerProperty"] = typeDef;
+    return schema;
 }
 
 } // namespace openspace

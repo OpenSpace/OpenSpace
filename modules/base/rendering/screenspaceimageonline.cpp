@@ -53,7 +53,7 @@ namespace {
     // To load an image from a local file on disk, see
     // [`ScreenSpaceImageLocal`](#base_screenspace_imagelocal).
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
-        std::optional<std::string> identifier;
+        std::optional<std::string> identifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<std::string> url [[codegen::key("URL")]];
@@ -64,7 +64,10 @@ namespace {
 namespace openspace {
 
 Documentation ScreenSpaceImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_screenspace_imageonline");
+    return codegen::doc<Parameters>(
+        "base_screenspace_imageonline",
+        ScreenSpaceRenderable::Documentation()
+    );
 }
 
 ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)

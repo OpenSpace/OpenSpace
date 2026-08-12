@@ -43,7 +43,9 @@ namespace openspace {
 
 class RenderablePlane : public Renderable {
 public:
-    explicit RenderablePlane(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlane(const ghoul::Dictionary& dictionary,
+
+    RenderableSettings settings = RenderableSettings());
 
     void initializeGL() override;
     void deinitializeGL() override;

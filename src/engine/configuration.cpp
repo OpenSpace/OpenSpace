@@ -32,6 +32,7 @@
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
@@ -321,9 +322,9 @@ namespace {
         std::optional<bool> bypassLauncher;
 
         // Set which layer server should be preferd to be used, the options are
-        // \"All\", \"NewYork\", \"Sweden\", \"Utah\" and \"None\".
+        // \"All\", \"NewYork\", \"Sweden\", and \"None\".
         std::optional<std::string> layerServer [[codegen::inlist("All", "NewYork",
-            "Sweden", "Utah", "None")]];
+            "Sweden", "None")]];
 
         // The URL that is pinged to check which version of OpenSpace is the most current
         // if you don't want this request to happen, this value should not be set at all.
@@ -724,7 +725,13 @@ Documentation Configuration::Documentation() {
     openspace::Documentation doc = codegen::doc<Parameters>("core_configuration");
 
     auto moduleConfiguration = std::make_shared<TableVerifier>();
-    for (OpenSpaceModule* mod : global::moduleEngine->modules()) {
+
+    const std::vector<OpenSpaceModule*> modules =
+        global::moduleEngine ?
+        global::moduleEngine->modules() :
+        std::vector<OpenSpaceModule*>();
+
+    for (OpenSpaceModule* mod : modules) {
         std::string name = mod->identifier();
         std::string id = mod->Documentation().id;
 
@@ -805,11 +812,40 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     return result;
 }
 
+void registerPathTokens(const Configuration& configuration) {
+    // Registering Path tokens. If the BASE path is set, it is the only one that will
+    // overwrite the default path of the cfg directory
+    using T = std::string;
+    for (const std::pair<const T, T>& path : configuration.pathTokens) {
+        std::string fullKey = std::format("${{{}}}", path.first);
+        LDEBUGC(
+            "Configuration",
+            std::format("Registering path '{}': {}", fullKey, path.second)
+        );
+
+        const bool overrideBase = (fullKey == "${BASE}");
+        if (overrideBase) {
+            LINFOC(
+                "Configuration",
+                std::format("Overriding base path with '{}'", path.second)
+            );
+        }
+
+        const bool overrideTemporary = (fullKey == "${TEMPORARY}");
+
+        using Override = ghoul::filesystem::FileSystem::Override;
+        FileSys.registerPathToken(
+            std::move(fullKey),
+            path.second,
+            Override(overrideBase || overrideTemporary)
+        );
+    }
+}
+
 Configuration::LayerServer stringToLayerServer(std::string_view server) {
     if (server == "All") { return Configuration::LayerServer::All; }
     else if (server == "NewYork") { return Configuration::LayerServer::NewYork; }
     else if (server == "Sweden") { return Configuration::LayerServer::Sweden; }
-    else if (server == "Utah") { return Configuration::LayerServer::Utah; }
     else if (server == "None") { return Configuration::LayerServer::None; }
     else { throw ghoul::MissingCaseException(); }
 }
@@ -819,7 +855,6 @@ std::string layerServerToString(Configuration::LayerServer server) {
         case Configuration::LayerServer::All: return "All";
         case Configuration::LayerServer::NewYork: return "NewYork";
         case Configuration::LayerServer::Sweden: return "Sweden";
-        case Configuration::LayerServer::Utah: return "Utah";
         case Configuration::LayerServer::None: return "None";
         default: throw ghoul::MissingCaseException();
     }

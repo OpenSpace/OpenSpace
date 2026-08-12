@@ -24,12 +24,11 @@
 
 #include <openspace/topic/topics/profiletopic.h>
 
+#include <openspace/documentation/schema.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/settings.h>
 #include <openspace/scene/profile.h>
-#include <openspace/topic/connection.h>
-#include <openspace/topic/jsonconverters.h>
 
 namespace openspace {
 
@@ -58,11 +57,58 @@ void ProfileTopic::handleJson(const nlohmann::json&) {
         data["version"] = global::profile->meta->version.value_or("");
     }
 
-    _connection->sendJson(wrappedPayload(data));
+    sendData(data);
 }
 
 bool ProfileTopic::isDone() const {
     return true;
+}
+
+Schema ProfileTopic::Schema() {
+    nlohmann::json schema = nlohmann::json::parse(R"(
+        {
+          "title": "ProfileTopic",
+          "type": "object",
+          "properties": {
+            "topicId": { "const": "profile" },
+            "topicPayload": {
+              "type": "object",
+              "additionalProperties": false
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "uiPanelVisibility": {
+                  "type": "object",
+                  "additionalProperties": { "type": "boolean" }
+                },
+                "markNodes": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "filePath": { "type": "string" },
+                "addons": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "hasStartedBefore": { "type": "boolean" },
+                "name": { "type": "string" },
+                "author": { "type": "string" },
+                "description": { "type": "string" },
+                "license": { "type": "string" },
+                "url": { "type": "string" },
+                "version": { "type": "string" }
+              },
+              "additionalProperties": false,
+              "required": ["uiPanelVisibility", "markNodes", "filePath", "addons"]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["topicId", "topicPayload", "data"]
+        }
+    )");
+
+    return { "profiletopic", schema };
 }
 
 } // namespace openspace

@@ -51,12 +51,19 @@ private:
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(
         const std::string& url);
 
+    void scaleToAspectRatio();
+
     StringProperty _texturePath;
+    StringProperty _rightTexturePath;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
+    std::future<DownloadManager::MemoryFile> _rightImageFuture;
+
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _rightTexture;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
     bool _textureIsDirty = false;
+    bool _isStereo = false;
 };
 
 } // namespace openspace

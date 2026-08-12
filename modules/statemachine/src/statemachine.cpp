@@ -45,7 +45,7 @@ namespace {
             [[codegen::reference("statemachine_transition")]];
 
         // The initial state of the state machine. Defaults to the first in the list.
-        std::optional<std::string> startState;
+        std::optional<std::string> startState [[codegen::identifier()]];
     };
 } // namespace
 #include "statemachine_codegen.cpp"

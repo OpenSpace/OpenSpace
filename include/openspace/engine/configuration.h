@@ -129,7 +129,6 @@ struct Configuration {
         All = 0,
         NewYork,
         Sweden,
-        Utah,
         None
     };
     LayerServer layerServer = LayerServer::All;
@@ -170,6 +169,8 @@ std::filesystem::path findConfiguration(const std::string& filename = "openspace
 
 Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
     const std::filesystem::path& settingsFile);
+
+void registerPathTokens(const Configuration& configuration);
 
 Configuration::LayerServer stringToLayerServer(std::string_view server);
 std::string layerServerToString(Configuration::LayerServer server);

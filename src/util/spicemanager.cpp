@@ -1648,7 +1648,8 @@ LuaLibrary SpiceManager::luaLibrary() {
             codegen::lua::SpiceBodies,
             codegen::lua::RotationMatrix,
             codegen::lua::Position,
-            codegen::lua::ConvertTLEtoSPK
+            codegen::lua::ConvertTLEtoSPK,
+            codegen::lua::ConvertCSVtoSPK
         }
     };
 }

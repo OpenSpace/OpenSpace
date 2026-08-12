@@ -125,7 +125,7 @@ namespace {
     // an asset, it requires some extra scripting to work with the SkyBrowser feature.
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(TextureQualityInfo.description)]]
-        std::optional<float> textureQuality;
+        std::optional<float> textureQuality [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(IsHiddenInfo.description)]]
         std::optional<bool> isHidden;
@@ -364,6 +364,12 @@ void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
         ScreenSpaceBrowser::render(renderData);
     }
 
+    if (!_renderHandler->isTextureReady()) {
+        return;
+    }
+
+    _renderHandler->updateTexture();
+
     // Render the display copies
     for (size_t i = 0; i < _displayCopies.size(); i++) {
         if (_showDisplayCopies[i]->value()) {
@@ -385,7 +391,7 @@ void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
                 glm::translate(glm::mat4(1.f), coordinates) *
                 localRotation *
                 scaleMatrix();
-            draw(mat, renderData, true);
+            draw(mat, renderData, _useAcceleratedRendering);
         }
     }
 }

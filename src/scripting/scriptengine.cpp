@@ -55,7 +55,7 @@ namespace {
 
     struct [[codegen::Dictionary(Documentation)]] Parameters {
         std::string name;
-        std::vector<std::vector<std::string>> arguments;
+        std::optional<std::vector<std::vector<std::string>>> arguments;
         std::optional<std::string> returnValue [[codegen::key("Return")]];
         std::optional<std::string> documentation;
     };
@@ -98,6 +98,18 @@ void ScriptEngine::initialize() {
     LDEBUG("Adding base library");
     addBaseLibrary();
 
+    LDEBUG("Add user defined scripts");
+    if (FileSys.hasRegisteredToken("${USER_SCRIPTS}")) {
+        _rootLibrary.scripts = ghoul::filesystem::walkDirectory(
+            absPath("${USER_SCRIPTS}"),
+            ghoul::filesystem::Recursive::Yes,
+            ghoul::filesystem::Sorted::Yes,
+            [](const std::filesystem::path& p) {
+                return p.extension() == ".lua" && !std::filesystem::is_directory(p);
+            }
+        );
+    }
+
     LDEBUG("Initializing Lua state");
     initializeLuaState(_state);
 }
@@ -116,6 +128,9 @@ void ScriptEngine::deinitialize() {
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
     ZoneScoped;
+
+    // Register functions that go outside the `openspace.` namespace
+    registerLuaLibrary(state, _rootLibrary, true);
 
     LDEBUG("Create openspace base library");
     const int top = lua_gettop(state);
@@ -296,7 +311,7 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
 }
 
 void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
-                                       Replace replace)
+                                       Replace replace, bool isRootLibrary)
 {
     ZoneScoped;
 
@@ -333,51 +348,101 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
     }
 
     library.documentations.clear();
-    for (const std::filesystem::path& script : library.scripts) {
-        // First we run the script to set its values in the current state
-        ghoul::lua::runScriptFile(state, script);
 
-        // Then, we extract the documentation information from the file
-        ghoul::lua::push(state, "documentation");
-        lua_gettable(state, -2);
-        if (lua_isnil(state, -1)) {
-            LERROR(std::format(
-                "Module '{}' did not provide a documentation in script file {}",
-                library.name, script
-            ));
-            lua_pop(state, 1);
-            continue;
-        }
+    // Register function used to declare new functions. The library pointer and the
+    // library's table are passed as upvalues so the closure can add the declared
+    // function into that table. For the root library (empty name), use the global
+    // table so that registered functions end up as global Lua functions
+    ghoul::lua::push(state, &library);
+    if (isRootLibrary) {
+        lua_pushglobaltable(state);
+    }
+    else {
+        lua_pushvalue(state, -2);
+    }
+    lua_pushcclosure(
+        state,
+        [](lua_State* L) {
+            LuaLibrary* lib = ghoul::lua::userData<LuaLibrary>(L, 1);
 
-        lua_pushnil(state);
-        while (lua_next(state, -2)) {
-            ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(state);
-            try {
-                const Parameters p = codegen::bake<Parameters>(d);
+            ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::registerFunction");
 
-                LuaLibrary::Function func;
-                func.name = p.name;
-                for (const std::vector<std::string>& pair : p.arguments) {
+            if (!ghoul::lua::hasValue<ghoul::Dictionary>(L)) {
+                ghoul::lua::luaError(L, "Invalid parameter. Needs table or function");
+            }
+
+            const ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(
+                L,
+                -1,
+                ghoul::lua::PopValue::No
+            );
+            const Parameters p = codegen::bake<Parameters>(d);
+
+            // Add definitions
+            LuaLibrary::Function func;
+            func.name = p.name;
+            if (p.arguments.has_value()) {
+                for (const std::vector<std::string>& pair : *p.arguments) {
                     LuaLibrary::Function::Argument arg = {
                         .name = pair[0],
                         .type = pair[1]
                     };
                     func.arguments.push_back(arg);
                 }
-                func.returnType = p.returnValue.value_or(func.returnType);
-                func.helpText = p.documentation.value_or(func.helpText);
-                library.documentations.push_back(std::move(func));
             }
-            catch (const SpecificationError& e) {
-                logError(e);
+            func.returnType = p.returnValue.value_or(func.returnType);
+            func.helpText = p.documentation.value_or(func.helpText);
+            lib->documentations.push_back(std::move(func));
+
+            // Lift and define the function into the library's table (second upvalue)
+            lua_getfield(L, 1, "Function");
+            if (lua_isfunction(L, -1) != 1) {
+                ghoul::lua::luaError(L, "Invalid parameter. Needs a function");
             }
-            lua_pop(state, 1);
+            luaL_checktype(L, -1, LUA_TFUNCTION);
+
+            // Check whether a function with this name was already registered in the
+            // library's table before assigning it
+            lua_getfield(L, lua_upvalueindex(2), p.name.c_str());
+            const bool alreadyExists = !lua_isnil(L, -1);
+            lua_pop(L, 1);
+            if (alreadyExists) {
+                ghoul::lua::luaError(
+                    L,
+                    std::format("Function '{}' was already assigned", p.name)
+                );
+            }
+
+            lua_setfield(L, lua_upvalueindex(2), p.name.c_str());
+
+            lua_remove(L, -1);
+            return 0;
+        },
+        2
+    );
+    lua_setglobal(state, "registerFunction");
+
+
+    try {
+        for (const std::filesystem::path& script : library.scripts) {
+            ghoul::lua::runScriptFile(state, script);
         }
-        lua_pop(state, 1);
     }
+    catch (...) {
+        // Remove the register function
+        lua_pushnil(state);
+        lua_setglobal(state, "registerFunction");
+        throw;
+    }
+
+    // Remove the register function
+    lua_pushnil(state);
+    lua_setglobal(state, "registerFunction");
 }
 
-bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
+void ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library,
+                                      bool isRootLibrary)
+{
     ZoneScoped;
 
     ghoul_assert(state, "State must not be nullptr");
@@ -385,14 +450,14 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
 
     lua_getglobal(state, OpenSpaceLibraryName.data());
     if (library.name.empty()) {
-        addLibraryFunctions(state, library, Replace::Yes);
+        addLibraryFunctions(state, library, Replace::Yes, isRootLibrary);
         lua_pop(state, 1);
     }
     else {
         const bool allowed = isLibraryNameAllowed(state, library.name);
         if (!allowed) {
             lua_settop(state, top);
-            return false;
+            return;
         }
 
         // We need to first create the table and then retrieve it as the table will
@@ -408,24 +473,24 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
         lua_gettable(state, -2);
 
         // Add the library functions into the table
-        addLibraryFunctions(state, library, Replace::No);
+        addLibraryFunctions(state, library, Replace::No, isRootLibrary);
 
         // Pop the table
         lua_pop(state, 1);
     }
 
     lua_settop(state, top);
-    return true;
 }
 
 std::vector<std::string> ScriptEngine::allLuaFunctions() const {
     ZoneScoped;
 
-    std::vector<std::string> result;
+    std::vector<std::string> result = luaFunctions(_rootLibrary, "");
     for (const LuaLibrary& library : _registeredLibraries) {
         std::vector<std::string> r = luaFunctions(library, "openspace.");
         result.insert(result.end(), r.begin(), r.end());
     }
+
     return result;
 }
 
@@ -722,6 +787,7 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::AbsolutePath,
             codegen::lua::SetPathToken,
             codegen::lua::FileExists,
+            codegen::lua::FileSize,
             codegen::lua::ReadFile,
             codegen::lua::ReadFileLines,
             codegen::lua::DirectoryExists,

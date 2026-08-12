@@ -83,7 +83,7 @@ namespace {
         // [RenderableNodeLine](#base_renderable_nodeline) that this label should track.
         // The label text will be updating based on the distance from the node line's
         // start and end.
-        std::string nodeLine;
+        std::string nodeLine [[codegen::identifier()]];
 
         // [[codegen::verbatim(DistanceUnitInfo.description)]]
         std::optional<std::string> distanceUnit
@@ -101,7 +101,10 @@ namespace {
 namespace openspace {
 
 Documentation RenderableDistanceLabel::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_distancelabel");
+    return codegen::doc<Parameters>(
+        "base_renderable_distancelabel",
+        RenderableLabel::Documentation()
+    );
 }
 
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)

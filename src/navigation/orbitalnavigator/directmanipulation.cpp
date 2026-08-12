@@ -27,6 +27,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -339,11 +340,52 @@ DirectManipulation::DirectManipulation()
         }
     });
     addProperty(_defaultRenderableTypes);
+
+    global::callback::touchDetected->emplace_back(
+        [this](TouchInput input) {
+            const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
+            ghoul_assert(anchor != nullptr, "Must have an anchor");
+
+            std::optional<glm::dvec3> sp = computeSurfacePoint(input.pos, anchor);
+            bool isValid = sp.has_value();
+
+            // Check if this and all previous points are valid
+            _isValidFirstTouch = isValid &&
+                std::all_of(
+                    _firstTouchPoints.begin(),
+                    _firstTouchPoints.end(),
+                    [](const FirstTouchPoint& ftp) { return ftp.isValid; }
+                );
+
+            _firstTouchPoints.push_back({ .id = input.fingerId, .isValid = isValid });
+
+            return false;
+        }
+    );
+
+    global::callback::touchExit->emplace_back(
+        [this](TouchInput input) {
+            auto it = std::find_if(
+                _firstTouchPoints.begin(),
+                _firstTouchPoints.end(),
+                [&input](const FirstTouchPoint& point) {
+                    return point.id == input.fingerId;
+                }
+            );
+
+            if (it != _firstTouchPoints.end()) {
+                _firstTouchPoints.erase(it);
+            }
+        }
+    );
 }
 
 void DirectManipulation::updateCameraFromInput() {
     std::vector<TouchInputHolder> touchInputs =
         global::interactionHandler->touchInputState().touchPoints();
+
+    const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
+    ghoul_assert(anchor != nullptr, "Must have an anchor");
 
     std::vector<TouchPoint> touchPoints;
     touchPoints.reserve(touchInputs.size());
@@ -364,6 +406,12 @@ void DirectManipulation::updateCameraFromInput() {
             const glm::ivec2 screenSize = global::windowDelegate->currentWindowSize();
             mousePos.x /= static_cast<double>(screenSize.x);
             mousePos.y /= static_cast<double>(screenSize.y);
+
+            if (global::interactionHandler->isMouseFirstPress()) {
+                std::optional<glm::dvec3> p = computeSurfacePoint(mousePos, anchor);
+                _isValidFirstTouch = p.has_value();
+            }
+
             touchPoints.push_back({ .position = mousePos });
         }
     }
@@ -372,13 +420,15 @@ void DirectManipulation::updateCameraFromInput() {
         // No fingers, no input
         _selectedNodeSurfacePoints.clear();
         _isActive = false;
+        _isValidFirstTouch = true;
         return;
     }
 
     bool isValidNode = isValidDirectTouchNode();
     bool isCloseEnough = isWithinDirectTouchDistance();
 
-    bool isValidTouchPoints = !_selectedNodeSurfacePoints.empty() &&
+    bool isValidTouchPoints = _isValidFirstTouch &&
+        !_selectedNodeSurfacePoints.empty() &&
         touchPoints.size() == _selectedNodeSurfacePoints.size() &&
         std::equal(
             touchPoints.begin(),
@@ -440,53 +490,62 @@ void DirectManipulation::updateNodeSurfacePoints(
     _selectedNodeSurfacePoints.clear();
 
     const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
-    const Camera* camera = global::navigationHandler->camera();
-
-    const glm::dquat camRotation = camera->rotationQuaternion();
-    const glm::dvec3 camPos = camera->position();
-
-    std::vector<SelectedBody> surfacePoints;
 
     for (const TouchPoint& touchPoint : touchPoints) {
-        const size_t id = touchPoint.id;
-        // Normalized -1 to 1 coordinates on screen
-        const double xCo = 2.0 * (touchPoint.position.x - 0.5);
-        const double yCo = -2.0 * (touchPoint.position.y - 0.5);
+        std::optional<glm::dvec3> surfacePoint =
+            computeSurfacePoint(touchPoint.position, anchor);
 
-        const glm::dvec3 cursorInWorldSpace = camRotation *
-            glm::dvec3(glm::inverse(camera->projectionMatrix()) *
-            glm::dvec4(xCo, yCo, -1.0, 1.0));
-
-        const glm::dvec3 rayDirection = glm::normalize(cursorInWorldSpace);
-
-        // Compute positions on anchor node, by checking if touch input intersect
-        // interaction sphere
-        double intersectionDist = 0.0;
-        const double interactionSphere = anchor->interactionSphere();
-        const bool intersected = glm::intersectRaySphere(
-            camPos,
-            rayDirection,
-            anchor->worldPosition(),
-            interactionSphere * interactionSphere,
-            intersectionDist
-        );
-
-        if (intersected) {
-            glm::dvec3 intersectionPos = camPos + rayDirection * intersectionDist;
-            glm::dvec3 pointInModelView = glm::inverse(anchor->worldRotationMatrix()) *
-                (intersectionPos - anchor->worldPosition());
-
+        if (surfacePoint.has_value()) {
             // Note that node is saved as the direct input solver was initially
             // implemented to handle touch contact points on multiple nodes
-            surfacePoints.push_back({
-                .id = id,
+            _selectedNodeSurfacePoints.push_back({
+                .id = touchPoint.id,
                 .node = anchor,
-                .coordinates = pointInModelView
+                .coordinates = *surfacePoint
             });
         }
     }
+}
 
-    _selectedNodeSurfacePoints = std::move(surfacePoints);
+std::optional<glm::dvec3> DirectManipulation::computeSurfacePoint(
+                                                          const glm::dvec2& touchPosition,
+                                                         const SceneGraphNode* node) const
+{
+    const Camera* camera = global::navigationHandler->camera();
+    const glm::dquat camRotation = camera->rotationQuaternion();
+    const glm::dvec3 camPos = camera->position();
+
+    // Normalized -1 to 1 coordinates on screen
+    const double xCo = 2.0 * (touchPosition.x - 0.5);
+    const double yCo = -2.0 * (touchPosition.y - 0.5);
+
+    const glm::dvec3 cursorInWorldSpace = camRotation *
+        glm::dvec3(glm::inverse(camera->projectionMatrix()) *
+            glm::dvec4(xCo, yCo, -1.0, 1.0));
+
+    const glm::dvec3 rayDirection = glm::normalize(cursorInWorldSpace);
+
+    // Compute positions on anchor node, by checking if touch input intersect
+    // interaction sphere
+    double intersectionDist = 0.0;
+    const double interactionSphere = node->interactionSphere();
+    const bool intersected = glm::intersectRaySphere(
+        camPos,
+        rayDirection,
+        node->worldPosition(),
+        interactionSphere * interactionSphere,
+        intersectionDist
+    );
+
+    if (intersected) {
+        glm::dvec3 intersectionPos = camPos + rayDirection * intersectionDist;
+        glm::dvec3 pointInModelView = glm::inverse(node->worldRotationMatrix()) *
+            (intersectionPos - node->worldPosition());
+
+        return pointInModelView;
+    }
+
+    return std::nullopt;
 }
 
 CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& velocities,

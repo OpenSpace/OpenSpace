@@ -153,6 +153,15 @@ ChunkTile TileProvider::traverseTree(TileIndex tileIndex, int parents, int maxPa
     // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside
     //         the range of defined data
     const int maximumLevel = maxLevel();
+    if (maximumLevel == -1) {
+        // The tile provider does not have any data, so there will never be a valid tile
+        return ChunkTile{
+            .tile = Tile(),
+            .uvTransform = uvTransform,
+            .depthTransform = TileDepthTransform()
+        };
+    }
+
     while (tileIndex.level > maximumLevel) {
         ascendToParent(tileIndex, uvTransform);
         maxParents--;

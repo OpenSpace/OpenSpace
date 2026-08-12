@@ -37,6 +37,10 @@
 #include <array>
 #include <iterator>
 
+#ifndef WIN32
+#include <unistd.h>
+#endif // WIN32
+
 using namespace openspace;
 
 namespace {
@@ -99,9 +103,20 @@ namespace {
 }
 
 /**
- * Downloads a file from Lua interpreter.
+ * Downloads the provided `url` into the location provided by `savePath`.
+ *
+ * \param url The URL to the file that should be downloaded
+ * \param savePath The location on disk where the file should be downloaded to
+ * \param waitForCompletion If `true`, this function will wait until the download is
+ *        finished. If the parameter is `false`, the download will occur in the background
+ *        and this function returns immediately
+ * \param overrideExistingFile If `true`, the file will be downloaded even if a file
+ *        already exists at the `savePath` location. The existing file will be overritten.
+ *        If it is `false` and a file already exists, no file will be downloaded
+ * \return `true` if the download completed successfully, `false` otherwise. IMPORTANT:
+ *         If `waitForCompletion` is `true`, this function will always return `true` 
  */
-[[codegen::luawrap]] void downloadFile(std::string url, std::string savePath,
+[[codegen::luawrap]] bool downloadFile(std::string url, std::string savePath,
                                        bool waitForCompletion = false,
                                        bool overrideExistingFile = true)
 {
@@ -118,13 +133,24 @@ namespace {
     if (waitForCompletion) {
         if (!future) {
             // The download file already exists and override is disabled
-            return;
+            return true;
         }
         while (!future->isFinished && future->errorMessage.empty()) {
             // Just wait
             LTRACEC("OpenSpaceEngine", std::format("waiting '{}'", future->errorMessage));
         }
+
+        if (!future->errorMessage.empty()) {
+            LERRORC("OpenSpaceEngine", future->errorMessage);
+            std::filesystem::remove(savePath);
+            return false;
+        }
+        else {
+            return true;
+        }
     }
+
+    return true;
 }
 
 /**
@@ -343,6 +369,24 @@ namespace {
  */
 [[codegen::luawrap]] double ramInUse() {
     return static_cast<double>(global::openSpaceEngine->ramInUse());
+}
+
+/**
+ * Returns the name of the computer.
+ */
+[[codegen::luawrap]] std::string computerName() {
+#ifdef WIN32
+    std::array<char, MAX_COMPUTERNAME_LENGTH + 1> Buffer = {};
+    DWORD size = MAX_COMPUTERNAME_LENGTH;
+    GetComputerNameExA(ComputerNameDnsHostname, Buffer.data(), &size);
+    const std::string_view name = std::string_view(Buffer.data(), size);
+    return std::string(name);
+#else // ^^^^ WIN32 // !WIN32
+    std::array<char, 256> Buffer = {};
+    gethostname(Buffer.data(), Buffer.size());
+    const std::string_view name = Buffer.data();
+    return std::string(name);
+#endif // WIN32
 }
 
 } // namespace

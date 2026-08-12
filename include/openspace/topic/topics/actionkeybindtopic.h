@@ -29,6 +29,8 @@
 
 namespace openspace {
 
+struct Schema;
+
 class ActionKeybindTopic : public Topic {
 public:
     ~ActionKeybindTopic() override = default;
@@ -36,8 +38,9 @@ public:
     void handleJson(const nlohmann::json& input) override;
     bool isDone() const override;
 
+    static openspace::Schema Schema();
+
 private:
-    void sendData(nlohmann::json data) const;
     nlohmann::json allActionsKeybinds() const;
     nlohmann::json action(const std::string& identifier) const;
 };

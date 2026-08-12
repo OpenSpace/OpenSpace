@@ -163,6 +163,15 @@ void AssetTreeModel::importModelData(const std::string& assetBasePath,
     );
     std::string assetList = assets.useQtFileSystemModelToTraverseDir(assetBasePath);
     assetList += assets.useQtFileSystemModelToTraverseDir(userAssetBasePath, true);
+
+    FileSystemAccess jassets(
+        ".jasset",
+        true,
+        true
+    );
+    assetList += jassets.useQtFileSystemModelToTraverseDir(assetBasePath);
+    assetList += jassets.useQtFileSystemModelToTraverseDir(userAssetBasePath, true);
+
     std::istringstream iss(assetList);
     ImportElement rootElem = {
         .line = "",

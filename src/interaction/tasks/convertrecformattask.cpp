@@ -35,7 +35,7 @@ namespace {
 
     struct [[codegen::Dictionary(ConvertRecFormatTask)]] Parameters {
         std::filesystem::path inputFilePath;
-        std::filesystem::path outputFilePath;
+        std::filesystem::path outputFilePath [[codegen::mustexist(false)]];
 
         enum class DataMode {
             Ascii,
@@ -48,8 +48,11 @@ namespace {
 
 namespace openspace {
 
-Documentation ConvertRecFormatTask::documentation() {
-    return codegen::doc<Parameters>("core_task_convertrecformat");
+Documentation ConvertRecFormatTask::Documentation() {
+    return codegen::doc<Parameters>(
+        "core_task_convertrecformat",
+        Task::Documentation()
+    );
 }
 
 ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) {

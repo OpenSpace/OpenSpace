@@ -36,6 +36,7 @@ uniform float blackTransparencyThreshold;
 uniform float contrastValue;
 uniform float gammaValue;
 uniform float planeOpacity;
+uniform bool useAdditiveBlending;
 uniform bool hasLut;
 uniform bool isCoronaGraph;
 uniform int faceMode;
@@ -99,6 +100,6 @@ Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(outColor.xyz, planeOpacity);
   frag.depth = in_data.depth;
-  frag.blend = BlendModeAdditive;
+  frag.blend = useAdditiveBlending ? BlendModeAdditive : BlendModeNormal;
   return frag;
 }

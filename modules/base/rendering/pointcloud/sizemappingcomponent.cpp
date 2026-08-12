@@ -72,6 +72,14 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    constexpr Property::PropertyInfo InvertScaleInfo = {
+        "InvertScale",
+        "Invert scale",
+        "If true, the points will be scaled based on the inverse of the data value "
+        "(1/value), so that larger values result in a smaller scale, and vice versa.",
+        Property::Visibility::AdvancedUser
+    };
+
     // A reusable component for point-cloud rendering that controls how per-point data
     // influences rendered point size. It is intended for datasets where point size should
     // convey meaning instead of remaining visually uniform.
@@ -137,6 +145,9 @@ namespace {
 
         // [[codegen::verbatim(IsRadiusInfo.description)]]
         std::optional<bool> isRadius;
+
+        // [[codegen::verbatim(InvertScaleInfo.description)]]
+        std::optional<bool> invertScale;
     };
 } // namespace
 #include "sizemappingcomponent_codegen.cpp"
@@ -153,11 +164,13 @@ SizeMappingComponent::SizeMappingComponent()
     , parameterOption(OptionInfo)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)
     , isRadius(IsRadiusInfo, false)
+    , invertScale(InvertScaleInfo, false)
 {
     addProperty(enabled);
     addProperty(parameterOption);
     addProperty(scaleFactor);
     addProperty(isRadius);
+    addProperty(invertScale);
 }
 
 SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
@@ -204,6 +217,7 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
     }
 
     isRadius = p.isRadius.value_or(isRadius);
+    invertScale = p.invertScale.value_or(invertScale);
 }
 
 } // namespace openspace

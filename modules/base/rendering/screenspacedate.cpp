@@ -59,7 +59,7 @@ namespace {
     // Shows the current in-game simulation time. The `FormatString` and the `TimeFormat`
     // options provide the ability to customize the output that is printed. See these two
     // parameters for more information on how to structure the inputs.
-    struct [[codegen::Dictionary(ScreenSpaceTextDate)]] Parameters {
+    struct [[codegen::Dictionary(ScreenSpaceDate)]] Parameters {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
 

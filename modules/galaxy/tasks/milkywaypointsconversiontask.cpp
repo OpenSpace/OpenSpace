@@ -39,7 +39,10 @@ namespace {
 namespace openspace {
 
 Documentation MilkywayPointsConversionTask::Documentation() {
-    return codegen::doc<Parameters>("galaxy_task_milkywaypointsconversion");
+    return codegen::doc<Parameters>(
+        "galaxy_task_milkywaypointsconversion",
+        Task::Documentation()
+    );
 }
 
 MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary&) {}
