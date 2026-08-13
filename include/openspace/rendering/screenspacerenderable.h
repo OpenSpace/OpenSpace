@@ -168,6 +168,9 @@ protected:
 
     BoolProperty _renderDuringBlackout;
 
+    // A hint to the user interface to hide this screen space renderable
+    BoolProperty _guiIsHidden;
+
     glm::ivec2 _objectSize = glm::ivec2(0);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;

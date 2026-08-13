@@ -111,6 +111,7 @@ private:
 
     MouseButtonState _leftButton;
     MouseButtonState _rightButton;
+    MouseButtonState _middleButton;
 
     /// This vector assumes first element to be the active one
     std::vector<TouchInput> _validTouchStates;

@@ -194,6 +194,14 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
+    constexpr Property::PropertyInfo GuiIsHiddenInfo = {
+        "GuiHidden",
+        "GUI Hidden",
+        "If this value is set to `true`, this ScreenSpaceRenderable will indicate to the "
+        "user interface that it should not be shown.",
+        Property::Visibility::Hidden
+    };
+
     float wrap(float value, float min, float max) {
         return glm::mod(value - min, max - min) + min;
     }
@@ -273,6 +281,9 @@ namespace {
         // `ScreenSpaceRenderable`, thus making it possible to address multiple, separate
         // Renderables with a single property change.
         std::optional<std::variant<std::string, std::vector<std::string>>> tag;
+
+        // [[codegen::verbatim(GuiIsHiddenInfo.description)]]
+        std::optional<bool> hidden;
     };
 } // namespace
 #include "screenspacerenderable_codegen.cpp"
@@ -375,6 +386,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         }
     }
     , _renderDuringBlackout(RenderDuringBlackoutInfo, false)
+    , _guiIsHidden(GuiIsHiddenInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -475,6 +487,9 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
             throw ghoul::MissingCaseException();
         }
     }
+
+    _guiIsHidden = p.hidden.value_or(_guiIsHidden);
+    addProperty(_guiIsHidden);
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable() {}
