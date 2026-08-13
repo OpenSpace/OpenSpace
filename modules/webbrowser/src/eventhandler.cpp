@@ -364,12 +364,25 @@ void EventHandler::initialize() {
 bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
                                        KeyModifier mods)
 {
-    if (button != MouseButton::Left && button != MouseButton::Right) {
+    if (button != MouseButton::Left && button != MouseButton::Right &&
+        button != MouseButton::Middle)
+    {
         return false;
     }
 
     global::interactionHandler->markInteraction();
-    MouseButtonState& state = (button == MouseButton::Left) ? _leftButton : _rightButton;
+
+    MouseButtonState& state = [this, button]() -> MouseButtonState& {
+        switch (button) {
+            case MouseButton::Left:
+                return _leftButton;
+            case MouseButton::Middle:
+                return _middleButton;
+            case MouseButton::Right:
+            default:
+                return _rightButton;
+        }
+    }();
 
     int clickCount = BrowserInstance::SingleClick;
 
@@ -389,9 +402,21 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
         state.lastClickPosition = _mousePosition;
     }
 
+    CefBrowserHost::MouseButtonType cefButton = [this, button]() {
+        switch (button) {
+        case MouseButton::Left:
+            return MBT_LEFT;
+        case MouseButton::Middle:
+            return MBT_MIDDLE;
+        case MouseButton::Right:
+        default:
+            return MBT_RIGHT;
+        }
+    }();
+
     return _browserInstance->sendMouseClickEvent(
         mouseEvent(mods),
-        (button == MouseButton::Left) ? MBT_LEFT : MBT_RIGHT,
+        cefButton,
         !state.down,
         clickCount
     );
@@ -534,6 +559,10 @@ CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) const {
 
     if (_rightButton.down) {
         event.modifiers = EVENTFLAG_RIGHT_MOUSE_BUTTON;
+    }
+
+    if (_middleButton.down) {
+        event.modifiers = EVENTFLAG_MIDDLE_MOUSE_BUTTON;
     }
 
     event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));
