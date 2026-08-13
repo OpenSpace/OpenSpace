@@ -74,7 +74,7 @@ Schema ActionKeybindTopic::Schema() {
                 "identifier": { "type": "string" },
                 "isLocal": { "type": "boolean" },
                 "name": { "type": "string" },
-                "isHidden" { "type": "boolean" } 
+                "isHidden": { "type": "boolean" }
               },
               "additionalProperties": false,
               "required": ["identifier", "name", "isLocal", "documentation", "guiPath"]
