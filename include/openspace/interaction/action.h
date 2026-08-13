@@ -34,9 +34,10 @@ namespace openspace {
 
 struct Action {
     BooleanType(IsLocal);
+    BooleanType(IsHidden);
 
     /// Unique identifier that identifies this action. There is no special naming scheme
-    /// that we enforce, we are trying to stick to the same . separated structure that
+    /// that we enforce, we are trying to stick to the same `.` separated structure that
     /// hopefully provides some protection against accidentally reusing identifiers
     std::string identifier;
 
@@ -76,6 +77,11 @@ struct Action {
     /// instances, for example other nodes in a cluster environment, or to other OpenSpace
     /// instances using a parallel connection
     IsLocal isLocal = IsLocal::No;
+
+    /// If this value is set to `Yes`, the provided action will indicate to the user
+    /// interface as a hint that it would like to be hidden from lists. Note that user
+    /// interfaces are free to ignore the hint in some or all circumstances
+    IsHidden isHidden = IsHidden::No;
 };
 
 } // namespace openspace
