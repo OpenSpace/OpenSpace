@@ -66,7 +66,7 @@ namespace {
         "ShowAfter",
         "Show image after last time",
         "If enabled, the image with the latest timestamp is shown when the simulation "
-        "time is after the lasttimestamp specified in the data file.",
+        "time is after the last timestamp specified in the data file.",
         Property::Visibility::User
     };
 
