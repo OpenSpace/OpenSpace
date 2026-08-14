@@ -42,6 +42,8 @@ public:
 
     void initialize() override;
     void deinitializeGL() override;
+
+    void render(const RenderData& renderData) override;
     void update() override;
 
     static openspace::Documentation Documentation();

@@ -146,6 +146,13 @@ void ScreenSpaceTimeVaryingImageOnline::computeSequenceEndTime() {
     _sequenceEndTime = last + avg;
 }
 
+void ScreenSpaceTimeVaryingImageOnline::render(const RenderData& renderData) {
+    if (!_texture) {
+        return;
+    }
+    ScreenSpaceRenderable::render(renderData);
+}
+
 void ScreenSpaceTimeVaryingImageOnline::update() {
     if (_timestamps.empty()) {
         return;
