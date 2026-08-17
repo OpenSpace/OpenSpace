@@ -170,6 +170,7 @@ LuaLibrary SpaceModule::luaLibrary() const {
             codegen::lua::ReadKeplerFile
         },
         .scripts = {
+            absPath("${MODULE_SPACE}/scripts/sbdb.lua"),
             absPath("${MODULE_SPACE}/scripts/spice.lua")
         }
     };
