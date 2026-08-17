@@ -62,6 +62,7 @@ struct Event {
         ActionRemoved,
         ApplicationShutdown,
         AssetLoading,
+        AstrocastConnection,
         CameraFocusTransition,
         CameraMovedPosition,
         CameraPathFinished,
@@ -73,7 +74,6 @@ struct Event {
         MissionAdded,
         MissionEventReached,
         MissionRemoved,
-        ParallelConnection,
         PlanetEclipsed,
         PointSpacecraft,
         ProfileLoadingFinished,
@@ -200,6 +200,30 @@ struct EventAssetLoading : public Event {
     EventAssetLoading(const std::filesystem::path& assetPath_, State newState);
 
     std::filesystem::path assetPath;
+    State state;
+};
+
+/**
+ * This event is created whenever something in the astrocast connection subsystem changes.
+ * The new state is sent as an argument with this event.
+ */
+struct EventAstrocastConnection : public Event {
+    static constexpr Type Type = Event::Type::AstrocastConnection;
+
+    enum class State : uint8_t {
+        Established,
+        Lost,
+        HostshipGained,
+        HostshipLost
+    };
+
+    /**
+     * Creates an instance of an EventAstrocastConnection event.
+     *
+     * \param state_ The new state of the astrocast connection system; is one of
+     *        `Established`, `Lost`, `HostshipGained`, or `HostshipLost`
+     */
+    explicit EventAstrocastConnection(State state_);
     State state;
 };
 
@@ -418,30 +442,6 @@ struct EventMissionRemoved : public Event {
     explicit EventMissionRemoved(std::string_view identifier);
 
     const tstring identifier;
-};
-
-/**
- * This event is created whenever something in the parallel connection subsystem changes.
- * The new state is sent as an argument with this event.
- */
-struct EventParallelConnection : public Event {
-    static constexpr Type Type = Event::Type::ParallelConnection;
-
-    enum class State : uint8_t {
-        Established,
-        Lost,
-        HostshipGained,
-        HostshipLost
-    };
-
-    /**
-     * Creates an instance of an EventParallelConnection event.
-     *
-     * \param state_ The new state of the parallel connection system; is one of
-     *        `Established`, `Lost`, `HostshipGained`, or `HostshipLost`
-     */
-    explicit EventParallelConnection(State state_);
-    State state;
 };
 
 /**

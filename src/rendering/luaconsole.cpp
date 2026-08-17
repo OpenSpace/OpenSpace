@@ -26,7 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/network/parallelpeer.h>
+#include <openspace/network/astrocast.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -95,7 +95,7 @@ namespace {
         "Should send to remote",
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remote instances (other "
-        "peers through a parallel connection).",
+        "peers through an astrocast connection).",
         Property::Visibility::AdvancedUser
     };
 
@@ -254,12 +254,12 @@ void LuaConsole::initialize() {
         ghoul::fontrendering::FontManager::Outline::No
     );
 
-    global::parallelPeer->connectionEvent().subscribe(
+    global::astrocast->connectionEvent().subscribe(
         "luaConsole",
         "statusChanged",
         [this]() {
-            const ParallelConnection::Status status = global::parallelPeer->status();
-            parallelConnectionChanged(status);
+            const Astrocast::Status status = global::astrocast->status();
+            astrocastConnectionChanged(status);
         }
     );
 
@@ -303,7 +303,7 @@ void LuaConsole::deinitialize() {
         }
     }
 
-    global::parallelPeer->connectionEvent().unsubscribe("luaConsole");
+    global::astrocast->connectionEvent().unsubscribe("luaConsole");
 }
 
 bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
@@ -323,13 +323,11 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 _shouldBeSynchronized = !_shouldBeSynchronized;
             }
             else if (modifierControl) {
-                // Only allow this toggle if a ParallelConnection exists
+                // Only allow this toggle if an AstrocastConnection exists
                 if (_shouldSendToRemote) {
                     _shouldSendToRemote = false;
                 }
-                else if (global::parallelPeer->status() ==
-                         ParallelConnection::Status::Host)
-                {
+                else if (global::astrocast->status() == Astrocast::Status::Host) {
                     _shouldSendToRemote = true;
                 }
             }
@@ -673,10 +671,10 @@ void LuaConsole::render() {
     else if (_shouldSendToRemote) {
         const glm::vec4 Red(1.f, 0.f, 0.f, 1.f);
 
-        const ParallelConnection::Status status = global::parallelPeer->status();
+        const Astrocast::Status status = global::astrocast->status();
         const int nClients =
-            status != ParallelConnection::Status::Disconnected ?
-            global::parallelPeer->nConnections() - 1 :
+            status != Astrocast::Status::Disconnected ?
+            global::astrocast->nConnections() - 1 :
             0;
 
         const std::string nClientsText =
@@ -687,7 +685,7 @@ void LuaConsole::render() {
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
         RenderFont(*_font, loc, nClientsText, Red);
     }
-    else if (global::parallelPeer->isHost()) {
+    else if (global::astrocast->isHost()) {
         const glm::vec4 LightBlue(0.4f, 0.4f, 1.f, 1.f);
 
         const std::string localExecutionText =
@@ -711,8 +709,8 @@ void LuaConsole::addToCommand(const std::string& c) {
     _inputPosition += length;
 }
 
-void LuaConsole::parallelConnectionChanged(const ParallelConnection::Status& status) {
-    _shouldSendToRemote = (status == ParallelConnection::Status::Host);
+void LuaConsole::astrocastConnectionChanged(const Astrocast::Status& status) {
+    _shouldSendToRemote = (status == Astrocast::Status::Host);
 }
 
 void LuaConsole::registerKeyHandler(Key key, KeyModifier modifier,

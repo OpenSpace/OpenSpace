@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/network/parallelpeer.h>
+#include <openspace/network/astrocast.h>
 
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
@@ -38,6 +38,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
+#include <ghoul/format.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -45,15 +46,174 @@
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
+#include <string_view>
 #include <utility>
 
-#include "parallelpeer_lua.inl"
+#include "astrocast_lua.inl"
 
 namespace {
     using namespace openspace;
 
-    constexpr std::string_view _loggerCat = "ParallelPeer";
+    constexpr std::string_view _loggerCat = "Astrocast";
     constexpr size_t MaxLatencyDiffs = 64;
+
+    // Gonna do some UTF-like magic once we reach 255 to introduce a second byte or so
+    static constexpr uint8_t ProtocolVersion = 7;
+
+    BooleanType(ShouldLogError);
+
+    class ConnectionLostError final : public ghoul::RuntimeError {
+    public:
+        explicit ConnectionLostError(ShouldLogError shouldLogError_ = ShouldLogError::Yes)
+            : ghoul::RuntimeError("Astrocast connection lost", "Astrocast")
+            , shouldLogError(shouldLogError_)
+        {}
+
+        bool shouldLogError;
+    };
+
+    Astrocast::DataMessage createCameraKeyframe() {
+        NavigationHandler& navHandler = *global::navigationHandler;
+        const SceneGraphNode* focusNode = navHandler.orbitalNavigator().anchorNode();
+
+        // Create a keyframe with current position and orientation of camera
+        datamessagestructures::CameraKeyframe kf;
+        kf._position = navHandler.orbitalNavigator().anchorNodeToCameraVector();
+
+        kf._followNodeRotation = navHandler.orbitalNavigator().followingAnchorRotation();
+        if (kf._followNodeRotation) {
+            kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
+            kf._rotation = navHandler.orbitalNavigator().anchorNodeToCameraRotation();
+        }
+        else {
+            kf._rotation = navHandler.camera()->rotationQuaternion();
+        }
+
+        kf._focusNode = focusNode->identifier();
+        kf._scale = navHandler.camera()->scaling();
+        kf._timestamp = global::windowDelegate->applicationTime();
+
+        std::vector<char> buffer;
+        kf.serialize(buffer);
+
+        const double timestamp = global::windowDelegate->applicationTime();
+        return Astrocast::DataMessage(
+            datamessagestructures::Type::CameraData,
+            timestamp,
+            buffer
+        );
+    }
+
+    Astrocast::DataMessage createTimeKeyframe(bool timeJumped) {
+        // Create a keyframe with current position and orientation of camera
+        const Timeline<TimeManager::TimeKeyframeData>& timeline =
+            global::timeManager->timeline();
+        std::deque<Keyframe<TimeManager::TimeKeyframeData>> keyframes =
+            timeline.keyframes();
+
+        datamessagestructures::TimeTimeline timelineMessage;
+        timelineMessage._clear = true;
+        timelineMessage._keyframes.reserve(timeline.nKeyframes());
+
+        // Case 1: Copy all keyframes from the native timeline
+        for (size_t i = 0; i < timeline.nKeyframes(); i++) {
+            const Keyframe<TimeManager::TimeKeyframeData>& kf = keyframes.at(i);
+
+            datamessagestructures::TimeKeyframe kfMessage;
+            kfMessage._time = kf.data.time.j2000Seconds();
+            kfMessage._dt = kf.data.delta;
+            kfMessage._paused = kf.data.pause;
+            kfMessage._requiresTimeJump = kf.data.jump;
+            kfMessage._timestamp = kf.timestamp;
+            timelineMessage._keyframes.push_back(kfMessage);
+        }
+
+        // Case 2: Send one keyframe to represent the current time. If time jumped this
+        // frame, this is represented in the keyframe
+        if (timeline.nKeyframes() == 0) {
+            datamessagestructures::TimeKeyframe kfMessage;
+            kfMessage._time = global::timeManager->time().j2000Seconds();
+            kfMessage._dt = global::timeManager->targetDeltaTime();
+            kfMessage._paused = global::timeManager->isPaused();
+            kfMessage._timestamp = global::windowDelegate->applicationTime();
+            kfMessage._requiresTimeJump = timeJumped;
+            timelineMessage._keyframes.push_back(kfMessage);
+        }
+
+        std::vector<char> buffer;
+        timelineMessage.serialize(buffer);
+
+        const double timestamp = global::windowDelegate->applicationTime();
+        return Astrocast::DataMessage(
+            datamessagestructures::Type::TimelineData,
+            timestamp,
+            buffer
+        );
+    }
+
+    bool sendMessage(const Astrocast::Message& message, ghoul::io::TcpSocket& socket) {
+        const uint8_t messageTypeOut = static_cast<uint8_t>(message.type);
+        const uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
+        std::vector<char> payload;
+        payload.reserve(2 + 2 * sizeof(uint8_t) + sizeof(uint32_t) + messageSizeOut);
+
+        // Insert header into buffer
+        payload.push_back('O');
+        payload.push_back('S');
+
+        payload.insert(
+            payload.end(),
+            reinterpret_cast<const char*>(&ProtocolVersion),
+            reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint8_t)
+        );
+
+        payload.insert(
+            payload.end(),
+            reinterpret_cast<const char*>(&messageTypeOut),
+            reinterpret_cast<const char*>(&messageTypeOut) + sizeof(uint8_t)
+        );
+
+        payload.insert(
+            payload.end(),
+            reinterpret_cast<const char*>(&messageSizeOut),
+            reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
+        );
+
+        payload.insert(payload.end(), message.content.begin(), message.content.end());
+
+        const bool res = socket.put<char>(payload.data(), payload.size());
+        return res;
+    }
+
+    void sendDataMessage(const Astrocast::DataMessage& dataMessage,
+                         ghoul::io::TcpSocket& socket)
+    {
+        const uint8_t dataMessageTypeOut = static_cast<uint8_t>(dataMessage.type);
+        const double dataMessageTimestamp = dataMessage.timestamp;
+
+        std::vector<char> messageContent;
+        messageContent.insert(
+            messageContent.end(),
+            reinterpret_cast<const char*>(&dataMessageTypeOut),
+            reinterpret_cast<const char*>(&dataMessageTypeOut) + sizeof(uint8_t)
+        );
+
+        messageContent.insert(
+            messageContent.end(),
+            reinterpret_cast<const char*>(&dataMessageTimestamp),
+            reinterpret_cast<const char*>(&dataMessageTimestamp) + sizeof(double)
+        );
+
+        messageContent.insert(
+            messageContent.end(),
+            dataMessage.content.begin(),
+            dataMessage.content.end()
+        );
+
+        sendMessage(
+            Astrocast::Message(Astrocast::MessageType::Data, messageContent), socket
+        );
+    }
 
     constexpr Property::PropertyInfo PasswordInfo = {
         "Password",
@@ -132,8 +292,8 @@ namespace {
 
 namespace openspace {
 
-ParallelPeer::ParallelPeer()
-    : PropertyOwner({ "ParallelPeer", "Parallel Peer" })
+Astrocast::Astrocast()
+    : PropertyOwner({ "Astrocast", "Astrocast" })
     , _password(PasswordInfo)
     , _hostPassword(HostPasswordInfo)
     , _serverName(ServerNameInfo)
@@ -144,7 +304,6 @@ ParallelPeer::ParallelPeer()
     , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _connectionEvent(std::make_shared<ghoul::Event<>>())
-    , _connection(nullptr)
 {
     addProperty(_name);
     addProperty(_serverName);
@@ -159,43 +318,42 @@ ParallelPeer::ParallelPeer()
     addProperty(_cameraKeyframeInterval);
 }
 
-ParallelPeer::~ParallelPeer() {
+Astrocast::~Astrocast() {
     disconnect();
     if (_timeJumpCallback != -1) {
         global::timeManager->removeTimeJumpCallback(_timeJumpCallback);
     }
 }
 
-void ParallelPeer::connect() {
+void Astrocast::connect() {
     disconnect();
 
-    setStatus(ParallelConnection::Status::Connecting);
+    setStatus(Status::Connecting);
 
-    auto socket = std::make_unique<ghoul::io::TcpSocket>(
-        _address,
-        std::atoi(_port.value().c_str())
-    );
+    std::string p = _port.value();
+    _socket = std::make_unique<ghoul::io::TcpSocket>(_address, std::atoi(p.c_str()));
 
-    socket->connect();
-    _connection = ParallelConnection(std::move(socket));
+    _socket->connect();
 
     sendAuthentication();
 
     _receiveThread = std::make_unique<std::thread>([this]() { handleCommunication(); });
 }
 
-void ParallelPeer::disconnect() {
+void Astrocast::disconnect() {
     _shouldDisconnect = true;
-    _connection.disconnect();
+    if (_socket) {
+        _socket->disconnect();
+    }
     if (_receiveThread && _receiveThread->joinable()) {
         _receiveThread->join();
         _receiveThread = nullptr;
     }
     _shouldDisconnect = false;
-    setStatus(ParallelConnection::Status::Disconnected);
+    setStatus(Status::Disconnected);
 }
 
-void ParallelPeer::sendAuthentication() {
+void Astrocast::sendAuthentication() {
     std::string password = _password;
     if (password.size() > std::numeric_limits<uint16_t>::max()) {
         password.resize(std::numeric_limits<uint16_t>::max());
@@ -271,55 +429,16 @@ void ParallelPeer::sendAuthentication() {
     buffer.insert(buffer.end(), name.begin(), name.end());
 
     // Send message
-    _connection.sendMessage(ParallelConnection::Message(
-        ParallelConnection::MessageType::Authentication,
-        buffer
-    ));
+    sendMessage(Message(MessageType::Authentication, buffer), *_socket);
 }
 
-void ParallelPeer::queueInMessage(const ParallelConnection::Message& message) {
-    const std::unique_lock lock(_receiveBufferMutex);
-    _receiveBuffer.push_back(message);
-}
-
-void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
-    switch (message.type) {
-        case ParallelConnection::MessageType::Data:
-            dataMessageReceived(message.content);
-            break;
-        case ParallelConnection::MessageType::ConnectionStatus:
-            connectionStatusMessageReceived(message.content);
-            break;
-        case ParallelConnection::MessageType::NConnections:
-            nConnectionsMessageReceived(message.content);
-            break;
-        default:
-            // Unknown message type
-            break;
-    }
-}
-
-void ParallelPeer::analyzeTimeDifference(double messageTimestamp) {
-    const std::unique_lock lock(_latencyMutex);
-
-    const double timeDiff = global::windowDelegate->applicationTime() - messageTimestamp;
-    if (_latencyDiffs.empty()) {
-        _initialTimeDiff = timeDiff;
-    }
-    const double latencyDiff = timeDiff - _initialTimeDiff;
-    if (_latencyDiffs.size() >= MaxLatencyDiffs) {
-        _latencyDiffs.pop_front();
-    }
-    _latencyDiffs.push_back(latencyDiff);
-}
-
-double ParallelPeer::convertTimestamp(double messageTimestamp) {
+double Astrocast::convertTimestamp(double messageTimestamp) {
     const std::unique_lock lock(_latencyMutex);
 
     return messageTimestamp + _initialTimeDiff + _bufferTime;
 }
 
-double ParallelPeer::latencyStandardDeviation() const {
+double Astrocast::latencyStandardDeviation() const {
     double accumulatedLatencyDiffSquared = 0;
     double accumulatedLatencyDiff = 0;
     for (const double diff : _latencyDiffs) {
@@ -338,7 +457,7 @@ double ParallelPeer::latencyStandardDeviation() const {
     return std::sqrt(latencyVariance);
 }
 
-void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
+void Astrocast::dataMessageReceived(const std::vector<char>& message) {
     size_t offset = 0;
 
     // The type of data message received
@@ -348,7 +467,20 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     const double timestamp = *(reinterpret_cast<const double*>(message.data() + offset));
     offset += sizeof(double);
 
-    analyzeTimeDifference(timestamp);
+    {
+        // Analyze time difference
+        const std::unique_lock lock(_latencyMutex);
+
+        const double timeDiff = global::windowDelegate->applicationTime() - timestamp;
+        if (_latencyDiffs.empty()) {
+            _initialTimeDiff = timeDiff;
+        }
+        const double latencyDiff = timeDiff - _initialTimeDiff;
+        if (_latencyDiffs.size() >= MaxLatencyDiffs) {
+            _latencyDiffs.pop_front();
+        }
+        _latencyDiffs.push_back(latencyDiff);
+    }
 
     const std::vector<char> buffer(message.begin() + offset, message.end());
     switch (static_cast<datamessagestructures::Type>(type)) {
@@ -433,24 +565,21 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
         }
         default:
             LERROR(std::format(
-                "Unidentified message with identifier '{}' received in parallel "
-                "connection",
-                type
+                "Unidentified message with identifier '{}' received in astrocast "
+                "connection", type
             ));
             break;
     }
 }
 
-void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message) {
+void Astrocast::connectionStatusMessageReceived(const std::vector<char>& message) {
     if (message.size() < 2 * sizeof(uint8_t)) {
         LERROR("Malformed connection status message");
         return;
     }
     size_t pointer = 0;
     const uint8_t statusIn = *(reinterpret_cast<const uint8_t*>(&message[pointer]));
-    const ParallelConnection::Status status = static_cast<ParallelConnection::Status>(
-        statusIn
-    );
+    const Status status = static_cast<Status>(statusIn);
     pointer += sizeof(uint8_t);
 
     const uint8_t hostNameSize = *(reinterpret_cast<const uint8_t*>(&message[pointer]));
@@ -466,14 +595,15 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
         hostName = std::string(&message[pointer], hostNameSize);
     }
 
-    if (status > ParallelConnection::Status::Host) {
+    if (status > Status::Host) {
         LERROR("Invalid status");
         return;
     }
 
-    _latencyMutex.lock();
-    _latencyDiffs.clear();
-    _latencyMutex.unlock();
+    {
+        const std::unique_lock lk(_latencyMutex);
+        _latencyDiffs.clear();
+    }
     setHostName(hostName);
 
     if (status == _status) {
@@ -487,7 +617,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
     global::timeManager->clearKeyframes();
 }
 
-void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message) {
+void Astrocast::nConnectionsMessageReceived(const std::vector<char>& message) {
     if (message.size() < sizeof(uint32_t)) {
         LERROR("Malformed host info message");
         return;
@@ -496,38 +626,39 @@ void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
     setNConnections(nConnections);
 }
 
-void ParallelPeer::handleCommunication() {
-    while (!_shouldDisconnect && _connection.isConnectedOrConnecting()) {
+void Astrocast::handleCommunication() {
+    while (!_shouldDisconnect && isConnectedOrConnecting()) {
         try {
-            const ParallelConnection::Message m = _connection.receiveMessage();
-            queueInMessage(m);
+            Message message = receiveMessage();
+            const std::unique_lock lock(_receiveBufferMutex);
+            _receiveBuffer.push_back(std::move(message));
         }
-        catch (const ParallelConnection::ConnectionLostError& e) {
+        catch (const ConnectionLostError& e) {
             if (e.shouldLogError) {
-                LERROR("Parallel connection lost");
+                LERROR("Astrocast connection lost");
             }
         }
     }
-    setStatus(ParallelConnection::Status::Disconnected);
+    setStatus(Status::Disconnected);
 }
 
-void ParallelPeer::setPort(std::string port) {
+void Astrocast::setPort(std::string port) {
     _port = std::move(port);
 }
 
-void ParallelPeer::setAddress(std::string address) {
+void Astrocast::setAddress(std::string address) {
     _address = std::move(address);
 }
 
-void ParallelPeer::setServerName(std::string name) {
+void Astrocast::setServerName(std::string name) {
     _serverName = std::move(name);
 }
 
-void ParallelPeer::setName(std::string name) {
+void Astrocast::setName(std::string name) {
     _name = std::move(name);
 }
 
-void ParallelPeer::requestHostship(std::optional<std::string> hostPassword) {
+void Astrocast::requestHostship(std::optional<std::string> hostPassword) {
     std::vector<char> buffer;
     std::string hostPw = hostPassword.value_or(_hostPassword);
     uint16_t hostPwSize = static_cast<uint16_t>(hostPw.size());
@@ -538,33 +669,32 @@ void ParallelPeer::requestHostship(std::optional<std::string> hostPassword) {
     );
     buffer.insert(buffer.end(), hostPw.begin(), hostPw.end());
 
-    _connection.sendMessage(
-        ParallelConnection::Message(
-            ParallelConnection::MessageType::HostshipRequest,
-            buffer
-        )
-    );
+    sendMessage(Message(MessageType::HostshipRequest, buffer), *_socket);
 }
 
-void ParallelPeer::resignHostship() {
-    _connection.sendMessage(
-        ParallelConnection::Message(
-            ParallelConnection::MessageType::HostshipResignation,
-            std::vector<char>()
-        )
-    );
+void Astrocast::resignHostship() {
+    sendMessage(Message(MessageType::HostshipResignation, std::vector<char>()), *_socket);
 }
 
-void ParallelPeer::setPassword(std::string password) {
+void Astrocast::setPassword(std::string password) {
     _password = std::move(password);
 }
 
-void ParallelPeer::setHostPassword(std::string hostPassword) {
+void Astrocast::setHostPassword(std::string hostPassword) {
     _hostPassword = std::move(hostPassword);
 }
 
-void ParallelPeer::sendScript(std::string script) {
+void Astrocast::sendScript(std::string script) {
     if (!isHost()) {
+        return;
+    }
+
+    // @TODO (anden88 2026-08-11): This is a temporary solution to avoid sending scripts
+    // that are related to astrocast. Probably what we want is to have the JavaScript
+    // API functions take additional parameters that sets the sync flags
+    if (script.find(".astrocast.") != std::string::npos) {
+        // Do not send scripts that are related to astrocast since the host could for
+        // example disconnect any client that sends such a script
         return;
     }
 
@@ -575,29 +705,43 @@ void ParallelPeer::sendScript(std::string script) {
     std::vector<char> buffer;
     sm.serialize(buffer);
 
-    const double timestamp = global::windowDelegate->applicationTime();
-    const ParallelConnection::DataMessage message = ParallelConnection::DataMessage(
+    const DataMessage message = DataMessage(
         datamessagestructures::Type::ScriptData,
-        timestamp,
+        global::windowDelegate->applicationTime(),
         buffer
     );
-    _connection.sendDataMessage(message);
+    sendDataMessage(message, *_socket);
 }
 
-void ParallelPeer::resetTimeOffset() {
+void Astrocast::resetTimeOffset() {
     global::navigationHandler->keyframeNavigator().clearKeyframes();
     global::timeManager->clearKeyframes();
     const std::unique_lock lock(_latencyMutex);
     _latencyDiffs.clear();
 }
 
-void ParallelPeer::preSynchronization() {
+void Astrocast::preSynchronization() {
     ZoneScoped;
 
     const std::unique_lock lock(_receiveBufferMutex);
     while (!_receiveBuffer.empty()) {
-        const ParallelConnection::Message& message = _receiveBuffer.front();
-        handleMessage(message);
+        const Message& message = _receiveBuffer.front();
+
+        switch (message.type) {
+            case MessageType::Data:
+                dataMessageReceived(message.content);
+                break;
+            case MessageType::ConnectionStatus:
+                connectionStatusMessageReceived(message.content);
+                break;
+            case MessageType::NConnections:
+                nConnectionsMessageReceived(message.content);
+                break;
+            default:
+                // Unknown message type
+                break;
+        }
+
         _receiveBuffer.pop_front();
     }
 
@@ -605,13 +749,17 @@ void ParallelPeer::preSynchronization() {
         const double now = global::windowDelegate->applicationTime();
 
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
-            sendCameraKeyframe();
+            DataMessage message = createCameraKeyframe();
+            sendDataMessage(message, *_socket);
+
             _lastCameraKeyframeTimestamp = now;
         }
         if (_timeTimelineChanged ||
             _lastTimeKeyframeTimestamp + _timeKeyframeInterval < now)
         {
-            sendTimeTimeline();
+            DataMessage message = createTimeKeyframe(_timeJumped);
+            sendDataMessage(message, *_socket);
+
             _lastTimeKeyframeTimestamp = now;
             _timeJumped = false;
             _timeTimelineChanged = false;
@@ -622,9 +770,9 @@ void ParallelPeer::preSynchronization() {
     }
 }
 
-void ParallelPeer::setStatus(ParallelConnection::Status status) {
+void Astrocast::setStatus(Status status) {
     if (_status != status) {
-        const ParallelConnection::Status prevStatus = _status;
+        const Status prevStatus = _status;
         _status = status;
         _timeJumped = true;
         _connectionEvent->publish("statusChanged");
@@ -632,44 +780,41 @@ void ParallelPeer::setStatus(ParallelConnection::Status status) {
 
         EventEngine* ee = global::eventEngine;
         const bool isConnected =
-            status == ParallelConnection::Status::ClientWithoutHost ||
-            status == ParallelConnection::Status::ClientWithHost ||
-            status == ParallelConnection::Status::Host;
+            status == Status::ClientWithoutHost || status == Status::ClientWithHost ||
+            status == Status::Host;
         const bool wasConnected =
-            prevStatus == ParallelConnection::Status::ClientWithoutHost ||
-            prevStatus == ParallelConnection::Status::ClientWithHost ||
-            prevStatus == ParallelConnection::Status::Host;
-        const bool isDisconnected = status == ParallelConnection::Status::Disconnected;
+            prevStatus == Status::ClientWithoutHost ||
+            prevStatus == Status::ClientWithHost || prevStatus == Status::Host;
+        const bool isDisconnected = status == Status::Disconnected;
         const bool wasDisconnected =
-            prevStatus == ParallelConnection::Status::Disconnected;
-        const bool isHost = status == ParallelConnection::Status::Host;
-        const bool wasHost = prevStatus == ParallelConnection::Status::Host;
+            prevStatus == Status::Disconnected;
+        const bool isHost = status == Status::Host;
+        const bool wasHost = prevStatus == Status::Host;
         const bool isClient =
-            status == ParallelConnection::Status::ClientWithoutHost ||
-            status == ParallelConnection::Status::ClientWithHost;
+            status == Status::ClientWithoutHost || status == Status::ClientWithHost;
         const bool wasClient =
-            prevStatus == ParallelConnection::Status::ClientWithoutHost ||
-            prevStatus == ParallelConnection::Status::ClientWithHost;
+            prevStatus == Status::ClientWithoutHost ||
+            prevStatus == Status::ClientWithHost;
 
 
         if (isDisconnected && wasConnected) {
-            ee->publishEvent<EventParallelConnection>(
-                EventParallelConnection::State::Lost
+            ee->publishEvent<EventAstrocastConnection>(
+                EventAstrocastConnection::State::Lost
             );
         }
         if (isConnected && wasDisconnected) {
-            ee->publishEvent<EventParallelConnection>(
-                EventParallelConnection::State::Established
+            ee->publishEvent<EventAstrocastConnection>(
+                EventAstrocastConnection::State::Established
             );
         }
         if (isHost && (wasClient || wasDisconnected)) {
-            ee->publishEvent<EventParallelConnection>(
-                EventParallelConnection::State::HostshipGained
+            ee->publishEvent<EventAstrocastConnection>(
+                EventAstrocastConnection::State::HostshipGained
             );
         }
         if ((isClient || isDisconnected) && wasHost) {
-            ee->publishEvent<EventParallelConnection>(
-                EventParallelConnection::State::HostshipLost
+            ee->publishEvent<EventAstrocastConnection>(
+                EventAstrocastConnection::State::HostshipLost
             );
         }
     }
@@ -691,127 +836,111 @@ void ParallelPeer::setStatus(ParallelConnection::Status status) {
     }
 }
 
-ParallelConnection::Status ParallelPeer::status() {
+Astrocast::Status Astrocast::status() {
     return _status;
 }
 
-void ParallelPeer::setNConnections(size_t nConnections) {
+void Astrocast::setNConnections(size_t nConnections) {
     if (_nConnections != nConnections) {
         _nConnections = nConnections;
         _connectionEvent->publish("nConnectionsChanged");
     }
 }
 
-int ParallelPeer::nConnections() {
+int Astrocast::nConnections() {
     return static_cast<int>(_nConnections);
 }
 
-bool ParallelPeer::isHost() {
-    return _status == ParallelConnection::Status::Host;
+bool Astrocast::isHost() {
+    return _status == Status::Host;
 }
 
-void ParallelPeer::setHostName(const std::string& hostName) {
+void Astrocast::setHostName(const std::string& hostName) {
     if (_hostName != hostName) {
         _hostName = hostName;
         _connectionEvent->publish("hostNameChanged");
     }
 }
 
-const std::string& ParallelPeer::hostName() {
+const std::string& Astrocast::hostName() {
     return _hostName;
 }
 
-void ParallelPeer::sendCameraKeyframe() {
-    NavigationHandler& navHandler = *global::navigationHandler;
-
-    const SceneGraphNode* focusNode =
-        navHandler.orbitalNavigator().anchorNode();
-    if (!focusNode) {
-        return;
-    }
-
-    // Create a keyframe with current position and orientation of camera
-    datamessagestructures::CameraKeyframe kf;
-    kf._position = navHandler.orbitalNavigator().anchorNodeToCameraVector();
-
-    kf._followNodeRotation = navHandler.orbitalNavigator().followingAnchorRotation();
-    if (kf._followNodeRotation) {
-        kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = navHandler.orbitalNavigator().anchorNodeToCameraRotation();
-    }
-    else {
-        kf._rotation = navHandler.camera()->rotationQuaternion();
-    }
-
-    kf._focusNode = focusNode->identifier();
-    kf._scale = navHandler.camera()->scaling();
-    kf._timestamp = global::windowDelegate->applicationTime();
-
-    std::vector<char> buffer;
-    kf.serialize(buffer);
-
-    const double timestamp = global::windowDelegate->applicationTime();
-    _connection.sendDataMessage(ParallelConnection::DataMessage(
-        datamessagestructures::Type::CameraData,
-        timestamp,
-        buffer
-    ));
-}
-
-void ParallelPeer::sendTimeTimeline() {
-    // Create a keyframe with current position and orientation of camera
-    const Timeline<TimeManager::TimeKeyframeData>& timeline =
-        global::timeManager->timeline();
-    std::deque<Keyframe<TimeManager::TimeKeyframeData>> keyframes = timeline.keyframes();
-
-    datamessagestructures::TimeTimeline timelineMessage;
-    timelineMessage._clear = true;
-    timelineMessage._keyframes.reserve(timeline.nKeyframes());
-
-    // Case 1: Copy all keyframes from the native timeline
-    for (size_t i = 0; i < timeline.nKeyframes(); i++) {
-        const Keyframe<TimeManager::TimeKeyframeData>& kf = keyframes.at(i);
-
-        datamessagestructures::TimeKeyframe kfMessage;
-        kfMessage._time = kf.data.time.j2000Seconds();
-        kfMessage._dt = kf.data.delta;
-        kfMessage._paused = kf.data.pause;
-        kfMessage._requiresTimeJump = kf.data.jump;
-        kfMessage._timestamp = kf.timestamp;
-
-        timelineMessage._keyframes.push_back(kfMessage);
-    }
-
-    // Case 2: Send one keyframe to represent the curernt time. If time jumped this frame,
-    // this is represented in the keyframe
-    if (timeline.nKeyframes() == 0) {
-        datamessagestructures::TimeKeyframe kfMessage;
-        kfMessage._time = global::timeManager->time().j2000Seconds();
-        kfMessage._dt = global::timeManager->targetDeltaTime();
-        kfMessage._paused = global::timeManager->isPaused();
-        kfMessage._timestamp = global::windowDelegate->applicationTime();
-        kfMessage._requiresTimeJump = _timeJumped;
-        timelineMessage._keyframes.push_back(kfMessage);
-    }
-
-    std::vector<char> buffer;
-    timelineMessage.serialize(buffer);
-
-    const double timestamp = global::windowDelegate->applicationTime();
-    _connection.sendDataMessage(ParallelConnection::DataMessage(
-        datamessagestructures::Type::TimelineData,
-        timestamp,
-        buffer
-    ));
-}
-
-ghoul::Event<>& ParallelPeer::connectionEvent() {
+ghoul::Event<>& Astrocast::connectionEvent() {
     return *_connectionEvent;
 }
 
-LuaLibrary ParallelPeer::luaLibrary() {
+bool Astrocast::isConnectedOrConnecting() const {
+    return _socket != nullptr && (_socket->isConnected() || _socket->isConnecting());
+}
+
+Astrocast::Message Astrocast::receiveMessage() {
+    // (anden88 2026-08-12): Must match the header protocol in the Wormhole server
+    // https://github.com/OpenSpace/Wormhole/blob/6de7100157755111d938a6cbfacfe3be9cefbe85/src/wormhole.ts#L220-L224
+    constexpr size_t HeaderSize =
+        2 * sizeof(char) + // OS
+        sizeof(uint8_t) +  // Protocol version
+        sizeof(uint8_t) +  // Message type
+        sizeof(uint32_t);  // message size
+
+    std::vector<char> headerBuffer(HeaderSize);
+    std::vector<char> messageBuffer;
+
+    // Receive the header data
+    if (!_socket->get(headerBuffer.data(), HeaderSize)) {
+        // The `get` call is blocking until something happens, so we might end up here if
+        // the socket properly closed or if the loading legitimately failed
+        if (_shouldDisconnect) {
+            throw ConnectionLostError(ShouldLogError::No);
+        }
+        else {
+            LERROR("Failed to read header from socket. Disconnecting");
+            throw ConnectionLostError();
+        }
+    }
+
+    // Make sure that header matches this version of OpenSpace
+    if (headerBuffer[0] != 'O' || headerBuffer[1] != 'S') {
+        LERROR("Expected to read message header 'OS' from socket");
+        throw ConnectionLostError();
+    }
+
+    size_t offset = 2;
+    const uint8_t protocolVersionIn =
+        *reinterpret_cast<uint8_t*>(headerBuffer.data() + offset);
+    offset += sizeof(uint8_t);
+
+    if (protocolVersionIn != ProtocolVersion) {
+        LERROR(std::format(
+            "Protocol versions do not match. Remote version: {}, Local version: {}",
+            protocolVersionIn, ProtocolVersion
+        ));
+        throw ConnectionLostError();
+    }
+
+    const uint8_t messageTypeIn =
+        *reinterpret_cast<uint8_t*>(headerBuffer.data() + offset);
+    offset += sizeof(uint8_t);
+
+    const uint32_t messageSizeIn =
+        *reinterpret_cast<uint32_t*>(headerBuffer.data() + offset);
+
+    const size_t messageSize = messageSizeIn;
+
+    // Receive the payload
+    messageBuffer.resize(messageSize);
+    if (!_socket->get(messageBuffer.data(), messageSize)) {
+        LERROR("Failed to read message from socket. Disconnecting");
+        throw ConnectionLostError();
+    }
+
+    // And delegate decoding depending on type
+    return Message(static_cast<MessageType>(messageTypeIn), messageBuffer);
+}
+
+LuaLibrary Astrocast::luaLibrary() {
     return {
-        "parallel",
+        "astrocast",
         {
             codegen::lua::Connect,
             codegen::lua::Disconnect,

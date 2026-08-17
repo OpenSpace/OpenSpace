@@ -22,31 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PARALLELPEER___H__
-#define __OPENSPACE_CORE___PARALLELPEER___H__
+#ifndef __OPENSPACE_CORE___ASTROCAST___H__
+#define __OPENSPACE_CORE___ASTROCAST___H__
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/messagestructures.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/designpattern/event.h>
+#include <ghoul/io/socket/tcpsocket.h>
+#include <ghoul/misc/exception.h>
 #include <atomic>
+#include <cstdint>
 #include <deque>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <thread>
+#include <vector>
 
 namespace openspace {
 
 struct LuaLibrary;
 
-class ParallelPeer : public PropertyOwner {
+class Astrocast : public PropertyOwner {
 public:
-    ParallelPeer();
-    ~ParallelPeer() override;
+    enum class Status : uint32_t {
+        Disconnected = 0,
+        Connecting,
+        ClientWithoutHost,
+        ClientWithHost,
+        Host
+    };
+
+    enum class MessageType : uint8_t {
+        Authentication = 0,
+        Data,
+        ConnectionStatus,
+        HostshipRequest,
+        HostshipResignation,
+        NConnections
+    };
+
+    struct Message {
+        MessageType type;
+        std::vector<char> content;
+    };
+
+    struct DataMessage {
+        datamessagestructures::Type type;
+        double timestamp;
+        std::vector<char> content;
+    };
+
+    Astrocast();
+    ~Astrocast() override;
 
     void connect();
     void setPort(std::string port);
@@ -65,35 +97,29 @@ public:
     void resetTimeOffset();
     double latencyStandardDeviation() const;
 
-    /**
-     * Returns the Lua library that contains all Lua functions available to affect the
-     * remote OS parallel connection.
-     */
-    static LuaLibrary luaLibrary();
-    ParallelConnection::Status status();
+    Status status();
     int nConnections();
     ghoul::Event<>& connectionEvent();
 
-private:
-    void queueInMessage(const ParallelConnection::Message& message);
+    static LuaLibrary luaLibrary();
 
+private:
     void sendAuthentication();
     void handleCommunication();
 
-    void handleMessage(const ParallelConnection::Message&);
     void dataMessageReceived(const std::vector<char>& message);
     void connectionStatusMessageReceived(const std::vector<char>& message);
     void nConnectionsMessageReceived(const std::vector<char>& message);
 
-    void sendCameraKeyframe();
-    void sendTimeTimeline();
-
-    void setStatus(ParallelConnection::Status status);
+    void setStatus(Status status);
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 
     double convertTimestamp(double messageTimestamp);
-    void analyzeTimeDifference(double messageTimestamp);
+
+    bool isConnectedOrConnecting() const;
+
+    Message receiveMessage();
 
     StringProperty _password;
     StringProperty _hostPassword;
@@ -114,12 +140,11 @@ private:
     std::atomic_bool _shouldDisconnect = false;
 
     std::atomic<size_t> _nConnections = 0;
-    std::atomic<ParallelConnection::Status> _status =
-        ParallelConnection::Status::Disconnected;
+    std::atomic<Status> _status = Status::Disconnected;
 
     std::string _hostName;
 
-    std::deque<ParallelConnection::Message> _receiveBuffer;
+    std::deque<Message> _receiveBuffer;
     std::mutex _receiveBufferMutex;
 
     std::atomic<bool> _timeJumped;
@@ -129,9 +154,8 @@ private:
     double _initialTimeDiff = 0.0;
 
     std::unique_ptr<std::thread> _receiveThread = nullptr;
+    std::unique_ptr<ghoul::io::TcpSocket> _socket;
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
-
-    ParallelConnection _connection;
 
     TimeManager::CallbackHandle _timeJumpCallback = -1;
     TimeManager::CallbackHandle _timeTimelineChangeCallback = -1;
@@ -139,4 +163,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___PARALLELPEER___H__
+#endif // __OPENSPACE_CORE___ASTROCAST___H__

@@ -219,7 +219,7 @@ namespace {
         // Toggles whether the Lua states used inside OpenSpace are sandboxed which
         // prevents potentially unsafe malicious code to run on the system. Only turn this
         // setting to `false` if you are sure that no external code from asset files,
-        // session recordings, or parallel connections can be executed on this machine.
+        // session recordings, or astrocast connections can be executed on this machine.
         std::optional<bool> sandboxedLua;
 
         struct HttpProxy {

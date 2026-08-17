@@ -34,7 +34,7 @@ namespace {
                                      std::string name = "Anonymous")
 {
     if (global::windowDelegate->isMaster()) {
-        ParallelPeer* peer = global::parallelPeer;
+        Astrocast* peer = global::astrocast;
         peer->setPort(std::move(port));
         peer->setAddress(std::move(address));
         peer->setPassword(std::move(password));
@@ -46,20 +46,20 @@ namespace {
 }
 
 /**
- * Connect to parallel.
+ * Connect to astrocasting.
  */
 [[codegen::luawrap]] void connect() {
     if (global::windowDelegate->isMaster()) {
-        global::parallelPeer->connect();
+        global::astrocast->connect();
     }
 }
 
 /**
- * Disconnect from parallel.
+ * Disconnect from astrocasting.
  */
 [[codegen::luawrap]] void disconnect() {
     if (global::windowDelegate->isMaster()) {
-        global::parallelPeer->disconnect();
+        global::astrocast->disconnect();
     }
 }
 
@@ -68,7 +68,7 @@ namespace {
  */
 [[codegen::luawrap]] void requestHostship(std::optional<std::string> hostPassword) {
     if (global::windowDelegate->isMaster()) {
-        global::parallelPeer->requestHostship(hostPassword);
+        global::astrocast->requestHostship(hostPassword);
     }
 }
 
@@ -77,10 +77,10 @@ namespace {
  */
 [[codegen::luawrap]] void resignHostship() {
     if (global::windowDelegate->isMaster()) {
-        global::parallelPeer->resignHostship();
+        global::astrocast->resignHostship();
     }
 }
 
 } // namespace
 
-#include "parallelpeer_lua_codegen.cpp"
+#include "astrocast_lua_codegen.cpp"

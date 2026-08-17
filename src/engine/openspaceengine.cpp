@@ -48,8 +48,7 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
-#include <openspace/network/parallelconnection.h>
-#include <openspace/network/parallelpeer.h>
+#include <openspace/network/astrocast.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
@@ -960,8 +959,8 @@ void OpenSpaceEngine::deinitialize() {
     global::navigationHandler->deinitialize();
 
     LTRACE("deinitialize(begin)");
-    if (global::parallelPeer->status() != ParallelConnection::Status::Disconnected) {
-        global::parallelPeer->disconnect();
+    if (global::astrocast->status() != Astrocast::Status::Disconnected) {
+        global::astrocast->disconnect();
     }
     if (global::renderEngine->scene() && global::renderEngine->scene()->camera()) {
         global::syncEngine->removeSyncables(
@@ -1203,7 +1202,7 @@ void OpenSpaceEngine::preSynchronization() {
             }
         }
         global::sessionRecordingHandler->preSynchronization(dt);
-        global::parallelPeer->preSynchronization();
+        global::astrocast->preSynchronization();
         global::interactionHandler->preSynchronization();
     }
 
