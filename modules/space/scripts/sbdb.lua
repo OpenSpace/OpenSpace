@@ -4,11 +4,13 @@ registerFunction(
     Arguments = {
       { "object_search_string", "String" }
     },
+    Return = "( Trail, Position )",
     Documentation = [[
       Creates a new scene graph node from the small body object by querying the JPL Small
       Body Database for the provided object. If the object exists, its Keplerian elements
       are retrieved and an orbital path for that object is created. If the search returns
-      no result, an error is logged
+      no result, an error is logged. The function returns the created Trail and Position
+      objects.
     ]],
     Function = function(object_search_string)
       local Input = "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=" .. object_search_string .. "&full-prec=true"
@@ -114,6 +116,8 @@ registerFunction(
 
       openspace.addSceneGraphNode(Trail)
       openspace.addSceneGraphNode(Position)
+
+      return Trail, Position
     end
   }
 )
