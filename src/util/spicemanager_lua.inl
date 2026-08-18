@@ -469,6 +469,22 @@ namespace {
     return bodyId;
 }
 
+
+/**
+ * Helper function to compute solar event times (sunrise/sunset).
+ * Both sunriseTime and sunsetTime delegate to SpiceManager::solarEventTime.
+ */
+
+[[codegen::luawrap]] double sunriseTime(double lat_deg, double lon_deg,
+                                        std::string utc_date, std::string observer) {
+    return SpiceManager::ref().solarEventTime(lat_deg, lon_deg, utc_date, observer, true);
+}
+
+[[codegen::luawrap]] double sunsetTime(double lat_deg, double lon_deg,
+                                       std::string utc_date, std::string observer) {
+    return SpiceManager::ref().solarEventTime(lat_deg, lon_deg, utc_date, observer, false);
+}
+
 } // namespace
 
 #include "spicemanager_lua_codegen.cpp"

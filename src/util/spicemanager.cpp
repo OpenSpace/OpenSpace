@@ -749,6 +749,8 @@ SpiceManager::SurfaceInterceptResult SpiceManager::surfaceIntercept(
     return result;
 }
 
+
+
 bool SpiceManager::isTargetInFieldOfView(const std::string& target,
                                          const std::string& observer,
                                          const std::string& referenceFrame,
@@ -1638,6 +1640,84 @@ SpiceManager::UseException SpiceManager::exceptionHandling() const {
     return _useExceptions;
 }
 
+double SpiceManager::solarEventTime(double lat_deg, double lon_deg,
+                                    const std::string& utc_date,
+                                    const std::string& observer, bool isSunrise) const {
+    // 1. Bracket the search window: local midnight to midnight+1day (UTC as proxy)
+    double et0, et1;
+    str2et_c((utc_date + " 00:00:00").c_str(), &et0);
+    str2et_c((utc_date + " 23:59:59").c_str(), &et1);
+
+    // 2. Body radii -> planetographic to rectangular (body-fixed frame)
+    SpiceInt dim;
+    SpiceDouble radii[3];
+    bodvrd_c(observer.c_str(), "RADII", 3, &dim, radii);
+    double re = radii[0], rp = radii[2];
+    double f = (re - rp) / re;
+
+    double lat = lat_deg * rpd_c();
+    double lon = lon_deg * rpd_c();
+
+    SpiceDouble obsPos[3];
+    georec_c(lon, lat, 0.0, re, f, obsPos);
+
+    // Local "up" (zenith) direction is just the normalized surface position
+    // for a spherical/oblate body-fixed vector at alt=0.
+    SpiceDouble zenith[3];
+    vhat_c(obsPos, zenith);
+
+    auto solarElevation = [&](double et) -> double {
+        SpiceDouble sunPos[3], lt;
+        // Sun position relative to the observer's surface point, in body-fixed frame
+        SpiceDouble sunFromCenter[3];
+        spkpos_c("SUN", et, ("IAU_" + observer).c_str(), "LT+S",
+            observer.c_str(), sunFromCenter, &lt);
+
+        SpiceDouble losVec[3];
+        vsub_c(sunFromCenter, obsPos, losVec);
+        vhat_c(losVec, losVec);
+
+        double cosZenithAngle = vdot_c(zenith, losVec);
+        return halfpi_c() - std::acos(cosZenithAngle); // elevation, radians
+    };
+
+    // 3. Bisection search
+    const double tol = 1.0; // seconds
+    double a = et0, b = et1;
+    double fa = solarElevation(a);
+
+    // Coarse scan to find the bracket
+    const int steps = 288; // 5-min resolution
+    double step = (b - a) / steps;
+    bool found = false;
+    double t0 = a, f0 = fa;
+    for (int i = 1; i <= steps; ++i) {
+        double t1 = a + i * step;
+        double f1 = solarElevation(t1);
+        // Check for crossing: sunrise (neg->pos) or sunset (pos->neg)
+        if (isSunrise ? (f0 < 0.0 && f1 >= 0.0) : (f0 >= 0.0 && f1 < 0.0)) {
+            a = t0; b = t1;
+            found = true;
+            break;
+        }
+        t0 = t1; f0 = f1;
+    }
+
+    if (!found) {
+        std::string eventType = isSunrise ? "sunrise" : "sunset";
+        throwSpiceError("No " + eventType + " found for the given date/location (polar day or night)");
+    }
+
+    while (b - a > tol) {
+        double mid = 0.5 * (a + b);
+        double fm = solarElevation(mid);
+        if (isSunrise ? (fm < 0.0) : (fm >= 0.0)) a = mid; else b = mid;
+    }
+
+    double time = 0.5 * (a + b);
+    return time; // ET seconds past J2000
+}
+
 LuaLibrary SpiceManager::luaLibrary() {
     return {
         "spice",
@@ -1649,7 +1729,9 @@ LuaLibrary SpiceManager::luaLibrary() {
             codegen::lua::RotationMatrix,
             codegen::lua::Position,
             codegen::lua::ConvertTLEtoSPK,
-            codegen::lua::ConvertCSVtoSPK
+            codegen::lua::ConvertCSVtoSPK,
+            codegen::lua::SunriseTime,
+            codegen::lua::SunsetTime,
         }
     };
 }

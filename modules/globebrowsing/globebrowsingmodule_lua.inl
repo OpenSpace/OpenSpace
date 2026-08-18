@@ -28,6 +28,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/stringhelper.h>
@@ -593,6 +595,24 @@ namespace {
     }
 
     return res;
+}
+
+[[codegen::luawrap]] double sunriseTimeForSimulation() {
+    auto [lon, lat, _] = geoPositionForCamera();
+    std::string_view date = global::timeManager->time().ISO8601();
+    std::string_view dateTrim = date.substr(0, date.find('T'));
+    std::string dateStr(dateTrim);
+    std::string globe = global::navigationHandler->orbitalNavigator().anchorNode()->identifier();
+    return SpiceManager::ref().solarEventTime(lon, lat, dateStr.c_str(), globe, false);
+}
+
+[[codegen::luawrap]] double sunsetTimeForSimulation() {
+    auto [lon, lat, _] = geoPositionForCamera();
+    std::string_view date = global::timeManager->time().ISO8601();
+    std::string_view dateTrim = date.substr(0, date.find('T'));
+    std::string dateStr(dateTrim);
+    std::string globe = global::navigationHandler->orbitalNavigator().anchorNode()->identifier();
+    return SpiceManager::ref().solarEventTime(lon, lat, dateStr.c_str(), globe, true);
 }
 
 } // namespace

@@ -876,6 +876,22 @@ public:
         int numberOfTerminatorPoints);
 
     /**
+     * Computes the time of a solar event (sunrise or sunset) for a given location and date.
+     *
+     * \\param lat_deg Latitude in degrees
+     * \\param lon_deg Longitude in degrees
+     * \\param utc_date UTC date as a string (e.g., "2024-01-01")
+     * \\param observer The observing body (e.g., "EARTH")
+     * \\param isSunrise If true, computes sunrise time; if false, computes sunset time
+     * \\return The ephemeris time (ET seconds past J2000) of the solar event
+     *
+     * \\throw SpiceException If no sunrise/sunset found for the given date/location
+     *        (e.g., polar day or night)
+     */
+    double solarEventTime(double lat_deg, double lon_deg, const std::string& utc_date,
+        const std::string& observer, bool isSunrise) const;
+
+    /**
      * Sets the SpiceManager's exception handling. If UseException::No is passed to this
      * function, all subsequent calls will not throw an error, but fail silently instead.
      * If set to UseException::Yes, a SpiceException is thrown whenever an error occurs.
