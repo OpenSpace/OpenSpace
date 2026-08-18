@@ -1703,7 +1703,7 @@ double SpiceManager::solarEventTime(double lat_deg, double lon_deg,
 
     if (!found) {
         std::string eventType = isSunrise ? "sunrise" : "sunset";
-        throwSpiceError("No " + eventType + " found for the given date/location (polar day or night)");
+        throwSpiceError("No " + eventType + " found for the given date/location");
     }
 
     while (b - a > tol) {
