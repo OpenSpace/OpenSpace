@@ -27,10 +27,6 @@ registerFunction(
       local json = openspace.loadJson(Output)
 
       local object = json.object
-      openspace.printInfo("JSON")
-      openspace.printInfo(json)
-      openspace.printInfo("object")
-      openspace.printInfo(object)
       if object == nil then
         error("Malformed small body object '" .. object_search_string .. "'")
       end
