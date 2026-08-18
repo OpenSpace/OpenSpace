@@ -749,8 +749,6 @@ SpiceManager::SurfaceInterceptResult SpiceManager::surfaceIntercept(
     return result;
 }
 
-
-
 bool SpiceManager::isTargetInFieldOfView(const std::string& target,
                                          const std::string& observer,
                                          const std::string& referenceFrame,
