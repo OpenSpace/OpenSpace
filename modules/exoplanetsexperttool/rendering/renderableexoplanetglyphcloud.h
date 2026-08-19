@@ -31,6 +31,7 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/syncdata.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
@@ -87,6 +88,8 @@ private:
     void renderIndexTexture(ghoul::opengl::ProgramObject& program);
     void renderSelectedPoints(ghoul::opengl::ProgramObject& program);
 
+    void renderStars(const RenderData& data);
+
     bool _renderDataIsDirty = true;
     bool _selectionChanged = true;
     bool _glyphModeChanged = false;
@@ -113,6 +116,14 @@ private:
     OptionProperty _glyphMode;
 
     FloatProperty _darkenFactor;
+
+    struct {
+        PropertyOwner owner;
+        BoolProperty enabled;
+        Vec4Property lineColor;
+        FloatProperty lineWidth;
+        FloatProperty lineLength;
+    } _starGlyph;
 
     // Unified glyph data structure
     struct GlyphData {
@@ -153,8 +164,25 @@ private:
 
     glm::ivec2 _lastViewPortSize;
     double _lastDataTimeStamp = 0.0;
+
+    // Star glyphs
+    struct StarGlyphData {
+        glm::vec3 position;
+        glm::vec3 up; // Up vector of the star, in world space
+    };
+    std::vector<StarGlyphData> _starData;
+
+    GLuint _starsVao = 0;
+    GLuint _starsVbo = 0;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programStars = nullptr;
+
+    UniformCache(
+        modelMatrix, cameraViewProjectionMatrix, opacity, scale, cameraPosition,
+        originLineColor, lineLengthFactor
+    ) _uniformCacheStars;
 };
 
-}// namespace openspace::exoplanets
+} // namespace openspace::exoplanets
 
 #endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___RENDERABLEEXOPLANETGLYPHCLOUD___H__

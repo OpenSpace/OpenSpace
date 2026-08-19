@@ -105,6 +105,38 @@ namespace {
         "holding CTRL + SHIFT)."
     };
 
+    const PropertyOwner::PropertyOwnerInfo StarGlyphInfo = {
+        "StarGlyph",
+        "Star Glyph",
+        "Controls properties for the part for the glyph that are related to the star "
+        "itself, rather than individual planets."
+    };
+
+    constexpr Property::PropertyInfo ShowStarLineInfo = {
+        "Enabled",
+        "Enabled",
+        "If true, the inclination glyphs include a line in the direction of Earth."
+    };
+
+    constexpr Property::PropertyInfo StarLineColorInfo = {
+        "LineColor",
+        "Line color",
+        "The color of the lines from the stars towards the center in inclination mode."
+    };
+
+    constexpr Property::PropertyInfo StarLineWidthInfo = {
+        "LineWidth",
+        "Line width",
+        "The width of the lines from the stars towards the center in inclination mode."
+    };
+
+    constexpr Property::PropertyInfo StarLineLengthInfo = {
+        "LineLength",
+        "Line length",
+        "A factor controlling the length of the lines from the stars towards the center "
+        "in inclination mode."
+    };
+
     struct [[codegen::Dictionary(RenderableExoplanetGlyphCloud)]] Parameters {
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
@@ -134,6 +166,23 @@ namespace {
 
         // [[codegen::verbatim(GlyphModeInfo.description)]]
         std::optional<GlyphMode> glyphMode;
+
+        struct StarGlyph {
+            // [[codegen::verbatim(ShowStarLineInfo.description)]]
+            std::optional<bool> enabled;
+
+            // [[codegen::verbatim(StarLineColorInfo.description)]]
+            std::optional<glm::vec4> lineColor [[codegen::color()]];
+
+            // [[codegen::verbatim(StarLineWidthInfo.description)]]
+            std::optional<float> lineWidth [[codegen::greater(0.f)]];
+
+            // [[codegen::verbatim(StarLineLengthInfo.description)]]
+            std::optional<float> lineLength [[codegen::greater(0.f)]];
+        };
+
+        // [[codegen::verbatim(StarGlyphInfo.description)]]
+        std::optional<StarGlyph> _starGlyph;
     };
 #include "renderableexoplanetglyphcloud_codegen.cpp"
 } // namespace
@@ -155,6 +204,18 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     , _orientationRenderOption(OrientationRenderOptionInfo)
     , _glyphMode(GlyphModeInfo)
     , _darkenFactor(DarkenFactorInfo, 0.3f, 0.f, 1.f)
+    , _starGlyph{
+        .owner = PropertyOwner(StarGlyphInfo),
+        .enabled = BoolProperty(ShowStarLineInfo, true),
+        .lineColor = Vec4Property(
+            StarLineColorInfo,
+            glm::vec4(1.f, 0.f, 0.f, 0.2f),
+            glm::vec4(0.f),
+            glm::vec4(1.f)
+        ),
+        .lineWidth = FloatProperty(StarLineWidthInfo, 2.f, 0.01f, 3.f),
+        .lineLength = FloatProperty(StarLineLengthInfo, 1.f, 0.01f, 3.f)
+    }
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -196,6 +257,21 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
 
     _darkenFactor = p.darkenFactor.value_or(_darkenFactor);
     addProperty(_darkenFactor);
+
+    if (p._starGlyph.has_value()) {
+        const Parameters::StarGlyph& params = *p._starGlyph;
+        _starGlyph.enabled = params.enabled.value_or(_starGlyph.enabled);
+        _starGlyph.lineColor = params.lineColor.value_or(_starGlyph.lineColor);
+        _starGlyph.lineWidth = params.lineWidth.value_or(_starGlyph.lineWidth);
+        _starGlyph.lineLength = params.lineLength.value_or(_starGlyph.lineLength);
+    }
+
+    _starGlyph.owner.addProperty(_starGlyph.enabled);
+    _starGlyph.lineColor.setViewOption(Property::ViewOptions::Color);
+    _starGlyph.owner.addProperty(_starGlyph.lineColor);
+    _starGlyph.owner.addProperty(_starGlyph.lineWidth);
+    _starGlyph.owner.addProperty(_starGlyph.lineLength);
+    addPropertySubOwner(_starGlyph.owner);
 
     updateDataIfChanged();
 
@@ -308,6 +384,9 @@ void RenderableExoplanetGlyphCloud::initializeGL() {
 
     glCreateVertexArrays(1, &_selectedVao);
     glCreateBuffers(1, &_selectedVbo);
+
+    glCreateVertexArrays(1, &_starsVao);
+    glCreateBuffers(1, &_starsVbo);
 }
 
 void RenderableExoplanetGlyphCloud::deinitialize() {
@@ -321,6 +400,9 @@ void RenderableExoplanetGlyphCloud::deinitializeGL() {
     glDeleteVertexArrays(1, &_selectedVao);
     glDeleteBuffers(1, &_selectedVbo);
 
+    glDeleteVertexArrays(1, &_starsVao);
+    glDeleteBuffers(1, &_starsVbo);
+
     if (_programRings) {
         global::renderEngine->removeRenderProgram(_programRings.get());
         _programRings = nullptr;
@@ -329,6 +411,11 @@ void RenderableExoplanetGlyphCloud::deinitializeGL() {
     if (_programInclination) {
         global::renderEngine->removeRenderProgram(_programInclination.get());
         _programInclination = nullptr;
+    }
+
+    if (_programStars) {
+        global::renderEngine->removeRenderProgram(_programStars.get());
+        _programStars = nullptr;
     }
 }
 
@@ -348,6 +435,14 @@ void RenderableExoplanetGlyphCloud::initializeShaders() {
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_inclination_gs.glsl")
     );
     ghoul::opengl::updateUniformLocations(*_programInclination, _uniformCacheInclination);
+
+    _programStars = global::renderEngine->buildRenderProgram(
+        "ExoGlyphCloud_StarGlyph",
+        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_star_vs.glsl"),
+        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_star_fs.glsl"),
+        absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_star_gs.glsl")
+    );
+    ghoul::opengl::updateUniformLocations(*_programStars, _uniformCacheStars);
 }
 
 void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks&) {
@@ -390,6 +485,9 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
 
     program->deactivate();
     glBindVertexArray(0);
+
+    // TODO: Docs/order
+    renderStars(data);
 
     // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
@@ -540,6 +638,38 @@ void RenderableExoplanetGlyphCloud::renderSelectedPoints(
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(nSelected));
 }
 
+void RenderableExoplanetGlyphCloud::renderStars(const RenderData& data) {
+    if (_starData.empty()) {
+        return;
+    }
+    _programStars->activate();
+
+    const glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+    const glm::dmat4 viewProjectionMatrix =
+        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
+
+    _programStars->setUniform(_uniformCacheStars.modelMatrix, modelTransform);
+    _programStars->setUniform(_uniformCacheStars.cameraViewProjectionMatrix, viewProjectionMatrix);
+    _programStars->setUniform(_uniformCacheStars.opacity, opacity());
+    _programStars->setUniform(_uniformCacheStars.scale, _scale);
+    _programStars->setUniform(_uniformCacheStars.cameraPosition, data.camera.position());
+    _programStars->setUniform(_uniformCacheStars.originLineColor, _starGlyph.lineColor);
+    _programStars->setUniform(_uniformCacheStars.lineLengthFactor, _starGlyph.lineLength);
+
+    glLineWidth(_starGlyph.lineWidth);
+
+    glEnablei(GL_BLEND, 0);
+    glDepthMask(true);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBindVertexArray(_starsVao);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_starData.size()));
+};
+
 void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
     if (_programInclination->isDirty()) {
         _programInclination->rebuildFromFile();
@@ -549,6 +679,11 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
     if (_programRings->isDirty()) {
         _programRings->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_programRings, _uniformCacheRings);
+    }
+
+    if (_programStars->isDirty()) {
+        _programStars->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_programStars, _uniformCacheStars);
     }
 
     updateDataIfChanged();
@@ -562,6 +697,32 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
         );
         mapVertexAttributes(_pointsVao);
         glVertexArrayVertexBuffer(_pointsVao, 0, _pointsVbo, 0, sizeof(GlyphData));
+
+        glNamedBufferData(
+            _starsVbo,
+            _starData.size() * sizeof(StarGlyphData),
+            _starData.data(),
+            GL_STATIC_DRAW
+        );
+
+        // Location 0: in_position
+        glEnableVertexArrayAttrib(_starsVao, 0);
+        glVertexArrayAttribBinding(_starsVao, 0, 0);
+        glVertexArrayAttribFormat(
+            _starsVao, 0, 3, GL_FLOAT, GL_FALSE,
+            offsetof(StarGlyphData, position)
+        );
+
+        // Location 1: in_up
+        glEnableVertexArrayAttrib(_starsVao, 1);
+        glVertexArrayAttribBinding(_starsVao, 1, 0);
+        glVertexArrayAttribFormat(
+            _starsVao, 1, 3, GL_FLOAT, GL_FALSE,
+            offsetof(StarGlyphData, up)
+        );
+
+        glVertexArrayVertexBuffer(_starsVao, 0, _starsVbo, 0, sizeof(StarGlyphData));
+
         _renderDataIsDirty = false;
     }
 
@@ -731,6 +892,10 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
     _glyphIndices.reserve(nPoints);
     int maxIndex = -1;
 
+    _starData.clear();
+    _starData.reserve(nPoints);
+    std::vector<glm::vec3> uniquePositions;
+
     for (const GlyphRenderData::Item& item : syncedData.items) {
         GlyphData d;
 
@@ -768,11 +933,22 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
 
             glm::dmat3 planeRotation = computeOrbitPlaneRotationMatrix(item.inclination);
 
-            // This is the up vector of the orbit plane, in world space
+            // This is the up vector of the orbit plane, in world space. Note that globes
             d.inclinationVector = systemRotation * planeRotation * glm::vec3(0.f, 0.f, 1.f);
 
             // Use just one of the colors
             d.colors[0] = item.colors[0];
+
+            // Add data for star glyph
+            if (std::find(uniquePositions.begin(), uniquePositions.end(), d.position) ==
+                uniquePositions.end())
+            {
+                uniquePositions.push_back(d.position);
+                _starData.push_back({
+                    .position = d.position,
+                    .up = systemRotation * glm::vec3(0.f, 1.f, 0.f)
+                });
+            }
         }
 
         if (static_cast<int>(d.index) > maxIndex) {
@@ -782,6 +958,8 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
         _glyphData.push_back(std::move(d));
         _glyphIndices.push_back(item.index);
     }
+
+    _starData.shrink_to_fit();
 
     _maxIndex = maxIndex;
 

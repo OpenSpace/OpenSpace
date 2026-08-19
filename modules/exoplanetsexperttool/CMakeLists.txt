@@ -64,6 +64,9 @@ set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/glyphs_inclination_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/glyphs_inclination_gs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/glyphs_inclination_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/glyphs_star_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/glyphs_star_gs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/glyphs_star_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_vs.glsl
 )
