@@ -1638,83 +1638,131 @@ SpiceManager::UseException SpiceManager::exceptionHandling() const {
     return _useExceptions;
 }
 
-double SpiceManager::solarEventTime(double lat_deg, double lon_deg,
-                                    const std::string& utc_date,
-                                    const std::string& observer, bool isSunrise) const {
+double SpiceManager::solarEventTime(double latitude,
+                                    double longitude,
+                                    double altitude,
+                                    const std::string& date,
+                                    const std::string& observer,
+                                    bool isSunrise) const
+{
     // 1. Bracket the search window: local midnight to midnight+1day (UTC as proxy)
-    double et0, et1;
-    str2et_c((utc_date + " 00:00:00").c_str(), &et0);
-    str2et_c((utc_date + " 23:59:59").c_str(), &et1);
+    double et0;
+    double et1;
+    const std::string startDate = date + " 00:00:00";
+    str2et_c(startDate.c_str(), &et0);
+    const std::string endDate = date + " 23:59:59";
+    str2et_c(endDate.c_str(), &et1);
 
     // 2. Body radii -> planetographic to rectangular (body-fixed frame)
     SpiceInt dim;
     SpiceDouble radii[3];
     bodvrd_c(observer.c_str(), "RADII", 3, &dim, radii);
-    double re = radii[0], rp = radii[2];
-    double f = (re - rp) / re;
+    double equatorialRadius = radii[0];
+    double polarRadius = radii[2];
+    double flattening = (equatorialRadius - polarRadius) / equatorialRadius;
 
-    double lat = lat_deg * rpd_c();
-    double lon = lon_deg * rpd_c();
+    double lat = glm::radians(latitude);
+    double lon = glm::radians(longitude);
 
-    SpiceDouble obsPos[3];
-    georec_c(lon, lat, 0.0, re, f, obsPos);
+    double altitudeKm = altitude / 1000.0;
 
-    // Local "up" (zenith) direction is just the normalized surface position
-    // for a spherical/oblate body-fixed vector at alt=0.
-    SpiceDouble zenith[3];
-    vhat_c(obsPos, zenith);
+    SpiceDouble observerPosition[3];
+    georec_c(lon, lat, altitudeKm,
+        equatorialRadius, flattening, observerPosition);
 
+    // Local "up" (zenith) direction is the normalized surface position for a
+    // spherical/oblate body-fixed vector at the specified altitude.
+    SpiceDouble zenithDirection[3];
+    vhat_c(observerPosition, zenithDirection);
+
+    // An elevated observer can see the Sun for a while after it has dropped below
+    // the local horizontal plane, because the true horizon (the ground/sea in the
+    // distance) dips below that plane by this angle.
+    double dipAltitudeKm = std::max(0.0, altitudeKm);
+    double horizonDipAngle =
+        std::acos(equatorialRadius / (equatorialRadius + dipAltitudeKm));
+
+    // Lambda to compute solar elevation angle at a given ephemeris time
     auto solarElevation = [&](double et) -> double {
-        SpiceDouble sunPos[3], lt;
-        // Sun position relative to the observer's surface point, in body-fixed frame
-        SpiceDouble sunFromCenter[3];
-        spkpos_c("SUN", et, ("IAU_" + observer).c_str(), "LT+S",
-            observer.c_str(), sunFromCenter, &lt);
+        SpiceDouble lightTime;
+        // Sun position relative to observer's surface point, in body-fixed frame.
+        SpiceDouble sunFromBodyCenter[3];
+        const std::string obs = "IAU_" + observer;
+        spkpos_c(
+            "SUN",
+            et,
+            obs.c_str(),
+            "LT+S",
+            observer.c_str(),
+            sunFromBodyCenter,
+            &lightTime
+        );
 
-        SpiceDouble losVec[3];
-        vsub_c(sunFromCenter, obsPos, losVec);
-        vhat_c(losVec, losVec);
+        SpiceDouble sunBelowObserverVector[3];
+        vsub_c(sunFromBodyCenter, observerPosition, sunBelowObserverVector);
+        vhat_c(sunBelowObserverVector, sunBelowObserverVector);
 
-        double cosZenithAngle = vdot_c(zenith, losVec);
-        return halfpi_c() - std::acos(cosZenithAngle); // elevation, radians
+        double cosZenithAngle = vdot_c(zenithDirection, sunBelowObserverVector);
+        return glm::half_pi<double>() - std::acos(cosZenithAngle); 
     };
 
-    // 3. Bisection search
-    const double tol = 1.0; // seconds
-    double a = et0, b = et1;
-    double fa = solarElevation(a);
+    // 3. Bisection search to find the solar event time
+    const double tolerance = 1.0; // seconds
+    double bracketsLow = et0;
+    double bracketsHigh = et1;
+    double fLow = solarElevation(bracketsLow);
 
-    // Coarse scan to find the bracket
-    const int steps = 288; // 5-min resolution
-    double step = (b - a) / steps;
-    bool found = false;
-    double t0 = a, f0 = fa;
-    for (int i = 1; i <= steps; ++i) {
-        double t1 = a + i * step;
-        double f1 = solarElevation(t1);
-        // Check for crossing: sunrise (neg->pos) or sunset (pos->neg)
-        if (isSunrise ? (f0 < 0.0 && f1 >= 0.0) : (f0 >= 0.0 && f1 < 0.0)) {
-            a = t0; b = t1;
-            found = true;
+    // Coarse scan to find the bracket containing the event
+    constexpr int Steps = 288; // 5-minute resolution (86400/300) = 288
+    double stepSize = (bracketsHigh - bracketsLow) / Steps;
+    bool eventFound = false;
+    double previousTime = bracketsLow;
+    double previousElevation = fLow;
+    for (int i = 1; i <= Steps; i++) {
+        double currentTime = bracketsLow + i * stepSize;
+        double currentElevation = solarElevation(currentTime);
+        // Check for crossing: sunrise (neg->pos) or sunset (pos->neg), relative to
+        // the altitude-adjusted horizon rather than the local horizontal plane
+        bool sunRisen = previousElevation < -horizonDipAngle &&
+                         currentElevation >= -horizonDipAngle;
+        bool sunSet = previousElevation >= -horizonDipAngle &&
+                       currentElevation < -horizonDipAngle;
+        if (isSunrise ? sunRisen : sunSet) {
+            bracketsLow = previousTime;
+            bracketsHigh = currentTime;
+            eventFound = true;
             break;
         }
-        t0 = t1; f0 = f1;
+        previousTime = currentTime;
+        previousElevation = currentElevation;
     }
 
-    if (!found) {
-        std::string eventType = isSunrise ? "sunrise" : "sunset";
-        throwSpiceError("No " + eventType + " found for the given date/location");
+    if (!eventFound) {
+        const std::string_view eventType = isSunrise ? "sunrise" : "sunset";
+        throwSpiceError(std::format(
+            "No {} found for latitude {}, longitude {}, date {} at observer '{}'",
+            eventType, latitude, longitude, date, observer
+        ));
     }
 
-    while (b - a > tol) {
-        double mid = 0.5 * (a + b);
-        double fm = solarElevation(mid);
-        if (isSunrise ? (fm < 0.0) : (fm >= 0.0)) a = mid; else b = mid;
+    // Refine the bracket using bisection search
+    while (bracketsHigh - bracketsLow > tolerance) {
+        double midpoint = 0.5 * (bracketsLow + bracketsHigh);
+        double elevationAtMidpoint = solarElevation(midpoint);
+        // Conditionally update the bracket based on solar event type
+        bool shouldUpdateLow = isSunrise ?
+            (elevationAtMidpoint < -horizonDipAngle) :
+            (elevationAtMidpoint >= -horizonDipAngle);
+        if (shouldUpdateLow) {
+            bracketsLow = midpoint;
+        } else {
+            bracketsHigh = midpoint;
+        }
     }
 
-    double time = 0.5 * (a + b);
-    return time; // ET seconds past J2000
+    return 0.5 * (bracketsLow + bracketsHigh); // ET seconds past J2000
 }
+
 
 LuaLibrary SpiceManager::luaLibrary() {
     return {
@@ -1727,9 +1775,7 @@ LuaLibrary SpiceManager::luaLibrary() {
             codegen::lua::RotationMatrix,
             codegen::lua::Position,
             codegen::lua::ConvertTLEtoSPK,
-            codegen::lua::ConvertCSVtoSPK,
-            codegen::lua::SunriseTime,
-            codegen::lua::SunsetTime,
+            codegen::lua::ConvertCSVtoSPK
         }
     };
 }
