@@ -117,6 +117,8 @@ private:
 
     FloatProperty _darkenFactor;
 
+    BoolProperty _showMissingInclination;
+
     struct {
         PropertyOwner owner;
         BoolProperty enabled;
@@ -138,6 +140,7 @@ private:
 
         // Inclination mode data
         glm::vec3 inclinationVector = glm::vec3(0.f);
+        int hasInclination = 1; // 1 if inclination is present, 0 if not (default value is used)
     };
 
     std::vector<GlyphData> _glyphData;

@@ -105,6 +105,13 @@ namespace {
         "holding CTRL + SHIFT)."
     };
 
+    constexpr Property::PropertyInfo ShowMissingInclinationInfo = {
+        "ShowMissingInclination",
+        "Show Missing Inclination",
+        "If true, glyphs without inclination data will be displayed with a dashed "
+        "pattern in the inlincation glyph mode. Otherwise, they will be hidden."
+    };
+
     const PropertyOwner::PropertyOwnerInfo StarGlyphInfo = {
         "StarGlyph",
         "Star Glyph",
@@ -167,6 +174,9 @@ namespace {
         // [[codegen::verbatim(GlyphModeInfo.description)]]
         std::optional<GlyphMode> glyphMode;
 
+        // [[codegen::verbatim(ShowMissingInclinationInfo.description)]]
+        std::optional<bool> showMissingInclination;
+
         struct StarGlyph {
             // [[codegen::verbatim(ShowStarLineInfo.description)]]
             std::optional<bool> enabled;
@@ -204,6 +214,7 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     , _orientationRenderOption(OrientationRenderOptionInfo)
     , _glyphMode(GlyphModeInfo)
     , _darkenFactor(DarkenFactorInfo, 0.3f, 0.f, 1.f)
+    , _showMissingInclination(ShowMissingInclinationInfo, false)
     , _starGlyph{
         .owner = PropertyOwner(StarGlyphInfo),
         .enabled = BoolProperty(ShowStarLineInfo, true),
@@ -257,6 +268,13 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
 
     _darkenFactor = p.darkenFactor.value_or(_darkenFactor);
     addProperty(_darkenFactor);
+
+    _showMissingInclination = p.showMissingInclination.value_or(_showMissingInclination);
+    _showMissingInclination.onChange([this]() {
+        // Force a recomputation of the render data
+        _glyphModeChanged = true;
+    });
+    addProperty(_showMissingInclination);
 
     if (p._starGlyph.has_value()) {
         const Parameters::StarGlyph& params = *p._starGlyph;
@@ -857,9 +875,17 @@ void RenderableExoplanetGlyphCloud::mapVertexAttributes(GLuint vao) {
             offsetof(GlyphData, inclinationVector)
         );
 
-        // Location 4: in_colors[0] (only one color used for inclination mode)
+        // Location 4: in_hasInclinationFlag
+        glEnableVertexArrayAttrib(vao, 4);
+        glVertexArrayAttribBinding(vao, 4, 0);
+        glVertexArrayAttribIFormat(
+            vao, 4, 1, GL_INT,
+            offsetof(GlyphData, hasInclination)
+        );
+
+        // Location 5: in_colors[0] (only one color used for inclination mode)
         glVertexArrayAttribFormat(
-            vao, 4, 4, GL_FLOAT, GL_FALSE,
+            vao, 5, 4, GL_FLOAT, GL_FALSE,
             offsetof(GlyphData, colors)
         );
     }
@@ -927,16 +953,30 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
             // Rotation corresponding to a plane whose normal is facing Earth
             glm::dmat3 systemRotation = computeSystemRotation(d.position);
 
-            if (std::isnan(item.inclination)) {
-                continue; // Skip this point if inclination is not defined
+            glm::dmat3 planeRotation;
+
+            bool hasInclination = !std::isnan(item.inclination);
+            if (!hasInclination && !_showMissingInclination) {
+                continue;
+            }
+            else if (!hasInclination) {
+                // Use a default inclination of 90 degrees, which is edge-on, to show the
+                // orbit plane the same way as it is render in close up view
+                planeRotation = computeOrbitPlaneRotationMatrix(90.f);
+                d.hasInclination = 0;
+            }
+            else {
+                // Use the real inclination data!
+                planeRotation = computeOrbitPlaneRotationMatrix(item.inclination);
+                d.hasInclination = 1;
             }
 
-            glm::dmat3 planeRotation = computeOrbitPlaneRotationMatrix(item.inclination);
+            // This is the up vector of the orbit plane, in world space
+            d.inclinationVector = glm::normalize(
+                systemRotation * planeRotation * glm::vec3(0.f, 0.f, 1.f)
+            );
 
-            // This is the up vector of the orbit plane, in world space. Note that globes
-            d.inclinationVector = systemRotation * planeRotation * glm::vec3(0.f, 0.f, 1.f);
-
-            // Use just one of the colors
+            // Use just one of the colors (more becomes too visually complex)
             d.colors[0] = item.colors[0];
 
             // Add data for star glyph

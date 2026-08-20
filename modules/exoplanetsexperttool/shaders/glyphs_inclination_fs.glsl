@@ -32,6 +32,7 @@ in Data {
   vec2 texCoords; // [-1, 1]
   float sizeFactor; // The factor used for the radius of the ring
   vec4 color;
+  flat int hasInclination;
 } in_data;
 
 uniform float opacity;
@@ -78,6 +79,16 @@ Fragment getFragment() {
   float coord = (radius - minRadius) / (1.0 - minRadius);
   if (coord < 0.0 || coord > 1.0) {
     discard;
+  }
+
+  // Create dashed pattern if no inclination data
+  if (in_data.hasInclination == 0 && !isRenderIndexStep) {
+    float angle = atan(y, x);
+    float normalizedAngle = (angle + M_PI) / (2.0 * M_PI);
+    float dashPattern = mod(normalizedAngle * 16.0, 1.0);
+    if (dashPattern > 0.3) {
+      discard;
+    }
   }
 
   vec4 color = in_data.color;
