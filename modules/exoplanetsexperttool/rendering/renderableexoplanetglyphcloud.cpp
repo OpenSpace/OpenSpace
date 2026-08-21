@@ -504,7 +504,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     program->deactivate();
     glBindVertexArray(0);
 
-    // TODO: Docs/order
+    // 4th rendering pass: Render the star glyphs (lines from stars to center)
     renderStars(data);
 
     // Restores GL State
@@ -657,7 +657,7 @@ void RenderableExoplanetGlyphCloud::renderSelectedPoints(
 }
 
 void RenderableExoplanetGlyphCloud::renderStars(const RenderData& data) {
-    if (_starData.empty()) {
+    if (_starData.empty() || !_programStars || !_starGlyph.enabled) {
         return;
     }
     _programStars->activate();
