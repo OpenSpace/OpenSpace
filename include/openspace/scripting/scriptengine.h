@@ -71,7 +71,7 @@ public:
         ShouldBeSynchronized synchronized = ShouldBeSynchronized::Yes;
 
         /// Determines whether a script should be send to a distant OpenSpace instance
-        /// that is not part of the same cluster. This is used in the ParallelConnection
+        /// that is not part of the same cluster. This is used in the AstrocastConnection
         /// feature that can connect OpenSpace instances in a connection that does not
         /// require instantaneous synchronization
         ShouldSendToRemote sendToRemote = ShouldSendToRemote::Yes;
@@ -140,8 +140,10 @@ private:
 
     void writeLog(const std::string& script);
 
-    bool registerLuaLibrary(lua_State* state, LuaLibrary& library);
-    void addLibraryFunctions(lua_State* state, LuaLibrary& library, Replace replace);
+    void registerLuaLibrary(lua_State* state, LuaLibrary& library,
+        bool isRootLibrary = false);
+    void addLibraryFunctions(lua_State* state, LuaLibrary& library, Replace replace,
+        bool isRootLibrary = false);
 
     bool isLibraryNameAllowed(lua_State* state, const std::string& name);
 
@@ -149,6 +151,8 @@ private:
 
 
     ghoul::lua::LuaState _state;
+    /// The library that has functions that are not placed in the `openspace.` namespace
+    LuaLibrary _rootLibrary;
     std::vector<LuaLibrary> _registeredLibraries;
 
     std::queue<Script> _incomingScripts;

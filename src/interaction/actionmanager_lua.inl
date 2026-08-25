@@ -104,8 +104,12 @@ struct [[codegen::Dictionary(Action)]] Action {
     std::optional<glm::vec4> textColor [[codegen::color()]];
 
     // Determines whether the provided command will be executed locally or will be sent to
-    // connected computers in a cluster or parallel connection environment.
+    // connected computers in a cluster or astrocast connection environment.
     std::optional<bool> isLocal;
+
+    // Determines whether the provided command will be hidden from the user interface.
+    // This is just a hint that will be forwarded to the user interface.
+    std::optional<bool> isHidden;
 };
 
 /**
@@ -114,7 +118,7 @@ struct [[codegen::Dictionary(Action)]] Action {
  * is to be executed, and the optional third argument is the name used in a user-interface
  * to refer to this action. The fourth is a human readable description of the command for
  * documentation purposes. The fifth is the GUI path and the last parameter determines
- * whether the action should be executed locally (= false) or remotely (= true, the
+ * whether the action should be executed locally (= true) or remotely (= false, the
  * default).
  */
 [[codegen::luawrap]] void registerAction(Action action) {
@@ -140,14 +144,16 @@ struct [[codegen::Dictionary(Action)]] Action {
         .guiPath = action.guiPath.value_or("/"),
         .color = action.color,
         .textColor = action.textColor,
-        .isLocal = openspace::Action::IsLocal(action.isLocal.value_or(false))
+        .isLocal = openspace::Action::IsLocal(action.isLocal.value_or(false)),
+        .isHidden = openspace::Action::IsHidden(action.isHidden.value_or(false))
     };
     global::actionManager->registerAction(std::move(a));
 }
 
 /**
  * Returns information about the action as a table with the keys 'Identifier', 'Command',
- * 'Name', 'Documentation', 'GuiPath', and 'Synchronization'.
+* Returns information about the action as a table with the keys: `Identifier`, `Command`,
+* `Name`, `Documentation`, `GuiPath`, `IsLocal`, and `IsHidden`.
  */
 [[codegen::luawrap]] ghoul::Dictionary action(std::string identifier) {
     if (identifier.empty()) {
@@ -173,13 +179,15 @@ struct [[codegen::Dictionary(Action)]] Action {
     }
     res.setValue("GuiPath", action.guiPath);
     res.setValue("IsLocal", action.isLocal == openspace::Action::IsLocal::Yes);
+    res.setValue("IsHidden", action.isHidden == openspace::Action::IsHidden::Yes);
     return res;
 }
 
 /**
  * Returns all registered actions in the system as a table of tables each containing the
  * keys 'Identifier', 'Command', 'Name', 'Documentation', 'GuiPath', and
- * 'Synchronization'.
+* keys: `Identifier`, `Command`, `Name`, `Documentation`, `GuiPath`,
+* `IsLocal`, and `IsHidden`.
  */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> actions() {
     std::vector<ghoul::Dictionary> res;
@@ -198,6 +206,7 @@ struct [[codegen::Dictionary(Action)]] Action {
         }
         d.setValue("GuiPath", a.guiPath);
         d.setValue("IsLocal", a.isLocal == openspace::Action::IsLocal::Yes);
+        d.setValue("IsHidden", a.isHidden == openspace::Action::IsHidden::Yes);
         res.push_back(d);
     }
     return res;

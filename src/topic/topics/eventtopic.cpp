@@ -27,9 +27,7 @@
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/topic/connection.h>
 #include <openspace/topic/jsonconverters.h>
-#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <algorithm>
@@ -141,7 +139,7 @@ Schema EventTopic::Schema() {
                 "MissionAdded",
                 "MissionEventReached",
                 "MissionRemoved",
-                "ParallelConnection",
+                "AstrocastConnection",
                 "PlanetEclipsed",
                 "PointSpacecraft",
                 "ProfileLoadingFinished",
@@ -171,7 +169,7 @@ Schema EventTopic::Schema() {
                 { "$ref": "#/$defs/MissionAddedEventData" },
                 { "$ref": "#/$defs/MissionEventReachedEventData" },
                 { "$ref": "#/$defs/MissionRemovedEventData" },
-                { "$ref": "#/$defs/ParallelConnectionEventData" },
+                { "$ref": "#/$defs/AstrocastConnectionEventData" },
                 { "$ref": "#/$defs/PlanetEclipsedEventData" },
                 { "$ref": "#/$defs/PointSpacecraftEventData" },
                 { "$ref": "#/$defs/ProfileLoadingFinishedEventData" },
@@ -331,10 +329,10 @@ Schema EventTopic::Schema() {
               "additionalProperties": false,
               "required": ["event", "Identifier"]
             },
-            "ParallelConnectionEventData": {
+            "AstrocastConnectionEventData": {
               "type": "object",
               "properties": {
-                "event": { "const": "ParallelConnection" },
+                "event": { "const": "AstrocastConnection" },
                 "State": {
                   "type": "string",
                   "enum": ["Established", "Lost", "HostshipGained", "HostshipLost"]

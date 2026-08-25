@@ -161,9 +161,21 @@ function addExoplanetSystem(data)
     end
   end
 
+  -- Use SolarSystemBarycenter as parent if available; otherwise fall back to Root (these
+  -- are technically the same, but SolarSystemBarycenter signals that the coordinate
+  -- system is the galactic coordinate system, which is more appropriate for exoplanets)
+  local parentNodeIdentifier = "SolarSystemBarycenter"
+  if not openspace.hasSceneGraphNode(parentNodeIdentifier) then
+    openspace.printWarning(
+      "Scene graph node with identifier'" .. parentNodeIdentifier .. "' was not " ..
+      "found. Using 'Root' as parent for the exoplanet system instead"
+    )
+    parentNodeIdentifier = "Root"
+  end
+
   local Star = {
     Identifier = starIdentifier,
-    Parent = "SolarSystemBarycenter",
+    Parent = parentNodeIdentifier,
     Transform = {
       Rotation = {
         Type = "StaticRotation",

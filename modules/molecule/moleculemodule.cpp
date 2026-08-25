@@ -32,7 +32,9 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/logging/logmanager.h>
@@ -379,6 +381,15 @@ std::vector<Documentation> MoleculeModule::documentations() const {
     return {
         RenderableMolecule::Documentation(),
         RenderableSimulationBox::Documentation()
+    };
+}
+
+LuaLibrary MoleculeModule::luaLibrary() const {
+    return {
+        .name = "molecule",
+        .scripts = {
+            absPath("${MODULE_MOLECULE}/scripts/pdb.lua")
+        }
     };
 }
 

@@ -25,13 +25,10 @@
 #include <openspace/topic/topics/authorizationtopic.h>
 
 #include <openspace/documentation/schema.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
 #include <openspace/topic/connection.h>
 #include <ghoul/logging/logmanager.h>
 #include <stdexcept>
 #include <string_view>
-#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "AuthorizationTopic";

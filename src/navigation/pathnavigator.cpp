@@ -122,6 +122,23 @@ namespace {
         "when avoiding collisions.",
         Property::Visibility::AdvancedUser
     };
+
+    constexpr Property::PropertyInfo UseCustomFlyToDurationInfo = {
+        "UseCustomFlyToDuration",
+        "Use Custom Fly-To Duration",
+        "If this value is set, the fly-to will always use the duration provided in the "
+        "'CustomFlyToDuration' property.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo CustomFlyToDurationInfo = {
+        "CustomFlyToDuration",
+        "Custom Fly-To Duration",
+        "If the 'UseCustomFlyToDuration' value is set to 'true', any fly-to command will "
+        "use this number of seconds instead. If 'UseCustomFlyToDuration' is 'false', the "
+        "duration will be automatically calculated if nothing else is specified.",
+        Property::Visibility::AdvancedUser
+    };
 } // namespace
 
 namespace openspace {
@@ -136,6 +153,8 @@ PathNavigator::PathNavigator()
     , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 2.f, 0.1f, 3.f)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
+    , _useCustomFlyToDuration(UseCustomFlyToDurationInfo, false)
+    , _customFlyToDuration(CustomFlyToDurationInfo, 5.f, 0.f, 120.f)
 {
     _defaultPathType.addOptions({
         { static_cast<int>(Path::Type::AvoidCollision), "AvoidCollision" },
@@ -161,6 +180,9 @@ PathNavigator::PathNavigator()
     };
     _relevantNodeTags.onChange([this]() { findRelevantNodes(); });
     addProperty(_relevantNodeTags);
+
+    addProperty(_useCustomFlyToDuration);
+    addProperty(_customFlyToDuration);
 }
 
 PathNavigator::~PathNavigator() {}
@@ -289,7 +311,7 @@ void PathNavigator::updateCamera(double deltaTime) {
     }
 }
 
-void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
+void PathNavigator::createPath(ghoul::Dictionary dictionary) {
     const OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
         // Silently ignore any paths that are being created during a session recording
@@ -298,6 +320,14 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     }
 
     clearPath();
+
+    // If the user specified to overwride the duration, we want to inject that duration in
+    // here, unless the dictionary already contains a duration, in which case that value
+    // has precedence
+    if (_useCustomFlyToDuration && !dictionary.hasValue<double>("Duration")) {
+        const double duration = _customFlyToDuration;
+        dictionary.setValue("Duration", duration);
+    }
 
     try {
         _currentPath = std::make_unique<Path>(createPathFromDictionary(dictionary));

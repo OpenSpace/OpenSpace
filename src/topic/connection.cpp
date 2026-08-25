@@ -24,15 +24,11 @@
 
 #include <openspace/topic/connection.h>
 
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/topic/topics/topic.h>
-#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 

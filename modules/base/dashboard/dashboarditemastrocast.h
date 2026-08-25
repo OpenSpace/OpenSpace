@@ -22,79 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PARALLELCONNECTION___H__
-#define __OPENSPACE_CORE___PARALLELCONNECTION___H__
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMASTROCAST___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMASTROCAST___H__
 
-#include <openspace/network/messagestructures.h>
-#include <ghoul/io/socket/tcpsocket.h>
-#include <ghoul/misc/exception.h>
-#include <cstdint>
-#include <memory>
-#include <vector>
+#include <openspace/rendering/dashboardtextitem.h>
 
 namespace openspace {
 
-class ParallelConnection {
+class DashboardItemAstrocast : public DashboardTextItem {
 public:
-    enum class Status : uint32_t {
-        Disconnected = 0,
-        Connecting,
-        ClientWithoutHost,
-        ClientWithHost,
-        Host
-    };
+    explicit DashboardItemAstrocast(const ghoul::Dictionary& dictionary);
+    ~DashboardItemAstrocast() override = default;
 
-    enum class MessageType : uint8_t {
-        Authentication = 0,
-        Data,
-        ConnectionStatus,
-        HostshipRequest,
-        HostshipResignation,
-        NConnections
-    };
+    void update() override;
 
-    struct Message {
-        Message() = default;
-        Message(MessageType t, std::vector<char> c);
-
-        MessageType type;
-        std::vector<char> content;
-    };
-
-    struct DataMessage {
-        DataMessage() = default;
-        DataMessage(datamessagestructures::Type t, double time, std::vector<char> c);
-
-        datamessagestructures::Type type;
-        double timestamp;
-        std::vector<char> content;
-    };
-
-    class ConnectionLostError final : public ghoul::RuntimeError {
-    public:
-        explicit ConnectionLostError(bool shouldLogError_ = true);
-
-        bool shouldLogError;
-    };
-
-    explicit ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
-
-    bool isConnectedOrConnecting() const;
-    void sendDataMessage(const ParallelConnection::DataMessage& dataMessage);
-    bool sendMessage(const ParallelConnection::Message& message);
-    void disconnect();
-    ghoul::io::TcpSocket* socket();
-
-    ParallelConnection::Message receiveMessage();
-
-    // Gonna do some UTF-like magic once we reach 255 to introduce a second byte or so
-    static constexpr uint8_t ProtocolVersion = 7;
-
-private:
-    std::unique_ptr<ghoul::io::TcpSocket> _socket;
-    bool _shouldDisconnect = false;
+    static openspace::Documentation Documentation();
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___PARALLELCONNECTION___H__
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMASTROCAST___H__

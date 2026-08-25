@@ -27,9 +27,6 @@
 #include <openspace/documentation/schema.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
-#include <openspace/topic/connection.h>
-#include <openspace/topic/jsonconverters.h>
-#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <string_view>
 

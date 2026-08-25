@@ -54,6 +54,7 @@ public:
 
     ThreadPool& threadPool();
 
+    LuaLibrary luaLibrary() const override;
     std::vector<openspace::Documentation> documentations() const override;
 
 private:

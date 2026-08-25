@@ -83,6 +83,21 @@ namespace {
         LINFO(std::format("[{}] AssetLoading: '{}': ({})", i, e.assetPath, state));
     }
 
+    void log(int i, const EventAstrocastConnection& e) {
+        ghoul_assert(e.type == EventAstrocastConnection::Type, "Wrong type");
+        std::string_view state = [](EventAstrocastConnection::State s) {
+            using State = EventAstrocastConnection::State;
+            switch (s) {
+                case State::Established:    return "Established";
+                case State::Lost:           return "Lost";
+                case State::HostshipGained: return "HostshipGained";
+                case State::HostshipLost:   return "HostshipLost";
+                default:                    throw ghoul::MissingCaseException();
+            }
+        }(e.state);
+        LINFO(std::format("[{}] AstrocastConnection ({})", i, state));
+    }
+
     void log(int i, const EventCameraFocusTransition& e) {
         ghoul_assert(e.type == EventCameraFocusTransition::Type, "Wrong type");
         std::string_view t = [](EventCameraFocusTransition::Transition transition) {
@@ -156,21 +171,6 @@ namespace {
     void log(int i, const EventMissionRemoved& e) {
         ghoul_assert(e.type == EventMissionRemoved::Type, "Wrong type");
         LINFO(std::format("[{}] MissionRemoved: {}", i, e.identifier));
-    }
-
-    void log(int i, const EventParallelConnection& e) {
-        ghoul_assert(e.type == EventParallelConnection::Type, "Wrong type");
-        std::string_view state = [](EventParallelConnection::State s) {
-            using State = EventParallelConnection::State;
-            switch (s) {
-                case State::Established:    return "Established";
-                case State::Lost:           return "Lost";
-                case State::HostshipGained: return "HostshipGained";
-                case State::HostshipLost:   return "HostshipLost";
-                default:                    throw ghoul::MissingCaseException();
-            }
-        }(e.state);
-        LINFO(std::format("[{}] ParallelConnection ({})", i, state));
     }
 
     void log(int i, const EventPlanetEclipsed& e) {
@@ -250,6 +250,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::ActionRemoved: return "ActionRemoved";
         case Event::Type::ApplicationShutdown: return "ApplicationShutdown";
         case Event::Type::AssetLoading: return "AssetLoading";
+        case Event::Type::AstrocastConnection: return "AstrocastConnection";
         case Event::Type::CameraFocusTransition: return "CameraFocusTransition";
         case Event::Type::CameraMovedPosition: return "CameraMovedPosition";
         case Event::Type::CameraPathFinished: return "CameraPathFinished";
@@ -261,7 +262,6 @@ std::string_view toString(Event::Type type) {
         case Event::Type::MissionAdded: return "MissionAdded";
         case Event::Type::MissionEventReached: return "MissionEventReached";
         case Event::Type::MissionRemoved: return "MissionRemoved";
-        case Event::Type::ParallelConnection: return "ParallelConnection";
         case Event::Type::PointSpacecraft: return "PointSpacecraft";
         case Event::Type::ProfileLoadingFinished: return "ProfileLoadingFinished";
         case Event::Type::PropertyTreePruned: return "PropertyTreePruned";
@@ -283,6 +283,7 @@ Event::Type fromString(std::string_view str) {
     else if (str == "ActionRemoved") { return Type::ActionRemoved; }
     else if (str == "ApplicationShutdown") { return Type::ApplicationShutdown; }
     else if (str == "AssetLoading") { return Type::AssetLoading; }
+    else if (str == "AstrocastConnection") { return Type::AstrocastConnection; }
     else if (str == "CameraFocusTransition") { return Type::CameraFocusTransition; }
     else if (str == "CameraMovedPosition") { return Type::CameraMovedPosition; }
     else if (str == "CameraPathFinished") { return Type::CameraPathFinished; }
@@ -294,7 +295,6 @@ Event::Type fromString(std::string_view str) {
     else if (str == "MissionAdded") { return Type::MissionAdded; }
     else if (str == "MissionEventReached") { return Type::MissionEventReached; }
     else if (str == "MissionRemoved") { return Type::MissionRemoved; }
-    else if (str == "ParallelConnection") { return Type::ParallelConnection; }
     else if (str == "PlanetEclipsed") { return Type::PlanetEclipsed; }
     else if (str == "PointSpacecraft") { return Type::PointSpacecraft; }
     else if (str == "ProfileLoadingFinished") { return Type::ProfileLoadingFinished; }
@@ -354,6 +354,22 @@ ghoul::Dictionary toParameter(const Event& e) {
                     break;
                 case EventAssetLoading::State::Error:
                     d.setValue("State", "Error"s);
+                    break;
+            }
+            break;
+        case Event::Type::AstrocastConnection:
+            switch (static_cast<const EventAstrocastConnection&>(e).state) {
+                case EventAstrocastConnection::State::Established:
+                    d.setValue("State", "Established"s);
+                    break;
+                case EventAstrocastConnection::State::Lost:
+                    d.setValue("State", "Lost"s);
+                    break;
+                case EventAstrocastConnection::State::HostshipGained:
+                    d.setValue("State", "HostshipGained"s);
+                    break;
+                case EventAstrocastConnection::State::HostshipLost:
+                    d.setValue("State", "HostshipLost"s);
                     break;
             }
             break;
@@ -432,22 +448,6 @@ ghoul::Dictionary toParameter(const Event& e) {
                 "Identifier",
                 std::string(static_cast<const EventMissionRemoved&>(e).identifier)
             );
-            break;
-        case Event::Type::ParallelConnection:
-            switch (static_cast<const EventParallelConnection&>(e).state) {
-                case EventParallelConnection::State::Established:
-                    d.setValue("State", "Established"s);
-                    break;
-                case EventParallelConnection::State::Lost:
-                    d.setValue("State", "Lost"s);
-                    break;
-                case EventParallelConnection::State::HostshipGained:
-                    d.setValue("State", "HostshipGained"s);
-                    break;
-                case EventParallelConnection::State::HostshipLost:
-                    d.setValue("State", "HostshipLost"s);
-                    break;
-            }
             break;
         case Event::Type::PlanetEclipsed:
             d.setValue(
@@ -532,6 +532,9 @@ void logAllEvents(const Event* e) {
             case Event::Type::AssetLoading:
                 log(i, *static_cast<const EventAssetLoading*>(e));
                 break;
+            case Event::Type::AstrocastConnection:
+                log(i, *static_cast<const EventAstrocastConnection*>(e));
+                break;
             case Event::Type::CameraFocusTransition:
                 log(i, *static_cast<const EventCameraFocusTransition*>(e));
                 break;
@@ -564,9 +567,6 @@ void logAllEvents(const Event* e) {
                 break;
             case Event::Type::MissionRemoved:
                 log(i, *static_cast<const EventMissionRemoved*>(e));
-                break;
-            case Event::Type::ParallelConnection:
-                log(i, *static_cast<const EventParallelConnection*>(e));
                 break;
             case Event::Type::PlanetEclipsed:
                 log(i, *static_cast<const EventPlanetEclipsed*>(e));
@@ -617,6 +617,11 @@ EventActionRemoved::EventActionRemoved(std::string_view uri_)
     , uri(temporaryString(uri_))
 {}
 
+EventApplicationShutdown::EventApplicationShutdown(State state_)
+    : Event(Type)
+    , state(state_)
+{}
+
 EventAssetLoading::EventAssetLoading(const std::filesystem::path& assetPath_,
                                      State newState)
     : Event(Type)
@@ -624,7 +629,7 @@ EventAssetLoading::EventAssetLoading(const std::filesystem::path& assetPath_,
     , state(newState)
 {}
 
-EventApplicationShutdown::EventApplicationShutdown(State state_)
+EventAstrocastConnection::EventAstrocastConnection(State state_)
     : Event(Type)
     , state(state_)
 {}
@@ -692,11 +697,6 @@ EventMissionEventReached::EventMissionEventReached()
 EventMissionRemoved::EventMissionRemoved(const std::string_view identifier_)
     : Event(Type)
     , identifier(temporaryString(identifier_))
-{}
-
-EventParallelConnection::EventParallelConnection(State state_)
-    : Event(Type)
-    , state(state_)
 {}
 
 EventPlanetEclipsed::EventPlanetEclipsed(const SceneGraphNode* eclipsee_,

@@ -29,11 +29,9 @@
 #include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/topic/connection.h>
 #include <openspace/topic/jsonconverters.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/logging/logmanager.h>
 #include <utility>
 
 namespace openspace {

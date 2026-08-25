@@ -722,7 +722,7 @@ namespace {
 /**
  * Stops the bouncing interpolation on the provided property and interpolate the value to
  * the original starting value over the original duration.
- * 
+ *
  *
  * \param uri The URI of the property whose bouncing interpolation should be stopped
  */
@@ -1326,7 +1326,7 @@ enum class [[codegen::enum]] CustomPropertyType {
 };
 
 /**
- * Creates a new property that lives in the `UserProperty` group.
+ * Creates a new property that lives in the `UserProperties` group.
  *
  * \param identifier The identifier that is going to be used for the new property
  * \param type The type of the property, has to be one of "DMat2Property",

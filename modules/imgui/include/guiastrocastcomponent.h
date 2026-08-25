@@ -22,16 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_IMGUI___GUIPARALLELCOMPONENT___H__
-#define __OPENSPACE_MODULE_IMGUI___GUIPARALLELCOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIASTROCASTCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIASTROCASTCOMPONENT___H__
 
 #include <modules/imgui/include/guipropertycomponent.h>
 
 namespace openspace {
 
-class GuiParallelComponent : public GuiPropertyComponent {
+class GuiAstrocastComponent : public GuiPropertyComponent {
 public:
-    GuiParallelComponent();
+    GuiAstrocastComponent();
 
     void render() override;
 
@@ -45,4 +45,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_IMGUI___GUIPARALLELCOMPONENT___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUIASTROCASTCOMPONENT___H__

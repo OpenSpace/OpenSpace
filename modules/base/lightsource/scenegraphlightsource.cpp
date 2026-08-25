@@ -29,11 +29,14 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <optional>
 
 namespace {
+    constexpr std::string_view _loggerCat = "SceneGraphLightSource";
+
     using namespace openspace;
 
     constexpr Property::PropertyInfo IntensityInfo = {
@@ -79,26 +82,30 @@ Documentation SceneGraphLightSource::Documentation() {
 SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)
     : LightSource(dictionary)
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-    , _sceneGraphNodeReference(NodeInfo, "")
+    , _nodeIdentifier(NodeInfo, "")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _intensity = p.intensity.value_or(_intensity);
     addProperty(_intensity);
 
-    _sceneGraphNodeReference.onChange([this]() {
-        _sceneGraphNode =
-            global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);
+    _nodeIdentifier.onChange([this]() {
+        _sceneGraphNode = global::renderEngine->scene()->sceneGraphNode(_nodeIdentifier);
+
+        if (!_sceneGraphNode) {
+            LERROR(std::format(
+                "Could not find a scene graph node with identifier: '{}'",
+                _nodeIdentifier.value()
+            ));
+        }
     });
-    addProperty(_sceneGraphNodeReference);
-    _sceneGraphNodeReference = p.node;
+    addProperty(_nodeIdentifier);
+    _nodeIdentifier = p.node;
 }
 
 bool SceneGraphLightSource::initialize() {
     ZoneScoped;
-
-    _sceneGraphNode =
-        global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);
+    _sceneGraphNode = global::renderEngine->scene()->sceneGraphNode(_nodeIdentifier);
     return _sceneGraphNode != nullptr;
 }
 
@@ -116,10 +123,11 @@ glm::vec3 SceneGraphLightSource::directionViewSpace(const RenderData& renderData
 
     const glm::dvec3 renderNodePosition = renderData.modelTransform.translation;
 
-    const glm::dvec3 viewSpace = glm::dvec3(renderData.camera.combinedViewMatrix() *
-        glm::dvec4((lightPosition - renderNodePosition), 1.0));
+    const glm::dvec3 direction = lightPosition - renderNodePosition;
+    const glm::dvec3 viewSpaceDirection =
+        glm::dmat3(renderData.camera.combinedViewMatrix()) * direction;
 
-    return glm::normalize(viewSpace);
+    return glm::normalize(viewSpaceDirection);
 }
 
 } // namespace openspace

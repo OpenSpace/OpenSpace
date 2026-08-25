@@ -29,7 +29,6 @@
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/topic/connection.h>
 #include <openspace/topic/jsonconverters.h>
 #include <openspace/util/keys.h>
 #include <ghoul/misc/stringconversion.h>
@@ -74,7 +73,8 @@ Schema ActionKeybindTopic::Schema() {
                 "guiPath": { "type": "string" },
                 "identifier": { "type": "string" },
                 "isLocal": { "type": "boolean" },
-                "name": { "type": "string" }
+                "name": { "type": "string" },
+                "isHidden": { "type": "boolean" }
               },
               "additionalProperties": false,
               "required": ["identifier", "name", "isLocal", "documentation", "guiPath"]

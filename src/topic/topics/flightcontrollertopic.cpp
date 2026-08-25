@@ -31,22 +31,12 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/topic/connection.h>
 #include <openspace/topic/jsonconverters.h>
-#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <iterator>
 #include <string_view>
 #include <unordered_map>
-#include <vector>
 
 using nlohmann::json;
 

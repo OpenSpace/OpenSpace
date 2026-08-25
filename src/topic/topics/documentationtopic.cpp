@@ -27,8 +27,6 @@
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
-#include <openspace/topic/connection.h>
-#include <openspace/topic/jsonconverters.h>
 
 namespace openspace {
 

@@ -27,9 +27,6 @@
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <stdexcept>
