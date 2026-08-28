@@ -28,7 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
-#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -134,31 +134,39 @@ protected:
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
 
     BoolProperty _enabled;
+    StringProperty _renderableType;
+
+    struct {
+        PropertyOwner owner;
+        BoolProperty useRadiusAzimuthElevation;
+        // x, y, z
+        Vec3Property cartesian;
+        // Radius, azimuth, elevation, where azimuth is relative to negative y axis and
+        // elevation is angle from plane with normal z
+        Vec3Property rae;
+
+        FloatProperty scale;
+        // Local rotation (roll, pitch, yaw)
+        Vec3Property localRotation;
+
+        BoolProperty faceCamera;
+    } _placement;
+
+    struct {
+        PropertyOwner owner;
+        Vec3Property multiplyColor;
+        Vec4Property backgroundColor;
+        FloatProperty gammaOffset;
+
+        struct {
+            PropertyOwner owner;
+            FloatProperty width;
+            Vec3Property color;
+            BoolProperty feather;
+        } border;
+    } _style;
+
     BoolProperty _renderDuringBlackout;
-    BoolProperty _usePerspectiveProjection;
-    BoolProperty _useRadiusAzimuthElevation;
-    BoolProperty _faceCamera;
-
-    // x, y, z
-    Vec3Property _cartesianPosition;
-
-    // Radius, azimuth, elevation, where azimuth is relative to negative y axis and
-    // elevation is angle from plane with normal z.
-    Vec3Property _raePosition;
-
-    // Local rotation (roll, pitch, yaw)
-    Vec3Property _localRotation;
-
-    // Border
-    FloatProperty _borderWidth;
-    Vec3Property _borderColor;
-    BoolProperty _borderFeather;
-
-    FloatProperty _scale;
-    FloatProperty _gammaOffset;
-    Vec3Property _multiplyColor;
-    Vec4Property _backgroundColor;
-    TriggerProperty _delete;
 
     // A hint to the user interface to hide this screen space renderable
     BoolProperty _guiIsHidden;
