@@ -221,8 +221,6 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         }
     }
     addProperty(_destination.nodeIdentifier);
-
-    _localBuffer.resize(128);
 }
 
 void DashboardItemAngle::update() {
@@ -235,27 +233,22 @@ void DashboardItemAngle::update() {
     const glm::dvec3 a = referenceInfo.first - sourceInfo.first;
     const glm::dvec3 b = destinationInfo.first - sourceInfo.first;
 
-    std::fill(_localBuffer.begin(), _localBuffer.end(), char(0));
     if (glm::length(a) == 0.0 || glm::length(b) == 0) {
-        char* end = std::format_to(
-            _localBuffer.data(),
+        _buffer = std::format(
             "Could not compute angle at {} between {} and {}. At least two of the three "
             "items are placed in the same location",
             sourceInfo.second, destinationInfo.second, referenceInfo.second
         );
-        _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
     else {
         const double angle = glm::degrees(
             glm::acos(glm::dot(a, b) / (glm::length(a) * glm::length(b)))
         );
 
-        char* end = std::format_to(
-            _localBuffer.data(),
+        _buffer = std::format(
             "Angle at {} between {} and {}: {} degrees",
             sourceInfo.second, destinationInfo.second, referenceInfo.second, angle
         );
-        _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
 }
 
