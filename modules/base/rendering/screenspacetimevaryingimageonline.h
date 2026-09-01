@@ -29,6 +29,8 @@
 
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <filesystem>
 #include <future>
 
@@ -42,6 +44,8 @@ public:
 
     void initialize() override;
     void deinitializeGL() override;
+
+    void render(const RenderData& renderData) override;
     void update() override;
 
     static openspace::Documentation Documentation();
@@ -54,6 +58,9 @@ private:
     int activeIndex(double currentTime) const;
 
     StringProperty _jsonFilePath;
+    BoolProperty _showBefore;
+    BoolProperty _showAfter;
+    TriggerProperty _jumpToFirstTime;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
     std::map<double, std::string> _urls;
