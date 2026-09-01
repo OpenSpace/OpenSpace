@@ -23,7 +23,9 @@ local Item = {
     -- Contains control points for left spline in order bottom to top
     Left = { }
   },
-  Scale = 1.0
+  Placement = {
+    Scale = 1.0
+  }
 }
 
 

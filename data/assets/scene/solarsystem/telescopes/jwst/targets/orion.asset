@@ -6,10 +6,12 @@ local OrionImage = {
   Identifier = "OrionImage",
   Type = "ScreenSpaceImageLocal",
   Name = "Orion Nebula",
-  UseRadiusAzimuthElevation = true,
-  FaceCamera = false,
-  RadiusAzimuthElevation = { 1.0, 0.5, 0.0 },
-  UsePerspectiveProjection = false,
+  Placement = {
+    UseRadiusAzimuthElevation = true,
+    FaceCamera = false,
+    RadiusAzimuthElevation = { 1.0, 0.5, 0.0 }
+  },
+  -- UsePerspectiveProjection = false, TODO: investigate
   Opacity = 1.0,
   TexturePath = orion.image .. "orion-nebula.png",
   Tag = { "mission_jwst_target" },

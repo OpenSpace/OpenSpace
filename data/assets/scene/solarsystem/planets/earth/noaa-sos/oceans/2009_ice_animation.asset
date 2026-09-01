@@ -43,8 +43,10 @@ local Colorbar2007to2009 = {
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "2007-2009-Compare.png",
-  FaceCamera = false,
-  CartesianPosition = { -0.85, -0.5, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    CartesianPosition = { -0.85, -0.5, -2.0 }
+  }
 }
 
 local Colorbar2008Minimum = {
@@ -53,8 +55,10 @@ local Colorbar2008Minimum = {
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "2008-Minimum-Label.png",
-  FaceCamera = false,
-  CartesianPosition = { 0.6, -0.4, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    CartesianPosition = { 0.6, -0.4, -2.0 }
+  }
 }
 
 local Colorbar2009IceConcentration = {
@@ -63,8 +67,10 @@ local Colorbar2009IceConcentration = {
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "2009-IceConcentration-Label.png",
-  FaceCamera = false,
-  CartesianPosition = { 0.6, -0.6, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    CartesianPosition = { 0.6, -0.6, -2.0 }
+  }
 }
 
 
