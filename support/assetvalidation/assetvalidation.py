@@ -451,7 +451,6 @@ def runAssetValidation(files: list[Path], executable: Path, rootDir: Path, args)
       logLevel = logging.ERROR
     )
     processedCount += 1
-    _printProgressBar(processedCount, totalCount)
     startIndex += completed + 1
     remaining = remaining[completed + 1:]
 
@@ -461,3 +460,5 @@ def runAssetValidation(files: list[Path], executable: Path, rootDir: Path, args)
         logLevel = logging.ERROR
       )
       break
+
+    _printProgressBar(processedCount, totalCount)
