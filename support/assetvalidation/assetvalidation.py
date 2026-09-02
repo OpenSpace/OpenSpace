@@ -56,6 +56,18 @@ def _sanitizePaths(text: str) -> str:
   """Replace all absolute Windows paths embedded in a string with display-safe relative paths"""
   return _WIN_PATH_RE.sub(lambda m: _relPath(m.group()), text)
 
+def _printProgressBar(current: int, total: int, width: int = 40):
+  """Print a simple in-place progress bar to stdout."""
+  if total <= 0:
+    return
+
+  ratio = max(0.0, min(1.0, current / total))
+  filled = int(width * ratio)
+  bar = "=" * filled + "." * (width - filled)
+  print(f"\rProgress: [{bar}] {current}/{total}", end = "", flush = True)
+  if current >= total:
+    print()
+
 class OpenSpaceCrashException(Exception):
   """
   Raised when OpenSpace crashes mid-run, carrying the number of assets that were
@@ -281,6 +293,7 @@ async def internalRun(openspace, assets: list[Path], osDir: Path, api: Api,
           await ensureEmptyScene(openspace, asset)
 
         assetCount += 1
+        _printProgressBar(startIndex + assetCount, totalCount)
         log("Finished testing asset\n", logLevel = logging.INFO)
         await asyncio.sleep(0.5) # Arbitrary sleep to let OpenSpace breathe
 
@@ -388,6 +401,9 @@ def runAssetValidation(files: list[Path], executable: Path, rootDir: Path, args)
   remaining = list(files)
   totalCount = len(files)
   startIndex = 0
+  processedCount = 0
+
+  _printProgressBar(processedCount, totalCount)
 
   while remaining:
     if startOpenSpace:
@@ -422,8 +438,11 @@ def runAssetValidation(files: list[Path], executable: Path, rootDir: Path, args)
       process = None
 
     if completed >= len(remaining):
+      processedCount = totalCount
       log("All assets validated", logLevel = logging.INFO)
       break
+
+    processedCount += completed
 
     # OpenSpace crashed - log the offending asset and continue with the next one
     crashedAsset = remaining[completed]
@@ -431,6 +450,8 @@ def runAssetValidation(files: list[Path], executable: Path, rootDir: Path, args)
       f"OpenSpace crashed during validation of '{_relPath(crashedAsset)}', skipping to next asset\n",
       logLevel = logging.ERROR
     )
+    processedCount += 1
+    _printProgressBar(processedCount, totalCount)
     startIndex += completed + 1
     remaining = remaining[completed + 1:]
 
