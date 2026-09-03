@@ -12,7 +12,7 @@
     {
       "type": "property",
       "value": {
-        "property": "ScreenSpace.ScreenSpaceDate_Example_DayOfYear.Scale",
+        "property": "ScreenSpace.ScreenSpaceDate_Example_DayOfYear.Placement.Scale",
         "value": 0.75
       }
     },

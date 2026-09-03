@@ -8,7 +8,7 @@
     {
       "type": "property",
       "value": {
-        "property": "ScreenSpace.ScreenSpaceRenderableRenderable_Example.Scale",
+        "property": "ScreenSpace.ScreenSpaceRenderableRenderable_Example.Placement.Scale",
         "value": 1.5
       }
     },
