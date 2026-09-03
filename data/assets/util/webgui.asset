@@ -4,7 +4,7 @@ local guiCustomization = asset.require("customization/gui")
 
 
 -- Select which commit hashes to use for the UI frontend
-local frontendHash = "f798c78352bd5f6fae01b3429efd12f1fb1fd74f"
+local frontendHash = "ab158d74435c49fa199662b0e552555fdced61bd"
 
 -- The name of the file to download from the server
 local frontendFile = "frontend.zip"

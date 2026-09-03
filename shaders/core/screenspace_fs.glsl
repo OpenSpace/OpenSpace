@@ -59,15 +59,17 @@ Fragment getFragment() {
     originalColor = texture(tex, in_data.texCoords);
   }
 
-  vec4 texColor = originalColor * vec4(color, opacity);
+  // Apply the multiply color to the texture
+  vec4 texColor = originalColor * vec4(color, 1.0);
 
+  // Show background color in transparent areas
   frag.color = texColor.a * texColor + (1.0 - texColor.a) * backgroundColor;
 
   // Set border color
   if (in_data.texCoords.s < borderWidth.x || in_data.texCoords.s > 1 - borderWidth.x ||
       in_data.texCoords.t < borderWidth.y || in_data.texCoords.t > 1 - borderWidth.y)
   {
-    frag.color = vec4(borderColor, opacity);
+    frag.color = vec4(borderColor, 1.0);
     if (borderFeather == 1) {
       vec2 f1 = in_data.texCoords / borderWidth;
       float g1 = min(f1.x, f1.y);
@@ -77,12 +79,14 @@ Fragment getFragment() {
     }
   }
 
+  // Apply fading
+  frag.color.a *= opacity;
+
   if (frag.color.a == 0.0) {
     discard;
   }
 
-  frag.depth = in_data.depth;
-
+  // Apply gamma correction
   vec3 hsvColor = rgb2hsv(frag.color.rgb);
   hsvColor.x = (hsvColor.x + hue);
   if (hsvColor.x > 360.0) {
@@ -90,7 +94,8 @@ Fragment getFragment() {
   }
   hsvColor.y = clamp(hsvColor.y * saturation, 0.0, 1.0);
   hsvColor.z = clamp(hsvColor.z * value, 0.0, 1.0);
-
   frag.color.rgb = gammaCorrection(hsv2rgb(hsvColor), gamma) * blackoutFactor;
+
+  frag.depth = in_data.depth;
   return frag;
 }

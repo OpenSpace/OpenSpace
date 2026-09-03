@@ -22,56 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACETIMEVARYINGIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACETIMEVARYINGIMAGEONLINE___H__
+#ifndef __OPENSPACE_ASSETBUILDER___STRINGLISTWIDGET___H__
+#define __OPENSPACE_ASSETBUILDER___STRINGLISTWIDGET___H__
 
-#include <openspace/rendering/screenspacerenderable.h>
+#include <QWidget>
 
-#include <openspace/engine/downloadmanager.h>
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/misc/triggerproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <filesystem>
-#include <future>
+#include <QStringList>
 
-namespace ghoul::opengl { class Texture; }
+class QLineEdit;
+class QPushButton;
 
-namespace openspace {
-
-class ScreenSpaceTimeVaryingImageOnline : public ScreenSpaceRenderable {
+/**
+ * Tag-style chip widget for editing a list of strings. Each entry is rendered as a
+ * removable chip in a flow layout, with an input field and add button at the bottom.
+ */
+class StringListWidget : public QWidget {
+Q_OBJECT
 public:
-    explicit ScreenSpaceTimeVaryingImageOnline(const ghoul::Dictionary& dictionary);
+    explicit StringListWidget(QWidget* parent = nullptr);
 
-    void initialize() override;
-    void deinitializeGL() override;
+    /**
+     * Returns the current list of string values from all chips.
+     *
+     * \return One entry per chip, in display order
+     */
+    QStringList values() const;
 
-    void render(const RenderData& renderData) override;
-    void update() override;
+    /**
+     * Replaces all chips with the given list of values.
+     *
+     * \param vals The strings to display as chips
+     */
+    void setValues(const QStringList& vals);
 
-    static openspace::Documentation Documentation();
+    /**
+     * Returns `true` if at least one chip exists.
+     *
+     * \return `true` if the list is non-empty
+     */
+    bool hasContent() const;
+
+    /**
+     * Removes all chips and emits valueChanged.
+     */
+    void clear();
+
+signals:
+    /**
+     * Emitted whenever a chip is added or removed.
+     */
+    void valueChanged();
 
 private:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
-    void loadJsonData(const std::filesystem::path& path);
-    void computeSequenceEndTime();
-    void loadImage(const std::string& imageUrl);
-    int activeIndex(double currentTime) const;
+    /**
+     * Creates a chip frame for the given text and adds it to the chip area.
+     *
+     * \param text The string value for this chip
+     */
+    void addChip(const QString& text);
 
-    StringProperty _jsonFilePath;
-    BoolProperty _showBefore;
-    BoolProperty _showAfter;
-    TriggerProperty _jumpToFirstTime;
-
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    std::map<double, std::string> _urls;
-    std::string _currentUrl;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::vector<double> _timestamps;
-
-    int _activeIndex = -1;
-    double _sequenceEndTime = 0.0;
+    /// Container widget whose layout holds the chip frames
+    QWidget* _chipArea = nullptr;
+    /// Text field for entering new values
+    QLineEdit* _input = nullptr;
+    /// Button to add the current input as a new chip
+    QPushButton* _addButton = nullptr;
 };
 
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACETIMEVARYINGIMAGEONLINE___H__
+#endif // __OPENSPACE_ASSETBUILDER___STRINGLISTWIDGET___H__

@@ -54,6 +54,29 @@ namespace {
         Property::Visibility::User
     };
 
+    constexpr Property::PropertyInfo ShowBeforeInfo = {
+        "ShowBefore",
+        "Show image before first time",
+        "If enabled, the image with the earliest timestamp is shown when the simulation "
+        "time is before the first timestamp specified in the data file.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo ShowAfterInfo = {
+        "ShowAfter",
+        "Show image after last time",
+        "If enabled, the image with the latest timestamp is shown when the simulation "
+        "time is after the last timestamp specified in the data file.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo JumpToFirstTimeInfo = {
+        "JumpToFirstTime",
+        "Jump to first time",
+        "Performs a time jump to the first timestamp in the loaded file.",
+        Property::Visibility::NoviceUser
+    };
+
     // Displays an image based on the current in-game simulation time. The image shown is
     // selected from a JSON file containing timestamp-URL pairs. The image with the
     // closest timestamp before or equal to the current time is displayed.
@@ -68,6 +91,12 @@ namespace {
     struct [[codegen::Dictionary(ScreenSpaceTimeVaryingImageOnline)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path filePath;
+
+        // [[codegen::verbatim(ShowBeforeInfo.description)]]
+        std::optional<bool> showBefore;
+
+        // [[codegen::verbatim(ShowAfterInfo.description)]]
+        std::optional<bool> showAfter;
     };
 } // namespace
 #include "screenspacetimevaryingimageonline_codegen.cpp"
@@ -85,12 +114,31 @@ ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
                                                       const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _jsonFilePath(FileInfo, "")
+    , _showBefore(ShowBeforeInfo, false)
+    , _showAfter(ShowAfterInfo, false)
+    , _jumpToFirstTime(JumpToFirstTimeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _jsonFilePath = p.filePath.string();
     _jsonFilePath.onChange([this]() { loadJsonData(_jsonFilePath.value()); });
     addProperty(_jsonFilePath);
+
+    _showBefore = p.showBefore.value_or(_showBefore);
+    addProperty(_showBefore);
+
+    _showAfter = p.showAfter.value_or(_showAfter);
+    addProperty(_showAfter);
+
+    _jumpToFirstTime.onChange([this]() {
+        if (_timestamps.empty()) {
+            LWARNING("Cannot jump to first time because no times were loaded");
+        }
+        else {
+            global::timeManager->setTimeNextFrame(Time(_timestamps[0]));
+        }
+    });
+    addProperty(_jumpToFirstTime);
 }
 
 void ScreenSpaceTimeVaryingImageOnline::initialize() {
@@ -146,6 +194,13 @@ void ScreenSpaceTimeVaryingImageOnline::computeSequenceEndTime() {
     _sequenceEndTime = last + avg;
 }
 
+void ScreenSpaceTimeVaryingImageOnline::render(const RenderData& renderData) {
+    if (!_texture) {
+        return;
+    }
+    ScreenSpaceRenderable::render(renderData);
+}
+
 void ScreenSpaceTimeVaryingImageOnline::update() {
     if (_timestamps.empty()) {
         return;
@@ -153,25 +208,23 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
 
     const double current = global::timeManager->time().j2000Seconds();
 
-    if (current < _timestamps.front() || current >= _sequenceEndTime) {
+    const bool timeIsBeforeFirst = current < _timestamps.front();
+    const bool timeIsLastOrLater = current >= _sequenceEndTime;
+
+    if ((!_showBefore && timeIsBeforeFirst) || (!_showAfter && timeIsLastOrLater)) {
         _activeIndex = -1;
         _texture = nullptr;
         _currentUrl.clear();
         return;
     }
 
-    if (current >= _timestamps.front() && current < _sequenceEndTime) {
-        if (int idx = activeIndex(current);  idx != _activeIndex) {
-            _activeIndex = idx;
-            std::string url = _urls[_timestamps[_activeIndex]];
-            if (_currentUrl != url) {
-                _currentUrl = url;
-                loadImage(url);
-            }
+    if (int idx = activeIndex(current);  idx != _activeIndex) {
+        _activeIndex = idx;
+        std::string url = _urls[_timestamps[_activeIndex]];
+        if (_currentUrl != url) {
+            _currentUrl = url;
+            loadImage(url);
         }
-    }
-    else {
-        _activeIndex = -1;
     }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
