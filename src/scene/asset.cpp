@@ -303,6 +303,7 @@ void Asset::initialize() {
         _assetPath.string(),
         EventAssetLoading::State::Loading
     );
+    _manager.updateAssetState(_assetPath, EventAssetLoading::State::Loading);
     // 1. Initialize requirements
     for (Asset* child : _requiredAssets) {
         child->initialize();
@@ -316,12 +317,22 @@ void Asset::initialize() {
         LERROR(std::format("Failed to initialize asset '{}'", path()));
         logError(e);
         setState(State::InitializationFailed);
+        global::eventEngine->publishEvent<EventAssetLoading>(
+            _assetPath.string(),
+            EventAssetLoading::State::Error
+        );
+        _manager.updateAssetState(_assetPath, EventAssetLoading::State::Error);
         return;
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR(std::format("Failed to initialize asset '{}'", path()));
         LERROR(std::format("{}: {}", e.component, e.message));
         setState(State::InitializationFailed);
+        global::eventEngine->publishEvent<EventAssetLoading>(
+            _assetPath.string(),
+            EventAssetLoading::State::Error
+        );
+        _manager.updateAssetState(_assetPath, EventAssetLoading::State::Error);
         return;
     }
 
@@ -331,6 +342,7 @@ void Asset::initialize() {
         _assetPath.string(),
         EventAssetLoading::State::Loaded
     );
+    _manager.updateAssetState(_assetPath, EventAssetLoading::State::Loaded);
 }
 
 void Asset::deinitialize() {

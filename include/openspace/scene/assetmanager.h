@@ -25,7 +25,9 @@
 #ifndef __OPENSPACE_CORE___ASSETMANAGER___H__
 #define __OPENSPACE_CORE___ASSETMANAGER___H__
 
+#include <openspace/events/event.h>
 #include <filesystem>
+#include <functional>
 #include <list>
 #include <memory>
 #include <optional>
@@ -51,6 +53,23 @@ class ResourceSynchronization;
  */
 class AssetManager {
 public:
+    struct AssetTreeChange {
+        enum class Type {
+            Shipped,
+            User,
+            Other,
+            RootAssets,
+            State
+        };
+
+        Type type;
+
+        // Only populated when type == `Type::State`
+        std::string statePath;
+        EventAssetLoading::State state = EventAssetLoading::State::Unloaded;
+    };
+    using AssetTreeCallback = std::function<void(const AssetTreeChange&)>;
+
     AssetManager(ghoul::lua::LuaState* state, std::filesystem::path assetRootDirectory);
     ~AssetManager();
 
@@ -172,6 +191,65 @@ public:
      */
     void callOnDeinitialize(Asset* asset) const;
 
+    /**
+     * Update internal bookeeping state of the provided \p assetPath to the provided \p
+     * state.
+     *
+     * \param assetPath The asset path to update the state for.
+     * \param state The new state to update to.
+     */
+    void updateAssetState(const std::filesystem::path& assetPath,
+        EventAssetLoading::State state);
+
+    /**
+     * Register a callback to be invoked whenever the asset tree or state map changes.
+     *
+     * \param callback The call back to be invoked whenever there is an update.
+     * \return The id of the callback that can be used to unsubscribe the callback later.
+     */
+    size_t subscribeAssetTree(AssetTreeCallback callback);
+
+    /**
+     * Unregister a callback that was previously registered with `subscribeAssetTree`.
+     *
+     * \param callbackId The ID returned by `subscribeAssetTree` when starting the
+     *                   subscription.
+     */
+    void unsubscribeAssetTree(size_t callbackId);
+
+    /**
+     * Re-scans the Data and User asset directories from disk, updating the internal
+     * path lists.
+     */
+    void rescanAssetPaths();
+
+    /**
+     * \return The list of all asset paths in the Data folder, as of the last rescan.
+     */
+    std::vector<std::filesystem::path> shippedAssetPaths() const;
+
+    /**
+     * \return The list of all asset paths in the User folder, as of the last rescan.
+     */
+    std::vector<std::filesystem::path> userAssetPaths() const;
+
+    /**
+     * \return The list of all loaded asset paths that do not belong to the Data or User
+     * folders.
+     */
+    std::vector<std::filesystem::path> otherAssetPaths() const;
+
+    /**
+     * \return The list of all root asset paths, which are assets that have been loaded
+     * directly from the profile or by calling the #add method.
+     */
+    std::vector<std::filesystem::path> rootAssetPaths() const;
+
+    /**
+     * \return The state of all assets that are in any way loaded/loading/error'ed
+     */
+    std::unordered_map<std::string, EventAssetLoading::State> assetStates() const;
+
 private:
     /**
      * Creates and registers all of the callback functions that the asset is expected to
@@ -202,6 +280,26 @@ private:
     void runRemoveQueue();
     void runAddQueue();
 
+    enum class AssetPathLocation {
+        Shipped,
+        User,
+        Other
+    };
+
+    /**
+     * Classify an asset path as belonging to either the Data, User or Other base folder
+     *
+     * \return The asset base folder location type.
+     */
+    AssetPathLocation classifyAssetPath(const std::filesystem::path& path) const;
+
+    /**
+     * Notify all subscribers of the asset tree \p change
+     *
+     * \param change The update to notify all subscribers
+     */
+    void notifyAssetTreeSubscribers(const AssetTreeChange& change) const;
+
     //
     // Assets
     //
@@ -224,6 +322,22 @@ private:
 
     /// This list contains all of the assets that will be deleted in the next update call
     std::vector<std::unique_ptr<Asset>> _toBeDeleted;
+
+    // This list contains all of the shipped asset paths that are available to be loaded
+    std::vector<std::filesystem::path> _shippedAssetPaths;
+
+    // This list contains all of the user asset paths that are available to be loaded
+    std::vector<std::filesystem::path> _userAssetPaths;
+
+    // This list contains all asset paths that have been loaded from other sources than
+    // Data and User
+    std::vector<std::filesystem::path> _otherAssetPaths;
+
+    std::unordered_map<size_t, AssetTreeCallback> _assetTreeSubscribers;
+    size_t _nextAssetTreeSubscriptionId = 0;
+
+    // The state of assets that have in any way been loaded/loading or have error'ed out
+    std::unordered_map<std::string, EventAssetLoading::State> _assetStates;
 
     //
     // ResourceSynchronizations

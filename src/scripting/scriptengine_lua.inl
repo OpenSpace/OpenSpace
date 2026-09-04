@@ -25,6 +25,15 @@
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <ghoul/misc/stringhelper.h>
 #include <vector>
+#ifdef WIN32
+#include <windows.h>
+#include <shellapi.h>
+#else
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#endif // WIN32
 
 using namespace openspace;
 
@@ -61,6 +70,111 @@ int printError(lua_State* L) {
 
 int printFatal(lua_State* L) {
     return printInternal(ghoul::logging::LogLevel::Fatal, L);
+}
+
+/**
+ * Open a directory path using Windows explorer and in Linux the default explorer
+ * application.
+ *
+ * \param path The directory path to open in the explorer.
+ * \return Windows: True if the explorer window was successfully launched, false
+ *         otherwise.
+ *
+ *         Linux: True if the request to launch the file manager was successfully handed
+ *         off, false otherwise. This does not guarantee that xdg-open successfully opened
+ *         the requested path.
+ */
+bool openDirectory(const std::filesystem::path& path) {
+#ifdef WIN32
+    HINSTANCE result = ShellExecuteW(
+        nullptr,
+        L"open",
+        L"explorer.exe",
+        path.wstring().c_str(),
+        nullptr,
+        SW_SHOWNORMAL
+    );
+
+    // If successful ShellExecuteW returns a value greater than 32
+    return reinterpret_cast<std::intptr_t>(result) > 32;
+#else
+    const pid_t pid = fork();
+
+    if (pid < 0) {
+        return false;
+    }
+
+    if (pid == 0) {
+        // Intermediate child
+        const pid_t grandchild = fork();
+
+        if (grandchild < 0) {
+            _exit(EXIT_FAILURE);
+        }
+
+        // We launch the xdg-open from a grandchild to avoid having to deal with zombie
+        // processes that we'd have to cleanup. Instead we let the grandchild be reaped by
+        // the system
+        if (grandchild == 0) {
+            execlp(
+                "xdg-open",
+                "xdg-open",
+                path.string().c_str(),
+                static_cast<char*>(nullptr)
+            );
+
+            // `execlp` only returns if it failed and we're currently in the child process
+            // so we should kill it
+            _exit(EXIT_FAILURE);
+        }
+
+        // Intermediate child is no longer needed
+        _exit(EXIT_SUCCESS);
+    }
+
+    // Reap the intermediate child, should return almost immediately
+    int status = 0;
+    if (waitpid(pid, &status, 0) == -1) {
+        return false;
+    }
+
+    // Sucessfully started the child process, which is now independent of OpenSpace
+    return WIFEXITED(status) && WEXITSTATUS(status) == EXIT_SUCCESS;
+#endif // WIN32
+}
+
+/**
+ * Open a file path using Windows explorer and in Linux the default explorer application.
+ *
+ * \param path The file path to open in the explorer.
+ * \return Windows: True if the explorer window was successfully launched, false
+ *         otherwise.
+ *
+ *         Linux: True if the request to launch the file manager was successfully handed
+ *         off, false otherwise. This does not guarantee that xdg-open successfully opened
+ *         the requested path.
+ */
+bool openFileLocation(const std::filesystem::path& path) {
+#ifdef WIN32
+    // Explorer supports selecting a file using /select
+    const std::wstring arguments = std::format(L"/select,\"{}\"", path.wstring());
+
+    HINSTANCE result = ShellExecuteW(
+        nullptr,
+        L"open",
+        L"explorer.exe",
+        arguments.c_str(),
+        nullptr,
+        SW_SHOWNORMAL
+    );
+
+    // If successful ShellExecuteW returns a value greater than 32
+    return reinterpret_cast<std::intptr_t>(result) > 32;
+
+#else
+    // xdg-open doesn't have a "select this file" option
+    return openDirectory(path.parent_path());
+#endif // WIN32
 }
 
 /**
@@ -245,6 +359,26 @@ int printFatal(lua_State* L) {
 [[codegen::luawrap]] std::filesystem::path directoryForPath(std::filesystem::path file) {
     std::filesystem::path path = std::filesystem::path(std::move(file)).parent_path();
     return path;
+}
+
+/**
+ * Open a file or folder path in the native OS explorer window. For Windows the path is
+ * opened in windows explorer and for Linux the default explorer app.
+ */
+[[codegen::luawrap]] void openFileExplorer(std::filesystem::path path) {
+    path.make_preferred();
+
+    if (!std::filesystem::exists(path)) {
+        throw ghoul::RuntimeError(std::format("Could not find path '{}'", path));
+    }
+
+    const bool success = std::filesystem::is_directory(path)
+        ? openDirectory(path)
+        : openFileLocation(path);
+
+    if (!success) {
+        throw ghoul::RuntimeError(std::format("Could not open path '{}'", path));
+    }
 }
 
 /**

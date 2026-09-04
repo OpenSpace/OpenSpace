@@ -101,6 +101,7 @@
 #include <openspace/topic/server.h>
 #include <openspace/topic/serverinterface.h>
 #include <openspace/topic/topics/actionkeybindtopic.h>
+#include <openspace/topic/topics/assettreetopic.h>
 #include <openspace/topic/topics/authorizationtopic.h>
 #include <openspace/topic/topics/camerapathtopic.h>
 #include <openspace/topic/topics/cameratopic.h>
@@ -153,6 +154,7 @@ void registerCoreClasses(DocumentationEngine& engine) {
 
 void registerCoreSchemas(DocumentationEngine& engine) {
     engine.addSchema(ActionKeybindTopic::Schema());
+    engine.addSchema(AssetTreeTopic::Schema());
     engine.addSchema(AuthorizationTopic::Schema());
     engine.addSchema(CameraPathTopic::Schema());
     engine.addSchema(CameraTopic::Schema());

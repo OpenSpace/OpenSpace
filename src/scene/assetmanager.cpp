@@ -86,6 +86,21 @@ namespace {
         return PathType::RelativeToAssetRoot;
     }
 
+    /**
+     * Check if \p path belongs to directory of \p root
+     *
+     * \param path The path to check
+     * \param root The root directory to check \p path against
+     * \return True if a \p path is belonging to a subdirectory \p root, false otherwise
+     */
+    bool underRoot(const std::filesystem::path& path, const std::filesystem::path& root) {
+        if (path.root_name() != root.root_name()) {
+            return false;
+        }
+
+        return !std::filesystem::relative(path, root).string().starts_with("..");
+    }
+
     struct [[codegen::Dictionary(AssetMeta)]] Parameters {
         // The user-facing name of the asset. It should describe to the user what they can
         // expect when loading the asset into a profile.
@@ -134,6 +149,7 @@ AssetManager::AssetManager(ghoul::lua::LuaState* state,
     // Create _assets table
     lua_newtable(*_luaState);
     _assetsTableRef = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
+    rescanAssetPaths();
 }
 
 AssetManager::~AssetManager() {
@@ -155,6 +171,7 @@ void AssetManager::deinitialize() {
         }
         _rootAssets.pop_back();
     }
+    notifyAssetTreeSubscribers({ AssetTreeChange::Type::RootAssets });
     _toBeDeleted.clear();
 }
 
@@ -190,6 +207,7 @@ void AssetManager::runRemoveQueue() {
         }
 
         _rootAssets.erase(jt);
+        notifyAssetTreeSubscribers({ AssetTreeChange::Type::RootAssets });
         // Even though we are removing a root asset, we might not be the only person that
         // is interested in the asset, so we can only deinitialize it if we were, in fact,
         // the only person, meaning that the asset never had any parents
@@ -233,6 +251,7 @@ void AssetManager::runAddQueue() {
             continue;
         }
         _rootAssets.push_back(a);
+        notifyAssetTreeSubscribers({ AssetTreeChange::Type::RootAssets });
         a->startSynchronizations();
 
         _toBeInitialized.push_back(a);
@@ -409,10 +428,16 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
             asset->path().string(),
             EventAssetLoading::State::Error
         );
+        updateAssetState(asset->path(), EventAssetLoading::State::Error);
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
+        global::eventEngine->publishEvent<EventAssetLoading>(
+            asset->path().string(),
+            EventAssetLoading::State::Error
+        );
+        updateAssetState(asset->path(), EventAssetLoading::State::Error);
         return false;
     }
 
@@ -492,6 +517,7 @@ void AssetManager::unloadAsset(Asset* asset) {
             asset->path().string(),
             EventAssetLoading::State::Unloaded
         );
+        updateAssetState(asset->path(), EventAssetLoading::State::Unloaded);
     }
 }
 
@@ -1017,10 +1043,6 @@ void AssetManager::callOnInitialize(Asset* asset) const {
     for (const int init : it->second) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
-            global::eventEngine->publishEvent<EventAssetLoading>(
-                asset->path().string(),
-                EventAssetLoading::State::Error
-            );
             throw ghoul::lua::LuaRuntimeException(std::format(
                 "When initializing '{}': {}",
                 asset->path(),
@@ -1123,6 +1145,129 @@ std::filesystem::path AssetManager::generateAssetPath(
     // comprehensively logged by Lua either way
     return absPath(fullAssetPath);
 }
+
+void AssetManager::updateAssetState(const std::filesystem::path& path,
+                                                           EventAssetLoading::State state)
+{
+    const std::string key = path.generic_string();
+    _assetStates[key] = state;
+
+    AssetTreeChange change = {
+        .type = AssetTreeChange::Type::State,
+        .statePath = key,
+        .state = state
+    };
+    notifyAssetTreeSubscribers(change);
+
+    if (classifyAssetPath(path) != AssetPathLocation::Other) {
+        return;
+    }
+
+    // We may need to update the `otherAssetPaths` list
+    const auto it = std::find(_otherAssetPaths.begin(), _otherAssetPaths.end(), path);
+    const bool alreadyTracked = it != _otherAssetPaths.end();
+
+    // If we we're tracking a now unloaded asset, we need to remove it and notify
+    if (state == EventAssetLoading::State::Unloaded && alreadyTracked) {
+        _otherAssetPaths.erase(it);
+        notifyAssetTreeSubscribers({ AssetTreeChange::Type::Other });
+    }
+
+    // If the asset is loading, has finished loading or errored out and we were not
+    // already tracking it - add it to the list and notify
+    if(state != EventAssetLoading::State::Unloaded && !alreadyTracked) {
+        _otherAssetPaths.push_back(path);
+        notifyAssetTreeSubscribers({ AssetTreeChange::Type::Other });
+    }
+}
+
+size_t AssetManager::subscribeAssetTree(AssetTreeCallback callback) {
+    const size_t id = _nextAssetTreeSubscriptionId++;
+    _assetTreeSubscribers[id] = std::move(callback);
+    return id;
+}
+
+void AssetManager::unsubscribeAssetTree(size_t id) {
+    _assetTreeSubscribers.erase(id);
+}
+
+void AssetManager::notifyAssetTreeSubscribers(const AssetTreeChange& change) const {
+    for (auto& [_, callback] : _assetTreeSubscribers) {
+        callback(change);
+    }
+}
+
+void AssetManager::rescanAssetPaths() {
+    auto scanAssets = [](const std::filesystem::path& root) {
+        return ghoul::filesystem::walkDirectory(
+            root,
+            ghoul::filesystem::Recursive::Yes,
+            ghoul::filesystem::Sorted::Yes,
+            [](const std::filesystem::path& p) {
+                return (
+                    std::filesystem::is_regular_file(p) &&
+                    (p.extension() == ".asset" || p.extension() == ".jasset")
+                );
+            }
+        );
+    };
+
+    std::vector<std::filesystem::path> newShipped = scanAssets(_assetRootDirectory);
+    std::vector<std::filesystem::path> newUser = scanAssets(absPath("${USER_ASSETS}"));
+
+    const bool shippedChanged = newShipped != _shippedAssetPaths;
+    const bool userChanged = newUser != _userAssetPaths;
+
+    _shippedAssetPaths = std::move(newShipped);
+    _userAssetPaths = std::move(newUser);
+
+    if (shippedChanged) {
+        notifyAssetTreeSubscribers({ AssetTreeChange::Type::Shipped });
+    }
+    if (userChanged) {
+        notifyAssetTreeSubscribers({ AssetTreeChange::Type::User });
+    }
+}
+
+AssetManager::AssetPathLocation
+AssetManager::classifyAssetPath(const std::filesystem::path& path) const
+{
+    if (underRoot(path, _assetRootDirectory)) {
+        return AssetPathLocation::Shipped;
+    }
+    if (underRoot(path, absPath("${USER_ASSETS}"))) {
+        return AssetPathLocation::User;
+    }
+    return AssetPathLocation::Other;
+}
+
+std::vector<std::filesystem::path> AssetManager::shippedAssetPaths() const {
+    return _shippedAssetPaths;
+}
+
+std::vector<std::filesystem::path> AssetManager::userAssetPaths() const {
+    return _userAssetPaths;
+}
+
+std::vector<std::filesystem::path> AssetManager::otherAssetPaths() const {
+    return _otherAssetPaths;
+}
+
+std::vector<std::filesystem::path> AssetManager::rootAssetPaths() const {
+    std::vector<std::filesystem::path> result;
+    result.reserve(_rootAssets.size());
+    for (const Asset* a : _rootAssets) {
+        result.push_back(a->path());
+    }
+    return result;
+}
+
+std::unordered_map<std::string, EventAssetLoading::State>
+AssetManager::assetStates() const
+{
+    return _assetStates;
+}
+
 
 LuaLibrary AssetManager::luaLibrary() {
     return {
