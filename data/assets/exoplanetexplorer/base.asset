@@ -16,6 +16,7 @@ asset.require("scene/milkyway/milkyway/volume")
 -- Some DU assets related to the Milky way
 asset.require("scene/digitaluniverse/allsky_visible")
 asset.require("scene/digitaluniverse/constellationbounds")
+asset.require("scene/digitaluniverse/constellations")
 asset.require("scene/digitaluniverse/brown_dwarfs")
 asset.require("scene/digitaluniverse/exoplanets")
 asset.require("scene/digitaluniverse/globularclusters")
