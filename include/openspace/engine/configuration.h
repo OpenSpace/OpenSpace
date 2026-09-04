@@ -109,8 +109,6 @@ struct Configuration {
 
     Key consoleKey = Key::GraveAccent;
 
-    float shutdownCountdown = 0.f;
-
     bool shouldUseScreenshotDateTime = false;
 
     bool sandboxedLua = true;
