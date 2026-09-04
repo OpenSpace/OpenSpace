@@ -34,6 +34,7 @@ namespace {
     constexpr std::string_view _loggerCat = "ColumnFilter";
 
     constexpr char Separator = ',';
+    constexpr char OrOperator = '|';
     constexpr char GreaterOperator = '>';
     constexpr char LessOperator = '<';
     constexpr char EqualsOperator = '=';
@@ -53,16 +54,63 @@ namespace {
     void removeWhitespaces(std::string& str) {
         str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
     }
+
+    // Splits `str` on `delimiter`, but ignores delimiters that occur inside a
+    // "quoted section" or inside parentheses, so `(A, B) | C` splits into
+    // `(A, B)` and `C` when delimiter is '|', and `"a, b", c` splits into
+    // `"a, b"` and `c` when delimiter is ','.
+    std::vector<std::string> splitTopLevel(const std::string& str, char delimiter) {
+        std::vector<std::string> tokens;
+        std::string current;
+        bool inQuotes = false;
+        int parenDepth = 0;
+
+        for (char c : str) {
+            if (c == '"') {
+                inQuotes = !inQuotes;
+                current += c;
+            }
+            else if (!inQuotes && c == '(') {
+                parenDepth++;
+                current += c;
+            }
+            else if (!inQuotes && c == ')') {
+                parenDepth = std::max(0, parenDepth - 1);
+                current += c;
+            }
+            else if (!inQuotes && parenDepth == 0 && c == delimiter) {
+                tokens.push_back(current);
+                current.clear();
+            }
+            else {
+                current += c;
+            }
+        }
+        tokens.push_back(current);
+        return tokens;
+    }
+
+    std::string stripOuterParens(std::string group) {
+        ghoul::trimWhitespace(group);
+        if (group.size() >= 2 && group.front() == '(' && group.back() == ')') {
+            group = group.substr(1, group.size() - 2);
+            ghoul::trimWhitespace(group);
+        }
+        return group;
+    }
 } // namespace
 
 namespace openspace::exoplanets {
 
-const char* ColumnFilter::TextFilterDescriptionShort = "incl, -excl";
+const char* ColumnFilter::TextFilterDescriptionShort = "incl, -excl, \"exact\"";
 
 const char* ColumnFilter::TextFilterDescription =
     "Text filter. Start with '-' for exclusive check, otherwise an "
     "inclusive check against the string is performed. \n \n"
-    "Combine multiple conditions with comma";
+    "Combine multiple conditions with comma (AND). Combine groups of "
+    "conditions with '|' for OR, e.g. '(A, B) | C'. \n \n"
+    "Wrap a term in quotes to match it exactly, including leading/trailing "
+    "whitespace, e.g. \"k2-18 \"";
 
 const char* ColumnFilter::NumericFilterDescriptionShort =
     ">, >=, <, <=, =, null, !null";
@@ -70,16 +118,13 @@ const char* ColumnFilter::NumericFilterDescriptionShort =
 const char* ColumnFilter::NumericFilterDescription =
     "Numeric filter. Supported operators are: "
     "\t >, >=, <, <=, =, null, !null. \n \nNo input => check is not null. \n \n"
-    "Combine multiple conditions with comma. Ex: '> 30, !null'";
+    "Combine multiple conditions with comma (AND). Combine groups of "
+    "conditions with '|' for OR, e.g. '(> 30, < 100) | = 0'";
 
 ColumnFilter::ColumnFilter(std::string query, Type type)
     : _type(type), _query(query)
 {
-    _subqueries = ghoul::tokenizeString(_query, Separator);
-
-    for (std::string& s : _subqueries) {
-        ghoul::trimWhitespace(s);
-    }
+    _subqueries = parseQuery(_query, _type);
 
     // Validate numeric filter query (text filters cannot be invalid)
     if (_type == ColumnFilter::Type::Numeric) {
@@ -91,6 +136,52 @@ ColumnFilter::ColumnFilter(std::string query, Type type)
             LWARNING(std::format("Failed creating numeric filter. {}", e.message));
         }
     }
+}
+
+std::vector<ColumnFilter::AndGroup> ColumnFilter::parseQuery(
+    const std::string& query, Type type)
+{
+    std::vector<AndGroup> result;
+
+    std::vector<std::string> orParts = splitTopLevel(query, OrOperator);
+    for (std::string& part : orParts) {
+        part = stripOuterParens(part);
+
+        std::vector<std::string> rawTerms = splitTopLevel(part, Separator);
+        AndGroup group;
+        group.reserve(rawTerms.size());
+        for (std::string& raw : rawTerms) {
+            group.push_back(parseTerm(std::move(raw), type));
+        }
+        result.push_back(std::move(group));
+    }
+
+    return result;
+}
+
+ColumnFilter::SubQuery ColumnFilter::parseTerm(std::string raw, Type type) {
+    ghoul::trimWhitespace(raw);
+
+    SubQuery sq;
+
+    // Only text filters support exclusion prefixes and quoted exact matches
+    if (type == Type::Text) {
+        if (!raw.empty() && raw.front() == '-') {
+            sq.exclude = true;
+            raw = raw.substr(1);
+            ghoul::trimWhitespace(raw);
+        }
+
+        if (raw.size() >= 2 && raw.front() == '"' && raw.back() == '"') {
+            sq.exact = true;
+            // Keep interior whitespace exactly as written, including leading
+            // and trailing spaces, e.g. "k2-18 " -> `k2-18 ` (with trailing space)
+            raw = raw.substr(1, raw.size() - 2);
+        }
+    }
+
+    sq.text = std::move(raw);
+    return sq;
 }
 
 std::string ColumnFilter::query() const {
@@ -128,95 +219,103 @@ bool ColumnFilter::passFilter(float value) const {
         return true; // let everything through
     }
 
-    bool pass = true;
-
-    // Special case when we only have one subquery and an empty string
-    // => check against non existing value
-    if (_subqueries.size() == 1 && _subqueries.front().empty()) {
+    // Special case: a single, single-term, empty group => check against
+    // non-existing value
+    if (_subqueries.size() == 1 && _subqueries.front().size() == 1 &&
+        _subqueries.front().front().text.empty())
+    {
         return !std::isnan(value);
     }
 
-    // Test against each subquery
-    for (std::string q : _subqueries) {
-        bool passSubquery = false;
+    bool anyGroupPassed = false;
 
-        removeWhitespaces(q);
+    // OR across groups, AND within each group
+    for (const AndGroup& group : _subqueries) {
+        bool passGroup = true;
 
-        if (q.empty()) {
-            continue;
-        }
+        for (const SubQuery& sub : group) {
+            std::string q = sub.text;
+            removeWhitespaces(q);
 
-        size_t pos; // contains position of first character on match
-
-        // Is null
-        if (contains(NullOperator, q, pos)) {
-            bool isNot = contains(NotOperator, q, pos);
-            passSubquery = isNot ? !std::isnan(value) : std::isnan(value);
-        }
-        // Greater than
-        else if (contains(GreaterOperator, q, pos)) {
-            bool equals = q[pos + 1] == '=';
-            std::string right = equals ? q.substr(pos + 2) : q.substr(pos + 1);
-
-            if (right.empty()) {
-                throw ghoul::RuntimeError("Right side of query is empty");
+            if (q.empty()) {
+                continue;
             }
 
-            const float rVal = data::parseFloatData(right);
-            if (std::isnan(rVal)) {
-                throw ghoul::RuntimeError(
-                    "Right side of query '" + q + "' is not a valid number"
-                );
+            bool passSubquery = false;
+            size_t pos; // contains position of first character on match
+
+            // Is null
+            if (contains(NullOperator, q, pos)) {
+                bool isNot = contains(NotOperator, q, pos);
+                passSubquery = isNot ? !std::isnan(value) : std::isnan(value);
+            }
+            // Greater than
+            else if (contains(GreaterOperator, q, pos)) {
+                bool equals = q[pos + 1] == '=';
+                std::string right = equals ? q.substr(pos + 2) : q.substr(pos + 1);
+
+                if (right.empty()) {
+                    throw ghoul::RuntimeError("Right side of query is empty");
+                }
+
+                const float rVal = data::parseFloatData(right);
+                if (std::isnan(rVal)) {
+                    throw ghoul::RuntimeError(
+                        "Right side of query '" + q + "' is not a valid number"
+                    );
+                }
+                else {
+                    passSubquery = equals ? (value >= rVal) : (value > rVal);
+                }
+            }
+            // Less than
+            else if (contains(LessOperator, q, pos)) {
+                bool equals = q[pos + 1] == '=';
+                std::string right = equals ? q.substr(pos + 2) : q.substr(pos + 1);
+
+                if (right.empty()) {
+                    throw ghoul::RuntimeError("Right side of query is empty");
+                }
+
+                const float rVal = data::parseFloatData(right);
+                if (std::isnan(rVal)) {
+                    throw ghoul::RuntimeError(
+                        "Right side of query '" + q + "' is not a valid number"
+                    );
+                }
+                else {
+                    passSubquery = equals ? (value <= rVal) : (value < rVal);
+                }
+            }
+            // Equals
+            else if (contains(EqualsOperator, q, pos)) {
+                std::string right = q.substr(pos + 1);
+
+                if (right.empty()) {
+                    throw ghoul::RuntimeError("Right side of query is empty");
+                }
+
+                const float rVal = data::parseFloatData(right);
+                if (std::isnan(rVal)) {
+                    throw ghoul::RuntimeError(
+                        "Right side of query '" + q + "' is not a valid number"
+                    );
+                }
+                else {
+                    passSubquery = value == rVal;
+                }
             }
             else {
-                passSubquery = equals ? (value >= rVal) : (value > rVal);
-            }
-        }
-        // Less than
-        else if (contains(LessOperator, q, pos)) {
-            bool equals = q[pos + 1] == '=';
-            std::string right = equals ? q.substr(pos + 2) : q.substr(pos + 1);
-
-            if (right.empty()) {
-                throw ghoul::RuntimeError("Right side of query is empty");
+                throw ghoul::RuntimeError(std::format("Invalid filter query '{}'", q));
             }
 
-            const float rVal = data::parseFloatData(right);
-            if (std::isnan(rVal)) {
-                throw ghoul::RuntimeError(
-                    "Right side of query '" + q + "' is not a valid number"
-                );
-            }
-            else {
-                passSubquery = equals ? (value <= rVal) : (value < rVal);
-            }
-        }
-        // Equals
-        else if (contains(EqualsOperator, q, pos)) {
-            std::string right = q.substr(pos + 1);
-
-            if (right.empty()) {
-                throw ghoul::RuntimeError("Right side of query is empty");
-            }
-
-            const float rVal = data::parseFloatData(right);
-            if (std::isnan(rVal)) {
-                throw ghoul::RuntimeError(
-                    "Right side of query '" + q + "' is not a valid number"
-                );
-            }
-            else {
-                passSubquery = value == rVal;
-            }
-        }
-        else {
-            throw ghoul::RuntimeError(std::format("Invalid filter query '{}'", q));
+            passGroup = passGroup && passSubquery;
         }
 
-        pass &= passSubquery; // true only if both are true
+        anyGroupPassed = anyGroupPassed || passGroup;
     }
 
-    return pass;
+    return anyGroupPassed;
 }
 
 bool ColumnFilter::passFilter(const std::string& value) const {
@@ -224,47 +323,48 @@ bool ColumnFilter::passFilter(const std::string& value) const {
         throw ghoul::RuntimeError("Can only pass text to text based filters");
     }
 
-    bool pass = true;
-
     std::string lowercaseValue = value;
     std::transform(lowercaseValue.begin(), lowercaseValue.end(), lowercaseValue.begin(),
         [](unsigned char c) { return std::tolower(c); });
 
     ghoul::trimWhitespace(lowercaseValue);
 
-    // Special case when we only have one subquery and an empty string
-    // => check against non existing value
-    if (_subqueries.size() == 1 && _subqueries.front().empty()) {
+    // Special case: a single, single-term, empty, non-exact group => check
+    // against non-existing value
+    if (_subqueries.size() == 1 && _subqueries.front().size() == 1 &&
+        _subqueries.front().front().text.empty() && !_subqueries.front().front().exact)
+    {
         return !value.empty();
     }
 
-    // Test against each subquery
-    for (const std::string& q : _subqueries) {
-        bool passSubquery = false;
+    bool anyGroupPassed = false;
 
-        if (q.empty()) {
-            continue;
+    // OR across groups, AND within each group
+    for (const AndGroup& group : _subqueries) {
+        bool passGroup = true;
+
+        for (const SubQuery& sub : group) {
+            if (sub.text.empty() && !sub.exact) {
+                continue;
+            }
+
+            std::string term = sub.text;
+            std::transform(term.begin(), term.end(), term.begin(),
+                [](unsigned char c) { return std::tolower(c); });
+
+            // Quoted terms keep their leading/trailing whitespace exactly as
+            // written (e.g. "k2-18 " won't also match "K2-180"). Unquoted
+            // terms behave as before
+            bool found = (lowercaseValue.find(term) != std::string::npos);
+            bool passSubquery = sub.exclude ? !found : found;
+
+            passGroup = passGroup && passSubquery;
         }
 
-        std::string query = q;
-        std::transform(query.begin(), query.end(), query.begin(),
-            [](unsigned char c) { return std::tolower(c); });
-
-        if (query[0] == '-') {
-            // Subtract
-            std::string str = query.substr(1);
-            ghoul::trimWhitespace(str);
-            passSubquery = (lowercaseValue.find(str) == std::string::npos);
-        }
-        else {
-            // Full search
-            passSubquery = (lowercaseValue.find(query) != std::string::npos);
-        }
-
-        pass &= passSubquery; // true only if both are true
+        anyGroupPassed = anyGroupPassed || passGroup;
     }
 
-    return pass;
+    return anyGroupPassed;
 }
 
 } // namespace openspace::exoplanets

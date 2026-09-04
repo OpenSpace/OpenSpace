@@ -53,10 +53,19 @@ public:
     bool passFilter(const std::string& value) const;
 
 private:
+    struct SubQuery {
+        std::string text;
+        bool exclude = false;  // leading '-'
+        bool exact = false;    // wrapped in quotes -> preserve whitespace, no case-folding trim
+    };
+    using AndGroup = std::vector<SubQuery>;
+
+    static std::vector<AndGroup> parseQuery(const std::string& query, Type type);
+    static SubQuery parseTerm(std::string raw, Type type);
+
     Type _type;
     std::string _query;
-    std::vector<std::string> _subqueries;
-
+    std::vector<AndGroup> _subqueries;   // was: std::vector<std::string> _subqueries;
     bool _valid = true;
 };
 
