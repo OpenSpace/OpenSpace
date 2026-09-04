@@ -121,7 +121,7 @@ public:
     void decode(std::vector<std::byte> data);
 
     Property::Visibility visibility() const;
-    void toggleShutdownMode(std::optional<float> timer);
+    void toggleShutdownMode(std::optional<float> timer = std::nullopt);
 
     Mode currentMode() const;
     bool setMode(Mode newMode);
