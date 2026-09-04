@@ -247,8 +247,6 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
 
     _formatString = p.formatString.value_or(_formatString);
     addProperty(_formatString);
-
-    _localBuffer.resize(256);
 }
 
 std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
@@ -334,11 +332,9 @@ void DashboardItemDistance::update() {
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
-    std::fill(_localBuffer.begin(), _localBuffer.end(), char(0));
     try {
         // @CPP26(abock): This can be replaced with std::runtime_format
-        char* end = std::vformat_to(
-            _localBuffer.data(),
+        _buffer = std::vformat(
             _formatString.value(),
             std::make_format_args(
                 sourceInfo.second,
@@ -347,8 +343,6 @@ void DashboardItemDistance::update() {
                 dist.second
             )
         );
-
-        _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
     catch (const std::format_error&) {
         LERROR("Illegal format string");
