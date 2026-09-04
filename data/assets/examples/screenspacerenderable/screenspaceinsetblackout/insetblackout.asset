@@ -11,7 +11,9 @@ local Item = {
     -- top-left, top-right, bottom-right, bottom-left
     Corners = { {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.0, 0.0} }
   },
-  Scale = 1.0
+  Placement = {
+    Scale = 1.0
+  }
 }
 
 
