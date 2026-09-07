@@ -61,8 +61,6 @@ private:
 
     Component _source;
     Component _destination;
-
-    std::vector<char> _localBuffer;
 };
 
 } // namespace openspace
