@@ -49,8 +49,8 @@ namespace {
  * Toggles the shutdown mode that will close the application after the countdown timer is
  * reached.
  */
-[[codegen::luawrap]] void toggleShutdown() {
-    global::openSpaceEngine->toggleShutdownMode();
+[[codegen::luawrap]] void toggleShutdown(std::optional<float> timer = std::nullopt) {
+    global::openSpaceEngine->toggleShutdownMode(timer);
 }
 
 /**

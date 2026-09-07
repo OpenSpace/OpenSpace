@@ -60,9 +60,6 @@ def write_configuration_overwrite(base_path: Path, data_path: Path) -> None:
     # Setting this to true will cause OpenGL errors to appear in the log
     f.write("CheckOpenGLState = true\n")
 
-    # We can reduce the amount of time that we have to wait for OpenSpace to shut down
-    f.write("ShutdownCountdown = 0.25\n")
-
 
 
 async def setup_test_run(openspace: Any) -> None:
@@ -112,7 +109,7 @@ async def internal_run(openspace: Any, os_api: Api, test: Test, shutdown: bool =
   commit = version["Commit"]
 
   if shutdown:
-    await openspace.toggleShutdown()
+    await openspace.toggleShutdown(0.25)
 
   return screenshot_folder, commit
 
