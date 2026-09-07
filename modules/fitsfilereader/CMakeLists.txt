@@ -47,10 +47,10 @@ create_new_module(
 )
 
 # CCfits is dependent on cfitsio, let it handle the internal linking
-add_subdirectory(ext/cfitsio SYSTEM)
+add_subdirectory(ext/cfitsio SYSTEM EXCLUDE_FROM_ALL)
 set_target_properties(cfitsio PROPERTIES FOLDER "External")
 
-add_subdirectory(ext/CCfits SYSTEM)
+add_subdirectory(ext/CCfits SYSTEM EXCLUDE_FROM_ALL)
 set_target_properties(CCfits PROPERTIES FOLDER "External")
 
 if (MSVC)
