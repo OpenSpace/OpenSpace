@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+PATCH_TARGET="/usr/share/openspace/openspace.cfg"
+PATCH_FILE="/usr/share/openspace/openspacecfg.patch"
+
+if [ -f "$PATCH_TARGET" ] && [ -f "$PATCH_FILE" ]; then
+    patch "$PATCH_TARGET" < "$PATCH_FILE"
+fi
+
+exit 0
+
