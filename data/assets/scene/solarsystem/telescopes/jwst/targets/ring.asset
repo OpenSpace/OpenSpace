@@ -6,10 +6,12 @@ local RingImage = {
   Identifier = "RingImage",
   Type = "ScreenSpaceImageLocal",
   Name = "Ring Nebula",
-  UseRadiusAzimuthElevation = true,
-  FaceCamera = false,
-  RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
-  UsePerspectiveProjection = false,
+  Placement = {
+    UseRadiusAzimuthElevation = true,
+    FaceCamera = false,
+    RadiusAzimuthElevation = { 1.0, 0.5, 0.1 }
+  },
+  -- UsePerspectiveProjection = false, TODO: investigate
   Opacity = 1.0,
   TexturePath = ring.image .. "ring-nebula.png",
   Tag = { "mission_jwst_target" },
