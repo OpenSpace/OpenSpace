@@ -132,7 +132,11 @@ if not executable.exists():
 files = list(Path(rootDir / "data" / "assets").rglob("*.asset"))
 if args.filter:
   p = re.compile(args.filter)
-  files = [x for x in files if re.search(p, str(x))]
+  assetRoot = rootDir / "data" / "assets"
+  files = [
+    x for x in files
+    if re.search(p, str(x.relative_to(assetRoot)).replace("\\", "/"))
+  ]
 
 # Sort files to make sure the files we've gotten are consistent between runs, this way we
 # can start from a specific index
