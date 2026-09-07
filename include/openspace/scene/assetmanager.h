@@ -192,7 +192,7 @@ public:
     void callOnDeinitialize(Asset* asset) const;
 
     /**
-     * Update internal bookeeping state of the provided \p assetPath to the provided \p
+     * Update internal bookkeeping state of the provided \p assetPath to the provided \p
      * state.
      *
      * \param assetPath The asset path to update the state for.

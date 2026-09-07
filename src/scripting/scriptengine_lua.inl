@@ -138,7 +138,7 @@ bool openDirectory(const std::filesystem::path& path) {
         return false;
     }
 
-    // Sucessfully started the child process, which is now independent of OpenSpace
+    // Successfully started the child process, which is now independent of OpenSpace
     return WIFEXITED(status) && WEXITSTATUS(status) == EXIT_SUCCESS;
 #endif // WIN32
 }

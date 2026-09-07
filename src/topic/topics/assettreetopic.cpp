@@ -174,7 +174,7 @@ void AssetTreeTopic::sendFullSnapshot() {
     sendPathList("other", m.otherAssetPaths());
     sendPathList("rootAssets", m.rootAssetPaths());
 
-    nlohmann::json states;
+    nlohmann::json states = nlohmann::json::object();
     for (const auto& [path, state] : m.assetStates()) {
         states[path] = stateToString(state);
     }

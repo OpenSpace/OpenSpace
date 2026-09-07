@@ -299,11 +299,6 @@ void Asset::initialize() {
     }
     LDEBUG(std::format("Initializing asset '{}'", _assetPath));
 
-    global::eventEngine->publishEvent<EventAssetLoading>(
-        _assetPath.string(),
-        EventAssetLoading::State::Loading
-    );
-    _manager.updateAssetState(_assetPath, EventAssetLoading::State::Loading);
     // 1. Initialize requirements
     for (Asset* child : _requiredAssets) {
         child->initialize();
