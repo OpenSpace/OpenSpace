@@ -676,10 +676,18 @@ bool ImGUIModule::mouseWheelCallback(double position) {
 }
 
 bool ImGUIModule::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
+    const int keyIndex = static_cast<int>(key);
+    if (keyIndex < 0) {
+        return false;
+    }
+
     ImGuiIO& io = ImGui::GetIO();
 
-    const bool isDown = (action != KeyAction::Release);
+    // Always update the modifier and keys, even if event is not consumed, so keys and
+    // modifiers are set to false on release
+
     if (const ImGuiKey k = toImGuiKey(key); k != ImGuiKey_None) {
+        const bool isDown = (action != KeyAction::Release);
         io.AddKeyEvent(k, isDown);
     }
 

@@ -12,7 +12,7 @@
     {
       "type": "property",
       "value": {
-        "property": "ScreenSpace.ScreenSpaceTimeVaryingImageOnline_Example.Scale",
+        "property": "ScreenSpace.ScreenSpaceTimeVaryingImageOnline_Example.Placement.Scale",
         "value": 1.0
       }
     },
