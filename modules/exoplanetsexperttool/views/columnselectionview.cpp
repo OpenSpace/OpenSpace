@@ -67,7 +67,7 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
     std::sort(
         _namedColumns.begin(),
         _namedColumns.end(),
-        [&dataSettings, this](const ColumnKey& lhs, const ColumnKey& rhs) {
+        [&dataSettings](const ColumnKey& lhs, const ColumnKey& rhs) {
             return data::caseInsensitiveLessThan(
                 dataSettings.columnName(lhs),
                 dataSettings.columnName(rhs)

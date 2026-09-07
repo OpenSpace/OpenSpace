@@ -217,6 +217,8 @@ DataSettings DataLoader::loadDataSettingsFromJson() {
         return DataSettings();
     }
 
+    LINFO(std::format("Loading settings from file: '{}'", settingsPath));
+
     try {
         const nlohmann::json j = nlohmann::json::parse(datasetConfigFile);
         DataSettings settings;

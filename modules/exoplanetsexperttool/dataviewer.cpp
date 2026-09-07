@@ -223,19 +223,7 @@ void DataViewer::initializeData() {
         if (!isNumericColumn(i)) {
             continue;
         }
-
-        const ColumnKey& key = _columns[i];
-        int count = 0;
-        float sum = 0.f;
-        for (const ExoplanetItem& p : _data) {
-            float v = std::get<float>(p.dataColumns.at(key));
-            if (!std::isnan(v)) {
-                sum += v;
-                count++;
-            }
-        }
-
-        _meanColumnValues[key] = sum / static_cast<float>(count);
+        computeMeanForColumn(_columns[i]);
     }
 
     _filterChanged = true;
@@ -264,9 +252,13 @@ std::variant<const char*, float> DataViewer::columnValue(const ColumnKey& key,
 }
 
 bool DataViewer::isNumericColumn(size_t index) const {
+    return  isNumericColumn(_columns[index]);
+}
+
+bool DataViewer::isNumericColumn(const ColumnKey& key) const {
     ghoul_assert(_data.size() > 0, "Data size cannot be zero");
     // Test type using the first data point
-    std::variant<const char*, float> aValue = columnValue(_columns[index], _data.front());
+    std::variant<const char*, float> aValue = columnValue(key, _data.front());
     return std::holds_alternative<float>(aValue);
 }
 
@@ -1399,9 +1391,8 @@ void DataViewer::updateGlyphRenderData() {
             );
         }
 
-        constexpr std::string InclinationKey= "pl_orbincl"; // TODO: Do not hardcode
         const std::variant<std::string, float>& inclination =
-            item.dataColumns.at(InclinationKey);
+            item.dataColumns.at("pl_orbincl"); // TODO: Do not hardcode
 
         if (std::holds_alternative<float>(inclination)) {
             renderItem.inclination = std::get<float>(inclination);
@@ -1468,6 +1459,28 @@ void DataViewer::flyToInsideView() const {
             "PathType = 'Linear'"
         "});"
     );
+}
+
+void DataViewer::computeMeanForColumn(const ColumnKey& key) {
+    int count = 0;
+    float sum = 0.f;
+    for (const ExoplanetItem& p : _data) {
+        if (!std::holds_alternative<float>(p.dataColumns.at(key))) {
+            LERROR(std::format(
+                "Trying to compute mean value for non-numeric column: {}. Skipping. "
+                "OBS! This is a sign that the column is wrongly classified as numeric",
+                key
+            ));
+            return;
+        }
+        float v = std::get<float>(p.dataColumns.at(key));
+        if (!std::isnan(v)) {
+            sum += v;
+            count++;
+        }
+    }
+
+    _meanColumnValues[key] = sum / static_cast<float>(count);
 }
 
 } // namespace openspace::exoplanets

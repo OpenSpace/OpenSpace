@@ -55,8 +55,8 @@ public:
 
     std::filesystem::path currentDataFile() const;
 
-    // Check if a column is numeric. If it isn't, then it is text based
     bool isNumericColumn(size_t index) const;
+    bool isNumericColumn(const ColumnKey& key) const;
 
     std::variant<const char*, float> columnValue(const ColumnKey& key,
         const ExoplanetItem& item) const;
@@ -135,6 +135,8 @@ private:
     void refocusView() const;
     void flyToOverview() const;
     void flyToInsideView() const;
+
+    void computeMeanForColumn(const ColumnKey& key);
 
     DataSettings _dataSettings;
     ColumnSelectionView _columnSelectionView;
