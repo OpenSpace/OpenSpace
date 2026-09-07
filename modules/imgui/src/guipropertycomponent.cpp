@@ -367,8 +367,6 @@ void GuiPropertyComponent::render() {
 
         renderTree(root, renderProp);
 
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
-
         for (PropertyOwner* pOwner : owners) {
             // We checked above that pOwner is a SceneGraphNode
             SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
