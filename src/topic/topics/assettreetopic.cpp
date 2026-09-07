@@ -106,7 +106,7 @@ Schema AssetTreeTopic::Schema() {
               "additionalProperties": false,
               "required": ["type", "states"]
             },
-            "State": {
+            "AssetState": {
               "properties": {
                 "type": { "const": "state" },
                 "path": { "type": "string" },
@@ -138,7 +138,7 @@ Schema AssetTreeTopic::Schema() {
               "anyOf": [
                 { "$ref": "#/$defs/PathList" },
                 { "$ref": "#/$defs/StateSnapshot" },
-                { "$ref": "#/$defs/State" }
+                { "$ref": "#/$defs/AssetState" }
               ]
             }
           },
