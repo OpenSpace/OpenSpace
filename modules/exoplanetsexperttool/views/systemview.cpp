@@ -386,7 +386,7 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
     // General information about the system
     ImGui::BeginChild(
         std::format("overview_left{}", host).c_str(),
-        ImVec2(ImGui::GetContentRegionAvailWidth() * 0.5f, boxHeight),
+        ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, boxHeight),
         true
     );
     {

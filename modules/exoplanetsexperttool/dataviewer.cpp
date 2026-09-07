@@ -189,6 +189,8 @@ void DataViewer::initializeData() {
     // construction since we need the module to exist first (to access its settings)
     _dataSettings = DataLoader::loadDataSettingsFromJson();
 
+    LINFO("Loading data from file: " + _dataSettings.dataFile.string());
+
     // Load the dataset
     _data = DataLoader::loadData(_dataSettings);
 
@@ -396,9 +398,8 @@ void DataViewer::renderStartupInfo() {
         ImGui::Separator();
 
         // Ok
-        ImGuiIO& io = ImGui::GetIO();
         if (ImGui::Button("Continue", ImVec2(120, 0)) ||
-            ImGui::IsKeyPressed(io.KeyMap[ImGuiKey_Enter]))
+            ImGui::IsKeyPressed(ImGuiKey_Enter))
         {
             ImGui::CloseCurrentPopup();
             _shouldOpenInfoWindow = false;
@@ -787,7 +788,7 @@ void DataViewer::renderTable(const std::string& tableId,
                 const ExoplanetItem& item = _data[index];
 
                 ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns
-                    | ImGuiSelectableFlags_AllowItemOverlap;
+                    | ImGuiSelectableFlags_AllowOverlap;
 
                 auto found = std::find(_selection.begin(), _selection.end(), index);
                 const bool itemIsSelected = found != _selection.end();
@@ -1227,9 +1228,8 @@ void DataViewer::renderFileMenu() {
             ImGui::Separator();
 
             // Cancel
-            ImGuiIO& io = ImGui::GetIO();
             if (ImGui::Button("Cancel") ||
-                ImGui::IsKeyPressed(io.KeyMap[ImGuiKey_Escape]))
+                ImGui::IsKeyPressed(ImGuiKey_Escape))
             {
                 ImGui::CloseCurrentPopup();
                 showSaveCsvModal = false;
@@ -1237,7 +1237,7 @@ void DataViewer::renderFileMenu() {
             ImGui::SameLine();
             // Save
             if (ImGui::Button("Save") ||
-                ImGui::IsKeyPressed(io.KeyMap[ImGuiKey_Enter]))
+                ImGui::IsKeyPressed(ImGuiKey_Enter))
             {
                 std::filesystem::path fileName = std::filesystem::path(name);
                 std::filesystem::path directory = std::filesystem::path(dir);

@@ -209,51 +209,67 @@ bool ColorMappingView::renderViewContent() {
 
     ImGui::EndGroup(); // all variable groups
 
-    // Circle plot to show which parameters map to which part of a glyph
-    ImGui::SameLine();
-    {
-        int nVariables = static_cast<int>(_variableSelection.size());
-        std::vector<float> data(nVariables, 1.f / static_cast<float>(nVariables));
+    //// Circle plot to show which parameters map to which part of a glyph
+    //ImGui::SameLine();
+    //{
+    //    int nVariables = static_cast<int>(_variableSelection.size());
+    //    std::vector<float> data(nVariables, 1.f / static_cast<float>(nVariables));
 
-        // First build array with real strings. Note that this has to stay alive for
-        // the entire lifetime of the char * array
-        std::vector<std::string> labelStrings;
-        labelStrings.reserve(nVariables);
-        for (int i = 0; i < nVariables; ++i) {
-            std::string label = _dataViewer.columnName(
-                _dataViewer.columns()[_variableSelection[i].columnIndex]
-            );
-            label = label.substr(0, 10); // limit length
-            labelStrings.push_back(std::format(" {}. {}", i + 1, label));
-        }
+    //    // First build array with real strings. Note that this has to stay alive for
+    //    // the entire lifetime of the char * array
+    //    std::vector<std::string> labelStrings;
+    //    labelStrings.reserve(nVariables);
+    //    for (int i = 0; i < nVariables; ++i) {
+    //        std::string label = _dataViewer.columnName(
+    //            _dataViewer.columns()[_variableSelection[i].columnIndex]
+    //        );
+    //        label = label.substr(0, 10); // limit length
+    //        labelStrings.push_back(std::format(" {}. {}", i + 1, label));
+    //    }
 
-        // Then build array with const char * from that array
-        std::vector<const char*> labels;
-        labels.reserve(nVariables);
-        for (int i = 0; i < nVariables; ++i) {
-            labels.push_back(labelStrings[i].data());
-        }
+    //    // Then build array with const char * from that array
+    //    std::vector<const char*> labels;
+    //    labels.reserve(nVariables);
+    //    for (int i = 0; i < nVariables; ++i) {
+    //        labels.push_back(labelStrings[i].data());
+    //    }
 
-        // Reverse vector to get the order its actually rendered
-        std::reverse(labels.begin(), labels.end());
+    //    // Reverse vector to get the order its actually rendered
+    //    std::reverse(labels.begin(), labels.end());
 
-        constexpr const int ColorScaleHeight = 140;
-        ImVec2 plotSize = ImVec2(1.5 * ColorScaleHeight, ColorScaleHeight);
-        ImPlot::SetNextPlotLimits(0, 1.5, 0, 1, ImGuiCond_Always);
+    //    constexpr const int ColorScaleHeight = 140;
+    //    ImVec2 plotSize = ImVec2(1.5f * ColorScaleHeight, static_cast<float>(ColorScaleHeight));
+    //    ImPlot::SetNextAxesLimits(0, 1.5, 0, 1, ImGuiCond_Always);
 
-        if (ImPlot::BeginPlot(
-                "##Pie",
-                NULL, NULL,
-                plotSize,
-                ImPlotFlags_Equal | ImPlotFlags_NoMousePos,
-                ImPlotAxisFlags_NoDecorations,
-                ImPlotAxisFlags_NoDecorations
-            ))
-        {
-            ImPlot::PlotPieChart(labels.data(), data.data(), nVariables, 1.1, 0.5, 0.3, true, NULL);
-            ImPlot::EndPlot();
-        }
-    }
+    //    if (ImPlot::BeginPlot(
+    //            "##Pie",
+    //            plotSize,
+    //            ImPlotFlags_Equal | ImPlotFlags_NoMouseText
+    //        ))
+    //    {
+    //        ImPlot::SetupAxes(
+    //            nullptr,
+    //            nullptr,
+    //            ImPlotAxisFlags_NoDecorations,
+    //            ImPlotAxisFlags_NoDecorations
+    //        );
+
+    //        // TODO: revive
+    //        //ImPlot::PlotPieChart(
+    //        //    labels.data(),
+    //        //    data.data(),
+    //        //    nVariables,
+    //        //    1.1,
+    //        //    0.5,
+    //        //    0.3,
+    //        //    "%.1f",
+    //        //    90.0,
+    //        //    true
+    //        //);
+
+    //        ImPlot::EndPlot();
+    //    }
+    //}
 
     ImGui::EndGroup(); // variables + plot group
 
