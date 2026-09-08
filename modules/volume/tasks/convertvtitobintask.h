@@ -1,4 +1,3 @@
-
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -23,65 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/rendering/volumeclipplanes.h>
+#ifndef __OPENSPACE_MODULE_VOLUME___CONVERTVTITOBINTASK___H__
+#define __OPENSPACE_MODULE_VOLUME___CONVERTVTITOBINTASK___H__
 
-#include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <utility>
-
-namespace {
-    using namespace openspace;
-
-    constexpr Property::PropertyInfo NClipPlanesInfo = {
-        "nClipPlanes",
-        "# Clip Planes",
-        "Number of clip planes"
-    };
-
-} // namespace
-
+#include <openspace/util/task.h>
+#include <filesystem>
+#include <string>
 
 namespace openspace {
 
-VolumeClipPlanes::VolumeClipPlanes(const std::vector<ghoul::Dictionary>& planes)
-    : PropertyOwner({ "ClipPlanes", "Clip Planes", "" }) // @TODO Missing name
-    // @TODO Missing documentation
-    , _nClipPlanes( NClipPlanesInfo, 0, 0, 10)
-{
-    int index = 0;
-    for (const ghoul::Dictionary& c : planes) {
-        std::unique_ptr<VolumeClipPlane> clipPlane = std::make_unique<VolumeClipPlane>(c);
-        // TODO 2025-05-06 check if this is ok to do with Alex / Emma
-        clipPlane->setIdentifier(std::format("clipPlane_{}", index++));
-        addPropertySubOwner(clipPlane.get());
+class ConvertVtiToBinTask : public Task {
+public:
+    explicit ConvertVtiToBinTask(const ghoul::Dictionary& dictionary);
 
-        _clipPlanes.push_back(std::move(clipPlane));
-    }
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static openspace::Documentation Documentation();
 
-    _nClipPlanes = static_cast<int>(_clipPlanes.size());
-    addProperty(_nClipPlanes);
-}
-
-void VolumeClipPlanes::initialize() {
-
-}
-
-std::vector<glm::vec3> VolumeClipPlanes::normals() {
-    std::vector<glm::vec3> normals;
-    normals.reserve(_clipPlanes.size());
-    for (const std::unique_ptr<VolumeClipPlane>& clipPlane : _clipPlanes) {
-        normals.push_back(clipPlane->normal());
-    }
-    return normals;
-}
-
-std::vector<glm::vec2> VolumeClipPlanes::offsets() {
-    std::vector<glm::vec2> offsets;
-    offsets.reserve(_clipPlanes.size());
-    for (const std::unique_ptr<VolumeClipPlane>& clipPlane : _clipPlanes) {
-        offsets.push_back(clipPlane->offsets());
-    }
-    return offsets;
-}
+private:
+    std::filesystem::path _inputFolder;
+    std::filesystem::path _outputFolder;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_VOLUME___CONVERTVTITOBINTASK___H__

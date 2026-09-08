@@ -107,7 +107,7 @@ void BasicVolumeRaycaster::renderExitPoints(const RenderData& data,
 }
 
 void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
-                                      ghoul::opengl::ProgramObject& program)
+    ghoul::opengl::ProgramObject& program)
 {
     if (!_volumeTexture || !_transferFunction) {
         return;
@@ -139,12 +139,23 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
     program.setUniform("brightness_" + id, brightness());
     program.setUniform("rNormalization_" + id, _rNormalization);
     program.setUniform("rUpperBound_" + id, _rUpperBound);
+    program.setUniform("valueRange_" + id, _valueRange);
+    program.setUniform("hideOutsideRange_" + id, _hideOutsideRange);
+    program.setUniform("sharpBorder_" + id, _sharpBorder);
+    program.setUniform("nonValue_" + id, _nonValue);
+
+    if (_safeMask) {
+        _maskUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+        _maskUnit->bind(*_safeMask);
+        program.setUniform("safeMask_" + id, *_maskUnit);
+    }
 }
 
 void BasicVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&)
 {
     _textureUnit = nullptr;
     _tfUnit = nullptr;
+    _maskUnit = nullptr;
 }
 
 bool BasicVolumeRaycaster::isCameraInside(const RenderData& data,
@@ -230,6 +241,26 @@ void BasicVolumeRaycaster::setGridType(VolumeGridType gridType) {
 
 void BasicVolumeRaycaster::setModelTransform(glm::mat4 transform) {
     _modelTransform = std::move(transform);
+}
+
+void BasicVolumeRaycaster::setValueRange(glm::vec2 range) {
+    _valueRange = range;
+}
+
+void BasicVolumeRaycaster::setHideOutsideRange(bool value) {
+    _hideOutsideRange = value;
+}
+
+void BasicVolumeRaycaster::setSharpBorder(bool value) {
+    _sharpBorder = value;
+}
+
+void BasicVolumeRaycaster::setSafeMask(std::shared_ptr<ghoul::opengl::Texture> mask) {
+    _safeMask = std::move(mask);
+}
+
+void BasicVolumeRaycaster::setNonValue(float value) {
+    _nonValue = value;
 }
 
 } // namespace openspace

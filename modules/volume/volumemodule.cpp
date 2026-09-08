@@ -26,6 +26,8 @@
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
 #include <modules/volume/rendering/renderablevectorfield.h>
+#include <modules/volume/rendering/volumeclipplane.h>
+#include <modules/volume/tasks/convertvtitobintask.h>
 #include <modules/volume/tasks/generaterawvolumetask.h>
 #include <modules/volume/tasks/generaterawvolumefromfiletask.h>
 #include <openspace/documentation/documentation.h>
@@ -49,17 +51,20 @@ void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
 
     ghoul::TemplateFactory<Task>* tFactory = FactoryManager::ref().factory<Task>();
     ghoul_assert(tFactory, "No task factory existed");
-    tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
+    tFactory->registerClass<ConvertVtiToBinTask>("ConvertVtiToBinTask");
     tFactory->registerClass<GenerateRawVolumeFromFileTask>(
         "GenerateRawVolumeFromFileTask"
     );
+    tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
 }
 
 std::vector<Documentation> VolumeModule::documentations() const {
     return {
         RenderableTimeVaryingVolume::Documentation(),
-        RenderableVectorField::Documentation(),
-        GenerateRawVolumeTask::Documentation()
+        ConvertVtiToBinTask::Documentation(),
+        GenerateRawVolumeTask::Documentation(),
+        RenderableVectorField::Documentation()
+        //VolumeClipPlane::Documentation()
     };
 }
 

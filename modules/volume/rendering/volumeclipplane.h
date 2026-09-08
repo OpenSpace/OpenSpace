@@ -42,6 +42,7 @@ public:
     glm::vec3 normal() const;
     glm::vec2 offsets() const;
 
+    //static openspace::Documentation Documentation();
 private:
     Vec3Property _normal;
     Vec2Property _offsets;

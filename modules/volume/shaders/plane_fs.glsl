@@ -1,4 +1,3 @@
-
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -22,66 +21,45 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#include "fragment.glsl"
 
-#include <modules/volume/rendering/volumeclipplanes.h>
+in vec3 texCoord;
+in vec4 positionCameraSpace;
+out vec4 outColor;
 
-#include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <utility>
+uniform sampler3D volumeTexture;
+uniform sampler1D transferFunction;
+uniform vec3 volumeResolution;
+uniform vec2 valueRange;
 
-namespace {
-    using namespace openspace;
-
-    constexpr Property::PropertyInfo NClipPlanesInfo = {
-        "nClipPlanes",
-        "# Clip Planes",
-        "Number of clip planes"
-    };
-
-} // namespace
-
-
-namespace openspace {
-
-VolumeClipPlanes::VolumeClipPlanes(const std::vector<ghoul::Dictionary>& planes)
-    : PropertyOwner({ "ClipPlanes", "Clip Planes", "" }) // @TODO Missing name
-    // @TODO Missing documentation
-    , _nClipPlanes( NClipPlanesInfo, 0, 0, 10)
-{
-    int index = 0;
-    for (const ghoul::Dictionary& c : planes) {
-        std::unique_ptr<VolumeClipPlane> clipPlane = std::make_unique<VolumeClipPlane>(c);
-        // TODO 2025-05-06 check if this is ok to do with Alex / Emma
-        clipPlane->setIdentifier(std::format("clipPlane_{}", index++));
-        addPropertySubOwner(clipPlane.get());
-
-        _clipPlanes.push_back(std::move(clipPlane));
+Fragment getFragment() {
+    // Discard fragments that lie outside the volume bounds
+    if (any(lessThan(texCoord, vec3(0.0))) || any(greaterThan(texCoord, vec3(1.0)))) {
+        discard;
     }
 
-    _nClipPlanes = static_cast<int>(_clipPlanes.size());
-    addProperty(_nClipPlanes);
+    // Fixes color artifact at the edges, TODO come up with a better solution that allows
+    // lookup of texture coordinates at the extremes (0,1)
+    vec3 texelSize = 1.0 / volumeResolution;
+    vec3 coords = clamp(texCoord, texelSize, 1.0 - texelSize );
+
+    Fragment frag;
+    vec4 value = texture(volumeTexture, coords);
+    float minVal = valueRange.x;
+    float maxVal = valueRange.y;
+    value.r = (value.r - minVal) / (maxVal - minVal);
+    frag.color = texture(transferFunction, value.r);
+
+    vec4 position = positionCameraSpace;
+    frag.depth = -position.z;
+    // TODO: ask alex about wether or not to pre multiply alpha values and what
+    // that means in terms of the interpretation of the values
+
+    // TODO: Enable this as a property to show/hide background. Must also fix depth values
+    // so that the entire background is shown. Right now trails for example are not shown.
+    // Also need to fix so that the volume is shown behind the cut plane as well.
+    frag.color.rgb *= frag.color.a;
+    frag.color.a = 1.0;
+
+    return frag;
 }
-
-void VolumeClipPlanes::initialize() {
-
-}
-
-std::vector<glm::vec3> VolumeClipPlanes::normals() {
-    std::vector<glm::vec3> normals;
-    normals.reserve(_clipPlanes.size());
-    for (const std::unique_ptr<VolumeClipPlane>& clipPlane : _clipPlanes) {
-        normals.push_back(clipPlane->normal());
-    }
-    return normals;
-}
-
-std::vector<glm::vec2> VolumeClipPlanes::offsets() {
-    std::vector<glm::vec2> offsets;
-    offsets.reserve(_clipPlanes.size());
-    for (const std::unique_ptr<VolumeClipPlane>& clipPlane : _clipPlanes) {
-        offsets.push_back(clipPlane->offsets());
-    }
-    return offsets;
-}
-
-} // namespace openspace

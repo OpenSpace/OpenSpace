@@ -1051,24 +1051,27 @@ void RenderableFieldlinesSequence::firstUpdate() {
         _colorQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
         _maskingQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
     }
-    _colorQuantity = _colorQuantityTemp;
-    _maskingQuantity = _maskingQuantityTemp;
 
-    if (_colorQuantity < static_cast<int>(_colorTablePaths.size())) {
-        _colorTablePath = _colorTablePaths[_colorQuantity].string();
-    }
-    else {
-        _colorTablePath = _colorTablePaths[0].string();
-    }
+    if (!quantities.empty()) {
+        _colorQuantity = _colorQuantityTemp;
+        _maskingQuantity = _maskingQuantityTemp;
 
-    if (std::filesystem::exists(_colorTablePath.value())) {
-        _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.value());
-    }
-    else {
-        LWARNING("Invalid path to transfer function, please enter new path");
-        _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
-        _transferFunction =
-            std::make_unique<TransferFunction>(_colorTablePath.stringValue());
+        if (_colorQuantity < static_cast<int>(_colorTablePaths.size())) {
+            _colorTablePath = _colorTablePaths[_colorQuantity].string();
+        }
+        else {
+            _colorTablePath = _colorTablePaths[0].string();
+        }
+
+        if (std::filesystem::exists(_colorTablePath.value())) {
+            _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.value());
+        }
+        else {
+            LWARNING("Invalid path to transfer function, please enter new path");
+            _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
+            _transferFunction =
+                std::make_unique<TransferFunction>(_colorTablePath.stringValue());
+        }
     }
 
     _shouldUpdateColorBuffer = true;
@@ -1196,6 +1199,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         }
         else {
             glDisableVertexArrayAttrib(_vao, 1);
+            _shouldUpdateColorBuffer = false;
         }
     }
 
@@ -1223,6 +1227,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         }
         else {
             glDisableVertexArrayAttrib(_vao, 2);
+            _shouldUpdateMaskingBuffer = false;
         }
     }
 }

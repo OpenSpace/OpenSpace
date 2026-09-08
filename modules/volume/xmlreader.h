@@ -1,9 +1,8 @@
-
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2026                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,65 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/rendering/volumeclipplanes.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <modules/volume/rawvolumemetadata.h>
 
-#include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <utility>
-
-namespace {
-    using namespace openspace;
-
-    constexpr Property::PropertyInfo NClipPlanesInfo = {
-        "nClipPlanes",
-        "# Clip Planes",
-        "Number of clip planes"
-    };
-
-} // namespace
-
-
-namespace openspace {
-
-VolumeClipPlanes::VolumeClipPlanes(const std::vector<ghoul::Dictionary>& planes)
-    : PropertyOwner({ "ClipPlanes", "Clip Planes", "" }) // @TODO Missing name
-    // @TODO Missing documentation
-    , _nClipPlanes( NClipPlanesInfo, 0, 0, 10)
+namespace openspace
 {
-    int index = 0;
-    for (const ghoul::Dictionary& c : planes) {
-        std::unique_ptr<VolumeClipPlane> clipPlane = std::make_unique<VolumeClipPlane>(c);
-        // TODO 2025-05-06 check if this is ok to do with Alex / Emma
-        clipPlane->setIdentifier(std::format("clipPlane_{}", index++));
-        addPropertySubOwner(clipPlane.get());
-
-        _clipPlanes.push_back(std::move(clipPlane));
-    }
-
-    _nClipPlanes = static_cast<int>(_clipPlanes.size());
-    addProperty(_nClipPlanes);
-}
-
-void VolumeClipPlanes::initialize() {
-
-}
-
-std::vector<glm::vec3> VolumeClipPlanes::normals() {
-    std::vector<glm::vec3> normals;
-    normals.reserve(_clipPlanes.size());
-    for (const std::unique_ptr<VolumeClipPlane>& clipPlane : _clipPlanes) {
-        normals.push_back(clipPlane->normal());
-    }
-    return normals;
-}
-
-std::vector<glm::vec2> VolumeClipPlanes::offsets() {
-    std::vector<glm::vec2> offsets;
-    offsets.reserve(_clipPlanes.size());
-    for (const std::unique_ptr<VolumeClipPlane>& clipPlane : _clipPlanes) {
-        offsets.push_back(clipPlane->offsets());
-    }
-    return offsets;
-}
+    std::pair<RawVolumeMetadata, std::vector<float>> readVTIFile(
+        const std::filesystem::path &path,
+        double timestep);
 
 } // namespace openspace

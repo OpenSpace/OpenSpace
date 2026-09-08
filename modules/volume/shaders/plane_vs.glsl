@@ -1,4 +1,3 @@
-
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -23,65 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/rendering/volumeclipplanes.h>
+#version __CONTEXT__
 
-#include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <utility>
+#include "powerscaling/powerscaling_vs.glsl"
 
-namespace {
-    using namespace openspace;
+layout(location = 0) in vec2 in_position;
 
-    constexpr Property::PropertyInfo NClipPlanesInfo = {
-        "nClipPlanes",
-        "# Clip Planes",
-        "Number of clip planes"
-    };
+out vec3 texCoord;
+out vec4 positionCameraSpace;
 
-} // namespace
+uniform vec3 normal;
+uniform float offset;
+uniform mat3 basis;
 
+uniform mat4 modelViewProjection;
+uniform mat4 modelViewTransform;
+uniform mat4 modelTransform;
 
-namespace openspace {
+void main() {
+    // The quad is covers -1.0 to 1.0 while the volume is defined for -0.5 to 0.5
+    vec2 pos = in_position * 0.5; // map quad to the range -0.5 to 0.5
+    // Scale plane so that it will cover entire volume on the diagonal
+    float quadScale = 1.42;
+    pos *= quadScale;
+    vec3 sliceCenter = normalize(normal) * offset;
+    // Convert 2D quad coordinates into 3D slice position
+    vec3 localPos = sliceCenter + basis * vec3(pos, 0.0);
+    // Remap texture coordinates to the range 0 to 1
+    texCoord = localPos + 0.5;
 
-VolumeClipPlanes::VolumeClipPlanes(const std::vector<ghoul::Dictionary>& planes)
-    : PropertyOwner({ "ClipPlanes", "Clip Planes", "" }) // @TODO Missing name
-    // @TODO Missing documentation
-    , _nClipPlanes( NClipPlanesInfo, 0, 0, 10)
-{
-    int index = 0;
-    for (const ghoul::Dictionary& c : planes) {
-        std::unique_ptr<VolumeClipPlane> clipPlane = std::make_unique<VolumeClipPlane>(c);
-        // TODO 2025-05-06 check if this is ok to do with Alex / Emma
-        clipPlane->setIdentifier(std::format("clipPlane_{}", index++));
-        addPropertySubOwner(clipPlane.get());
+    positionCameraSpace = modelViewTransform * modelTransform * vec4(localPos, 1.0);
 
-        _clipPlanes.push_back(std::move(clipPlane));
-    }
+    vec4 positionClipSpace = modelViewProjection * modelTransform * vec4(localPos, 1.0);
+    vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
-    _nClipPlanes = static_cast<int>(_clipPlanes.size());
-    addProperty(_nClipPlanes);
+    gl_Position =  positionScreenSpace;
 }
-
-void VolumeClipPlanes::initialize() {
-
-}
-
-std::vector<glm::vec3> VolumeClipPlanes::normals() {
-    std::vector<glm::vec3> normals;
-    normals.reserve(_clipPlanes.size());
-    for (const std::unique_ptr<VolumeClipPlane>& clipPlane : _clipPlanes) {
-        normals.push_back(clipPlane->normal());
-    }
-    return normals;
-}
-
-std::vector<glm::vec2> VolumeClipPlanes::offsets() {
-    std::vector<glm::vec2> offsets;
-    offsets.reserve(_clipPlanes.size());
-    for (const std::unique_ptr<VolumeClipPlane>& clipPlane : _clipPlanes) {
-        offsets.push_back(clipPlane->offsets());
-    }
-    return offsets;
-}
-
-} // namespace openspace

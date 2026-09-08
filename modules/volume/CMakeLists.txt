@@ -46,8 +46,10 @@ set(HEADER_FILES
   rendering/basicvolumeraycaster.h
   rendering/volumeclipplane.h
   rendering/volumeclipplanes.h
+  tasks/convertvtitobintask.h
   tasks/generaterawvolumetask.h
   tasks/generaterawvolumefromfiletask.h
+  xmlreader.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -66,8 +68,10 @@ set(SOURCE_FILES
   rendering/basicvolumeraycaster.cpp
   rendering/volumeclipplane.cpp
   rendering/volumeclipplanes.cpp
+  tasks/convertvtitobintask.cpp
   tasks/generaterawvolumetask.cpp
   tasks/generaterawvolumefromfiletask.cpp
+  xmlreader.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -76,6 +80,8 @@ set(SHADER_FILES
   shaders/bounds_vs.glsl
   shaders/helper.glsl
   shaders/raycast.glsl
+  shaders/plane_fs.glsl
+  shaders/plane_vs.glsl
   shaders/vectorfield_fs.glsl
   shaders/vectorfield_gs.glsl
   shaders/vectorfield_vs.glsl
@@ -88,3 +94,8 @@ create_new_module(
   volume_module
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
+
+# This introduces a dependency into SGCT, but the way it is handled is not great right now
+# This will break when we remove tinyxml2 from SGCT and then we can move the submodule
+# over into this ext folder and fix it well
+target_link_libraries(${volume_module} PRIVATE tinyxml2)
