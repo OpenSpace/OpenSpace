@@ -42,23 +42,13 @@ begin_dependency("nlohmann")
 find_package(nlohmann_json CONFIG REQUIRED)
 end_dependency()
 
-# Curl
+# date - Howard Hinnant's date library (vcpkg). Only the header-only date::date target is
+# used; the tz database features are not needed.
+begin_dependency("date")
+find_package(date CONFIG REQUIRED)
+end_dependency()
+
+# Curl (vcpkg)
 begin_dependency("CURL")
-if (WIN32)
-  add_library(external-curl SHARED IMPORTED GLOBAL)
-  target_include_directories(external-curl INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/curl/include)
-  set_property(TARGET external-curl PROPERTY IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libcurl.lib)
-  set_property(TARGET external-curl PROPERTY IMPORTED_LOCATION
-    ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libcurl.dll
-    ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libeay32.dll
-    ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/ssleay32.dll
-  )
-else ()
-  find_package(CURL)
-  if (CURL_FOUND)
-    add_library(external-curl INTERFACE)
-    target_include_directories(external-curl INTERFACE ${CURL_INCLUDE_DIRS})
-    target_link_libraries(external-curl INTERFACE ${CURL_LIBRARIES})
-  endif ()
-endif ()
+find_package(CURL REQUIRED)
 end_dependency()

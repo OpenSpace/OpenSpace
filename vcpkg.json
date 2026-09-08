@@ -29,6 +29,9 @@
   "dependencies": [
     "ghoul",
     "sgct",
+    "curl",
+    { "name": "date", "default-features": false },
+    "kubazip",
     "nlohmann-json",
     "json-schema-validator",
     "stb",
