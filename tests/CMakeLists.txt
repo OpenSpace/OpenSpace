@@ -59,14 +59,19 @@ add_executable(
 
 set_openspace_compile_settings(OpenSpaceTest)
 
-target_include_directories(OpenSpaceTest
-  PRIVATE
-    "../apps/OpenSpace/ext/sgct/ext/json/include"
-    "../apps/OpenSpace/ext/sgct/ext/json-schema-validator/src"
-)
+find_package(Catch2 CONFIG REQUIRED)
+find_package(sgct CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(nlohmann_json_schema_validator CONFIG REQUIRED)
 
 target_compile_definitions(OpenSpaceTest PRIVATE "GHL_THROW_ON_ASSERT")
-target_link_libraries(OpenSpaceTest PRIVATE Catch2 openspace-core sgct)
+target_link_libraries(OpenSpaceTest PRIVATE
+  Catch2::Catch2
+  openspace-core
+  sgct::sgct
+  nlohmann_json::nlohmann_json
+  nlohmann_json_schema_validator::validator
+)
 
 target_precompile_headers(OpenSpaceTest PRIVATE
   <catch2/catch_test_macros.hpp>
@@ -90,3 +95,5 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
 endif ()
 
 set_target_properties(OpenSpaceTest PROPERTIES FOLDER "Unit Tests")
+
+add_test(NAME OpenSpaceTest COMMAND OpenSpaceTest)

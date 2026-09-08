@@ -24,18 +24,30 @@
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
-execute_process(
-  COMMAND git apply --verbose --recount --whitespace=fix "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_1_md_os_h.patch"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-execute_process(
-  COMMAND git apply --verbose --recount --whitespace=fix "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_2_md_os_c.patch"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-execute_process(
-  COMMAND git apply --verbose --recount --whitespace=fix "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_3_md_gl_c.patch"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
+# The mold submodule needs three local patches. Apply each only if it is not already
+# applied, so that re-running CMake configure over an already-patched checkout is a no-op
+# instead of a stream of "patch does not apply" errors.
+function (apply_mold_patch patch_file)
+  set(patch "${CMAKE_CURRENT_SOURCE_DIR}/${patch_file}")
+  execute_process(
+    COMMAND git apply --reverse --check "${patch}"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    RESULT_VARIABLE already_applied
+    OUTPUT_QUIET ERROR_QUIET
+  )
+  if (already_applied EQUAL 0)
+    message(STATUS "mold patch already applied: ${patch_file}")
+  else ()
+    execute_process(
+      COMMAND git apply --verbose --recount --whitespace=fix "${patch}"
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+  endif ()
+endfunction ()
+
+apply_mold_patch(pathpatch_1_md_os_h.patch)
+apply_mold_patch(pathpatch_2_md_os_c.patch)
+apply_mold_patch(pathpatch_3_md_gl_c.patch)
 
 set(HEADER_FILES
   moleculemodule.h

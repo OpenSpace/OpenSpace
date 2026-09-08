@@ -568,7 +568,7 @@ target_include_directories(openspace-core
     ${PROJECT_SOURCE_DIR}
 )
 
-target_link_libraries(openspace-core PUBLIC nlohmann_json)
+target_link_libraries(openspace-core PUBLIC nlohmann_json::nlohmann_json)
 
 if (UNIX)
   # On Arch Linux, if you have the package `oneapi` installed, this influences including
@@ -627,4 +627,4 @@ if (WIN32)
 endif ()
 
 set_openspace_compile_settings(openspace-core)
-target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)
+target_link_libraries(openspace-core PUBLIC Ghoul::Ghoul spice external-curl)

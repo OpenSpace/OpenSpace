@@ -22,15 +22,12 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-# Ghoul
-if (NOT OPENSPACE_HAVE_TESTS)
-  # Unless overriden, disable ghoul tests if OpenSpace tests are disabled
-  set(GHOUL_HAVE_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
-endif()
-add_subdirectory(ghoul)
-if (TARGET GhoulTest)
-  set_target_properties(GhoulTest PROPERTIES FOLDER "Unit Tests")
-endif ()
+# Ghoul is resolved through the vcpkg overlay port at
+# ext/ghoul/support/vcpkg/ports/ghoul, which builds the enclosing submodule checkout.
+# The ghoul submodule stays checked out because that port builds from its source path.
+begin_dependency("Ghoul")
+find_package(ghoul CONFIG REQUIRED)
+end_dependency()
 
 # Spice
 begin_dependency("Spice")
@@ -40,9 +37,9 @@ target_compile_features(spice PUBLIC cxx_std_20)
 set_target_properties(spice PROPERTIES FOLDER "External")
 end_dependency()
 
-# nlohmann
+# nlohmann JSON (vcpkg)
 begin_dependency("nlohmann")
-add_subdirectory(json)
+find_package(nlohmann_json CONFIG REQUIRED)
 end_dependency()
 
 # Curl

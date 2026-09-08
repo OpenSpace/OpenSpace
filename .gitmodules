@@ -50,9 +50,6 @@
 [submodule "modules/opensoundcontrol/ext/oscpack"]
 	path = modules/opensoundcontrol/ext/oscpack
 	url = https://github.com/OpenSpace/oscpack.git
-[submodule "ext/json"]
-	path = ext/json
-	url = https://github.com/nlohmann/json
 [submodule "support/cmake/common-compile-settings"]
 	path = support/cmake/common-compile-settings
 	url = https://github.com/OpenSpace/common-compile-settings

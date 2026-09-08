@@ -1,5 +1,0 @@
-<Project>
-    <PropertyGroup Label="Vcpkg">
-        <VcpkgEnabled>false</VcpkgEnabled>
-    </PropertyGroup>
-</Project>
