@@ -467,19 +467,6 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
             wasChanged = true;
         }
 
-        // Logarithmic scaling toggle
-        if (ImGui::Checkbox("Log scale", &variable.useLogScale)) {
-            wasChanged = true;
-        }
-
-        const ImVec4 WarningColor = ImVec4(1.f, 0.6f, 0.2f, 1.f);
-        if (variable.useLogScale && variable.colorScaleMin <= 0.f) {
-            ImGui::TextColored(WarningColor, "Min must be > 0 for log scale");
-        }
-        if (variable.useLogScale && variable.colorScaleMax <= 0.f) {
-            ImGui::TextColored(WarningColor, "Max must be > 0 for log scale");
-        }
-
         bool updateMinMax = false;
 
         std::vector<size_t> relevantIndices;
@@ -527,6 +514,20 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
             variable.colorScaleMax = newMax;
             wasChanged = true;
         };
+
+
+        // Logarithmic scaling toggle
+        if (ImGui::Checkbox("Log scale", &variable.useLogScale)) {
+            wasChanged = true;
+        }
+
+        const ImVec4 WarningColor = ImVec4(1.f, 0.6f, 0.2f, 1.f);
+        if (variable.useLogScale && variable.colorScaleMin <= 0.f) {
+            ImGui::TextColored(WarningColor, "Min must be > 0 for log scale");
+        }
+        if (variable.useLogScale && variable.colorScaleMax <= 0.f) {
+            ImGui::TextColored(WarningColor, "Max must be > 0 for log scale");
+        }
 
         // Render an opacity slider
         ImGui::SetNextItemWidth(InputWidth);
