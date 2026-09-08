@@ -188,6 +188,7 @@ set(OPENSPACE_SOURCE
   topic/serverinterface.cpp
   topic/server.cpp
   topic/topics/actionkeybindtopic.cpp
+  topic/topics/assettreetopic.cpp
   topic/topics/authorizationtopic.cpp
   topic/topics/camerapathtopic.cpp
   topic/topics/cameratopic.cpp
@@ -409,6 +410,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/serverinterface.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/server.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/actionkeybindtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/assettreetopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/authorizationtopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/camerapathtopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/cameratopic.h
