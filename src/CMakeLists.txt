@@ -547,14 +547,6 @@ add_library(
   STATIC
   ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE} ${OPENSPACE_SHADERS}
 )
-target_include_directories(openspace-core SYSTEM
-  PUBLIC
-    # In order to use the date library
-    ${PROJECT_SOURCE_DIR}/ext/date/include
-    # In order to use the nlohmann JSON library
-    ${PROJECT_SOURCE_DIR}/ext
-)
-
 target_include_directories(openspace-core
   PUBLIC
     # In order to be able to include openspace-core files
@@ -568,7 +560,14 @@ target_include_directories(openspace-core
     ${PROJECT_SOURCE_DIR}
 )
 
-target_link_libraries(openspace-core PUBLIC nlohmann_json)
+target_link_libraries(openspace-core PUBLIC nlohmann_json::nlohmann_json)
+
+# kuba--/zip (vcpkg port "kubazip"). Used by the scripting engine's UnzipFile and by the
+# sync module; both include <zip/zip.h>. Previously this rode along inside Ghoul's vendored
+# assimp contrib, which vcpkg's assimp no longer exposes. PUBLIC so the sync module picks
+# up the include directory transitively.
+find_package(zip CONFIG REQUIRED)
+target_link_libraries(openspace-core PUBLIC zip::zip)
 
 if (UNIX)
   # On Arch Linux, if you have the package `oneapi` installed, this influences including
@@ -627,4 +626,4 @@ if (WIN32)
 endif ()
 
 set_openspace_compile_settings(openspace-core)
-target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)
+target_link_libraries(openspace-core PUBLIC Ghoul::Ghoul spice CURL::libcurl date::date)

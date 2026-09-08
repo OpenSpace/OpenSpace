@@ -31,11 +31,11 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 #####
 # OpenVR
 #####
-option(OPENSPACE_OPENVR_SUPPORT "Build OpenSpace application with OpenVR support" OFF)
-
+# OPENSPACE_OPENVR_SUPPORT is declared in the top-level CMakeLists.txt (before project())
+# so it can drive the vcpkg "openvr" manifest feature.
 if (OPENSPACE_OPENVR_SUPPORT)
   begin_header("Dependency: OpenVR")
-  find_package(OpenVR REQUIRED)
+  find_package(openvr CONFIG REQUIRED)
 
   set(SGCT_OPENVR_DEFINITIONS OPENVR_SUPPORT)
   if (NOT SGCT_OPENVR_INCLUDE_DIRECTORY)
@@ -81,11 +81,17 @@ create_new_application(OpenSpace
 
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
+# main.cpp loads the window icon through stb_image directly. The stb headers come from
+# vcpkg; the stb_image implementation is compiled into Ghoul, so only the include path is
+# needed here.
+find_path(STB_INCLUDE_DIR "stb_image.h" REQUIRED)
+
 target_include_directories(
   OpenSpace PRIVATE
   ${OPENVR_INCLUDE_DIRS}
   ${SGCT_OPENVR_INCLUDE_DIRECTORY}
   ${SPOUT_INCLUDE_DIRS}
+  ${STB_INCLUDE_DIR}
 )
 
 target_link_libraries(OpenSpace PRIVATE openspace-core openspace-module-collection ${OPENVR_LIBRARY} ${SPOUT_LIBRARY})
@@ -101,25 +107,12 @@ endif ()
 
 begin_header("Dependency: SGCT")
 
-set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_JSON OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
-
-if (NOT OPENSPACE_HAVE_TESTS)
-  # Unless overriden, disable sgct tests if OpenSpace tests are disabled
-  set(SGCT_BUILD_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
-endif()
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
-target_link_libraries(OpenSpace PRIVATE sgct)
-
-set_target_properties(sgct PROPERTIES FOLDER "External")
-set_target_properties(glfw PROPERTIES FOLDER "External")
-if (TARGET SGCTTest)
-  set_target_properties(SGCTTest PROPERTIES FOLDER "External")
-endif ()
+# SGCT is resolved through the vcpkg overlay port at
+# apps/OpenSpace/ext/sgct/support/vcpkg/ports/sgct, which builds the enclosing submodule
+# checkout. The sgct submodule stays checked out because that port builds from its source
+# path (and additional_includes/openvr is still consumed from it above).
+find_package(sgct CONFIG REQUIRED)
+target_link_libraries(OpenSpace PRIVATE sgct::sgct)
 
 if (UNIX)
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
@@ -144,14 +137,29 @@ if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
   end_header("Dependency: Profile Editor")
 
   if (WIN32)
-    # Find the windeployqt application
-    get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
-    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
-    add_custom_command(
-      TARGET OpenSpace POST_BUILD
-      COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
-      COMMENT "Deploying Qt libraries"
-    )
+    # Qt comes from vcpkg and is linked dynamically (LGPL compliance). The Qt DLLs
+    # themselves are picked up by the $<TARGET_RUNTIME_DLLS:OpenSpace> copy further down,
+    # but the runtime plugins (platforms/qwindows.dll, styles, imageformats, tls, ...) are
+    # loaded at runtime and not seen as link dependencies, so copy them next to the
+    # executable. The vcpkg qtbase port does not ship windeployqt, so this is done by hand.
+    # Release plugins live in <triplet>/Qt6/plugins, debug plugins in
+    # <triplet>/debug/Qt6/plugins.
+    get_filename_component(_qt_triplet_dir "${Qt6_DIR}/../.." ABSOLUTE)
+    set(_qt_plugins_release "${_qt_triplet_dir}/Qt6/plugins")
+    set(_qt_plugins_debug "${_qt_triplet_dir}/debug/Qt6/plugins")
+    file(GLOB _qt_plugin_groups RELATIVE "${_qt_plugins_release}" "${_qt_plugins_release}/*")
+    foreach (_group ${_qt_plugin_groups})
+      if (IS_DIRECTORY "${_qt_plugins_release}/${_group}")
+        add_custom_command(
+          TARGET OpenSpace POST_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "$<IF:$<CONFIG:Debug>,${_qt_plugins_debug}/${_group},${_qt_plugins_release}/${_group}>"
+            "$<TARGET_FILE_DIR:OpenSpace>/${_group}"
+          COMMENT "Deploying Qt plugin group '${_group}'"
+          VERBATIM
+        )
+      endif ()
+    endforeach ()
   endif ()
 endif ()
 

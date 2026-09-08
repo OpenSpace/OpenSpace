@@ -22,15 +22,12 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-# Ghoul
-if (NOT OPENSPACE_HAVE_TESTS)
-  # Unless overriden, disable ghoul tests if OpenSpace tests are disabled
-  set(GHOUL_HAVE_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
-endif()
-add_subdirectory(ghoul)
-if (TARGET GhoulTest)
-  set_target_properties(GhoulTest PROPERTIES FOLDER "Unit Tests")
-endif ()
+# Ghoul is resolved through the vcpkg overlay port at
+# ext/ghoul/support/vcpkg/ports/ghoul, which builds the enclosing submodule checkout.
+# The ghoul submodule stays checked out because that port builds from its source path.
+begin_dependency("Ghoul")
+find_package(ghoul CONFIG REQUIRED)
+end_dependency()
 
 # Spice
 begin_dependency("Spice")
@@ -40,28 +37,18 @@ target_compile_features(spice PUBLIC cxx_std_20)
 set_target_properties(spice PROPERTIES FOLDER "External")
 end_dependency()
 
-# nlohmann
+# nlohmann JSON (vcpkg)
 begin_dependency("nlohmann")
-add_subdirectory(json)
+find_package(nlohmann_json CONFIG REQUIRED)
 end_dependency()
 
-# Curl
+# date - Howard Hinnant's date library (vcpkg). Only the header-only date::date target is
+# used; the tz database features are not needed.
+begin_dependency("date")
+find_package(date CONFIG REQUIRED)
+end_dependency()
+
+# Curl (vcpkg)
 begin_dependency("CURL")
-if (WIN32)
-  add_library(external-curl SHARED IMPORTED GLOBAL)
-  target_include_directories(external-curl INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/curl/include)
-  set_property(TARGET external-curl PROPERTY IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libcurl.lib)
-  set_property(TARGET external-curl PROPERTY IMPORTED_LOCATION
-    ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libcurl.dll
-    ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libeay32.dll
-    ${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/ssleay32.dll
-  )
-else ()
-  find_package(CURL)
-  if (CURL_FOUND)
-    add_library(external-curl INTERFACE)
-    target_include_directories(external-curl INTERFACE ${CURL_INCLUDE_DIRS})
-    target_link_libraries(external-curl INTERFACE ${CURL_LIBRARIES})
-  endif ()
-endif ()
+find_package(CURL REQUIRED)
 end_dependency()
