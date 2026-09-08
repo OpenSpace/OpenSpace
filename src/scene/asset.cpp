@@ -213,6 +213,11 @@ void Asset::startSynchronizations() {
     }
 
     setState(State::Synchronizing);
+    global::eventEngine->publishEvent<EventAssetLoading>(
+        _assetPath.string(),
+        EventAssetLoading::State::Loading
+    );
+    _manager.updateAssetState(_assetPath, EventAssetLoading::State::Loading);
 
     // Start synchronization of all children first
     for (Asset* child : _requiredAssets) {

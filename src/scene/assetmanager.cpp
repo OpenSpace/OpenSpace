@@ -253,11 +253,6 @@ void AssetManager::runAddQueue() {
         _rootAssets.push_back(a);
         notifyAssetTreeSubscribers({ AssetTreeChange::Type::RootAssets });
         a->startSynchronizations();
-        global::eventEngine->publishEvent<EventAssetLoading>(
-            a->path().string(),
-            EventAssetLoading::State::Loading
-        );
-        updateAssetState(a->path(), EventAssetLoading::State::Loading);
 
         _toBeInitialized.push_back(a);
         global::profile->addAsset(asset);
