@@ -41,6 +41,7 @@ public:
         float colorScaleMin = 0.f;
         float colorScaleMax = 100.f;
         float opacity = 1.f;
+        bool useLogScale = false;
     };
 
     ColorMappingView(DataViewer& dataViewer,
