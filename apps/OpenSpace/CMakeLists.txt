@@ -129,10 +129,7 @@ end_header("Dependency: SGCT")
 
 # Profile Editor / Launcher GUI
 option(OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER "Build Launcher GUI" ON)
-if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER AND NOT OPENSPACE_ENABLE_QT)
-  message(STATUS "OPENSPACE_ENABLE_QT is OFF, so the Launcher GUI is disabled")
-endif ()
-if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER AND OPENSPACE_ENABLE_QT)
+if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
   begin_header("Dependency: Profile Editor")
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
   target_link_libraries(OpenSpace PRIVATE openspace-ui-launcher)

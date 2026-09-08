@@ -24,11 +24,6 @@
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 
-if (NOT OPENSPACE_ENABLE_QT)
-  message(STATUS "OPENSPACE_ENABLE_QT is OFF, so the AssetBuilder application is skipped")
-  return()
-endif ()
-
 set(HEADER_FILES
   include/asseteditorwidget.h
   include/contentslistwidget.h

@@ -38,15 +38,11 @@ set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 # corresponding dependency: delete build/<preset>/vcpkg_installed (or the whole build
 # directory) and configure again.
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
-option(OPENSPACE_ENABLE_QT "Build the Qt-based Launcher and AssetBuilder applications" ON)
 option(OPENSPACE_ENABLE_TRACY "Enable profiling with Tracy" OFF)
 option(OPENSPACE_OPENVR_SUPPORT "Build the OpenSpace application with OpenVR support" OFF)
 
 if (OPENSPACE_HAVE_TESTS)
   list(APPEND VCPKG_MANIFEST_FEATURES "tests")
-endif ()
-if (OPENSPACE_ENABLE_QT)
-  list(APPEND VCPKG_MANIFEST_FEATURES "qt")
 endif ()
 if (OPENSPACE_ENABLE_TRACY)
   list(APPEND VCPKG_MANIFEST_FEATURES "profiling")
