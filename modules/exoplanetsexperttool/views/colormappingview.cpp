@@ -286,12 +286,15 @@ bool ColorMappingView::renderViewContent() {
 void LogColormapScale(const char* label, double scaleMin, double scaleMax,
                       float barWidthPx, float height)
 {
-    if (scaleMin <= 0.0 || scaleMax <= 0.0 || scaleMin >= scaleMax) {
+    if (scaleMin <= 0.0 || scaleMax <= 0.0 || scaleMin == scaleMax) {
         return;
     }
 
     const double logMin = std::log10(scaleMin);
     const double logMax = std::log10(scaleMax);
+
+    const double tickMin = std::min(scaleMin, scaleMax);
+    const double tickMax = std::max(scaleMin, scaleMax);
 
     auto buildTicks = [](
         double minV,
@@ -329,10 +332,10 @@ void LogColormapScale(const char* label, double scaleMin, double scaleMax,
 
     std::vector<double> majorValues;
     std::vector<std::string> majorLabels;
-    buildTicks(scaleMin, scaleMax, { 1.0 }, majorValues, &majorLabels);
+    buildTicks(tickMin, tickMax, { 1.0 }, majorValues, &majorLabels);
 
     std::vector<double> minorValues;
-    buildTicks(scaleMin, scaleMax, { 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 }, minorValues);
+    buildTicks(tickMin, tickMax, { 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 }, minorValues);
 
     std::vector<const char*> majorLabelPtrs;
     majorLabelPtrs.reserve(majorLabels.size());
@@ -391,7 +394,9 @@ void LogColormapScale(const char* label, double scaleMin, double scaleMax,
             const ImVec2 p1 = ImPlot::PlotToPixels(ImPlotPoint(barFrac, v1));
             const ImVec4 c = ImPlot::SampleColormap(0.5f * (t0 + t1));
 
-            plotDl->AddRectFilled(p0, p1, ImGui::ColorConvertFloat4ToU32(c));
+            const ImVec2 rMin(std::min(p0.x, p1.x), std::min(p0.y, p1.y));
+            const ImVec2 rMax(std::max(p0.x, p1.x), std::max(p0.y, p1.y));
+            plotDl->AddRectFilled(rMin, rMax, ImGui::ColorConvertFloat4ToU32(c));
         }
 
         ImDrawList* windowDl = ImGui::GetWindowDrawList();
