@@ -32,6 +32,7 @@
 #include <modules/exoplanetsexperttool/views/columnselectionview.h>
 #include <modules/exoplanetsexperttool/views/filteringview.h>
 #include <modules/exoplanetsexperttool/views/systemview.h>
+#include <modules/exoplanetsexperttool/views/tableview.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <ghoul/glm.h>
 #include <filesystem>
@@ -74,8 +75,12 @@ public:
     const std::vector<size_t>& currentFiltering() const;
     const std::vector<ColumnKey>& columns() const;
     const DataSettings::DataMapping& dataMapping() const;
+    const DataSettings& dataSettings() const;
+    bool filterChanged() const;
 
     ColorMappingView* colorMappingView();
+    SystemViewer* systemViewer();
+    TableView* tableView();
 
     std::vector<size_t> planetsForHost(const std::string& hostStar) const;
 
@@ -99,14 +104,10 @@ public:
     void renderTable(const std::string& tableId, std::vector<size_t>& dataRows,
         bool useFixedHeight, std::string_view search = "");
 
-    // Render the first column in the table, which is used for navigation
-    void renderFirstTableColumn(const ExoplanetItem& item, size_t row);
-
     // Render column description on the same line as the previous imgui item,
     // if a description exists.
     void renderColumnDescriptionTooltip(size_t index) const;
 
-    void renderColumnValue(size_t columnIndex, const ExoplanetItem& item) const;
     void renderColumnValue(const ColumnKey& key, const ExoplanetItem& item) const;
 
 private:
@@ -143,18 +144,17 @@ private:
     std::unique_ptr<ColorMappingView> _colorMappingView;
     std::unique_ptr<FilteringView> _filteringView;
     std::unique_ptr<SystemViewer> _systemViewer;
+    std::unique_ptr<TableView> _tableView;
 
     std::vector<ExoplanetItem> _data;
     std::vector<size_t> _filteredData;  // The indices of the items which will be rendered
     std::vector<size_t> _selection;     // Indices of selected data points
 
-    std::vector<size_t> _pinnedItems;
-
     std::unordered_map<std::string, std::vector<size_t>> _hostIdToPlanetsMap;
 
     std::unordered_map<std::string, float> _meanColumnValues; // For only numerical columns
 
-    std::vector<ColumnKey> _columns;
+    std::vector<ColumnKey> _columns; // All loaded columns
 
     bool _colormapWasChanged = true;
     bool _filterChanged = false;

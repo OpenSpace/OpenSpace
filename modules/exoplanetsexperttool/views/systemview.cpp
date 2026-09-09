@@ -26,6 +26,7 @@
 
 #include <modules/exoplanetsexperttool/dataviewer.h>
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
+#include <modules/exoplanetsexperttool/views/tableview.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -337,7 +338,7 @@ void SystemViewer::renderSystemViewContent(const std::string& host) {
             // windows. This is not possible just using the same id in the BeginTable call,
             // since the id is connected to the ImGuiwindow instance
             ImGui::PushOverrideID(ImHashStr("systemTable"));
-            _dataViewer.renderTable("systemTable", planetIndices, true);
+            _dataViewer.tableView()->renderTable("systemTable", planetIndices, true);
             ImGui::PopID();
 
 

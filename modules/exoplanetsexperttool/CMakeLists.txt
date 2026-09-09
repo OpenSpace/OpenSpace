@@ -37,6 +37,7 @@ set(HEADER_FILES
     views/columnselectionview.h
     views/filteringview.h
     views/systemview.h
+    views/tableview.h
     views/viewhelper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -53,6 +54,7 @@ set(SOURCE_FILES
     views/columnselectionview.cpp
     views/filteringview.cpp
     views/systemview.cpp
+    views/tableview.cpp
     views/viewhelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

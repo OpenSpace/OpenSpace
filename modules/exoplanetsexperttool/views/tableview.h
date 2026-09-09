@@ -22,51 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNSELECTIONVIEW___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNSELECTIONVIEW___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___TABLEVIEW___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___TABLEVIEW___H__
 
 #include <modules/exoplanetsexperttool/datastructures.h>
-#include <string>
-#include <vector>
 
 namespace openspace::exoplanets {
 
-class ColumnSelectionView {
+class DataViewer;
+
+class TableView {
 public:
-    ColumnSelectionView() = default;
+    TableView(DataViewer& dataViewer, const std::vector<ColumnKey>& columns);
 
-    /**
-     * Returns the columns in order of:
-     *   1. Name column
-     *   2. Named columns from the \p dataSettings
-     *   3. Any other columns in the dataset
-     */
-    std::vector<ColumnKey> initializeColumnsFromData(
-        const std::vector<ExoplanetItem>& data, const DataSettings& dataSettings);
+    void updateColumns(const std::vector<ColumnKey>& columns);
 
-    bool renderColumnSettingsView(const DataSettings& dataSettings);
+    void renderTableView(std::vector<size_t>& filteredDataRows);
 
-    std::vector<ColumnKey> orderedSelectedColumns() const;
+    // Render the table with the given data rows, optionally filtering by a search string
+    void renderTable(const std::string& tableId, std::vector<size_t>& dataRows,
+        bool useFixedHeight, std::string_view search = "");
 
 private:
-    std::vector<ColumnKey> _namedColumns;
-    std::vector<ColumnKey> _otherColumns;
+    // Render the first column in the table, which is used for navigation
+    void renderFirstTableColumn(const ExoplanetItem& item, size_t row);
 
-    // The name column is always selected
-    ColumnKey _nameColumn;
+    DataViewer& _dataViewer;
 
-    // Column selection for table views
-    std::vector<bool> _selectedNamedColumns;
-    std::vector<bool> _selectedOtherColumns;
+    std::vector<size_t> _selection;     // Indices of selected data points
+    std::vector<size_t> _pinnedItems;
 
-    // Saved column selection before opening the column selection view,
-    // to allow for canceling changes or preventing invalid selections
-    std::vector<bool> _savedSelectedNamedColumns;
-    std::vector<bool> _savedSelectedOtherColumns;
+    // ImGui table only supports a limited number of columns, so we need to keep track of
+    // the columns we want to display
+    std::vector<ColumnKey> _columns;
 
-    std::vector<ColumnKey> _savedSelectedColumns;
 };
 
 } // namespace openspace::exoplanets
 
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNSELECTIONVIEW___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___TABLEVIEW___H__

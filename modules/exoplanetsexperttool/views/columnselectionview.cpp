@@ -34,30 +34,30 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
                                                   const std::vector<ExoplanetItem>& data,
                                                   const DataSettings& dataSettings)
 {
-    std::vector<ColumnKey> result;
+    std::vector<ColumnKey> allColumnsOrdered;
 
     if (data.empty()) {
-        return result;
+        return allColumnsOrdered;
     }
 
     const auto& allDataColumns = data.front().dataColumns;
     const auto& columnsWithSettings = dataSettings.columnInfo;
 
-    auto isNameColumn = [&dataSettings](const ColumnKey & key) {
-        return key == dataSettings.dataMapping.name;
-    };
+    allColumnsOrdered.reserve(allDataColumns.size());
 
     // The name column is required and should be handled separately, to always be the
     // first column
     bool hasNameColumn = !dataSettings.nameColumn().empty();
-    result.push_back(hasNameColumn ? dataSettings.nameColumn() : "name");
+    _nameColumn = hasNameColumn ? dataSettings.nameColumn() : "name";
+
+    allColumnsOrdered.push_back(_nameColumn);
 
     // The default column are the which info has been provided for, if they exist in
     // the dataset
     _namedColumns.clear();
     _namedColumns.reserve(columnsWithSettings.size());
     for (auto const& [key, _] : columnsWithSettings) {
-        if (allDataColumns.contains(key) && !isNameColumn(key)) {
+        if (allDataColumns.contains(key) && key != _nameColumn) {
             _namedColumns.push_back(key);
         }
     }
@@ -75,87 +75,63 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
         }
     );
 
-    result.insert(result.end(), _namedColumns.begin(), _namedColumns.end());
-    _selectedNamedColumns.assign(result.size(), true);
+    allColumnsOrdered.insert(allColumnsOrdered.end(), _namedColumns.begin(), _namedColumns.end());
+    _selectedNamedColumns.assign(allColumnsOrdered.size(), true);
 
     // Add other columns, if there are any. Assume all items have the same columns
     _otherColumns.clear();
     _otherColumns.reserve(allDataColumns.size());
     for (auto const& [key, _] : allDataColumns) {
-        if (!columnsWithSettings.contains(key) && !isNameColumn(key)) {
+        if (!columnsWithSettings.contains(key) && key != _nameColumn) {
             _otherColumns.push_back(key);
         }
     }
     _otherColumns.shrink_to_fit();
+    allColumnsOrdered.insert(allColumnsOrdered.end(), _otherColumns.begin(), _otherColumns.end());
     _selectedOtherColumns.assign(_otherColumns.size(), false);
 
-    // Fill up with other columns
-    for (size_t i = 0; i < _otherColumns.size(); ++i) {
-        if (result.size() == (IMGUI_TABLE_MAX_COLUMNS - 1)) {
-            break;
-        }
-        const ColumnKey& key = _otherColumns[i];
-        result.push_back(key);
-        _selectedOtherColumns[i] = true;
-    }
+    allColumnsOrdered.shrink_to_fit();
 
-    _savedSelectedNamedColumns = _selectedNamedColumns;
-    _savedSelectedOtherColumns = _selectedOtherColumns;
-
-    return result;
+    return allColumnsOrdered;
 }
 
-void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& columnsToEdit,
-                                                   const DataSettings& dataSettings)
-{
-    if (ImGui::Button("Set up columns...")) {
-        ImGui::OpenPopup("Set columns");
+bool ColumnSelectionView::renderColumnSettingsView(const DataSettings& dataSettings) {
+    static bool showSetColumnsWindow = false;
+    if (ImGui::Button("Set up table columns...")) {
+        showSetColumnsWindow = true;
+    }
+
+    if (!showSetColumnsWindow) {
+        return false;
     }
 
     // Always center this window when appearing
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-    ImGuiWindowFlags flags = ImGuiWindowFlags_None;
-
-    if (!ImGui::BeginPopupModal("Set columns", NULL, flags)) {
-        return;
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoSavedSettings;
+    if (!ImGui::Begin("Set table columns", &showSetColumnsWindow, flags)) {
+        ImGui::End();
+        return false;
     }
 
     int nSelected = 0;
+    bool selectionChanged = false;
 
-    auto resetSelection = [this]() {
+    auto resetSelection = [&selectionChanged, this]() {
         _selectedNamedColumns = _savedSelectedNamedColumns;
         _selectedOtherColumns = _savedSelectedOtherColumns;
+        selectionChanged = false;
     };
 
-    auto applySelection = [&columnsToEdit, &dataSettings, this](size_t nSelected) {
-        columnsToEdit.clear();
-        columnsToEdit.reserve(nSelected + 1);
-
-        bool hasNameColumn = !dataSettings.nameColumn().empty();
-        columnsToEdit.push_back(hasNameColumn ? dataSettings.nameColumn() : "name");
-
-        for (int i = 0; i < _namedColumns.size(); i++) {
-            if (_selectedNamedColumns[i]) {
-                columnsToEdit.push_back(_namedColumns[i]);
-            }
-        }
-
-        for (int i = 0; i < _otherColumns.size(); i++) {
-            if (_selectedOtherColumns[i]) {
-                columnsToEdit.push_back(_otherColumns[i]);
-            }
-        }
-
+    auto applySelection = [&selectionChanged, this]() {
         _savedSelectedNamedColumns = _selectedNamedColumns;
         _savedSelectedOtherColumns = _selectedOtherColumns;
+        selectionChanged = true;
     };
 
     ImGui::TextWrapped(
-        "This view controls which data columns are exposed in the application. "
-        "Only the selected columns will be exposed in the table view, can be "
-        "used for color mapping, filtering, et cetera. "
+        "Select which columns to show in the tables in the interface."
     );
 
     ImGui::Separator();
@@ -176,22 +152,19 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
             ImGui::Text("Object name: ");
             ImGui::SameLine();
 
-            bool hasNameColumn = !dataSettings.nameColumn().empty();
-            const ColumnKey nameColumn = hasNameColumn ? dataSettings.nameColumn() : "name";
-
             view::helper::renderDescriptiveText(
-                dataSettings.columnName(nameColumn)
+                dataSettings.columnName(_nameColumn)
             );
 
-            if (dataSettings.columnInfo.contains(nameColumn)) {
+            if (dataSettings.columnInfo.contains(_nameColumn)) {
                 ImGui::SameLine();
                 view::helper::renderDescriptiveText(
-                    std::format("({})", nameColumn).c_str()
+                    std::format("({})", _nameColumn).c_str()
                 );
 
-                if (dataSettings.hasDescription(nameColumn)) {
+                if (dataSettings.hasDescription(_nameColumn)) {
                     ImGui::SameLine();
-                    view::helper::renderHelpMarker(dataSettings.description(nameColumn).c_str());
+                    view::helper::renderHelpMarker(dataSettings.description(_nameColumn).c_str());
                 }
             }
         }
@@ -287,10 +260,6 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
         static ImGuiTextFilter filter;
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.4f);
         filter.Draw();
-        ImGui::SameLine();
-        if (ImGui::Button("Clear")) {
-            filter.Clear();
-        }
 
         ImGui::BeginChild(
             "OtherColumns",
@@ -359,8 +328,6 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
     }
     ImGui::Spacing();
 
-
-
     // Confirmaiton / Cancellation
     {
         // Push to bottom of window
@@ -411,23 +378,51 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
             );
         }
 
-        if (ImGui::Button("OK", ImVec2(120, 0)) && !isInvalidColumnNr) {
-            applySelection(nSelected);
-            ImGui::CloseCurrentPopup();
+        if (isInvalidColumnNr) {
+            ImGui::BeginDisabled();
+        }
+
+        if (ImGui::Button("Save", ImVec2(120, 0))) {
+            applySelection();
+            showSetColumnsWindow = false;
+            //ImGui::CloseCurrentPopup();
         }
 
         if (isInvalidColumnNr) {
             ImGui::PopStyleColor(3);
+            ImGui::EndDisabled();
         }
 
         ImGui::SetItemDefaultFocus();
         ImGui::SameLine();
         if (ImGui::Button("Cancel", ImVec2(120, 0))) {
             resetSelection();
-            ImGui::CloseCurrentPopup();
+            showSetColumnsWindow = false;
+            //ImGui::CloseCurrentPopup();
         }
     }
-    ImGui::EndPopup();
+    ImGui::End();
+
+    return selectionChanged;
+}
+
+std::vector<ColumnKey> ColumnSelectionView::orderedSelectedColumns() const {
+    std::vector<ColumnKey> selectedColumns;
+    selectedColumns.reserve(IMGUI_TABLE_MAX_COLUMNS);
+    // Always include name column
+    selectedColumns.push_back(_nameColumn);
+    for (int i = 0; i < _namedColumns.size(); i++) {
+        if (_selectedNamedColumns[i]) {
+            selectedColumns.push_back(_namedColumns[i]);
+        }
+    }
+    for (int i = 0; i < _otherColumns.size(); i++) {
+        if (_selectedOtherColumns[i]) {
+            selectedColumns.push_back(_otherColumns[i]);
+        }
+    }
+    selectedColumns.shrink_to_fit();
+    return selectedColumns;
 }
 
 } // namespace openspace::exoplanets
