@@ -430,6 +430,13 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
                 _dataViewer.columnName(variable.columnIndex)
             ))
         {
+            static ImGuiTextFilter columnFilter;
+            if (ImGui::IsWindowAppearing()) {
+                ImGui::SetKeyboardFocusHere();
+                columnFilter.Clear();
+            }
+            columnFilter.Draw("##Filter");
+
             for (int i = 0; i < _dataViewer.columns().size(); ++i) {
                 // Ignore non-numeric columns
                 if (!_dataViewer.isNumericColumn(i)) {
@@ -437,6 +444,10 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
                 }
 
                 const char* name = _dataViewer.columnName(i);
+                if (!columnFilter.PassFilter(name)) {
+                    continue;
+                }
+
                 if (ImGui::Selectable(name, variable.columnIndex == i)) {
                     variable.columnIndex = i;
                     wasChanged = true;

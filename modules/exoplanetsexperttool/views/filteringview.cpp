@@ -277,8 +277,21 @@ bool FilteringView::renderColumnFilterSettings() {
         ImGui::Text("Filter on column");
         ImGui::SetNextItemWidth(120);
         if (ImGui::BeginCombo("##Column", _dataViewer.columnName(filterColIndex))) {
+            static ImGuiTextFilter columnFilter;
+            if (ImGui::IsWindowAppearing()) {
+                ImGui::SetKeyboardFocusHere();
+                columnFilter.Clear();
+            }
+            columnFilter.Draw("##Filter");
+
             for (size_t i = 0; i < _dataViewer.columns().size(); ++i) {
-                if (ImGui::Selectable(_dataViewer.columnName(i), filterColIndex == i)) {
+                const char* name = _dataViewer.columnName(i);
+
+                if (!columnFilter.PassFilter(name)) {
+                    continue;
+                }
+
+                if (ImGui::Selectable(name, filterColIndex == i)) {
                     filterColIndex = i;
                 }
 
@@ -538,6 +551,13 @@ bool FilteringView::renderRowLimitFilterSettings() {
     const char* columnName = _dataViewer.columnName(_rowLimitColumnIndex);
     ImGui::SetNextItemWidth(100);
     if (ImGui::BeginCombo("##RowLimitColumn", columnName)) {
+        static ImGuiTextFilter columnFilter;
+        if (ImGui::IsWindowAppearing()) {
+            ImGui::SetKeyboardFocusHere();
+            columnFilter.Clear();
+        }
+
+        columnFilter.Draw("##Filter");
         for (size_t i = 0; i < _dataViewer.columns().size(); ++i) {
             // Ignore non-numeric columns
             if (!_dataViewer.isNumericColumn(i)) {
@@ -545,6 +565,10 @@ bool FilteringView::renderRowLimitFilterSettings() {
             }
 
             const char* name = _dataViewer.columnName(i);
+            if (!columnFilter.PassFilter(name)) {
+                continue;
+            }
+
             if (ImGui::Selectable(name, _rowLimitColumnIndex == i)) {
                 _rowLimitColumnIndex = i;
                 filterWasChanged = true;
