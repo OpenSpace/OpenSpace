@@ -116,7 +116,10 @@ void Gui::initializeGL() {
 
     ImGuiIO& io = ImGui::GetIO();
 
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    // Keyboard navigation would be nice, but leads to conflicts in capturing when using
+    // CTRL to double click on a glyph and open a new window. Also, it does not really
+    // together with the WebGui
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     {
         unsigned char* texData = nullptr;
