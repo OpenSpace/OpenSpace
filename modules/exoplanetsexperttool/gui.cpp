@@ -219,9 +219,10 @@ void Gui::startFrame(float deltaTime, const glm::vec2& windowSize,
     io.DisplayFramebufferScale = ImVec2(dpiScaling.x, dpiScaling.y);
     io.DeltaTime = deltaTime;
 
-    io.AddMousePosEvent(mousePos.x, mousePos.y);
-    io.AddMouseButtonEvent(0, (mouseButtonsPressed & (1 << 0)) != 0);
-    io.AddMouseButtonEvent(1, (mouseButtonsPressed & (1 << 1)) != 0);
+    io.MousePos = ImVec2(mousePos.x, mousePos.y);
+
+    io.MouseDown[0] = mouseButtonsPressed & (1 << 0);
+    io.MouseDown[1] = mouseButtonsPressed & (1 << 1);
 
     ImGui::NewFrame();
 }
@@ -344,15 +345,26 @@ bool Gui::mouseButtonCallback(MouseButton, MouseAction) {
 
 bool Gui::mouseWheelCallback(double position) {
     ImGuiIO& io = ImGui::GetIO();
-    io.AddMouseWheelEvent(0.f, static_cast<float>(position));
-    return io.WantCaptureMouse;
+    const bool consumeEvent = io.WantCaptureMouse;
+    if (consumeEvent) {
+        io.AddMouseWheelEvent(0.f, static_cast<float>(position));
+    }
+    return consumeEvent;
 }
 
 bool Gui::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
+    const int keyIndex = static_cast<int>(key);
+    if (keyIndex < 0) {
+        return false;
+    }
+
     ImGuiIO& io = ImGui::GetIO();
 
-    const bool isDown = (action != KeyAction::Release);
+    // Always update the modifier and keys, even if event is not consumed, so keys and
+    // modifiers are set to false on release
+
     if (const ImGuiKey k = toImGuiKey(key); k != ImGuiKey_None) {
+        const bool isDown = (action != KeyAction::Release);
         io.AddKeyEvent(k, isDown);
     }
 
@@ -366,8 +378,11 @@ bool Gui::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
 
 bool Gui::charCallback(unsigned int character, KeyModifier) {
     ImGuiIO& io = ImGui::GetIO();
-    io.AddInputCharacter(static_cast<unsigned short>(character));
-    return io.WantCaptureKeyboard;
+    const bool consumeEvent = io.WantCaptureKeyboard;
+    if (consumeEvent) {
+        io.AddInputCharacter(static_cast<unsigned short>(character));
+    }
+    return consumeEvent;
 }
 
 void Gui::render() {
