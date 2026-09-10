@@ -58,13 +58,6 @@ private:
     // Column selection for table views
     std::vector<bool> _selectedNamedColumns;
     std::vector<bool> _selectedOtherColumns;
-
-    // Saved column selection before opening the column selection view,
-    // to allow for canceling changes or preventing invalid selections
-    std::vector<bool> _savedSelectedNamedColumns;
-    std::vector<bool> _savedSelectedOtherColumns;
-
-    std::vector<ColumnKey> _savedSelectedColumns;
 };
 
 } // namespace openspace::exoplanets

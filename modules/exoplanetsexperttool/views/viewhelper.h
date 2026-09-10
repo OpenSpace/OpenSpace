@@ -34,7 +34,6 @@ namespace colors {
     constexpr const glm::vec3 DefaultSelected = { 0.2f, 0.8f, 1.f };
     constexpr const glm::vec4 DescriptiveText = { 0.6f, 0.6f, 0.6f, 1.f };
     constexpr const glm::vec4 Error = { 1.f, 0.2f, 0.2f, 1.f };
-    constexpr const glm::vec4 DisabledButton = { 0.3f, 0.3f, 0.3f, 0.7f };
 } // namespace colors
 
 namespace helper {

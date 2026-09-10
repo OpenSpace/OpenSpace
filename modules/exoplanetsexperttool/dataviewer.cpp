@@ -538,11 +538,7 @@ void DataViewer::render() {
             ImGui::EndMenu();
         }
 
-
-        if (ImGui::BeginMenu("Settings")) {
-            renderSettingsMenuContent();
-            ImGui::EndMenu();
-        }
+        renderSettingsMenu();
 
         if (ImGui::BeginMenu("Navigation")) {
             if (ImGui::Button("Refocus on Earth")) {
@@ -992,19 +988,36 @@ void DataViewer::renderFileMenu() {
     }
 }
 
-void DataViewer::renderSettingsMenuContent() {
+void DataViewer::renderSettingsMenu() {
     // OBS! These should match the default settings for the SGNs
     static bool useFixedWidth = false;
     static bool showKepler = true;
     static bool showMilkyWayLine = true;
 
-    // This function also renders the buttons that opens the modal
-    bool columnSettingsChanged = _columnSelectionView.renderColumnSettingsView(
-        _dataSettings
-    );
+    static bool showColumnSelectionView = false;
 
-    if (columnSettingsChanged) {
-        _tableView->updateColumns(_columnSelectionView.orderedSelectedColumns());
+    // Column selection is rendered in a separate window, so do this before the menu
+    if (showColumnSelectionView) {
+        // Always center this window when appearing
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+        ImGuiWindowFlags flags = ImGuiWindowFlags_NoSavedSettings;
+        ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Set table columns", &showColumnSelectionView, flags)) {
+            if (_columnSelectionView.renderColumnSettingsView(_dataSettings)) {
+                _tableView->updateColumns(_columnSelectionView.orderedSelectedColumns());
+            }
+            ImGui::End();
+        }
+    }
+
+    if (!ImGui::BeginMenu("Settings")) {
+        return;
+    }
+
+    if (ImGui::Button("Set up table columns...")) {
+        showColumnSelectionView = true;
     }
 
     ImGui::Separator();
@@ -1053,8 +1066,8 @@ void DataViewer::renderSettingsMenuContent() {
     ImGuiIO& io = ImGui::GetIO();
     float dragWidth = 60.f * io.FontGlobalScale;
     {
-        const float MIN_GUI_SCALE = 0.3f;
-        const float MAX_GUI_SCALE = 2.0f;
+        constexpr float MIN_GUI_SCALE = 0.3f;
+        constexpr float MAX_GUI_SCALE = 2.0f;
         ImGui::SetNextItemWidth(dragWidth);
         ImGui::DragFloat(
             "GUI font scale", &io.FontGlobalScale, 0.005f,
@@ -1063,8 +1076,8 @@ void DataViewer::renderSettingsMenuContent() {
     }
 
     {
-        const float MIN_GLYPH_SCALE = 0.3f;
-        const float MAX_GLYPH_SCALE = 2.0f;
+        constexpr float MIN_GLYPH_SCALE = 0.3f;
+        constexpr float MAX_GLYPH_SCALE = 2.0f;
         static float glyphSizeScale = DefaultGlyphScale;
         ImGui::SetNextItemWidth(dragWidth);
         bool changed = ImGui::DragFloat(
@@ -1079,6 +1092,8 @@ void DataViewer::renderSettingsMenuContent() {
             ));
         }
     }
+
+    ImGui::EndMenu();
 }
 
 void DataViewer::updateGlyphRenderData() {

@@ -129,7 +129,7 @@ private:
     void handleDoubleClickHoveredPlanet(int index);
 
     void renderFileMenu();
-    void renderSettingsMenuContent();
+    void renderSettingsMenu();
 
     // Write the information about the rendered points to a file
     void updateGlyphRenderData();
