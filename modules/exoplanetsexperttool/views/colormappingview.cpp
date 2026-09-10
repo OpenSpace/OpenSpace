@@ -532,7 +532,7 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
             wasChanged = true;
         }
 
-        const ImVec4 WarningColor = ImVec4(1.f, 0.6f, 0.2f, 1.f);
+        const ImVec4 WarningColor = view::helper::toImVec4(view::colors::Warning);
         if (variable.useLogScale && variable.colorScaleMin <= 0.f) {
             ImGui::TextColored(WarningColor, "Min must be > 0 for log scale");
         }
@@ -604,7 +604,6 @@ glm::vec4 ColorMappingView::colorFromColormap(const ExoplanetItem& item,
         pointColor = _nanPointColor;
     }
     else {
-        // TODO: handle min > max
         ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
 
         float min = variable.colorScaleMin;
