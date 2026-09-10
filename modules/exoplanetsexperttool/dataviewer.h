@@ -88,6 +88,9 @@ public:
     const std::string& lastExternalSelectionTimestamp() const;
     void clearExternalSelection();
 
+    // Set the selected planets to be highlighted in the rendering
+    void setSelection(const std::vector<size_t>& indices);
+
     // Compare the values of two Exoplanets items, given a specific column.
     // The comparison made is (left < right)
     bool compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,

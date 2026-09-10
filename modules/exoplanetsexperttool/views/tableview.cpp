@@ -138,6 +138,8 @@ void TableView::renderTable(const std::string& tableId, std::vector<size_t>& dat
         (dataRows.size() + 1) * 1.2f * RowHeight + ImGui::GetStyle().ScrollbarSize;
     const ImVec2 TableSize = ImVec2(0.f, useFixedHeight ? TableHeight : 0.f);
 
+    bool selectionChanged = false;
+
     if (ImGui::BeginTable(tableId.c_str(), nColumns + 1, flags, TableSize)) {
         // Extra column with add button
         ImGuiTableColumnFlags firstColFlags = ImGuiTableColumnFlags_NoResize |
@@ -309,21 +311,22 @@ void TableView::renderTable(const std::string& tableId, std::vector<size_t>& dat
                         }
 
                         if (changed) {
-                            if (ImGui::GetIO().KeyCtrl) {
-                                if (itemIsSelected) {
-                                    _selection.erase(found);
-                                }
-                                else {
-                                    _selection.push_back(index);
-                                }
-                            }
-                            else {
+                            // @TODO (2026-09-10): Revive multi-selection if we want to.
+                            // Maybe we could use it to select items to pin/export or something?
+                            //if (ImGui::GetIO().KeyCtrl) {
+                            //    if (itemIsSelected) {
+                            //        _selection.erase(found);
+                            //    }
+                            //    else {
+                            //        _selection.push_back(index);
+                            //    }
+                            //}
+                            //else {
                                 _selection.clear();
                                 _selection.push_back(index);
-                            }
+                            //}
 
-                            // TODO
-                            //_selectionChanged = true;
+                            selectionChanged = true;
                         }
                         continue;
                     }
@@ -334,10 +337,9 @@ void TableView::renderTable(const std::string& tableId, std::vector<size_t>& dat
         }
         ImGui::EndTable();
 
-        //if (_selectionChanged) {
-        //    updateSelectionInRenderable();
-        //    _selectionChanged = false;
-        //}
+        if (selectionChanged) {
+            _dataViewer.setSelection(_selection);
+        }
     }
 }
 

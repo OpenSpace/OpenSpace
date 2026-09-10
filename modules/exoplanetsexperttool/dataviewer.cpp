@@ -366,6 +366,11 @@ void DataViewer::clearExternalSelection() {
     LINFO("Cleared external selection");
 };
 
+void DataViewer::setSelection(const std::vector<size_t>& indices) {
+    _selection = indices;
+    _selectionChanged = true;
+}
+
 bool DataViewer::compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
                                      const ExoplanetItem& right) const
 {
@@ -609,8 +614,6 @@ void DataViewer::render() {
         ImGui::EndMainMenuBar();
     }
 
-
-
     // Windows
     if (showFilterSettingsWindow) {
         renderFilterSettingsWindow(&showFilterSettingsWindow);
@@ -644,6 +647,11 @@ void DataViewer::render() {
         updateGlyphRenderData();
         _colormapWasChanged = false;
         _filterChanged = false;
+    }
+
+    if (_selectionChanged) {
+        updateSelectionInRenderable();
+        _selectionChanged = false;
     }
 }
 
