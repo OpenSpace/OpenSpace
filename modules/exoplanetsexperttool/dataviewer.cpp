@@ -495,9 +495,6 @@ void DataViewer::initializeCallbacks() {
 }
 
 void DataViewer::render() {
-    static bool showTable = true;
-    static bool showFilterSettingsWindow = false;
-    static bool showColormapWindow = false;
     static bool showHelpers = false;
 
     auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
@@ -523,10 +520,10 @@ void DataViewer::render() {
 
         renderFileMenu();
 
-        if (ImGui::BeginMenu("Windows")) {
-            ImGui::MenuItem("Table", NULL, &showTable);
-            ImGui::MenuItem("Filters", NULL, &showFilterSettingsWindow);
-            ImGui::MenuItem("Color mapping", NULL, &showColormapWindow);
+        if (ImGui::BeginMenu("Views")) {
+            ImGui::MenuItem("Table", NULL, &_showTable);
+            ImGui::MenuItem("Filters", NULL, &_showFilterSettingsWindow);
+            ImGui::MenuItem("Color mapping", NULL, &_showColormapWindow);
             if (mod->showInfoWindowAtStartup()) {
                 ImGui::Separator();
                 ImGui::MenuItem("Start-up info", NULL, &_shouldOpenInfoWindow);
@@ -607,20 +604,71 @@ void DataViewer::render() {
             }
         }
 
+        ImGui::SameLine(0.f, 30.f);
+        ImGui::TextDisabled(std::format(
+            "Showing {} / {} planets", _filteredData.size(), _data.size()
+        ).c_str());
+
+        ImGui::SameLine(0.f, 30.f);
+
+        // Filters info
+        {
+            std::string label = std::format(
+                "Filters: {}", _filteringView->activeFilters()
+            );
+            ImVec2 text_size = ImGui::CalcTextSize(label.c_str());
+            if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, text_size)) {
+                _showFilterSettingsWindow = true;
+            }
+
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                view::helper::renderDescriptiveText(("Click to open filters view"));
+                ImGui::Separator();
+                _filteringView->renderAppliedColumnFilters();
+                ImGui::EndTooltip();
+            }
+
+            if (_filteringView->isUsingRowFiltering()) {
+                ImGui::SameLine();
+                ImGui::TextColored(ImVec4(0.f, 1.f, 1.f, 1.f), "+ row limit");
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip(_filteringView->rowLimitDescription().c_str());
+                }
+            }
+
+            if (_externalSelection.value().size() > 0) {
+                ImGui::SameLine();
+                ImGui::TextColored(ImVec4(1.f, 0.3f, 1.f, 1.f), "+ external"); // TODO: add timestamp here?
+                if (ImGui::IsItemHovered()) {
+                    ImGui::BeginTooltip();
+                    ImGui::TextUnformatted(std::format(
+                        "External selection: {} planets", _externalSelection.value().size()
+                    ).c_str());
+                    view::helper::renderDescriptiveText(std::format(
+                        "Last updated {}", _lastExternalSelectionTimeStamp
+                    ).c_str());
+
+                    ImGui::EndTooltip();
+
+                }
+            }
+        }
+
         ImGui::EndMainMenuBar();
     }
 
     // Windows
-    if (showFilterSettingsWindow) {
-        renderFilterSettingsWindow(&showFilterSettingsWindow);
+    if (_showFilterSettingsWindow) {
+        renderFilterSettingsWindow(&_showFilterSettingsWindow);
     }
 
-    if (showColormapWindow) {
-        renderColormapWindow(&showColormapWindow);
+    if (_showColormapWindow) {
+        renderColormapWindow(&_showColormapWindow);
     }
 
-    if (showTable) {
-        renderTableWindow(&showTable);
+    if (_showTable) {
+        renderTableWindow(&_showTable);
     }
 
     _systemViewer->renderAllSystemViews();

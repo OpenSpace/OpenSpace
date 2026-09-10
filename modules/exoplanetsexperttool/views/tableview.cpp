@@ -60,7 +60,7 @@ void TableView::renderTableView(std::vector<size_t>& filteredDataRows) {
 
     ImGui::Separator();
     view::helper::renderDescriptiveText(std::format(
-        "Showing {} items out of a total {} ",
+        "Showing {} / {} planets",
         filteredDataRows.size(), _dataViewer.data().size()
     ).c_str());
 

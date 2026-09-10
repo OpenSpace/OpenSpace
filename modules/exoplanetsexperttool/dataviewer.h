@@ -149,6 +149,11 @@ private:
     std::unique_ptr<SystemViewer> _systemViewer;
     std::unique_ptr<TableView> _tableView;
 
+    // Bools to toggle the views above
+    bool _showTable = true;
+    bool _showFilterSettingsWindow = false;
+    bool _showColormapWindow = false;
+
     std::vector<ExoplanetItem> _data;
     std::vector<size_t> _filteredData;  // The indices of the items which will be rendered
     std::vector<size_t> _selection;     // Indices of selected data points

@@ -27,6 +27,7 @@
 
 #include <modules/exoplanetsexperttool/columnfilter.h>
 #include <modules/exoplanetsexperttool/datastructures.h>
+#include <string>
 
 namespace openspace::exoplanets {
 
@@ -38,6 +39,11 @@ public:
 
     bool isUsingRowFiltering() const;
     bool isUsingExternalFiltering() const;
+
+    int activeFilters() const;
+    std::string rowLimitDescription() const;
+
+    void renderAppliedColumnFilters() const;
 
     // Return true if filtering was changed
     bool renderFilterSettings();
@@ -72,6 +78,8 @@ private:
     // Filter selection from webpage
     bool _useExternalSelection = false;
     bool _overrideInternalSelection = false;
+
+    int _nActiveFilters = 0;
 
     DataViewer& _dataViewer;
     const std::vector<DataSettings::QuickFilterGroup>& _quickFilterGroups;

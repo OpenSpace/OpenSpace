@@ -66,6 +66,56 @@ bool FilteringView::isUsingExternalFiltering() const {
     return _useExternalSelection;
 }
 
+int FilteringView::activeFilters() const {
+    return _nActiveFilters;
+}
+
+std::string FilteringView::rowLimitDescription() const {
+    return std::format(
+        "{} rows with {} {}",
+        _nRows, _useHighestValue ? "highest" : "lowest",
+        _dataViewer.columnName(_rowLimitColumnIndex)
+    );
+}
+
+void FilteringView::renderAppliedColumnFilters() const {
+    bool didRender = false;
+    for (const ColumnFilterEntry& f : _columnFilters) {
+        if (!f.enabled) {
+            continue;
+        }
+        const ColumnKey& key = _dataViewer.columns()[f.columnIndex];
+        const std::string& query = f.filter.query();
+        ImGui::TextUnformatted(
+            std::format("{}: {}", _dataViewer.columnName(key), query == "" ? "Has value" : query).c_str()
+        );
+        didRender = true;
+    }
+    for (size_t groupId = 0; groupId < _quickFilterFlags.size(); ++groupId) {
+        const DataSettings::QuickFilterGroup& group =
+            _quickFilterGroups[groupId];
+        for (size_t qIndex = 0; qIndex < _quickFilterFlags[groupId].size(); ++qIndex) {
+            const DataSettings::QuickFilter& q = group.quickFilters[qIndex];
+            bool shouldMatchFilter = _quickFilterFlags[groupId][qIndex];
+            if (shouldMatchFilter) {
+                if (group.title != "") {
+                    ImGui::TextUnformatted(
+                        std::format("{}: {}", group.title, q.name).c_str()
+                    );
+                }
+                else {
+                    ImGui::TextUnformatted(q.name.c_str());
+                }
+                didRender = true;
+            }
+        }
+    }
+
+    if (!didRender) {
+        ImGui::TextUnformatted("No active filters");
+    }
+}
+
 bool FilteringView::renderFilterSettings() {
     bool filterWasChanged = false;
 
@@ -495,6 +545,22 @@ bool FilteringView::renderColumnFilterSettings() {
     }
 
     ImGui::Spacing();
+
+    if (filterWasChanged) {
+        _nActiveFilters = 0;
+        for (const ColumnFilterEntry& f : _columnFilters) {
+            if (f.enabled) {
+                ++_nActiveFilters;
+            }
+        }
+        for (const auto& group : _quickFilterFlags) {
+            for (bool isChecked : group) {
+                if (isChecked) {
+                    ++_nActiveFilters;
+                }
+            }
+        }
+    };
 
     return filterWasChanged;
 }
