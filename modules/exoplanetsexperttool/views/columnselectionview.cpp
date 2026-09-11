@@ -216,7 +216,6 @@ bool ColumnSelectionView::renderColumnSettingsView(const DataSettings& dataSetti
         ImGui::Checkbox("Show only checked", &showOnlySelected);
 
         static ImGuiTextFilter filter;
-        ImGui::SetNextItemWidth(0.f);
         filter.Draw();
 
         ImGui::BeginChild(
