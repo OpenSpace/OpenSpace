@@ -700,8 +700,7 @@ void DataViewer::render() {
 }
 
 void DataViewer::renderColormapWindow(bool* open) {
-    ImGui::SetNextWindowSize(ImVec2(350, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Color mapping", open)) {
+    if (!ImGui::Begin("Color mapping", open, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::End();
         return;
     }

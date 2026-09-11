@@ -226,9 +226,9 @@ bool ColorMappingView::renderViewContent() {
     ImGui::EndGroup(); // all variable groups
 
     // Circle plot to show which parameters map to which part of a glyph
-    ImGui::SameLine();
-    {
-        const int nVariables = static_cast<int>(_variableSelection.size());
+    const int nVariables = static_cast<int>(_variableSelection.size());
+    if (nVariables > 1) {
+        ImGui::SameLine();
         if (nVariables > 0) {
             std::vector<float> data(nVariables, 1.f / static_cast<float>(nVariables));
 
@@ -250,35 +250,42 @@ bool ColorMappingView::renderViewContent() {
                 labels.push_back(s.c_str());
             }
 
-            constexpr int ColorScaleHeight = 140;
-            const ImVec2 plotSize = ImVec2(
-                1.5f * static_cast<float>(ColorScaleHeight),
-                static_cast<float>(ColorScaleHeight)
-            );
+            constexpr float PieSize = 120.f;
+            constexpr float LabelLineHeight = 30.f; // TODO: need to update width and height based on actual label size and max width
 
-            if (ImPlot::BeginPlot(
-                    "##Pie",
-                    plotSize,
-                    ImPlotFlags_Equal | ImPlotFlags_NoMouseText
-                ))
+            // Reserve extra vertical space for labels above the pie
+            const int estimatedTopLabels = std::max(1, (nVariables + 1) / 2);
+            const float extraTopSpace = estimatedTopLabels * LabelLineHeight;
+
+            const float plotWidth = PieSize;
+            const float plotHeight = PieSize + extraTopSpace;
+            const ImVec2 plotSize(plotWidth, plotHeight);
+
+            if (ImPlot::BeginPlot("##Pie", plotSize, ImPlotFlags_Equal | ImPlotFlags_NoMouseText))
             {
                 ImPlot::SetupAxes(
-                    nullptr,
-                    nullptr,
+                    nullptr, nullptr,
                     ImPlotAxisFlags_NoDecorations,
                     ImPlotAxisFlags_NoDecorations
                 );
-                ImPlot::SetupAxesLimits(0.0, 1.5, 0.0, 1.0, ImGuiCond_Always);
+
+                // Keep both axes in the same unit scale so ImPlotFlags_Equal actually
+                // gives a circular pie: x spans [0,1] over `plotWidth` px, so 1 unit
+                // == plotWidth px. y must span the equivalent number of units to get
+                // the same px-per-unit: plotHeight / plotWidth.
+                const double yMax = static_cast<double>(plotHeight) / static_cast<double>(plotWidth);
+                ImPlot::SetupAxesLimits(0.0, 1.0, 0.0, yMax, ImGuiCond_Always);
+
+                // The pie always occupies the bottom 1x1-unit square (== PieSize x PieSize
+                // px), regardless of label count. Everything from y=1.0 up to yMax is
+                // the reserved label area above it.
+                constexpr double pieCenterY = 0.5;
+                constexpr double pieRadius = 0.3;
 
                 ImPlot::PlotPieChart(
-                    labels.data(),
-                    data.data(),
-                    nVariables,
-                    1.1,
-                    0.5,
-                    0.3,
-                    "",
-                    90.0
+                    labels.data(), data.data(), nVariables,
+                    0.5, pieCenterY, pieRadius,
+                    "", 90.0
                 );
 
                 ImPlot::EndPlot();
