@@ -58,6 +58,11 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/modules/
   PATTERN "*.fs"
   PATTERN "*.vs"
   PATTERN "*.lua"
+  # mold's GLSL, which it compiles at runtime out of modules/molecule/shaders/mold
+  PATTERN "*.vert"
+  PATTERN "*.frag"
+  PATTERN "*.geom"
+  PATTERN "*.comp"
 )
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/ DESTINATION scripts)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/shaders/ DESTINATION shaders)

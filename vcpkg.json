@@ -5,9 +5,9 @@
   "description": [
     "OpenSpace.",
     "Ghoul, SGCT, and Spice are consumed through the overlay ports under ext/ghoul/support/vcpkg/ports, apps/OpenSpace/ext/sgct/support/vcpkg/ports, and ext/spice/support/vcpkg/ports. Ghoul's lua 5.4.7 override cannot be expressed by a port and is repeated here.",
-    "ccfits, kameleon, oscpack, soloud, spout2 (windows-only), and tuio have no usable upstream vcpkg port, so each was converted from a vendored binary/submodule into a hand-authored overlay port under support/vcpkg/ports instead of staying vendored.",
+    "ccfits, kameleon, mold, oscpack, soloud, spout2 (windows-only), and tuio have no usable upstream vcpkg port, so each was converted from a vendored binary/submodule into a hand-authored overlay port under support/vcpkg/ports instead of staying vendored.",
     "gdal, geos, and imgui were previously a vendored prebuilt binary (gdal), a git submodule (geos), and a vendored source tree (imgui); all three are now consumed directly from the public vcpkg registry with no overlay needed. imgui disables default features, and cfitsio (consumed by the ccfits overlay port) enables its curl feature.",
-    "Dependencies with no upstream registry port and not worth an overlay port stay as git submodules: modules/molecule/ext/mold; plus the CEF download.",
+    "Dependencies with no upstream registry port and not worth an overlay port are not consumed through vcpkg at all: the libmpv and CEF downloads.",
     "Qt (qtbase) is an unconditional dependency. It is linked dynamically for Qt LGPL compliance, which the overlay triplet under support/vcpkg/triplets enforces by keeping only the qt* ports dynamic while everything else is static.",
     "The tests, profiling, and openvr features are gated by the OPENSPACE_HAVE_TESTS, OPENSPACE_ENABLE_TRACY, and OPENSPACE_OPENVR_SUPPORT CMake options, which are declared before the first project() call. vcpkg only reads VCPKG_MANIFEST_FEATURES on the configure that first creates the build directory: to change one of these afterwards, delete build/<preset>/vcpkg_installed (or the whole build directory) and configure again."
   ],
@@ -38,6 +38,7 @@
     "geos",
     { "name": "imgui", "default-features": false },
     "kameleon",
+    "mold",
     "soloud",
     "ccfits",
     { "name": "cfitsio", "features": [ "curl" ] },

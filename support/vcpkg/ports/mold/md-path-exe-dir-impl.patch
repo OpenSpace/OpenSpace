@@ -1,6 +1,8 @@
---- a/ext/mold/src/core/md_os.c
-+++ b/ext/mold/src/core/md_os.c
-@@ -6,6 +6,10 @@
+diff --git a/src/core/md_os.c b/src/core/md_os.c
+index 15ae916..f20d1e5 100644
+--- a/src/core/md_os.c
++++ b/src/core/md_os.c
+@@ -5,6 +5,10 @@
  #include "md_log.h"
  #include "md_allocator.h"
  
@@ -10,7 +12,8 @@
 +
  #include <stdio.h>
  #include <stdarg.h>
-@@ -88,6 +92,51 @@ str_t md_path_cwd() {
+ 
+@@ -113,6 +117,57 @@ str_t md_path_cwd() {
      return res;
  }
  
@@ -66,3 +69,5 @@
 +}
 +
  static inline str_t internal_fullpath(str_t path, md_allocator_i* alloc) {
+     path = str_copy(path, default_temp_allocator); // Zero terminate
+ 

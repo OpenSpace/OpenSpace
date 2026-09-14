@@ -1,7 +1,8 @@
---- a/ext/mold/src/md_gl.c
-+++ b/ext/mold/src/md_gl.c
-@@ -25,6 +25,41 @@
- 
+diff --git a/src/md_gl.c b/src/md_gl.c
+index f9c13f7..7583a8f 100644
+--- a/src/md_gl.c
++++ b/src/md_gl.c
+@@ -31,6 +31,43 @@
  #define UBO_SIZE (1 << 10)
  #define SHADER_BUF_SIZE KILOBYTES(14)
  
@@ -10,12 +11,12 @@
 +//
 +// OpenSpace layout on all platforms in a release build:
 +//   <root>/bin/openspace    <- executable
-+//   <root>/modules/molecule/ext/mold/src/shaders/
++//   <root>/modules/molecule/shaders/mold/   <- copied out of the mold vcpkg package
 +// OpenSpace layout on Windows in development build:
 +//   <root>/bin/<Configuration>/OpenSpace  <- executable
 +//
-+// Resolves <exe_dir>/../modules/molecule/ext/mold/src/shaders/<file>
-+// or <exe_dir>/../../modules/molecule/ext/mold/src/shaders/<file>
++// Resolves <exe_dir>/../modules/molecule/shaders/mold/<file>
++// or <exe_dir>/../../modules/molecule/shaders/mold/<file>
 +// at runtime: works for .deb, AppImage, Windows, and macOS.
 +// ---------------------------------------------------------------------------
 +#define MD_SHADER_PATH_SLOTS 8
@@ -29,13 +30,13 @@
 +    str_t exe_dir = md_path_exe_dir();
 +    if (str_ends_with(exe_dir, STR("bin/"))) {
 +        snprintf(buf, MD_SHADER_PATH_LEN,
-+            "%.*s../modules/molecule/ext/mold/src/shaders%s",
++            "%.*s../modules/molecule/shaders/mold%s",
 +            (int)exe_dir.len, exe_dir.ptr,
 +            filename);
 +    }
 +    else {
 +        snprintf(buf, MD_SHADER_PATH_LEN,
-+            "%.*s../../modules/molecule/ext/mold/src/shaders%s",
++            "%.*s../../modules/molecule/shaders/mold%s",
 +            (int)exe_dir.len, exe_dir.ptr,
 +            filename);
 +    }
@@ -44,7 +45,8 @@
 +
  static const char* default_shader_output = 
  "layout(location = 0) out vec4 out_color;\n"
-@@ -877,7 +902,7 @@
+ "void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color, uint atom_index) {\n"
+@@ -865,7 +902,7 @@ bool md_gl_initialize() {
          GLuint comp_shader = glCreateShader(GL_COMPUTE_SHADER);
  
          bool err;
@@ -53,7 +55,7 @@
              return err;
          }
          ctx.program[GL_PROGRAM_COMPUTE_AABB].id = glCreateProgram();
-@@ -894,9 +919,9 @@
+@@ -883,9 +920,9 @@ bool md_gl_initialize() {
          GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
  
          bool err;
@@ -66,7 +68,7 @@
              return err;
          }
          ctx.program[GL_PROGRAM_CULL_AABB].id = glCreateProgram();
-@@ -915,7 +940,7 @@
+@@ -902,7 +939,7 @@ bool md_gl_initialize() {
      {
          GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
  
@@ -75,7 +77,7 @@
              return false;
          }
          ctx.program[GL_PROGRAM_EXTRACT_CONTROL_POINTS].id = glCreateProgram();
-@@ -931,7 +956,7 @@
+@@ -918,7 +955,7 @@ bool md_gl_initialize() {
      {
          GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
  
@@ -84,7 +86,7 @@
              return false;
          }
          ctx.program[GL_PROGRAM_COMPUTE_VELOCITY].id = glCreateProgram();
-@@ -951,8 +976,8 @@
+@@ -939,8 +976,8 @@ bool md_gl_initialize() {
          snprintf(defines, sizeof(defines), "#define NUM_SUBDIVISIONS %i", SPLINE_MAX_SUBDIVISION_COUNT);
  
          bool err;
@@ -95,7 +97,7 @@
              return err;
          }
          ctx.program[GL_PROGRAM_COMPUTE_SPLINE].id = glCreateProgram();
-@@ -992,10 +1017,10 @@
+@@ -981,10 +1018,10 @@ bool md_gl_shaders_init(md_gl_shaders_t* ext_shaders, const char* custom_shader_
          if (!custom_shader_snippet) {
              custom_shader_snippet = default_shader_output;
          }
