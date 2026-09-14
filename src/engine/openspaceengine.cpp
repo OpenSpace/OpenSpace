@@ -173,6 +173,15 @@ namespace {
         Property::NeedsConfirmation::Yes
     };
 
+    constexpr Property::PropertyInfo DefaultShutdownCountdownInfo = {
+        "DefaultShutdownCountdown",
+        "Default Shutdown Countdown",
+        "The default shutdown countdown timer (in seconds). Unless some other time is "
+        "specified in the 'toggleShutdown' function, this is the number of seconds the "
+        "application will wait before shutting down",
+        Property::Visibility::AdvancedUser
+    };
+
     constexpr Property::PropertyInfo ShowPropertyConfirmationDialogInfo = {
         "ShowPropertyConfirmation",
         "Show property confirmation",
@@ -228,6 +237,7 @@ OpenSpaceEngine::OpenSpaceEngine()
     , _showPropertyConfirmationDialog(ShowPropertyConfirmationDialogInfo, true)
     , _fadeOnEnableDuration(FadeDurationInfo, 1.f, 0.f, 5.f)
     , _disableAllMouseInputs(DisableMouseInputInfo, false)
+    , _defaultShutdownCountdown(DefaultShutdownCountdownInfo, 3.f, 0.f, 60.f)
 {
     FactoryManager::initialize();
     SpiceManager::initialize();
@@ -248,6 +258,8 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     addProperty(_fadeOnEnableDuration);
     addProperty(_disableAllMouseInputs);
+
+    addProperty(_defaultShutdownCountdown);
 
 
     ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
@@ -531,8 +543,6 @@ void OpenSpaceEngine::initialize() {
     }
 
     global::scriptEngine->initialize();
-
-    _shutdown.waitTime = global::configuration->shutdownCountdown;
 
     global::navigationHandler->initialize();
 
@@ -1725,7 +1735,7 @@ Property::Visibility OpenSpaceEngine::visibility() const {
     return static_cast<Property::Visibility>(_visibility.value());
 }
 
-void OpenSpaceEngine::toggleShutdownMode() {
+void OpenSpaceEngine::toggleShutdownMode(std::optional<float> timer) {
     if (_shutdown.inShutdown) {
         // If we are already in shutdown mode, we want to disable it
         _shutdown.inShutdown = false;
@@ -1735,7 +1745,8 @@ void OpenSpaceEngine::toggleShutdownMode() {
     }
     else {
         // Else, we have to enable it
-        _shutdown.timer = _shutdown.waitTime;
+        _shutdown.timer = timer.value_or(_defaultShutdownCountdown);
+        _shutdown.waitTime = timer.value_or(_defaultShutdownCountdown);
         _shutdown.inShutdown = true;
         global::eventEngine->publishEvent<EventApplicationShutdown>(
             EventApplicationShutdown::State::Started
