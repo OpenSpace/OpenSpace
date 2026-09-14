@@ -467,6 +467,7 @@ function addExoplanetSystem(data)
     --------------------------------------------------------------------
     local ambientIntensity = 0.5 -- High to show the color from size more clearly
 
+    local planetTypeData = nil
     local planetSizeInfo = function (data)
       if hasValue(data.Radius) then
         return string.format(
@@ -479,9 +480,11 @@ function addExoplanetSystem(data)
       end
     end
 
+    local PlanetRenderable = nil
+    local planetTypeData = nil
     if hasValue(planetData.Radius) then
       local planetTypeKey = planetTypeKey(planetData.Radius)
-      local planetTypeData = PlanetType[planetTypeKey]
+      planetTypeData = PlanetType[planetTypeKey]
 
       local planetColorLayers = {
         {
@@ -506,50 +509,57 @@ function addExoplanetSystem(data)
         ambientIntensity = 0.15
       end
 
-      local Planet = {
-        Identifier = id,
-        Parent = starIdentifier,
-        Transform = {
-          Translation = PlanetKeplerTranslation
+      -- Add the planet renderable
+      PlanetRenderable = {
+        Type = "RenderableGlobe",
+        Radii = planetData.Radius,
+        PerformShading = true,
+        Layers = {
+          ColorLayers = planetColorLayers
         },
-        Renderable = {
-          Type = "RenderableGlobe",
-          Radii = planetData.Radius,
-          PerformShading = true,
-          Layers = {
-            ColorLayers = planetColorLayers
-          },
-          LightSourceNode = starIdentifier,
-          AmbientIntensity = ambientIntensity
-        },
-        Tag = { "exoplanet_planet" },
-        GUI = {
-          Name = planetData.Name,
-          Path = guiPath,
-          Description = string.format(
-            [[The exoplanet %s falls into the category of %s. Some key facts:
-              Radius: %s.
-              Orbit Period: %.1f (Earth) days.
-              Orbit Semi-major axis: %.2f (AU).
-              Orbit Eccentricity: %.2f. %s]],
-            planetData.Name,
-            planetTypeData.Description,
-            planetSizeInfo(planetData),
-            planetData.Period,
-            planetData.SemiMajorAxis / AstronomicalUnit,
-            planetData.Eccentricity,
-            openspace.ternary(
-              planetData.HasUsedDefaultValues,
-              [[OBS! Default values have been used to visualize the orbit (for example for
-                inclination, eccentricity, or argument of periastron), and hence the data
-                specified for the orbit might not be reliable.]],
-              ""
-            )
-          )
-        }
+        LightSourceNode = starIdentifier,
+        AmbientIntensity = ambientIntensity
       }
-      openspace.addSceneGraphNode(Planet)
     end
+
+    local Planet = {
+      Identifier = id,
+      Parent = starIdentifier,
+      Transform = {
+        Translation = PlanetKeplerTranslation
+      },
+      Tag = { "exoplanet_planet" },
+      GUI = {
+        Name = planetData.Name,
+        Path = guiPath,
+        Description = string.format(
+          [[The exoplanet %s falls into the category of %s. Some key facts:
+            Radius: %s.
+            Orbit Period: %.1f (Earth) days.
+            Orbit Semi-major axis: %.2f (AU).
+            Orbit Eccentricity: %.2f. %s]],
+          planetData.Name,
+          planetTypeData and planetTypeData.Description or "Unknown",
+          planetSizeInfo(planetData),
+          planetData.Period,
+          planetData.SemiMajorAxis / AstronomicalUnit,
+          planetData.Eccentricity,
+          openspace.ternary(
+            planetData.HasUsedDefaultValues,
+            [[OBS! Default values have been used to visualize the orbit (for example for
+              inclination, eccentricity, or argument of periastron), and hence the data
+              specified for the orbit might not be reliable.]],
+            ""
+          )
+        )
+      }
+    }
+
+    if PlanetRenderable ~= nil then
+      Planet.Renderable = PlanetRenderable
+    end
+
+    openspace.addSceneGraphNode(Planet)
 
     --------------------------------------------------------------------
     -- Planet Orbit
