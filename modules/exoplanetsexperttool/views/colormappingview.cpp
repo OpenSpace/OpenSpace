@@ -421,8 +421,12 @@ bool ColorMappingView::renderViewContent() {
                 constexpr double pieCenterY = 0.5;
                 constexpr double pieRadius = 0.3;
 
+                // ImPlot draws pie slices in the opposite winding order of the label
+                // sequence we want, so reverse the plotting arrays to match label order
+                std::vector<const char*> pieLabels(labels.rbegin(), labels.rend());
+
                 ImPlot::PlotPieChart(
-                    labels.data(), data.data(), nVariables,
+                    pieLabels.data(), data.data(), nVariables,
                     0.5, pieCenterY, pieRadius,
                     "", 90.0
                 );
