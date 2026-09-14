@@ -668,14 +668,12 @@ void DataViewer::render() {
             const char* column = columnName(firstCmap.columnIndex);
             totalWidth += ImGui::CalcTextSize(column).x;
 
-            std::string min = std::format("{}", firstCmap.colorScaleMin);
-            std::string max = std::format("{}", firstCmap.colorScaleMax);
+            std::string min = std::format("{:.2f}", firstCmap.colorScaleMin);
+            std::string max = std::format("{:.2f}", firstCmap.colorScaleMax);
 
             totalWidth += ImGui::CalcTextSize(min.c_str()).x;
             totalWidth += ImGui::CalcTextSize(max.c_str()).x;
             totalWidth += 2.f * ImGui::GetStyle().ItemSpacing.x;
-
-            const float iconSize = ImGui::GetFrameHeight();
 
             int cmap = ImPlot::GetColormapIndex(
                 _colorMappingView->colormapFromIndex(firstCmap.colormapIndex)
@@ -715,6 +713,12 @@ void DataViewer::render() {
             if (ImGui::Selectable(label, false, ImGuiSelectableFlags_None, text_size)) {
                 _showColormapWindow = true;
             }
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                view::helper::renderDescriptiveText(("Click to open color mapping view"));
+                ImGui::EndTooltip();
+            }
+
             ImGui::SameLine();
             ImGui::TextUnformatted(min.c_str());
             ImGui::SameLine();
