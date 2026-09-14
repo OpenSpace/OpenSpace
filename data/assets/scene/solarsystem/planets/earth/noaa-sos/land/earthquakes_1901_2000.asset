@@ -72,8 +72,10 @@ local Legend = {
   Name = Name,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "Earthquake_Legend.png",
-  FaceCamera = false,
-  CartesianPosition = { 0.0, -0.5, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    CartesianPosition = { 0.0, -0.5, -2.0 }
+  }
 }
 
 

@@ -7,7 +7,9 @@ local Item = {
   Type = "ScreenSpaceText",
   Identifier = "ScreenSpaceText_Example_FontSize",
   Text = "Example Text - Font Size",
-  Scale = 0.5,
+  Placement = {
+    Scale = 0.5
+  },
   FontSize = 72
 }
 

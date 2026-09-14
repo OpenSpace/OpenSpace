@@ -61,9 +61,11 @@ local Legend = {
   Name = Name,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "coral_legend.png",
-  FaceCamera = false,
-  Scale = 0.3,
-  CartesianPosition = { 0.0, -0.5, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    Scale = 0.3,
+    CartesianPosition = { 0.0, -0.5, -2.0 }
+  }
 }
 
 
