@@ -626,4 +626,4 @@ if (WIN32)
 endif ()
 
 set_openspace_compile_settings(openspace-core)
-target_link_libraries(openspace-core PUBLIC Ghoul::Ghoul spice CURL::libcurl date::date)
+target_link_libraries(openspace-core PUBLIC Ghoul::Ghoul spice::spice CURL::libcurl date::date)

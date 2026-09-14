@@ -1,21 +1,50 @@
 {
-  "version": 6,
-  "cmakeMinimumRequired": {
-    "major": 4,
-    "minor": 0,
-    "patch": 0
-  },
+  "$schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
+  "version": 10,
+  "cmakeMinimumRequired": { "major": 4, "minor": 0, "patch": 0 },
+
   "configurePresets": [
     {
       "name": "vcpkg",
       "hidden": true,
-      "binaryDir": "${sourceDir}/build/${presetName}",
       "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
     },
+
     {
-      "name": "windows-base",
+      "name": "build",
       "hidden": true,
-      "inherits": "vcpkg",
+      "binaryDir": "${sourceDir}/build/${presetName}"
+    },
+    {
+      "name": "msvc",
+      "hidden": true,
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+      }
+    },
+    {
+      "name": "ninja",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+      }
+    },
+    {
+      "name": "makefiles",
+      "hidden": true,
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+      }
+    },
+
+    {
+      "name": "windows",
+      "hidden": true,
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -23,58 +52,67 @@
       }
     },
     {
-      "name": "windows",
-      "inherits": "windows-base",
-      "displayName": "Windows x64",
-      "description": "Multi-config build; static dependencies against the dynamic CRT. The glbinding overlay port (pulled in through Ghoul) only supports static linkage, so unlike SGCT standalone this triplet is not x64-windows",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
-      }
-    },
-    {
-      "name": "windows-static",
-      "inherits": "windows-base",
-      "displayName": "Windows x64 (static CRT)",
-      "description": "Links the dependencies and the CRT statically",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static"
-      }
-    },
-    {
-      "name": "linux-base",
+      "name": "linux",
       "hidden": true,
-      "inherits": "vcpkg",
-      "generator": "Ninja",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux",
-        "OpenGL_GL_PREFERENCE": "GLVND"
-      },
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Linux"
-      }
-    },
-    {
-      "name": "linux",
-      "inherits": "linux-base",
-      "displayName": "Linux x64 RelWithDebInfo",
+      },
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+        "OpenGL_GL_PREFERENCE": "GLVND"
       }
     },
+
     {
-      "name": "linux-debug",
-      "inherits": "linux-base",
-      "displayName": "Linux x64 Debug",
+      "name": "windows-msvc",
+      "displayName": "Windows MSVC",
+      "inherits": [ "vcpkg", "build", "windows", "msvc" ]
+    },
+    {
+      "name": "windows-ninja-debug",
+      "displayName": "Windows Ninja Debug",
+      "inherits": [ "vcpkg", "build", "windows", "ninja" ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
-      "name": "linux-release",
-      "inherits": "linux-base",
-      "displayName": "Linux x64 Release",
+      "name": "windows-ninja-release",
+      "displayName": "Windows Ninja Release",
+      "inherits": [ "vcpkg", "build", "windows", "ninja" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "linux-ninja-debug",
+      "displayName": "Linux Ninja Debug",
+      "inherits": [ "vcpkg", "build", "linux", "ninja" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-ninja-release",
+      "displayName": "Linux Ninja Release",
+      "inherits": [ "vcpkg", "build", "linux", "ninja" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "linux-makefiles-debug",
+      "displayName": "Linux Makefiles Debug",
+      "inherits": [ "vcpkg", "build", "linux", "makefiles" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-makefiles-release",
+      "displayName": "Linux Makefiles Release",
+      "inherits": [ "vcpkg", "build", "linux", "makefiles" ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
@@ -82,84 +120,116 @@
   ],
   "buildPresets": [
     {
-      "name": "windows",
-      "configurePreset": "windows",
-      "configuration": "RelWithDebInfo"
-    },
-    {
-      "name": "windows-debug",
-      "configurePreset": "windows",
+      "name": "windows-msvc-debug",
+      "displayName": "Windows MSVC (Debug)",
+      "configurePreset": "windows-msvc",
       "configuration": "Debug"
     },
     {
-      "name": "windows-release",
-      "configurePreset": "windows",
-      "configuration": "Release"
+      "$comment": "Defining it to keep the same name as the configuration preset",
+      "name": "windows-msvc",
+      "inherits": "windows-msvc-debug"
     },
     {
-      "name": "windows-static",
-      "configurePreset": "windows-static",
+      "name": "windows-msvc-relwithdebinfo",
+      "displayName": "Windows MSVC (RelWithDebInfo)",
+      "configurePreset": "windows-msvc",
       "configuration": "RelWithDebInfo"
     },
     {
-      "name": "linux",
-      "configurePreset": "linux"
+      "name": "windows-ninja-debug",
+      "displayName": "Windows Ninja (Debug)",
+      "configurePreset": "windows-ninja-debug"
     },
     {
-      "name": "linux-debug",
-      "configurePreset": "linux-debug"
+      "name": "windows-ninja-release",
+      "displayName": "Windows Ninja (Release)",
+      "configurePreset": "windows-ninja-release"
     },
     {
-      "name": "linux-release",
-      "configurePreset": "linux-release"
+      "name": "linux-makefiles-debug",
+      "displayName": "Linux Makefiles (Debug)",
+      "configurePreset": "linux-makefiles-debug"
+    },
+    {
+      "name": "linux-makefiles-release",
+      "displayName": "Linux Makefiles (Release)",
+      "configurePreset": "linux-makefiles-release"
+    },
+    {
+      "name": "linux-ninja-debug",
+      "displayName": "Linux Ninja (Debug)",
+      "configurePreset": "linux-ninja-debug"
+    },
+    {
+      "name": "linux-ninja-release",
+      "displayName": "Linux Ninja (Release)",
+      "configurePreset": "linux-ninja-release"
     }
   ],
   "testPresets": [
     {
-      "name": "output-on-failure",
-      "hidden": true,
+      "name": "windows-msvc-debug",
+      "configurePreset": "windows-msvc",
+      "configuration": "Debug",
       "output": {
         "outputOnFailure": true
       }
     },
     {
-      "name": "windows",
-      "inherits": "output-on-failure",
-      "configurePreset": "windows",
-      "configuration": "RelWithDebInfo"
+      "$comment": "Defining it to keep the same name as the configuration preset",
+      "name": "windows-msvc",
+      "inherits": "windows-msvc-debug"
     },
     {
-      "name": "windows-debug",
-      "inherits": "output-on-failure",
-      "configurePreset": "windows",
-      "configuration": "Debug"
+      "name": "windows-msvc-relwithdebinfo",
+      "configurePreset": "windows-msvc",
+      "configuration": "RelWithDebInfo",
+      "output": {
+        "outputOnFailure": true
+      }
     },
     {
-      "name": "windows-release",
-      "inherits": "output-on-failure",
-      "configurePreset": "windows",
-      "configuration": "Release"
+      "name": "windows-ninja-debug",
+      "configurePreset": "windows-ninja-debug",
+      "output": {
+        "outputOnFailure": true
+      }
     },
     {
-      "name": "windows-static",
-      "inherits": "output-on-failure",
-      "configurePreset": "windows-static",
-      "configuration": "RelWithDebInfo"
+      "name": "windows-ninja-release",
+      "configurePreset": "windows-ninja-release",
+      "output": {
+        "outputOnFailure": true
+      }
     },
     {
-      "name": "linux",
-      "inherits": "output-on-failure",
-      "configurePreset": "linux"
+      "name": "linux-makefiles-debug",
+      "configurePreset": "linux-makefiles-debug",
+      "output": {
+        "outputOnFailure": true
+      }
     },
     {
-      "name": "linux-debug",
-      "inherits": "output-on-failure",
-      "configurePreset": "linux-debug"
+      "name": "linux-makefiles-release",
+      "configurePreset": "linux-makefiles-release",
+      "output": {
+        "outputOnFailure": true
+      }
     },
     {
-      "name": "linux-release",
-      "inherits": "output-on-failure",
-      "configurePreset": "linux-release"
+      "name": "linux-ninja-debug",
+      "configurePreset": "linux-ninja-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "linux-ninja-release",
+      "configurePreset": "linux-ninja-release",
+      "output": {
+        "outputOnFailure": true
+      }
     }
   ]
 }

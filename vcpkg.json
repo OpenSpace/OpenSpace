@@ -3,9 +3,9 @@
   "name": "openspace",
   "version-string": "0.22.0-dev",
   "description": [
-    "OpenSpace superproject manifest (vcpkg manifest mode).",
-    "Ghoul and SGCT are consumed through the overlay ports under ext/ghoul/support/vcpkg/ports and apps/OpenSpace/ext/sgct/support/vcpkg/ports. Ghoul's lua 5.4.7 override cannot be expressed by a port and is repeated here.",
-    "Dependencies with no upstream registry port stay as git submodules: ext/spice, modules/kameleon/ext/kameleon, modules/molecule/ext/mold, modules/touch/ext/libTUIO11; plus vendored imgui and the CEF download.",
+    "OpenSpace.",
+    "Ghoul, SGCT, and Spice are consumed through the overlay ports under ext/ghoul/support/vcpkg/ports, apps/OpenSpace/ext/sgct/support/vcpkg/ports, and ext/spice/support/vcpkg/ports. Ghoul's lua 5.4.7 override cannot be expressed by a port and is repeated here.",
+    "Dependencies with no upstream registry port stay as git submodules: modules/kameleon/ext/kameleon, modules/molecule/ext/mold, modules/touch/ext/libTUIO11; plus vendored imgui and the CEF download.",
     "Qt (qtbase) is an unconditional dependency. It is linked dynamically for Qt LGPL compliance, which the overlay triplet under support/vcpkg/triplets enforces by keeping only the qt* ports dynamic while everything else is static.",
     "The tests, profiling, and openvr features are gated by the OPENSPACE_HAVE_TESTS, OPENSPACE_ENABLE_TRACY, and OPENSPACE_OPENVR_SUPPORT CMake options, which are declared before the first project() call. vcpkg only reads VCPKG_MANIFEST_FEATURES on the configure that first creates the build directory: to change one of these afterwards, delete build/<preset>/vcpkg_installed (or the whole build directory) and configure again."
   ],
@@ -20,7 +20,8 @@
     "overlay-ports": [
       "./support/vcpkg/ports",
       "./ext/ghoul/support/vcpkg/ports",
-      "./apps/OpenSpace/ext/sgct/support/vcpkg/ports"
+      "./apps/OpenSpace/ext/sgct/support/vcpkg/ports",
+      "./ext/spice/support/vcpkg/ports"
     ],
     "overlay-triplets": [
       "./support/vcpkg/triplets"
@@ -29,6 +30,7 @@
   "dependencies": [
     "ghoul",
     "sgct",
+    "spice",
     "curl",
     { "name": "date", "default-features": false },
     "kubazip",
@@ -57,8 +59,5 @@
       "description": "Build the OpenSpace application with OpenVR/SteamVR support",
       "dependencies": [ "openvr" ]
     }
-  },
-  "overrides": [
-    { "name": "lua", "version": "5.4.7" }
-  ]
+  }
 }

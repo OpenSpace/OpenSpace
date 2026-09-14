@@ -70,11 +70,6 @@ include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
 
 begin_header("Configuring OpenSpace project")
 
-# Bail out if the user tries to generate a 32 bit project
-if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
-  message(FATAL_ERROR "OpenSpace can only be generated for 64 bit architectures.")
-endif ()
-
 ##########################################################################################
 # Cleanup project                                                                        #
 ##########################################################################################

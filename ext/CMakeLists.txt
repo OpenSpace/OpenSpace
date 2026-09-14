@@ -29,12 +29,11 @@ begin_dependency("Ghoul")
 find_package(ghoul CONFIG REQUIRED)
 end_dependency()
 
-# Spice
+# Spice is resolved through the vcpkg overlay port at
+# ext/spice/support/vcpkg/ports/spice, which builds the enclosing submodule checkout.
+# The spice submodule stays checked out because that port builds from its source path.
 begin_dependency("Spice")
-set(SPICE_BUILD_SHARED_LIBRARY OFF CACHE BOOL "" FORCE)
-add_subdirectory(spice SYSTEM)
-target_compile_features(spice PUBLIC cxx_std_20)
-set_target_properties(spice PROPERTIES FOLDER "External")
+find_package(spice CONFIG REQUIRED)
 end_dependency()
 
 # nlohmann JSON (vcpkg)
