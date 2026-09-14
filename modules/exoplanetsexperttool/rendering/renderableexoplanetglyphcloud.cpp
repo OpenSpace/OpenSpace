@@ -217,7 +217,7 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     , _showMissingInclination(ShowMissingInclinationInfo, false)
     , _starGlyph{
         .owner = PropertyOwner(StarGlyphInfo),
-        .enabled = BoolProperty(ShowStarLineInfo, true),
+        .enabled = BoolProperty(ShowStarLineInfo, false),
         .lineColor = Vec4Property(
             StarLineColorInfo,
             glm::vec4(1.f, 0.f, 0.f, 0.2f),
