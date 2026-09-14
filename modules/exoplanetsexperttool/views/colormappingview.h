@@ -55,6 +55,10 @@ public:
     // Return true if the color map was changed
     bool renderViewContent();
 
+    // Render an overview of all color mapped variables, with a small preview of the
+    // color mapping
+    void renderActiveColormapOverview();
+
     // Render an edit view for one individual color mapped value.
     // Returns true if value was changed. If relevantSystem given,
     // also show a button to color based on planets in that system
@@ -63,6 +67,8 @@ public:
 
     glm::vec4 colorFromColormap(const ExoplanetItem& item,
         const ColorMappedVariable& variable);
+
+    const char* colormapFromIndex(size_t index) const;
 
 private:
     glm::vec4 _nanPointColor = { 0.3f, 0.3f, 0.3f, 1.f };

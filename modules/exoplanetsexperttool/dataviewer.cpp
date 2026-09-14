@@ -650,7 +650,100 @@ void DataViewer::render() {
                     ).c_str());
 
                     ImGui::EndTooltip();
+                }
+            }
+        }
 
+        // Coloring (only show first column)
+        {
+            ImGui::SameLine(0, 30);
+
+            float totalWidth = 0.f;
+
+            const std::vector<ColorMappingView::ColorMappedVariable>& cmappedVariables =
+                _colorMappingView->colorMapperVariables();
+
+            const ColorMappingView::ColorMappedVariable& firstCmap = cmappedVariables.front();
+
+            const char* column = columnName(firstCmap.columnIndex);
+            totalWidth += ImGui::CalcTextSize(column).x;
+
+            std::string min = std::format("{}", firstCmap.colorScaleMin);
+            std::string max = std::format("{}", firstCmap.colorScaleMax);
+
+            totalWidth += ImGui::CalcTextSize(min.c_str()).x;
+            totalWidth += ImGui::CalcTextSize(max.c_str()).x;
+            totalWidth += 2.f * ImGui::GetStyle().ItemSpacing.x;
+
+            const float iconSize = ImGui::GetFrameHeight();
+
+            int cmap = ImPlot::GetColormapIndex(
+                _colorMappingView->colormapFromIndex(firstCmap.colormapIndex)
+            );
+            float startY = ImGui::GetCursorPosY();               // already correctly offset for the bar
+            float buttonHeight = ImGui::GetFrameHeight();
+            ImVec2 buttonPadding = ImGui::GetStyle().FramePadding;
+            totalWidth += buttonPadding.x;
+
+            const char* label = "Color:";
+            totalWidth += ImGui::CalcTextSize(label).x;
+
+            // Some extra padding to the right;
+            totalWidth += ImGui::GetStyle().ItemSpacing.x * 2.f;
+
+            std::string logScale = firstCmap.useLogScale ? " (log)" : "";
+            if (!logScale.empty()) {
+                totalWidth += ImGui::CalcTextSize(logScale.c_str()).x;
+                totalWidth += ImGui::GetStyle().ItemSpacing.x;
+            }
+
+            std::string cmapCount;
+            if (cmappedVariables.size() > 1) {
+                cmapCount = std::format(" 1/{}", cmappedVariables.size());
+                totalWidth += ImGui::CalcTextSize(cmapCount.c_str()).x;
+                totalWidth += ImGui::GetStyle().ItemSpacing.x;
+            }
+
+            // Right-align icon + selectable in current content region
+            const float currentX = ImGui::GetCursorPosX();
+            const float rightAlignedX = currentX + ImGui::GetContentRegionAvail().x - totalWidth;
+            if (rightAlignedX > currentX) {
+                ImGui::SetCursorPosX(rightAlignedX);
+            }
+
+            ImVec2 text_size = ImGui::CalcTextSize(label);
+            if (ImGui::Selectable(label, false, ImGuiSelectableFlags_None, text_size)) {
+                _showColormapWindow = true;
+            }
+            ImGui::SameLine();
+            ImGui::TextUnformatted(min.c_str());
+            ImGui::SameLine();
+
+            ImGui::SetCursorPosY(startY + 0.5f * buttonHeight + 2.f * buttonPadding.y);
+            if (ImPlot::ColormapButton(column, ImVec2(0, buttonHeight), cmap)) {
+                _showColormapOverviewWindow = !_showColormapOverviewWindow;
+            }
+
+            ImGui::SameLine();
+            ImGui::TextUnformatted(max.c_str());
+
+            if (!logScale.empty()) {
+                ImGui::SameLine();
+                view::helper::renderDescriptiveText(logScale.c_str());
+
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Using logarithmic scale");
+                }
+            }
+
+            if (!cmapCount.empty()) {
+                ImGui::SameLine();
+                view::helper::renderDescriptiveText(cmapCount.c_str());
+
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip(std::format(
+                        "First of {} color mappings", cmappedVariables.size()
+                    ).c_str());
                 }
             }
         }
@@ -665,6 +758,10 @@ void DataViewer::render() {
 
     if (_showColormapWindow) {
         renderColormapWindow(&_showColormapWindow);
+    }
+
+    if (_showColormapOverviewWindow) {
+        renderColormapOverviewWindow(&_showColormapOverviewWindow);
     }
 
     if (_showTable) {
@@ -700,23 +797,38 @@ void DataViewer::render() {
 }
 
 void DataViewer::renderColormapWindow(bool* open) {
-    if (!ImGui::Begin("Color mapping", open, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::End();
-        return;
+    if (ImGui::Begin("Color mapping", open, ImGuiWindowFlags_AlwaysAutoResize)) {
+        _colormapWasChanged = _colorMappingView->renderViewContent();
     }
+    ImGui::End();
+}
 
-    _colormapWasChanged = _colorMappingView->renderViewContent();
+void DataViewer::renderColormapOverviewWindow(bool* open) {
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    const float posPadding = 10.f;
+    ImGui::SetNextWindowPos(
+        ImVec2(viewport->WorkPos.x + viewport->WorkSize.x - posPadding, viewport->WorkPos.y + posPadding),
+        ImGuiCond_Always,
+        ImVec2(1.f, 0.f)
+    );
+
+    if (ImGui::Begin("Colors", open, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse)) {
+        _colorMappingView->renderActiveColormapOverview();
+        ImGui::Spacing();
+        if (ImGui::Button("Edit")) {
+            _showColormapWindow = true;
+        }
+    }
+    ImGui::End();
 }
 
 void DataViewer::renderTableWindow(bool *open) {
     ImGui::SetNextWindowSize(DefaultWindowSize, ImGuiCond_FirstUseEver);
 
-    if (!ImGui::Begin("Table", open)) {
-        ImGui::End();
-        return;
+    if (ImGui::Begin("Table", open)) {
+        _tableView->renderTableView(_filteredData);
     }
-
-    _tableView->renderTableView(_filteredData);
+    ImGui::End();
 }
 
 void DataViewer::renderColumnDescriptionTooltip(size_t index) const {

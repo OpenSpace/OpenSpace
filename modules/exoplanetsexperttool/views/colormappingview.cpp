@@ -34,6 +34,141 @@
 #include <string>
 #include <vector>
 
+namespace {
+    void LogColormapScale(const char* label, double scaleMin, double scaleMax,
+                          float barWidthPx, float height)
+    {
+        if (scaleMin <= 0.0 || scaleMax <= 0.0 || scaleMin == scaleMax) {
+            return;
+        }
+
+        const double logMin = std::log10(scaleMin);
+        const double logMax = std::log10(scaleMax);
+
+        const double tickMin = std::min(scaleMin, scaleMax);
+        const double tickMax = std::max(scaleMin, scaleMax);
+
+        auto buildTicks = [](
+            double minV,
+            double maxV,
+            std::initializer_list<double> multipliers,
+            std::vector<double>& values,
+            std::vector<std::string>* labels = nullptr
+            ) {
+                values.clear();
+                if (labels) {
+                    labels->clear();
+                }
+
+                const int decadeStart = static_cast<int>(std::floor(std::log10(minV)));
+                const int decadeEnd = static_cast<int>(std::ceil(std::log10(maxV)));
+
+                for (int d = decadeStart; d <= decadeEnd; ++d) {
+                    const double decade = std::pow(10.0, d);
+                    for (double m : multipliers) {
+                        const double v = decade * m;
+                        if (v < minV || v > maxV) {
+                            continue;
+                        }
+
+                        values.push_back(v);
+
+                        if (labels) {
+                            char buf[32];
+                            std::snprintf(buf, sizeof(buf), "%g", v);
+                            labels->push_back(buf);
+                        }
+                    }
+                }
+            };
+
+        std::vector<double> majorValues;
+        std::vector<std::string> majorLabels;
+        buildTicks(tickMin, tickMax, { 1.0 }, majorValues, &majorLabels);
+
+        std::vector<double> minorValues;
+        buildTicks(tickMin, tickMax, { 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 }, minorValues);
+
+        std::vector<const char*> majorLabelPtrs;
+        majorLabelPtrs.reserve(majorLabels.size());
+        for (const std::string& s : majorLabels) {
+            majorLabelPtrs.push_back(s.c_str());
+        }
+
+        float maxLabelWidth = 0.0f;
+        for (const std::string& s : majorLabels) {
+            maxLabelWidth = std::max(maxLabelWidth, ImGui::CalcTextSize(s.c_str()).x);
+        }
+
+        const ImPlotStyle& style = ImPlot::GetStyle();
+        const float axisReserve = style.MajorTickLen.y
+            + style.LabelPadding.x * 2.0f
+            + maxLabelWidth
+            + style.PlotPadding.x;
+        const float totalWidth = barWidthPx + axisReserve;
+
+        ImGui::PushID(label);
+        ImPlot::PushStyleColor(ImPlotCol_AxisTick, ImVec4(1.f, 1.f, 1.f, 1.f));
+
+        if (ImPlot::BeginPlot("##LogColorbar", ImVec2(totalWidth, height),
+            ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs))
+        {
+            ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_NoDecorations);
+            ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, 1.0, ImPlotCond_Always);
+
+            ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_Opposite);
+            ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_Log10);
+            ImPlot::SetupAxisLimits(ImAxis_Y1, scaleMin, scaleMax, ImPlotCond_Always);
+
+            if (!majorValues.empty()) {
+                ImPlot::SetupAxisTicks(
+                    ImAxis_Y1,
+                    majorValues.data(),
+                    static_cast<int>(majorValues.size()),
+                    majorLabelPtrs.data(),
+                    false
+                );
+            }
+
+            const ImVec2 plotSize = ImPlot::GetPlotSize();
+            const float barFrac = (plotSize.x > 0.0f) ? std::min(1.0f, barWidthPx / plotSize.x) : 1.0f;
+
+            ImDrawList* plotDl = ImPlot::GetPlotDrawList();
+            constexpr int Steps = 256;
+            for (int i = 0; i < Steps; ++i) {
+                const float t0 = static_cast<float>(i) / Steps;
+                const float t1 = static_cast<float>(i + 1) / Steps;
+
+                const double v0 = std::pow(10.0, logMin + t0 * (logMax - logMin));
+                const double v1 = std::pow(10.0, logMin + t1 * (logMax - logMin));
+
+                const ImVec2 p0 = ImPlot::PlotToPixels(ImPlotPoint(0.0, v0));
+                const ImVec2 p1 = ImPlot::PlotToPixels(ImPlotPoint(barFrac, v1));
+                const ImVec4 c = ImPlot::SampleColormap(0.5f * (t0 + t1));
+
+                const ImVec2 rMin(std::min(p0.x, p1.x), std::min(p0.y, p1.y));
+                const ImVec2 rMax(std::max(p0.x, p1.x), std::max(p0.y, p1.y));
+                plotDl->AddRectFilled(rMin, rMax, ImGui::ColorConvertFloat4ToU32(c));
+            }
+
+            ImDrawList* windowDl = ImGui::GetWindowDrawList();
+            // Dimmer and shorter than major ticks
+            const ImU32 minorColor = ImGui::GetColorU32(ImGuiCol_Text, 0.6f);
+            const float minorTickLen = style.MajorTickLen.y * 0.3f;
+
+            for (double v : minorValues) {
+                const ImVec2 p = ImPlot::PlotToPixels(ImPlotPoint(1.0, v));
+                windowDl->AddLine(p, ImVec2(p.x - minorTickLen, p.y), minorColor, 1.0f);
+            }
+
+            ImPlot::EndPlot();
+        }
+
+        ImPlot::PopStyleColor();
+        ImGui::PopID();
+    }
+} // namespace
+
 namespace openspace::exoplanets {
 
 ColorMappingView::ColorMappingView(DataViewer& dataViewer,
@@ -155,75 +290,79 @@ bool ColorMappingView::renderViewContent() {
     // Start variable group
     ImGui::BeginGroup();
 
-    ImGui::BeginGroup();
+    {
+        ImGui::BeginGroup();
 
-    // NaNColor
-    ImGuiColorEditFlags nanColorFlags = ImGuiColorEditFlags_NoInputs |
-        ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreview |
-        ImGuiColorEditFlags_AlphaBar;
-    static ImVec4 c = view::helper::toImVec4(_nanPointColor);
-    if (ImGui::ColorEdit4("NanColor", (float*)&c, nanColorFlags)) {
-        _nanPointColor = { c.x, c.y, c.z, c.w };
-        cmapWasChanged = true;
+        // NaNColor
+        ImGuiColorEditFlags nanColorFlags = ImGuiColorEditFlags_NoInputs |
+            ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreview |
+            ImGuiColorEditFlags_AlphaBar;
+        static ImVec4 c = view::helper::toImVec4(_nanPointColor);
+        if (ImGui::ColorEdit4("NanColor", (float*)&c, nanColorFlags)) {
+            _nanPointColor = { c.x, c.y, c.z, c.w };
+            cmapWasChanged = true;
+        }
+        ImGui::SameLine();
+        ImGui::Text("No value color");
+
+        ImGui::EndGroup();
     }
-    ImGui::SameLine();
-    ImGui::Text("No value color");
-
-    ImGui::EndGroup();
 
     ImGui::Spacing();
 
-    ImGui::BeginGroup();
-
-    for (size_t index = 0; index < _variableSelection.size(); ++index) {
-        ColorMappedVariable& variable = _variableSelection[index];
-
-        ImGui::PushID(std::format("##variable{}", index).c_str());
-
-        ImGui::Text(std::format("{}.", index + 1).c_str());
-        ImGui::SameLine();
-
-        // Entire variable group
-        cmapWasChanged |= renderColormapEdit(variable);
-
-        ImGui::PopID();
-        ImGui::SameLine();
-
-        ImGui::PushID(std::format("##remove{}", index).c_str());
-        if (_variableSelection.size() > 1 && ImGui::Button("x")) {
-            _variableSelection.erase(_variableSelection.begin() + index);
-            cmapWasChanged = true;
-        }
-        ImGui::PopID();
-
-        // Some spacing before the next group
-        ImGui::Spacing();
-    }
-
-    // Add button
     {
-        bool isMaxColors =
-            _variableSelection.size() == RenderableExoplanetGlyphCloud::MaxNumberColors;
+        ImGui::BeginGroup();
 
-        if (isMaxColors) {
-            ImGui::BeginDisabled();
-        }
+        for (size_t index = 0; index < _variableSelection.size(); ++index) {
+            ColorMappedVariable& variable = _variableSelection[index];
 
-        // Colormap for each selected variable
-        if (ImGui::Button("+ Add variable")) {
-            ColorMappedVariable newVariable = { .columnIndex = _firstNumericColumnIndex };
-            _variableSelection.push_back(newVariable);
-            cmapWasChanged = true;
-        };
+            ImGui::PushID(std::format("##variable{}", index).c_str());
 
-        if (isMaxColors) {
-            ImGui::EndDisabled();
+            ImGui::Text(std::format("{}.", index + 1).c_str());
             ImGui::SameLine();
-            ImGui::Text("Max colors reached");
-        }
-    }
 
-    ImGui::EndGroup(); // all variable groups
+            // Entire variable group
+            cmapWasChanged |= renderColormapEdit(variable);
+
+            ImGui::PopID();
+            ImGui::SameLine();
+
+            ImGui::PushID(std::format("##remove{}", index).c_str());
+            if (_variableSelection.size() > 1 && ImGui::Button("x")) {
+                _variableSelection.erase(_variableSelection.begin() + index);
+                cmapWasChanged = true;
+            }
+            ImGui::PopID();
+
+            // Some spacing before the next group
+            ImGui::Spacing();
+        }
+
+        // Add button
+        {
+            bool isMaxColors =
+                _variableSelection.size() == RenderableExoplanetGlyphCloud::MaxNumberColors;
+
+            if (isMaxColors) {
+                ImGui::BeginDisabled();
+            }
+
+            // Colormap for each selected variable
+            if (ImGui::Button("+ Add variable")) {
+                ColorMappedVariable newVariable = { .columnIndex = _firstNumericColumnIndex };
+                _variableSelection.push_back(newVariable);
+                cmapWasChanged = true;
+            };
+
+            if (isMaxColors) {
+                ImGui::EndDisabled();
+                ImGui::SameLine();
+                ImGui::Text("Max colors reached");
+            }
+        }
+
+        ImGui::EndGroup(); // all variable groups
+    }
 
     // Circle plot to show which parameters map to which part of a glyph
     const int nVariables = static_cast<int>(_variableSelection.size());
@@ -295,143 +434,54 @@ bool ColorMappingView::renderViewContent() {
 
     ImGui::EndGroup(); // variables + plot group
 
-    ImGui::End();
-
     return cmapWasChanged;
 }
 
-// Create a logarithmic color scale (ImPlot has no built-in one), with decade labels
-void LogColormapScale(const char* label, double scaleMin, double scaleMax,
-                      float barWidthPx, float height)
-{
-    if (scaleMin <= 0.0 || scaleMax <= 0.0 || scaleMin == scaleMax) {
-        return;
-    }
+void ColorMappingView::renderActiveColormapOverview() {
 
-    const double logMin = std::log10(scaleMin);
-    const double logMax = std::log10(scaleMax);
+    ImGui::ColorButton("##NoValuecolor", view::helper::toImVec4(_nanPointColor), ImGuiColorEditFlags_NoInputs);
+    ImGui::SameLine();
+    ImGui::TextUnformatted("No value");
 
-    const double tickMin = std::min(scaleMin, scaleMax);
-    const double tickMax = std::max(scaleMin, scaleMax);
+    ImGui::Spacing();
 
-    auto buildTicks = [](
-        double minV,
-        double maxV,
-        std::initializer_list<double> multipliers,
-        std::vector<double>& values,
-        std::vector<std::string>* labels = nullptr
-    ) {
-        values.clear();
-        if (labels) {
-            labels->clear();
+    const int nVariables = static_cast<int>(_variableSelection.size());
+    for (int i = 0; i < nVariables; ++i) {
+        const ColorMappedVariable& variable = _variableSelection[i];
+        const std::string columnName = _dataViewer.columnName(
+            _dataViewer.columns()[variable.columnIndex]
+        );
+
+        ImGui::Text("%s", columnName.c_str());
+
+        ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
+        const std::string label = std::format(
+            "##ColormapScale{}",
+            i
+        );
+
+        const float barWidthPx = 20.f;
+        const float height = 150.f;
+        if (variable.useLogScale) {
+            LogColormapScale(
+                label.c_str(),
+                variable.colorScaleMin,
+                variable.colorScaleMax,
+                barWidthPx,
+                height
+            );
         }
-
-        const int decadeStart = static_cast<int>(std::floor(std::log10(minV)));
-        const int decadeEnd = static_cast<int>(std::ceil(std::log10(maxV)));
-
-        for (int d = decadeStart; d <= decadeEnd; ++d) {
-            const double decade = std::pow(10.0, d);
-            for (double m : multipliers) {
-                const double v = decade * m;
-                if (v < minV || v > maxV) {
-                    continue;
-                }
-
-                values.push_back(v);
-
-                if (labels) {
-                    char buf[32];
-                    std::snprintf(buf, sizeof(buf), "%g", v);
-                    labels->push_back(buf);
-                }
-            }
-        }
-    };
-
-    std::vector<double> majorValues;
-    std::vector<std::string> majorLabels;
-    buildTicks(tickMin, tickMax, { 1.0 }, majorValues, &majorLabels);
-
-    std::vector<double> minorValues;
-    buildTicks(tickMin, tickMax, { 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 }, minorValues);
-
-    std::vector<const char*> majorLabelPtrs;
-    majorLabelPtrs.reserve(majorLabels.size());
-    for (const std::string& s : majorLabels) {
-        majorLabelPtrs.push_back(s.c_str());
-    }
-
-    float maxLabelWidth = 0.0f;
-    for (const std::string& s : majorLabels) {
-        maxLabelWidth = std::max(maxLabelWidth, ImGui::CalcTextSize(s.c_str()).x);
-    }
-
-    const ImPlotStyle& style = ImPlot::GetStyle();
-    const float axisReserve = style.MajorTickLen.y
-        + style.LabelPadding.x * 2.0f
-        + maxLabelWidth
-        + style.PlotPadding.x;
-    const float totalWidth = barWidthPx + axisReserve;
-
-    ImGui::PushID(label);
-    ImPlot::PushStyleColor(ImPlotCol_AxisTick, ImVec4(1.f, 1.f, 1.f, 1.f));
-
-    if (ImPlot::BeginPlot("##LogColorbar", ImVec2(totalWidth, height),
-        ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs))
-    {
-        ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_NoDecorations);
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, 1.0, ImPlotCond_Always);
-
-        ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_Opposite);
-        ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_Log10);
-        ImPlot::SetupAxisLimits(ImAxis_Y1, scaleMin, scaleMax, ImPlotCond_Always);
-
-        if (!majorValues.empty()) {
-            ImPlot::SetupAxisTicks(
-                ImAxis_Y1,
-                majorValues.data(),
-                static_cast<int>(majorValues.size()),
-                majorLabelPtrs.data(),
-                false
+        else {
+            ImPlot::ColormapScale(
+                label.c_str(),
+                variable.colorScaleMin,
+                variable.colorScaleMax,
+                ImVec2(0, height)
             );
         }
 
-        const ImVec2 plotSize = ImPlot::GetPlotSize();
-        const float barFrac = (plotSize.x > 0.0f) ? std::min(1.0f, barWidthPx / plotSize.x) : 1.0f;
-
-        ImDrawList* plotDl = ImPlot::GetPlotDrawList();
-        constexpr int Steps = 256;
-        for (int i = 0; i < Steps; ++i) {
-            const float t0 = static_cast<float>(i) / Steps;
-            const float t1 = static_cast<float>(i + 1) / Steps;
-
-            const double v0 = std::pow(10.0, logMin + t0 * (logMax - logMin));
-            const double v1 = std::pow(10.0, logMin + t1 * (logMax - logMin));
-
-            const ImVec2 p0 = ImPlot::PlotToPixels(ImPlotPoint(0.0, v0));
-            const ImVec2 p1 = ImPlot::PlotToPixels(ImPlotPoint(barFrac, v1));
-            const ImVec4 c = ImPlot::SampleColormap(0.5f * (t0 + t1));
-
-            const ImVec2 rMin(std::min(p0.x, p1.x), std::min(p0.y, p1.y));
-            const ImVec2 rMax(std::max(p0.x, p1.x), std::max(p0.y, p1.y));
-            plotDl->AddRectFilled(rMin, rMax, ImGui::ColorConvertFloat4ToU32(c));
-        }
-
-        ImDrawList* windowDl = ImGui::GetWindowDrawList();
-        // Dimmer and shorter than major ticks
-        const ImU32 minorColor = ImGui::GetColorU32(ImGuiCol_Text, 0.6f);
-        const float minorTickLen = style.MajorTickLen.y * 0.3f;
-
-        for (double v : minorValues) {
-            const ImVec2 p = ImPlot::PlotToPixels(ImPlotPoint(1.0, v));
-            windowDl->AddLine(p, ImVec2(p.x - minorTickLen, p.y), minorColor, 1.0f);
-        }
-
-        ImPlot::EndPlot();
+        ImPlot::PopColormap();
     }
-
-    ImPlot::PopStyleColor();
-    ImGui::PopID();
 }
 
 bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
@@ -651,6 +701,10 @@ glm::vec4 ColorMappingView::colorFromColormap(const ExoplanetItem& item,
     pointColor.a *= variable.opacity;
 
     return pointColor;
+}
+
+const char* ColorMappingView::colormapFromIndex(size_t index) const {
+    return _colormaps[index];
 }
 
 } // namespace openspace::exoplanets

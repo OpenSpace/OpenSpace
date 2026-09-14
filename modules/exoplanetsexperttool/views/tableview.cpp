@@ -78,8 +78,6 @@ void TableView::renderTableView(std::vector<size_t>& filteredDataRows) {
     }
 
     renderTable("full_exoplanets_table", filteredDataRows, false, searchString);
-
-    ImGui::End();
 }
 
 void TableView::renderFirstTableColumn(const ExoplanetItem& item, size_t row) {
@@ -96,7 +94,7 @@ void TableView::renderFirstTableColumn(const ExoplanetItem& item, size_t row) {
         // Add a target button instead
         ImGui::PushID(std::format("targetbutton{}", row).c_str());
 
-        // Check if is target item. The GUI name should be set from the planet name
+        // Check if is target item. The GUI name should be set from the planet nameö
         const SceneGraphNode* node = global::navigationHandler->anchorNode();
         bool isCurrentAnchor = node && node->guiName() == item.name;
         if (isCurrentAnchor) {

@@ -122,6 +122,7 @@ private:
 
     void renderTableWindow(bool* open);
     void renderColormapWindow(bool* open);
+    void renderColormapOverviewWindow(bool* open);
     void renderFilterSettingsWindow(bool* open);
 
     int getHoveredPlanetIndex() const;
@@ -153,6 +154,8 @@ private:
     bool _showTable = true;
     bool _showFilterSettingsWindow = false;
     bool _showColormapWindow = false;
+
+    bool _showColormapOverviewWindow = false;
 
     std::vector<ExoplanetItem> _data;
     std::vector<size_t> _filteredData;  // The indices of the items which will be rendered
