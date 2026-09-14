@@ -75,7 +75,7 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-add_subdirectory(ext/imgui SYSTEM)
-target_link_libraries(${imgui_module} PUBLIC Imgui)
-disable_compiler_warnings(Imgui)
-set_target_properties(Imgui PROPERTIES FOLDER "External")
+begin_dependency("ImGui")
+find_package(imgui CONFIG REQUIRED)
+target_link_libraries(${imgui_module} PUBLIC imgui::imgui)
+end_dependency("ImGui")

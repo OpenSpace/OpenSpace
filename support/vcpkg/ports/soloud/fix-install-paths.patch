@@ -1,0 +1,34 @@
+diff --git a/contrib/cmake/InstallExport.cmake b/contrib/cmake/InstallExport.cmake
+index a9fa0a8..486268c 100644
+--- a/contrib/cmake/InstallExport.cmake
++++ b/contrib/cmake/InstallExport.cmake
+@@ -3,16 +3,13 @@
+ # Installs ${PROJECT_NAME}-SetThirdParties.cmake too if such file
+ # is found in ${PROJECT_SOURCE_DIR}.
+ 
+-SET (EV_CMAKE_EXPORT_DIR share/${PROJECT_NAME}/cmake)
+-
+-IF (WIN32)
+-	SET (EV_CMAKE_EXPORT_DIR cmake)
+-ENDIF ()
+-
+ SET (PROJECT_NAME_LOWERCASE)
+ STRING (TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
++SET (EV_CMAKE_EXPORT_DIR share/${PROJECT_NAME_LOWERCASE}/cmake)
++
+ INSTALL (
+ 	EXPORT ${PROJECT_NAME_LOWERCASE}-config
++	NAMESPACE soloud::
+ 	DESTINATION ${EV_CMAKE_EXPORT_DIR}
+ )
+ 
+diff --git a/contrib/src.cmake b/contrib/src.cmake
+index 831fe75..5669010 100644
+--- a/contrib/src.cmake
++++ b/contrib/src.cmake
+@@ -297,4 +297,4 @@ endif()
+ target_link_libraries (${TARGET_NAME} ${LINK_LIBRARIES})
+ 
+ include (Install)
+-INSTALL(FILES ${TARGET_HEADERS} DESTINATION include/${TARGET_NAME})
++INSTALL(FILES ${TARGET_HEADERS} DESTINATION include)

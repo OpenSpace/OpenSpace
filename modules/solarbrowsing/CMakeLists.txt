@@ -29,6 +29,7 @@ set(HEADER_FILES
   rendering/renderablesolarimageryprojection.h
   tasks/helioviewerdownloadtask.h
   util/asyncimagedecoder.h
+  util/format_defs.h
   util/j2kcodec.h
   util/solarbrowsinghelper.h
   util/structs.h
@@ -62,24 +63,7 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
-add_subdirectory(${OPENJPEG_ROOT_DIR} SYSTEM)
-set_target_properties(openjp2 PROPERTIES FOLDER "External")
+begin_dependency("OpenJPEG")
+find_package(OpenJPEG CONFIG REQUIRED)
 target_link_libraries(openspace-module-solarbrowsing PRIVATE openjp2)
-
-set_target_properties(opj_compress PROPERTIES FOLDER "External")
-set_target_properties(opj_decompress PROPERTIES FOLDER "External")
-set_target_properties(opj_dump PROPERTIES FOLDER "External")
-
-
-target_include_directories(
-  openspace-module-solarbrowsing PUBLIC
-  ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
-  ${OPENJPEG_BINARY_DIR}/src/bin/common
-  ${OPENJPEG_ROOT_DIR}/src/lib/openjp2
-  ${OPENJPEG_ROOT_DIR}/src/bin/jp2
-  ${OPENJPEG_ROOT_DIR}/src/bin/common
-)
-
-# Force static linking to prevent __imp* linker errors
-target_compile_definitions(openspace-module-solarbrowsing PUBLIC "OPJ_STATIC")
+end_dependency("OpenJPEG")

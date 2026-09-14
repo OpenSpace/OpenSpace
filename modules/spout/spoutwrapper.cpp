@@ -35,8 +35,15 @@
 #include <string_view>
 #include <utility>
 
-#define SPOUT_NO_GL_INCLUDE
-#include <SpoutLibrary.h>
+// ghoul_gl.h (included above) pulls in glbinding and does `using namespace gl;`, bringing
+// the scoped enum `gl::GLenum` into scope unqualified. SpoutLibrary.h would otherwise
+// unconditionally redeclare a plain `typedef unsigned int GLenum;` in the global
+// namespace (and `#define GL_RGBA`, corrupting glbinding's own `GL_RGBA` enumerator) to
+// avoid needing a real GL header; SPOUT_NO_GL_TYPEDEFS (added by
+// support/vcpkg/ports/spout2/fix-gl-typedefs.patch) suppresses that so glbinding's real
+// types are used instead. This only works with glbinding included first, as above.
+#define SPOUT_NO_GL_TYPEDEFS
+#include <SpoutLibrary/SpoutLibrary.h>
 
 namespace {
     using namespace openspace;
@@ -124,7 +131,7 @@ const std::vector<std::string>& SpoutReceiver::spoutReceiverList() {
 
     for (int i = 0; i < nSenders; i++) {
         char Name[256];
-        _spoutHandle->GetSenderName(i, Name, 256);
+        _spoutHandle->GetSender(i, Name, 256);
         _receiverList.push_back(Name);
     }
 
@@ -156,9 +163,6 @@ bool SpoutReceiver::updateReceiver() {
         saveGLState();
 
         _spoutHandle->ReceiveTexture(
-            currentSpoutName,
-            width,
-            height,
             static_cast<GLuint>(*_spoutTexture),
             static_cast<GLuint>(GL_TEXTURE_2D),
             true

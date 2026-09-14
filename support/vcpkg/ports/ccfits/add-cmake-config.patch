@@ -1,0 +1,65 @@
+diff --git a/CCfitsConfig.cmake.in b/CCfitsConfig.cmake.in
+new file mode 100644
+index 0000000..f3327c9
+--- /dev/null
++++ b/CCfitsConfig.cmake.in
+@@ -0,0 +1,6 @@
++@PACKAGE_INIT@
++
++include(CMakeFindDependencyMacro)
++find_dependency(cfitsio CONFIG)
++
++include("${CMAKE_CURRENT_LIST_DIR}/CCfitsTargets.cmake")
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index be242ca..6d527c5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -95,7 +95,7 @@ ENDIF(MSVC)
+ 
+ # Add link dependencies:
+ if(1)
+-   target_link_libraries(${LIB_NAME} PRIVATE CFITSIO::cfitsio)
++   target_link_libraries(${LIB_NAME} PUBLIC CFITSIO::cfitsio)
+ elseif(0)
+    # pkg-config supplies the CFITSIO dependencies (zlib, curl)
+    IF (CFITSIO_FOUND)
+@@ -115,13 +115,39 @@ ENDIF (${PkgConfig_FOUND})
+ # Install:
+ #==============================================================================
+ include(GNUInstallDirs)
++include(CMakePackageConfigHelpers)
++
+ install(TARGETS ${LIB_NAME}
++        EXPORT CCfitsTargets
+         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        INCLUDES DESTINATION include/CCfits
+ )
+ install(FILES ${H_FILES} DESTINATION ${INCLUDE_INSTALL_DIR})
+ 
++install(EXPORT CCfitsTargets
++        FILE CCfitsTargets.cmake
++        NAMESPACE CCfits::
++        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CCfits
++)
++
++configure_package_config_file(
++        ${CMAKE_CURRENT_SOURCE_DIR}/CCfitsConfig.cmake.in
++        ${CMAKE_CURRENT_BINARY_DIR}/CCfitsConfig.cmake
++        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CCfits
++)
++write_basic_package_version_file(
++        ${CMAKE_CURRENT_BINARY_DIR}/CCfitsConfigVersion.cmake
++        VERSION ${${PROJECT_NAME}_VERSION}
++        COMPATIBILITY AnyNewerVersion
++)
++install(FILES
++        ${CMAKE_CURRENT_BINARY_DIR}/CCfitsConfig.cmake
++        ${CMAKE_CURRENT_BINARY_DIR}/CCfitsConfigVersion.cmake
++        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CCfits
++)
++
+ #==============================================================================
+ # Tests:
+ #==============================================================================

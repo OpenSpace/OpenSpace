@@ -11,6 +11,7 @@ vcpkg_from_github(
     PATCHES
         fix-include-path.patch
         fix-dx-keyed.patch
+        fix-gl-typedefs.patch
 )
 
 if(VCPKG_CRT_LINKAGE STREQUAL "static")

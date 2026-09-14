@@ -19,27 +19,20 @@
       "name": "msvc",
       "hidden": true,
       "generator": "Visual Studio 18 2026",
-      "architecture": "x64",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
-      }
+      "architecture": "x64"
     },
     {
       "name": "ninja",
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": true,
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true
       }
     },
     {
       "name": "makefiles",
       "hidden": true,
-      "generator": "Unix Makefiles",
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
-      }
+      "generator": "Unix Makefiles"
     },
 
     {
@@ -49,6 +42,9 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
       }
     },
     {
