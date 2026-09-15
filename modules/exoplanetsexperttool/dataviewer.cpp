@@ -29,6 +29,7 @@
 #include <modules/exoplanetsexperttool/dataloader.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
+#include <modules/exoplanetsexperttool/rendering/renderablehostcloud.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
@@ -440,8 +441,9 @@ void DataViewer::initializeRenderables() {
 
     updateGlyphRenderData();
 
+    // Glyphs
     ghoul::Dictionary gui;
-    gui.setValue("Name", "All Exoplanets"s);
+    gui.setValue("Name", "Glyphs - Planets"s);
     gui.setValue("Path", "/ExoplanetExplorer"s);
 
     ghoul::Dictionary renderable;
@@ -457,6 +459,26 @@ void DataViewer::initializeRenderables() {
 
     global::scriptEngine->queueScript(
         std::format("openspace.addSceneGraphNode({})", ghoul::formatLua(node))
+    );
+
+    // Stars
+    ghoul::Dictionary hostsGui;
+    hostsGui.setValue("Name", "Glyphs - Stars"s);
+    hostsGui.setValue("Path", "/ExoplanetExplorer"s);
+
+    ghoul::Dictionary hostsRenderable;
+    hostsRenderable.setValue("Type", "RenderableHostCloud"s);
+    hostsRenderable.setValue("Scale", static_cast<double>(DefaultGlyphScale));
+    hostsRenderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
+    hostsRenderable.setValue("Enabled", false);
+
+    ghoul::Dictionary hostsNode;
+    hostsNode.setValue("Identifier", std::string(ExoplanetsExpertToolModule::HostCloudIdentifier));
+    hostsNode.setValue("Renderable", hostsRenderable);
+    hostsNode.setValue("GUI", hostsGui);
+
+    global::scriptEngine->queueScript(
+        std::format("openspace.addSceneGraphNode({})", ghoul::formatLua(hostsNode))
     );
 }
 
@@ -913,19 +935,26 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 }
 
 int DataViewer::getHoveredPlanetIndex() const {
-    std::string sgnId = std::string(ExoplanetsExpertToolModule::GlyphCloudIdentifier);
-    SceneGraphNode* n = sceneGraphNode(sgnId);
-    if (!n) {
-        return -1;
+    // Start by checking the glyph cloud
+    SceneGraphNode* n = sceneGraphNode(ExoplanetsExpertToolModule::GlyphCloudIdentifier);
+    if (n) {
+        RenderableExoplanetGlyphCloud* cloud =
+            dynamic_cast<RenderableExoplanetGlyphCloud*>(n->renderable());
+        if (cloud && cloud->isEnabled()) {
+            return cloud->hoveredIndex();
+        }
     }
 
-   RenderableExoplanetGlyphCloud* cloud =
-       dynamic_cast<RenderableExoplanetGlyphCloud*>(n->renderable());
-   if (!cloud) {
-       return -1;
-   }
+    // Then, the host renderable
+    SceneGraphNode* n2 = sceneGraphNode(ExoplanetsExpertToolModule::HostCloudIdentifier);
+    if (n2) {
+        RenderableHostCloud* cloud = dynamic_cast<RenderableHostCloud*>(n2->renderable());
+        if (cloud && cloud->isEnabled()) {
+            return cloud->hoveredIndex();
+        }
+    }
 
-   return cloud->hoveredIndex();
+    return -1;
 }
 
 void DataViewer::renderPlanetTooltip(int index) const {
@@ -1253,6 +1282,11 @@ void DataViewer::renderSettingsMenu() {
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.Scale', {})",
                 ExoplanetsExpertToolModule::GlyphCloudIdentifier, glyphSizeScale
             ));
+
+            global::scriptEngine->queueScript(std::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Scale', {})",
+                ExoplanetsExpertToolModule::HostCloudIdentifier, glyphSizeScale
+            ));
         }
     }
 
@@ -1319,18 +1353,20 @@ void DataViewer::updateGlyphRenderData() {
 
 void DataViewer::updateSelectionInRenderable() {
     const std::string indices = formatIndicesList(_selection);
-    const std::string uri = std::format(
-        "Scene.{}.Renderable.Selection",
-        ExoplanetsExpertToolModule::GlyphCloudIdentifier
-    );
-
-    const std::string script = std::format(
-        "openspace.setPropertyValueSingle('{}', {{ {} }})",
-        uri, indices
-    );
 
     global::scriptEngine->queueScript({
-        .code = script,
+        .code = std::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Selection', {{ {} }})",
+            ExoplanetsExpertToolModule::GlyphCloudIdentifier, indices
+        ),
+        .addToLog = ScriptEngine::Script::ShouldBeLogged::No
+    });
+
+    global::scriptEngine->queueScript({
+        .code = std::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Selection', {{ {} }})",
+            ExoplanetsExpertToolModule::HostCloudIdentifier, indices
+        ),
         .addToLog = ScriptEngine::Script::ShouldBeLogged::No
     });
 }

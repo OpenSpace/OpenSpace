@@ -33,6 +33,7 @@ set(HEADER_FILES
     exoplanetsexperttoolmodule.h
     gui.h
     rendering/renderableexoplanetglyphcloud.h
+    rendering/renderablehostcloud.h
     views/colormappingview.h
     views/columnselectionview.h
     views/filteringview.h
@@ -50,6 +51,7 @@ set(SOURCE_FILES
     exoplanetsexperttoolmodule.cpp
     gui.cpp
     rendering/renderableexoplanetglyphcloud.cpp
+    rendering/renderablehostcloud.cpp
     views/colormappingview.cpp
     views/columnselectionview.cpp
     views/filteringview.cpp
@@ -60,6 +62,9 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/hosts_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/hosts_gs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/hosts_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/glyphs_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/glyphs_gs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/glyphs_vs.glsl
