@@ -114,6 +114,14 @@ begin_header("Dependency: SGCT")
 find_package(sgct CONFIG REQUIRED)
 target_link_libraries(OpenSpace PRIVATE sgct::sgct)
 
+# stb_image is a bit weird in which it required _exactly_ one instatiation of the
+#implementation. All other parts in the system are only using the header-includes of the
+# project. Since this is the top-level application we need to include the impl version
+# here to have exactly one implementation. Less than 1: Linker error. More than 1: ODR
+# violation
+find_package(stbimage CONFIG REQUIRED)
+target_link_libraries(OpenSpace PRIVATE unofficial::stbimage::stbimage-impl)
+
 if (UNIX)
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
 endif ()
