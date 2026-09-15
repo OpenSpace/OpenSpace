@@ -63,12 +63,14 @@ find_package(Catch2 CONFIG REQUIRED)
 find_package(sgct CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(nlohmann_json_schema_validator CONFIG REQUIRED)
+find_package(stbimage CONFIG REQUIRED)
 
 target_compile_definitions(OpenSpaceTest PRIVATE "GHL_THROW_ON_ASSERT")
 target_link_libraries(OpenSpaceTest PRIVATE
   Catch2::Catch2
   openspace-core
   sgct::sgct
+  unofficial::stbimage::stbimage-write-impl
   nlohmann_json::nlohmann_json
   nlohmann_json_schema_validator::validator
 )

@@ -113,8 +113,12 @@ target_link_libraries(OpenSpace PRIVATE sgct::sgct)
 # project. Since this is the top-level application we need to include the impl version
 # here to have exactly one implementation. Less than 1: Linker error. More than 1: ODR
 # violation
+#
+# OpenSpace only links the *write* half (stbi_write_*): the *read* half (stbi_load, ...)
+# is already satisfied by assimp, which vendors its own stb_image copy, so linking the
+# stbimage port's read implementation too would be a duplicate-symbol conflict
 find_package(stbimage CONFIG REQUIRED)
-target_link_libraries(OpenSpace PRIVATE unofficial::stbimage::stbimage-impl)
+target_link_libraries(OpenSpace PRIVATE unofficial::stbimage::stbimage-write-impl)
 
 if (UNIX)
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)

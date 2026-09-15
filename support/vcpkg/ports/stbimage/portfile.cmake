@@ -1,12 +1,12 @@
 # stbimage has no upstream registry port; This is a small library that compiles the
-# stb_image/stb_image_write implementation exactly once so it can be shared without
+# stb_image/stb_image_write implementation so it can be shared without
 # duplicate-symbol/ODR conflicts (see https://github.com/sgct/stbimage for details).
 
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO sgct/stbimage
-  REF a531835e711aa97a095b73290fb6cec0173542a3
-  SHA512 d0b1ab0795ed9cc8bde6282a2e58d46603f8a7cde8080545734dc7eec2d58c57257527641ad94a887e4fb04256589c6501646f0afe7102625497755e3749ee7a
+  REF c2ff2f66602a2b54478163d785a38cfae703c94c
+  SHA512 2a4ca94421e79ad6f2a029f11199ed4efcf1bfe71052d28326b459a5e29da967ed145441a6285e27a9321ef2d3c2498a621304bc3c0cbe119902dadbfa71a2e1
   HEAD_REF master
 )
 
