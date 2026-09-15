@@ -28,7 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/util/downloadeventengine.h>
 #include <openspace/util/httprequest.h>
-#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
+#include <zip/zip.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>

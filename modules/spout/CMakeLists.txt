@@ -28,7 +28,6 @@ set(HEADER_FILES
   renderableplanespout.h
   renderablespherespout.h
   screenspacespout.h
-  spoutlibrary.h
   spoutwrapper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -49,13 +48,7 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 
-add_library(spout SHARED IMPORTED)
-target_include_directories(spout SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
-set_target_properties(
-  spout PROPERTIES
-  IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib
-  IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll
-)
-target_link_libraries(openspace-module-spout PRIVATE spout)
+find_package(Spout2 CONFIG REQUIRED)
+target_link_libraries(openspace-module-spout PRIVATE Spout2::SpoutLibrary)
 
 target_compile_definitions(openspace-module-spout PUBLIC "OPENSPACE_HAS_SPOUT")

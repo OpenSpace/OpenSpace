@@ -59,8 +59,8 @@
 #include <sgct/projection/nonlinearprojection.h>
 #include <sgct/user.h>
 #include <sgct/window.h>
+#include <ghoul/misc/profiling.h>
 #include <stb_image.h>
-#include <tracy/Tracy.hpp>
 #include <iostream>
 #include <string_view>
 

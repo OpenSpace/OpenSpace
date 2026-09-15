@@ -162,31 +162,12 @@ target_precompile_headers(${globebrowsing_module} PRIVATE
 # Gdal
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
-if (WIN32)
-  add_library(gdal SHARED IMPORTED)
-  target_include_directories(gdal SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include)
-  set_target_properties(gdal PROPERTIES IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib)
-  set_target_properties(gdal PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal241.dll)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE gdal)
-else (WIN32)
-  find_package(GDAL REQUIRED)
-
-  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${GDAL_INCLUDE_DIR})
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${GDAL_LIBRARY})
-  mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
-endif () # WIN32
+begin_dependency("GDAL")
+find_package(GDAL CONFIG REQUIRED)
+target_link_libraries(openspace-module-globebrowsing PRIVATE GDAL::GDAL)
+end_dependency("GDAL")
 
 begin_dependency("GEOS")
-add_subdirectory(ext/geos SYSTEM)
-target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
-
-if (MSVC)
-  target_compile_options(geos PRIVATE "/W0")
-else ()
-  target_compile_options(geos PRIVATE "-w")
-endif ()
-
-set_property(TARGET geos PROPERTY FOLDER "External")
-set_property(TARGET geos_c PROPERTY FOLDER "External")
-set_property(TARGET ryu PROPERTY FOLDER "External")
+find_package(GEOS CONFIG REQUIRED)
+target_link_libraries(openspace-module-globebrowsing PRIVATE GEOS::geos)
 end_dependency("GEOS")

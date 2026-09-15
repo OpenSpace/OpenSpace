@@ -55,3 +55,6 @@ openspace.cfg.override
 support/runner/config.json
 support/runner/**/__pycache__
 support/runner/**/__pycache__
+
+# mold GLSL, copied out of the mold vcpkg package by modules/molecule/CMakeLists.txt
+/modules/molecule/shaders/mold/

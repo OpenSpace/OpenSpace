@@ -31,11 +31,11 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 #####
 # OpenVR
 #####
-option(OPENSPACE_OPENVR_SUPPORT "Build OpenSpace application with OpenVR support" OFF)
-
+# OPENSPACE_OPENVR_SUPPORT is declared in the top-level CMakeLists.txt (before project())
+# so it can drive the vcpkg "openvr" manifest feature.
 if (OPENSPACE_OPENVR_SUPPORT)
   begin_header("Dependency: OpenVR")
-  find_package(OpenVR REQUIRED)
+  find_package(openvr CONFIG REQUIRED)
 
   set(SGCT_OPENVR_DEFINITIONS OPENVR_SUPPORT)
   if (NOT SGCT_OPENVR_INCLUDE_DIRECTORY)
@@ -101,25 +101,20 @@ endif ()
 
 begin_header("Dependency: SGCT")
 
-set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_JSON OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
+# SGCT is resolved through the vcpkg overlay port at
+# apps/OpenSpace/ext/sgct/support/vcpkg/ports/sgct, which builds the enclosing submodule
+# checkout. The sgct submodule stays checked out because that port builds from its source
+# path (and additional_includes/openvr is still consumed from it above).
+find_package(sgct CONFIG REQUIRED)
+target_link_libraries(OpenSpace PRIVATE sgct::sgct)
 
-if (NOT OPENSPACE_HAVE_TESTS)
-  # Unless overriden, disable sgct tests if OpenSpace tests are disabled
-  set(SGCT_BUILD_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
-endif()
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
-target_link_libraries(OpenSpace PRIVATE sgct)
-
-set_target_properties(sgct PROPERTIES FOLDER "External")
-set_target_properties(glfw PROPERTIES FOLDER "External")
-if (TARGET SGCTTest)
-  set_target_properties(SGCTTest PROPERTIES FOLDER "External")
-endif ()
+# stb_image is a bit weird in which it required _exactly_ one instatiation of the
+#implementation. All other parts in the system are only using the header-includes of the
+# project. Since this is the top-level application we need to include the impl version
+# here to have exactly one implementation. Less than 1: Linker error. More than 1: ODR
+# violation
+find_package(stbimage CONFIG REQUIRED)
+target_link_libraries(OpenSpace PRIVATE unofficial::stbimage::stbimage-impl)
 
 if (UNIX)
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
@@ -144,13 +139,24 @@ if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
   end_header("Dependency: Profile Editor")
 
   if (WIN32)
-    # Find the windeployqt application
-    get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
-    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+    # Qt comes from vcpkg and is linked dynamically (LGPL compliance). The Qt DLLs
+    # themselves are picked up by the $<TARGET_RUNTIME_DLLS:OpenSpace> copy further down,
+    # but the runtime plugins (platforms/qwindows.dll, styles, imageformats, tls, ...) are
+    # loaded at runtime and not seen as link dependencies, so windeployqt is run to place
+    # them next to the executable. windeployqt.exe is built by enabling qtbase's
+    # "windeployqt" feature; vcpkg's host-tools search path makes it discoverable here
+    # without any extra hints
+    find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt REQUIRED)
     add_custom_command(
       TARGET OpenSpace POST_BUILD
-      COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
-      COMMENT "Deploying Qt libraries"
+      COMMAND ${WINDEPLOYQT_EXECUTABLE}
+        $<IF:$<CONFIG:Debug>,--debug,--release>
+        --no-translations
+        --no-compiler-runtime
+        --verbose=0
+        "$<TARGET_FILE:OpenSpace>"
+      COMMENT "Deploying Qt runtime dependencies via windeployqt"
+      VERBATIM
     )
   endif ()
 endif ()

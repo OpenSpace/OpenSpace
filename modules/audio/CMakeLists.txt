@@ -42,23 +42,6 @@ create_new_module(
 )
 
 begin_dependency("SoLoud")
-set(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "")
-if (WIN32)
-  set(SOLOUD_BACKEND_WINMM ON CACHE BOOL "")
-elseif (UNIX)
-  set(SOLOUD_BACKEND_ALSA ON CACHE BOOL "")
-endif ()
-add_subdirectory(ext/soloud/contrib SYSTEM)
-
-# Unfortunately, the soloud cmake tarket doesn't set the include directories correctly
-target_include_directories(openspace-module-audio SYSTEM PRIVATE ext/soloud/include)
-target_link_libraries(openspace-module-audio PRIVATE soloud)
-
-if (MSVC)
-  target_compile_options(soloud PRIVATE "/W0")
-else ()
-  target_compile_options(soloud PRIVATE "-w")
-endif ()
-
-set_property(TARGET soloud PROPERTY FOLDER "External")
+find_package(soloud CONFIG REQUIRED)
+target_link_libraries(openspace-module-audio PRIVATE soloud::soloud)
 end_dependency("SoLoud")

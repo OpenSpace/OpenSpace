@@ -1,0 +1,11 @@
+stbimage provides two CMake targets:
+
+    find_package(stbimage CONFIG REQUIRED)
+
+    # A library that only calls stbi_* functions needs the declarations, but must
+    # not itself compile the implementation (only one translation unit ever may):
+    target_link_libraries(mylib PRIVATE unofficial::stbimage::stbimage)
+
+    # The final executable that actually needs the compiled symbols to resolve
+    # links the implementation once:
+    target_link_libraries(myexe PRIVATE unofficial::stbimage::stbimage-impl)

@@ -145,7 +145,7 @@ $sevenZipArgs = @(
   "modules/*/shaders/*",
   "modules/*/scripts/*",
   "modules/globebrowsing/gdal_data/*",
-  "modules/molecule/ext/mold/src/shaders/*",
+  "modules/molecule/shaders/mold/*",
   "modules/webgui/ext/nodejs/node.exe",
   "-x!documentation/.git"
 )
