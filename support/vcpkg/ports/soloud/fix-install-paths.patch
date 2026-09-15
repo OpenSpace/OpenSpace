@@ -26,9 +26,11 @@ diff --git a/contrib/src.cmake b/contrib/src.cmake
 index 831fe75..5669010 100644
 --- a/contrib/src.cmake
 +++ b/contrib/src.cmake
-@@ -297,4 +297,4 @@ endif()
+@@ -297,4 +297,6 @@ endif()
  target_link_libraries (${TARGET_NAME} ${LINK_LIBRARIES})
  
++target_include_directories (${TARGET_NAME} INTERFACE $<INSTALL_INTERFACE:include>)
++
  include (Install)
 -INSTALL(FILES ${TARGET_HEADERS} DESTINATION include/${TARGET_NAME})
 +INSTALL(FILES ${TARGET_HEADERS} DESTINATION include)

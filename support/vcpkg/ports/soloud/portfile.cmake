@@ -1,8 +1,13 @@
 # Overlay port. SoLoud has no registry port and its own upstream CMake build (contrib/) is not
 # meant to be consumed via find_package: its exported config lands in a platform-specific
-# location and installs headers under include/soloud instead of flat include/, neither of which
-# match OpenSpace's usage (`#include <soloud.h>`). fix-install-paths.patch corrects both, and adds
-# a `soloud::` namespace to the exported target to match the rest of this project's vcpkg ports.
+# location, installs headers under include/soloud instead of flat include/, and never records
+# an INTERFACE_INCLUDE_DIRECTORIES on the exported target (upstream exposes headers only via a
+# directory-scoped include_directories(../include)), none of which match OpenSpace's usage
+# (`#include <soloud.h>`). fix-install-paths.patch corrects all of this, and adds a `soloud::`
+# namespace to the exported target to match the rest of this project's vcpkg ports.
+# use-system-alsa.patch makes the Linux ALSA backend go through find_package(ALSA)/ALSA::ALSA
+# instead of upstream's bare find_library(asound), so the port picks up the alsa dependency
+# declared below instead of silently depending on whatever asound happens to be on the system.
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
@@ -12,6 +17,7 @@ vcpkg_from_github(
     HEAD_REF master
     PATCHES
         fix-install-paths.patch
+        use-system-alsa.patch
 )
 
 if(VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")

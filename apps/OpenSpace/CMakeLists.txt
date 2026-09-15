@@ -81,17 +81,11 @@ create_new_application(OpenSpace
 
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
-# main.cpp loads the window icon through stb_image directly. The stb headers come from
-# vcpkg; the stb_image implementation is compiled into Ghoul, so only the include path is
-# needed here.
-find_path(STB_INCLUDE_DIR "stb_image.h" REQUIRED)
-
 target_include_directories(
   OpenSpace PRIVATE
   ${OPENVR_INCLUDE_DIRS}
   ${SGCT_OPENVR_INCLUDE_DIRECTORY}
   ${SPOUT_INCLUDE_DIRS}
-  ${STB_INCLUDE_DIR}
 )
 
 target_link_libraries(OpenSpace PRIVATE openspace-core openspace-module-collection ${OPENVR_LIBRARY} ${SPOUT_LIBRARY})
@@ -148,26 +142,22 @@ if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
     # Qt comes from vcpkg and is linked dynamically (LGPL compliance). The Qt DLLs
     # themselves are picked up by the $<TARGET_RUNTIME_DLLS:OpenSpace> copy further down,
     # but the runtime plugins (platforms/qwindows.dll, styles, imageformats, tls, ...) are
-    # loaded at runtime and not seen as link dependencies, so copy them next to the
-    # executable. The vcpkg qtbase port does not ship windeployqt, so this is done by hand.
-    # Release plugins live in <triplet>/Qt6/plugins, debug plugins in
-    # <triplet>/debug/Qt6/plugins.
-    get_filename_component(_qt_triplet_dir "${Qt6_DIR}/../.." ABSOLUTE)
-    set(_qt_plugins_release "${_qt_triplet_dir}/Qt6/plugins")
-    set(_qt_plugins_debug "${_qt_triplet_dir}/debug/Qt6/plugins")
-    file(GLOB _qt_plugin_groups RELATIVE "${_qt_plugins_release}" "${_qt_plugins_release}/*")
-    foreach (_group ${_qt_plugin_groups})
-      if (IS_DIRECTORY "${_qt_plugins_release}/${_group}")
-        add_custom_command(
-          TARGET OpenSpace POST_BUILD
-          COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "$<IF:$<CONFIG:Debug>,${_qt_plugins_debug}/${_group},${_qt_plugins_release}/${_group}>"
-            "$<TARGET_FILE_DIR:OpenSpace>/${_group}"
-          COMMENT "Deploying Qt plugin group '${_group}'"
-          VERBATIM
-        )
-      endif ()
-    endforeach ()
+    # loaded at runtime and not seen as link dependencies, so windeployqt is run to place
+    # them next to the executable. windeployqt.exe is built by enabling qtbase's
+    # "windeployqt" feature; vcpkg's host-tools search path makes it discoverable here
+    # without any extra hints
+    find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt REQUIRED)
+    add_custom_command(
+      TARGET OpenSpace POST_BUILD
+      COMMAND ${WINDEPLOYQT_EXECUTABLE}
+        $<IF:$<CONFIG:Debug>,--debug,--release>
+        --no-translations
+        --no-compiler-runtime
+        --verbose=0
+        "$<TARGET_FILE:OpenSpace>"
+      COMMENT "Deploying Qt runtime dependencies via windeployqt"
+      VERBATIM
+    )
   endif ()
 endif ()
 
