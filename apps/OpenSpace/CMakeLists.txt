@@ -155,9 +155,21 @@ if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
     )
     unset(_openspace_qt_host_tools_dirs)
     find_program(OPENSPACE_WINDEPLOYQT_EXECUTABLE NAMES windeployqt REQUIRED)
+
+    get_filename_component(_openspace_windeployqt_dir "${OPENSPACE_WINDEPLOYQT_EXECUTABLE}" DIRECTORY)
+    find_program(OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE
+      NAMES windeployqt.debug.bat
+      HINTS ${_openspace_windeployqt_dir}
+      NO_DEFAULT_PATH
+    )
+    unset(_openspace_windeployqt_dir)
+    if (NOT OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE)
+      set(OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE ${OPENSPACE_WINDEPLOYQT_EXECUTABLE})
+    endif ()
+
     add_custom_command(
       TARGET OpenSpace POST_BUILD
-      COMMAND ${OPENSPACE_WINDEPLOYQT_EXECUTABLE}
+      COMMAND $<IF:$<CONFIG:Debug>,${OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE},${OPENSPACE_WINDEPLOYQT_EXECUTABLE}>
         $<IF:$<CONFIG:Debug>,--debug,--release>
         --no-translations
         --no-compiler-runtime
