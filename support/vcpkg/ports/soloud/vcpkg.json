@@ -1,7 +1,7 @@
 {
   "name": "soloud",
   "version-date": "2024-08-13",
-  "port-version": 2,
+  "port-version": 3,
   "description": "SoLoud is an easy to use, free, portable c/c++ audio engine for games.",
   "homepage": "https://solhsa.com/soloud/",
   "license": "Zlib",

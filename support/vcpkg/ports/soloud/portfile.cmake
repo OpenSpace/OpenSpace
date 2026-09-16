@@ -8,6 +8,12 @@
 # use-system-alsa.patch makes the Linux ALSA backend go through find_package(ALSA)/ALSA::ALSA
 # instead of upstream's bare find_library(asound), so the port picks up the alsa dependency
 # declared below instead of silently depending on whatever asound happens to be on the system.
+# ALSA::ALSA itself comes from CMake's built-in module-mode FindALSA.cmake rather than a package
+# with its own Config.cmake, so it only exists in a directory scope after find_package(ALSA) has
+# actually run there. fix-install-paths.patch therefore also splits the raw `install(EXPORT ...)`
+# output into a soloud-targets.cmake plus a generated soloud-config.cmake wrapper that calls
+# find_dependency(ALSA) before including it, so consumers of soloud::soloud get ALSA::ALSA
+# re-created automatically instead of failing with "ALSA::ALSA ... target was not found".
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH

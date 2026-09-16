@@ -1,8 +1,8 @@
 diff --git a/contrib/cmake/InstallExport.cmake b/contrib/cmake/InstallExport.cmake
-index a9fa0a8..486268c 100644
+index a9fa0a8..16d85b6 100644
 --- a/contrib/cmake/InstallExport.cmake
 +++ b/contrib/cmake/InstallExport.cmake
-@@ -3,16 +3,13 @@
+@@ -3,16 +3,30 @@
  # Installs ${PROJECT_NAME}-SetThirdParties.cmake too if such file
  # is found in ${PROJECT_SOURCE_DIR}.
  
@@ -18,15 +18,33 @@ index a9fa0a8..486268c 100644
 +
  INSTALL (
  	EXPORT ${PROJECT_NAME_LOWERCASE}-config
++	FILE ${PROJECT_NAME_LOWERCASE}-targets.cmake
 +	NAMESPACE soloud::
++	DESTINATION ${EV_CMAKE_EXPORT_DIR}
++)
++
++# The ALSA backend links against ALSA::ALSA, a target from CMake's own module-mode
++# FindALSA.cmake rather than a package that ships its own Config.cmake. That target only
++# exists in a directory scope after find_package(ALSA) has run there, so consumers of
++# soloud::soloud need it re-created via find_dependency(ALSA) when they find_package(soloud).
++SET (EV_CONFIG_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}-config.cmake)
++SET (EV_CONFIG_CONTENTS "include(CMakeFindDependencyMacro)\n")
++IF (SOLOUD_BACKEND_ALSA)
++	STRING (APPEND EV_CONFIG_CONTENTS "find_dependency(ALSA)\n")
++ENDIF ()
++STRING (APPEND EV_CONFIG_CONTENTS "include(\"\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME_LOWERCASE}-targets.cmake\")\n")
++FILE (WRITE ${EV_CONFIG_FILENAME} "${EV_CONFIG_CONTENTS}")
++INSTALL (
++	FILES ${EV_CONFIG_FILENAME}
  	DESTINATION ${EV_CMAKE_EXPORT_DIR}
  )
  
 diff --git a/contrib/src.cmake b/contrib/src.cmake
-index 831fe75..5669010 100644
+index f297295..9421fcc 100644
 --- a/contrib/src.cmake
 +++ b/contrib/src.cmake
-@@ -297,4 +297,6 @@ endif()
+@@ -296,5 +296,7 @@ endif()
+ 
  target_link_libraries (${TARGET_NAME} ${LINK_LIBRARIES})
  
 +target_include_directories (${TARGET_NAME} INTERFACE $<INSTALL_INTERFACE:include>)
