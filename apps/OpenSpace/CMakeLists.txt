@@ -109,7 +109,7 @@ find_package(sgct CONFIG REQUIRED)
 target_link_libraries(OpenSpace PRIVATE sgct::sgct)
 
 # stb_image is a bit weird in which it required _exactly_ one instatiation of the
-#implementation. All other parts in the system are only using the header-includes of the
+# implementation. All other parts in the system are only using the header-includes of the
 # project. Since this is the top-level application we need to include the impl version
 # here to have exactly one implementation. Less than 1: Linker error. More than 1: ODR
 # violation
@@ -147,18 +147,45 @@ if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
     # themselves are picked up by the $<TARGET_RUNTIME_DLLS:OpenSpace> copy further down,
     # but the runtime plugins (platforms/qwindows.dll, styles, imageformats, tls, ...) are
     # loaded at runtime and not seen as link dependencies, so windeployqt is run to place
-    # them next to the executable. windeployqt.exe is built by enabling qtbase's
-    # "windeployqt" feature; vcpkg's host-tools search path makes it discoverable here
-    # without any extra hints
-    find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt REQUIRED)
+    # them next to the executable.
+    # Qt6CoreMacros.cmake itself does a plain find_program(WINDEPLOYQT_EXECUTABLE ...)
+    # internally (for its own deploy-script support) with no reliable hint towards
+    # vcpkg's own Qt install, so on a machine with an unrelated Qt SDK on PATH it caches
+    # WINDEPLOYQT_EXECUTABLE pointing at that other (potentially different-version) copy.
+    # Qt then refuses to load the mismatched-version plugins that tool deploys ("Ignoring
+    # QPA plugin due to mismatching Qt versions") - only visible in
+    # Release/RelWithDebInfo/MinSizeRel because the --debug lookup happens to fall back to
+    # the target's actual Qt dependencies when no bundled debug plugin exists, while
+    # --release does not. Use our own cache variable name so we don't just read back Qt's
+    # already-wrong cached value, and explicitly restrict the search to vcpkg's host-tools
+    # Qt6 install so we always get the exact windeployqt matching the linked Qt version.
+    file(GLOB _openspace_qt_host_tools_dirs "${_VCPKG_INSTALLED_DIR}/*/tools/Qt6/bin")
+    find_program(OPENSPACE_WINDEPLOYQT_EXECUTABLE
+      NAMES windeployqt
+      HINTS ${_openspace_qt_host_tools_dirs}
+      NO_DEFAULT_PATH
+    )
+    unset(_openspace_qt_host_tools_dirs)
+    find_program(OPENSPACE_WINDEPLOYQT_EXECUTABLE NAMES windeployqt REQUIRED)
     add_custom_command(
       TARGET OpenSpace POST_BUILD
-      COMMAND ${WINDEPLOYQT_EXECUTABLE}
+      COMMAND ${OPENSPACE_WINDEPLOYQT_EXECUTABLE}
         $<IF:$<CONFIG:Debug>,--debug,--release>
         --no-translations
         --no-compiler-runtime
         --verbose=0
         "$<TARGET_FILE:OpenSpace>"
+      # windeployqt.exe is itself a host tool built for the "x64-windows" (dynamic)
+      # triplet, and it fails to detect that OpenSpace actually links the
+      # "x64-windows-static-md" triplet's Qt (vcpkg splits libs under bin/ from plugins
+      # under Qt6/plugins/, which confuses its usual same-prefix layout heuristic). It
+      # ends up deploying its own host triplet's plugins, which are a different,
+      # ABI-incompatible Qt build (same version number, but "Cannot load library ...:
+      # The specified procedure could not be found" at runtime). Overwrite whatever it
+      # copied with the plugins from the triplet actually linked into OpenSpace.
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/$<IF:$<CONFIG:Debug>,debug/,>Qt6/plugins"
+        "$<TARGET_FILE_DIR:OpenSpace>"
       COMMENT "Deploying Qt runtime dependencies via windeployqt"
       VERBATIM
     )

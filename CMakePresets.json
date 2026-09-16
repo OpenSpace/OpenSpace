@@ -71,6 +71,9 @@
       "inherits": [ "vcpkg", "build", "windows", "ninja" ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "environment": {
+        "PKG_CONFIG_PATH": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows-static-md/debug/lib/pkgconfig"
       }
     },
     {
@@ -79,6 +82,9 @@
       "inherits": [ "vcpkg", "build", "windows", "ninja" ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
+      },
+      "environment": {
+        "PKG_CONFIG_PATH": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows-static-md/lib/pkgconfig"
       }
     },
     {

@@ -82,9 +82,14 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/CMakeLists.txt DESTINATION ${C
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/cmake/cef_variables.cmake DESTINATION ${CEF_ROOT}/cmake)
 
-# CEF does not provide RelWithDebInfo libs, so we use the ones without Debug information
+# CEF does not provide RelWithDebInfo/MinSizeRel libs, so we use the ones without Debug
+# information
 file(COPY ${CEF_ROOT}/Release/
   DESTINATION ${CEF_ROOT}/RelWithDebInfo
+  FILES_MATCHING PATTERN *
+)
+file(COPY ${CEF_ROOT}/Release/
+  DESTINATION ${CEF_ROOT}/MinSizeRel
   FILES_MATCHING PATTERN *
 )
 
@@ -98,6 +103,7 @@ if (UNIX)
     "${CEF_ROOT}/Debug/libvulkan.so.1"
     "${CEF_ROOT}/Release/libvulkan.so.1"
     "${CEF_ROOT}/RelWithDebInfo/libvulkan.so.1"
+    "${CEF_ROOT}/MinSizeRel/libvulkan.so.1"
   )
 endif ()
 
