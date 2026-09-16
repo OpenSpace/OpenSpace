@@ -42,6 +42,18 @@ else ()
     set(LINK_STDLIB_STATIC OFF)
 endif ()
 
+# mdlib uses AVX2 intrinsics unconditionally. Without an explicit arch flag, GCC/Clang
+# reject them at compile time, which is what breaks the build inside a Docker container.
+# Match the blanket AVX2/x86-64-v3 baseline the rest of the project compiles with (see
+# common-compile-settings).
+if (VCPKG_TARGET_IS_WINDOWS)
+    set(VCPKG_C_FLAGS "${VCPKG_C_FLAGS} /arch:AVX2")
+    set(VCPKG_CXX_FLAGS "${VCPKG_CXX_FLAGS} /arch:AVX2")
+else ()
+    set(VCPKG_C_FLAGS "${VCPKG_C_FLAGS} -march=x86-64-v3")
+    set(VCPKG_CXX_FLAGS "${VCPKG_CXX_FLAGS} -march=x86-64-v3")
+endif ()
+
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
