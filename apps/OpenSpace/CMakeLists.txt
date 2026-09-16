@@ -108,18 +108,6 @@ begin_header("Dependency: SGCT")
 find_package(sgct CONFIG REQUIRED)
 target_link_libraries(OpenSpace PRIVATE sgct::sgct)
 
-# stb_image is a bit weird in which it required _exactly_ one instatiation of the
-# implementation. All other parts in the system are only using the header-includes of the
-# project. Since this is the top-level application we need to include the impl version
-# here to have exactly one implementation. Less than 1: Linker error. More than 1: ODR
-# violation
-#
-# OpenSpace only links the *write* half (stbi_write_*): the *read* half (stbi_load, ...)
-# is already satisfied by assimp, which vendors its own stb_image copy, so linking the
-# stbimage port's read implementation too would be a duplicate-symbol conflict
-find_package(stbimage CONFIG REQUIRED)
-target_link_libraries(OpenSpace PRIVATE unofficial::stbimage::stbimage-write-impl)
-
 if (UNIX)
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
 endif ()
@@ -187,6 +175,16 @@ if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
         "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/$<IF:$<CONFIG:Debug>,debug/,>Qt6/plugins"
         "$<TARGET_FILE_DIR:OpenSpace>"
       COMMENT "Deploying Qt runtime dependencies via windeployqt"
+      VERBATIM
+    )
+  endif ()
+
+  if (UNIX)
+    add_custom_command(TARGET OpenSpace POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/$<IF:$<CONFIG:Debug>,debug/,>Qt6/plugins"
+        "$<TARGET_FILE_DIR:OpenSpace>"
+      COMMENT "Deploying Qt runtime plugins"
       VERBATIM
     )
   endif ()

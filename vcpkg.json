@@ -83,6 +83,20 @@
       "platform": "windows"
     },
     {
+      "name": "qtbase",
+      "default-features": false,
+      "features": [
+        "xcb",
+        "wayland",
+        "fontconfig"
+      ],
+      "platform": "linux"
+    },
+    {
+      "name": "qtwayland",
+      "platform": "linux"
+    },
+    {
       "name": "vcpkg-cmake",
       "host": true
     },

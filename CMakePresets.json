@@ -56,7 +56,8 @@
         "rhs": "Linux"
       },
       "cacheVariables": {
-        "OpenGL_GL_PREFERENCE": "GLVND"
+        "OpenGL_GL_PREFERENCE": "GLVND",
+        "VCPKG_TARGET_TRIPLET": "x64-linux"
       }
     },
 
