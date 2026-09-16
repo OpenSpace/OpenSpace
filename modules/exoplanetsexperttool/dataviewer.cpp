@@ -659,7 +659,7 @@ void DataViewer::render() {
                 }
             }
 
-            if (_externalSelection.value().size() > 0) {
+            if (_externalSelection.value().size() > 0 && _filteringView->isUsingExternalFiltering()) {
                 ImGui::SameLine();
                 ImGui::TextColored(ImVec4(1.f, 0.3f, 1.f, 1.f), "+ external"); // TODO: add timestamp here?
                 if (ImGui::IsItemHovered()) {
