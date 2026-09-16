@@ -48,7 +48,7 @@ class RenderableHostCloud : public Renderable {
 public:
     RenderableHostCloud(const ghoul::Dictionary& dictionary);
 
-    static const size_t MaxNumberColors = 4;
+    static const size_t MaxNumberColors = 2;
 
     /**
      * Return the index of the currently hovered glyph, or -1 if none is hovered
@@ -90,27 +90,26 @@ private:
 
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, opacity, scale, maxIndex,
         currentIndex, cameraPosition, isHighlightMode, darkenFactor, renderOption, up,
-        right, cameraLookUp
+        right, cameraLookUp, useSecondColor
     ) _uniformCache;
 
     FloatProperty _scale;
     IntListProperty _selectedIndices;
-
     OptionProperty _orientationRenderOption;
-
     FloatProperty _darkenFactor;
-
     BoolProperty _useAdditiveBlending;
 
-    // Unified glyph data structure
+    // If true, use second color in the list (to allow colormapping stars differently
+    // than planets)
+    BoolProperty _useSecondColor;
+
     struct GlyphData {
         glm::vec3 position;
         float component = -1.f;
         size_t index = 0;
 
-        // Color data (TODO: Decide if we should keep multi-color feature here)
-        int nColors = -1;
-        std::array<glm::vec4, MaxNumberColors> colors = {};
+        // This renderable only supports 2 colors, any other mapped variables
+        std::array<glm::vec4, 2> colors = {};
     };
 
     std::vector<GlyphData> _glyphData;

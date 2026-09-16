@@ -95,6 +95,14 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    constexpr Property::PropertyInfo UseSecondMappedColorInfo = {
+        "UseSecondMappedColor",
+        "Use second mapped color",
+        "If true, the points will be colored based on the second color in the given "
+        "color mapping, rather than the first one. This allows showing both host and "
+        "planet glyphs, with different color mapping",
+        Property::Visibility::AdvancedUser
+    };
 
     struct [[codegen::Dictionary(RenderableHostCloud)]] Parameters {
         // [[codegen::verbatim(ScaleInfo.description)]]
@@ -117,6 +125,9 @@ namespace {
 
         // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
         std::optional<bool> useAdditiveBlending;
+
+        // [[codegen::verbatim(UseSecondMappedColorInfo.description)]]
+        std::optional<bool> useSecondMappedColor;
     };
 #include "renderablehostcloud_codegen.cpp"
 } // namespace
@@ -136,6 +147,7 @@ RenderableHostCloud::RenderableHostCloud(const ghoul::Dictionary& dictionary)
     , _orientationRenderOption(OrientationRenderOptionInfo)
     , _darkenFactor(DarkenFactorInfo, 0.3f, 0.f, 1.f)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
+    , _useSecondColor(UseSecondMappedColorInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -169,6 +181,9 @@ RenderableHostCloud::RenderableHostCloud(const ghoul::Dictionary& dictionary)
 
     _useAdditiveBlending = p.useAdditiveBlending.value_or(_useAdditiveBlending);
     addProperty(_useAdditiveBlending);
+
+    _useSecondColor = p.useSecondMappedColor.value_or(_useSecondColor);
+    addProperty(_useSecondColor);
 
     updateDataIfChanged();
 
@@ -361,6 +376,7 @@ void RenderableHostCloud::setupUniforms(ghoul::opengl::ProgramObject& program,
     program.setUniform(_uniformCache.isHighlightMode, _shouldHighlightHovered);
     program.setUniform(_uniformCache.darkenFactor, _darkenFactor);
     program.setUniform(_uniformCache.cameraPosition, data.camera.position());
+    program.setUniform(_uniformCache.useSecondColor, _useSecondColor);
 
     program.setUniform("isRenderIndexStep", false);
 
@@ -584,17 +600,9 @@ void RenderableHostCloud::mapVertexAttributes(GLuint vao) {
         offsetof(GlyphData, index)
     );
 
-    // Location 3: in_nColors
-    glEnableVertexArrayAttrib(vao, 3);
-    glVertexArrayAttribBinding(vao, 3, 0);
-    glVertexArrayAttribIFormat(
-        vao, 3, 1, GL_INT,
-        offsetof(GlyphData, nColors)
-    );
-
-    // Locations 4-7: in_colors[4] array
-    for (int i = 0; i < 4; i++) {
-        int location = 4 + i;
+    // Locations 3-4: in_colors[2] array
+    for (int i = 0; i < 2; i++) {
+        int location = 3 + i;
         glEnableVertexArrayAttrib(vao, location);
         glVertexArrayAttribBinding(vao, location, 0);
         glVertexArrayAttribFormat(
@@ -654,16 +662,13 @@ void RenderableHostCloud::updateDataIfChanged() {
         d.index = item.index + 1;
 
         // Clear all color slots first (defensive programming)
-        for (size_t i = 0; i < MaxNumberColors; i++) {
-            d.colors[i] = glm::vec4(0.0f);
-        }
+        d.colors[0] = glm::vec4(0.0f);
+        d.colors[1] = glm::vec4(0.0f); // TODO: Use some other dafult color, bades on data?
 
         size_t nColors = item.colors.size();
-        d.nColors = static_cast<int>(nColors);
 
         // Limit the number of colors to the maximum supported by the shader
-        size_t temp = std::min(nColors, MaxNumberColors);
-        for (size_t j = 0; j < temp; j++) {
+        for (size_t j = 0; j < std::min(nColors, size_t(2)); j++) {
             d.colors[j] = item.colors[j];
         }
 

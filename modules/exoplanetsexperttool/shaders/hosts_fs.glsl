@@ -31,8 +31,7 @@ in Data {
   float depthClipSpace;
   vec4 positionViewSpace;
   flat int glyphIndex;
-  flat int nColors;
-  flat vec4 colors[MaxColors];
+  flat vec4 color;
   vec2 texCoords; // [-1, 1]
 } in_data;
 
@@ -52,6 +51,8 @@ Fragment getFragment() {
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
   frag.depth = in_data.depthClipSpace;
 
+  vec4 color = in_data.color;
+
   float radius = length(in_data.texCoords);
   float x = in_data.texCoords.x;
   float y = in_data.texCoords.y;
@@ -67,20 +68,6 @@ Fragment getFragment() {
   if (onTop || radius > 1.0) {
     discard;
   }
-
-  // Find what color corresponds to the given angle
-  float angleSlice = 2.0 * M_PI / in_data.nColors;
-  vec2 up = vec2(0.0, 1.0);
-  float angle = acos(dot(up, normalize(in_data.texCoords)));
-
-  // left half of circle quadrant
-  if (x < 0) {
-    angle = M_PI + (M_PI - angle);
-  }
-
-  int colorIndex = int(floor(angle / angleSlice));
-
-  vec4 color = in_data.colors[colorIndex];
 
   // Gaussian/star-like alpha fade from center to edge of the point sprite
   bool useFade = true;

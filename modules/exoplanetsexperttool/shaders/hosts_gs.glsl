@@ -29,12 +29,9 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
-const int MaxColors = 4;
-
 in Data {
-  flat float component;
-  flat int nColors;
-  flat vec4 colors[MaxColors];
+  flat float component; // TODO: Use for something?
+  flat vec4 colors[2];
   flat int glyphIndex;
   flat dvec4 dposWorld;
 } in_data[];
@@ -44,8 +41,7 @@ out Data {
   float depthClipSpace;
   vec4 positionViewSpace;
   flat int glyphIndex;
-  flat int nColors;
-  flat vec4 colors[MaxColors];
+  flat vec4 color;
   vec2 texCoords;
 } out_data;
 
@@ -53,6 +49,7 @@ uniform dmat4 modelMatrix;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform float scale;
 uniform bool onTop;
+uniform bool useSecondColor;
 
 uniform int renderOption;
 
@@ -76,8 +73,7 @@ const vec2 Corners[4] = vec2[4](
 
 void main() {
   out_data.component = in_data[0].component;
-  out_data.colors = in_data[0].colors;
-  out_data.nColors = in_data[0].nColors;
+  out_data.color = useSecondColor ? in_data[0].colors[1] : in_data[0].colors[0];
   out_data.glyphIndex = in_data[0].glyphIndex;
 
   dvec4 dpos = in_data[0].dposWorld;

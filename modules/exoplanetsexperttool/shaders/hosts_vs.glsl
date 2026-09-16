@@ -26,20 +26,16 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-const int MaxColors = 4;
-
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in float in_component;
 layout(location = 2) in int in_glyphIndex;
-layout(location = 3) in int in_nColors;
 
-// Always pass 8 colors
-layout(location = 4) in vec4 in_colors[MaxColors];
+// Always pass 2 colors
+layout(location = 3) in vec4 in_colors[2];
 
 out Data {
   flat float component;
-  flat int nColors;
-  flat vec4 colors[MaxColors];
+  flat vec4 colors[2];
   flat int glyphIndex;
   flat dvec4 dposWorld;
 } out_data;
@@ -48,7 +44,6 @@ uniform dmat4 modelMatrix;
 
 void main() {
   out_data.component = in_component;
-  out_data.nColors = in_nColors;
   out_data.colors = in_colors;
   out_data.dposWorld = modelMatrix * dvec4(in_position, 1.0);
   out_data.glyphIndex = in_glyphIndex;
