@@ -777,10 +777,32 @@ void DataViewer::render() {
         ImGui::EndMainMenuBar();
     }
 
+    _filterChanged = false;
+
     // Windows
+
+
     if (_showFilterSettingsWindow) {
         renderFilterSettingsWindow(&_showFilterSettingsWindow);
     }
+
+    _filterChanged = _filterChanged || _externalSelectionChanged;
+
+    // Update the filtered data right away
+    if (_filterChanged) {
+        _filteredData = _filteringView->applyFiltering(
+            _data,
+            _externalSelection.value()
+        );
+
+        updateFilteredRowsProperty();
+
+        // Clear selection
+        _selection.clear();
+        _selectionChanged = true;
+    }
+
+    _externalSelectionChanged = false;
 
     if (_showColormapWindow) {
         renderColormapWindow(&_showColormapWindow);
@@ -894,9 +916,6 @@ void DataViewer::renderColumnValue(const ColumnKey& key, const ExoplanetItem& it
 }
 
 void DataViewer::renderFilterSettingsWindow(bool* open) {
-    // Reset some state changed variables
-    _filterChanged = false;
-
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Filters", open)) {
         ImGui::End();
@@ -904,34 +923,8 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     }
 
     _filterChanged = _filteringView->renderFilterSettings();
-    _filterChanged = _filterChanged || _externalSelectionChanged;
-
-    // Update the filtered data
-    if (_filterChanged) {
-        _filteredData = _filteringView->applyFiltering(
-            _data,
-            _externalSelection.value()
-        );
-    }
-
-    ImGui::Separator();
-
-    view::helper::renderDescriptiveText(std::format(
-        "Number items after filtering: {} / {}",
-        _filteredData.size(), _data.size()
-    ).c_str());
 
     ImGui::End(); // Filter settings window
-
-    updateFilteredRowsProperty();
-
-    // Clear selection
-    if (_filterChanged) {
-        _selection.clear();
-        updateSelectionInRenderable();
-    }
-
-    _externalSelectionChanged = false;
 }
 
 int DataViewer::getHoveredPlanetIndex() const {
