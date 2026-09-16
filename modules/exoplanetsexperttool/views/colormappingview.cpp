@@ -682,6 +682,8 @@ glm::vec4 ColorMappingView::colorFromColormap(const ExoplanetItem& item,
         float max = variable.colorScaleMax;
         float t = 0.f;
 
+        // TODO: Make log scale work for zero values, by mapping min to something very close to zero?
+
         if (variable.useLogScale && min > 0.f && max > 0.f) {
             float logMin = std::log10(min);
             float logMax = std::log10(max);
