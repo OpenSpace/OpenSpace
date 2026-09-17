@@ -190,20 +190,17 @@ private:
     /// Whether or not to use additive blending
     BoolProperty _colorABlendEnabled;
 
-    /// Whether or not to use Domain limits
-    BoolProperty _domainEnabled;
-    /// Group to hold the Domain properties
-    PropertyOwner _domainGroup;
-    Vec2Property _domainX;
-    Vec2Property _domainY;
-    Vec2Property _domainZ;
-    Vec2Property _domainR;
-
-
+    struct Domain : public PropertyOwner {
+        explicit Domain(const ghoul::Dictionary& dictionary);
+        BoolProperty enabled;
+        Vec2Property x;
+        Vec2Property y;
+        Vec2Property z;
+        Vec2Property r;
+    } _domain;
 
     struct Flow : public PropertyOwner, public Fadeable {
         explicit Flow(const ghoul::Dictionary& dictionary);
-
         BoolProperty enabled;
         /// Simulated particles' color
         Vec4Property color;

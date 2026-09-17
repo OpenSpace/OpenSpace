@@ -421,6 +421,32 @@ Documentation RenderableFieldlinesSequence::Documentation() {
     );
 }
 
+RenderableFieldlinesSequence::Domain::Domain(const ghoul::Dictionary& dictionary)
+    : PropertyOwner({ "Domain" })
+    , enabled(DomainEnabledInfo, false)
+    , x(DomainXInfo)
+    , y(DomainYInfo)
+    , z(DomainZInfo)
+    , r(DomainRInfo)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    enabled = p.domainEnabled.value_or(enabled);
+    addProperty(enabled);
+
+    x.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(x);
+
+    y.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(y);
+
+    z.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(z);
+
+    r.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(r);
+}
+
 RenderableFieldlinesSequence::Flow::Flow(const ghoul::Dictionary& dictionary)
     : PropertyOwner({ "Flow" })
     , enabled(FlowEnabledInfo, false)
@@ -479,12 +505,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         glm::vec4(1.f)
     )
     , _colorABlendEnabled(ColorUseABlendingInfo, true)
-    , _domainEnabled(DomainEnabledInfo, false)
-    , _domainGroup({ "Domain" })
-    , _domainX(DomainXInfo)
-    , _domainY(DomainYInfo)
-    , _domainZ(DomainZInfo)
-    , _domainR(DomainRInfo)
+    , _domain(dictionary)
     , _flow(dictionary)
     , _maskingEnabled(MaskingEnabledInfo, false)
     , _maskingGroup({ "Masking" })
@@ -591,7 +612,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
     _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
-    _domainEnabled = p.domainEnabled.value_or(_domainEnabled);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _colorABlendEnabled = p.alphaBlendingEnabled.value_or(_colorABlendEnabled);
     _renderForever = p.showAtAllTimes.value_or(_renderForever);
@@ -833,7 +853,7 @@ void RenderableFieldlinesSequence::setupProperties() {
 
     // Add Property Groups
     addPropertySubOwner(_colorGroup);
-    addPropertySubOwner(_domainGroup);
+    addPropertySubOwner(_domain);
     addPropertySubOwner(_flow);
     addPropertySubOwner(_maskingGroup);
 
@@ -844,12 +864,6 @@ void RenderableFieldlinesSequence::setupProperties() {
     _selectedColorRange.setViewOption(Property::ViewOptions::MinMaxRange);
     _colorGroup.addProperty(_selectedColorRange);
     _colorGroup.addProperty(_colorTablePath);
-
-    _domainGroup.addProperty(_domainEnabled);
-    _domainGroup.addProperty(_domainX);
-    _domainGroup.addProperty(_domainY);
-    _domainGroup.addProperty(_domainZ);
-    _domainGroup.addProperty(_domainR);
 
     _maskingGroup.addProperty(_maskingEnabled);
     _maskingGroup.addProperty(_maskingQuantity);
@@ -878,24 +892,24 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
         default:
             break;
     }
-    _domainX.setMinValue(glm::vec2(-limit));
-    _domainX.setMaxValue(glm::vec2(limit));
+    _domain.x.setMinValue(glm::vec2(-limit));
+    _domain.x.setMaxValue(glm::vec2(limit));
 
-    _domainY.setMinValue(glm::vec2(-limit));
-    _domainY.setMaxValue(glm::vec2(limit));
+    _domain.y.setMinValue(glm::vec2(-limit));
+    _domain.y.setMaxValue(glm::vec2(limit));
 
-    _domainZ.setMinValue(glm::vec2(-limit));
-    _domainZ.setMaxValue(glm::vec2(limit));
+    _domain.z.setMinValue(glm::vec2(-limit));
+    _domain.z.setMaxValue(glm::vec2(limit));
 
     // Radial should range from 0 out to a corner of the cartesian box:
     // sqrt(3) = 1.732..., 1.75 is a nice and round number
-    _domainR.setMinValue(glm::vec2(0.f));
-    _domainR.setMaxValue(glm::vec2(limit * 1.75f));
+    _domain.r.setMinValue(glm::vec2(0.f));
+    _domain.r.setMaxValue(glm::vec2(limit * 1.75f));
 
-    _domainX = glm::vec2(-limit, limit);
-    _domainY = glm::vec2(-limit, limit);
-    _domainZ = glm::vec2(-limit, limit);
-    _domainR = glm::vec2(0.f, limit * 1.5f);
+    _domain.x = glm::vec2(-limit, limit);
+    _domain.y = glm::vec2(-limit, limit);
+    _domain.z = glm::vec2(-limit, limit);
+    _domain.r = glm::vec2(0.f, limit * 1.5f);
 }
 
 void RenderableFieldlinesSequence::deinitializeGL() {
@@ -1266,7 +1280,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
     _shaderProgram->setUniform("colorMethod", _colorMethod);
     _shaderProgram->setUniform("lineColor", _colorUniform);
-    _shaderProgram->setUniform("usingDomain", _domainEnabled);
+    _shaderProgram->setUniform("usingDomain", _domain.enabled);
     _shaderProgram->setUniform("usingMasking", _maskingEnabled);
 
     if (_colorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
@@ -1281,10 +1295,10 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         _shaderProgram->setUniform("maskingRange", _selectedMaskingRange);
     }
 
-    _shaderProgram->setUniform("domainLimR", _domainR.value() * _scalingFactor);
-    _shaderProgram->setUniform("domainLimX", _domainX.value() * _scalingFactor);
-    _shaderProgram->setUniform("domainLimY", _domainY.value() * _scalingFactor);
-    _shaderProgram->setUniform("domainLimZ", _domainZ.value() * _scalingFactor);
+    _shaderProgram->setUniform("domainLimR", _domain.r.value() * _scalingFactor);
+    _shaderProgram->setUniform("domainLimX", _domain.x.value() * _scalingFactor);
+    _shaderProgram->setUniform("domainLimY", _domain.y.value() * _scalingFactor);
+    _shaderProgram->setUniform("domainLimZ", _domain.z.value() * _scalingFactor);
 
     glm::vec4 flowColor = _flow.color;
     flowColor.a *= _flow.opacity();
