@@ -698,6 +698,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             "files"
         );
     }
+
     if (_loadingType == LoadingType::StaticLoading && !p.sourceFolder.has_value()) {
         throw ghoul::RuntimeError(
             "Either dynamic downloading parameters or a sync folder must be specified"
@@ -769,12 +770,13 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _extraVars = p.extraVariables.value_or(_extraVars);
 
     _useAdditiveBlending = p.alphaBlendingEnabled.value_or(_useAdditiveBlending);
+    addProperty(_useAdditiveBlending);
+
     _lineWidth = p.lineWidth.value_or(_lineWidth);
+    addProperty(_lineWidth);
 
     _renderForever = p.showAtAllTimes.value_or(_renderForever);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
-
-    _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
 
     if (_loadingType == LoadingType::StaticLoading){
         staticallyLoadFiles(p.seedPointDirectory, p.tracingVariable);
@@ -787,17 +789,15 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         }
     });
 
-    addProperty(_useAdditiveBlending);
-    addProperty(_lineWidth);
     addProperty(_jumpToStart);
 
-    // Add Property Groups
+    _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
+    addProperty(_saveDownloadsOnShutdown);
+
     addPropertySubOwner(_color);
     addPropertySubOwner(_domain);
     addPropertySubOwner(_flow);
     addPropertySubOwner(_masking);
-
-    addProperty(_saveDownloadsOnShutdown);
 }
 
 void RenderableFieldlinesSequence::staticallyLoadFiles(
