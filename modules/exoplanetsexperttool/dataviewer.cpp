@@ -939,7 +939,10 @@ int DataViewer::getHoveredPlanetIndex() const {
         RenderableExoplanetGlyphCloud* cloud =
             dynamic_cast<RenderableExoplanetGlyphCloud*>(n->renderable());
         if (cloud && cloud->isEnabled()) {
-            return cloud->hoveredIndex();
+            int index = cloud->hoveredIndex();
+            if (index != -1) {
+                return index;
+            }
         }
     }
 
@@ -948,7 +951,10 @@ int DataViewer::getHoveredPlanetIndex() const {
     if (n2) {
         RenderableHostCloud* cloud = dynamic_cast<RenderableHostCloud*>(n2->renderable());
         if (cloud && cloud->isEnabled()) {
-            return cloud->hoveredIndex();
+            int index = cloud->hoveredIndex();
+            if (index != -1) {
+                return index;
+            }
         }
     }
 
