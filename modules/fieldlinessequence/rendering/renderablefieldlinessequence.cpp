@@ -68,6 +68,13 @@ namespace {
         return Time::convertTime(fileName);
     }
 
+    const PropertyOwner::PropertyOwnerInfo ColorInfo = {
+        "Color",
+        "Color",
+        "Settings for how to color the field lines. Can either be done with a fixed "
+        "uniform color, or by color mapping based on a quantity in the data."
+    };
+
     constexpr Property::PropertyInfo ColorMethodInfo = {
         "ColorMethod",
         "Color method",
@@ -147,18 +154,26 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    const PropertyOwner::PropertyOwnerInfo FlowInfo = {
+        "Flow",
+        "Flow",
+        "Toggles the rendering of moving particles along the field lines. This can for "
+        "example be used to illustrate magnetic flow."
+    };
+
     constexpr Property::PropertyInfo FlowEnabledInfo = {
         "Enabled",
         "Flow enabled",
-        "Toggles the rendering of moving particles along the lines. Can, for example, "
-        "illustrate magnetic flow.",
+        "Enable/disable the moving flow particles along the lines.",
         Property::Visibility::NoviceUser
     };
 
     constexpr Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
         "Flow color",
-        "Color of particles flow direction indication.",
+        "Color of particles flow direction indication. This is only used if the uniform "
+        "color method for the lines is used. Otherwise, the particle color will also be "
+        "based on the color mapping.",
         Property::Visibility::NoviceUser
     };
 
@@ -186,38 +201,44 @@ namespace {
     constexpr Property::PropertyInfo FlowSpeedInfo = {
         "FlowSpeed",
         "Speed",
-        "Speed of the flow.",
+        "Speed of the visualized flow.",
         Property::Visibility::User
+    };
+
+    const PropertyOwner::PropertyOwnerInfo MaskingInfo = {
+        "Masking",
+        "Masking",
+        "Use masking to show only lines where a given quantity falls within a specified "
+        "range. For example, you can display only the regions where the temperature is "
+        "between 10 and 20 degrees. Masking can also be used to hide specific line "
+        "topologies, such as solar wind and closed lines."
     };
 
     constexpr Property::PropertyInfo MaskingEnabledInfo = {
         "Enabled",
         "Masking enabled",
-        "Enable/disable masking. Use masking to show lines where a given quantity is "
-        "within a given range, for example, if you only want to see where the "
-        "temperature is between 10 and 20 degrees. Also used for masking out line "
-        "topologies like solar wind & closed lines.",
+        "Enable/disable masking.",
         Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo MaskingMinMaxInfo = {
-        "MaskingMinLimit",
-        "Lower limit",
+        "MaskingRange",
+        "Masking range",
         "Lower and upper limit of the valid masking range.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
-        "Quantity used for masking",
-        "Quantity used for masking.",
+        "Quantity",
+        "Quantity in the dataset that is used for masking.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
-        "This value specifies the line width of the fieldlines.",
+        "The width of the field lines.",
         Property::Visibility::NoviceUser
     };
 
@@ -231,8 +252,7 @@ namespace {
     constexpr Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
         "Save downloads on shutdown",
-        "This is an option for if dynamically downloaded should be saved between runs or "
-        "not.",
+        "Decide whether dynamically downloaded should be saved between runs or not.",
         Property::Visibility::User
     };
 
@@ -422,7 +442,7 @@ Documentation RenderableFieldlinesSequence::Documentation() {
 }
 
 RenderableFieldlinesSequence::Color::Color(const ghoul::Dictionary& dictionary)
-    : PropertyOwner({ "Color" })
+    : PropertyOwner(ColorInfo)
     , method(ColorMethodInfo)
     , quantity(ColorQuantityInfo)
     , selectedRange(
@@ -575,7 +595,7 @@ RenderableFieldlinesSequence::Domain::Domain(const ghoul::Dictionary& dictionary
 }
 
 RenderableFieldlinesSequence::Flow::Flow(const ghoul::Dictionary& dictionary)
-    : PropertyOwner({ "Flow" })
+    : PropertyOwner(FlowInfo)
     , enabled(FlowEnabledInfo, false)
     , color(
         FlowColorInfo,
@@ -613,7 +633,7 @@ RenderableFieldlinesSequence::Flow::Flow(const ghoul::Dictionary& dictionary)
 }
 
 RenderableFieldlinesSequence::Masking::Masking(const ghoul::Dictionary& dictionary)
-    : PropertyOwner({ "Masking" })
+    : PropertyOwner(MaskingInfo)
     , enabled(MaskingEnabledInfo, false)
     , selectedRange(
         MaskingMinMaxInfo,
