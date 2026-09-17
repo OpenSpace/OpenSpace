@@ -110,9 +110,9 @@ void main() {
 
     if (isParticle) {
       out_data.color = vec4(
-          flowColor.rgb * flowColor.a + lineColor.rgb * (1.0 - flowColor.a),
-          flowColor.a + lineColor.a * (1.0 - flowColor.a)
-        );
+        flowColor.rgb * flowColor.a + lineColor.rgb * (1.0 - flowColor.a),
+        flowColor.a + lineColor.a * (1.0 - flowColor.a)
+      );
     }
     else {
       out_data.color = lineColor;
