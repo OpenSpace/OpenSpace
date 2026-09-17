@@ -955,7 +955,7 @@ void DataViewer::renderPlanetTooltip(int index) const {
         return; // no planet hovered
     }
 
-    // Show tooltip iwndow on mouse position
+    // Show tooltip window on mouse position
     ImVec2 pos = ImGui::GetIO().MousePos;
     ImGui::SetNextWindowPos(pos, ImGuiCond_Appearing, ImVec2(-0.01f, 1.f));
     ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
@@ -966,6 +966,35 @@ void DataViewer::renderPlanetTooltip(int index) const {
 
     if (ImGui::Begin("##planetToolTip", NULL, flags)) {
         ImGui::Text(item.name.c_str());
+
+        ImGui::Separator();
+
+        // Render the colormapped values
+        using Cmap = ColorMappingView::ColorMappedVariable;
+        for (const Cmap& cmap : _colorMappingView->colorMapperVariables()) {
+            const ColumnKey& key = _columns[cmap.columnIndex];
+            std::variant<const char*, float> value = columnValue(key, item);
+
+            const float lineHeight = ImGui::GetTextLineHeight();
+            const float buttonSize = 10.f;
+            ImGui::ColorButton(
+                "##NoValuecolor",
+                view::helper::toImVec4(_colorMappingView->colorFromColormap(item, cmap)),
+                ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip,
+                ImVec2(buttonSize, lineHeight)
+            );
+
+            ImGui::SameLine();
+
+            ImGui::Text("%s:", columnName(key));
+            ImGui::SameLine();
+            if (std::holds_alternative<float>(value)) {
+                ImGui::Text("%.2f", std::get<float>(value));
+            }
+            else {
+                ImGui::Text("%s", std::get<const char*>(value));
+            }
+        }
     }
     ImGui::End();
 }
