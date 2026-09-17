@@ -199,20 +199,23 @@ private:
     Vec2Property _domainZ;
     Vec2Property _domainR;
 
-    /// Toggle flow [ON/OFF]
-    BoolProperty _flowEnabled;
-    /// Group to hold the flow/particle properties
-    PropertyOwner _flowGroup;
-    /// Simulated particles' color
-    Vec4Property _flowColor;
-    /// Size of simulated flow particles
-    IntProperty _flowParticleSize;
-    /// Size of simulated flow particles
-    IntProperty _flowParticleSpacing;
-    /// Toggle flow direction [FORWARDS/BACKWARDS]
-    BoolProperty _flowReversed;
-    /// Speed of simulated flow
-    IntProperty _flowSpeed;
+
+
+    struct Flow : public PropertyOwner, public Fadeable {
+        explicit Flow(const ghoul::Dictionary& dictionary);
+
+        BoolProperty enabled;
+        /// Simulated particles' color
+        Vec4Property color;
+        /// Size of simulated flow particles
+        IntProperty particleSize;
+        /// Size of simulated flow particles
+        IntProperty particleSpacing;
+        /// Toggle flow direction [FORWARDS/BACKWARDS]
+        BoolProperty reversed;
+        /// Speed of simulated flow
+        IntProperty speed;
+    } _flow;
 
     /// Whether or not to use masking
     BoolProperty _maskingEnabled;

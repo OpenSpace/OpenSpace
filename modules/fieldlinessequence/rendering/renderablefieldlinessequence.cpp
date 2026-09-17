@@ -148,7 +148,7 @@ namespace {
     };
 
     constexpr Property::PropertyInfo FlowEnabledInfo = {
-        "FlowEnabled",
+        "Enabled",
         "Flow enabled",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow.",
@@ -421,6 +421,44 @@ Documentation RenderableFieldlinesSequence::Documentation() {
     );
 }
 
+RenderableFieldlinesSequence::Flow::Flow(const ghoul::Dictionary& dictionary)
+    : PropertyOwner({ "Flow" })
+    , enabled(FlowEnabledInfo, false)
+    , color(
+        FlowColorInfo,
+        glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , particleSize(FlowParticleSizeInfo, 5, 0, 500)
+    , particleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
+    , reversed(FlowReversedInfo, false)
+    , speed(FlowSpeedInfo, 20, 0, 1000)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_fade);
+
+    enabled = p.flowEnabled.value_or(enabled);
+    addProperty(enabled);
+
+    reversed = p.reversedFlow.value_or(reversed);
+    addProperty(reversed);
+
+    color = p.flowColor.value_or(color);
+    color.setViewOption(Property::ViewOptions::Color);
+    addProperty(color);
+
+    particleSize = p.particleSize.value_or(particleSize);
+    addProperty(particleSize);
+
+    particleSpacing = p.particleSpacing.value_or(particleSpacing);
+    addProperty(particleSpacing);
+
+    speed = p.flowSpeed.value_or(speed);
+    addProperty(speed);
+}
+
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -447,18 +485,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _domainY(DomainYInfo)
     , _domainZ(DomainZInfo)
     , _domainR(DomainRInfo)
-    , _flowEnabled(FlowEnabledInfo, false)
-    , _flowGroup({ "Flow" })
-    , _flowColor(
-        FlowColorInfo,
-        glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _flowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
-    , _flowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
-    , _flowReversed(FlowReversedInfo, false)
-    , _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
+    , _flow(dictionary)
     , _maskingEnabled(MaskingEnabledInfo, false)
     , _maskingGroup({ "Masking" })
     , _selectedMaskingRange(
@@ -561,12 +588,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     }
 
     _extraVars = p.extraVariables.value_or(_extraVars);
-    _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
-    _flowColor = p.flowColor.value_or(_flowColor);
-    _flowReversed = p.reversedFlow.value_or(_flowReversed);
-    _flowParticleSize = p.particleSize.value_or(_flowParticleSize);
-    _flowParticleSpacing = p.particleSpacing.value_or(_flowParticleSpacing);
-    _flowSpeed = p.flowSpeed.value_or(_flowSpeed);
+
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
     _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
     _domainEnabled = p.domainEnabled.value_or(_domainEnabled);
@@ -812,7 +834,7 @@ void RenderableFieldlinesSequence::setupProperties() {
     // Add Property Groups
     addPropertySubOwner(_colorGroup);
     addPropertySubOwner(_domainGroup);
-    addPropertySubOwner(_flowGroup);
+    addPropertySubOwner(_flow);
     addPropertySubOwner(_maskingGroup);
 
     _colorUniform.setViewOption(Property::ViewOptions::Color);
@@ -828,14 +850,6 @@ void RenderableFieldlinesSequence::setupProperties() {
     _domainGroup.addProperty(_domainY);
     _domainGroup.addProperty(_domainZ);
     _domainGroup.addProperty(_domainR);
-
-    _flowGroup.addProperty(_flowEnabled);
-    _flowGroup.addProperty(_flowReversed);
-    _flowColor.setViewOption(Property::ViewOptions::Color);
-    _flowGroup.addProperty(_flowColor);
-    _flowGroup.addProperty(_flowParticleSize);
-    _flowGroup.addProperty(_flowParticleSpacing);
-    _flowGroup.addProperty(_flowSpeed);
 
     _maskingGroup.addProperty(_maskingEnabled);
     _maskingGroup.addProperty(_maskingQuantity);
@@ -853,7 +867,7 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
             limit = 300.f; // Should include a long magnetotail
             break;
         case Model::Enlil:
-            _flowReversed = true;
+            _flow.reversed = true;
             _scalingFactor = AuToMeter;
             limit = 50.f; // Should include Plutos furthest distance from the Sun
             break;
@@ -1272,15 +1286,18 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     _shaderProgram->setUniform("domainLimY", _domainY.value() * _scalingFactor);
     _shaderProgram->setUniform("domainLimZ", _domainZ.value() * _scalingFactor);
 
+    glm::vec4 flowColor = _flow.color;
+    flowColor.a *= _flow.opacity();
+
     // Flow / Particles
-    _shaderProgram->setUniform("flowColor", _flowColor);
-    _shaderProgram->setUniform("usingParticles", _flowEnabled);
-    _shaderProgram->setUniform("particleSize", _flowParticleSize);
-    _shaderProgram->setUniform("particleSpacing", _flowParticleSpacing);
-    _shaderProgram->setUniform("particleSpeed", _flowSpeed);
+    _shaderProgram->setUniform("flowColor", flowColor);
+    _shaderProgram->setUniform("usingParticles", _flow.enabled);
+    _shaderProgram->setUniform("particleSize", _flow.particleSize);
+    _shaderProgram->setUniform("particleSpacing", _flow.particleSpacing);
+    _shaderProgram->setUniform("particleSpeed", _flow.speed);
     _shaderProgram->setUniform(
         "time",
-        global::windowDelegate->applicationTime() * (_flowReversed ? -1 : 1)
+        global::windowDelegate->applicationTime() * (_flow.reversed ? -1 : 1)
     );
 
     _shaderProgram->setUniform("opacity", opacity());
