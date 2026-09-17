@@ -148,15 +148,13 @@ private:
     float _scalingFactor = 1.f;
     Model _model = Model::Invalid;
     bool _shouldUpdateMaskingBuffer = false;
-    bool _shouldUpdateColorBuffer = false;
     int _activeIndex = -1;
     bool _atLeastOneFileLoaded = false;
 
     bool _isLoadingStateFromDisk = false;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
-    /// Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
-    std::unique_ptr<TransferFunction> _transferFunction;
+
 
     /// OpenGL Vertex Array Object
     GLuint _vao = 0;
@@ -169,26 +167,37 @@ private:
     /// OpenGL Vertex Buffer Object containing the vertex positions
     GLuint _vboPosition = 0;
 
-    /// Group to hold the color properties
-    PropertyOwner _colorGroup;
-    /// Uniform/transfer function/topology?
-    OptionProperty _colorMethod;
-    /// Index of the extra quantity to color lines by
-    OptionProperty _colorQuantity;
-    /// Used to save property for later initialization, because firstUpdate needs to run
-    /// first, to populate _colorQuantity with options
-    int _colorQuantityTemp;
-    std::vector<glm::vec2> _colorTableRanges;
-    /// Color table/transfer function selected min and max range
-    Vec2Property _selectedColorRange;
-    /// Paths to color tables. One for each 'extraQuantity'
-    std::vector<std::filesystem::path> _colorTablePaths;
-    /// Color table/transfer function for "By Quantity" coloring
-    StringProperty _colorTablePath;
-    /// Uniform Field Line Color
-    Vec4Property _colorUniform;
-    /// Whether or not to use additive blending
-    BoolProperty _colorABlendEnabled;
+    struct Color : public PropertyOwner {
+        explicit Color(const ghoul::Dictionary& dictionary);
+
+        /// Uniform/transfer function/topology?
+        OptionProperty method;
+
+        /// Index of the extra quantity to color lines by
+        OptionProperty quantity;
+        /// Used to save property for later initialization, because firstUpdate needs to run
+        /// first, to populate _colorQuantity with options
+        int quantityTemp;
+
+        /// Color table/transfer function selected min and max range
+        Vec2Property selectedRange;
+
+        /// Color table/transfer function for "By Quantity" coloring
+        StringProperty colorTablePath;
+
+        /// Uniform Field Line Color
+        Vec4Property uniformColor;
+
+        /// Paths to color tables. One for each 'extraQuantity'
+        std::vector<std::filesystem::path> colorTablePaths;
+        std::vector<glm::vec2> colorTableRanges;
+
+        bool bufferNeedsUpdate = false;
+
+        /// Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
+        std::unique_ptr<TransferFunction> transferFunction;
+    } _color;
+
 
     struct Domain : public PropertyOwner {
         explicit Domain(const ghoul::Dictionary& dictionary);
@@ -226,6 +235,7 @@ private:
     /// Used to save property for later initialization
     int _maskingQuantityTemp = 0;
 
+    BoolProperty _useAdditiveBlending;
     /// Line width for the line rendering part
     FloatProperty _lineWidth;
     /// Button which executes a time jump to start of sequence

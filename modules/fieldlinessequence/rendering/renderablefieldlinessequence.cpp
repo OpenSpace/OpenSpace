@@ -107,7 +107,7 @@ namespace {
 
     constexpr Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
-        "Additive blending",
+        "Use additive blending",
         "Activate/deactivate additive blending.",
         Property::Visibility::AdvancedUser
     };
@@ -421,6 +421,133 @@ Documentation RenderableFieldlinesSequence::Documentation() {
     );
 }
 
+RenderableFieldlinesSequence::Color::Color(const ghoul::Dictionary& dictionary)
+    : PropertyOwner({ "Color" })
+    , method(ColorMethodInfo)
+    , quantity(ColorQuantityInfo)
+    , selectedRange(
+        ColorMinMaxInfo,
+        glm::vec2(0.f, 100.f),
+        glm::vec2(-5000.f),
+        glm::vec2(5000.f)
+    )
+    , colorTablePath(ColorTablePathInfo)
+    , uniformColor(
+        ColorUniformInfo,
+        glm::vec4(0.3f, 0.57f, 0.75f, 0.5f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    uniformColor = p.color.value_or(uniformColor);
+    uniformColor.setViewOption(Property::ViewOptions::Color);
+    addProperty(uniformColor);
+
+    method.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
+    method.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
+    if (p.colorMethod.has_value()) {
+        method = static_cast<int>(codegen::map<ColorMethod>(*p.colorMethod));
+    }
+    else {
+        method = static_cast<int>(ColorMethod::Uniform);
+    }
+    addProperty(method);
+
+    quantity.onChange([this]() {
+        if (colorTablePaths.empty()) {
+            return;
+        }
+        shouldUpdateBuffer = true;
+        // Note that we do not need to set _selectedColorRange in the constructor, due to
+        // this onChange being declared before firstupdate() function that sets
+        // _colorQuantity
+        if (quantity < static_cast<int>(colorTableRanges.size())) {
+            selectedRange = colorTableRanges[quantity];
+        }
+        // If fewer data ranges are given than there are parameters in the data, use the
+        // first range.
+        // @TODO (2025-06-10, elon) We should use a better structure for providing the
+        // data, since this creates discrepancy for which range belongs to which parameter
+        else {
+            selectedRange = colorTableRanges[0];
+        }
+
+        if (quantity < static_cast<int>(colorTablePaths.size())) {
+            colorTablePath = colorTablePaths[quantity].string();
+        }
+        else {
+            colorTablePath = colorTablePaths[0].string();
+        }
+    });
+
+    quantityTemp = p.colorQuantity.value_or(quantityTemp);
+    addProperty(quantity);
+
+    if (p.colorMinMaxRange.has_value()) {
+        selectedRange.setMinValue(glm::vec2(p.colorMinMaxRange->x));
+        selectedRange.setMaxValue(glm::vec2(p.colorMinMaxRange->y));
+    }
+
+    if (p.colorTableRanges.has_value()) {
+        colorTableRanges = *p.colorTableRanges;
+        if (quantityTemp < static_cast<int>(colorTableRanges.size()) &&
+            quantityTemp >= 0)
+        {
+            selectedRange = colorTableRanges[quantityTemp];
+        }
+        else {
+            selectedRange = colorTableRanges[0];
+        }
+    }
+    else {
+        colorTableRanges.push_back(glm::vec2(0.f, 1.f));
+        selectedRange = glm::vec2(0.f, 1.f);
+    }
+
+    // This is to save the changes done in the gui for when you switch between options
+    selectedRange.onChange([this]() {
+        if (quantity < static_cast<int>(colorTableRanges.size())) {
+            colorTableRanges[quantity] = selectedRange;
+        }
+    });
+
+    selectedRange.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(selectedRange);
+
+    if (p.colorTablePaths.has_value()) {
+        for (const std::filesystem::path& path : *p.colorTablePaths) {
+            if (!std::filesystem::exists(path)) {
+                throw ghoul::RuntimeError(std::format(
+                    "Color table path '{}' is not a valid file", path
+                ));
+            }
+            colorTablePaths.emplace_back(path);
+        }
+    }
+    if (!p.colorTablePaths.has_value() || colorTablePaths.empty()) {
+        colorTablePaths.emplace_back(
+            FieldlinesSequenceModule::DefaultTransferFunctionFile
+        );
+    }
+
+    colorTablePath.onChange([this]() {
+        if (std::filesystem::exists(colorTablePath.value())) {
+            transferFunction =
+                std::make_unique<TransferFunction>(colorTablePath.value());
+        }
+        else {
+            LERROR(std::format(
+                "Invalid path '{}' to transfer function. Please enter new path",
+                colorTablePath.value()
+            ));
+        }
+    });
+    colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
+    addProperty(colorTablePath);
+}
+
 RenderableFieldlinesSequence::Domain::Domain(const ghoul::Dictionary& dictionary)
     : PropertyOwner({ "Domain" })
     , enabled(DomainEnabledInfo, false)
@@ -488,25 +615,10 @@ RenderableFieldlinesSequence::Flow::Flow(const ghoul::Dictionary& dictionary)
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _colorGroup({ "Color" })
-    , _colorMethod(ColorMethodInfo)
-    , _colorQuantity(ColorQuantityInfo)
-    , _selectedColorRange(
-        ColorMinMaxInfo,
-        glm::vec2(0.f, 100.f),
-        glm::vec2(-5000.f),
-        glm::vec2(5000.f)
-    )
-    , _colorTablePath(ColorTablePathInfo)
-    , _colorUniform(
-        ColorUniformInfo,
-        glm::vec4(0.3f, 0.57f, 0.75f, 0.5f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _colorABlendEnabled(ColorUseABlendingInfo, true)
+    , _color(dictionary)
     , _domain(dictionary)
     , _flow(dictionary)
+    , _useAdditiveBlending(ColorUseABlendingInfo, true)
     , _maskingEnabled(MaskingEnabledInfo, false)
     , _maskingGroup({ "Masking" })
     , _selectedMaskingRange(
@@ -612,67 +724,18 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
     _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
+
+    _useAdditiveBlending = p.alphaBlendingEnabled.value_or(_useAdditiveBlending);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
-    _colorABlendEnabled = p.alphaBlendingEnabled.value_or(_colorABlendEnabled);
+
     _renderForever = p.showAtAllTimes.value_or(_renderForever);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
+
     _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
 
     if (_loadingType == LoadingType::StaticLoading){
         staticallyLoadFiles(p.seedPointDirectory, p.tracingVariable);
         computeSequenceEndTime();
-    }
-
-    _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
-    if (p.colorTablePaths.has_value()) {
-        for (const std::filesystem::path& path : *p.colorTablePaths) {
-            if (!std::filesystem::exists(path)) {
-                throw ghoul::RuntimeError(std::format(
-                    "Color table path '{}' is not a valid file", path
-                ));
-            }
-            _colorTablePaths.emplace_back(path);
-        }
-    }
-    if (!p.colorTablePaths.has_value() || _colorTablePaths.empty()) {
-        _colorTablePaths.emplace_back(
-            FieldlinesSequenceModule::DefaultTransferFunctionFile
-        );
-    }
-    _colorUniform = p.color.value_or(_colorUniform);
-    _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
-    _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
-    if (p.colorMethod.has_value()) {
-        _colorMethod = static_cast<int>(
-            codegen::map<openspace::RenderableFieldlinesSequence::ColorMethod>(
-                *p.colorMethod
-            )
-        );
-    }
-    else {
-        _colorMethod = static_cast<int>(ColorMethod::Uniform);
-    }
-    _colorQuantityTemp = p.colorQuantity.value_or(_colorQuantityTemp);
-
-    if (p.colorTableRanges.has_value()) {
-        _colorTableRanges = *p.colorTableRanges;
-        if (_colorQuantityTemp < static_cast<int>(_colorTableRanges.size()) &&
-            _colorQuantityTemp >= 0)
-        {
-            _selectedColorRange = _colorTableRanges[_colorQuantityTemp];
-        }
-        else {
-            _selectedColorRange = _colorTableRanges[0];
-        }
-    }
-    else {
-        _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
-        _selectedColorRange = glm::vec2(0.f, 1.f);
-    }
-
-    if (p.colorMinMaxRange.has_value()) {
-        _selectedColorRange.setMinValue(glm::vec2(p.colorMinMaxRange->x));
-        _selectedColorRange.setMaxValue(glm::vec2(p.colorMinMaxRange->y));
     }
 
     if (p.maskingRanges.has_value()) {
@@ -687,53 +750,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _selectedMaskingRange.setMinValue(glm::vec2(p.maskingMinMaxRange->x));
         _selectedMaskingRange.setMaxValue(glm::vec2(p.maskingMinMaxRange->y));
     }
-
-    _colorQuantity.onChange([this]() {
-        if (_colorTablePaths.empty()) {
-            return;
-        }
-        _shouldUpdateColorBuffer = true;
-        // Note that we do not need to set _selectedColorRange in the constructor, due to
-        // this onChange being declared before firstupdate() function that sets
-        // _colorQuantity
-        if (_colorQuantity < static_cast<int>(_colorTableRanges.size())) {
-            _selectedColorRange = _colorTableRanges[_colorQuantity];
-        }
-        // If fewer data ranges are given than there are parameters in the data, use the
-        // first range.
-        // @TODO (2025-06-10, elon) We should use a better structure for providing the
-        // data, since this creates discrepancy for which range belongs to which parameter
-        else {
-            _selectedColorRange = _colorTableRanges[0];
-        }
-
-        if (_colorQuantity < static_cast<int>(_colorTablePaths.size())) {
-            _colorTablePath = _colorTablePaths[_colorQuantity].string();
-        }
-        else {
-            _colorTablePath = _colorTablePaths[0].string();
-        }
-    });
-
-    // This is to save the changes done in the gui for when you switch between options
-    _selectedColorRange.onChange([this]() {
-        if (_colorQuantity < static_cast<int>(_colorTableRanges.size())) {
-            _colorTableRanges[_colorQuantity] = _selectedColorRange;
-        }
-    });
-
-    _colorTablePath.onChange([this]() {
-        if (std::filesystem::exists(_colorTablePath.value())) {
-            _transferFunction =
-                std::make_unique<TransferFunction>(_colorTablePath.value());
-        }
-        else {
-            LERROR(std::format(
-                "Invalid path '{}' to transfer function. Please enter new path",
-                _colorTablePath.value()
-            ));
-        }
-    });
 
     _maskingQuantity.onChange([this]() {
         _shouldUpdateMaskingBuffer = true;
@@ -847,23 +863,15 @@ void RenderableFieldlinesSequence::initializeGL() {
 }
 
 void RenderableFieldlinesSequence::setupProperties() {
-    addProperty(_colorABlendEnabled);
+    addProperty(_useAdditiveBlending);
     addProperty(_lineWidth);
     addProperty(_jumpToStart);
 
     // Add Property Groups
-    addPropertySubOwner(_colorGroup);
+    addPropertySubOwner(_color);
     addPropertySubOwner(_domain);
     addPropertySubOwner(_flow);
     addPropertySubOwner(_maskingGroup);
-
-    _colorUniform.setViewOption(Property::ViewOptions::Color);
-    _colorGroup.addProperty(_colorUniform);
-    _colorGroup.addProperty(_colorMethod);
-    _colorGroup.addProperty(_colorQuantity);
-    _selectedColorRange.setViewOption(Property::ViewOptions::MinMaxRange);
-    _colorGroup.addProperty(_selectedColorRange);
-    _colorGroup.addProperty(_colorTablePath);
 
     _maskingGroup.addProperty(_maskingEnabled);
     _maskingGroup.addProperty(_maskingQuantity);
@@ -1076,30 +1084,33 @@ void RenderableFieldlinesSequence::firstUpdate() {
         file->state.extraQuantityNames();
 
     for (size_t i = 0; i < quantities.size(); i++) {
-        _colorQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
+        _color.quantity.addOption(static_cast<int>(i), extraNamesVec[i]);
         _maskingQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
     }
-    _colorQuantity = _colorQuantityTemp;
-    _maskingQuantity = _maskingQuantityTemp;
+    _color.quantity.setValue(_color.quantityTemp);
+    _maskingQuantity.setValue(_maskingQuantityTemp);
 
-    if (_colorQuantity < static_cast<int>(_colorTablePaths.size())) {
-        _colorTablePath = _colorTablePaths[_colorQuantity].string();
+    if (_color.quantity < static_cast<int>(_color.colorTablePaths.size())) {
+        _color.colorTablePath = _color.colorTablePaths[_color.quantity].string();
     }
     else {
-        _colorTablePath = _colorTablePaths[0].string();
+        _color.colorTablePath = _color.colorTablePaths[0].string();
     }
 
-    if (std::filesystem::exists(_colorTablePath.value())) {
-        _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.value());
+    if (std::filesystem::exists(_color.colorTablePath.value())) {
+        _color.transferFunction =
+            std::make_unique<TransferFunction>(_color.colorTablePath.value());
     }
     else {
         LWARNING("Invalid path to transfer function, please enter new path");
-        _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
-        _transferFunction =
-            std::make_unique<TransferFunction>(_colorTablePath.stringValue());
+        _color.colorTablePath =
+            FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
+
+        _color.transferFunction =
+            std::make_unique<TransferFunction>(_color.colorTablePath.stringValue());
     }
 
-    _shouldUpdateColorBuffer = true;
+    _color.shouldUpdateBuffer = true;
     _shouldUpdateMaskingBuffer = true;
 
     _isFirstLoad = false;
@@ -1197,15 +1208,15 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             GL_NONE_BIT
         );
 
-        _shouldUpdateColorBuffer = true;
+        _color.shouldUpdateBuffer = true;
         _shouldUpdateMaskingBuffer = true;
     }
 
-    if (_shouldUpdateColorBuffer) {
+    if (_color.shouldUpdateBuffer) {
         const FieldlinesState& state = _files[_activeIndex].state;
         bool success = false;
         const std::vector<float>& quantities =
-            state.extraQuantity(_colorQuantity, success);
+            state.extraQuantity(_color.quantity, success);
 
         if (success) {
             glEnableVertexArrayAttrib(_vao, 1);
@@ -1220,7 +1231,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
                 GL_NONE_BIT
             );
 
-            _shouldUpdateColorBuffer = false;
+            _color.shouldUpdateBuffer = false;
         }
         else {
             glDisableVertexArrayAttrib(_vao, 1);
@@ -1278,17 +1289,17 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat)
     );
 
-    _shaderProgram->setUniform("colorMethod", _colorMethod);
-    _shaderProgram->setUniform("lineColor", _colorUniform);
+    _shaderProgram->setUniform("colorMethod", _color.method);
+    _shaderProgram->setUniform("lineColor", _color.uniformColor);
     _shaderProgram->setUniform("usingDomain", _domain.enabled);
     _shaderProgram->setUniform("usingMasking", _maskingEnabled);
 
-    if (_colorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
-        _transferFunction->update();
+    if (_color.method == static_cast<int>(ColorMethod::ByQuantity)) {
+        _color.transferFunction->update();
         ghoul::opengl::TextureUnit textureUnit;
-        textureUnit.bind(_transferFunction->texture());
+        textureUnit.bind(_color.transferFunction->texture());
         _shaderProgram->setUniform("transferFunction", textureUnit);
-        _shaderProgram->setUniform("selectedColorRange", _selectedColorRange);
+        _shaderProgram->setUniform("selectedColorRange", _color.selectedRange);
     }
 
     if (_maskingEnabled) {
@@ -1316,9 +1327,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
     _shaderProgram->setUniform("opacity", opacity());
 
-    bool additiveBlending = false;
-    if (_colorABlendEnabled) {
-        additiveBlending = true;
+    if (_useAdditiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
@@ -1349,10 +1358,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     glBindVertexArray(0);
     _shaderProgram->deactivate();
 
-    if (additiveBlending) {
-        global::renderEngine->openglStateCache().resetBlendState();
-        global::renderEngine->openglStateCache().resetDepthState();
-    }
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 } // namespace openspace
