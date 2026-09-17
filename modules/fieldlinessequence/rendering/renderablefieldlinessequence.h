@@ -94,7 +94,6 @@ public:
     };
 
 private:
-    void setupProperties();
     void setModelDependentConstants();
 
     int updateActiveIndex(double currentTime);
@@ -147,14 +146,12 @@ private:
     /// domain limits
     float _scalingFactor = 1.f;
     Model _model = Model::Invalid;
-    bool _shouldUpdateMaskingBuffer = false;
     int _activeIndex = -1;
     bool _atLeastOneFileLoaded = false;
 
     bool _isLoadingStateFromDisk = false;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
-
 
     /// OpenGL Vertex Array Object
     GLuint _vao = 0;
@@ -192,7 +189,7 @@ private:
         std::vector<std::filesystem::path> colorTablePaths;
         std::vector<glm::vec2> colorTableRanges;
 
-        bool bufferNeedsUpdate = false;
+        bool shouldUpdateBuffer = false;
 
         /// Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
         std::unique_ptr<TransferFunction> transferFunction;
@@ -223,17 +220,20 @@ private:
         IntProperty speed;
     } _flow;
 
-    /// Whether or not to use masking
-    BoolProperty _maskingEnabled;
-    /// Group to hold the masking properties
-    PropertyOwner _maskingGroup;
-    std::vector<glm::vec2> _maskingRanges;
-    /// Selected lower and upper range limits for masking
-    Vec2Property _selectedMaskingRange;
-    /// Index of the extra quantity to use for masking
-    OptionProperty _maskingQuantity;
-    /// Used to save property for later initialization
-    int _maskingQuantityTemp = 0;
+    struct Masking : public PropertyOwner {
+        explicit Masking(const ghoul::Dictionary& dictionary);
+        BoolProperty enabled;
+        /// Selected lower and upper range limits for masking
+        Vec2Property selectedRange;
+        /// Index of the extra quantity to use for masking
+        OptionProperty quantity;
+
+        std::vector<glm::vec2> ranges;
+        /// Used to save property for later initialization
+        int quantityTemp = 0;
+
+        bool shouldUpdateBuffer = false;
+    } _masking;
 
     BoolProperty _useAdditiveBlending;
     /// Line width for the line rendering part

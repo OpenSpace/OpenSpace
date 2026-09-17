@@ -191,7 +191,7 @@ namespace {
     };
 
     constexpr Property::PropertyInfo MaskingEnabledInfo = {
-        "MaskingEnabled",
+        "Enabled",
         "Masking enabled",
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
@@ -612,22 +612,68 @@ RenderableFieldlinesSequence::Flow::Flow(const ghoul::Dictionary& dictionary)
     addProperty(speed);
 }
 
+RenderableFieldlinesSequence::Masking::Masking(const ghoul::Dictionary& dictionary)
+    : PropertyOwner({ "Masking" })
+    , enabled(MaskingEnabledInfo, false)
+    , selectedRange(
+        MaskingMinMaxInfo,
+        glm::vec2(0.f, 100.f),
+        glm::vec2(-5000.f),
+        glm::vec2(5000.f)
+    )
+    , quantity(MaskingQuantityInfo)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    enabled = p.maskingEnabled.value_or(enabled);
+    addProperty(enabled);
+
+    quantityTemp = p.maskingQuantity.value_or(quantityTemp);
+    quantity.onChange([this]() {
+        shouldUpdateBuffer = true;
+        if (quantity < static_cast<int>(ranges.size())) {
+            selectedRange = ranges[quantity];
+        }
+        else if (!ranges.empty()) {
+            selectedRange = ranges[0];
+        }
+        else {
+            LERROR("Cannot set selected masking range");
+        }
+    });
+    addProperty(quantity);
+
+    if (p.maskingRanges.has_value()) {
+        ranges = *p.maskingRanges;
+    }
+    else {
+        ranges.push_back(glm::vec2(0.f, 1.f));
+        selectedRange = glm::vec2(0.f, 1.f);
+    }
+
+    if (p.maskingMinMaxRange.has_value()) {
+        selectedRange.setMinValue(glm::vec2(p.maskingMinMaxRange->x));
+        selectedRange.setMaxValue(glm::vec2(p.maskingMinMaxRange->y));
+    }
+
+    selectedRange.onChange([this]() {
+        if (quantity < static_cast<int>(ranges.size())) {
+            ranges[quantity] = selectedRange;
+        }
+    });
+
+    selectedRange.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(selectedRange);
+}
+
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(dictionary)
     , _domain(dictionary)
     , _flow(dictionary)
+    , _masking(dictionary)
     , _useAdditiveBlending(ColorUseABlendingInfo, true)
-    , _maskingEnabled(MaskingEnabledInfo, false)
-    , _maskingGroup({ "Masking" })
-    , _selectedMaskingRange(
-        MaskingMinMaxInfo,
-        glm::vec2(0.f, 100.f),
-        glm::vec2(-5000.f),
-        glm::vec2(5000.f)
-    )
-    , _maskingQuantity(MaskingQuantityInfo)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _jumpToStart(TimeJumpButtonInfo)
     , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
@@ -722,9 +768,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     _extraVars = p.extraVariables.value_or(_extraVars);
 
-    _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
-    _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
-
     _useAdditiveBlending = p.alphaBlendingEnabled.value_or(_useAdditiveBlending);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
 
@@ -738,44 +781,23 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         computeSequenceEndTime();
     }
 
-    if (p.maskingRanges.has_value()) {
-        _maskingRanges = *p.maskingRanges;
-    }
-    else {
-        _maskingRanges.push_back(glm::vec2(0.f, 1.f));
-        _selectedMaskingRange = glm::vec2(0.f, 1.f);
-    }
-
-    if (p.maskingMinMaxRange.has_value()) {
-        _selectedMaskingRange.setMinValue(glm::vec2(p.maskingMinMaxRange->x));
-        _selectedMaskingRange.setMaxValue(glm::vec2(p.maskingMinMaxRange->y));
-    }
-
-    _maskingQuantity.onChange([this]() {
-        _shouldUpdateMaskingBuffer = true;
-        if (_maskingQuantity < static_cast<int>(_maskingRanges.size())) {
-            _selectedMaskingRange = _maskingRanges[_maskingQuantity];
-        }
-        else if (!_maskingRanges.empty()) {
-            _selectedMaskingRange = _maskingRanges[0];
-        }
-        else {
-            LERROR("Cannot set selected masking range");
-        }
-    });
-
-    _selectedMaskingRange.onChange([this]() {
-        if (_maskingQuantity < static_cast<int>(_maskingRanges.size())) {
-            _maskingRanges[_maskingQuantity] = _selectedMaskingRange;
-        }
-    });
-
     _jumpToStart.onChange([this]() {
         if (_atLeastOneFileLoaded) {
             global::timeManager->setTimeNextFrame(Time(_files[0].timestamp));
         }
     });
-    setupProperties();
+
+    addProperty(_useAdditiveBlending);
+    addProperty(_lineWidth);
+    addProperty(_jumpToStart);
+
+    // Add Property Groups
+    addPropertySubOwner(_color);
+    addPropertySubOwner(_domain);
+    addPropertySubOwner(_flow);
+    addPropertySubOwner(_masking);
+
+    addProperty(_saveDownloadsOnShutdown);
 }
 
 void RenderableFieldlinesSequence::staticallyLoadFiles(
@@ -860,25 +882,6 @@ void RenderableFieldlinesSequence::initializeGL() {
 
     // Needed for additive blending
     setRenderBin(Renderable::RenderBin::Overlay);
-}
-
-void RenderableFieldlinesSequence::setupProperties() {
-    addProperty(_useAdditiveBlending);
-    addProperty(_lineWidth);
-    addProperty(_jumpToStart);
-
-    // Add Property Groups
-    addPropertySubOwner(_color);
-    addPropertySubOwner(_domain);
-    addPropertySubOwner(_flow);
-    addPropertySubOwner(_maskingGroup);
-
-    _maskingGroup.addProperty(_maskingEnabled);
-    _maskingGroup.addProperty(_maskingQuantity);
-    _selectedMaskingRange.setViewOption(Property::ViewOptions::MinMaxRange);
-    _maskingGroup.addProperty(_selectedMaskingRange);
-
-    addProperty(_saveDownloadsOnShutdown);
 }
 
 void RenderableFieldlinesSequence::setModelDependentConstants() {
@@ -1085,10 +1088,10 @@ void RenderableFieldlinesSequence::firstUpdate() {
 
     for (size_t i = 0; i < quantities.size(); i++) {
         _color.quantity.addOption(static_cast<int>(i), extraNamesVec[i]);
-        _maskingQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
+        _masking.quantity.addOption(static_cast<int>(i), extraNamesVec[i]);
     }
     _color.quantity.setValue(_color.quantityTemp);
-    _maskingQuantity.setValue(_maskingQuantityTemp);
+    _masking.quantity.setValue(_masking.quantityTemp);
 
     if (_color.quantity < static_cast<int>(_color.colorTablePaths.size())) {
         _color.colorTablePath = _color.colorTablePaths[_color.quantity].string();
@@ -1111,7 +1114,7 @@ void RenderableFieldlinesSequence::firstUpdate() {
     }
 
     _color.shouldUpdateBuffer = true;
-    _shouldUpdateMaskingBuffer = true;
+    _masking.shouldUpdateBuffer = true;
 
     _isFirstLoad = false;
 }
@@ -1209,7 +1212,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         );
 
         _color.shouldUpdateBuffer = true;
-        _shouldUpdateMaskingBuffer = true;
+        _masking.shouldUpdateBuffer = true;
     }
 
     if (_color.shouldUpdateBuffer) {
@@ -1238,11 +1241,11 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         }
     }
 
-    if (_shouldUpdateMaskingBuffer) {
+    if (_masking.shouldUpdateBuffer) {
         const FieldlinesState& state = _files[_activeIndex].state;
         bool success = false;
         const std::vector<float>& quantities =
-            state.extraQuantity(_maskingQuantity, success);
+            state.extraQuantity(_masking.quantity, success);
 
         if (success) {
             glEnableVertexArrayAttrib(_vao, 2);
@@ -1258,7 +1261,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
                 GL_NONE_BIT
             );
 
-            _shouldUpdateMaskingBuffer = false;
+            _masking.shouldUpdateBuffer = false;
         }
         else {
             glDisableVertexArrayAttrib(_vao, 2);
@@ -1292,7 +1295,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     _shaderProgram->setUniform("colorMethod", _color.method);
     _shaderProgram->setUniform("lineColor", _color.uniformColor);
     _shaderProgram->setUniform("usingDomain", _domain.enabled);
-    _shaderProgram->setUniform("usingMasking", _maskingEnabled);
+    _shaderProgram->setUniform("usingMasking", _masking.enabled);
 
     if (_color.method == static_cast<int>(ColorMethod::ByQuantity)) {
         _color.transferFunction->update();
@@ -1302,8 +1305,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         _shaderProgram->setUniform("selectedColorRange", _color.selectedRange);
     }
 
-    if (_maskingEnabled) {
-        _shaderProgram->setUniform("maskingRange", _selectedMaskingRange);
+    if (_masking.enabled) {
+        _shaderProgram->setUniform("maskingRange", _masking.selectedRange);
     }
 
     _shaderProgram->setUniform("domainLimR", _domain.r.value() * _scalingFactor);
