@@ -371,11 +371,11 @@ bool ColorMappingView::renderViewContent() {
         if (nVariables > 0) {
             std::vector<float> data(nVariables, 1.f / static_cast<float>(nVariables));
 
-            // Build array with real strings. Note that this has to stay alive for
-            // the entire lifetime of the char* array
+            // ImPlot draws pie slices in the opposite winding order of the label
+            // sequence we want, so build labels directly in reverse order
             std::vector<std::string> labelStrings;
             labelStrings.reserve(nVariables);
-            for (int i = 0; i < nVariables; ++i) {
+            for (int i = nVariables - 1; i >= 0; --i) {
                 std::string label = _dataViewer.columnName(
                     _dataViewer.columns()[_variableSelection[i].columnIndex]
                 );
@@ -383,47 +383,37 @@ bool ColorMappingView::renderViewContent() {
                 labelStrings.push_back(std::format(" {}. {}", i + 1, label));
             }
 
-            std::vector<const char*> labels;
-            labels.reserve(nVariables);
+            std::vector<const char*> pieLabels;
+            pieLabels.reserve(nVariables);
             for (const std::string& s : labelStrings) {
-                labels.push_back(s.c_str());
+                pieLabels.push_back(s.c_str());
             }
 
-            constexpr float PieSize = 120.f;
-            constexpr float LabelLineHeight = 30.f; // TODO: need to update width and height based on actual label size and max width
-
+            // The label is included in the speicfied plot size
             // Reserve extra vertical space for labels above the pie
-            const int estimatedTopLabels = std::max(1, (nVariables + 1) / 2);
-            const float extraTopSpace = estimatedTopLabels * LabelLineHeight;
+            const float extraTopSpace = nVariables *
+                (ImGui::GetFrameHeight() - ImGui::GetStyle().FramePadding.y);
 
-            const float plotWidth = PieSize;
-            const float plotHeight = PieSize + extraTopSpace;
-            const ImVec2 plotSize(plotWidth, plotHeight);
+            ImPlot::PushStyleVar(ImPlotStyleVar_LegendPadding, ImVec2(0.f, 3.f));
 
-            if (ImPlot::BeginPlot("##Pie", plotSize, ImPlotFlags_Equal | ImPlotFlags_NoMouseText))
-            {
+            const ImVec2 size = ImVec2(120.f, 120.f + extraTopSpace);
+            constexpr ImPlotFlags flags = ImPlotFlags_Equal | ImPlotFlags_NoMouseText;
+            if (ImPlot::BeginPlot("##Pie", size, flags)) {
                 ImPlot::SetupAxes(
                     nullptr, nullptr,
                     ImPlotAxisFlags_NoDecorations,
                     ImPlotAxisFlags_NoDecorations
                 );
 
-                // Keep both axes in the same unit scale so ImPlotFlags_Equal actually
-                // gives a circular pie: x spans [0,1] over `plotWidth` px, so 1 unit
-                // == plotWidth px. y must span the equivalent number of units to get
-                // the same px-per-unit: plotHeight / plotWidth.
-                const double yMax = static_cast<double>(plotHeight) / static_cast<double>(plotWidth);
-                ImPlot::SetupAxesLimits(0.0, 1.0, 0.0, yMax, ImGuiCond_Always);
+                ImPlot::SetupLegend(
+                    ImPlotLocation_North,
+                    ImPlotLegendFlags_Outside | ImPlotLegendFlags_Reverse
+                );
 
-                // The pie always occupies the bottom 1x1-unit square (== PieSize x PieSize
-                // px), regardless of label count. Everything from y=1.0 up to yMax is
-                // the reserved label area above it.
+                ImPlot::SetupAxesLimits(0.0, 1.0, 0.0, 1.0, ImGuiCond_Always);
+
                 constexpr double pieCenterY = 0.5;
-                constexpr double pieRadius = 0.3;
-
-                // ImPlot draws pie slices in the opposite winding order of the label
-                // sequence we want, so reverse the plotting arrays to match label order
-                std::vector<const char*> pieLabels(labels.rbegin(), labels.rend());
+                constexpr double pieRadius = 0.4;
 
                 ImPlot::PlotPieChart(
                     pieLabels.data(), data.data(), nVariables,
@@ -433,6 +423,8 @@ bool ColorMappingView::renderViewContent() {
 
                 ImPlot::EndPlot();
             }
+
+            ImPlot::PopStyleVar();
         }
     }
 
