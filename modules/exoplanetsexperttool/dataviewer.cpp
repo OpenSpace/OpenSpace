@@ -525,8 +525,13 @@ void DataViewer::render() {
         return;
     }
 
-    // Tooltip for hovered planets
-    int hoveredPlanet = getHoveredPlanetIndex();
+    // Tooltip for hovered planets. Only do the (potentially expensive, since it may
+    // trigger GPU picking) hover computation when the mouse is not currently captured
+    // by an ImGui widget/window. This avoids doing unnecessary picking work every
+    // frame, which was especially noticeable (and costly) while holding CTRL, since
+    // that is when the picking-based hovering is actually enabled in the renderables.
+    ImGuiIO& mainIo = ImGui::GetIO();
+    int hoveredPlanet = mainIo.WantCaptureMouse ? -1 : getHoveredPlanetIndex();
     renderPlanetTooltip(hoveredPlanet);
     handleDoubleClickHoveredPlanet(hoveredPlanet);
 
