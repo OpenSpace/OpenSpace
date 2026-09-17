@@ -170,10 +170,6 @@ namespace {
         // Right now only contains the path where the documentation is written to.
         std::optional<Documentation> documentation;
 
-        // The countdown that the application will wait between pressing ESC and actually
-        // shutting down. If ESC is pressed again in this time, the shutdown is aborted.
-        std::optional<float> shutdownCountdown [[codegen::greater(0.0)]];
-
         // If this is set to 'true', the name of the profile will be appended to the cache
         // directory, thus not reusing the same directory. This is useful in cases where
         // the same instance of OpenSpace is run with multiple profiles, but the caches
@@ -437,7 +433,6 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("IsLoggingOpenGLCalls", isLoggingOpenGLCalls);
     res.setValue("IsPrintingEvents", isPrintingEvents);
     res.setValue("ConsoleKey", ghoul::to_string(consoleKey));
-    res.setValue("ShutdownCountdown", static_cast<double>(shutdownCountdown));
     res.setValue("shouldUseScreenshotDateTime", shouldUseScreenshotDateTime);
     res.setValue("sandboxedLua", sandboxedLua);
     res.setValue("OnScreenTextScaling", onScreenTextScaling);
@@ -591,7 +586,6 @@ void parseLuaState(Configuration& configuration) {
         c.consoleKey = km.key;
     }
 
-    c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
     c.shouldUseScreenshotDateTime =
         p.screenshotUseDateTime.value_or(c.shouldUseScreenshotDateTime);
     c.sandboxedLua = p.sandboxedLua.value_or(c.sandboxedLua);
