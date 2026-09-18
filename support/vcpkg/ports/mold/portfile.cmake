@@ -6,7 +6,7 @@
 # find_package(<pkg> CONFIG REQUIRED) + namespaced-target pattern used by every other
 # dependency in this project's vcpkg migration.
 #
-# The other three patches are the OpenSpace-local changes that used to live as
+# The next three patches are the OpenSpace-local changes that used to live as
 # pathpatch_[123]_*.patch next to modules/molecule/CMakeLists.txt and were applied to the
 # submodule working tree by a git-apply step during configure:
 #   md-path-exe-dir-decl.patch / md-path-exe-dir-impl.patch  add md_path_exe_dir()
@@ -15,8 +15,12 @@
 # Upstream bakes the absolute build-time shader directory into the library through the
 # MD_SHADER_DIR define, which is useless once the library is a redistributable package.
 #
-# REF is pinned to the commit the submodule pointed at; the three OpenSpace patches were
-# written against that revision.
+# opaque-file-handle.patch turns the unused `FILE handle` member of md_file_o into a
+# pointer. Embedding a FILE by value needs the definition of `struct _IO_FILE`, which
+# glibc exposes but musl does not, so the port does not compile on Alpine without it.
+#
+# REF is pinned to the commit the submodule pointed at; the OpenSpace patches were written
+# against that revision.
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
@@ -29,6 +33,7 @@ vcpkg_from_github(
         md-path-exe-dir-impl.patch
         runtime-shader-path.patch
         add-install-rules.patch
+        opaque-file-handle.patch
 )
 
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/moldConfig.cmake.in" DESTINATION "${SOURCE_PATH}")
