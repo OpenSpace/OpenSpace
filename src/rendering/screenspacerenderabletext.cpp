@@ -113,6 +113,9 @@ void ScreenSpaceRenderableText::update() {
 }
 
 void ScreenSpaceRenderableText::render(const RenderData& renderData) {
+    if (!_texture) {
+        return;
+    }
     glm::vec2 size = _texture->dimensions();
 
     std::array<GLint, 4> viewport;
@@ -145,6 +148,9 @@ void ScreenSpaceRenderableText::render(const RenderData& renderData) {
 }
 
 void ScreenSpaceRenderableText::updateFramebuffer() {
+    if (_buffer.empty()) {
+        return;
+    }
     const glm::vec2 bbox = _font->boundingBox(_buffer);
     const glm::uvec3 box = glm::uvec3(bbox.x, bbox.y, 1);
     const glm::uvec3 dim =  _texture ? _texture->dimensions() : glm::uvec3(0);
