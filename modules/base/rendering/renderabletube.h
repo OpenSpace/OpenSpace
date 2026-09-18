@@ -79,8 +79,12 @@ private:
     struct TimePolygon {
         double timestamp = 0.0;
         glm::dvec3 center = glm::dvec3(0.0);
+        glm::vec2 centerTex = glm::vec2(0.5f);
         std::vector<TimePolygonPoint> points;
         std::filesystem::path texturePath;
+        bool hasBfo = false;
+        glm::dvec3 bfoPos = glm::dvec3(0.0);
+        glm::vec2 bfoTex = glm::vec2(0.5f);
     };
 
     struct FindTimeStruct {

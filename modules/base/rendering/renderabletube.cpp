@@ -53,6 +53,8 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableTube";
     constexpr int8_t CurrentMajorVersion = 0;
     constexpr int8_t CurrentMinorVersion = 2;
+    constexpr int8_t CenterUVMinorVersion = 3;
+    constexpr int8_t BfoMinorVersion = 4;
     constexpr int SpiceIdOffset = 1000000;
 
     constexpr int NearestInterpolation = 0;
@@ -1078,13 +1080,16 @@ void RenderableTube::readDataFile() {
     json jsonData = json::parse(data);
 
     bool foundVersion = false;
+    bool useCenterUV = false;
+    bool hasBfo = false;
     if (auto version = jsonData.find("version"); version != jsonData.end()) {
         auto major = version->find("major");
         auto minor = version->find("minor");
 
         if (major != version->end() && minor != version->end()) {
             foundVersion = true;
-            if (*major != CurrentMajorVersion || *minor != CurrentMinorVersion) {
+            if (*major != CurrentMajorVersion && (*minor == CurrentMinorVersion ||
+                *minor == CenterUVMinorVersion || *minor == BfoMinorVersion)) {
                 LWARNING(std::format(
                     "Unknown data version '{}.{}' found. The currently supported version "
                     "is {}.{}", major->dump(), minor->dump(), CurrentMajorVersion,
@@ -1092,10 +1097,20 @@ void RenderableTube::readDataFile() {
                 ));
             }
         }
+
+        if (*minor == CenterUVMinorVersion) {
+            bool useCenterUV = true;
+        }
+        else if (*minor == BfoMinorVersion) {
+            bool useCenterUV = true;
+            bool hasBFO = true;
+        }
     }
     if (!foundVersion) {
         LWARNING("Could not find version information, version might not be supported");
     }
+
+    
 
     // Meta informaiton about the textures (optional)
     auto textureMeta = jsonData.find("texture-channels");
@@ -1162,11 +1177,40 @@ void RenderableTube::readDataFile() {
             return;
         }
         double x, y, z;
+        float cu, cv;
         centerPt->at("x").get_to(x);
         centerPt->at("y").get_to(y);
         centerPt->at("z").get_to(z);
         timePolygon.center = glm::dvec3(x, y, z);
 
+        if (useCenterUV) {
+            centerPt->at("u").get_to(cu);
+            centerPt->at("v").get_to(cv);
+            timePolygon.centerTex = glm::vec2(1.f - cu, cv);
+        }
+
+        if (hasBfo) {
+            // Bfo
+            auto bfoPt = it->find("bfo-center");
+            if (bfoPt == it->end()) {
+                LERROR("Could not find bfo center for polygon in data");
+                return;
+            }
+
+            timePolygon.hasBfo = true;
+
+            double bfoX, bfoY, bfoZ;
+            float bfoU, bfoV;
+            bfoPt->at("x").get_to(bfoX);
+            bfoPt->at("y").get_to(bfoY);
+            bfoPt->at("z").get_to(bfoZ);
+            timePolygon.bfoPos = glm::dvec3(bfoX, bfoY, bfoZ);
+
+            bfoPt->at("u").get_to(bfoU);
+            bfoPt->at("v").get_to(bfoV);
+            timePolygon.bfoTex = glm::vec2(1.f - bfoU, bfoV);
+        }
+        
         // Texture (optional)
         auto texPt = it->find("texture");
         if (texPt != it->end()) {
@@ -1243,7 +1287,7 @@ void RenderableTube::readDataFile() {
                 float u, v;
                 pt->at("u").get_to(u);
                 pt->at("v").get_to(v);
-                timePolygonPoint.tex = glm::vec2(u, 1.0 - v);
+                timePolygonPoint.tex = glm::vec2(1.f - u, v);
             }
             else if (_hasTextures) {
                 // Texture exist but no texture coordinates
@@ -1566,22 +1610,9 @@ void RenderableTube::addEdge(int polygonIndex, const TimePolygon const* polygon,
     }
 
     // Calculate texture coordinate for the center point of the given polygon
-    glm::vec2 centerTex = glm::vec2(0.f);
-    glm::vec2 centerTexNext = glm::vec2(0.f);
-    for (const TimePolygonPoint& timePolygonPoint : polygon->points) {
-        if (isCutplane) {
-            centerTex += timePolygonPoint.tex;
-            centerTexNext += timePolygonPoint.tex_next;
-        }
-        else {
-            centerTex += timePolygonPoint.tex;
-        }
-    }
-
-    if (isCutplane) {
-        centerTexNext /= _nPoints;
-    }
-    centerTex /= _nPoints;
+    glm::vec2 centerTex = polygon->centerTex;
+    glm::vec2 centerTexNext = (polygonIndex + 1 < _data.size()) ?
+        _data[polygonIndex + 1].centerTex : polygon->centerTex;
 
     // Add the center point of the edge
     PolygonVertex centerPoint;
