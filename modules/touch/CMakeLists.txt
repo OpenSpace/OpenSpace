@@ -42,6 +42,5 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 
-add_subdirectory(ext SYSTEM)
-target_link_libraries(${touch_module} PRIVATE libTUIO11)
-set_target_properties(libTUIO11 PROPERTIES FOLDER "External")
+find_package(tuio CONFIG REQUIRED)
+target_link_libraries(${touch_module} PRIVATE tuio::tuio)

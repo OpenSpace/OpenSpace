@@ -102,7 +102,7 @@ endfunction ()
 # External dependencies are found using the find_package function and then linked
 function (handle_module_dependencies target_name module_name)
   # We always want to link against Ghoul and the core library
-  target_link_libraries(${library_name} PRIVATE Ghoul openspace-core)
+  target_link_libraries(${library_name} PRIVATE Ghoul::Ghoul openspace-core)
   target_precompile_headers(${library_name} PRIVATE
     [["ghoul/format.h"]]
     [["ghoul/glm.h"]]

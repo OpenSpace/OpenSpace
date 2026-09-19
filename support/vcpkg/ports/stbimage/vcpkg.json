@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "stbimage",
+  "version-date": "2026-09-15",
+  "port-version": 4,
+  "description": [
+    "A single compiled instantiation of stb_image and stb_image_write, shared by Ghoul and SGCT so that linking both into the same program does not produce a duplicate-symbol/ODR conflict. See https://github.com/sgct/stbimage for details.",
+    "This package exports three CMake targets: unofficial::stbimage::stbimage (declarations only), unofficial::stbimage::stbimage-read-impl (compiled stb_image read functions), and unofficial::stbimage::stbimage-write-impl (compiled stb_image_write functions). The read and write implementations are split so a program that already links another stb_image read implementation (e.g. assimp) can link only the write half. See usage for details.",
+    "This port fetches the pinned commit directly from GitHub via vcpkg_from_github. Ghoul and SGCT each maintain their own copy of this same port, fetching the same pinned commit independently; see their own vcpkg.json."
+  ],
+  "homepage": "https://github.com/sgct/stbimage",
+  "license": "MIT",
+  "dependencies": [
+    "stb",
+    { "name": "vcpkg-cmake", "host": true },
+    { "name": "vcpkg-cmake-config", "host": true }
+  ]
+}

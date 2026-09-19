@@ -1,0 +1,16 @@
+{
+  "name": "mold",
+  "version-date": "2023-03-13",
+  "port-version": 0,
+  "description": [
+    "mdlib (\"mold\") is a molecular dynamics library: readers for common trajectory and structure formats (PDB, GRO, XYZ, XTC, TRR, DCD), a molecule query/filter language, and an OpenGL renderer for space-fill, licorice, ribbon, and cartoon representations.",
+    "Overlay port. mdlib has no upstream registry port and ships no install rules at all, so find_package(mold CONFIG REQUIRED) cannot succeed against it as-is. add-install-rules.patch adds the install/export logic plus a generated moldConfig.cmake, producing a mold::mdlib target and matching the find_package(<pkg> CONFIG REQUIRED) + namespaced-target pattern used by every other dependency in this project's vcpkg migration. The three remaining patches are the OpenSpace-local changes that previously lived as pathpatch_[123]_*.patch beside modules/molecule/CMakeLists.txt: they add md_path_exe_dir() and make md_gl.c resolve its GLSL relative to the running executable instead of through the build-time MD_SHADER_DIR define.",
+    "The GLSL sources md_gl.c compiles at runtime are installed to share/mold/shaders and exposed to consumers as the MOLD_SHADER_DIR variable."
+  ],
+  "homepage": "https://github.com/scanberg/mdlib",
+  "license": "MIT",
+  "dependencies": [
+    { "name": "vcpkg-cmake", "host": true },
+    { "name": "vcpkg-cmake-config", "host": true }
+  ]
+}

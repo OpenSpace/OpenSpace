@@ -1,0 +1,238 @@
+{
+  "$schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
+  "version": 10,
+  "cmakeMinimumRequired": { "major": 4, "minor": 0, "patch": 0 },
+
+  "configurePresets": [
+    {
+      "name": "vcpkg",
+      "hidden": true,
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+    },
+
+    {
+      "name": "build",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}"
+    },
+    {
+      "name": "msvc",
+      "hidden": true,
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64"
+    },
+    {
+      "name": "ninja",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true
+      }
+    },
+    {
+      "name": "makefiles",
+      "hidden": true,
+      "generator": "Unix Makefiles"
+    },
+
+    {
+      "name": "windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+      }
+    },
+    {
+      "name": "linux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "cacheVariables": {
+        "OpenGL_GL_PREFERENCE": "GLVND",
+        "VCPKG_TARGET_TRIPLET": "x64-linux"
+      }
+    },
+
+    {
+      "name": "windows-msvc",
+      "displayName": "Windows MSVC",
+      "inherits": [ "vcpkg", "build", "windows", "msvc" ]
+    },
+    {
+      "name": "windows-ninja-debug",
+      "displayName": "Windows Ninja Debug",
+      "inherits": [ "vcpkg", "build", "windows", "ninja" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "environment": {
+        "PKG_CONFIG_PATH": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows-static-md/debug/lib/pkgconfig"
+      }
+    },
+    {
+      "name": "windows-ninja-release",
+      "displayName": "Windows Ninja Release",
+      "inherits": [ "vcpkg", "build", "windows", "ninja" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "environment": {
+        "PKG_CONFIG_PATH": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows-static-md/lib/pkgconfig"
+      }
+    },
+    {
+      "name": "linux-ninja-debug",
+      "displayName": "Linux Ninja Debug",
+      "inherits": [ "vcpkg", "build", "linux", "ninja" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-ninja-release",
+      "displayName": "Linux Ninja Release",
+      "inherits": [ "vcpkg", "build", "linux", "ninja" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "linux-makefiles-debug",
+      "displayName": "Linux Makefiles Debug",
+      "inherits": [ "vcpkg", "build", "linux", "makefiles" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-makefiles-release",
+      "displayName": "Linux Makefiles Release",
+      "inherits": [ "vcpkg", "build", "linux", "makefiles" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-msvc-debug",
+      "displayName": "Windows MSVC (Debug)",
+      "configurePreset": "windows-msvc",
+      "configuration": "Debug"
+    },
+    {
+      "$comment": "Defining it to keep the same name as the configuration preset",
+      "name": "windows-msvc",
+      "inherits": "windows-msvc-debug"
+    },
+    {
+      "name": "windows-msvc-relwithdebinfo",
+      "displayName": "Windows MSVC (RelWithDebInfo)",
+      "configurePreset": "windows-msvc",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "windows-ninja-debug",
+      "displayName": "Windows Ninja (Debug)",
+      "configurePreset": "windows-ninja-debug"
+    },
+    {
+      "name": "windows-ninja-release",
+      "displayName": "Windows Ninja (Release)",
+      "configurePreset": "windows-ninja-release"
+    },
+    {
+      "name": "linux-makefiles-debug",
+      "displayName": "Linux Makefiles (Debug)",
+      "configurePreset": "linux-makefiles-debug"
+    },
+    {
+      "name": "linux-makefiles-release",
+      "displayName": "Linux Makefiles (Release)",
+      "configurePreset": "linux-makefiles-release"
+    },
+    {
+      "name": "linux-ninja-debug",
+      "displayName": "Linux Ninja (Debug)",
+      "configurePreset": "linux-ninja-debug"
+    },
+    {
+      "name": "linux-ninja-release",
+      "displayName": "Linux Ninja (Release)",
+      "configurePreset": "linux-ninja-release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "windows-msvc-debug",
+      "configurePreset": "windows-msvc",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "$comment": "Defining it to keep the same name as the configuration preset",
+      "name": "windows-msvc",
+      "inherits": "windows-msvc-debug"
+    },
+    {
+      "name": "windows-msvc-relwithdebinfo",
+      "configurePreset": "windows-msvc",
+      "configuration": "RelWithDebInfo",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-ninja-debug",
+      "configurePreset": "windows-ninja-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-ninja-release",
+      "configurePreset": "windows-ninja-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "linux-makefiles-debug",
+      "configurePreset": "linux-makefiles-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "linux-makefiles-release",
+      "configurePreset": "linux-makefiles-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "linux-ninja-debug",
+      "configurePreset": "linux-ninja-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "linux-ninja-release",
+      "configurePreset": "linux-ninja-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

@@ -31,11 +31,11 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 #####
 # OpenVR
 #####
-option(OPENSPACE_OPENVR_SUPPORT "Build OpenSpace application with OpenVR support" OFF)
-
+# OPENSPACE_OPENVR_SUPPORT is declared in the top-level CMakeLists.txt (before project())
+# so it can drive the vcpkg "openvr" manifest feature.
 if (OPENSPACE_OPENVR_SUPPORT)
   begin_header("Dependency: OpenVR")
-  find_package(OpenVR REQUIRED)
+  find_package(openvr CONFIG REQUIRED)
 
   set(SGCT_OPENVR_DEFINITIONS OPENVR_SUPPORT)
   if (NOT SGCT_OPENVR_INCLUDE_DIRECTORY)
@@ -101,25 +101,12 @@ endif ()
 
 begin_header("Dependency: SGCT")
 
-set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_JSON OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
-
-if (NOT OPENSPACE_HAVE_TESTS)
-  # Unless overriden, disable sgct tests if OpenSpace tests are disabled
-  set(SGCT_BUILD_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
-endif()
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
-target_link_libraries(OpenSpace PRIVATE sgct)
-
-set_target_properties(sgct PROPERTIES FOLDER "External")
-set_target_properties(glfw PROPERTIES FOLDER "External")
-if (TARGET SGCTTest)
-  set_target_properties(SGCTTest PROPERTIES FOLDER "External")
-endif ()
+# SGCT is resolved through the vcpkg overlay port at
+# apps/OpenSpace/ext/sgct/support/vcpkg/ports/sgct, which builds the enclosing submodule
+# checkout. The sgct submodule stays checked out because that port builds from its source
+# path (and additional_includes/openvr is still consumed from it above).
+find_package(sgct CONFIG REQUIRED)
+target_link_libraries(OpenSpace PRIVATE sgct::sgct)
 
 if (UNIX)
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
@@ -144,13 +131,73 @@ if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
   end_header("Dependency: Profile Editor")
 
   if (WIN32)
-    # Find the windeployqt application
-    get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
-    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+    # Qt comes from vcpkg and is linked dynamically (LGPL compliance). The Qt DLLs
+    # themselves are picked up by the $<TARGET_RUNTIME_DLLS:OpenSpace> copy further down,
+    # but the runtime plugins (platforms/qwindows.dll, styles, imageformats, tls, ...) are
+    # loaded at runtime and not seen as link dependencies, so windeployqt is run to place
+    # them next to the executable.
+    # Qt6CoreMacros.cmake itself does a plain find_program(WINDEPLOYQT_EXECUTABLE ...)
+    # internally (for its own deploy-script support) with no reliable hint towards
+    # vcpkg's own Qt install, so on a machine with an unrelated Qt SDK on PATH it caches
+    # WINDEPLOYQT_EXECUTABLE pointing at that other (potentially different-version) copy.
+    # Qt then refuses to load the mismatched-version plugins that tool deploys ("Ignoring
+    # QPA plugin due to mismatching Qt versions") - only visible in
+    # Release/RelWithDebInfo/MinSizeRel because the --debug lookup happens to fall back to
+    # the target's actual Qt dependencies when no bundled debug plugin exists, while
+    # --release does not. Use our own cache variable name so we don't just read back Qt's
+    # already-wrong cached value, and explicitly restrict the search to vcpkg's host-tools
+    # Qt6 install so we always get the exact windeployqt matching the linked Qt version.
+    file(GLOB _openspace_qt_host_tools_dirs "${_VCPKG_INSTALLED_DIR}/*/tools/Qt6/bin")
+    find_program(OPENSPACE_WINDEPLOYQT_EXECUTABLE
+      NAMES windeployqt
+      HINTS ${_openspace_qt_host_tools_dirs}
+      NO_DEFAULT_PATH
+    )
+    unset(_openspace_qt_host_tools_dirs)
+    find_program(OPENSPACE_WINDEPLOYQT_EXECUTABLE NAMES windeployqt REQUIRED)
+
+    get_filename_component(_openspace_windeployqt_dir "${OPENSPACE_WINDEPLOYQT_EXECUTABLE}" DIRECTORY)
+    find_program(OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE
+      NAMES windeployqt.debug.bat
+      HINTS ${_openspace_windeployqt_dir}
+      NO_DEFAULT_PATH
+    )
+    unset(_openspace_windeployqt_dir)
+    if (NOT OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE)
+      set(OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE ${OPENSPACE_WINDEPLOYQT_EXECUTABLE})
+    endif ()
+
     add_custom_command(
       TARGET OpenSpace POST_BUILD
-      COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
-      COMMENT "Deploying Qt libraries"
+      COMMAND $<IF:$<CONFIG:Debug>,${OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE},${OPENSPACE_WINDEPLOYQT_EXECUTABLE}>
+        $<IF:$<CONFIG:Debug>,--debug,--release>
+        --no-translations
+        --no-compiler-runtime
+        --verbose=0
+        "$<TARGET_FILE:OpenSpace>"
+      # windeployqt.exe is itself a host tool built for the "x64-windows" (dynamic)
+      # triplet, and it fails to detect that OpenSpace actually links the
+      # "x64-windows-static-md" triplet's Qt (vcpkg splits libs under bin/ from plugins
+      # under Qt6/plugins/, which confuses its usual same-prefix layout heuristic). It
+      # ends up deploying its own host triplet's plugins, which are a different,
+      # ABI-incompatible Qt build (same version number, but "Cannot load library ...:
+      # The specified procedure could not be found" at runtime). Overwrite whatever it
+      # copied with the plugins from the triplet actually linked into OpenSpace.
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/$<IF:$<CONFIG:Debug>,debug/,>Qt6/plugins"
+        "$<TARGET_FILE_DIR:OpenSpace>"
+      COMMENT "Deploying Qt runtime dependencies via windeployqt"
+      VERBATIM
+    )
+  endif ()
+
+  if (UNIX)
+    add_custom_command(TARGET OpenSpace POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/$<IF:$<CONFIG:Debug>,debug/,>Qt6/plugins"
+        "$<TARGET_FILE_DIR:OpenSpace>"
+      COMMENT "Deploying Qt runtime plugins"
+      VERBATIM
     )
   endif ()
 endif ()
