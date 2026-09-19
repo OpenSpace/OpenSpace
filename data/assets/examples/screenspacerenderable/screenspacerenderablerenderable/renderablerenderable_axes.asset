@@ -10,7 +10,9 @@ local Item = {
   Renderable = {
     Type = "RenderableCartesianAxes"
   },
-  BackgroundColor = { 0.0, 0.0, 0.0, 1.0 },
+  Style = {
+    BackgroundColor = { 0.0, 0.0, 0.0, 1.0 }
+  },
   CameraPosition = { 1.0, 1.0, 1.0 },
   CameraFov = 80.0
 }

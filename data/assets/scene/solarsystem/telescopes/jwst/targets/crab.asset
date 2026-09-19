@@ -6,10 +6,12 @@ local CrabImage = {
   Identifier = "CrabImage",
   Type = "ScreenSpaceImageLocal",
   Name = "Crab Nebula",
-  UseRadiusAzimuthElevation = true,
-  FaceCamera = false,
-  RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
-  UsePerspectiveProjection = false,
+  Placement = {
+    UseRadiusAzimuthElevation = true,
+    FaceCamera = false,
+    RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
+  },
+  -- UsePerspectiveProjection = false, TODO: investigate
   Opacity = 1.0,
   TexturePath = crab.image .. "crab-nebula.png",
   Tag = { "mission_jwst_target" },
