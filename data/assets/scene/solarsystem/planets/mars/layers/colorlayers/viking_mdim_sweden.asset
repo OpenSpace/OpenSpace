@@ -47,7 +47,6 @@ asset.meta = {
   Description = [[Alternate image layer for Mars. This map is hosted on the OpenSpace
     server in Sweden]],
   Author = "USGS",
-  URL = "https://astrogeology.usgs.gov/search/map/Mars/Viking/MDIM21/" ..
-    "Mars_Viking_MDIM21_ClrMosaic_global_232m",
+  URL = "https://astrogeology.usgs.gov/search/map/mars_viking_colorized_global_mosaic_232m",
   License = "NASA/PDS"
 }

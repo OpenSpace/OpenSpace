@@ -42,7 +42,6 @@ asset.meta = {
   Description = [[Colorzied elevation data for Mars (with shading). This map is hosted
     on the OpenSpace server in Sweden]],
   Author = "USGS",
-  URL = "https://astrogeology.usgs.gov/search/map/Mars/GlobalSurveyor/MOLA/" ..
-    "Mars_MGS_MOLA_ClrShade_merge_global_463m",
+  URL = "https://astrogeology.usgs.gov/search/map/mars_mgs_mola_global_color_shaded_relief_463m",
   License = "NASA/PDS"
 }
