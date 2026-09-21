@@ -104,6 +104,12 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    constexpr Property::PropertyInfo ShouldBlurPointsInfo = {
+        "ShouldBlurPoints",
+        "Should blur points",
+        "If true, the points will be blurred when rendered, looking more like stars."
+    };
+
     struct [[codegen::Dictionary(RenderableHostCloud)]] Parameters {
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
@@ -128,6 +134,9 @@ namespace {
 
         // [[codegen::verbatim(UseSecondMappedColorInfo.description)]]
         std::optional<bool> useSecondMappedColor;
+
+        // [[codegen::verbatim(ShouldBlurPointsInfo.description)]]
+        std::optional<bool> shouldBlurPoints;
     };
 #include "renderablehostcloud_codegen.cpp"
 } // namespace
@@ -148,6 +157,7 @@ RenderableHostCloud::RenderableHostCloud(const ghoul::Dictionary& dictionary)
     , _darkenFactor(DarkenFactorInfo, 0.3f, 0.f, 1.f)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _useSecondColor(UseSecondMappedColorInfo, false)
+    , _shouldBlurPoints(ShouldBlurPointsInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -184,6 +194,9 @@ RenderableHostCloud::RenderableHostCloud(const ghoul::Dictionary& dictionary)
 
     _useSecondColor = p.useSecondMappedColor.value_or(_useSecondColor);
     addProperty(_useSecondColor);
+
+    _shouldBlurPoints = p.shouldBlurPoints.value_or(_shouldBlurPoints);
+    addProperty(_shouldBlurPoints);
 
     updateDataIfChanged();
 
@@ -377,6 +390,7 @@ void RenderableHostCloud::setupUniforms(ghoul::opengl::ProgramObject& program,
     program.setUniform(_uniformCache.darkenFactor, _darkenFactor);
     program.setUniform(_uniformCache.cameraPosition, data.camera.position());
     program.setUniform(_uniformCache.useSecondColor, _useSecondColor);
+    program.setUniform(_uniformCache.shouldBlur, _shouldBlurPoints);
 
     program.setUniform("isRenderIndexStep", false);
 

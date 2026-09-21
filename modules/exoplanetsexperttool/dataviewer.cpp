@@ -71,8 +71,6 @@ namespace {
 
     constexpr std::string_view WebpagePath = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
 
-    constexpr float DefaultGlyphScale = 1.0;
-
     constexpr std::string_view AboutTheTool =
         "This is a research tool under development and we are currently \n"
         "looking for feedback from users. This feedback will be included \n"
@@ -95,18 +93,6 @@ namespace {
 
     const ImVec2 DefaultWindowSize = ImVec2(350, 350);
 
-    // @TODO this could be a templated helper function for lists. Used a lot
-    std::string formatIndicesList(const std::vector<size_t>& indices) {
-        std::string result;
-        for (size_t i : indices) {
-            result += std::to_string(i) + ',';
-        }
-        if (!result.empty()) {
-            result.pop_back();
-        }
-        return result;
-    }
-
     // Stolen from Log.cpp. // TODO: move to some util file in the module
     std::string timeString() {
 #ifdef WIN32
@@ -127,17 +113,7 @@ namespace {
 #endif
     }
 
-    std::string glyphPropertyUri(const std::string& p) {
-        using namespace openspace;
-        return std::format(
-            "Scene.{}.Renderable.{}",
-            ExoplanetsExpertToolModule::GlyphCloudIdentifier,
-            p
-        );
-    };
-
-    constexpr const openspace::Property::PropertyInfo ExternalSelectionInfo =
-    {
+    constexpr const openspace::Property::PropertyInfo ExternalSelectionInfo = {
         "ExternalSelection",
         "External Selection from Webpage",
         "Contains the indices of the rows in the data file that should be included, "
@@ -151,6 +127,7 @@ namespace openspace::exoplanets {
 DataViewer::DataViewer(std::string identifier, std::string guiName)
     : PropertyOwner({ std::move(identifier), std::move(guiName) })
     , _externalSelection(ExternalSelectionInfo)
+    , _glyphHandler(*this)
 {
     _externalSelection.setReadOnly(true);
     addProperty(_externalSelection);
@@ -237,7 +214,7 @@ void DataViewer::initializeData() {
 }
 
 void DataViewer::initializeGL() {
-    initializeRenderables();
+    _glyphHandler.initializeRenderables();
     initializeCallbacks();
 
     _colorMappingView->initializeGL();
@@ -436,52 +413,6 @@ void DataViewer::renderStartupInfo() {
     }
 }
 
-void DataViewer::initializeRenderables() {
-    using namespace std::string_literals;
-
-    updateGlyphRenderData();
-
-    // Glyphs
-    ghoul::Dictionary gui;
-    gui.setValue("Name", "Glyphs - Planets"s);
-    gui.setValue("Path", "/ExoplanetExplorer"s);
-
-    ghoul::Dictionary renderable;
-    renderable.setValue("Type", "RenderableExoplanetGlyphCloud"s);
-    renderable.setValue("Scale", static_cast<double>(DefaultGlyphScale));
-    renderable.setValue("UseFixedWidth", false);
-    renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
-
-    ghoul::Dictionary node;
-    node.setValue("Identifier", std::string(ExoplanetsExpertToolModule::GlyphCloudIdentifier));
-    node.setValue("Renderable", renderable);
-    node.setValue("GUI", gui);
-
-    global::scriptEngine->queueScript(
-        std::format("openspace.addSceneGraphNode({})", ghoul::formatLua(node))
-    );
-
-    // Stars
-    ghoul::Dictionary hostsGui;
-    hostsGui.setValue("Name", "Glyphs - Stars"s);
-    hostsGui.setValue("Path", "/ExoplanetExplorer"s);
-
-    ghoul::Dictionary hostsRenderable;
-    hostsRenderable.setValue("Type", "RenderableHostCloud"s);
-    hostsRenderable.setValue("Scale", static_cast<double>(DefaultGlyphScale));
-    hostsRenderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
-    hostsRenderable.setValue("Enabled", false);
-
-    ghoul::Dictionary hostsNode;
-    hostsNode.setValue("Identifier", std::string(ExoplanetsExpertToolModule::HostCloudIdentifier));
-    hostsNode.setValue("Renderable", hostsRenderable);
-    hostsNode.setValue("GUI", hostsGui);
-
-    global::scriptEngine->queueScript(
-        std::format("openspace.addSceneGraphNode({})", ghoul::formatLua(hostsNode))
-    );
-}
-
 void DataViewer::initializeCallbacks() {
     Property* anchorProperty =
         global::navigationHandler->orbitalNavigator().property("Anchor");
@@ -531,7 +462,7 @@ void DataViewer::render() {
     // frame, which was especially noticeable (and costly) while holding CTRL, since
     // that is when the picking-based hovering is actually enabled in the renderables.
     ImGuiIO& mainIo = ImGui::GetIO();
-    int hoveredPlanet = mainIo.WantCaptureMouse ? -1 : getHoveredPlanetIndex();
+    int hoveredPlanet = mainIo.WantCaptureMouse ? -1 : _glyphHandler.getHoveredPlanetIndex();
     renderPlanetTooltip(hoveredPlanet);
     handleDoubleClickHoveredPlanet(hoveredPlanet);
 
@@ -844,7 +775,7 @@ void DataViewer::render() {
     }
 
     if (_selectionChanged) {
-        updateSelectionInRenderable();
+        _glyphHandler.updateSelectionInRenderable(_selection);
         _selectionChanged = false;
     }
 }
@@ -930,35 +861,6 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     _filterChanged = _filteringView->renderFilterSettings();
 
     ImGui::End(); // Filter settings window
-}
-
-int DataViewer::getHoveredPlanetIndex() const {
-    // Start by checking the glyph cloud
-    SceneGraphNode* n = sceneGraphNode(ExoplanetsExpertToolModule::GlyphCloudIdentifier);
-    if (n) {
-        RenderableExoplanetGlyphCloud* cloud =
-            dynamic_cast<RenderableExoplanetGlyphCloud*>(n->renderable());
-        if (cloud && cloud->isEnabled()) {
-            int index = cloud->hoveredIndex();
-            if (index != -1) {
-                return index;
-            }
-        }
-    }
-
-    // Then, the host renderable
-    SceneGraphNode* n2 = sceneGraphNode(ExoplanetsExpertToolModule::HostCloudIdentifier);
-    if (n2) {
-        RenderableHostCloud* cloud = dynamic_cast<RenderableHostCloud*>(n2->renderable());
-        if (cloud && cloud->isEnabled()) {
-            int index = cloud->hoveredIndex();
-            if (index != -1) {
-                return index;
-            }
-        }
-    }
-
-    return -1;
 }
 
 void DataViewer::renderPlanetTooltip(int index) const {
@@ -1215,7 +1117,6 @@ void DataViewer::renderFileMenu() {
 
 void DataViewer::renderSettingsMenu() {
     // OBS! These should match the default settings for the SGNs
-    static bool useFixedWidth = false;
     static bool showKepler = true;
     static bool showMilkyWayLine = true;
 
@@ -1265,25 +1166,14 @@ void DataViewer::renderSettingsMenu() {
 
     ImGui::Separator();
 
-    const char* items[] = { "Rings", "Inclination" };
+    const char* items[] = { "Rings", "Inclination", "Star", "Inclination and Star" };
     static int item_current = 0;
     ImGui::SetNextItemWidth(120);
     if (ImGui::Combo("Glyph mode", &item_current, items, IM_ARRAYSIZE(items))) {
-        global::scriptEngine->queueScript(std::format(
-            "openspace.setPropertyValueSingle('{}', '{}')",
-            glyphPropertyUri("GlyphMode"),
-            items[item_current]
-        ));
+        _glyphHandler.setGlyphMode(static_cast<GlyphHandler::GlyphMode>(item_current));
     };
 
-    bool isInRingMode = item_current == 0;
-    if (isInRingMode && ImGui::Checkbox("Use fixed ring width", &useFixedWidth)) {
-        global::scriptEngine->queueScript(std::format(
-            "openspace.setPropertyValueSingle('{}', {})",
-            glyphPropertyUri("UseFixedWidth"),
-            useFixedWidth
-        ));
-    }
+    _glyphHandler.renderModeSpecificSettings();
 
     ImGui::Separator();
 
@@ -1303,7 +1193,7 @@ void DataViewer::renderSettingsMenu() {
     {
         constexpr float MIN_GLYPH_SCALE = 0.3f;
         constexpr float MAX_GLYPH_SCALE = 2.0f;
-        static float glyphSizeScale = DefaultGlyphScale;
+        static float glyphSizeScale = GlyphHandler::DefaultGlyphScale;
         ImGui::SetNextItemWidth(dragWidth);
         bool changed = ImGui::DragFloat(
             "Glyph scale", &glyphSizeScale, 0.005f,
@@ -1311,15 +1201,7 @@ void DataViewer::renderSettingsMenu() {
         );
 
         if (changed) {
-            global::scriptEngine->queueScript(std::format(
-                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Scale', {})",
-                ExoplanetsExpertToolModule::GlyphCloudIdentifier, glyphSizeScale
-            ));
-
-            global::scriptEngine->queueScript(std::format(
-                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Scale', {})",
-                ExoplanetsExpertToolModule::HostCloudIdentifier, glyphSizeScale
-            ));
+            _glyphHandler.setGlyphScale(glyphSizeScale);
         }
     }
 
@@ -1382,26 +1264,6 @@ void DataViewer::updateGlyphRenderData() {
 
     auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
     mod->updateGlyphRenderData(std::move(data));
-}
-
-void DataViewer::updateSelectionInRenderable() {
-    const std::string indices = formatIndicesList(_selection);
-
-    global::scriptEngine->queueScript({
-        .code = std::format(
-            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Selection', {{ {} }})",
-            ExoplanetsExpertToolModule::GlyphCloudIdentifier, indices
-        ),
-        .addToLog = ScriptEngine::Script::ShouldBeLogged::No
-    });
-
-    global::scriptEngine->queueScript({
-        .code = std::format(
-            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Selection', {{ {} }})",
-            ExoplanetsExpertToolModule::HostCloudIdentifier, indices
-        ),
-        .addToLog = ScriptEngine::Script::ShouldBeLogged::No
-    });
 }
 
 void DataViewer::refocusView() const {

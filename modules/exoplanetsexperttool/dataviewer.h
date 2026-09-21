@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/exoplanetsexperttool/datastructures.h>
+#include <modules/exoplanetsexperttool/glyphhandler.h>
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
 #include <modules/exoplanetsexperttool/views/columnselectionview.h>
 #include <modules/exoplanetsexperttool/views/filteringview.h>
@@ -113,11 +114,13 @@ public:
 
     void renderColumnValue(const ColumnKey& key, const ExoplanetItem& item) const;
 
+    // Write the information about the rendered points to a file
+    void updateGlyphRenderData();
+
 private:
     void renderStartupInfo();
     bool _shouldOpenInfoWindow = true;
 
-    void initializeRenderables();
     void initializeCallbacks();
 
     void renderTableWindow(bool* open);
@@ -125,17 +128,11 @@ private:
     void renderColormapOverviewWindow(bool* open);
     void renderFilterSettingsWindow(bool* open);
 
-    int getHoveredPlanetIndex() const;
     void renderPlanetTooltip(int index) const;
     void handleDoubleClickHoveredPlanet(int index);
 
     void renderFileMenu();
     void renderSettingsMenu();
-
-    // Write the information about the rendered points to a file
-    void updateGlyphRenderData();
-
-    void updateSelectionInRenderable();
 
     void refocusView() const;
     void flyToOverview() const;
@@ -149,6 +146,8 @@ private:
     std::unique_ptr<FilteringView> _filteringView;
     std::unique_ptr<SystemViewer> _systemViewer;
     std::unique_ptr<TableView> _tableView;
+
+    GlyphHandler _glyphHandler;
 
     // Bools to toggle the views above
     bool _showTable = true;

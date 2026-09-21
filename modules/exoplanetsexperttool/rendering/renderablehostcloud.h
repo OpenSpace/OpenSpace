@@ -90,7 +90,7 @@ private:
 
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, opacity, scale, maxIndex,
         currentIndex, cameraPosition, isHighlightMode, darkenFactor, renderOption, up,
-        right, cameraLookUp, useSecondColor
+        right, cameraLookUp, useSecondColor, shouldBlur
     ) _uniformCache;
 
     FloatProperty _scale;
@@ -98,6 +98,7 @@ private:
     OptionProperty _orientationRenderOption;
     FloatProperty _darkenFactor;
     BoolProperty _useAdditiveBlending;
+    BoolProperty _shouldBlurPoints;
 
     // If true, use second color in the list (to allow colormapping stars differently
     // than planets)

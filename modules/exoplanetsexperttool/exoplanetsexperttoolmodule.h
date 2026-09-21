@@ -42,10 +42,6 @@ class ExoplanetsExpertToolModule : public OpenSpaceModule, public Syncable {
 public:
     constexpr static const char* Name = "ExoplanetsExpertTool";
 
-    // The identifier used for the glyph cloud renderable throughout the module
-    constexpr static std::string_view GlyphCloudIdentifier = "ExoplanetDataPoints";
-    constexpr static std::string_view HostCloudIdentifier = "ExoplanetHostPoints";
-
     struct GlyphRenderData  {
         // One item per planet glyph
         struct Item {

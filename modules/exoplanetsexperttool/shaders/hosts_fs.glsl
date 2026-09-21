@@ -43,6 +43,7 @@ uniform int currentIndex;
 uniform bool isRenderIndexStep = false;
 uniform bool isHighlightMode = false;
 uniform float darkenFactor;
+uniform bool shouldBlur;
 
 const float M_PI = 3.141592657;
 
@@ -70,9 +71,7 @@ Fragment getFragment() {
   }
 
   // Gaussian/star-like alpha fade from center to edge of the point sprite
-  bool useFade = true;
-
-  if (useFade) {
+  if (shouldBlur) {
     const float sigma = 0.45;
     float gaussianFade = exp(-(radius * radius) / (2.0 * sigma * sigma));
     float coreGlow = exp(-(radius * radius) / (2.0 * (sigma * 0.28) * (sigma * 0.28)));
