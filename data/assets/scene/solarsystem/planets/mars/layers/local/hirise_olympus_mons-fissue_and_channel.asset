@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Olympus_Mons",
   Name = "Olympus Mons [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "Olympus_Mons-Fissure_and_Channel-17N127W_Texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Olympus_Mons",
   Name = "Olympus Mons [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "Olympus_Mons-Fissure_and_Channel-17N127W_Heightmap.vrt"
 }
 
