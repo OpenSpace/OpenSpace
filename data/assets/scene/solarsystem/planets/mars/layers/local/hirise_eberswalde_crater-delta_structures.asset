@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Eberswalde_Crater",
   Name = "Eberswalde Crater [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "Delta_Structure_in_Eberswalde_Crater_Texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Eberswalde_Crater",
   Name = "Eberswalde Crater [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "Delta_Structure_in_Eberswalde_Crater_Heightmap.vrt"
 }
 

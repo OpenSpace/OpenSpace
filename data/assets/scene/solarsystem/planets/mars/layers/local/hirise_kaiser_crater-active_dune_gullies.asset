@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Kaiser_Crater",
   Name = "Kaiser Crater [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "Active_Dune_Gullies_in_Kaiser_Crater_Texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Kaiser_Crater",
   Name = "Kaiser Crater [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "Active_Dune_Gullies_in_Kaiser_Crater_Heightmap.vrt"
 }
 
