@@ -22,49 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COMPUTECOLUMNSVIEW___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COMPUTECOLUMNSVIEW___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXPRESSIONPARSER___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXPRESSIONPARSER___H__
 
-#include <modules/exoplanetsexperttool/datastructures.h>
-#include <map>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace openspace::exoplanets {
 
-class DataViewer;
-struct DataSettings;
+enum class NodeType {
+    Number,
+    Variable,
+    UnaryMinus,
+    BinaryOp,
+    Call
+};
 
-class ComputeColumnsView {
+// A small arithmetic expression parser/evaluator, supporting +, -, *, /, unary minus,
+// parentheses, numeric literals, named variables (resolved at evaluation time), and the
+// functions sqrt, log, log10, abs, pow, min, max.
+class Expression {
 public:
-    ComputeColumnsView(DataViewer& dataViewer,
-        const DataSettings& dataSettings);
+    // Parses `text` into an expression. Check `isValid()` afterwards to see whether
+    // parsing succeeded; if not, `errorMessage()` describes the problem.
+    static Expression parse(const std::string& text);
 
-    void render(bool* open);
+    bool isValid() const;
+    const std::string& errorMessage() const;
+
+    // Evaluates the parsed expression. `resolveVariable` is called for every named
+    // variable encountered and should return its numeric value (or NaN if unknown).
+    // Only valid to call when `isValid()` is true.
+    float evaluate(const std::function<float(const std::string&)>& resolveVariable) const;
+
+    // A single node in the parsed expression tree, e.g. a literal, a variable
+    // reference, or an operator/function applied to child nodes.
+    struct Node {
+        NodeType type;
+        float number = 0.f;
+        std::string name; // variable or function name
+        char op = 0; // for BinaryOp
+        std::vector<std::shared_ptr<Node>> children;
+    };
 
 private:
-    bool isNameTaken(const std::string& name) const;
-    bool appendColumnToExpression(const std::string& columnName);
-    void renderColumnBrowser();
+    Expression() = default;
 
-    // Parses and evaluates `expressionText` for every data row, and on success stores
-    // the result in `_computedColumns` under `name`. Returns whether it succeeded; on
-    // failure, `_errorMessage` is set instead.
-    bool computeColumn(const std::string& name, const std::string& expressionText);
-
-    DataViewer& _dataViewer;
-
-    char _nameBuffer[128] = "";
-    char _expressionBuffer[1024] = "";
-    bool _showColumnBrowser = false;
-
-    // The relational store of computed columns: new column name -> computed values,
-    // index-aligned with `_dataViewer.data()`.
-    std::map<ColumnKey, std::vector<float>> _computedColumns;
-
+    std::shared_ptr<Node> _root;
+    bool _isValid = false;
     std::string _errorMessage;
 };
 
 } // namespace openspace::exoplanets
 
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COMPUTECOLUMNSVIEW___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXPRESSIONPARSER___H__

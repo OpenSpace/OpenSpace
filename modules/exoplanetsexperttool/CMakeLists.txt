@@ -31,6 +31,7 @@ set(HEADER_FILES
     datastructures.h
     dataviewer.h
     exoplanetsexperttoolmodule.h
+    expressionparser.h
     glyphhandler.h
     gui.h
     rendering/renderableexoplanetglyphcloud.h
@@ -51,6 +52,7 @@ set(SOURCE_FILES
     dataloader.cpp
     dataviewer.cpp
     exoplanetsexperttoolmodule.cpp
+    expressionparser.cpp
     glyphhandler.cpp
     gui.cpp
     rendering/renderableexoplanetglyphcloud.cpp
