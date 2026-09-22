@@ -1,0 +1,22 @@
+# Generated from support/linux/rpm/post_install.in, used as the %post scriptlet.
+# See support/linux/deb/postinst.in for why these links are created rather than packaged.
+# $1 is 1 on a fresh install and 2 on an upgrade; both want the links pointed here.
+
+ln -sfn "@OPENSPACE_INSTALL_ROOT@/bin/openspace-launcher" /usr/bin/openspace
+
+mkdir -p /usr/share/applications
+ln -sfn "@OPENSPACE_INSTALL_ROOT@/share/applications/openspace.desktop" \
+  /usr/share/applications/openspace.desktop
+
+mkdir -p /usr/share/icons/hicolor/512x512/apps
+ln -sfn "@OPENSPACE_INSTALL_ROOT@/share/icons/hicolor/512x512/apps/openspace.png" \
+  /usr/share/icons/hicolor/512x512/apps/openspace.png
+
+if command -v update-desktop-database > /dev/null 2>&1; then
+  update-desktop-database -q /usr/share/applications || true
+fi
+if command -v gtk-update-icon-cache > /dev/null 2>&1; then
+  gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+fi
+
+exit 0

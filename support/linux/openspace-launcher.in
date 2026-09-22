@@ -1,0 +1,105 @@
+#!/bin/sh
+##########################################################################################
+#                                                                                        #
+# OpenSpace                                                                              #
+#                                                                                        #
+# Copyright (c) 2014-2026                                                                #
+#                                                                                        #
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
+# software and associated documentation files (the "Software"), to deal in the Software  #
+# without restriction, including without limitation the rights to use, copy, modify,     #
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to     #
+# permit persons to whom the Software is furnished to do so, subject to the following    #
+# conditions:                                                                            #
+#                                                                                        #
+# The above copyright notice and this permission notice shall be included in all copies  #
+# or substantial portions of the Software.                                               #
+#                                                                                        #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,    #
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A          #
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT     #
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF   #
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE   #
+# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
+##########################################################################################
+
+# Starts OpenSpace from an installation tree that the user cannot write to. Generated from
+# support/linux/openspace-launcher.in.
+#
+# OpenSpace writes into ${BASE}, the directory holding the openspace.cfg it found:
+# cache/, logs/, temp/, user/, sync/, mrf_cache/ and settings.json all live there (see the
+# Paths table in openspace.cfg, and the loop over FileSys.tokens() in
+# OpenSpaceEngine::initialize that creates every one of them at startup). A package
+# installed into /opt, or an AppImage on its read-only mount, cannot provide that.
+#
+# So instead of running the binary out of the installation directly, this assembles a
+# writable base directory in the user's home whose read-only parts (bin, data, config,
+# modules, scripts, shaders) are symlinks back into the installation, and runs the binary
+# through that directory.
+#
+# This works because ${BIN} is "current_path() / dirname(argv[0])" and findConfiguration()
+# walks up from there with parent_path(), which is purely lexical and does not resolve
+# symlinks. Launching $BASE/bin/OpenSpace therefore makes OpenSpace pick the real, writable
+# $BASE/openspace.cfg and treat $BASE as ${BASE}. The loader is unaffected: both $ORIGIN
+# and QCoreApplication::applicationDirPath() go through /proc/self/exe, which resolves to
+# the real file, so the bundled Qt libraries and plugins are still found next to it.
+#
+# Used by two callers:
+#   - the DEB and RPM packages, where it is installed as <root>/bin/openspace-launcher and
+#     symlinked to /usr/bin/openspace, and derives <root> from its own location
+#   - the AppImage, whose AppRun sets OPENSPACE_ROOT and the library environment first
+
+set -e
+
+# A wrapper may hand us the installation root; otherwise this script lives in <root>/bin,
+# and readlink -f resolves the /usr/bin/openspace symlink that the packages install
+if [ -z "$OPENSPACE_ROOT" ]; then
+  OPENSPACE_ROOT="$(dirname "$(dirname "$(readlink -f "$0")")")"
+fi
+
+if [ ! -f "$OPENSPACE_ROOT/openspace.cfg" ]; then
+  echo "openspace-launcher: no openspace.cfg in '$OPENSPACE_ROOT'" >&2
+  exit 1
+fi
+
+# The version is part of the path so that two OpenSpace releases don't fight over the same
+# cache and settings. OPENSPACE_BASE overrides it for anyone who wants the writable data
+# somewhere else entirely.
+BASE="${OPENSPACE_BASE:-${XDG_DATA_HOME:-$HOME/.local/share}/OpenSpace/@OPENSPACE_VERSION_NUMBER@}"
+mkdir -p "$BASE"
+
+# For the AppImage the mountpoint is a fresh /tmp/.mount_XXXXXX on every launch, so the
+# links have to be refreshed each time. Only ever replace an entry that is a symlink or
+# missing, never a real directory or file the user put there.
+link() {
+  if [ -L "$2" ] || [ ! -e "$2" ]; then
+    rm -f "$2"
+    ln -s "$1" "$2"
+  fi
+}
+
+for directory in data config modules scripts shaders; do
+  [ -d "$OPENSPACE_ROOT/$directory" ] && link "$OPENSPACE_ROOT/$directory" "$BASE/$directory"
+done
+
+# bin is the one that cannot be a symlink to the installation: the web browser module
+# points CEF's root_cache_path at ${BIN}/cefcache, so the directory holding the executables
+# has to be writable. Linking the individual files keeps ${BIN} pointing here while leaving
+# room next to them for whatever the application writes.
+mkdir -p "$BASE/bin"
+for file in "$OPENSPACE_ROOT"/bin/*; do
+  [ -e "$file" ] || continue
+  link "$file" "$BASE/bin/$(basename "$file")"
+done
+
+# openspace.cfg has to be a real file in $BASE: it is what findConfiguration() looks for,
+# and settings.json is written next to it. Keep any edits the user made to their copy.
+if [ ! -f "$BASE/openspace.cfg" ]; then
+  cp "$OPENSPACE_ROOT/openspace.cfg" "$BASE/openspace.cfg"
+  # cp preserves the mode it had in the read-only installation, which is neither writable
+  # nor sensible for a config file
+  chmod 644 "$BASE/openspace.cfg"
+fi
+
+cd "$BASE"
+exec "$BASE/bin/OpenSpace" "$@"
