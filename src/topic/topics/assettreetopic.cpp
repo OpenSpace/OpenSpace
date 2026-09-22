@@ -30,11 +30,13 @@
 #include <openspace/scene/assetmanager.h>
 
 namespace {
-    std::string stateToString(openspace::EventAssetLoading::State state) {
+    using namespace openspace;
+
+    std::string stateToString(EventAssetLoading::State state) {
         // @TODO (anden88 2026-08-19): The creation of an event and passing it to params
         // is just to get the state value in text. Should we use a local toString function
         // instead?
-        openspace::EventAssetLoading e("", state);
+        EventAssetLoading e("", state);
         ghoul::Dictionary params = toParameter(e);
         return params.value<std::string>("State");
     }

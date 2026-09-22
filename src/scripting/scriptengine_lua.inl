@@ -28,7 +28,7 @@
 #ifdef WIN32
 #include <windows.h>
 #include <shellapi.h>
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
 #include <cstdlib>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -73,31 +73,36 @@ int printFatal(lua_State* L) {
 }
 
 /**
- * Open a directory path using Windows explorer and in Linux the default explorer
- * application.
+ * Open a file path using Windows explorer and in Linux the default explorer application.
  *
- * \param path The directory path to open in the explorer.
- * \return Windows: True if the explorer window was successfully launched, false
+ * \param path The file path to open in the file explorer
+ * \return Windows: `true` if the explorer window was successfully launched, `false`
  *         otherwise.
  *
- *         Linux: True if the request to launch the file manager was successfully handed
- *         off, false otherwise. This does not guarantee that xdg-open successfully opened
- *         the requested path.
+ *         Linux: `true` if the request to launch the file manager was successfully handed
+ *         off, `false` otherwise. This does not guarantee that xdg-open successfully
+ *         opened the requested path
  */
-bool openDirectory(const std::filesystem::path& path) {
+bool openFileLocation(const std::filesystem::path& path) {
 #ifdef WIN32
+    std::wstring arg = path.wstring();
+    if (std::filesystem::is_directory(path)) {
+        arg = std::format(L"/select,\"{}\"", path.wstring());
+    }
+
     HINSTANCE result = ShellExecuteW(
         nullptr,
         L"open",
         L"explorer.exe",
-        path.wstring().c_str(),
+        arg.c_str(),
         nullptr,
         SW_SHOWNORMAL
     );
 
     // If successful ShellExecuteW returns a value greater than 32
     return reinterpret_cast<std::intptr_t>(result) > 32;
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
+    // xdg-open doesn't have a "select this file" option
     const pid_t pid = fork();
 
     if (pid < 0) {
@@ -113,7 +118,7 @@ bool openDirectory(const std::filesystem::path& path) {
         }
 
         // We launch the xdg-open from a grandchild to avoid having to deal with zombie
-        // processes that we'd have to cleanup. Instead we let the grandchild be reaped by
+        // processes that we'd have to cleanup. Instead we let the grandchild be culled by
         // the system
         if (grandchild == 0) {
             execlp(
@@ -140,40 +145,6 @@ bool openDirectory(const std::filesystem::path& path) {
 
     // Successfully started the child process, which is now independent of OpenSpace
     return WIFEXITED(status) && WEXITSTATUS(status) == EXIT_SUCCESS;
-#endif // WIN32
-}
-
-/**
- * Open a file path using Windows explorer and in Linux the default explorer application.
- *
- * \param path The file path to open in the explorer.
- * \return Windows: True if the explorer window was successfully launched, false
- *         otherwise.
- *
- *         Linux: True if the request to launch the file manager was successfully handed
- *         off, false otherwise. This does not guarantee that xdg-open successfully opened
- *         the requested path.
- */
-bool openFileLocation(const std::filesystem::path& path) {
-#ifdef WIN32
-    // Explorer supports selecting a file using /select
-    const std::wstring arguments = std::format(L"/select,\"{}\"", path.wstring());
-
-    HINSTANCE result = ShellExecuteW(
-        nullptr,
-        L"open",
-        L"explorer.exe",
-        arguments.c_str(),
-        nullptr,
-        SW_SHOWNORMAL
-    );
-
-    // If successful ShellExecuteW returns a value greater than 32
-    return reinterpret_cast<std::intptr_t>(result) > 32;
-
-#else
-    // xdg-open doesn't have a "select this file" option
-    return openDirectory(path.parent_path());
 #endif // WIN32
 }
 
@@ -369,15 +340,13 @@ bool openFileLocation(const std::filesystem::path& path) {
     path.make_preferred();
 
     if (!std::filesystem::exists(path)) {
-        throw ghoul::RuntimeError(std::format("Could not find path '{}'", path));
+        throw ghoul::lua::LuaError(std::format("Could not find path '{}'", path));
     }
 
-    const bool success = std::filesystem::is_directory(path)
-        ? openDirectory(path)
-        : openFileLocation(path);
+    const bool success = openFileLocation(path);
 
     if (!success) {
-        throw ghoul::RuntimeError(std::format("Could not open path '{}'", path));
+        throw ghoul::lua::LuaError(std::format("Could not open path '{}'", path));
     }
 }
 

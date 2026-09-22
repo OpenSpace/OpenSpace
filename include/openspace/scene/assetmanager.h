@@ -195,8 +195,8 @@ public:
      * Update internal bookkeeping state of the provided \p assetPath to the provided \p
      * state.
      *
-     * \param assetPath The asset path to update the state for.
-     * \param state The new state to update to.
+     * \param assetPath The asset path to update the state for
+     * \param state The new state to update to
      */
     void updateAssetState(const std::filesystem::path& assetPath,
         EventAssetLoading::State state);
@@ -204,8 +204,8 @@ public:
     /**
      * Register a callback to be invoked whenever the asset tree or state map changes.
      *
-     * \param callback The call back to be invoked whenever there is an update.
-     * \return The id of the callback that can be used to unsubscribe the callback later.
+     * \param callback The call back to be invoked whenever there is an update
+     * \return The id of the callback that can be used to unsubscribe the callback later
      */
     size_t subscribeAssetTree(AssetTreeCallback callback);
 
@@ -213,7 +213,7 @@ public:
      * Unregister a callback that was previously registered with `subscribeAssetTree`.
      *
      * \param callbackId The ID returned by `subscribeAssetTree` when starting the
-     *                   subscription.
+     *        subscription
      */
     void unsubscribeAssetTree(size_t callbackId);
 
@@ -224,24 +224,24 @@ public:
     void rescanAssetPaths();
 
     /**
-     * \return The list of all asset paths in the Data folder, as of the last rescan.
+     * \return The list of all asset paths in the Data folder, as of the last rescan
      */
     std::vector<std::filesystem::path> shippedAssetPaths() const;
 
     /**
-     * \return The list of all asset paths in the User folder, as of the last rescan.
+     * \return The list of all asset paths in the User folder, as of the last rescan
      */
     std::vector<std::filesystem::path> userAssetPaths() const;
 
     /**
      * \return The list of all loaded asset paths that do not belong to the Data or User
-     * folders.
+     *         folders
      */
     std::vector<std::filesystem::path> otherAssetPaths() const;
 
     /**
      * \return The list of all root asset paths, which are assets that have been loaded
-     * directly from the profile or by calling the #add method.
+     *         directly from the profile or by calling the #add method
      */
     std::vector<std::filesystem::path> rootAssetPaths() const;
 
@@ -289,7 +289,7 @@ private:
     /**
      * Classify an asset path as belonging to either the Data, User or Other base folder
      *
-     * \return The asset base folder location type.
+     * \return The asset base folder location type
      */
     AssetPathLocation classifyAssetPath(const std::filesystem::path& path) const;
 

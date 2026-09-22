@@ -49,7 +49,6 @@ private:
     void sendFullSnapshot();
     void handleChange(const AssetManager::AssetTreeChange& change);
 
-
     bool _isDone = false;
     std::optional<size_t> _subscriptionId;
 };

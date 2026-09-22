@@ -1152,7 +1152,7 @@ std::filesystem::path AssetManager::generateAssetPath(
 }
 
 void AssetManager::updateAssetState(const std::filesystem::path& path,
-                                                           EventAssetLoading::State state)
+                                    EventAssetLoading::State state)
 {
     const std::string key = path.generic_string();
     _assetStates[key] = state;
@@ -1180,7 +1180,7 @@ void AssetManager::updateAssetState(const std::filesystem::path& path,
 
     // If the asset is loading, has finished loading or errored out and we were not
     // already tracking it - add it to the list and notify
-    if(state != EventAssetLoading::State::Unloaded && !alreadyTracked) {
+    if (state != EventAssetLoading::State::Unloaded && !alreadyTracked) {
         _otherAssetPaths.push_back(path);
         notifyAssetTreeSubscribers({ AssetTreeChange::Type::Other });
     }
