@@ -47,7 +47,14 @@ void TableView::updateColumns(const std::vector<ColumnKey>& columns) {
     _columns = columns;
 }
 
-void TableView::renderTableView(std::vector<size_t>& filteredDataRows) {
+void TableView::render(bool* open, std::vector<size_t>& filteredDataRows) {
+    ImGui::SetNextWindowSize(view::helper::DefaultWindowSize, ImGuiCond_FirstUseEver);
+
+    if (!ImGui::Begin("Table", open)) {
+        ImGui::End();
+        return;
+    }
+
     // @TODO: Maybe do a more sophisticated comparison view
     bool showPinnedTable = ImGui::CollapsingHeader("Pinned items");
     ImGui::SameLine();
@@ -78,6 +85,8 @@ void TableView::renderTableView(std::vector<size_t>& filteredDataRows) {
     }
 
     renderTable("full_exoplanets_table", filteredDataRows, false, searchString);
+
+    ImGui::End();
 }
 
 void TableView::renderFirstTableColumn(const ExoplanetItem& item, size_t row) {

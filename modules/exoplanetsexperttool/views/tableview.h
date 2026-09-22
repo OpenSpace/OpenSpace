@@ -37,7 +37,7 @@ public:
 
     void updateColumns(const std::vector<ColumnKey>& columns);
 
-    void renderTableView(std::vector<size_t>& filteredDataRows);
+    void render(bool* open, std::vector<size_t>& filteredDataRows);
 
     // Render the table with the given data rows, optionally filtering by a search string
     void renderTable(const std::string& tableId, std::vector<size_t>& dataRows,

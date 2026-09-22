@@ -31,11 +31,11 @@
 #include <modules/exoplanetsexperttool/glyphhandler.h>
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
 #include <modules/exoplanetsexperttool/views/columnselectionview.h>
+#include <modules/exoplanetsexperttool/views/computecolumnsview.h>
 #include <modules/exoplanetsexperttool/views/filteringview.h>
 #include <modules/exoplanetsexperttool/views/systemview.h>
 #include <modules/exoplanetsexperttool/views/tableview.h>
 #include <openspace/properties/list/intlistproperty.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 #include <memory>
 #include <optional>
@@ -105,9 +105,6 @@ public:
 
     void render();
 
-    void renderTable(const std::string& tableId, std::vector<size_t>& dataRows,
-        bool useFixedHeight, std::string_view search = "");
-
     // Render column description on the same line as the previous imgui item,
     // if a description exists.
     void renderColumnDescriptionTooltip(size_t index) const;
@@ -123,10 +120,7 @@ private:
 
     void initializeCallbacks();
 
-    void renderTableWindow(bool* open);
-    void renderColormapWindow(bool* open);
     void renderColormapOverviewWindow(bool* open);
-    void renderFilterSettingsWindow(bool* open);
 
     void renderPlanetTooltip(int index) const;
     void handleDoubleClickHoveredPlanet(int index);
@@ -146,6 +140,7 @@ private:
     std::unique_ptr<FilteringView> _filteringView;
     std::unique_ptr<SystemViewer> _systemViewer;
     std::unique_ptr<TableView> _tableView;
+    std::unique_ptr<ComputeColumnsView> _computeColumnsView;
 
     GlyphHandler _glyphHandler;
 
@@ -153,6 +148,7 @@ private:
     bool _showTable = true;
     bool _showFilterSettingsWindow = false;
     bool _showColormapWindow = false;
+    bool _showComputeColumnsWindow = false;
 
     bool _showColormapOverviewWindow = false;
 

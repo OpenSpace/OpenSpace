@@ -22,31 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__
+#include <modules/exoplanetsexperttool/views/computecolumnsview.h>
 
 #include <modules/imgui/include/imgui_include.h>
-#include <ghoul/glm.h>
 
-namespace openspace::view {
+namespace openspace::exoplanets {
 
-namespace colors {
-    constexpr const glm::vec3 DefaultSelected = { 0.2f, 0.8f, 1.f };
-    constexpr const glm::vec4 DescriptiveText = { 0.6f, 0.6f, 0.6f, 1.f };
-    constexpr const glm::vec4 Error = { 1.f, 0.2f, 0.2f, 1.f };
-    constexpr const glm::vec4 Warning = { 1.f, 0.6f, 0.2f, 1.f };
-} // namespace colors
+ComputeColumnsView::ComputeColumnsView(DataViewer& dataViewer,
+                                       const DataSettings& dataSettings)
+    : _dataViewer(dataViewer)
+{
 
-namespace helper {
-    const ImVec2 DefaultWindowSize = ImVec2(350, 350);
+}
 
-    ImVec4 toImVec4(const glm::vec4& v);
+void ComputeColumnsView::render(bool* open) {
+    if (!ImGui::Begin("Compute data columns", open)) {
+        ImGui::End();
+        return;
+    }
 
-    void renderDescriptiveText(const char* text);
-    void renderHelpMarker(const char* text);
+    // Render the compute columns view, which allows the user to compute new data columns based on existing ones
 
-} // namespace helper
+    ImGui::End();
+}
 
-} // namespace openspace::view
-
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__
+} // namespace openspace::exoplanets

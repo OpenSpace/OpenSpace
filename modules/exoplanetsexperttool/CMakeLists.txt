@@ -37,6 +37,7 @@ set(HEADER_FILES
     rendering/renderablehostcloud.h
     views/colormappingview.h
     views/columnselectionview.h
+    views/computecolumnsview.h
     views/filteringview.h
     views/systemview.h
     views/tableview.h
@@ -56,6 +57,7 @@ set(SOURCE_FILES
     rendering/renderablehostcloud.cpp
     views/colormappingview.cpp
     views/columnselectionview.cpp
+    views/computecolumnsview.cpp
     views/filteringview.cpp
     views/systemview.cpp
     views/tableview.cpp

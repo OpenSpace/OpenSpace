@@ -28,8 +28,6 @@
 #include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/dataloader.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
-#include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
-#include <modules/exoplanetsexperttool/rendering/renderablehostcloud.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
@@ -90,8 +88,6 @@ namespace {
 
         return std::find(tags.begin(), tags.end(), tag) != std::end(tags);
     };
-
-    const ImVec2 DefaultWindowSize = ImVec2(350, 350);
 
     // Stolen from Log.cpp. // TODO: move to some util file in the module
     std::string timeString() {
@@ -197,6 +193,7 @@ void DataViewer::initializeData() {
         *this,
         _columnSelectionView.orderedSelectedColumns()
     );
+    _computeColumnsView = std::make_unique<ComputeColumnsView>(*this, _dataSettings);
 
     _currentlyTargettedSystem = std::nullopt;
 
@@ -482,6 +479,7 @@ void DataViewer::render() {
             ImGui::MenuItem("Table", NULL, &_showTable);
             ImGui::MenuItem("Filters", NULL, &_showFilterSettingsWindow);
             ImGui::MenuItem("Color mapping", NULL, &_showColormapWindow);
+            ImGui::MenuItem("Compute data columns", NULL, &_showComputeColumnsWindow);
             if (mod->showInfoWindowAtStartup()) {
                 ImGui::Separator();
                 ImGui::MenuItem("Start-up info", NULL, &_shouldOpenInfoWindow);
@@ -719,7 +717,7 @@ void DataViewer::render() {
 
 
     if (_showFilterSettingsWindow) {
-        renderFilterSettingsWindow(&_showFilterSettingsWindow);
+        _filterChanged = _filteringView->render(&_showFilterSettingsWindow);
     }
 
     _filterChanged = _filterChanged || _externalSelectionChanged;
@@ -741,7 +739,7 @@ void DataViewer::render() {
     _externalSelectionChanged = false;
 
     if (_showColormapWindow) {
-        renderColormapWindow(&_showColormapWindow);
+        _colormapWasChanged = _colorMappingView->render(&_showColormapWindow);
     }
 
     if (_showColormapOverviewWindow) {
@@ -749,7 +747,11 @@ void DataViewer::render() {
     }
 
     if (_showTable) {
-        renderTableWindow(&_showTable);
+        _tableView->render(&_showTable, _filteredData);
+    }
+
+    if (_showComputeColumnsWindow) {
+        _computeColumnsView->render(&_showComputeColumnsWindow);
     }
 
     _systemViewer->renderAllSystemViews();
@@ -780,13 +782,6 @@ void DataViewer::render() {
     }
 }
 
-void DataViewer::renderColormapWindow(bool* open) {
-    if (ImGui::Begin("Color mapping", open, ImGuiWindowFlags_AlwaysAutoResize)) {
-        _colormapWasChanged = _colorMappingView->renderViewContent();
-    }
-    ImGui::End();
-}
-
 void DataViewer::renderColormapOverviewWindow(bool* open) {
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     const float posPadding = 10.f;
@@ -802,15 +797,6 @@ void DataViewer::renderColormapOverviewWindow(bool* open) {
         if (ImGui::Button("Edit")) {
             _showColormapWindow = true;
         }
-    }
-    ImGui::End();
-}
-
-void DataViewer::renderTableWindow(bool *open) {
-    ImGui::SetNextWindowSize(DefaultWindowSize, ImGuiCond_FirstUseEver);
-
-    if (ImGui::Begin("Table", open)) {
-        _tableView->renderTableView(_filteredData);
     }
     ImGui::End();
 }
@@ -849,18 +835,6 @@ void DataViewer::renderColumnValue(const ColumnKey& key, const ExoplanetItem& it
     else if (std::holds_alternative<const char*>(value)) {
         ImGui::Text("%s", std::get<const char*>(value));
     }
-}
-
-void DataViewer::renderFilterSettingsWindow(bool* open) {
-    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Filters", open)) {
-        ImGui::End();
-        return;
-    }
-
-    _filterChanged = _filteringView->renderFilterSettings();
-
-    ImGui::End(); // Filter settings window
 }
 
 void DataViewer::renderPlanetTooltip(int index) const {

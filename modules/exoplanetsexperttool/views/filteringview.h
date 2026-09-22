@@ -46,7 +46,7 @@ public:
     void renderAppliedColumnFilters() const;
 
     // Return true if filtering was changed
-    bool renderFilterSettings();
+    bool render(bool* open);
 
     // Return the rows matching the current filtering
     std::vector<size_t> applyFiltering(const std::vector<ExoplanetItem>& data,

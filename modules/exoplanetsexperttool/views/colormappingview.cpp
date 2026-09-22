@@ -284,7 +284,12 @@ size_t ColorMappingView::firstNumericColumn() const {
     return _firstNumericColumnIndex;
 }
 
-bool ColorMappingView::renderViewContent() {
+bool ColorMappingView::render(bool* open) {
+    if (!ImGui::Begin("Color mapping", open, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::End();
+        return false;
+    }
+
     bool cmapWasChanged = false;
 
     // Start variable group
@@ -429,6 +434,8 @@ bool ColorMappingView::renderViewContent() {
     }
 
     ImGui::EndGroup(); // variables + plot group
+
+    ImGui::End();
 
     return cmapWasChanged;
 }

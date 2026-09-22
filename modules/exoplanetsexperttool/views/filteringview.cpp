@@ -116,7 +116,13 @@ void FilteringView::renderAppliedColumnFilters() const {
     }
 }
 
-bool FilteringView::renderFilterSettings() {
+bool FilteringView::render(bool* open) {
+    ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("Filters", open)) {
+        ImGui::End();
+        return false;
+    }
+
     bool filterWasChanged = false;
 
     if (ImGui::Button("Reset internal")) {
@@ -146,6 +152,8 @@ bool FilteringView::renderFilterSettings() {
     filterWasChanged |= renderColumnFilterSettings();
     filterWasChanged |= renderRowLimitFilterSettings();
     filterWasChanged |= renderExternalFilterSettings();
+
+    ImGui::End();
 
     return filterWasChanged;
 }

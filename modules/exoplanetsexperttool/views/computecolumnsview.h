@@ -22,31 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COMPUTECOLUMNSVIEW___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COMPUTECOLUMNSVIEW___H__
 
-#include <modules/imgui/include/imgui_include.h>
-#include <ghoul/glm.h>
+namespace openspace::exoplanets {
 
-namespace openspace::view {
+class DataViewer;
+struct DataSettings;
 
-namespace colors {
-    constexpr const glm::vec3 DefaultSelected = { 0.2f, 0.8f, 1.f };
-    constexpr const glm::vec4 DescriptiveText = { 0.6f, 0.6f, 0.6f, 1.f };
-    constexpr const glm::vec4 Error = { 1.f, 0.2f, 0.2f, 1.f };
-    constexpr const glm::vec4 Warning = { 1.f, 0.6f, 0.2f, 1.f };
-} // namespace colors
+class ComputeColumnsView {
+public:
+    ComputeColumnsView(DataViewer& dataViewer,
+        const DataSettings& dataSettings);
 
-namespace helper {
-    const ImVec2 DefaultWindowSize = ImVec2(350, 350);
+    void render(bool* open);
 
-    ImVec4 toImVec4(const glm::vec4& v);
+private:
 
-    void renderDescriptiveText(const char* text);
-    void renderHelpMarker(const char* text);
+    DataViewer& _dataViewer;
+};
 
-} // namespace helper
+} // namespace openspace::exoplanets
 
-} // namespace openspace::view
-
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COMPUTECOLUMNSVIEW___H__

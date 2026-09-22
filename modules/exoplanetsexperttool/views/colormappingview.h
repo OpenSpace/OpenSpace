@@ -53,7 +53,7 @@ public:
     size_t firstNumericColumn() const;
 
     // Return true if the color map was changed
-    bool renderViewContent();
+    bool render(bool* open);
 
     // Render an overview of all color mapped variables, with a small preview of the
     // color mapping
