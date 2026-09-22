@@ -33,5 +33,5 @@ asset.meta = {
     server in New York]],
   Author = "OpenSpace Team",
   URL = "http://www.openspaceproject.com",
-  License = "NASA/PDS"
+  License = "NASA/PDS + CC BY-SA 3.0 IGO (HRSC)"
 }

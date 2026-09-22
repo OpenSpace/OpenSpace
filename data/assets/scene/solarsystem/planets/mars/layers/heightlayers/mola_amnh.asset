@@ -43,7 +43,6 @@ asset.meta = {
   Description = [[Global elevation layer for Mars. This layer is hosted on the OpenSpace
     server in New York]],
   Author = "USGS",
-  URL = "https://astrogeology.usgs.gov/search/map/Mars/GlobalSurveyor/MOLA/" ..
-    "Mars_MGS_MOLA_DEM_mosaic_global_463m",
+  URL = "https://astrogeology.usgs.gov/search/map/mars_odyssey_themis_ir_day_global_mosaic_100m_v12",
   License = "NASA/PDS"
 }
