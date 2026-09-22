@@ -123,40 +123,48 @@
   ],
   "packagePresets": [
     {
+      "$comment": "Every package preset configures a release build. A debug build packages the unstripped debug runtime of every dependency, which took the Linux packages past 3 GB installed",
       "name": "windows-zip",
       "displayName": "Windows ZIP Package",
-      "configurePreset": "windows-ninja-debug",
+      "configurePreset": "windows-ninja-release",
       "generators": ["ZIP"]
     },
     {
       "name": "windows-nsis",
       "displayName": "Windows NSIS Installer",
-      "configurePreset": "windows-ninja-debug",
+      "configurePreset": "windows-ninja-release",
       "generators": ["NSIS"]
     },
     {
       "name": "linux-zip",
       "displayName": "Linux ZIP Package",
-      "configurePreset": "linux-ninja-debug",
+      "configurePreset": "linux-ninja-release",
       "generators": ["ZIP"]
     },
     {
       "name": "linux-tgz",
       "displayName": "Linux TGZ Package",
-      "configurePreset": "linux-ninja-debug",
+      "configurePreset": "linux-ninja-release",
       "generators": ["TGZ"]
     },
     {
       "name": "linux-deb",
       "displayName": "Linux DEB Package",
-      "configurePreset": "linux-ninja-debug",
+      "configurePreset": "linux-ninja-release",
       "generators": ["DEB"]
     },
     {
       "name": "linux-rpm",
       "displayName": "Linux RPM Package",
-      "configurePreset": "linux-ninja-debug",
+      "configurePreset": "linux-ninja-release",
       "generators": ["RPM"]
+    },
+    {
+      "$comment": "The AppImage is built through CPack's External generator, which runs support/cmake/appimage.cmake. It requires linuxdeploy, linuxdeploy-plugin-qt, and appimagetool on the PATH",
+      "name": "linux-appimage",
+      "displayName": "Linux AppImage",
+      "configurePreset": "linux-ninja-release",
+      "generators": ["External"]
     }
   ],
   "buildPresets": [
