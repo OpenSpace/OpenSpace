@@ -121,6 +121,44 @@
       }
     }
   ],
+  "packagePresets": [
+    {
+      "name": "windows-zip",
+      "displayName": "Windows ZIP Package",
+      "configurePreset": "windows-ninja-debug",
+      "generators": ["ZIP"]
+    },
+    {
+      "name": "windows-nsis",
+      "displayName": "Windows NSIS Installer",
+      "configurePreset": "windows-ninja-debug",
+      "generators": ["NSIS"]
+    },
+    {
+      "name": "linux-zip",
+      "displayName": "Linux ZIP Package",
+      "configurePreset": "linux-ninja-debug",
+      "generators": ["ZIP"]
+    },
+    {
+      "name": "linux-tgz",
+      "displayName": "Linux TGZ Package",
+      "configurePreset": "linux-ninja-debug",
+      "generators": ["TGZ"]
+    },
+    {
+      "name": "linux-deb",
+      "displayName": "Linux DEB Package",
+      "configurePreset": "linux-ninja-debug",
+      "generators": ["DEB"]
+    },
+    {
+      "name": "linux-rpm",
+      "displayName": "Linux RPM Package",
+      "configurePreset": "linux-ninja-debug",
+      "generators": ["RPM"]
+    }
+  ],
   "buildPresets": [
     {
       "name": "windows-msvc-debug",
