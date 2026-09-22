@@ -1,34 +1,27 @@
-import groovy.io.FileType
+// OpenSpace CI pipeline
+//
+// Required plugins: Pipeline, Git, Warnings Next Generation, JUnit, Workspace Cleanup
 
-library('sharedSpace'); // jenkins-pipeline-lib
-
-
-def url = 'https://github.com/OpenSpace/OpenSpace';
-def branch = env.BRANCH_NAME;
+def url = 'https://github.com/OpenSpace/OpenSpace'
+def branch = env.BRANCH_NAME
 
 // The CHANGE_BRANCH only exists if we are building a PR branch in which case it returns
 // the original branch
 if (env.CHANGE_BRANCH) {
-  branch = env.CHANGE_BRANCH;
+  branch = env.CHANGE_BRANCH
 }
 
-def moduleCMakeFlags() {
-  def modules = [];
-  // using new File doesn't work as it is not allowed in the sandbox
-
-  if (isUnix()) {
-     modules = sh(returnStdout: true, script: 'ls -d modules/*').trim().split('\n');
-  }
-  else {
-    modules = bat(returnStdout: true, script: '@dir modules /b /ad /on').trim().split('\r\n');
-  }
-
-  def flags = '';
-  for (module in modules) {
-      flags += "-DOPENSPACE_MODULE_${module.toUpperCase()}=ON "
-  }
-  return flags;
-}
+// Checks out the repository with all of its submodules. In contrast to a manual
+// `git clone`, this reports the commit and the changelog back to Jenkins
+def scmConfig = scmGit(
+  userRemoteConfigs: [[url: url]],
+  branches: [[name: "*/${branch}"]],
+  extensions: [
+    cleanBeforeCheckout(),
+    cloneOption(shallow: true, depth: 1, noTags: true, timeout: 30),
+    submodule(recursiveSubmodules: true, parentCredentials: true, shallow: true, depth: 1, threads: 4, timeout: 60)
+  ]
+)
 
 //
 // Pipeline start
@@ -37,260 +30,102 @@ def moduleCMakeFlags() {
 parallel tools: {
   node('tools') {
     stage('tools/scm') {
-      deleteDir();
-      gitHelper.checkoutGit(url, branch, false);
+      checkout scmConfig
     }
     stage('tools/cppcheck') {
       sh(
         script: 'cppcheck --enable=all --xml --xml-version=2 -i ext --suppressions-list=support/cppcheck/suppressions.txt include modules src tests 2> cppcheck.xml',
         label: 'CPPCheck'
       )
-      recordIssues(
-        id: 'tools-cppcheck',
-        tool: cppCheck(pattern: 'cppcheck.xml')
-      )
+      recordIssues(id: 'tools-cppcheck', tool: cppCheck(pattern: 'cppcheck.xml'))
     }
     cleanWs()
   } // node('tools')
 },
-linux_gcc_make: {
+linux_gcc: {
   if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux-gcc') {
-      stage('linux-gcc-make/scm') {
-        deleteDir();
-        gitHelper.checkoutGit(url, branch);
+      stage('linux-gcc/scm') {
+        checkout scmConfig
       }
 
-      stage('linux-gcc-make/build') {
-          def cmakeCompileOptions = moduleCMakeFlags();
-          cmakeCompileOptions += ' -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS:STRING="-DGLM_ENABLE_EXPERIMENTAL"';
-          cmakeCompileOptions += ' -DOpenGL_GL_PREFERENCE:STRING=GLVND -DASSIMP_BUILD_MINIZIP=1';
-          // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeCompileOptions, '', 'build-make');
-          compileHelper.recordCompileIssues(compileHelper.Gcc());
+      stage('linux-gcc/build') {
+        sh(script: 'cmake --preset linux-makefiles-release', label: 'Configure')
+        sh(script: 'cmake --build --preset linux-makefiles-release --parallel 6', label: 'Compile')
+        recordIssues(id: 'linux-gcc', tool: gcc())
       }
 
       if (env.RUN_UNIT_TESTS == 'true') {
-        stage('linux-gcc-make/test-codegen') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/codegentest');
+        stage('linux-gcc/test') {
+          timeout(time: 15, unit: 'MINUTES') {
+            sh(
+              script: 'xvfb-run --auto-servernum ctest --preset linux-makefiles-release --output-junit test-results.xml',
+              label: 'Run unit tests',
+              returnStatus: true
+            )
           }
-        }
-
-        stage('linux-gcc-make/test-sgct') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/SGCTTest');
-          }
-        }
-
-        stage('linux-gcc-make/test-ghoul') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/GhoulTest');
-          }
-        }
-
-        stage('linux-gcc-make/test-openspace') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/OpenSpaceTest');
-          }
+          junit(testResults: '**/test-results.xml', keepLongStdio: true)
         }
       }
       cleanWs()
-    } // node('linux')
+    } // node('linux-gcc')
   }
 },
-// linux_gcc_ninja: {
-//   if (env.USE_BUILD_OS_LINUX == 'true') {
-//     node('linux-gcc') {
-//       stage('linux-gcc-ninja/scm') {
-//         deleteDir();
-//         gitHelper.checkoutGit(url, branch);
-//       }
-// 
-//       stage('linux-gcc-ninja/build') {
-//           def cmakeCompileOptions = moduleCMakeFlags();
-//           cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release';
-//           // Not sure why the linking of OpenSpaceTest takes so long
-//           compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, '', 'build-ninja');
-//       }
-// 
-//       if (env.RUN_UNIT_TESTS == 'true') {
-//         stage('linux-gcc-ninja/test-codegen') {
-//           timeout(time: 2, unit: 'MINUTES') {
-//             testHelper.runUnitTests('bin/codegentest');
-//           }
-//         }
-// 
-//         stage('linux-gcc-ninja/test-sgct') {
-//           timeout(time: 2, unit: 'MINUTES') {
-//             testHelper.runUnitTests('bin/SGCTTest');
-//           }
-//         }
-// 
-//         stage('linux-gcc-ninja/test-ghoul') {
-//           timeout(time: 2, unit: 'MINUTES') {
-//             testHelper.runUnitTests('bin/GhoulTest');
-//           }
-//         }
-// 
-//         stage('linux-gcc-ninja/test-openspace') {
-//           timeout(time: 2, unit: 'MINUTES') {
-//             testHelper.runUnitTests('bin/OpenSpaceTest');
-//           }
-//         }
-//       }
-//       cleanWs()
-//     } // node('linux')
-//   }
-// },
-linux_clang_make: {
+linux_clang: {
   if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux-clang') {
-      stage('linux-clang-make/scm') {
-        deleteDir();
-        gitHelper.checkoutGit(url, branch);
+      stage('linux-clang/scm') {
+        checkout scmConfig
       }
 
-      stage('linux-clang-make/build') {
-          def cmakeCompileOptions = moduleCMakeFlags()
-          cmakeCompileOptions += ' -DCMAKE_BUILD_TYPE=Release'
-          // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Make(), compileHelper.Clang(), cmakeCompileOptions, '', 'build-make');
-          compileHelper.recordCompileIssues(compileHelper.Clang());
+      stage('linux-clang/build') {
+        sh(script: 'cmake --preset linux-makefiles-release', label: 'Configure')
+        sh(script: 'cmake --build --preset linux-makefiles-release --parallel 6', label: 'Compile')
+        recordIssues(id: 'linux-clang', tool: clang())
       }
 
       if (env.RUN_UNIT_TESTS == 'true') {
-        stage('linux-clang-make/test-codegen') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/codegentest');
+        stage('linux-clang/test') {
+          timeout(time: 15, unit: 'MINUTES') {
+            sh(
+              script: 'xvfb-run --auto-servernum ctest --preset linux-makefiles-release --output-junit test-results.xml',
+              label: 'Run unit tests',
+              returnStatus: true
+            )
           }
-        }
-
-        stage('linux-clang-make/test-sgct') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/SGCTTest');
-          }
-        }
-
-        stage('linux-clang-make/test-ghoul') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/GhoulTest');
-          }
-        }
-
-        stage('linux-clang-make/test-openspace') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/OpenSpaceTest');
-          }
+          junit(testResults: '**/test-results.xml', keepLongStdio: true)
         }
       }
       cleanWs()
-    } // node('linux')
+    } // node('linux-clang')
   }
 },
-// linux_clang_ninja: {
-//   if (env.USE_BUILD_OS_LINUX == 'true') {
-//     node('linux-clang') {
-//       stage('linux-clang-ninja/scm') {
-//         deleteDir()
-//         gitHelper.checkoutGit(url, branch);
-//       }
-// 
-//       stage('linux-clang-ninja/build') {
-//           def cmakeCompileOptions = moduleCMakeFlags()
-//           cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release'
-//           // Not sure why the linking of OpenSpaceTest takes so long
-//           compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, '', 'build-ninja');
-//       }
-// 
-//       if (env.RUN_UNIT_TESTS == 'true') {
-//         stage('linux-clang-ninja/test-codegen') {
-//           timeout(time: 2, unit: 'MINUTES') {
-//             testHelper.runUnitTests('bin/codegentest');
-//           }
-//         }
-// 
-//         stage('linux-clang-ninja/test-sgct') {
-//           timeout(time: 2, unit: 'MINUTES') {
-//             testHelper.runUnitTests('bin/SGCTTest');
-//           }
-//         }
-// 
-//         stage('linux-clang-ninja/test-ghoul') {
-//           timeout(time: 2, unit: 'MINUTES') {
-//             testHelper.runUnitTests('bin/GhoulTest');
-//           }
-//         }
-// 
-//         stage('linux-clang-ninja/test-openspace') {
-//           timeout(time: 2, unit: 'MINUTES') {
-//             testHelper.runUnitTests('bin/OpenSpaceTest');
-//           }
-//         }
-//       }
-//       cleanWs()
-//     } // node('linux')
-//   }
-// },
 windows_msvc: {
   if (env.USE_BUILD_OS_WINDOWS == 'true') {
     node('windows') {
       stage('windows-msvc/scm') {
-        deleteDir();
-        gitHelper.checkoutGit(url, branch);
+        checkout scmConfig
       }
 
       stage('windows-msvc/build') {
-        compileHelper.build(compileHelper.VisualStudio(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-msvc');
-        compileHelper.recordCompileIssues(compileHelper.VisualStudio());
+        bat(script: 'cmake --preset windows-msvc-debug', label: 'Configure')
+        bat(script: 'cmake --build --preset windows-msvc-debug --parallel 8', label: 'Compile')
+        recordIssues(id: 'windows-msvc', tool: msBuild())
       }
 
       if (env.RUN_UNIT_TESTS == 'true') {
-        stage('windows-msvc/test-codegen') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin\\Debug\\codegentest');
+        stage('windows-msvc/test') {
+          timeout(time: 15, unit: 'MINUTES') {
+            bat(
+              script: 'ctest --preset windows-msvc --output-junit test-results.xml',
+              label: 'Run unit tests',
+              returnStatus: true
+            )
           }
-        }
-
-        stage('windows-msvc/test-sgct') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin\\Debug\\SGCTTest');
-          }
-        }
-
-        stage('windows-msvc/test-ghoul') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin\\Debug\\GhoulTest');
-          }
-        }
-
-        stage('windows-msvc/test-openspace') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest');
-          }
+          junit(testResults: '**/test-results.xml', keepLongStdio: true)
         }
       }
       cleanWs()
     } // node('windows')
   }
 }
-// windows_ninja: {
-//   if (env.USE_BUILD_OS_WINDOWS == 'true') {
-//     node('windows') {
-//       ws("${env.JENKINS_BASE}/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
-//         stage('windows-ninja/scm') {
-//           deleteDir();
-//           gitHelper.checkoutGit(url, branch);
-//         }
-//         stage('windows-ninja/build') {
-//           compileHelper.build(compileHelper.Ninja(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-ninja');
-//         }
-//         stage('windows-ninja/test') {
-//           // Currently, the unit tests are failing on Windows
-//           // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
-//         }
-//       } // node('windows')
-//       cleanWs()
-//     } // node('windows')
-//   }
-// }
