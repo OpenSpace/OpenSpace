@@ -102,7 +102,14 @@ install(TARGETS OpenSpace RUNTIME DESTINATION bin COMPONENT Runtime)
 
 if (WIN32)
   install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/" DESTINATION bin COMPONENT Runtime FILES_MATCHING PATTERN "*.dll")
-  install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/$<IF:$<CONFIG:Debug>,debug/,>Qt6/plugins/" DESTINATION plugins COMPONENT Runtime)
+  if (OPENSPACE_USE_SYSTEM_QT)
+    # The blanket copy of the vcpkg bin folder above no longer covers Qt, so the Qt DLLs
+    # and the runtime plugins have to be taken from the system installation instead
+    install(IMPORTED_RUNTIME_ARTIFACTS Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network RUNTIME DESTINATION bin COMPONENT Runtime)
+    install(DIRECTORY "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_PLUGINS}/" DESTINATION plugins COMPONENT Runtime)
+  else ()
+    install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/$<IF:$<CONFIG:Debug>,debug/,>Qt6/plugins/" DESTINATION plugins COMPONENT Runtime)
+  endif ()
   install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/" DESTINATION bin COMPONENT Runtime FILES_MATCHING PATTERN "msvcp*.dll" PATTERN "vcruntime*.dll")
 endif()
 

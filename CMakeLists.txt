@@ -31,15 +31,16 @@ cmake_minimum_required(VERSION 4.0)
 set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 
 # The options gating optional dependencies have to be declared before the first project()
-# call: that is when vcpkg's toolchain file runs and reads VCPKG_MANIFEST_FEATURES.
+# call: that is when vcpkg's toolchain file runs and reads VCPKG_MANIFEST_FEATURES
 #
 # vcpkg only reads VCPKG_MANIFEST_FEATURES on the configure that first creates the build
 # directory. Changing any of the options below afterwards will not add or remove the
 # corresponding dependency: delete build/<preset>/vcpkg_installed (or the whole build
-# directory) and configure again.
+# directory) and configure again
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 option(OPENSPACE_ENABLE_TRACY "Enable profiling with Tracy" OFF)
 option(OPENSPACE_OPENVR_SUPPORT "Build the OpenSpace application with OpenVR support" OFF)
+option(OPENSPACE_USE_SYSTEM_QT "Use a Qt installation provided by the system instead of building Qt through vcpkg" OFF)
 
 if (OPENSPACE_HAVE_TESTS)
   list(APPEND VCPKG_MANIFEST_FEATURES "tests")
@@ -49,6 +50,9 @@ if (OPENSPACE_ENABLE_TRACY)
 endif ()
 if (OPENSPACE_OPENVR_SUPPORT)
   list(APPEND VCPKG_MANIFEST_FEATURES "openvr")
+endif ()
+if (NOT OPENSPACE_USE_SYSTEM_QT)
+  list(APPEND VCPKG_MANIFEST_FEATURES "qt")
 endif ()
 
 project(OpenSpace LANGUAGES C CXX)
@@ -62,7 +66,7 @@ set(OPENSPACE_VERSION_PATCH)
 # subdirectory that consumes them (ext/, apps/, individual modules). Their IMPORTED targets
 # have to be visible across sibling directories (for example Ghoul::Ghoul is found in ext/
 # but linked from src/, modules/ and tests/), so promote every find_package target to
-# global scope.
+# global scope
 set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON)
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
@@ -127,6 +131,29 @@ if (UNIX AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
   endif ()
   add_compile_definitions(D_GNU_SOURCE)
+endif ()
+
+# Qt is consumed by apps/OpenSpace/ext/launcher and apps/AssetBuilder, both of which call
+# find_package themselves. When the system Qt is used we additionally resolve it here, at
+# the top level: it turns a missing Qt into an actionable error instead of a cryptic failure
+# deep inside apps/, and it puts QT6_INSTALL_PREFIX and friends into this scope, where
+# support/cmake/packaging.cmake (included at the bottom of this file) needs them. Because
+# CMAKE_FIND_PACKAGE_TARGETS_GLOBAL is on, the Qt6:: targets found here are visible
+# everywhere and the find_package calls in the subdirectories become no-ops.
+if (OPENSPACE_USE_SYSTEM_QT)
+  begin_header("Dependency: Qt")
+  find_package(Qt6 COMPONENTS Core Gui Widgets Network QUIET)
+  if (NOT Qt6_FOUND)
+    message(FATAL_ERROR
+      "OPENSPACE_USE_SYSTEM_QT is enabled, but no Qt6 installation providing the Core, "
+      "Gui, Widgets, and Network components was found. Point CMake at the Qt installation "
+      "with -DCMAKE_PREFIX_PATH=<qt>/lib/cmake or -DQt6_DIR=<qt>/lib/cmake/Qt6, or disable "
+      "the option to have vcpkg build Qt instead (which requires deleting the "
+      "vcpkg_installed folder in the build directory first)."
+    )
+  endif ()
+  message(STATUS "Using system Qt ${Qt6_VERSION} from ${Qt6_DIR}")
+  end_header("Dependency: Qt")
 endif ()
 
 add_subdirectory(ext)

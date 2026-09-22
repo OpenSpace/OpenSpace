@@ -63,40 +63,6 @@
       "platform": "windows"
     },
     {
-      "name": "qtbase",
-      "default-features": false,
-      "features": [
-        "gui",
-        "widgets",
-        "network",
-        "png",
-        "freetype",
-        "harfbuzz"
-      ]
-    },
-    {
-      "name": "qtbase",
-      "default-features": false,
-      "features": [
-        "windeployqt"
-      ],
-      "platform": "windows"
-    },
-    {
-      "name": "qtbase",
-      "default-features": false,
-      "features": [
-        "xcb",
-        "wayland",
-        "fontconfig"
-      ],
-      "platform": "linux"
-    },
-    {
-      "name": "qtwayland",
-      "platform": "linux"
-    },
-    {
       "name": "vcpkg-cmake",
       "host": true
     },
@@ -106,6 +72,45 @@
     }
   ],
   "features": {
+    "qt": {
+      "description": "Build Qt through vcpkg instead of using a Qt provided by the system",
+      "dependencies": [
+        {
+          "name": "qtbase",
+          "default-features": false,
+          "features": [
+            "gui",
+            "widgets",
+            "network",
+            "png",
+            "freetype",
+            "harfbuzz"
+          ]
+        },
+        {
+          "name": "qtbase",
+          "default-features": false,
+          "features": [
+            "windeployqt"
+          ],
+          "platform": "windows"
+        },
+        {
+          "name": "qtbase",
+          "default-features": false,
+          "features": [
+            "xcb",
+            "wayland",
+            "fontconfig"
+          ],
+          "platform": "linux"
+        },
+        {
+          "name": "qtwayland",
+          "platform": "linux"
+        }
+      ]
+    },
     "tests": {
       "description": "Build the unit tests",
       "dependencies": [
