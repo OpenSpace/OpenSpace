@@ -25,6 +25,7 @@
 #include <modules/webbrowser/include/cefhost.h>
 
 #include <modules/webbrowser/include/webbrowserapp.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
@@ -69,6 +70,13 @@ CefHost::CefHost(const std::string& helperLocation, bool enableRemoteDebugging) 
     const std::filesystem::path cefcache = std::format("{}/cefcache", root);
     CefString(&settings.root_cache_path).FromString(cefcache.string());
     CefString(&settings.browser_subprocess_path).FromString(helperLocation);
+
+    // Left unset, CEF looks for required files next to whichever libcef it was loaded
+    // from. This was an issue on AppImage packaging on Linux before where there were
+    // multiple libcef.so present
+    const std::filesystem::path resources = absPath("${BIN}");
+    CefString(&settings.resources_dir_path).FromString(resources.string());
+    CefString(&settings.locales_dir_path).FromString((resources / "locales").string());
 
     settings.windowless_rendering_enabled = 1;
 

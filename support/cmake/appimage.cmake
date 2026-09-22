@@ -129,12 +129,12 @@ foreach (pluginDirectory
   file(REMOVE_RECURSE "${APPDIR}/usr/bin/${pluginDirectory}")
 endforeach ()
 
-# Every library that is not inside the AppDir has to be present on the user's machine, and
-# getting that wrong is invisible on the build host, which has all of them installed - it
-# only shows up as "error while loading shared libraries" on someone else's computer.
-# Listing them here makes the assumption reviewable: the graphics, font and C libraries
-# belong on it, anything that looks like an optional codec or audio backend does not and
-# should be added to OPENSPACE_APPIMAGE_FORCED_SONAMES in support/cmake/packaging.cmake.
+# The CEF runtime needs the opposite treatment. libcef.so is an ordinary dependency of the
+# executable as far as linuxdeploy is concerned. Unlike the Qt libraries above, the copy
+# we want to keep is the one put in usr/bin next to its resources
+file(REMOVE "${APPDIR}/usr/lib/libcef.so")
+
+# Every library that is not inside the AppDir has to be present on the user's machine
 set(HOST_LIBRARY_SCAN [[
 for f in "$APPDIR"/usr/bin/OpenSpace "$APPDIR"/usr/bin/*.so* "$APPDIR"/usr/lib/*.so* \
          "$APPDIR"/usr/plugins/*/*.so; do

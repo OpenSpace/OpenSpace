@@ -36,7 +36,14 @@ set -e
 
 HERE="$(dirname "$(readlink -f "$0")")"
 
-export LD_LIBRARY_PATH="$HERE/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+# usr/bin comes first because that is where the CEF runtime lives: support/cmake/
+# appimage.cmake deletes the copy of libcef.so that linuxdeploy puts in usr/lib, since only
+# the one in usr/bin has the resources CEF loads beside it. The RPATH linuxdeploy writes
+# points at usr/lib alone, so without this the executable would no longer find libcef.so at
+# all. Nothing else in usr/bin can be shadowed by this: after the Qt cleanup the only
+# libraries left there are CEF's own, and their unversioned names (libEGL.so, libGLESv2.so)
+# cannot stand in for the host's versioned libEGL.so.1.
+export LD_LIBRARY_PATH="$HERE/usr/bin:$HERE/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export QT_PLUGIN_PATH="$HERE/usr/plugins${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
 export XDG_DATA_DIRS="$HERE/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 
