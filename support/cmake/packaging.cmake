@@ -101,9 +101,9 @@ set(CPACK_PACKAGE_CONTACT "support@openspaceproject.com")
 install(TARGETS OpenSpace RUNTIME DESTINATION bin COMPONENT Runtime)
 
 if (WIN32)
-  install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/" DESTINATION bin FILES_MATCHING PATTERN "*.dll" COMPONENT Runtime)
+  install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/" DESTINATION bin COMPONENT Runtime FILES_MATCHING PATTERN "*.dll")
   install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/$<IF:$<CONFIG:Debug>,debug/,>Qt6/plugins/" DESTINATION plugins COMPONENT Runtime)
-  install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/" DESTINATION bin FILES_MATCHING PATTERN "msvcp*.dll" PATTERN "vcruntime*.dll" COMPONENT Runtime)
+  install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/" DESTINATION bin COMPONENT Runtime FILES_MATCHING PATTERN "msvcp*.dll" PATTERN "vcruntime*.dll")
 endif()
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/data/" DESTINATION data)
@@ -127,12 +127,12 @@ if (OPENSPACE_OPENVR_SUPPORT)
 endif()
 
 if (OPENSPACE_MODULE_SPOUT)
-  install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/" DESTINATION bin FILES_MATCHING PATTERN "*Spout*.dll" COMPONENT Runtime)
+  install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/" DESTINATION bin COMPONENT Runtime FILES_MATCHING PATTERN "*Spout*.dll")
 endif()
 
 if (WIN32 AND OPENSPACE_MODULE_VIDEO)
   if (EXISTS "${PROJECT_SOURCE_DIR}/modules/video/ext/libmpv/bin/libmpv-2.dll")
-    install(FILES "${PROJECT_SOURCE_DIR}/modules/video/ext/libmpv/bin/libmpv-2.dll" "${PROJECT_SOURCE_DIR}/modules/video/ext/libmpv/bin/libopenh264.dll" DESTINATION bin OMPONENT Runtime)
+    install(FILES "${PROJECT_SOURCE_DIR}/modules/video/ext/libmpv/bin/libmpv-2.dll" "${PROJECT_SOURCE_DIR}/modules/video/ext/libmpv/bin/libopenh264.dll" DESTINATION bin COMPONENT Runtime)
   endif()
 endif()
 
