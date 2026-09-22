@@ -108,8 +108,8 @@ windows_msvc: {
       }
 
       stage('windows-msvc/build') {
-        bat(script: 'cmake --preset windows-msvc-debug', label: 'Configure')
-        bat(script: 'cmake --build --preset windows-msvc-debug --parallel 8', label: 'Compile')
+        bat(script: 'cmake --preset windows-msvc', label: 'Configure')
+        bat(script: 'cmake --build --preset windows-msvc --parallel 8', label: 'Compile')
         recordIssues(id: 'windows-msvc', tool: msBuild())
       }
 
