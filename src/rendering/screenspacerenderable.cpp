@@ -237,45 +237,60 @@ namespace {
         // [[codegen::verbatim(RenderDuringBlackoutInfo.description)]]
         std::optional<bool> renderDuringBlackout;
 
-        // [[codegen::verbatim(UseRadiusAzimuthElevationInfo.description)]]
-        std::optional<bool> useRadiusAzimuthElevation;
-
-        // [[codegen::verbatim(FaceCameraInfo.description)]]
-        std::optional<bool> faceCamera;
-
-        // [[codegen::verbatim(CartesianPositionInfo.description)]]
-        std::optional<glm::vec3> cartesianPosition;
-
-        // [[codegen::verbatim(RadiusAzimuthElevationInfo.description)]]
-        std::optional<glm::vec3> radiusAzimuthElevation;
-
-        // [[codegen::verbatim(BorderWidthInfo.description)]]
-        std::optional<float> borderWidth [[codegen::greater(0.0)]];
-
-        // [[codegen::verbatim(BorderColorInfo.description)]]
-        std::optional<glm::vec3> borderColor [[codegen::color()]];
-
-        // [[codegen::verbatim(BorderFeatherInfo.description)]]
-        std::optional<bool> borderFeather;
-
-        // [[codegen::verbatim(ScaleInfo.description)]]
-        std::optional<float> scale;
-
-        // [[codegen::verbatim(LocalRotationInfo.description)]]
-        std::optional<glm::vec3> rotation;
-
-        // [[codegen::verbatim(GammaOffsetInfo.description)]]
-        std::optional<float> gammaOffset;
-
-        // [[codegen::verbatim(MultiplyColorInfo.description)]]
-        std::optional<glm::vec3> multiplyColor [[codegen::color()]];
-
-        // [[codegen::verbatim(BackgroundColorInfo.description)]]
-        std::optional<glm::vec4> backgroundColor [[codegen::color()]];
-
         // The opacity of the screen space object. If 1, the object is completely opaque.
         // If 0, the object is completely transparent.
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
+
+        struct Placement {
+            // [[codegen::verbatim(UseRadiusAzimuthElevationInfo.description)]]
+            std::optional<bool> useRadiusAzimuthElevation;
+
+            // [[codegen::verbatim(FaceCameraInfo.description)]]
+            std::optional<bool> faceCamera;
+
+            // [[codegen::verbatim(CartesianPositionInfo.description)]]
+            std::optional<glm::vec3> cartesianPosition;
+
+            // [[codegen::verbatim(RadiusAzimuthElevationInfo.description)]]
+            std::optional<glm::vec3> radiusAzimuthElevation;
+
+            // [[codegen::verbatim(ScaleInfo.description)]]
+            std::optional<float> scale;
+
+            // [[codegen::verbatim(LocalRotationInfo.description)]]
+            std::optional<glm::vec3> rotation;
+        };
+
+        // [[codegen::verbatim(PlacementInfo.description)]]
+        std::optional<Placement> placement;
+
+        struct Style {
+            // [[codegen::verbatim(GammaOffsetInfo.description)]]
+            std::optional<float> gammaOffset;
+
+            // [[codegen::verbatim(MultiplyColorInfo.description)]]
+            std::optional<glm::vec3> multiplyColor [[codegen::color()]];
+
+            // [[codegen::verbatim(BackgroundColorInfo.description)]]
+            std::optional<glm::vec4> backgroundColor [[codegen::color()]];
+
+            struct Border {
+                // [[codegen::verbatim(BorderWidthInfo.description)]]
+                std::optional<float> width [[codegen::greater(0.0)]];
+
+                // [[codegen::verbatim(BorderColorInfo.description)]]
+                std::optional<glm::vec3> color [[codegen::color()]];
+
+                // [[codegen::verbatim(BorderFeatherInfo.description)]]
+                std::optional<bool> feather;
+            };
+
+            // [[codegen::verbatim(BorderInfo.description)]]
+            std::optional<Border> border;
+        };
+
+        // [[codegen::verbatim(StyleInfo.description)]]
+        std::optional<Style> style;
 
         // Defines either a single or multiple tags that apply to this
         // `ScreenSpaceRenderable`, thus making it possible to address multiple, separate
@@ -413,8 +428,11 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     //
     // Placement
     //
-    _placement.useRadiusAzimuthElevation =
-        p.useRadiusAzimuthElevation.value_or(_placement.useRadiusAzimuthElevation);
+    const Parameters::Placement placement = p.placement.value_or({});
+
+    _placement.useRadiusAzimuthElevation = placement.useRadiusAzimuthElevation.value_or(
+        _placement.useRadiusAzimuthElevation
+    );
     _placement.useRadiusAzimuthElevation.onChange([this]() {
         if (_placement.useRadiusAzimuthElevation) {
             _placement.rae = sphericalToRae(cartesianToSpherical(_placement.cartesian));
@@ -425,19 +443,19 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     });
     _placement.owner.addProperty(_placement.useRadiusAzimuthElevation);
 
-    _placement.cartesian = p.cartesianPosition.value_or(_placement.cartesian);
+    _placement.cartesian = placement.cartesianPosition.value_or(_placement.cartesian);
     _placement.owner.addProperty(_placement.cartesian);
 
-    _placement.rae = p.radiusAzimuthElevation.value_or(_placement.rae);
+    _placement.rae = placement.radiusAzimuthElevation.value_or(_placement.rae);
     _placement.owner.addProperty(_placement.rae);
 
-    _placement.scale = p.scale.value_or(_placement.scale);
+    _placement.scale = placement.scale.value_or(_placement.scale);
     _placement.owner.addProperty(_placement.scale);
 
-    _placement.localRotation = p.rotation.value_or(_placement.localRotation);
+    _placement.localRotation = placement.rotation.value_or(_placement.localRotation);
     _placement.owner.addProperty(_placement.localRotation);
 
-    _placement.faceCamera = p.faceCamera.value_or(_placement.faceCamera);
+    _placement.faceCamera = placement.faceCamera.value_or(_placement.faceCamera);
     _placement.owner.addProperty(_placement.faceCamera);
 
     addPropertySubOwner(_placement.owner);
@@ -445,25 +463,29 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     //
     // Style
     //
-    _style.multiplyColor = p.multiplyColor.value_or(_style.multiplyColor);
+    const Parameters::Style style = p.style.value_or({});
+
+    _style.multiplyColor = style.multiplyColor.value_or(_style.multiplyColor);
     _style.multiplyColor.setViewOption(Property::ViewOptions::Color);
     _style.owner.addProperty(_style.multiplyColor);
 
-    _style.backgroundColor = p.backgroundColor.value_or(_style.backgroundColor);
+    _style.backgroundColor = style.backgroundColor.value_or(_style.backgroundColor);
     _style.backgroundColor.setViewOption(Property::ViewOptions::Color);
     _style.owner.addProperty(_style.backgroundColor);
 
-    _style.gammaOffset = p.gammaOffset.value_or(_style.gammaOffset);
+    _style.gammaOffset = style.gammaOffset.value_or(_style.gammaOffset);
     _style.owner.addProperty(_style.gammaOffset);
 
-    _style.border.width = p.borderWidth.value_or(_style.border.width);
+    const Parameters::Style::Border border = style.border.value_or({});
+
+    _style.border.width = border.width.value_or(_style.border.width);
     _style.border.owner.addProperty(_style.border.width);
 
-    _style.border.color = p.borderColor.value_or(_style.border.color);
+    _style.border.color = border.color.value_or(_style.border.color);
     _style.border.color.setViewOption(Property::ViewOptions::Color);
     _style.border.owner.addProperty(_style.border.color);
 
-    _style.border.feather = p.borderFeather.value_or(_style.border.feather);
+    _style.border.feather = border.feather.value_or(_style.border.feather);
     _style.border.owner.addProperty(_style.border.feather);
     _style.owner.addPropertySubOwner(_style.border.owner);
 

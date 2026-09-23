@@ -66,9 +66,11 @@ local Label = {
   Name = Name,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "forest_label.png",
-  FaceCamera = false,
-  Scale = 0.13,
-  CartesianPosition = { 0.5, 0.0, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    Scale = 0.13,
+    CartesianPosition = { 0.5, 0.0, -2.0 }
+  }
 }
 
 local Label1 = {
@@ -77,9 +79,11 @@ local Label1 = {
   Type = "ScreenSpaceImageLocal",
   Enabled = false,
   TexturePath = syncedDirectory .. "forest_label1.png",
-  FaceCamera = false,
-  Scale = 0.13,
-  CartesianPosition = { 0.5, 0.0, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    Scale = 0.13,
+    CartesianPosition = { 0.5, 0.0, -2.0 }
+  }
 }
 
 

@@ -46,9 +46,11 @@ local Legend = {
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "legend.png",
-  FaceCamera = false,
-  Scale = 0.3,
-  CartesianPosition = { 0.0, -0.6, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    Scale = 0.3,
+    CartesianPosition = { 0.0, -0.6, -2.0 }
+  }
 }
 
 local Quakebar = {
@@ -57,8 +59,10 @@ local Quakebar = {
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "quakebar.png",
-  FaceCamera = false,
-  CartesianPosition = { 0.0, -0.3, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    CartesianPosition = { 0.0, -0.3, -2.0 }
+  }
 }
 
 local QuakebarCombined = {
@@ -67,9 +71,11 @@ local QuakebarCombined = {
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "quakebar_combined.png",
-  FaceCamera = false,
-  Scale = 0.6,
-  CartesianPosition = { 0.5, -0.5, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    Scale = 0.6,
+    CartesianPosition = { 0.5, -0.5, -2.0 }
+  }
 }
 
 

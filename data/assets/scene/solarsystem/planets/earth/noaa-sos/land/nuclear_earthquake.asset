@@ -75,9 +75,11 @@ local Legend = {
   Name = Name,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "legend.png",
-  FaceCamera = false,
-  Scale = 0.175,
-  CartesianPosition = { 1.0, 0.0, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    Scale = 0.175,
+    CartesianPosition = { 1.0, 0.0, -2.0 }
+  }
 }
 
 
