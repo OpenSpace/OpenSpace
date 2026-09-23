@@ -117,11 +117,38 @@ void ComputeColumnsView::renderHistory() {
     if (_history.empty()) {
         ImGui::TextUnformatted("No computed-column queries saved yet");
     }
-    else {
-        for (const HistoryEntry& entry : _history) {
+    else if (ImGui::BeginTable(
+        "QueryHistoryTable",
+        2,
+        ImGuiTableFlags_SizingStretchProp
+    )) {
+        auto entryToRemove = _history.end();
+
+        for (auto it = _history.begin(); it != _history.end(); ++it) {
+            const HistoryEntry& entry = *it;
             ImGui::PushID(entry.name.c_str());
-            if (ImGui::Selectable(std::format("{} = {}", entry.name, entry.expression).c_str()))
-            {
+            ImGui::TableNextRow();
+
+            ImGui::TableNextColumn();
+            const bool selected = ImGui::Selectable(
+                entry.name.c_str(),
+                false,
+                ImGuiSelectableFlags_SpanAllColumns
+            );
+
+            // Attach the context menu to the row-spanning selectable so it can
+            // be opened from anywhere across the row
+            if (ImGui::BeginPopupContextItem("QueryHistoryContextMenu")) {
+                if (ImGui::MenuItem("Remove from history")) {
+                    entryToRemove = it;
+                }
+                ImGui::EndPopup();
+            }
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted(entry.expression.c_str());
+
+            if (selected) {
                 std::strncpy(_nameBuffer, entry.name.c_str(), sizeof(_nameBuffer) - 1);
                 _nameBuffer[sizeof(_nameBuffer) - 1] = '\0';
                 std::strncpy(
@@ -133,8 +160,16 @@ void ComputeColumnsView::renderHistory() {
                 _errorMessage.clear();
                 ImGui::CloseCurrentPopup();
             }
+
             ImGui::PopID();
         }
+
+        if (entryToRemove != _history.end()) {
+            _history.erase(entryToRemove);
+            saveHistory();
+        }
+
+        ImGui::EndTable();
     }
 
     ImGui::EndPopup();
