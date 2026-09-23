@@ -72,7 +72,7 @@ local Colorbar = {
     CartesianPosition = { 0.0, -0.5, -2.0 }
   },
   Style = {
-    BackgroundColor = { 1.0, 1.0, 1.0, 1.0 },
+    BackgroundColor = { 1.0, 1.0, 1.0, 1.0 }
   }
 }
 

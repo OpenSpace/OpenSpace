@@ -72,7 +72,7 @@ local Colorbar = {
   Placement = {
     FaceCamera = false,
     CartesianPosition = { 0.0, -0.5, -2.0 }
-  },
+  }
 }
 
 

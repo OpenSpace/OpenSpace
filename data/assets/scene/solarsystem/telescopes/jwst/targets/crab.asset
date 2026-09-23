@@ -9,7 +9,7 @@ local CrabImage = {
   Placement = {
     UseRadiusAzimuthElevation = true,
     FaceCamera = false,
-    RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
+    RadiusAzimuthElevation = { 1.0, 0.5, 0.1 }
   },
   -- UsePerspectiveProjection = false, TODO: investigate
   Opacity = 1.0,
