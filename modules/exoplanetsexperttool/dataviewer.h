@@ -82,7 +82,7 @@ public:
     const std::vector<size_t>& currentFiltering() const;
     const std::vector<ColumnKey>& columns() const;
     const std::map<ColumnKey, ComputedColumn>& computedColumns() const;
-    bool addComputedColumn(ColumnKey key, std::string expression,
+    bool addComputedColumn(ColumnKey key, std::string expression, std::string description,
         std::vector<float> values);
     bool removeComputedColumn(const ColumnKey& key);
     const DataSettings::DataMapping& dataMapping() const;

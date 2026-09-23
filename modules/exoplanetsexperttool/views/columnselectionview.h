@@ -54,6 +54,7 @@ private:
     std::vector<ColumnKey> _namedColumns;
     std::vector<ColumnKey> _otherColumns;
     std::vector<ColumnKey> _computedColumns;
+    std::vector<std::string> _computedColumnDescriptions;
 
     // The name column is always selected
     ColumnKey _nameColumn;

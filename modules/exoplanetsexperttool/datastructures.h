@@ -40,6 +40,7 @@ using ColumnKey = std::string;
 
 struct ComputedColumn {
     std::string expression;
+    std::string description;
     std::vector<float> values;
 };
 

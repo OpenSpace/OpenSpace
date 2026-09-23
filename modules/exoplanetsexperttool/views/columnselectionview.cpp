@@ -90,6 +90,7 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
     allColumnsOrdered.insert(allColumnsOrdered.end(), _otherColumns.begin(), _otherColumns.end());
     _selectedOtherColumns.assign(_otherColumns.size(), false);
     _computedColumns.clear();
+    _computedColumnDescriptions.clear();
     _selectedComputedColumns.clear();
 
     allColumnsOrdered.shrink_to_fit();
@@ -285,6 +286,13 @@ bool ColumnSelectionView::renderColumnSettingsView(const DataSettings& dataSetti
                 }
                 _selectedComputedColumns[index] = isSelected;
                 nSelected += isSelected ? 1 : 0;
+
+                if (!_computedColumnDescriptions[index].empty()) {
+                    ImGui::SameLine();
+                    view::helper::renderHelpMarker(
+                        _computedColumnDescriptions[index].c_str()
+                    );
+                }
             }
             ImGui::EndChild();
         }
@@ -379,8 +387,11 @@ void ColumnSelectionView::updateComputedColumns(
 
     _computedColumns.clear();
     _computedColumns.reserve(columns.size());
-    for (const auto& [key, _] : columns) {
+    _computedColumnDescriptions.clear();
+    _computedColumnDescriptions.reserve(columns.size());
+    for (const auto& [key, column] : columns) {
         _computedColumns.push_back(key);
+        _computedColumnDescriptions.push_back(column.description);
     }
     _selectedComputedColumns = std::move(selections);
 }

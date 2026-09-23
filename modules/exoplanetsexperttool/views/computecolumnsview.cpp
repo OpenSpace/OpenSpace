@@ -66,8 +66,9 @@ void ComputeColumnsView::loadHistory() {
             const nlohmann::json& entry = *it;
             const std::string name = entry.value("name", "");
             const std::string expression = entry.value("expression", "");
+            const std::string description = entry.value("description", "");
             if (!name.empty() && !expression.empty()) {
-                _history.push_back({ name, expression });
+                _history.push_back({ name, expression, description });
             }
         }
     }
@@ -79,7 +80,11 @@ void ComputeColumnsView::loadHistory() {
 void ComputeColumnsView::saveHistory() const {
     nlohmann::json columns = nlohmann::json::array();
     for (const HistoryEntry& entry : _history) {
-        columns.push_back({ { "name", entry.name }, { "expression", entry.expression } });
+        columns.push_back({
+            { "name", entry.name },
+            { "expression", entry.expression },
+            { "description", entry.description }
+        });
     }
 
     std::ofstream file(_historyFile, std::ofstream::trunc);
@@ -89,7 +94,8 @@ void ComputeColumnsView::saveHistory() const {
 }
 
 void ComputeColumnsView::rememberQuery(const std::string& name,
-                                       const std::string& expression)
+                                       const std::string& expression,
+                                       const std::string& description)
 {
     auto entry = std::find_if(
         _history.begin(),
@@ -97,10 +103,11 @@ void ComputeColumnsView::rememberQuery(const std::string& name,
         [&name](const HistoryEntry& value) { return value.name == name; }
     );
     if (entry == _history.end()) {
-        _history.push_back({ name, expression });
+        _history.push_back({ name, expression, description });
     }
     else {
         entry->expression = expression;
+        entry->description = description;
     }
     saveHistory();
 }
@@ -151,6 +158,12 @@ void ComputeColumnsView::renderHistory() {
             if (selected) {
                 std::strncpy(_nameBuffer, entry.name.c_str(), sizeof(_nameBuffer) - 1);
                 _nameBuffer[sizeof(_nameBuffer) - 1] = '\0';
+                std::strncpy(
+                    _descriptionBuffer,
+                    entry.description.c_str(),
+                    sizeof(_descriptionBuffer) - 1
+                );
+                _descriptionBuffer[sizeof(_descriptionBuffer) - 1] = '\0';
                 std::strncpy(
                     _expressionBuffer,
                     entry.expression.c_str(),
@@ -214,6 +227,10 @@ void ComputeColumnsView::renderColumnBrowser() {
         ImGuiCond_Appearing,
         ImVec2(0.5f, 0.5f)
     );
+    if (_focusColumnBrowser) {
+        ImGui::SetNextWindowFocus();
+        _focusColumnBrowser = false;
+    }
 
     if (!ImGui::Begin("Available numeric columns", &_showColumnBrowser)) {
         ImGui::End();
@@ -275,7 +292,14 @@ void ComputeColumnsView::renderColumnBrowser() {
                     appendColumnToExpression(column);
                 }
                 if (ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Computed column; no description available");
+                    if (entry.second.description.empty()) {
+                        ImGui::SetTooltip("Computed column; no description available");
+                    }
+                    else {
+                        ImGui::BeginTooltip();
+                        ImGui::TextWrapped("%s", entry.second.description.c_str());
+                        ImGui::EndTooltip();
+                    }
                 }
                 ImGui::PopID();
             }
@@ -293,7 +317,8 @@ bool ComputeColumnsView::isNameTaken(const std::string& name) const {
 }
 
 bool ComputeColumnsView::computeColumn(const std::string& name,
-                                        const std::string& expressionText)
+                                        const std::string& expressionText,
+                                        const std::string& description)
 {
     if (name.empty()) {
         _errorMessage = "Column name cannot be empty";
@@ -348,11 +373,16 @@ bool ComputeColumnsView::computeColumn(const std::string& name,
         }
     }
 
-    if (!_dataViewer.addComputedColumn(name, expressionText, std::move(result))) {
+    if (!_dataViewer.addComputedColumn(
+        name,
+        expressionText,
+        description,
+        std::move(result)
+    )) {
         _errorMessage = std::format("Column name '{}' is already in use", name);
         return false;
     }
-    rememberQuery(name, expressionText);
+    rememberQuery(name, expressionText, description);
     _errorMessage.clear();
     return true;
 }
@@ -365,11 +395,18 @@ void ComputeColumnsView::render(bool* open) {
     }
 
     ImGui::InputText("Column name", _nameBuffer, IM_ARRAYSIZE(_nameBuffer));
+    ImGui::InputTextWithHint(
+        "Description",
+        "Enter a description... (optional)",
+        _descriptionBuffer,
+        IM_ARRAYSIZE(_descriptionBuffer)
+    );
 
     ImGui::Text("Expression");
     ImGui::SameLine();
     if (ImGui::Button("Browse columns")) {
         _showColumnBrowser = true;
+        _focusColumnBrowser = true;
     }
     ImGui::SameLine();
     view::helper::renderHelpMarker(
@@ -387,8 +424,9 @@ void ComputeColumnsView::render(bool* open) {
     );
 
     if (ImGui::Button("Compute")) {
-        if (computeColumn(_nameBuffer, _expressionBuffer)) {
+        if (computeColumn(_nameBuffer, _expressionBuffer, _descriptionBuffer)) {
             _nameBuffer[0] = '\0';
+            _descriptionBuffer[0] = '\0';
             _expressionBuffer[0] = '\0';
         }
     }
@@ -428,6 +466,11 @@ void ComputeColumnsView::render(bool* open) {
             ImGui::BeginTooltip();
             ImGui::TextUnformatted("Query:");
             ImGui::TextUnformatted(column.expression.c_str());
+            if (!column.description.empty()) {
+                ImGui::Spacing();
+                ImGui::TextUnformatted("Description:");
+                ImGui::TextWrapped("%s", column.description.c_str());
+            }
             ImGui::EndTooltip();
         }
 

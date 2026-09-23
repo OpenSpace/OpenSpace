@@ -331,11 +331,17 @@ std::optional<float> DataViewer::meanValue(const ColumnKey& key) const {
 }
 
 bool DataViewer::hasColumnDescription(const ColumnKey& key) const {
+    if (auto it = _computedColumns.find(key); it != _computedColumns.end()) {
+        return !it->second.description.empty();
+    }
     return _dataSettings.hasDescription(key);
 }
 
 const char* DataViewer::columnDescription(const ColumnKey& key) const {
     ghoul_assert(hasColumnDescription(key), "Must have a description");
+    if (auto it = _computedColumns.find(key); it != _computedColumns.end()) {
+        return it->second.description.c_str();
+    }
     return _dataSettings.description(key).c_str();
 }
 
@@ -356,7 +362,7 @@ const std::map<ColumnKey, ComputedColumn>& DataViewer::computedColumns() const {
 }
 
 bool DataViewer::addComputedColumn(ColumnKey key, std::string expression,
-                                   std::vector<float> values)
+                                   std::string description, std::vector<float> values)
 {
     if (key.empty() || values.size() != _data.size() ||
         _computedColumns.contains(key) ||
@@ -368,7 +374,11 @@ bool DataViewer::addComputedColumn(ColumnKey key, std::string expression,
     _columns.push_back(std::move(key));
     _computedColumns.emplace(
         _columns.back(),
-        ComputedColumn{ std::move(expression), std::move(values) }
+        ComputedColumn{
+            std::move(expression),
+            std::move(description),
+            std::move(values)
+        }
     );
     computeMeanForColumn(_columns.back());
     _columnSelectionView.updateComputedColumns(_computedColumns);

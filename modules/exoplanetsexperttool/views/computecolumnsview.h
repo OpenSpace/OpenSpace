@@ -49,22 +49,27 @@ private:
     void renderHistory();
     void loadHistory();
     void saveHistory() const;
-    void rememberQuery(const std::string& name, const std::string& expression);
+    void rememberQuery(const std::string& name, const std::string& expression,
+        const std::string& description);
 
     // Parses and evaluates `expressionText` for every data row, and on success registers
     // the result in the DataViewer under `name`. Returns whether it succeeded; on failure,
     // `_errorMessage` is set instead.
-    bool computeColumn(const std::string& name, const std::string& expressionText);
+    bool computeColumn(const std::string& name, const std::string& expressionText,
+        const std::string& description);
 
     DataViewer& _dataViewer;
 
     char _nameBuffer[128] = "";
+    char _descriptionBuffer[512] = "";
     char _expressionBuffer[1024] = "";
     bool _showColumnBrowser = false;
+    bool _focusColumnBrowser = false;
 
     struct HistoryEntry {
         std::string name;
         std::string expression;
+        std::string description;
     };
     std::vector<HistoryEntry> _history;
     std::filesystem::path _historyFile;
