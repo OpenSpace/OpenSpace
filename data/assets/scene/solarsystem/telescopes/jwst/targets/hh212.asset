@@ -11,7 +11,6 @@ local HH212Image = {
     FaceCamera = false,
     RadiusAzimuthElevation = { 1.0, 0.5, 0.1 }
   },
-  -- UsePerspectiveProjection = false, TODO: investigate
   Opacity = 1.0,
   TexturePath = hh212.image .. "hh212.png",
   Tag = { "mission_jwst_target" },

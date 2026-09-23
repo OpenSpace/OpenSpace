@@ -39,7 +39,6 @@ local HUDFImage = {
     FaceCamera = false,
     RadiusAzimuthElevation = { 1.0, 0.5, 0.1 }
   },
-  -- UsePerspectiveProjection = false, TODO: investigate
   Opacity = 1.0,
   TexturePath = hudf.image .. "Hubble_ultra_deep_field.png",
   Tag = { "mission_jwst_hudf", "mission_jwst_target" },

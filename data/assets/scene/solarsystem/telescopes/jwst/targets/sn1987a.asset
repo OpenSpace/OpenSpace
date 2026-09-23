@@ -11,7 +11,6 @@ local SN1987aImage = {
     FaceCamera = false,
     RadiusAzimuthElevation = { 1.0, 0.5, 0.0 }
   },
-  -- UsePerspectiveProjection = false, TODO: investigate
   Opacity = 1.0,
   TexturePath = sn1987a.image .. "sn1987a.png",
   Tag = { "mission_jwst_target" },
