@@ -37,6 +37,10 @@ FilteringView::FilteringView(DataViewer& dataViewer,
     : _dataViewer(dataViewer)
     , _quickFilterGroups(dataSettings.quickFilterGroups)
 {
+    if (!_dataViewer.columns().empty()) {
+        _newFilterColumn = _dataViewer.columns().front();
+    }
+
     // Set all quick filters to false
     const size_t nQuickFilterGroups = _quickFilterGroups.size();
     _quickFilterFlags.reserve(nQuickFilterGroups);
@@ -52,7 +56,7 @@ FilteringView::FilteringView(DataViewer& dataViewer,
     // Find default column - first numeric.
     for (size_t i = 0; i < _dataViewer.columns().size(); ++i) {
         if (_dataViewer.isNumericColumn(i)) {
-            _rowLimitColumnIndex = i; // TODO: Should be the row limit column
+            _rowLimitColumn = _dataViewer.columns()[i];
             break;
         }
     }
@@ -74,20 +78,32 @@ std::string FilteringView::rowLimitDescription() const {
     return std::format(
         "{} rows with {} {}",
         _nRows, _useHighestValue ? "highest" : "lowest",
-        _dataViewer.columnName(_rowLimitColumnIndex)
+        _dataViewer.columnName(rowLimitColumn())
     );
+}
+
+const ColumnKey& FilteringView::rowLimitColumn() const {
+    if (_dataViewer.hasColumn(_rowLimitColumn)) {
+        return _rowLimitColumn;
+    }
+
+    for (const ColumnKey& column : _dataViewer.columns()) {
+        if (_dataViewer.isNumericColumn(column)) {
+            return column;
+        }
+    }
+    return _dataViewer.columns().front();
 }
 
 void FilteringView::renderAppliedColumnFilters() const {
     bool didRender = false;
     for (const ColumnFilterEntry& f : _columnFilters) {
-        if (!f.enabled) {
+        if (!f.enabled || !_dataViewer.hasColumn(f.column)) {
             continue;
         }
-        const ColumnKey& key = _dataViewer.columns()[f.columnIndex];
         const std::string& query = f.filter.query();
         ImGui::TextUnformatted(
-            std::format("{}: {}", _dataViewer.columnName(key), query == "" ? "Has value" : query).c_str()
+            std::format("{}: {}", _dataViewer.columnName(f.column), query == "" ? "Has value" : query).c_str()
         );
         didRender = true;
     }
@@ -232,12 +248,12 @@ std::vector<size_t> FilteringView::applyFiltering(const std::vector<ExoplanetIte
 
         // Other filters
         for (const ColumnFilterEntry& f : _columnFilters) {
-            if (!f.enabled) {
+            if (!f.enabled || !_dataViewer.hasColumn(f.column)) {
                 continue;
             }
 
             filteredOut |= !f.filter.passFilter(
-                _dataViewer.columnValue(_dataViewer.columns()[f.columnIndex], item)
+                _dataViewer.columnValue(f.column, item)
             );
         }
 
@@ -260,7 +276,7 @@ void FilteringView::applyRowLimit(const std::vector<ExoplanetItem>& data,
         return;
     }
 
-    ColumnKey rowLimitCol = _dataViewer.columns()[_rowLimitColumnIndex];
+    const ColumnKey& rowLimitCol = rowLimitColumn();
 
     if (filteredData.size() > _nRows) {
         auto compare = [&rowLimitCol, &data, this](const size_t& lhs, const size_t& rhs) {
@@ -329,12 +345,10 @@ bool FilteringView::renderColumnFilterSettings() {
 
     // Per-column filtering
     {
-        static size_t filterColIndex = 0;
-
         ImGui::Separator();
         ImGui::Text("Filter on column");
         ImGui::SetNextItemWidth(120);
-        if (ImGui::BeginCombo("##Column", _dataViewer.columnName(filterColIndex))) {
+        if (ImGui::BeginCombo("##Column", _dataViewer.columnName(_newFilterColumn))) {
             static ImGuiTextFilter columnFilter;
             if (ImGui::IsWindowAppearing()) {
                 ImGui::SetKeyboardFocusHere();
@@ -349,8 +363,9 @@ bool FilteringView::renderColumnFilterSettings() {
                     continue;
                 }
 
-                if (ImGui::Selectable(name, filterColIndex == i)) {
-                    filterColIndex = i;
+                const ColumnKey& column = _dataViewer.columns()[i];
+                if (ImGui::Selectable(name, _newFilterColumn == column)) {
+                    _newFilterColumn = column;
                 }
 
                 _dataViewer.renderColumnDescriptionTooltip(i);
@@ -362,7 +377,7 @@ bool FilteringView::renderColumnFilterSettings() {
 
         static char queryString[128] = "";
 
-        bool numeric = _dataViewer.isNumericColumn(filterColIndex);
+        bool numeric = _dataViewer.isNumericColumn(_newFilterColumn);
 
         ImGui::SetNextItemWidth(numeric ? ImGui::GetContentRegionAvail().x * 0.3f : -150);
         bool inputEntered = ImGui::InputTextWithHint(
@@ -393,7 +408,7 @@ bool FilteringView::renderColumnFilterSettings() {
                 ColumnFilter(queryString, ColumnFilter::Type::Text);
 
             if (filter.isValid()) {
-                _columnFilters.push_back({ filterColIndex , filter });
+                _columnFilters.push_back({ _newFilterColumn, filter });
                 strcpy(queryString, "");
                 filterWasChanged = true;
             }
@@ -436,6 +451,9 @@ bool FilteringView::renderColumnFilterSettings() {
             if (ImGui::BeginTable("filtersTable", nColumns, flags)) {
                 for (int i = 0; i < _columnFilters.size(); ++i) {
                     ColumnFilterEntry& f = _columnFilters[i];
+                    if (!_dataViewer.hasColumn(f.column)) {
+                        continue;
+                    }
                     const std::string queryString = f.filter.query();
                     bool isEditingColumn = (editingColumn == i);
                     ImGui::TableNextRow();
@@ -448,8 +466,10 @@ bool FilteringView::renderColumnFilterSettings() {
                     ImGui::PopID();
 
                     ImGui::TableNextColumn();
-                    ImGui::Text(_dataViewer.columnName(f.columnIndex));
-                    _dataViewer.renderColumnDescriptionTooltip(f.columnIndex);
+                    ImGui::Text(_dataViewer.columnName(f.column));
+                    _dataViewer.renderColumnDescriptionTooltip(
+                        _dataViewer.columnIndex(f.column)
+                    );
 
                     ImGui::TableNextColumn();
                     ImGui::Text("    ");
@@ -557,7 +577,7 @@ bool FilteringView::renderColumnFilterSettings() {
     if (filterWasChanged) {
         _nActiveFilters = 0;
         for (const ColumnFilterEntry& f : _columnFilters) {
-            if (f.enabled) {
+            if (f.enabled && _dataViewer.hasColumn(f.column)) {
                 ++_nActiveFilters;
             }
         }
@@ -622,7 +642,7 @@ bool FilteringView::renderRowLimitFilterSettings() {
 
     ImGui::SameLine();
 
-    const char* columnName = _dataViewer.columnName(_rowLimitColumnIndex);
+    const char* columnName = _dataViewer.columnName(rowLimitColumn());
     ImGui::SetNextItemWidth(100);
     if (ImGui::BeginCombo("##RowLimitColumn", columnName)) {
         static ImGuiTextFilter columnFilter;
@@ -643,8 +663,9 @@ bool FilteringView::renderRowLimitFilterSettings() {
                 continue;
             }
 
-            if (ImGui::Selectable(name, _rowLimitColumnIndex == i)) {
-                _rowLimitColumnIndex = i;
+            const ColumnKey& column = _dataViewer.columns()[i];
+            if (ImGui::Selectable(name, _rowLimitColumn == column)) {
+                _rowLimitColumn = column;
                 filterWasChanged = true;
             }
         }

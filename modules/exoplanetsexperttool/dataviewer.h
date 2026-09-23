@@ -37,6 +37,7 @@
 #include <modules/exoplanetsexperttool/views/tableview.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <filesystem>
+#include <map>
 #include <memory>
 #include <optional>
 #include <unordered_map>
@@ -50,18 +51,23 @@ public:
     DataViewer(std::string identifier, std::string guiName = "");
 
     void initializeData();
+    bool loadCsvFile(std::filesystem::path path);
 
     void initializeGL();
 
     // Accessors and functions that are needed for the other views
 
     std::filesystem::path currentDataFile() const;
+    std::filesystem::path computedColumnHistoryFile() const;
 
     bool isNumericColumn(size_t index) const;
     bool isNumericColumn(const ColumnKey& key) const;
+    bool hasColumn(const ColumnKey& key) const;
 
     std::variant<const char*, float> columnValue(const ColumnKey& key,
         const ExoplanetItem& item) const;
+    std::variant<const char*, float> columnValue(const ColumnKey& key,
+        size_t rowIndex) const;
     size_t columnIndex(const ColumnKey& key) const;
     const char* columnName(const ColumnKey& key) const;
     const char* columnName(size_t columnIndex) const;
@@ -75,6 +81,10 @@ public:
     const std::vector<ExoplanetItem>& data() const;
     const std::vector<size_t>& currentFiltering() const;
     const std::vector<ColumnKey>& columns() const;
+    const std::map<ColumnKey, ComputedColumn>& computedColumns() const;
+    bool addComputedColumn(ColumnKey key, std::string expression,
+        std::vector<float> values);
+    bool removeComputedColumn(const ColumnKey& key);
     const DataSettings::DataMapping& dataMapping() const;
     const DataSettings& dataSettings() const;
     bool filterChanged() const;
@@ -115,6 +125,8 @@ public:
     void updateGlyphRenderData();
 
 private:
+    bool initializeData(DataSettings settings);
+
     void renderStartupInfo();
     bool _shouldOpenInfoWindow = true;
 
@@ -161,6 +173,7 @@ private:
     std::unordered_map<std::string, float> _meanColumnValues; // For only numerical columns
 
     std::vector<ColumnKey> _columns; // All loaded columns
+    std::map<ColumnKey, ComputedColumn> _computedColumns;
 
     bool _colormapWasChanged = true;
     bool _filterChanged = false;

@@ -37,7 +37,7 @@ class ColorMappingView {
 public:
     struct ColorMappedVariable {
         int colormapIndex = 0;
-        size_t columnIndex = 0;
+        ColumnKey column;
         float colorScaleMin = 0.f;
         float colorScaleMax = 100.f;
         float opacity = 1.f;
@@ -49,8 +49,8 @@ public:
 
     void initializeGL();
 
-    const std::vector<ColorMappedVariable>& colorMapperVariables() const;
-    size_t firstNumericColumn() const;
+    const std::vector<ColorMappedVariable>& colorMapperVariables();
+    const ColumnKey& firstNumericColumn() const;
 
     // Return true if the color map was changed
     bool render(bool* open);
@@ -76,7 +76,7 @@ private:
 
     std::vector<ColorMappedVariable> _variableSelection;
 
-    size_t _firstNumericColumnIndex = 0;
+    ColumnKey _firstNumericColumn;
 
     DataViewer& _dataViewer;
 };

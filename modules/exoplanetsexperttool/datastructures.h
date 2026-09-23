@@ -32,10 +32,16 @@
 #include <string>
 #include <unordered_map>
 #include <variant>
+#include <vector>
 
 namespace openspace::exoplanets {
 
 using ColumnKey = std::string;
+
+struct ComputedColumn {
+    std::string expression;
+    std::vector<float> values;
+};
 
 // Represent a data point with upper and lower uncertainty values
 struct DataPoint {

@@ -53,6 +53,8 @@ public:
         const std::vector<int>& externalSelection);
 
 private:
+    const ColumnKey& rowLimitColumn() const;
+
     bool renderColumnFilterSettings();
     bool renderRowLimitFilterSettings();
     bool renderExternalFilterSettings();
@@ -63,17 +65,18 @@ private:
         std::vector<size_t>& prefilteredData);
 
     struct ColumnFilterEntry {
-        size_t columnIndex;
+        ColumnKey column;
         ColumnFilter filter;
         bool enabled = true;
     };
     std::vector<ColumnFilterEntry> _columnFilters;
+    ColumnKey _newFilterColumn;
     std::vector<std::vector<bool>> _quickFilterFlags;
 
     bool _limitNumberOfRows = false;
     int _nRows = 100;
     bool _useHighestValue = true;
-    size_t _rowLimitColumnIndex = 0;
+    ColumnKey _rowLimitColumn;
 
     // Filter selection from webpage
     bool _useExternalSelection = false;

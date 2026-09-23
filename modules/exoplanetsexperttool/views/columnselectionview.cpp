@@ -89,6 +89,8 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
     _otherColumns.shrink_to_fit();
     allColumnsOrdered.insert(allColumnsOrdered.end(), _otherColumns.begin(), _otherColumns.end());
     _selectedOtherColumns.assign(_otherColumns.size(), false);
+    _computedColumns.clear();
+    _selectedComputedColumns.clear();
 
     allColumnsOrdered.shrink_to_fit();
 
@@ -132,8 +134,10 @@ bool ColumnSelectionView::renderColumnSettingsView(const DataSettings& dataSetti
     ImGui::Spacing();
 
     const float groupsSpacing = 10.f;
-    const float group1Width = (ImGui::GetContentRegionAvail().x - groupsSpacing) * 0.45f;
-    const float group2Width = (ImGui::GetContentRegionAvail().x - groupsSpacing) * 0.55f;
+    const float availableGroupsWidth = ImGui::GetContentRegionAvail().x - 2.f * groupsSpacing;
+    const float group1Width = availableGroupsWidth * 0.35f;
+    const float group2Width = availableGroupsWidth * 0.45f;
+    const float group3Width = availableGroupsWidth * 0.20f;
     const float groupsHeight = ImGui::GetContentRegionAvail().y * 0.8f;
 
     // Named columns
@@ -143,7 +147,7 @@ bool ColumnSelectionView::renderColumnSettingsView(const DataSettings& dataSetti
 
         ImGui::SameLine();
         view::helper::renderHelpMarker(
-            "This is the columns specified with column information and a given name in "
+            "The columns specified with column information and a given name in "
             "the .json file with data settings."
         );
 
@@ -200,7 +204,7 @@ bool ColumnSelectionView::renderColumnSettingsView(const DataSettings& dataSetti
 
         ImGui::SameLine();
         view::helper::renderHelpMarker(
-            "This is any other columns that may exist in the dataset."
+            "Any other columns that may exist in the dataset."
         );
 
         ImGui::SameLine(0, 10);
@@ -248,6 +252,42 @@ bool ColumnSelectionView::renderColumnSettingsView(const DataSettings& dataSetti
         }
         ImGui::Columns(1);
         ImGui::EndChild();
+    }
+    ImGui::EndChild();
+
+    ImGui::SameLine(0, groupsSpacing);
+
+    // Computed columns
+    ImGui::BeginChild("ComputedColumnsGroup", ImVec2(group3Width, groupsHeight), false);
+    {
+        ImGui::TextUnformatted("Computed:");
+        ImGui::SameLine();
+        ImGui::PushID("clear_computed");
+        if (ImGui::Button("Clear")) {
+            _selectedComputedColumns.assign(_computedColumns.size(), false);
+            selectionChanged = true;
+        }
+        ImGui::PopID();
+
+        if (_computedColumns.empty()) {
+            ImGui::TextDisabled("No computed columns");
+        }
+        else {
+            ImGui::BeginChild(
+                "ComputedColumns",
+                ImVec2(0.f, ImGui::GetTextLineHeightWithSpacing() * 6.f),
+                false
+            );
+            for (size_t index = 0; index < _computedColumns.size(); ++index) {
+                bool isSelected = _selectedComputedColumns[index];
+                if (ImGui::Checkbox(_computedColumns[index].c_str(), &isSelected)) {
+                    selectionChanged = true;
+                }
+                _selectedComputedColumns[index] = isSelected;
+                nSelected += isSelected ? 1 : 0;
+            }
+            ImGui::EndChild();
+        }
     }
     ImGui::EndChild();
 
@@ -303,6 +343,12 @@ bool ColumnSelectionView::renderColumnSettingsView(const DataSettings& dataSetti
                 }
             }
 
+            for (int i = 0; i < static_cast<int>(_computedColumns.size()); ++i) {
+                if (_selectedComputedColumns[i]) {
+                    columnsText += ", " + _computedColumns[i];
+                }
+            }
+
             ImGui::PushTextWrapPos(0.f);
             ImGui::TextUnformatted(columnsText.c_str());
             ImGui::PopTextWrapPos();
@@ -313,6 +359,30 @@ bool ColumnSelectionView::renderColumnSettingsView(const DataSettings& dataSetti
     ImGui::EndChild();
 
     return selectionChanged;
+}
+
+void ColumnSelectionView::updateComputedColumns(
+    const std::map<ColumnKey, ComputedColumn>& columns)
+{
+    std::vector<bool> selections;
+    selections.reserve(columns.size());
+    for (const auto& [key, _] : columns) {
+        auto previous = std::find(_computedColumns.begin(), _computedColumns.end(), key);
+        if (previous == _computedColumns.end()) {
+            selections.push_back(false);
+        }
+        else {
+            const size_t index = std::distance(_computedColumns.begin(), previous);
+            selections.push_back(_selectedComputedColumns[index]);
+        }
+    }
+
+    _computedColumns.clear();
+    _computedColumns.reserve(columns.size());
+    for (const auto& [key, _] : columns) {
+        _computedColumns.push_back(key);
+    }
+    _selectedComputedColumns = std::move(selections);
 }
 
 std::vector<ColumnKey> ColumnSelectionView::orderedSelectedColumns() const {
@@ -328,6 +398,11 @@ std::vector<ColumnKey> ColumnSelectionView::orderedSelectedColumns() const {
     for (int i = 0; i < _otherColumns.size(); i++) {
         if (_selectedOtherColumns[i]) {
             selectedColumns.push_back(_otherColumns[i]);
+        }
+    }
+    for (int i = 0; i < _computedColumns.size(); i++) {
+        if (_selectedComputedColumns[i]) {
+            selectedColumns.push_back(_computedColumns[i]);
         }
     }
     selectedColumns.shrink_to_fit();

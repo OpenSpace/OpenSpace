@@ -198,16 +198,16 @@ ColorMappingView::ColorMappingView(DataViewer& dataViewer,
 
     for (size_t i = 0; i < _dataViewer.columns().size(); ++i) {
         if (_dataViewer.isNumericColumn(i)) {
-            _firstNumericColumnIndex = i;
+            _firstNumericColumn = _dataViewer.columns()[i];
             break;
         }
     }
 
-    ColorMappedVariable newVariable = { .columnIndex = _firstNumericColumnIndex };
+    ColorMappedVariable newVariable = { .column = _firstNumericColumn };
     if (dataSettings.defaultColormapping.has_value()) {
         DataSettings::CmapInfo info = *dataSettings.defaultColormapping;
         newVariable = {
-            .columnIndex = _dataViewer.columnIndex(info.column),
+            .column = info.column,
             .colorScaleMin = info.min,
             .colorScaleMax = info.max
         };
@@ -275,13 +275,18 @@ void ColorMappingView::initializeGL() {
 }
 
 const std::vector<ColorMappingView::ColorMappedVariable>&
-ColorMappingView::colorMapperVariables() const
+ColorMappingView::colorMapperVariables()
 {
+    for (ColorMappedVariable& variable : _variableSelection) {
+        if (!_dataViewer.hasColumn(variable.column)) {
+            variable.column = _firstNumericColumn;
+        }
+    }
     return _variableSelection;
 }
 
-size_t ColorMappingView::firstNumericColumn() const {
-    return _firstNumericColumnIndex;
+const ColumnKey& ColorMappingView::firstNumericColumn() const {
+    return _firstNumericColumn;
 }
 
 bool ColorMappingView::render(bool* open) {
@@ -354,7 +359,7 @@ bool ColorMappingView::render(bool* open) {
 
             // Colormap for each selected variable
             if (ImGui::Button("+ Add variable")) {
-                ColorMappedVariable newVariable = { .columnIndex = _firstNumericColumnIndex };
+                ColorMappedVariable newVariable = { .column = _firstNumericColumn };
                 _variableSelection.push_back(newVariable);
                 cmapWasChanged = true;
             };
@@ -382,7 +387,7 @@ bool ColorMappingView::render(bool* open) {
             labelStrings.reserve(nVariables);
             for (int i = nVariables - 1; i >= 0; --i) {
                 std::string label = _dataViewer.columnName(
-                    _dataViewer.columns()[_variableSelection[i].columnIndex]
+                    _variableSelection[i].column
                 );
                 label = label.substr(0, 10); // limit length
                 labelStrings.push_back(std::format(" {}. {}", i + 1, label));
@@ -451,9 +456,7 @@ void ColorMappingView::renderActiveColormapOverview() {
     const int nVariables = static_cast<int>(_variableSelection.size());
     for (int i = 0; i < nVariables; ++i) {
         const ColorMappedVariable& variable = _variableSelection[i];
-        const std::string columnName = _dataViewer.columnName(
-            _dataViewer.columns()[variable.columnIndex]
-        );
+        const std::string columnName = _dataViewer.columnName(variable.column);
 
         ImGui::Text("%s", columnName.c_str());
 
@@ -493,12 +496,17 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
     constexpr const int InputWidth = 120;
     bool wasChanged = false;
 
+    if (!_dataViewer.hasColumn(variable.column)) {
+        variable.column = _firstNumericColumn;
+        wasChanged = true;
+    }
+
     ImGui::BeginGroup();
     {
         ImGui::SetNextItemWidth(InputWidth);
         if (ImGui::BeginCombo(
                 "Column",
-                _dataViewer.columnName(variable.columnIndex)
+                _dataViewer.columnName(variable.column)
             ))
         {
             static ImGuiTextFilter columnFilter;
@@ -519,8 +527,9 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
                     continue;
                 }
 
-                if (ImGui::Selectable(name, variable.columnIndex == i)) {
-                    variable.columnIndex = i;
+                const ColumnKey& column = _dataViewer.columns()[i];
+                if (ImGui::Selectable(name, variable.column == column)) {
+                    variable.column = column;
                     wasChanged = true;
                 }
 
@@ -574,11 +583,9 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
             float newMin = std::numeric_limits<float>::max();
             float newMax = std::numeric_limits<float>::lowest();
 
-            size_t colormapColumn = variable.columnIndex;
-
             for (size_t i : relevantIndices) {
                 const ExoplanetItem& item = data[i];
-                auto value = _dataViewer.columnValue(_dataViewer.columns()[colormapColumn], item);
+                auto value = _dataViewer.columnValue(variable.column, item);
                 if (!std::holds_alternative<float>(value)) {
                     // Shouldn't be possible to try to use non numbers
                     throw;
@@ -653,7 +660,8 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
 glm::vec4 ColorMappingView::colorFromColormap(const ExoplanetItem& item,
                                               const ColorMappedVariable& variable)
 {
-    const ColumnKey& colormapColumn = _dataViewer.columns()[variable.columnIndex];
+    const ColumnKey& colormapColumn = _dataViewer.hasColumn(variable.column) ?
+        variable.column : _firstNumericColumn;
 
     std::variant<const char*, float> value = _dataViewer.columnValue(colormapColumn, item);
     float fValue = 0.0;

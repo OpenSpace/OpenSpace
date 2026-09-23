@@ -84,7 +84,11 @@ namespace {
                 {
                     i++;
                 }
-                tokens.push_back({ TokenType::Identifier, text.substr(start, i - start), 0.f });
+                tokens.push_back({
+                    TokenType::Identifier,
+                    text.substr(start, i - start),
+                    0.f
+                });
                 continue;
             }
             switch (c) {

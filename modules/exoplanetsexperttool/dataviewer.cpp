@@ -161,16 +161,39 @@ void DataViewer::initializeData() {
 
     // Load things related to the dataset. We need to do this on initialize rather than
     // construction since we need the module to exist first (to access its settings)
-    _dataSettings = DataLoader::loadDataSettingsFromJson();
+    initializeData(DataLoader::loadDataSettingsFromJson());
+}
 
-    LINFO("Loading data from file: " + _dataSettings.dataFile.string());
+bool DataViewer::loadCsvFile(std::filesystem::path path) {
+    DataSettings settings = _dataSettings;
+    settings.dataFile = std::move(path);
+    return initializeData(std::move(settings));
+}
 
-    // Load the dataset
-    _data = DataLoader::loadData(_dataSettings);
+bool DataViewer::initializeData(DataSettings settings) {
+    LINFO("Loading data from file: " + settings.dataFile.string());
 
-    if (_data.empty()) {
-        LERROR("No data was loaded!");
+    std::vector<ExoplanetItem> data;
+    try {
+        data = DataLoader::loadData(settings);
     }
+    catch (const std::exception& e) {
+        LERROR(std::format("Failed to load data: {}", e.what()));
+        return false;
+    }
+
+    if (data.empty()) {
+        LERROR("No data was loaded!");
+        return false;
+    }
+
+    _dataSettings = std::move(settings);
+    _data = std::move(data);
+    _computedColumns.clear();
+    _hostIdToPlanetsMap.clear();
+    _meanColumnValues.clear();
+    _selection.clear();
+    _externalSelection = {};
 
     // Initialize filtered data index list and map of host star to planet indices
     _filteredData.clear();
@@ -207,7 +230,10 @@ void DataViewer::initializeData() {
         computeMeanForColumn(_columns[i]);
     }
 
+    _colormapWasChanged = true;
     _filterChanged = true;
+    _selectionChanged = true;
+    return true;
 }
 
 void DataViewer::initializeGL() {
@@ -221,9 +247,19 @@ std::filesystem::path DataViewer::currentDataFile() const {
     return _dataSettings.dataFile;
 }
 
+std::filesystem::path DataViewer::computedColumnHistoryFile() const {
+    auto module = global::moduleEngine->module<ExoplanetsExpertToolModule>();
+    const std::filesystem::path settingsFile = absPath(module->dataConfigFile());
+    return settingsFile.parent_path() / "computed_columns_history.json";
+}
+
 std::variant<const char*, float> DataViewer::columnValue(const ColumnKey& key,
                                                          const ExoplanetItem& item) const
 {
+    if (auto it = _computedColumns.find(key); it != _computedColumns.end()) {
+        return it->second.values.at(static_cast<size_t>(item.id));
+    }
+
     const std::variant<std::string, float>& value = item.dataColumns.at(key);
 
     if (std::holds_alternative<std::string>(value)) {
@@ -232,15 +268,31 @@ std::variant<const char*, float> DataViewer::columnValue(const ColumnKey& key,
     return std::get<float>(value);
 }
 
+std::variant<const char*, float> DataViewer::columnValue(const ColumnKey& key,
+                                                         size_t rowIndex) const
+{
+    if (auto it = _computedColumns.find(key); it != _computedColumns.end()) {
+        return it->second.values.at(rowIndex);
+    }
+    return columnValue(key, _data.at(rowIndex));
+}
+
 bool DataViewer::isNumericColumn(size_t index) const {
     return  isNumericColumn(_columns[index]);
 }
 
 bool DataViewer::isNumericColumn(const ColumnKey& key) const {
+    if (_computedColumns.contains(key)) {
+        return true;
+    }
     ghoul_assert(_data.size() > 0, "Data size cannot be zero");
     // Test type using the first data point
     std::variant<const char*, float> aValue = columnValue(key, _data.front());
     return std::holds_alternative<float>(aValue);
+}
+
+bool DataViewer::hasColumn(const ColumnKey& key) const {
+    return std::find(_columns.begin(), _columns.end(), key) != _columns.end();
 }
 
 size_t DataViewer::columnIndex(const ColumnKey& key) const {
@@ -256,12 +308,15 @@ size_t DataViewer::columnIndex(const ColumnKey& key) const {
 }
 
 const char* DataViewer::columnName(const ColumnKey& key) const {
+    if (_computedColumns.contains(key)) {
+        return key.c_str();
+    }
     return _dataSettings.columnName(key);
 }
 
 const char* DataViewer::columnName(size_t columnIndex) const {
     // TODO: validate index
-    return _dataSettings.columnName(_columns[columnIndex]);
+    return columnName(_columns[columnIndex]);
 }
 
 bool DataViewer::isNameColumn(const ColumnKey& key) const {
@@ -294,6 +349,46 @@ const std::vector<size_t>& DataViewer::currentFiltering() const {
 
 const std::vector<ColumnKey>& DataViewer::columns() const {
     return _columns;
+}
+
+const std::map<ColumnKey, ComputedColumn>& DataViewer::computedColumns() const {
+    return _computedColumns;
+}
+
+bool DataViewer::addComputedColumn(ColumnKey key, std::string expression,
+                                   std::vector<float> values)
+{
+    if (key.empty() || values.size() != _data.size() ||
+        _computedColumns.contains(key) ||
+        std::find(_columns.begin(), _columns.end(), key) != _columns.end())
+    {
+        return false;
+    }
+
+    _columns.push_back(std::move(key));
+    _computedColumns.emplace(
+        _columns.back(),
+        ComputedColumn{ std::move(expression), std::move(values) }
+    );
+    computeMeanForColumn(_columns.back());
+    _columnSelectionView.updateComputedColumns(_computedColumns);
+    _tableView->updateColumns(_columnSelectionView.orderedSelectedColumns());
+    _filterChanged = true;
+    return true;
+}
+
+bool DataViewer::removeComputedColumn(const ColumnKey& key) {
+    if (!_computedColumns.erase(key)) {
+        return false;
+    }
+
+    std::erase(_columns, key);
+    _meanColumnValues.erase(key);
+    _columnSelectionView.updateComputedColumns(_computedColumns);
+    _tableView->updateColumns(_columnSelectionView.orderedSelectedColumns());
+    _colormapWasChanged = true;
+    _filterChanged = true;
+    return true;
 }
 
 const DataSettings::DataMapping& DataViewer::dataMapping() const {
@@ -621,7 +716,7 @@ void DataViewer::render() {
 
             const ColorMappingView::ColorMappedVariable& firstCmap = cmappedVariables.front();
 
-            const char* column = columnName(firstCmap.columnIndex);
+            const char* column = columnName(firstCmap.column);
             totalWidth += ImGui::CalcTextSize(column).x;
 
             std::string min = std::format("{:.2f}", firstCmap.colorScaleMin);
@@ -859,7 +954,7 @@ void DataViewer::renderPlanetTooltip(int index) const {
         // Render the colormapped values
         using Cmap = ColorMappingView::ColorMappedVariable;
         for (const Cmap& cmap : _colorMappingView->colorMapperVariables()) {
-            const ColumnKey& key = _columns[cmap.columnIndex];
+            const ColumnKey& key = cmap.column;
             std::variant<const char*, float> value = columnValue(key, item);
 
             const float lineHeight = ImGui::GetTextLineHeight();
@@ -958,15 +1053,19 @@ void DataViewer::updateFilteredRowsProperty(std::optional<std::vector<size_t>> c
 }
 
 void DataViewer::renderFileMenu() {
+    static bool showOpenCsvModal = false;
     static bool showSaveCsvModal = false;
+    static char csvPath[1024] = "";
+    static std::string openCsvError;
 
     // Menu
     if (ImGui::BeginMenu("File")) {
         if (ImGui::MenuItem("New", NULL, false, false)) {
             // TODO: Create a settings.json file
         }
-        if (ImGui::MenuItem("Open", NULL, false, false)) {
-            // TODO: Menu to load a new data file from disk
+        if (ImGui::MenuItem("Open CSV")) {
+            showOpenCsvModal = true;
+            openCsvError.clear();
         }
         ImGui::MenuItem("Save CSV", NULL, &showSaveCsvModal);
         ImGui::SameLine();
@@ -989,6 +1088,46 @@ void DataViewer::renderFileMenu() {
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
+
+    if (showOpenCsvModal) {
+        ImGui::OpenPopup("Open CSV");
+        if (ImGui::BeginPopupModal("Open CSV", NULL, flags)) {
+            ImGui::TextUnformatted(
+                "Load a CSV using the column mappings from the current dataset."
+            );
+            ImGui::SetNextItemWidth(520.f);
+            ImGui::InputText("CSV path", csvPath, IM_ARRAYSIZE(csvPath));
+
+            if (!openCsvError.empty()) {
+                ImGui::TextColored(
+                    view::helper::toImVec4(view::colors::Error),
+                    "%s",
+                    openCsvError.c_str()
+                );
+            }
+
+            if (ImGui::Button("Cancel") || ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+                ImGui::CloseCurrentPopup();
+                showOpenCsvModal = false;
+                openCsvError.clear();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Open") || ImGui::IsKeyPressed(ImGuiKey_Enter)) {
+                const std::filesystem::path path = csvPath;
+                if (loadCsvFile(path)) {
+                    csvPath[0] = '\0';
+                    ImGui::CloseCurrentPopup();
+                    showOpenCsvModal = false;
+                    openCsvError.clear();
+                }
+                else {
+                    openCsvError = "Could not load the CSV file";
+                }
+            }
+            ImGui::SetItemDefaultFocus();
+            ImGui::EndPopup();
+        }
+    }
 
     if (showSaveCsvModal) {
         ImGui::OpenPopup("Save CSV");
@@ -1277,8 +1416,9 @@ void DataViewer::flyToInsideView() const {
 void DataViewer::computeMeanForColumn(const ColumnKey& key) {
     int count = 0;
     float sum = 0.f;
-    for (const ExoplanetItem& p : _data) {
-        if (!std::holds_alternative<float>(p.dataColumns.at(key))) {
+    for (size_t rowIndex = 0; rowIndex < _data.size(); ++rowIndex) {
+        const std::variant<const char*, float> value = columnValue(key, rowIndex);
+        if (!std::holds_alternative<float>(value)) {
             LERROR(std::format(
                 "Trying to compute mean value for non-numeric column: {}. Skipping. "
                 "OBS! This is a sign that the column is wrongly classified as numeric",
@@ -1286,7 +1426,7 @@ void DataViewer::computeMeanForColumn(const ColumnKey& key) {
             ));
             return;
         }
-        float v = std::get<float>(p.dataColumns.at(key));
+        const float v = std::get<float>(value);
         if (!std::isnan(v)) {
             sum += v;
             count++;

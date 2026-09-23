@@ -694,7 +694,7 @@ void SystemViewer::renderVisualsTabContent(const std::string& host,
 
         if (!colorVariableInitialized) {
             orbitColorVariable = {
-                .columnIndex = _dataViewer.colorMappingView()->firstNumericColumn()
+                .column = _dataViewer.colorMappingView()->firstNumericColumn()
             };
             colorVariableInitialized = true;
         }

@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COMPUTECOLUMNSVIEW___H__
 
 #include <modules/exoplanetsexperttool/datastructures.h>
-#include <map>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -46,10 +46,14 @@ private:
     bool isNameTaken(const std::string& name) const;
     bool appendColumnToExpression(const std::string& columnName);
     void renderColumnBrowser();
+    void renderHistory();
+    void loadHistory();
+    void saveHistory() const;
+    void rememberQuery(const std::string& name, const std::string& expression);
 
-    // Parses and evaluates `expressionText` for every data row, and on success stores
-    // the result in `_computedColumns` under `name`. Returns whether it succeeded; on
-    // failure, `_errorMessage` is set instead.
+    // Parses and evaluates `expressionText` for every data row, and on success registers
+    // the result in the DataViewer under `name`. Returns whether it succeeded; on failure,
+    // `_errorMessage` is set instead.
     bool computeColumn(const std::string& name, const std::string& expressionText);
 
     DataViewer& _dataViewer;
@@ -58,9 +62,12 @@ private:
     char _expressionBuffer[1024] = "";
     bool _showColumnBrowser = false;
 
-    // The relational store of computed columns: new column name -> computed values,
-    // index-aligned with `_dataViewer.data()`.
-    std::map<ColumnKey, std::vector<float>> _computedColumns;
+    struct HistoryEntry {
+        std::string name;
+        std::string expression;
+    };
+    std::vector<HistoryEntry> _history;
+    std::filesystem::path _historyFile;
 
     std::string _errorMessage;
 };

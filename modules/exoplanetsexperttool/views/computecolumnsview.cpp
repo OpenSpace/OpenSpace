@@ -28,11 +28,13 @@
 #include <modules/exoplanetsexperttool/expressionparser.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
+#include <openspace/json.h>
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
 #include <cstring>
 #include <format>
+#include <fstream>
 #include <limits>
 
 namespace openspace::exoplanets {
@@ -40,8 +42,102 @@ namespace openspace::exoplanets {
 ComputeColumnsView::ComputeColumnsView(DataViewer& dataViewer,
                                        const DataSettings& dataSettings)
     : _dataViewer(dataViewer)
+    , _historyFile(dataViewer.computedColumnHistoryFile())
 {
+    loadHistory();
+}
 
+void ComputeColumnsView::loadHistory() {
+    if (!std::filesystem::is_regular_file(_historyFile)) {
+        return;
+    }
+
+    try {
+        std::ifstream file(_historyFile);
+        const nlohmann::json json = nlohmann::json::parse(file);
+        if (json.value("version", 0) != 1 || !json.contains("columns")) {
+            _errorMessage = "Computed-column history has an unsupported format";
+            return;
+        }
+
+        // Parse in reverse order, so we get the most recent first in the list
+        const nlohmann::json& columns = json.at("columns");
+        for (auto it = columns.rbegin(); it != columns.rend(); ++it) {
+            const nlohmann::json& entry = *it;
+            const std::string name = entry.value("name", "");
+            const std::string expression = entry.value("expression", "");
+            if (!name.empty() && !expression.empty()) {
+                _history.push_back({ name, expression });
+            }
+        }
+    }
+    catch (const std::exception&) {
+        _errorMessage = "Failed to load computed-column history";
+    }
+}
+
+void ComputeColumnsView::saveHistory() const {
+    nlohmann::json columns = nlohmann::json::array();
+    for (const HistoryEntry& entry : _history) {
+        columns.push_back({ { "name", entry.name }, { "expression", entry.expression } });
+    }
+
+    std::ofstream file(_historyFile, std::ofstream::trunc);
+    if (file.good()) {
+        file << nlohmann::json({ { "version", 1 }, { "columns", columns } }).dump(2);
+    }
+}
+
+void ComputeColumnsView::rememberQuery(const std::string& name,
+                                       const std::string& expression)
+{
+    auto entry = std::find_if(
+        _history.begin(),
+        _history.end(),
+        [&name](const HistoryEntry& value) { return value.name == name; }
+    );
+    if (entry == _history.end()) {
+        _history.push_back({ name, expression });
+    }
+    else {
+        entry->expression = expression;
+    }
+    saveHistory();
+}
+
+void ComputeColumnsView::renderHistory() {
+    if (ImGui::Button("Query history")) {
+        ImGui::OpenPopup("Query history");
+    }
+
+    if (!ImGui::BeginPopup("Query history")) {
+        return;
+    }
+
+    if (_history.empty()) {
+        ImGui::TextUnformatted("No computed-column queries saved yet");
+    }
+    else {
+        for (const HistoryEntry& entry : _history) {
+            ImGui::PushID(entry.name.c_str());
+            if (ImGui::Selectable(std::format("{} = {}", entry.name, entry.expression).c_str()))
+            {
+                std::strncpy(_nameBuffer, entry.name.c_str(), sizeof(_nameBuffer) - 1);
+                _nameBuffer[sizeof(_nameBuffer) - 1] = '\0';
+                std::strncpy(
+                    _expressionBuffer,
+                    entry.expression.c_str(),
+                    sizeof(_expressionBuffer) - 1
+                );
+                _expressionBuffer[sizeof(_expressionBuffer) - 1] = '\0';
+                _errorMessage.clear();
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::PopID();
+        }
+    }
+
+    ImGui::EndPopup();
 }
 
 bool ComputeColumnsView::appendColumnToExpression(const std::string& columnName) {
@@ -94,11 +190,15 @@ void ComputeColumnsView::renderColumnBrowser() {
     columnFilter.Draw("Filter columns", availableWidth);
 
     if (ImGui::BeginChild("ColumnList", ImVec2(0.f, 0.f), true)) {
+        const auto& computedColumns = _dataViewer.computedColumns();
+
         ImGui::TextUnformatted("Loaded columns");
         ImGui::Separator();
 
         for (const ColumnKey& column : _dataViewer.columns()) {
-            if (!_dataViewer.isNumericColumn(column)) {
+            if (!_dataViewer.isNumericColumn(column) ||
+                computedColumns.contains(column))
+            {
                 continue;
             }
 
@@ -124,12 +224,12 @@ void ComputeColumnsView::renderColumnBrowser() {
             ImGui::PopID();
         }
 
-        if (!_computedColumns.empty()) {
+        if (!computedColumns.empty()) {
             ImGui::Spacing();
             ImGui::TextUnformatted("Computed columns");
             ImGui::Separator();
 
-            for (const auto& entry : _computedColumns) {
+            for (const auto& entry : computedColumns) {
                 const std::string& column = entry.first;
                 if (!columnFilter.PassFilter(column.c_str())) {
                     continue;
@@ -153,9 +253,6 @@ void ComputeColumnsView::renderColumnBrowser() {
 }
 
 bool ComputeColumnsView::isNameTaken(const std::string& name) const {
-    if (_computedColumns.contains(name)) {
-        return true;
-    }
     const std::vector<ColumnKey>& columns = _dataViewer.columns();
     return std::find(columns.begin(), columns.end(), name) != columns.end();
 }
@@ -186,12 +283,12 @@ bool ComputeColumnsView::computeColumn(const std::string& name,
     result.reserve(data.size());
 
     for (size_t rowIndex = 0; rowIndex < data.size(); rowIndex++) {
-        const ExoplanetItem& item = data[rowIndex];
-        auto resolveVariable = [this, &item, rowIndex, &foundUnknownVariable,
-                                 &unknownVariableName](const std::string& varName)
+        auto resolveVariable = [this, rowIndex, &foundUnknownVariable,
+                                &unknownVariableName](const std::string& varName)
         {
-            if (auto it = _computedColumns.find(varName); it != _computedColumns.end()) {
-                return it->second[rowIndex];
+            const auto& computedColumns = _dataViewer.computedColumns();
+            if (auto it = computedColumns.find(varName); it != computedColumns.end()) {
+                return it->second.values[rowIndex];
             }
             const std::vector<ColumnKey>& columns = _dataViewer.columns();
             const bool isKnownColumn =
@@ -205,7 +302,7 @@ bool ComputeColumnsView::computeColumn(const std::string& name,
             if (!_dataViewer.isNumericColumn(varName)) {
                 return std::numeric_limits<float>::quiet_NaN();
             }
-            return std::get<float>(_dataViewer.columnValue(varName, item));
+            return std::get<float>(_dataViewer.columnValue(varName, rowIndex));
         };
 
         result.push_back(expression.evaluate(resolveVariable));
@@ -216,13 +313,18 @@ bool ComputeColumnsView::computeColumn(const std::string& name,
         }
     }
 
-    _computedColumns[name] = std::move(result);
+    if (!_dataViewer.addComputedColumn(name, expressionText, std::move(result))) {
+        _errorMessage = std::format("Column name '{}' is already in use", name);
+        return false;
+    }
+    rememberQuery(name, expressionText);
     _errorMessage.clear();
     return true;
 }
 
 void ComputeColumnsView::render(bool* open) {
     if (!ImGui::Begin("Compute data columns", open)) {
+        _showColumnBrowser = false;
         ImGui::End();
         return;
     }
@@ -264,11 +366,13 @@ void ComputeColumnsView::render(bool* open) {
         );
     }
 
+    renderHistory();
+
     ImGui::Separator();
     ImGui::Text("Computed columns");
 
     std::string columnToRemove;
-    for (const auto& [name, values] : _computedColumns) {
+    for (const auto& [name, column] : _dataViewer.computedColumns()) {
         ImGui::PushID(name.c_str());
 
         if (ImGui::Button("x")) {
@@ -278,18 +382,24 @@ void ComputeColumnsView::render(bool* open) {
 
         float minValue = std::numeric_limits<float>::max();
         float maxValue = std::numeric_limits<float>::lowest();
-        for (float v : values) {
+        for (float v : column.values) {
             if (!std::isnan(v)) {
                 minValue = std::min(minValue, v);
                 maxValue = std::max(maxValue, v);
             }
         }
         ImGui::Text("%s (min: %f, max: %f)", name.c_str(), minValue, maxValue);
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::TextUnformatted("Query:");
+            ImGui::TextUnformatted(column.expression.c_str());
+            ImGui::EndTooltip();
+        }
 
         ImGui::PopID();
     }
     if (!columnToRemove.empty()) {
-        _computedColumns.erase(columnToRemove);
+        _dataViewer.removeComputedColumn(columnToRemove);
     }
 
     ImGui::End();

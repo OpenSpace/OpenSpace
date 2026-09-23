@@ -46,11 +46,14 @@ public:
 
     bool renderColumnSettingsView(const DataSettings& dataSettings);
 
+    void updateComputedColumns(const std::map<ColumnKey, ComputedColumn>& columns);
+
     std::vector<ColumnKey> orderedSelectedColumns() const;
 
 private:
     std::vector<ColumnKey> _namedColumns;
     std::vector<ColumnKey> _otherColumns;
+    std::vector<ColumnKey> _computedColumns;
 
     // The name column is always selected
     ColumnKey _nameColumn;
@@ -58,6 +61,7 @@ private:
     // Column selection for table views
     std::vector<bool> _selectedNamedColumns;
     std::vector<bool> _selectedOtherColumns;
+    std::vector<bool> _selectedComputedColumns;
 };
 
 } // namespace openspace::exoplanets
