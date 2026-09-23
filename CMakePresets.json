@@ -123,16 +123,18 @@
   ],
   "packagePresets": [
     {
-      "$comment": "Every package preset configures a release build. A debug build packages the unstripped debug runtime of every dependency, which took the Linux packages past 3 GB installed",
+      "$comment": "Every package preset packages a release build. A debug build packages the unstripped debug runtime of every dependency, which took the Linux packages past 3 GB installed. The Windows presets use the multi-config Visual Studio generator and select Release through 'configurations', because the Ninja presets need the MSVC environment on the PATH and the build agents do not provide it",
       "name": "windows-zip",
       "displayName": "Windows ZIP Package",
-      "configurePreset": "windows-ninja-release",
+      "configurePreset": "windows-msvc",
+      "configurations": ["Release"],
       "generators": ["ZIP"]
     },
     {
       "name": "windows-nsis",
       "displayName": "Windows NSIS Installer",
-      "configurePreset": "windows-ninja-release",
+      "configurePreset": "windows-msvc",
+      "configurations": ["Release"],
       "generators": ["NSIS"]
     },
     {
@@ -184,6 +186,12 @@
       "displayName": "Windows MSVC (RelWithDebInfo)",
       "configurePreset": "windows-msvc",
       "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "windows-msvc-release",
+      "displayName": "Windows MSVC (Release)",
+      "configurePreset": "windows-msvc",
+      "configuration": "Release"
     },
     {
       "name": "windows-ninja-debug",
