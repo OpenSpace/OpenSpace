@@ -1,7 +1,7 @@
 // OpenSpace nightly packaging pipeline
 //
-// Builds master every night at 01:00 on Linux and Windows, runs CPack, and publishes the
-// results to /data/releases/nightly on the server-liu-cdn node as
+// Builds the branch selected below every night at 01:00 on Linux and Windows, runs CPack,
+// and publishes the results to /data/releases/nightly on the server-liu-cdn node as
 //   OpenSpace-nightly.zip       (Windows)
 //   OpenSpace-nightly.exe       (Windows, NSIS installer)
 //   OpenSpace-nightly.deb       (Linux)
@@ -16,6 +16,7 @@ properties([
 
 def url = 'https://github.com/OpenSpace/OpenSpace'
 def branch = 'master'
+// def branch = 'tmp/jenkins'
 def releaseDir = '/data/releases/nightly'
 
 def scmConfig = scmGit(
