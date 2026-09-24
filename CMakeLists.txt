@@ -24,40 +24,55 @@
 
 cmake_minimum_required(VERSION 4.0)
 
-project(OpenSpace LANGUAGES C CXX)
-
 # CMake 4.0 will no longer allow minimum required version below 3.5 and some of our
-# dependencies have not been updated to reflect this. To make things work, we blanked
-# require to 3.10 here to remove those issues. Once CMake configures and generates
+# dependencies have not been updated to reflect this. To make things work, we blanket
+# require 3.10 here to remove those issues. Once CMake configures and generates
 # successfully without this next line, it can be removed
 set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
+
+# The options gating optional dependencies have to be declared before the first project()
+# call: that is when vcpkg's toolchain file runs and reads VCPKG_MANIFEST_FEATURES
+#
+# vcpkg only reads VCPKG_MANIFEST_FEATURES on the configure that first creates the build
+# directory. Changing any of the options below afterwards will not add or remove the
+# corresponding dependency: delete build/<preset>/vcpkg_installed (or the whole build
+# directory) and configure again
+option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+option(OPENSPACE_ENABLE_TRACY "Enable profiling with Tracy" OFF)
+option(OPENSPACE_OPENVR_SUPPORT "Build the OpenSpace application with OpenVR support" OFF)
+option(OPENSPACE_USE_SYSTEM_QT "Use a Qt installation provided by the system instead of building Qt through vcpkg" OFF)
+
+if (OPENSPACE_HAVE_TESTS)
+  list(APPEND VCPKG_MANIFEST_FEATURES "tests")
+endif ()
+if (OPENSPACE_ENABLE_TRACY)
+  list(APPEND VCPKG_MANIFEST_FEATURES "profiling")
+endif ()
+if (OPENSPACE_OPENVR_SUPPORT)
+  list(APPEND VCPKG_MANIFEST_FEATURES "openvr")
+endif ()
+if (NOT OPENSPACE_USE_SYSTEM_QT)
+  list(APPEND VCPKG_MANIFEST_FEATURES "qt")
+endif ()
+
+project(OpenSpace LANGUAGES C CXX)
 
 set(OPENSPACE_RELEASE_BUILD OFF)
 set(OPENSPACE_VERSION_MAJOR)
 set(OPENSPACE_VERSION_MINOR)
 set(OPENSPACE_VERSION_PATCH)
 
-# Optionally disable vcpkg to prevent dependency conflicts
-set(DISABLE_VCPKG OFF CACHE BOOL "Disable the use of vcpkg libs for Windows builds")
-if (WIN32 AND DISABLE_VCPKG)
-  # This works for all subprojects due to MSBuild's hierarchical search
-  configure_file(
-    "${CMAKE_SOURCE_DIR}/support/cmake/Directory.Build.Props.template"
-    "${CMAKE_BINARY_DIR}/Directory.Build.props"
-    COPYONLY
-  )
-  message(STATUS "Vcpkg disabled through CMake option DISABLE_VCPKG")
-endif ()
+# The dependencies resolved through vcpkg are located with find_package() from the
+# subdirectory that consumes them (ext/, apps/, individual modules). Their IMPORTED targets
+# have to be visible across sibling directories (for example Ghoul::Ghoul is found in ext/
+# but linked from src/, modules/ and tests/), so promote every find_package target to
+# global scope
+set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON)
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
 
 begin_header("Configuring OpenSpace project")
-
-# Bail out if the user tries to generate a 32 bit project
-if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
-  message(FATAL_ERROR "OpenSpace can only be generated for 64 bit architectures.")
-endif ()
 
 ##########################################################################################
 # Cleanup project                                                                        #
@@ -107,8 +122,6 @@ execute_process(
   COMMAND_ERROR_IS_FATAL ANY
 )
 
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
-
 if (MSVC)
   option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
 endif ()
@@ -120,10 +133,33 @@ if (UNIX AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_definitions(D_GNU_SOURCE)
 endif ()
 
+# Qt is consumed by apps/OpenSpace/ext/launcher and apps/AssetBuilder, both of which call
+# find_package themselves. When the system Qt is used we additionally resolve it here, at
+# the top level: it turns a missing Qt into an actionable error instead of a cryptic failure
+# deep inside apps/, and it puts QT6_INSTALL_PREFIX and friends into this scope, where
+# support/cmake/packaging.cmake (included at the bottom of this file) needs them. Because
+# CMAKE_FIND_PACKAGE_TARGETS_GLOBAL is on, the Qt6:: targets found here are visible
+# everywhere and the find_package calls in the subdirectories become no-ops.
+if (OPENSPACE_USE_SYSTEM_QT)
+  begin_header("Dependency: Qt")
+  find_package(Qt6 COMPONENTS Core Gui Widgets Network QUIET)
+  if (NOT Qt6_FOUND)
+    message(FATAL_ERROR
+      "OPENSPACE_USE_SYSTEM_QT is enabled, but no Qt6 installation providing the Core, "
+      "Gui, Widgets, and Network components was found. Point CMake at the Qt installation "
+      "with -DCMAKE_PREFIX_PATH=<qt>/lib/cmake or -DQt6_DIR=<qt>/lib/cmake/Qt6, or disable "
+      "the option to have vcpkg build Qt instead (which requires deleting the "
+      "vcpkg_installed folder in the build directory first)."
+    )
+  endif ()
+  message(STATUS "Using system Qt ${Qt6_VERSION} from ${Qt6_DIR}")
+  end_header("Dependency: Qt")
+endif ()
+
 add_subdirectory(ext)
 add_subdirectory(src)
 
-add_subdirectory(support/coding/codegen)
+find_package(codegen CONFIG REQUIRED)
 # It is important that the __codegen.h do not actually exist so
 # that this target is never considered as finished
 add_custom_target(
@@ -131,15 +167,12 @@ add_custom_target(
   ALL DEPENDS
     "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
 )
-add_dependencies(run_codegen codegen-tool)
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
-  COMMAND codegen-tool ARGS "modules" "src"
+  COMMAND codegen::codegen-tool ARGS "modules" "src"
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   VERBATIM
 )
-set_target_properties(codegen-lib PROPERTIES FOLDER "support")
-set_target_properties(codegen-tool PROPERTIES FOLDER "support")
 set_target_properties(run_codegen PROPERTIES FOLDER "support")
 
 
@@ -159,9 +192,14 @@ endif ()
 
 
 if (OPENSPACE_HAVE_TESTS)
+  enable_testing()
+
   add_subdirectory(support/coding/codegen/tests)
   set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
   set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
+  if (NOT TEST codegentest)
+    add_test(NAME codegentest COMMAND codegentest)
+  endif ()
 
   begin_header("Generating OpenSpace unit test")
   add_subdirectory(tests)

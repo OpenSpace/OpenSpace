@@ -29,6 +29,7 @@
 #include <curl/curl.h>
 #include <array>
 #include <cstdint>
+#include <system_error>
 #include <utility>
 
 namespace openspace {
@@ -316,26 +317,20 @@ bool HttpFileDownload::setup() {
     return false;
 #else // ^^^^ WIN32 / !WIN32 vvvv
     if (errno) {
-#ifdef __unix__
-        std::array<char, 256> buffer;
+        // `strerror_r` cannot be called directly here since it has two incompatible
+        // signatures: glibc's version returns a `char*`, whereas the POSIX one that musl
+        // provides returns an `int` and only fills the buffer. `generic_category` wraps
+        // whichever of the two the standard library was built against, and is thread-safe
+        // either way, unlike a plain `strerror`
         LERRORC(
             "HttpFileDownload",
             std::format(
                 "Cannot open file '{}': {}",
                 _destination,
-                std::string(strerror_r(errno, buffer.data(), sizeof(buffer)))
+                std::generic_category().message(errno)
             )
         );
         return false;
-#else // ^^^^ __unix__ / !__unix__ vvvv
-        LERRORC(
-            "HttpFileDownload",
-            std::format(
-                "Cannot open file '{}': {}", _destination, std::string(strerror(errno))
-            )
-        );
-        return false;
-#endif // __unix__
     }
 
     LERRORC("HttpFileDownload", std::format("Cannot open file '{}'", _destination));

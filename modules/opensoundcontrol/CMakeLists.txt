@@ -41,16 +41,6 @@ create_new_module(
 )
 
 begin_dependency("oscpack")
-add_subdirectory(ext/oscpack SYSTEM)
-set_target_properties(oscpack PROPERTIES FOLDER "External")
-
-if (MSVC)
-  target_compile_options(oscpack PRIVATE "/W0")
-  target_compile_definitions(oscpack PRIVATE "_SCL_SECURE_NO_WARNINGS")
-else ()
-  target_compile_options(oscpack PRIVATE "-w")
-endif ()
-
-target_include_directories(openspace-module-opensoundcontrol SYSTEM PUBLIC ext/oscpack)
-target_link_libraries(openspace-module-opensoundcontrol PUBLIC oscpack)
+find_package(oscpack CONFIG REQUIRED)
+target_link_libraries(openspace-module-opensoundcontrol PUBLIC oscpack::oscpack)
 end_dependency("oscpack")

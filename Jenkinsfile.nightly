@@ -1,0 +1,125 @@
+// OpenSpace nightly packaging pipeline
+//
+// Builds the branch selected below every night at 01:00 on Linux and Windows, runs CPack,
+// and publishes the results to /data/releases/nightly on the server-liu-cdn node as
+//   OpenSpace-nightly.zip       (Windows)
+//   OpenSpace-nightly.exe       (Windows, NSIS installer)
+//   OpenSpace-nightly.deb       (Linux)
+//   OpenSpace-nightly.rpm       (Linux)
+//   OpenSpace-nightly.AppImage  (Linux)
+//
+// Required plugins: Pipeline, Git, Workspace Cleanup
+
+properties([
+  pipelineTriggers([cron('0 1 * * *')])
+])
+
+def url = 'https://github.com/OpenSpace/OpenSpace'
+// def branch = 'master'
+def branch = 'tmp/jenkins'
+def releaseDir = '/data/releases/nightly'
+
+def scmConfig = scmGit(
+  userRemoteConfigs: [[url: url]],
+  branches: [[name: "*/${branch}"]],
+  extensions: [
+    cleanBeforeCheckout(),
+    cloneOption(shallow: true, depth: 1, noTags: true, timeout: 30),
+    submodule(recursiveSubmodules: true, parentCredentials: true, shallow: true, depth: 1, threads: 4, timeout: 60)
+  ]
+)
+
+//
+// Pipeline start
+//
+parallel linux: {
+  node('linux-gcc') {
+    stage('nightly/linux/scm') {
+      checkout scmConfig
+    }
+
+    stage('nightly/linux/build') {
+      sh(script: 'cmake --preset linux-ninja-release', label: 'Configure')
+      sh(script: 'cmake --build --preset linux-ninja-release --parallel 6', label: 'Compile')
+    }
+
+    stage('nightly/linux/package') {
+      sh(script: 'cpack --preset linux-deb', label: 'Package DEB')
+      sh(script: 'cpack --preset linux-rpm', label: 'Package RPM')
+      sh(script: 'cpack --preset linux-appimage', label: 'Package AppImage')
+      sh(
+        script: '''
+          mkdir -p nightly
+          cp build/linux-ninja-release/OpenSpace-*.deb      nightly/OpenSpace-nightly.deb
+          cp build/linux-ninja-release/OpenSpace-*.rpm      nightly/OpenSpace-nightly.rpm
+          cp build/linux-ninja-release/OpenSpace-*.AppImage nightly/OpenSpace-nightly.AppImage
+        ''',
+        label: 'Collect packages'
+      )
+      stash(name: 'linux-packages', includes: 'nightly/*')
+    }
+    cleanWs()
+  } // node('linux-gcc')
+},
+windows: {
+  node('windows') {
+    stage('nightly/windows/scm') {
+      checkout scmConfig
+    }
+
+    stage('nightly/windows/build') {
+      bat(script: 'cmake --preset windows-msvc', label: 'Configure')
+      bat(script: 'cmake --build --preset windows-msvc-release --parallel 8', label: 'Compile')
+    }
+
+    stage('nightly/windows/package') {
+      bat(script: 'cpack --preset windows-zip', label: 'Package ZIP')
+      bat(script: 'cpack --preset windows-nsis', label: 'Package NSIS')
+
+      bat(
+        script: '''
+          if not exist nightly mkdir nightly
+          for %%f in (build\\windows-msvc\\OpenSpace-*-win64.zip) do copy /Y "%%f" "nightly\\OpenSpace-nightly.zip"
+          if not exist "nightly\\OpenSpace-nightly.zip" (
+            echo No ZIP package was produced in build\\windows-msvc
+            exit /b 1
+          )
+          for %%f in (build\\windows-msvc\\OpenSpace-*-win64.exe) do copy /Y "%%f" "nightly\\OpenSpace-nightly.exe"
+          if not exist "nightly\\OpenSpace-nightly.exe" (
+            echo No NSIS package was produced in build\\windows-msvc
+            exit /b 1
+          )
+        ''',
+        label: 'Collect packages'
+      )
+      stash(name: 'windows-packages', includes: 'nightly/*')
+    }
+    cleanWs()
+  } // node('windows')
+}
+
+// Publishing only happens once both platforms have succeeded. If either fails, the whole
+// run aborts here and the previous night's files are left in place rather than the folder
+// ending up with a mix of two builds
+node('server-liu-cdn') {
+  stage('nightly/publish') {
+    cleanWs()
+    unstash 'linux-packages'
+    unstash 'windows-packages'
+
+    // Both stashes unpack into the same directory, so a single copy publishes all files
+    sh(
+      script: """
+        mkdir -p ${releaseDir}
+        rm -f ${releaseDir}/OpenSpace-nightly.*
+        cp nightly/OpenSpace-nightly.* ${releaseDir}/
+        chmod 644 ${releaseDir}/OpenSpace-nightly.*
+        chmod 755 ${releaseDir}/OpenSpace-nightly.AppImage
+        chmod 755 ${releaseDir}/OpenSpace-nightly.exe
+        ls -l ${releaseDir}
+      """,
+      label: 'Publish packages'
+    )
+  }
+  cleanWs()
+} // node('server-liu-cdn')
