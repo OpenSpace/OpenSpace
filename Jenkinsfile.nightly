@@ -84,7 +84,7 @@ windows: {
             echo No ZIP package was produced in build\\windows-msvc
             exit /b 1
           )
-          for %%f in (build\\windows-msvc\\OpenSpace-*-win64-setup.exe) do copy /Y "%%f" "nightly\\OpenSpace-nightly.exe"
+          for %%f in (build\\windows-msvc\\OpenSpace-*-win64.exe) do copy /Y "%%f" "nightly\\OpenSpace-nightly.exe"
           if not exist "nightly\\OpenSpace-nightly.exe" (
             echo No NSIS package was produced in build\\windows-msvc
             exit /b 1
