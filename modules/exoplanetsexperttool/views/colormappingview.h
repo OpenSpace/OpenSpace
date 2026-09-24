@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLORMAPPINGVIEW___H__
 
 #include <modules/exoplanetsexperttool/datastructures.h>
+#include <map>
+#include <string>
 #include <vector>
 
 namespace openspace::exoplanets {
@@ -35,6 +37,11 @@ struct DataSettings;
 
 class ColorMappingView {
 public:
+    struct CategoryInfo {
+        glm::vec4 color = { 1.f, 1.f, 1.f, 1.f };
+        size_t count = 0;
+    };
+
     struct ColorMappedVariable {
         int colormapIndex = 0;
         ColumnKey column;
@@ -42,6 +49,10 @@ public:
         float colorScaleMax = 100.f;
         float opacity = 1.f;
         bool useLogScale = false;
+
+        // Categorical color mapping support
+        int categoricalPaletteIndex = 0;
+        std::map<std::string, CategoryInfo> categories;
     };
 
     ColorMappingView(DataViewer& dataViewer,
@@ -69,10 +80,15 @@ public:
         const ColorMappedVariable& variable);
 
     const char* colormapFromIndex(size_t index) const;
+    const char* categoricalPaletteFromIndex(size_t index) const;
+
+    void updateCategoriesForVariable(ColorMappedVariable& variable);
+    void resetCategoryColorsToPalette(ColorMappedVariable& variable);
 
 private:
     glm::vec4 _nanPointColor = { 0.3f, 0.3f, 0.3f, 1.f };
     std::vector<const char*> _colormaps;
+    std::vector<const char*> _categoricalPalettes;
 
     std::vector<ColorMappedVariable> _variableSelection;
 

@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
+#include <format>
+#include <string>
 
 namespace openspace::view {
 
@@ -44,6 +46,29 @@ void renderHelpMarker(const char* text) {
         ImGui::TextUnformatted(text);
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
+    }
+}
+
+void renderTruncatedTextWithTooltip(std::string_view text, size_t maxLength,
+                                    std::string_view suffix)
+{
+    const bool isTruncated = text.length() > maxLength;
+    const std::string truncated = isTruncated ?
+        std::string(text.substr(0, maxLength > 3 ? maxLength - 3 : maxLength)) + "..." :
+        std::string(text);
+
+    if (suffix.empty()) {
+        ImGui::TextUnformatted(truncated.c_str());
+        if (isTruncated && ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%.*s", static_cast<int>(text.length()), text.data());
+        }
+    }
+    else {
+        ImGui::Text("%s%.*s", truncated.c_str(), static_cast<int>(suffix.length()), suffix.data());
+        if (isTruncated && ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%.*s%.*s", static_cast<int>(text.length()), text.data(),
+                static_cast<int>(suffix.length()), suffix.data());
+        }
     }
 }
 

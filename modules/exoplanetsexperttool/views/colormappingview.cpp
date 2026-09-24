@@ -29,12 +29,39 @@
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <implot.h>
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <numeric>
 #include <string>
 #include <vector>
 
 namespace {
+    // Curated high-contrast qualitative palette of 20 colors (Tableau20-style)
+    constexpr ImVec4 Qualitative20Colors[] = {
+        ImVec4(0.121569f, 0.466667f, 0.705882f, 1.f), // Blue
+        ImVec4(1.000000f, 0.498039f, 0.054902f, 1.f), // Orange
+        ImVec4(0.172549f, 0.627451f, 0.172549f, 1.f), // Green
+        ImVec4(0.839216f, 0.152941f, 0.156863f, 1.f), // Red
+        ImVec4(0.580392f, 0.403922f, 0.741176f, 1.f), // Purple
+        ImVec4(0.549020f, 0.337255f, 0.294118f, 1.f), // Brown
+        ImVec4(0.890196f, 0.466667f, 0.760784f, 1.f), // Pink
+        ImVec4(0.498039f, 0.498039f, 0.498039f, 1.f), // Gray
+        ImVec4(0.737255f, 0.741176f, 0.133333f, 1.f), // Olive
+        ImVec4(0.090196f, 0.745098f, 0.811765f, 1.f), // Cyan
+        ImVec4(0.682353f, 0.780392f, 0.909804f, 1.f), // Light Blue
+        ImVec4(1.000000f, 0.733333f, 0.470588f, 1.f), // Light Orange
+        ImVec4(0.596078f, 0.874510f, 0.541176f, 1.f), // Light Green
+        ImVec4(1.000000f, 0.596078f, 0.588235f, 1.f), // Light Red
+        ImVec4(0.772549f, 0.690196f, 0.835294f, 1.f), // Light Purple
+        ImVec4(0.768627f, 0.611765f, 0.580392f, 1.f), // Light Brown
+        ImVec4(0.968627f, 0.713725f, 0.823529f, 1.f), // Light Pink
+        ImVec4(0.780392f, 0.780392f, 0.780392f, 1.f), // Light Gray
+        ImVec4(0.858824f, 0.858824f, 0.552941f, 1.f), // Light Olive
+        ImVec4(0.619608f, 0.854902f, 0.898039f, 1.f)  // Light Cyan
+    };
+    constexpr int NumQualitative20Colors = static_cast<int>(sizeof(Qualitative20Colors) / sizeof(Qualitative20Colors[0]));
+
     void LogColormapScale(const char* label, double scaleMin, double scaleMax,
                           float barWidthPx, float height)
     {
@@ -194,6 +221,14 @@ ColorMappingView::ColorMappingView(DataViewer& dataViewer,
         "Deep",
         "Dark",
         "Paired",
+    };
+
+    _categoricalPalettes = {
+        "Deep (10)",
+        "Dark / Set1 (9)",
+        "Paired (12)",
+        "Pastel (9)",
+        "Distinct 20"
     };
 
     for (size_t i = 0; i < _dataViewer.columns().size(); ++i) {
@@ -460,45 +495,70 @@ void ColorMappingView::renderActiveColormapOverview() {
 
         ImGui::Text("%s", columnName.c_str());
 
-        ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
-        const std::string label = std::format(
-            "##ColormapScale{}",
-            i
-        );
+        const bool isNumeric = _dataViewer.isNumericColumn(variable.column);
 
-        const float barWidthPx = 20.f;
-        const float height = 150.f;
-        if (variable.useLogScale) {
-            LogColormapScale(
-                label.c_str(),
-                variable.colorScaleMin,
-                variable.colorScaleMax,
-                barWidthPx,
-                height
+        if (isNumeric) {
+            ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
+            const std::string label = std::format(
+                "##ColormapScale{}",
+                i
             );
+
+            const float barWidthPx = 20.f;
+            const float height = 150.f;
+            if (variable.useLogScale) {
+                LogColormapScale(
+                    label.c_str(),
+                    variable.colorScaleMin,
+                    variable.colorScaleMax,
+                    barWidthPx,
+                    height
+                );
+            }
+            else {
+                ImPlot::ColormapScale(
+                    label.c_str(),
+                    variable.colorScaleMin,
+                    variable.colorScaleMax,
+                    ImVec2(0, height)
+                );
+            }
+
+            ImPlot::PopColormap();
         }
         else {
-            ImPlot::ColormapScale(
-                label.c_str(),
-                variable.colorScaleMin,
-                variable.colorScaleMax,
-                ImVec2(0, height)
-            );
+            // Render small discrete categorical legend swatches
+            const float swatchSize = 14.f;
+            constexpr size_t MaxNameLength = 16;
+            int catId = 0;
+            for (const auto& [name, info] : variable.categories) {
+                ImGui::PushID(std::format("##OverviewCat{}_{}", i, catId++).c_str());
+                ImVec4 c = view::helper::toImVec4(info.color);
+                c.w *= variable.opacity;
+                ImGui::ColorButton("##CatSwatch", c, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip, ImVec2(swatchSize, swatchSize));
+                ImGui::SameLine();
+                view::helper::renderTruncatedTextWithTooltip(name, MaxNameLength);
+                ImGui::PopID();
+            }
         }
-
-        ImPlot::PopColormap();
     }
 }
 
 bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
                                           std::string_view relevantSystem)
 {
-    constexpr const int InputWidth = 120;
+    constexpr const int InputWidth = 140;
     bool wasChanged = false;
 
     if (!_dataViewer.hasColumn(variable.column)) {
         variable.column = _firstNumericColumn;
         wasChanged = true;
+    }
+
+    const bool isNumeric = _dataViewer.isNumericColumn(variable.column);
+
+    if (!isNumeric && variable.categories.empty()) {
+        updateCategoriesForVariable(variable);
     }
 
     ImGui::BeginGroup();
@@ -517,11 +577,6 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
             columnFilter.Draw("##Filter");
 
             for (int i = 0; i < _dataViewer.columns().size(); ++i) {
-                // Ignore non-numeric columns
-                if (!_dataViewer.isNumericColumn(i)) {
-                    continue;
-                }
-
                 const char* name = _dataViewer.columnName(i);
                 if (!columnFilter.PassFilter(name)) {
                     continue;
@@ -530,6 +585,9 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
                 const ColumnKey& column = _dataViewer.columns()[i];
                 if (ImGui::Selectable(name, variable.column == column)) {
                     variable.column = column;
+                    if (!_dataViewer.isNumericColumn(column)) {
+                        updateCategoriesForVariable(variable);
+                    }
                     wasChanged = true;
                 }
 
@@ -538,84 +596,109 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
             ImGui::EndCombo();
         }
 
-        ImGui::SetNextItemWidth(InputWidth);
-        if (ImGui::BeginCombo("Colormap", _colormaps[variable.colormapIndex])) {
-            for (int i = 0; i < _colormaps.size(); ++i) {
-                const char* name = _colormaps[i];
-                ImPlot::ColormapIcon(ImPlot::GetColormapIndex(name));
-                ImGui::SameLine();
-                if (ImGui::Selectable(name, variable.colormapIndex == i)) {
-                    variable.colormapIndex = i;
-                    wasChanged = true;
+        if (isNumeric) {
+            ImGui::SetNextItemWidth(InputWidth);
+            if (ImGui::BeginCombo("Colormap", _colormaps[variable.colormapIndex])) {
+                for (int i = 0; i < _colormaps.size(); ++i) {
+                    const char* name = _colormaps[i];
+                    ImPlot::ColormapIcon(ImPlot::GetColormapIndex(name));
+                    ImGui::SameLine();
+                    if (ImGui::Selectable(name, variable.colormapIndex == i)) {
+                        variable.colormapIndex = i;
+                        wasChanged = true;
+                    }
                 }
-            }
-            ImGui::EndCombo();
-        }
-
-        // Min/max values for color range
-        ImGui::SetNextItemWidth(InputWidth);
-        if (ImGui::DragFloatRange2("Min / Max", &variable.colorScaleMin, &variable.colorScaleMax, 1.f)) {
-            wasChanged = true;
-        }
-
-        bool updateMinMax = false;
-
-        std::vector<size_t> relevantIndices;
-
-        const std::vector<ExoplanetItem>& data = _dataViewer.data();
-
-        if (!relevantSystem.empty() && ImGui::SmallButton("Set from planets in system")) {
-            relevantIndices = _dataViewer.planetsForHost(std::string(relevantSystem));
-            updateMinMax = true;
-        }
-        else if (ImGui::SmallButton("Set from current table data")) {
-            relevantIndices = _dataViewer.currentFiltering();
-            updateMinMax = true;
-        }
-        else if (ImGui::SmallButton("Set from full data")) {
-            std::vector<size_t> v(data.size()); // same number of indices as data
-            std::iota(std::begin(v), std::end(v), 0);
-            relevantIndices = std::move(v);
-            updateMinMax = true;
-        }
-
-        if (updateMinMax && !relevantIndices.empty()) {
-            float newMin = std::numeric_limits<float>::max();
-            float newMax = std::numeric_limits<float>::lowest();
-
-            for (size_t i : relevantIndices) {
-                const ExoplanetItem& item = data[i];
-                auto value = _dataViewer.columnValue(variable.column, item);
-                if (!std::holds_alternative<float>(value)) {
-                    // Shouldn't be possible to try to use non numbers
-                    throw;
-                }
-
-                float val = std::get<float>(value);
-                if (std::isnan(val)) {
-                    continue;
-                }
-                newMax = std::max(val, newMax);
-                newMin = std::min(val, newMin);
+                ImGui::EndCombo();
             }
 
-            variable.colorScaleMin = newMin;
-            variable.colorScaleMax = newMax;
-            wasChanged = true;
-        };
+            // Min/max values for color range
+            ImGui::SetNextItemWidth(InputWidth);
+            if (ImGui::DragFloatRange2("Min / Max", &variable.colorScaleMin, &variable.colorScaleMax, 1.f)) {
+                wasChanged = true;
+            }
 
+            bool updateMinMax = false;
 
-        // Logarithmic scaling toggle
-        if (ImGui::Checkbox("Log scale", &variable.useLogScale)) {
-            wasChanged = true;
+            std::vector<size_t> relevantIndices;
+
+            const std::vector<ExoplanetItem>& data = _dataViewer.data();
+
+            if (!relevantSystem.empty() && ImGui::SmallButton("Set from planets in system")) {
+                relevantIndices = _dataViewer.planetsForHost(std::string(relevantSystem));
+                updateMinMax = true;
+            }
+            else if (ImGui::SmallButton("Set from current table data")) {
+                relevantIndices = _dataViewer.currentFiltering();
+                updateMinMax = true;
+            }
+            else if (ImGui::SmallButton("Set from full data")) {
+                std::vector<size_t> v(data.size()); // same number of indices as data
+                std::iota(std::begin(v), std::end(v), 0);
+                relevantIndices = std::move(v);
+                updateMinMax = true;
+            }
+
+            if (updateMinMax && !relevantIndices.empty()) {
+                float newMin = std::numeric_limits<float>::max();
+                float newMax = std::numeric_limits<float>::lowest();
+
+                for (size_t i : relevantIndices) {
+                    const ExoplanetItem& item = data[i];
+                    auto value = _dataViewer.columnValue(variable.column, item);
+                    if (!std::holds_alternative<float>(value)) {
+                        continue;
+                    }
+
+                    float val = std::get<float>(value);
+                    if (std::isnan(val)) {
+                        continue;
+                    }
+                    newMax = std::max(val, newMax);
+                    newMin = std::min(val, newMin);
+                }
+
+                variable.colorScaleMin = newMin;
+                variable.colorScaleMax = newMax;
+                wasChanged = true;
+            };
+
+            // Logarithmic scaling toggle
+            if (ImGui::Checkbox("Log scale", &variable.useLogScale)) {
+                wasChanged = true;
+            }
+
+            const ImVec4 WarningColor = view::helper::toImVec4(view::colors::Warning);
+            if (variable.useLogScale && variable.colorScaleMin <= 0.f) {
+                ImGui::TextColored(WarningColor, "Min must be > 0 for log scale");
+            }
+            if (variable.useLogScale && variable.colorScaleMax <= 0.f) {
+                ImGui::TextColored(WarningColor, "Max must be > 0 for log scale");
+            }
         }
+        else {
+            // Categorical Palette dropdown
+            ImGui::SetNextItemWidth(InputWidth);
+            if (ImGui::BeginCombo("Palette", _categoricalPalettes[variable.categoricalPaletteIndex])) {
+                for (int i = 0; i < _categoricalPalettes.size(); ++i) {
+                    const char* name = _categoricalPalettes[i];
+                    if (ImGui::Selectable(name, variable.categoricalPaletteIndex == i)) {
+                        variable.categoricalPaletteIndex = i;
+                        resetCategoryColorsToPalette(variable);
+                        wasChanged = true;
+                    }
+                }
+                ImGui::EndCombo();
+            }
 
-        const ImVec4 WarningColor = view::helper::toImVec4(view::colors::Warning);
-        if (variable.useLogScale && variable.colorScaleMin <= 0.f) {
-            ImGui::TextColored(WarningColor, "Min must be > 0 for log scale");
-        }
-        if (variable.useLogScale && variable.colorScaleMax <= 0.f) {
-            ImGui::TextColored(WarningColor, "Max must be > 0 for log scale");
+            if (ImGui::SmallButton("Reset palette")) {
+                resetCategoryColorsToPalette(variable);
+                wasChanged = true;
+            }
+            ImGui::SameLine();
+            if (ImGui::SmallButton("Rescan data")) {
+                updateCategoriesForVariable(variable);
+                wasChanged = true;
+            }
         }
 
         // Render an opacity slider
@@ -628,31 +711,66 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
 
     // Render visuals for colormap
     ImGui::SameLine();
-    ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
 
-    constexpr const int ColorScaleHeight = 180;
-    const bool canUseLogScale = variable.colorScaleMin > 0.f && variable.colorScaleMax > 0.f;
+    if (isNumeric) {
+        ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
 
-    if (variable.useLogScale && canUseLogScale) {
-        // Use log-space bounds for the visual scale (ImPlot::ColormapScale has no log flag)
-        LogColormapScale(
-            "##ColorScale",
-            variable.colorScaleMin,
-            variable.colorScaleMax,
-            15,
-            ColorScaleHeight
-        );
+        constexpr const int ColorScaleHeight = 180;
+        const bool canUseLogScale = variable.colorScaleMin > 0.f && variable.colorScaleMax > 0.f;
+
+        if (variable.useLogScale && canUseLogScale) {
+            // Use log-space bounds for the visual scale (ImPlot::ColormapScale has no log flag)
+            LogColormapScale(
+                "##ColorScale",
+                variable.colorScaleMin,
+                variable.colorScaleMax,
+                15,
+                ColorScaleHeight
+            );
+        }
+        else {
+            ImPlot::ColormapScale(
+                "##ColorScale",
+                variable.colorScaleMin,
+                variable.colorScaleMax,
+                ImVec2(0, ColorScaleHeight)
+            );
+        }
+
+        ImPlot::PopColormap();
     }
     else {
-        ImPlot::ColormapScale(
-            "##ColorScale",
-            variable.colorScaleMin,
-            variable.colorScaleMax,
-            ImVec2(0, ColorScaleHeight)
-        );
-    }
+        // Render scrollable category color list with custom color pickers
+        ImGui::BeginGroup();
+        ImGui::Text("Categories (%zu):", variable.categories.size());
 
-    ImPlot::PopColormap();
+        const float childWidth = 200.f;
+        const float childHeight = 160.f;
+        if (ImGui::BeginChild("##CategoryList", ImVec2(childWidth, childHeight), true)) {
+            ImGuiColorEditFlags colorFlags = ImGuiColorEditFlags_NoInputs |
+                ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreview;
+
+            constexpr size_t MaxNameLength = 18;
+            int catId = 0;
+            for (auto& [name, info] : variable.categories) {
+                ImGui::PushID(catId++);
+
+                ImVec4 c = view::helper::toImVec4(info.color);
+                if (ImGui::ColorEdit4("##Color", (float*)&c, colorFlags)) {
+                    info.color = glm::vec4(c.x, c.y, c.z, c.w);
+                    wasChanged = true;
+                }
+                ImGui::SameLine();
+
+                const std::string suffix = std::format(" ({})", info.count);
+                view::helper::renderTruncatedTextWithTooltip(name, MaxNameLength, suffix);
+
+                ImGui::PopID();
+            }
+        }
+        ImGui::EndChild();
+        ImGui::EndGroup();
+    }
 
     return wasChanged;
 }
@@ -663,53 +781,98 @@ glm::vec4 ColorMappingView::colorFromColormap(const ExoplanetItem& item,
     const ColumnKey& colormapColumn = _dataViewer.hasColumn(variable.column) ?
         variable.column : _firstNumericColumn;
 
-    std::variant<const char*, float> value = _dataViewer.columnValue(colormapColumn, item);
-    float fValue = 0.0;
-    if (std::holds_alternative<float>(value)) {
-        fValue = std::get<float>(value);
-    }
-    else {
-        // text column => cannot be mapped to colormap
-        // OBS! This should not happen
-        return _nanPointColor;
-    }
+    const bool isNumeric = _dataViewer.isNumericColumn(colormapColumn);
 
-    glm::vec4 pointColor;
-    if (std::isnan(fValue)) {
-        pointColor = _nanPointColor;
-    }
-    else if (variable.useLogScale && fValue <= 0.f) {
-        // Log scale is undefined for non-positive values; treat as NaN
-        pointColor = _nanPointColor;
-    }
-    else {
-        ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
+    glm::vec4 pointColor = _nanPointColor;
 
-        float min = variable.colorScaleMin;
-        float max = variable.colorScaleMax;
-        float t = 0.f;
-
-        // TODO: Make log scale work for zero values, by mapping min to something very close to zero?
-
-        if (variable.useLogScale && min > 0.f && max > 0.f) {
-            float logMin = std::log10(min);
-            float logMax = std::log10(max);
-            float logVal = std::log10(fValue);
-            float logDiff = std::abs(logMax - logMin);
-            t = logDiff > std::numeric_limits<float>::epsilon() ?
-                (logVal - logMin) / logDiff : 0.f;
+    if (isNumeric) {
+        std::variant<const char*, float> value = _dataViewer.columnValue(colormapColumn, item);
+        float fValue = 0.0f;
+        if (std::holds_alternative<float>(value)) {
+            fValue = std::get<float>(value);
         }
         else {
-            float minMaxDiff = std::abs(max - min);
-            t = minMaxDiff > std::numeric_limits<float>::epsilon() ?
-                (fValue - min) / minMaxDiff : 0.f;
+            return _nanPointColor;
         }
 
-        t = std::clamp(t, 0.f, 1.f);
-        ImVec4 c = ImPlot::SampleColormap(t);
-        ImPlot::PopColormap();
-        pointColor = { c.x, c.y, c.z, c.w };
+        if (std::isnan(fValue)) {
+            pointColor = _nanPointColor;
+        }
+        else if (variable.useLogScale && fValue <= 0.f) {
+            // Log scale is undefined for non-positive values; treat as NaN
+            pointColor = _nanPointColor;
+        }
+        else {
+            ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
+
+            float min = variable.colorScaleMin;
+            float max = variable.colorScaleMax;
+            float t = 0.f;
+
+            if (variable.useLogScale && min > 0.f && max > 0.f) {
+                float logMin = std::log10(min);
+                float logMax = std::log10(max);
+                float logVal = std::log10(fValue);
+                float logDiff = std::abs(logMax - logMin);
+                t = logDiff > std::numeric_limits<float>::epsilon() ?
+                    (logVal - logMin) / logDiff : 0.f;
+            }
+            else {
+                float minMaxDiff = std::abs(max - min);
+                t = minMaxDiff > std::numeric_limits<float>::epsilon() ?
+                    (fValue - min) / minMaxDiff : 0.f;
+            }
+
+            t = std::clamp(t, 0.f, 1.f);
+            ImVec4 c = ImPlot::SampleColormap(t);
+            ImPlot::PopColormap();
+            pointColor = { c.x, c.y, c.z, c.w };
+        }
     }
+    else {
+        // String / Categorical column
+        std::variant<const char*, float> value = _dataViewer.columnValue(colormapColumn, item);
+        if (std::holds_alternative<const char*>(value)) {
+            const char* str = std::get<const char*>(value);
+            if (str && str[0] != '\0') {
+                std::string catKey(str);
+                auto it = variable.categories.find(catKey);
+                if (it != variable.categories.end()) {
+                    pointColor = it->second.color;
+                }
+                else {
+                    // Category not in cache yet: assign deterministically based on hash
+                    size_t hashVal = std::hash<std::string>{}(catKey);
+                    if (variable.categoricalPaletteIndex == 4) {
+                        ImVec4 c = Qualitative20Colors[hashVal % NumQualitative20Colors];
+                        pointColor = glm::vec4(c.x, c.y, c.z, c.w);
+                    }
+                    else {
+                        ImPlotColormap cmap = ImPlotColormap_Deep;
+                        if (variable.categoricalPaletteIndex == 1) {
+                            cmap = ImPlotColormap_Dark;
+                        }
+                        else if (variable.categoricalPaletteIndex == 2) {
+                            cmap = ImPlotColormap_Paired;
+                        }
+                        else if (variable.categoricalPaletteIndex == 3) {
+                            cmap = ImPlotColormap_Pastel;
+                        }
+                        ImVec4 c = ImPlot::GetColormapColor(static_cast<int>(hashVal), cmap);
+                        pointColor = glm::vec4(c.x, c.y, c.z, c.w);
+                    }
+                }
+            }
+            else {
+                // Empty string treated as missing/NaN
+                pointColor = _nanPointColor;
+            }
+        }
+        else {
+            pointColor = _nanPointColor;
+        }
+    }
+
     // Apply opacity
     pointColor.a *= variable.opacity;
 
@@ -718,6 +881,100 @@ glm::vec4 ColorMappingView::colorFromColormap(const ExoplanetItem& item,
 
 const char* ColorMappingView::colormapFromIndex(size_t index) const {
     return _colormaps[index];
+}
+
+const char* ColorMappingView::categoricalPaletteFromIndex(size_t index) const {
+    if (index < _categoricalPalettes.size()) {
+        return _categoricalPalettes[index];
+    }
+    return _categoricalPalettes.front();
+}
+
+void ColorMappingView::updateCategoriesForVariable(ColorMappedVariable& variable) {
+    // Scan all dataset rows to extract unique non-empty string values and counts
+    std::map<std::string, size_t> categoryCounts;
+    const std::vector<ExoplanetItem>& allData = _dataViewer.data();
+    for (const ExoplanetItem& item : allData) {
+        std::variant<const char*, float> val = _dataViewer.columnValue(variable.column, item);
+        if (std::holds_alternative<const char*>(val)) {
+            const char* str = std::get<const char*>(val);
+            if (str && str[0] != '\0') {
+                categoryCounts[std::string(str)]++;
+            }
+        }
+    }
+
+    // Preserve existing custom colors if category already existed, otherwise assign palette color
+    std::map<std::string, CategoryInfo> newCategories;
+    size_t catIndex = 0;
+    for (const auto& [name, count] : categoryCounts) {
+        if (auto it = variable.categories.find(name); it != variable.categories.end()) {
+            newCategories[name] = CategoryInfo{
+                .color = it->second.color,
+                .count = count
+            };
+        }
+        else {
+            // Assign default color from active qualitative palette
+            glm::vec4 color(1.f, 1.f, 1.f, 1.f);
+            if (variable.categoricalPaletteIndex == 4) { // Distinct 20
+                ImVec4 c = Qualitative20Colors[catIndex % NumQualitative20Colors];
+                color = glm::vec4(c.x, c.y, c.z, c.w);
+            }
+            else {
+                // Map to built-in ImPlot qualitative colormaps:
+                // 0: Deep (ImPlotColormap_Deep)
+                // 1: Dark (ImPlotColormap_Dark)
+                // 2: Paired (ImPlotColormap_Paired)
+                // 3: Pastel (ImPlotColormap_Pastel)
+                ImPlotColormap cmap = ImPlotColormap_Deep;
+                if (variable.categoricalPaletteIndex == 1) {
+                    cmap = ImPlotColormap_Dark;
+                }
+                else if (variable.categoricalPaletteIndex == 2) {
+                    cmap = ImPlotColormap_Paired;
+                }
+                else if (variable.categoricalPaletteIndex == 3) {
+                    cmap = ImPlotColormap_Pastel;
+                }
+                ImVec4 c = ImPlot::GetColormapColor(static_cast<int>(catIndex), cmap);
+                color = glm::vec4(c.x, c.y, c.z, c.w);
+            }
+
+            newCategories[name] = CategoryInfo{
+                .color = color,
+                .count = count
+            };
+        }
+        catIndex++;
+    }
+
+    variable.categories = std::move(newCategories);
+}
+
+void ColorMappingView::resetCategoryColorsToPalette(ColorMappedVariable& variable) {
+    size_t catIndex = 0;
+    for (auto& [name, info] : variable.categories) {
+        if (variable.categoricalPaletteIndex == 4) { // Distinct 20
+            ImVec4 c = Qualitative20Colors[catIndex % NumQualitative20Colors];
+            info.color = glm::vec4(c.x, c.y, c.z, c.w);
+        }
+        else {
+            ImPlotColormap cmap = ImPlotColormap_Deep;
+            if (variable.categoricalPaletteIndex == 1) {
+                cmap = ImPlotColormap_Dark;
+            }
+            else if (variable.categoricalPaletteIndex == 2) {
+                cmap = ImPlotColormap_Paired;
+            }
+            else if (variable.categoricalPaletteIndex == 3) {
+                cmap = ImPlotColormap_Pastel;
+            }
+            ImVec4 c = ImPlot::GetColormapColor(static_cast<int>(catIndex), cmap);
+            info.color = glm::vec4(c.x, c.y, c.z, c.w);
+        }
+        catIndex++;
+    }
 }
 
 } // namespace openspace::exoplanets

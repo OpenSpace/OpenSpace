@@ -725,16 +725,25 @@ void DataViewer::render() {
                 _colorMappingView->colorMapperVariables();
 
             const ColorMappingView::ColorMappedVariable& firstCmap = cmappedVariables.front();
+            const bool isNumeric = isNumericColumn(firstCmap.column);
 
             const char* column = columnName(firstCmap.column);
             totalWidth += ImGui::CalcTextSize(column).x;
 
-            std::string min = std::format("{:.2f}", firstCmap.colorScaleMin);
-            std::string max = std::format("{:.2f}", firstCmap.colorScaleMax);
-
-            totalWidth += ImGui::CalcTextSize(min.c_str()).x;
-            totalWidth += ImGui::CalcTextSize(max.c_str()).x;
-            totalWidth += 2.f * ImGui::GetStyle().ItemSpacing.x;
+            std::string min = "";
+            std::string max = "";
+            if (isNumeric) {
+                min = std::format("{:.2f}", firstCmap.colorScaleMin);
+                max = std::format("{:.2f}", firstCmap.colorScaleMax);
+                totalWidth += ImGui::CalcTextSize(min.c_str()).x;
+                totalWidth += ImGui::CalcTextSize(max.c_str()).x;
+                totalWidth += 2.f * ImGui::GetStyle().ItemSpacing.x;
+            }
+            else {
+                std::string catCount = std::format("({} categories)", firstCmap.categories.size());
+                totalWidth += ImGui::CalcTextSize(catCount.c_str()).x;
+                totalWidth += ImGui::GetStyle().ItemSpacing.x;
+            }
 
             int cmap = ImPlot::GetColormapIndex(
                 _colorMappingView->colormapFromIndex(firstCmap.colormapIndex)
@@ -750,7 +759,7 @@ void DataViewer::render() {
             // Some extra padding to the right;
             totalWidth += ImGui::GetStyle().ItemSpacing.x * 2.f;
 
-            std::string logScale = firstCmap.useLogScale ? " (log)" : "";
+            std::string logScale = (isNumeric && firstCmap.useLogScale) ? " (log)" : "";
             if (!logScale.empty()) {
                 totalWidth += ImGui::CalcTextSize(logScale.c_str()).x;
                 totalWidth += ImGui::GetStyle().ItemSpacing.x;
@@ -780,24 +789,34 @@ void DataViewer::render() {
                 ImGui::EndTooltip();
             }
 
-            ImGui::SameLine();
-            ImGui::TextUnformatted(min.c_str());
-            ImGui::SameLine();
-
-            ImGui::SetCursorPosY(startY + 0.5f * buttonHeight + 2.f * buttonPadding.y);
-            if (ImPlot::ColormapButton(column, ImVec2(0, buttonHeight), cmap)) {
-                _showColormapOverviewWindow = !_showColormapOverviewWindow;
-            }
-
-            ImGui::SameLine();
-            ImGui::TextUnformatted(max.c_str());
-
-            if (!logScale.empty()) {
+            if (isNumeric) {
                 ImGui::SameLine();
-                view::helper::renderDescriptiveText(logScale.c_str());
+                ImGui::TextUnformatted(min.c_str());
+                ImGui::SameLine();
 
-                if (ImGui::IsItemHovered()) {
-                    ImGui::SetTooltip("Using logarithmic scale");
+                ImGui::SetCursorPosY(startY + 0.5f * buttonHeight + 2.f * buttonPadding.y);
+                if (ImPlot::ColormapButton(column, ImVec2(0, buttonHeight), cmap)) {
+                    _showColormapOverviewWindow = !_showColormapOverviewWindow;
+                }
+
+                ImGui::SameLine();
+                ImGui::TextUnformatted(max.c_str());
+
+                if (!logScale.empty()) {
+                    ImGui::SameLine();
+                    view::helper::renderDescriptiveText(logScale.c_str());
+
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Using logarithmic scale");
+                    }
+                }
+            }
+            else {
+                ImGui::SameLine();
+                ImGui::SetCursorPosY(startY + 0.5f * buttonHeight + 2.f * buttonPadding.y);
+                std::string catSummary = std::format("{} categories", firstCmap.categories.size());
+                if (ImGui::Button(std::format("{} ({})", column, catSummary).c_str())) {
+                    _showColormapOverviewWindow = !_showColormapOverviewWindow;
                 }
             }
 

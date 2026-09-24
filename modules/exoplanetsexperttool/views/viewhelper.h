@@ -27,6 +27,7 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <ghoul/glm.h>
+#include <string_view>
 
 namespace openspace::view {
 
@@ -44,6 +45,10 @@ namespace helper {
 
     void renderDescriptiveText(const char* text);
     void renderHelpMarker(const char* text);
+
+    // Render text with a maximum character limit, truncating with "..." and showing the full text in a tooltip on hover
+    void renderTruncatedTextWithTooltip(std::string_view text, size_t maxLength,
+        std::string_view suffix = "");
 
 } // namespace helper
 
