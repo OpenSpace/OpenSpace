@@ -63,11 +63,26 @@ namespace {
                 continue;
             }
             if (std::isdigit(static_cast<unsigned char>(c)) || c == '.') {
-                size_t start = i;
+                const size_t start = i;
                 while (i < text.size() &&
                        (std::isdigit(static_cast<unsigned char>(text[i])) || text[i] == '.'))
                 {
                     i++;
+                }
+                if (i < text.size() && (text[i] == 'e' || text[i] == 'E')) {
+                    i++;
+                    if (i < text.size() && (text[i] == '+' || text[i] == '-')) {
+                        i++;
+                    }
+                    const size_t exponentStart = i;
+                    while (i < text.size() &&
+                           std::isdigit(static_cast<unsigned char>(text[i])))
+                    {
+                        i++;
+                    }
+                    if (i == exponentStart) {
+                        throw std::runtime_error("Expected exponent digits");
+                    }
                 }
                 const std::string numberText = text.substr(start, i - start);
                 Token token;

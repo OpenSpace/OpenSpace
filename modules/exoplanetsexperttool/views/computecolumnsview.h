@@ -28,6 +28,7 @@
 #include <modules/exoplanetsexperttool/datastructures.h>
 #include <filesystem>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace openspace::exoplanets {
@@ -44,8 +45,9 @@ public:
 
 private:
     bool isNameTaken(const std::string& name) const;
-    bool appendColumnToExpression(const std::string& columnName);
+    bool appendToExpression(std::string_view text);
     void renderColumnBrowser();
+    void renderConstantBrowser();
     void renderHistory();
     void loadHistory();
     void saveHistory() const;
@@ -65,6 +67,8 @@ private:
     char _expressionBuffer[1024] = "";
     bool _showColumnBrowser = false;
     bool _focusColumnBrowser = false;
+    bool _showConstantBrowser = false;
+    bool _focusConstantBrowser = false;
 
     struct HistoryEntry {
         std::string name;

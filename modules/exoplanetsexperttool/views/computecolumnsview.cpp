@@ -29,8 +29,11 @@
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/json.h>
+#include <openspace/util/distanceconstants.h>
 #include <algorithm>
+#include <array>
 #include <cfloat>
+#include <charconv>
 #include <cmath>
 #include <cstring>
 #include <format>
@@ -38,6 +41,44 @@
 #include <limits>
 
 namespace openspace::exoplanets {
+
+namespace {
+
+struct NumericConstant {
+    const char* name;
+    double value;
+};
+
+constexpr std::array<NumericConstant, 16> NumericConstants = {{
+    { "EarthRadius", distanceconstants::EarthRadius },
+    { "JupiterRadius", distanceconstants::JupiterRadius },
+    { "SolarRadius", distanceconstants::SolarRadius },
+    { "LightYear", distanceconstants::LightYear },
+    { "LightMonth", distanceconstants::LightMonth },
+    { "LightDay", distanceconstants::LightDay },
+    { "LightHour", distanceconstants::LightHour },
+    { "LightSecond", distanceconstants::LightSecond },
+    { "AstronomicalUnit", distanceconstants::AstronomicalUnit },
+    { "Parsec", distanceconstants::Parsec },
+    { "Inch", distanceconstants::Inch },
+    { "Foot", distanceconstants::Foot },
+    { "Yard", distanceconstants::Yard },
+    { "Chain", distanceconstants::Chain },
+    { "Mile", distanceconstants::Mile },
+    { "NauticalMile", distanceconstants::NauticalMile }
+}};
+
+std::string formatNumericConstant(double value) {
+    std::array<char, 32> buffer = {};
+    const auto [end, error] = std::to_chars(
+        buffer.data(),
+        buffer.data() + buffer.size(),
+        static_cast<float>(value)
+    );
+    return error == std::errc() ? std::string(buffer.data(), end) : std::string();
+}
+
+} // namespace
 
 ComputeColumnsView::ComputeColumnsView(DataViewer& dataViewer,
                                        const DataSettings& dataSettings)
@@ -188,7 +229,7 @@ void ComputeColumnsView::renderHistory() {
     ImGui::EndPopup();
 }
 
-bool ComputeColumnsView::appendColumnToExpression(const std::string& columnName) {
+bool ComputeColumnsView::appendToExpression(std::string_view text) {
     const size_t currentLength = std::strlen(_expressionBuffer);
     const bool needsSeparator = currentLength > 0 &&
         _expressionBuffer[currentLength - 1] != ' ' &&
@@ -198,8 +239,8 @@ bool ComputeColumnsView::appendColumnToExpression(const std::string& columnName)
     const size_t separatorLength = needsSeparator ? 1 : 0;
     constexpr size_t bufferSize = sizeof(_expressionBuffer);
 
-    if (currentLength + separatorLength + columnName.size() >= bufferSize) {
-        _errorMessage = "Column cannot be added: expression is too long";
+    if (currentLength + separatorLength + text.size() >= bufferSize) {
+        _errorMessage = "Value cannot be added: expression is too long";
         return false;
     }
 
@@ -208,10 +249,10 @@ bool ComputeColumnsView::appendColumnToExpression(const std::string& columnName)
     }
     std::memcpy(
         _expressionBuffer + currentLength + separatorLength,
-        columnName.c_str(),
-        columnName.size()
+        text.data(),
+        text.size()
     );
-    _expressionBuffer[currentLength + separatorLength + columnName.size()] = '\0';
+    _expressionBuffer[currentLength + separatorLength + text.size()] = '\0';
     _errorMessage.clear();
     return true;
 }
@@ -263,7 +304,7 @@ void ComputeColumnsView::renderColumnBrowser() {
 
             ImGui::PushID(column.c_str());
             if (ImGui::Selectable(displayName)) {
-                appendColumnToExpression(column);
+                appendToExpression(column);
             }
             if (ImGui::IsItemHovered()) {
                 ImGui::BeginTooltip();
@@ -289,7 +330,7 @@ void ComputeColumnsView::renderColumnBrowser() {
 
                 ImGui::PushID(column.c_str());
                 if (ImGui::Selectable(column.c_str())) {
-                    appendColumnToExpression(column);
+                    appendToExpression(column);
                 }
                 if (ImGui::IsItemHovered()) {
                     if (entry.second.description.empty()) {
@@ -307,6 +348,71 @@ void ComputeColumnsView::renderColumnBrowser() {
 
         ImGui::EndChild();
     }
+
+    ImGui::End();
+}
+
+void ComputeColumnsView::renderConstantBrowser() {
+    if (!_showConstantBrowser) {
+        return;
+    }
+
+    ImGui::SetNextWindowSize(ImVec2(440.f, 420.f), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(
+        ImGui::GetMainViewport()->GetCenter(),
+        ImGuiCond_Appearing,
+        ImVec2(0.5f, 0.5f)
+    );
+    if (_focusConstantBrowser) {
+        ImGui::SetNextWindowFocus();
+        _focusConstantBrowser = false;
+    }
+
+    if (!ImGui::Begin("Available numeric constants", &_showConstantBrowser)) {
+        ImGui::End();
+        return;
+    }
+
+    static ImGuiTextFilter constantFilter;
+    constantFilter.Draw("Filter constants", ImGui::GetContentRegionAvail().x);
+    ImGui::TextDisabled("Values are expressed in meters");
+
+    if (ImGui::BeginChild("ConstantList", ImVec2(0.f, 0.f), true) &&
+        ImGui::BeginTable(
+            "ConstantsTable",
+            2,
+            ImGuiTableFlags_SizingStretchProp
+        ))
+    {
+        for (const NumericConstant& constant : NumericConstants) {
+            if (!constantFilter.PassFilter(constant.name)) {
+                continue;
+            }
+
+            const std::string value = formatNumericConstant(constant.value);
+            ImGui::PushID(constant.name);
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            const bool selected = ImGui::Selectable(
+                constant.name,
+                false,
+                ImGuiSelectableFlags_SpanAllColumns
+            );
+            const bool hovered = ImGui::IsItemHovered();
+            ImGui::TableNextColumn();
+            ImGui::TextDisabled("%s m", value.c_str());
+
+            if (selected) {
+                appendToExpression(value);
+            }
+            if (hovered) {
+                ImGui::SetTooltip("%s meters", value.c_str());
+            }
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+    }
+    ImGui::EndChild();
 
     ImGui::End();
 }
@@ -390,6 +496,7 @@ bool ComputeColumnsView::computeColumn(const std::string& name,
 void ComputeColumnsView::render(bool* open) {
     if (!ImGui::Begin("Compute data columns", open)) {
         _showColumnBrowser = false;
+        _showConstantBrowser = false;
         ImGui::End();
         return;
     }
@@ -407,6 +514,11 @@ void ComputeColumnsView::render(bool* open) {
     if (ImGui::Button("Browse columns")) {
         _showColumnBrowser = true;
         _focusColumnBrowser = true;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Browse constants")) {
+        _showConstantBrowser = true;
+        _focusConstantBrowser = true;
     }
     ImGui::SameLine();
     view::helper::renderHelpMarker(
@@ -482,6 +594,7 @@ void ComputeColumnsView::render(bool* open) {
 
     ImGui::End();
     renderColumnBrowser();
+    renderConstantBrowser();
 }
 
 } // namespace openspace::exoplanets
