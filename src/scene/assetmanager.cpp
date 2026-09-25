@@ -93,12 +93,13 @@ namespace {
      * \param root The root directory to check \p path against
      * \return True if a \p path is belonging to a subdirectory \p root, false otherwise
      */
-    bool underRoot(const std::filesystem::path& path, const std::filesystem::path& root) {
+    bool isSameRoot(const std::filesystem::path& path, const std::filesystem::path& root) {
         if (path.root_name() != root.root_name()) {
             return false;
         }
 
-        return !std::filesystem::relative(path, root).string().starts_with("..");
+        const std::filesystem::path relativePath = std::filesystem::relative(path, root);
+        return relativePath.empty() || *relativePath.begin() != "..";
     }
 
     struct [[codegen::Dictionary(AssetMeta)]] Parameters {
@@ -171,7 +172,7 @@ void AssetManager::deinitialize() {
         }
         _rootAssets.pop_back();
     }
-    notifyAssetTreeSubscribers({ AssetTreeChange::Type::RootAssets });
+    notifyAssetTreeSubscribers({ AssetTreeChange::MessageType::RootAssets });
     _toBeDeleted.clear();
 }
 
@@ -207,7 +208,7 @@ void AssetManager::runRemoveQueue() {
         }
 
         _rootAssets.erase(jt);
-        notifyAssetTreeSubscribers({ AssetTreeChange::Type::RootAssets });
+        notifyAssetTreeSubscribers({ AssetTreeChange::MessageType::RootAssets });
         // Even though we are removing a root asset, we might not be the only person that
         // is interested in the asset, so we can only deinitialize it if we were, in fact,
         // the only person, meaning that the asset never had any parents
@@ -251,7 +252,7 @@ void AssetManager::runAddQueue() {
             continue;
         }
         _rootAssets.push_back(a);
-        notifyAssetTreeSubscribers({ AssetTreeChange::Type::RootAssets });
+        notifyAssetTreeSubscribers({ AssetTreeChange::MessageType::RootAssets });
         a->startSynchronizations();
 
         _toBeInitialized.push_back(a);
@@ -1158,7 +1159,7 @@ void AssetManager::updateAssetState(const std::filesystem::path& path,
     _assetStates[key] = state;
 
     AssetTreeChange change = {
-        .type = AssetTreeChange::Type::State,
+        .type = AssetTreeChange::MessageType::AssetState,
         .statePath = key,
         .state = state
     };
@@ -1175,14 +1176,14 @@ void AssetManager::updateAssetState(const std::filesystem::path& path,
     // If we we're tracking a now unloaded asset, we need to remove it and notify
     if (state == EventAssetLoading::State::Unloaded && alreadyTracked) {
         _otherAssetPaths.erase(it);
-        notifyAssetTreeSubscribers({ AssetTreeChange::Type::Other });
+        notifyAssetTreeSubscribers({ AssetTreeChange::MessageType::Other });
     }
 
     // If the asset is loading, has finished loading or errored out and we were not
     // already tracking it - add it to the list and notify
     if (state != EventAssetLoading::State::Unloaded && !alreadyTracked) {
         _otherAssetPaths.push_back(path);
-        notifyAssetTreeSubscribers({ AssetTreeChange::Type::Other });
+        notifyAssetTreeSubscribers({ AssetTreeChange::MessageType::Other });
     }
 }
 
@@ -1227,20 +1228,20 @@ void AssetManager::rescanAssetPaths() {
     _userAssetPaths = std::move(newUser);
 
     if (shippedChanged) {
-        notifyAssetTreeSubscribers({ AssetTreeChange::Type::Shipped });
+        notifyAssetTreeSubscribers({ AssetTreeChange::MessageType::Shipped });
     }
     if (userChanged) {
-        notifyAssetTreeSubscribers({ AssetTreeChange::Type::User });
+        notifyAssetTreeSubscribers({ AssetTreeChange::MessageType::User });
     }
 }
 
 AssetManager::AssetPathLocation
 AssetManager::classifyAssetPath(const std::filesystem::path& path) const
 {
-    if (underRoot(path, _assetRootDirectory)) {
+    if (isSameRoot(path, _assetRootDirectory)) {
         return AssetPathLocation::Shipped;
     }
-    if (underRoot(path, absPath("${USER_ASSETS}"))) {
+    if (isSameRoot(path, absPath("${USER_ASSETS}"))) {
         return AssetPathLocation::User;
     }
     return AssetPathLocation::Other;

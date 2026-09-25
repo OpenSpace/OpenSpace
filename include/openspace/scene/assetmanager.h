@@ -54,17 +54,17 @@ class ResourceSynchronization;
 class AssetManager {
 public:
     struct AssetTreeChange {
-        enum class Type {
+        enum class MessageType {
             Shipped,
             User,
             Other,
             RootAssets,
-            State
+            AssetState
         };
 
-        Type type;
+        MessageType type;
 
-        // Only populated when type == `Type::State`
+        // Only populated when type == `Type::AssetState`
         std::string statePath;
         EventAssetLoading::State state = EventAssetLoading::State::Unloaded;
     };

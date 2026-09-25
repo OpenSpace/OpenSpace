@@ -188,23 +188,23 @@ void AssetTreeTopic::sendFullSnapshot() {
 }
 
 void AssetTreeTopic::handleChange(const AssetManager::AssetTreeChange& change) {
-    using Type = AssetManager::AssetTreeChange::Type;
+    using MessageType = AssetManager::AssetTreeChange::MessageType;
     AssetManager& m = global::openSpaceEngine->assetManager();
 
     switch (change.type) {
-        case Type::Shipped:
+        case MessageType::Shipped:
             sendPathList("shipped", m.shippedAssetPaths());
             break;
-        case Type::User:
+        case MessageType::User:
             sendPathList("user", m.userAssetPaths());
             break;
-        case Type::Other:
+        case MessageType::Other:
             sendPathList("other", m.otherAssetPaths());
             break;
-        case Type::RootAssets:
+        case MessageType::RootAssets:
             sendPathList("rootAssets", m.rootAssetPaths());
             break;
-        case Type::State: {
+        case MessageType::AssetState: {
             nlohmann::json payload;
             payload["type"] = "state";
             payload["path"] = change.statePath;
