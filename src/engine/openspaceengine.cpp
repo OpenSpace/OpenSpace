@@ -513,14 +513,16 @@ void OpenSpaceEngine::initialize() {
         }
     }
 
-
-    // Set up asset loader
-    _assetManager = std::make_unique<AssetManager>(
+    // Set up asset loader. Constructed here (rather than in global::create()) since it
+    // needs the ${ASSETS} path token and the final ScriptEngine Lua state, neither of
+    // which are ready that early. Owned by `global::assetManager` since it must outlive
+    // the `server`, whose topics may still reference it while being torn down at shutdown
+    global::assetManager = new AssetManager(
         global::scriptEngine->luaState(),
         absPath("${ASSETS}")
     );
+    global::scriptEngine->addLibrary(global::assetManager->luaLibrary());
 
-    global::scriptEngine->addLibrary(_assetManager->luaLibrary());
 
     for (OpenSpaceModule* module : global::moduleEngine->modules()) {
         global::scriptEngine->addLibrary(module->luaLibrary());
@@ -867,7 +869,7 @@ void OpenSpaceEngine::loadAssets() {
 
     // Load all of the assets specified in the profile
     for (const std::string& a : global::profile->assets) {
-        _assetManager->add(a);
+        global::assetManager->add(a);
     }
 
     // Load all assets in enabled add-ons
@@ -878,7 +880,7 @@ void OpenSpaceEngine::loadAssets() {
 
         LDEBUG(std::format("Loading addon '{}'", addon.name));
         for (const std::string& a : addon.assets) {
-            _assetManager->add(a);
+            global::assetManager->add(a);
         }
     }
     for (const Addon& addon : global::profile->addons.recommended) {
@@ -888,7 +890,7 @@ void OpenSpaceEngine::loadAssets() {
 
         LDEBUG(std::format("Loading addon '{}'", addon.name));
         for (const std::string& a : addon.assets) {
-            _assetManager->add(a);
+            global::assetManager->add(a);
         }
     }
     for (const Addon& addon : global::profile->addons.general) {
@@ -898,11 +900,11 @@ void OpenSpaceEngine::loadAssets() {
 
         LDEBUG(std::format("Loading addon '{}'", addon.name));
         for (const std::string& a : addon.assets) {
-            _assetManager->add(a);
+            global::assetManager->add(a);
         }
     }
 
-    _loadingScreen->exec(*_assetManager, *_scene);
+    _loadingScreen->exec(*global::assetManager, *_scene);
     _loadingScreen = nullptr;
 
 
@@ -969,7 +971,6 @@ void OpenSpaceEngine::deinitialize() {
     }
     global::versionChecker->cancel();
 
-    _assetManager = nullptr;
 
     global::deinitialize();
 
@@ -1001,7 +1002,6 @@ void OpenSpaceEngine::deinitializeGL() {
     global::renderEngine->renderEndscreen();
     global::windowDelegate->swapBuffer();
 
-    global::openSpaceEngine->assetManager().deinitialize();
     global::openSpaceEngine->_scene = nullptr;
     global::renderEngine->setScene(nullptr);
 
@@ -1259,7 +1259,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _shutdown.timer -= static_cast<float>(global::windowDelegate->averageDeltaTime());
     }
 
-    _assetManager->update();
+    global::assetManager->update();
 
     global::renderEngine->updateScene();
     global::renderEngine->updateRenderer();
@@ -1875,11 +1875,6 @@ const std::vector<PropertyOwner*>& OpenSpaceEngine::allPropertyOwners() const {
     }
 
     return _allPropertyOwnersCache;
-}
-
-AssetManager& OpenSpaceEngine::assetManager() {
-    ghoul_assert(_assetManager, "Asset Manager must not be nullptr");
-    return *_assetManager;
 }
 
 void setCameraFromProfile(const Profile& p) {
