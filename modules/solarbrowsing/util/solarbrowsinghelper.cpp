@@ -65,12 +65,16 @@ namespace {
         im.filePath = filePath;
 
         std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
+        if (!stream.is_open()) {
+            LERROR(std::format("Could not open '{}'", filePath));
+            return std::nullopt;
+        }
         std::streamsize size = stream.tellg();
         stream.seekg(0, std::ios::beg);
         std::vector<char> buffer(size);
         if (!stream.read(buffer.data(), size)) {
             LERROR(std::format("Failed to read data from '{}' ", filePath));
-            return im;
+            return std::nullopt;
         }
         std::string_view bufferView(buffer.data(), size);
 
