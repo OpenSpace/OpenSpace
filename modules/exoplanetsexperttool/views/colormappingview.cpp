@@ -694,10 +694,16 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
                 resetCategoryColorsToPalette(variable);
                 wasChanged = true;
             }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Reset category colors to the selected palette");
+            }
             ImGui::SameLine();
             if (ImGui::SmallButton("Rescan data")) {
                 updateCategoriesForVariable(variable);
                 wasChanged = true;
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Rescan filtered data and update categories");
             }
         }
 
@@ -841,26 +847,8 @@ glm::vec4 ColorMappingView::colorFromColormap(const ExoplanetItem& item,
                     pointColor = it->second.color;
                 }
                 else {
-                    // Category not in cache yet: assign deterministically based on hash
-                    size_t hashVal = std::hash<std::string>{}(catKey);
-                    if (variable.categoricalPaletteIndex == 4) {
-                        ImVec4 c = Qualitative20Colors[hashVal % NumQualitative20Colors];
-                        pointColor = glm::vec4(c.x, c.y, c.z, c.w);
-                    }
-                    else {
-                        ImPlotColormap cmap = ImPlotColormap_Deep;
-                        if (variable.categoricalPaletteIndex == 1) {
-                            cmap = ImPlotColormap_Dark;
-                        }
-                        else if (variable.categoricalPaletteIndex == 2) {
-                            cmap = ImPlotColormap_Paired;
-                        }
-                        else if (variable.categoricalPaletteIndex == 3) {
-                            cmap = ImPlotColormap_Pastel;
-                        }
-                        ImVec4 c = ImPlot::GetColormapColor(static_cast<int>(hashVal), cmap);
-                        pointColor = glm::vec4(c.x, c.y, c.z, c.w);
-                    }
+                    // Category not in the color map (e.g. filtered out during rescan)
+                    pointColor = _nanPointColor;
                 }
             }
             else {
@@ -891,10 +879,11 @@ const char* ColorMappingView::categoricalPaletteFromIndex(size_t index) const {
 }
 
 void ColorMappingView::updateCategoriesForVariable(ColorMappedVariable& variable) {
-    // Scan all dataset rows to extract unique non-empty string values and counts
+    // Scan the currently filtered rows to extract unique non-empty string values and counts
     std::map<std::string, size_t> categoryCounts;
     const std::vector<ExoplanetItem>& allData = _dataViewer.data();
-    for (const ExoplanetItem& item : allData) {
+    for (size_t index : _dataViewer.currentFiltering()) {
+        const ExoplanetItem& item = allData[index];
         std::variant<const char*, float> val = _dataViewer.columnValue(variable.column, item);
         if (std::holds_alternative<const char*>(val)) {
             const char* str = std::get<const char*>(val);
