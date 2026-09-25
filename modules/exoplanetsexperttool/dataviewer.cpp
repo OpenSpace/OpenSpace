@@ -432,6 +432,12 @@ std::vector<size_t> DataViewer::planetsForHost(const std::string& hostIdentifier
     return _hostIdToPlanetsMap.at(hostIdentifier);
 }
 
+const std::unordered_map<std::string, std::vector<size_t>>&
+DataViewer::hostPlanetGroups() const
+{
+    return _hostIdToPlanetsMap;
+}
+
 size_t DataViewer::externalSelectionSize() const {
     return _externalSelection.value().size();
 }

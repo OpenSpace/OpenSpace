@@ -94,6 +94,7 @@ public:
     TableView* tableView();
 
     std::vector<size_t> planetsForHost(const std::string& hostStar) const;
+    const std::unordered_map<std::string, std::vector<size_t>>& hostPlanetGroups() const;
 
     size_t externalSelectionSize() const;
     const std::string& lastExternalSelectionTimestamp() const;

@@ -35,6 +35,7 @@ namespace openspace::exoplanets {
 
 class DataViewer;
 struct DataSettings;
+class Expression;
 
 class ComputeColumnsView {
 public:
@@ -44,10 +45,33 @@ public:
     void render(bool* open);
 
 private:
+    enum class ComputeMode {
+        PerPlanet,
+        WithinSystem
+    };
+
+    enum class AggregateOperation {
+        Count,
+        Sum,
+        Mean,
+        Minimum,
+        Maximum,
+        StandardDeviation,
+        Variance,
+        Median,
+        Range
+    };
+
+    struct CountFilterRule {
+        ColumnKey column;
+        std::string query;
+    };
+
     bool isNameTaken(const std::string& name) const;
     bool appendToExpression(std::string_view text);
     void renderColumnBrowser();
     void renderConstantBrowser();
+    void renderSystemAggregateControls();
     void renderHistory();
     void loadHistory();
     void saveHistory() const;
@@ -59,6 +83,14 @@ private:
     // `_errorMessage` is set instead.
     bool computeColumn(const std::string& name, const std::string& expressionText,
         const std::string& description);
+    bool computePerPlanetColumn(const std::string& name, const std::string& expressionText,
+        const std::string& description);
+    bool computeSystemColumn(const std::string& name, const std::string& description);
+    bool evaluateExpressionForRow(const Expression& expression, size_t rowIndex,
+        float& value);
+    float aggregateValues(std::vector<float>& values) const;
+    static const std::array<const char*, 9>& aggregateOperationNames();
+    std::string systemExpressionDescription() const;
 
     DataViewer& _dataViewer;
 
@@ -69,11 +101,19 @@ private:
     bool _focusColumnBrowser = false;
     bool _showConstantBrowser = false;
     bool _focusConstantBrowser = false;
+    ComputeMode _computeMode = ComputeMode::PerPlanet;
+    AggregateOperation _aggregateOperation = AggregateOperation::Count;
+    ColumnKey _aggregateColumn;
+    std::vector<CountFilterRule> _countFilterRules;
 
     struct HistoryEntry {
         std::string name;
         std::string expression;
         std::string description;
+        ComputeMode mode = ComputeMode::PerPlanet;
+        AggregateOperation operation = AggregateOperation::Count;
+        ColumnKey aggregateColumn;
+        std::vector<CountFilterRule> countFilters;
     };
     std::vector<HistoryEntry> _history;
     std::filesystem::path _historyFile;
