@@ -104,10 +104,9 @@ void ComputeColumnsView::loadHistory() {
             return;
         }
 
-        // Parse in reverse order, so we get the most recent first in the list
+        // Parse in normal order; history is displayed in reverse order below
         const nlohmann::json& columns = json.at("columns");
-        for (auto it = columns.rbegin(); it != columns.rend(); ++it) {
-            const nlohmann::json& entry = *it;
+        for (const nlohmann::json& entry : columns) {
             const std::string name = entry.value("name", "");
             const std::string expression = entry.value("expression", "");
             const std::string description = entry.value("description", "");
@@ -219,7 +218,8 @@ void ComputeColumnsView::renderHistory() {
     )) {
         auto entryToRemove = _history.end();
 
-        for (auto it = _history.begin(); it != _history.end(); ++it) {
+        for (auto it = _history.end(); it != _history.begin();) {
+            --it;
             const HistoryEntry& entry = *it;
             ImGui::PushID(entry.name.c_str());
             ImGui::TableNextRow();
@@ -758,6 +758,7 @@ void ComputeColumnsView::renderSystemAggregateControls() {
     if (_aggregateOperation != AggregateOperation::Count) {
         const char* preview = _aggregateColumn.empty() ? "Select numeric column" :
             _dataViewer.columnName(_aggregateColumn);
+
         ImGui::SetNextItemWidth(260.f);
         if (ImGui::BeginCombo("Numeric column", preview)) {
             static ImGuiTextFilter columnFilter;
