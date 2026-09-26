@@ -15,8 +15,7 @@ properties([
 ])
 
 def url = 'https://github.com/OpenSpace/OpenSpace'
-// def branch = 'master'
-def branch = 'tmp/jenkins'
+def branch = 'master'
 def releaseDir = '/data/releases/nightly'
 
 def scmConfig = scmGit(
