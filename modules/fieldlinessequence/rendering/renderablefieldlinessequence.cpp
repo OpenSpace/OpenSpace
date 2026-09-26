@@ -68,6 +68,13 @@ namespace {
         return Time::convertTime(fileName);
     }
 
+    const PropertyOwner::PropertyOwnerInfo ColorInfo = {
+        "Color",
+        "Color",
+        "Settings for how to color the field lines. Can either be done with a fixed "
+        "uniform color, or by color mapping based on a quantity in the data."
+    };
+
     constexpr Property::PropertyInfo ColorMethodInfo = {
         "ColorMethod",
         "Color method",
@@ -107,7 +114,7 @@ namespace {
 
     constexpr Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
-        "Additive blending",
+        "Use additive blending",
         "Activate/deactivate additive blending.",
         Property::Visibility::AdvancedUser
     };
@@ -147,18 +154,26 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    const PropertyOwner::PropertyOwnerInfo FlowInfo = {
+        "Flow",
+        "Flow",
+        "Toggles the rendering of moving particles along the field lines. This can for "
+        "example be used to illustrate magnetic flow."
+    };
+
     constexpr Property::PropertyInfo FlowEnabledInfo = {
-        "FlowEnabled",
+        "Enabled",
         "Flow enabled",
-        "Toggles the rendering of moving particles along the lines. Can, for example, "
-        "illustrate magnetic flow.",
+        "Enable/disable the moving flow particles along the lines.",
         Property::Visibility::NoviceUser
     };
 
     constexpr Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
         "Flow color",
-        "Color of particles flow direction indication.",
+        "Color of particles flow direction indication. This is only used if the uniform "
+        "color method for the lines is used. Otherwise, the particle color will also be "
+        "based on the color mapping.",
         Property::Visibility::NoviceUser
     };
 
@@ -186,38 +201,44 @@ namespace {
     constexpr Property::PropertyInfo FlowSpeedInfo = {
         "FlowSpeed",
         "Speed",
-        "Speed of the flow.",
+        "Speed of the visualized flow.",
         Property::Visibility::User
     };
 
+    const PropertyOwner::PropertyOwnerInfo MaskingInfo = {
+        "Masking",
+        "Masking",
+        "Use masking to show only lines where a given quantity falls within a specified "
+        "range. For example, you can display only the regions where the temperature is "
+        "between 10 and 20 degrees. Masking can also be used to hide specific line "
+        "topologies, such as solar wind and closed lines."
+    };
+
     constexpr Property::PropertyInfo MaskingEnabledInfo = {
-        "MaskingEnabled",
+        "Enabled",
         "Masking enabled",
-        "Enable/disable masking. Use masking to show lines where a given quantity is "
-        "within a given range, for example, if you only want to see where the "
-        "temperature is between 10 and 20 degrees. Also used for masking out line "
-        "topologies like solar wind & closed lines.",
+        "Enable/disable masking.",
         Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo MaskingMinMaxInfo = {
-        "MaskingMinLimit",
-        "Lower limit",
+        "MaskingRange",
+        "Masking range",
         "Lower and upper limit of the valid masking range.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
-        "Quantity used for masking",
-        "Quantity used for masking.",
+        "Quantity",
+        "Quantity in the dataset that is used for masking.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
-        "This value specifies the line width of the fieldlines.",
+        "The width of the field lines.",
         Property::Visibility::NoviceUser
     };
 
@@ -231,8 +252,7 @@ namespace {
     constexpr Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
         "Save downloads on shutdown",
-        "This is an option for if dynamically downloaded should be saved between runs or "
-        "not.",
+        "Decide whether dynamically downloaded should be saved between runs or not.",
         Property::Visibility::User
     };
 
@@ -421,53 +441,259 @@ Documentation RenderableFieldlinesSequence::Documentation() {
     );
 }
 
-RenderableFieldlinesSequence::RenderableFieldlinesSequence(
-                                                      const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-    , _colorGroup({ "Color" })
-    , _colorMethod(ColorMethodInfo)
-    , _colorQuantity(ColorQuantityInfo)
-    , _selectedColorRange(
+RenderableFieldlinesSequence::Color::Color(const ghoul::Dictionary& dictionary)
+    : PropertyOwner(ColorInfo)
+    , method(ColorMethodInfo)
+    , quantity(ColorQuantityInfo)
+    , selectedRange(
         ColorMinMaxInfo,
         glm::vec2(0.f, 100.f),
         glm::vec2(-5000.f),
         glm::vec2(5000.f)
     )
-    , _colorTablePath(ColorTablePathInfo)
-    , _colorUniform(
+    , colorTablePath(ColorTablePathInfo)
+    , uniformColor(
         ColorUniformInfo,
         glm::vec4(0.3f, 0.57f, 0.75f, 0.5f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _colorABlendEnabled(ColorUseABlendingInfo, true)
-    , _domainEnabled(DomainEnabledInfo, false)
-    , _domainGroup({ "Domain" })
-    , _domainX(DomainXInfo)
-    , _domainY(DomainYInfo)
-    , _domainZ(DomainZInfo)
-    , _domainR(DomainRInfo)
-    , _flowEnabled(FlowEnabledInfo, false)
-    , _flowGroup({ "Flow" })
-    , _flowColor(
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    uniformColor = p.color.value_or(uniformColor);
+    uniformColor.setViewOption(Property::ViewOptions::Color);
+    addProperty(uniformColor);
+
+    method.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
+    method.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
+    if (p.colorMethod.has_value()) {
+        method = static_cast<int>(codegen::map<ColorMethod>(*p.colorMethod));
+    }
+    else {
+        method = static_cast<int>(ColorMethod::Uniform);
+    }
+    addProperty(method);
+
+    quantity.onChange([this]() {
+        if (colorTablePaths.empty()) {
+            return;
+        }
+        shouldUpdateBuffer = true;
+        // Note that we do not need to set _selectedColorRange in the constructor, due to
+        // this onChange being declared before firstupdate() function that sets
+        // _colorQuantity
+        if (quantity < static_cast<int>(colorTableRanges.size())) {
+            selectedRange = colorTableRanges[quantity];
+        }
+        // If fewer data ranges are given than there are parameters in the data, use the
+        // first range.
+        // @TODO (2025-06-10, elon) We should use a better structure for providing the
+        // data, since this creates discrepancy for which range belongs to which parameter
+        else {
+            selectedRange = colorTableRanges[0];
+        }
+
+        if (quantity < static_cast<int>(colorTablePaths.size())) {
+            colorTablePath = colorTablePaths[quantity].string();
+        }
+        else {
+            colorTablePath = colorTablePaths[0].string();
+        }
+    });
+
+    quantityTemp = p.colorQuantity.value_or(quantityTemp);
+    addProperty(quantity);
+
+    if (p.colorMinMaxRange.has_value()) {
+        selectedRange.setMinValue(glm::vec2(p.colorMinMaxRange->x));
+        selectedRange.setMaxValue(glm::vec2(p.colorMinMaxRange->y));
+    }
+
+    if (p.colorTableRanges.has_value()) {
+        colorTableRanges = *p.colorTableRanges;
+        if (quantityTemp < static_cast<int>(colorTableRanges.size()) &&
+            quantityTemp >= 0)
+        {
+            selectedRange = colorTableRanges[quantityTemp];
+        }
+        else {
+            selectedRange = colorTableRanges[0];
+        }
+    }
+    else {
+        colorTableRanges.push_back(glm::vec2(0.f, 1.f));
+        selectedRange = glm::vec2(0.f, 1.f);
+    }
+
+    // This is to save the changes done in the gui for when you switch between options
+    selectedRange.onChange([this]() {
+        if (quantity < static_cast<int>(colorTableRanges.size())) {
+            colorTableRanges[quantity] = selectedRange;
+        }
+    });
+
+    selectedRange.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(selectedRange);
+
+    if (p.colorTablePaths.has_value()) {
+        for (const std::filesystem::path& path : *p.colorTablePaths) {
+            if (!std::filesystem::exists(path)) {
+                throw ghoul::RuntimeError(std::format(
+                    "Color table path '{}' is not a valid file", path
+                ));
+            }
+            colorTablePaths.emplace_back(path);
+        }
+    }
+    if (!p.colorTablePaths.has_value() || colorTablePaths.empty()) {
+        colorTablePaths.emplace_back(
+            FieldlinesSequenceModule::DefaultTransferFunctionFile
+        );
+    }
+
+    colorTablePath.onChange([this]() {
+        if (std::filesystem::exists(colorTablePath.value())) {
+            transferFunction =
+                std::make_unique<TransferFunction>(colorTablePath.value());
+        }
+        else {
+            LERROR(std::format(
+                "Invalid path '{}' to transfer function. Please enter new path",
+                colorTablePath.value()
+            ));
+        }
+    });
+    colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
+    addProperty(colorTablePath);
+}
+
+RenderableFieldlinesSequence::Domain::Domain(const ghoul::Dictionary& dictionary)
+    : PropertyOwner({ "Domain" })
+    , enabled(DomainEnabledInfo, false)
+    , x(DomainXInfo)
+    , y(DomainYInfo)
+    , z(DomainZInfo)
+    , r(DomainRInfo)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    enabled = p.domainEnabled.value_or(enabled);
+    addProperty(enabled);
+
+    x.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(x);
+
+    y.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(y);
+
+    z.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(z);
+
+    r.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(r);
+}
+
+RenderableFieldlinesSequence::Flow::Flow(const ghoul::Dictionary& dictionary)
+    : PropertyOwner(FlowInfo)
+    , enabled(FlowEnabledInfo, false)
+    , color(
         FlowColorInfo,
         glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _flowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
-    , _flowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
-    , _flowReversed(FlowReversedInfo, false)
-    , _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
-    , _maskingEnabled(MaskingEnabledInfo, false)
-    , _maskingGroup({ "Masking" })
-    , _selectedMaskingRange(
+    , particleSize(FlowParticleSizeInfo, 5, 0, 500)
+    , particleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
+    , reversed(FlowReversedInfo, false)
+    , speed(FlowSpeedInfo, 20, 0, 1000)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_fade);
+
+    enabled = p.flowEnabled.value_or(enabled);
+    addProperty(enabled);
+
+    reversed = p.reversedFlow.value_or(reversed);
+    addProperty(reversed);
+
+    color = p.flowColor.value_or(color);
+    color.setViewOption(Property::ViewOptions::Color);
+    addProperty(color);
+
+    particleSize = p.particleSize.value_or(particleSize);
+    addProperty(particleSize);
+
+    particleSpacing = p.particleSpacing.value_or(particleSpacing);
+    addProperty(particleSpacing);
+
+    speed = p.flowSpeed.value_or(speed);
+    addProperty(speed);
+}
+
+RenderableFieldlinesSequence::Masking::Masking(const ghoul::Dictionary& dictionary)
+    : PropertyOwner(MaskingInfo)
+    , enabled(MaskingEnabledInfo, false)
+    , selectedRange(
         MaskingMinMaxInfo,
         glm::vec2(0.f, 100.f),
         glm::vec2(-5000.f),
         glm::vec2(5000.f)
     )
-    , _maskingQuantity(MaskingQuantityInfo)
+    , quantity(MaskingQuantityInfo)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    enabled = p.maskingEnabled.value_or(enabled);
+    addProperty(enabled);
+
+    quantityTemp = p.maskingQuantity.value_or(quantityTemp);
+    quantity.onChange([this]() {
+        shouldUpdateBuffer = true;
+        if (quantity < static_cast<int>(ranges.size())) {
+            selectedRange = ranges[quantity];
+        }
+        else if (!ranges.empty()) {
+            selectedRange = ranges[0];
+        }
+        else {
+            LERROR("Cannot set selected masking range");
+        }
+    });
+    addProperty(quantity);
+
+    if (p.maskingRanges.has_value()) {
+        ranges = *p.maskingRanges;
+    }
+    else {
+        ranges.push_back(glm::vec2(0.f, 1.f));
+        selectedRange = glm::vec2(0.f, 1.f);
+    }
+
+    if (p.maskingMinMaxRange.has_value()) {
+        selectedRange.setMinValue(glm::vec2(p.maskingMinMaxRange->x));
+        selectedRange.setMaxValue(glm::vec2(p.maskingMinMaxRange->y));
+    }
+
+    selectedRange.onChange([this]() {
+        if (quantity < static_cast<int>(ranges.size())) {
+            ranges[quantity] = selectedRange;
+        }
+    });
+
+    selectedRange.setViewOption(Property::ViewOptions::MinMaxRange);
+    addProperty(selectedRange);
+}
+
+RenderableFieldlinesSequence::RenderableFieldlinesSequence(
+                                                      const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+    , _color(dictionary)
+    , _domain(dictionary)
+    , _flow(dictionary)
+    , _masking(dictionary)
+    , _useAdditiveBlending(ColorUseABlendingInfo, true)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _jumpToStart(TimeJumpButtonInfo)
     , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
@@ -492,6 +718,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             "files"
         );
     }
+
     if (_loadingType == LoadingType::StaticLoading && !p.sourceFolder.has_value()) {
         throw ghoul::RuntimeError(
             "Either dynamic downloading parameters or a sync folder must be specified"
@@ -561,163 +788,36 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     }
 
     _extraVars = p.extraVariables.value_or(_extraVars);
-    _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
-    _flowColor = p.flowColor.value_or(_flowColor);
-    _flowReversed = p.reversedFlow.value_or(_flowReversed);
-    _flowParticleSize = p.particleSize.value_or(_flowParticleSize);
-    _flowParticleSpacing = p.particleSpacing.value_or(_flowParticleSpacing);
-    _flowSpeed = p.flowSpeed.value_or(_flowSpeed);
-    _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
-    _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
-    _domainEnabled = p.domainEnabled.value_or(_domainEnabled);
+
+    _useAdditiveBlending = p.alphaBlendingEnabled.value_or(_useAdditiveBlending);
+    addProperty(_useAdditiveBlending);
+
     _lineWidth = p.lineWidth.value_or(_lineWidth);
-    _colorABlendEnabled = p.alphaBlendingEnabled.value_or(_colorABlendEnabled);
+    addProperty(_lineWidth);
+
     _renderForever = p.showAtAllTimes.value_or(_renderForever);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
-    _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
 
     if (_loadingType == LoadingType::StaticLoading){
         staticallyLoadFiles(p.seedPointDirectory, p.tracingVariable);
         computeSequenceEndTime();
     }
 
-    _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
-    if (p.colorTablePaths.has_value()) {
-        for (const std::filesystem::path& path : *p.colorTablePaths) {
-            if (!std::filesystem::exists(path)) {
-                throw ghoul::RuntimeError(std::format(
-                    "Color table path '{}' is not a valid file", path
-                ));
-            }
-            _colorTablePaths.emplace_back(path);
-        }
-    }
-    if (!p.colorTablePaths.has_value() || _colorTablePaths.empty()) {
-        _colorTablePaths.emplace_back(
-            FieldlinesSequenceModule::DefaultTransferFunctionFile
-        );
-    }
-    _colorUniform = p.color.value_or(_colorUniform);
-    _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
-    _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
-    if (p.colorMethod.has_value()) {
-        _colorMethod = static_cast<int>(
-            codegen::map<openspace::RenderableFieldlinesSequence::ColorMethod>(
-                *p.colorMethod
-            )
-        );
-    }
-    else {
-        _colorMethod = static_cast<int>(ColorMethod::Uniform);
-    }
-    _colorQuantityTemp = p.colorQuantity.value_or(_colorQuantityTemp);
-
-    if (p.colorTableRanges.has_value()) {
-        _colorTableRanges = *p.colorTableRanges;
-        if (_colorQuantityTemp < static_cast<int>(_colorTableRanges.size()) &&
-            _colorQuantityTemp >= 0)
-        {
-            _selectedColorRange = _colorTableRanges[_colorQuantityTemp];
-        }
-        else {
-            _selectedColorRange = _colorTableRanges[0];
-        }
-    }
-    else {
-        _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
-        _selectedColorRange = glm::vec2(0.f, 1.f);
-    }
-
-    if (p.colorMinMaxRange.has_value()) {
-        _selectedColorRange.setMinValue(glm::vec2(p.colorMinMaxRange->x));
-        _selectedColorRange.setMaxValue(glm::vec2(p.colorMinMaxRange->y));
-    }
-
-    if (p.maskingRanges.has_value()) {
-        _maskingRanges = *p.maskingRanges;
-    }
-    else {
-        _maskingRanges.push_back(glm::vec2(0.f, 1.f));
-        _selectedMaskingRange = glm::vec2(0.f, 1.f);
-    }
-
-    if (p.maskingMinMaxRange.has_value()) {
-        _selectedMaskingRange.setMinValue(glm::vec2(p.maskingMinMaxRange->x));
-        _selectedMaskingRange.setMaxValue(glm::vec2(p.maskingMinMaxRange->y));
-    }
-
-    _colorQuantity.onChange([this]() {
-        if (_colorTablePaths.empty()) {
-            return;
-        }
-        _shouldUpdateColorBuffer = true;
-        // Note that we do not need to set _selectedColorRange in the constructor, due to
-        // this onChange being declared before firstupdate() function that sets
-        // _colorQuantity
-        if (_colorQuantity < static_cast<int>(_colorTableRanges.size())) {
-            _selectedColorRange = _colorTableRanges[_colorQuantity];
-        }
-        // If fewer data ranges are given than there are parameters in the data, use the
-        // first range.
-        // @TODO (2025-06-10, elon) We should use a better structure for providing the
-        // data, since this creates discrepancy for which range belongs to which parameter
-        else {
-            _selectedColorRange = _colorTableRanges[0];
-        }
-
-        if (_colorQuantity < static_cast<int>(_colorTablePaths.size())) {
-            _colorTablePath = _colorTablePaths[_colorQuantity].string();
-        }
-        else {
-            _colorTablePath = _colorTablePaths[0].string();
-        }
-    });
-
-    // This is to save the changes done in the gui for when you switch between options
-    _selectedColorRange.onChange([this]() {
-        if (_colorQuantity < static_cast<int>(_colorTableRanges.size())) {
-            _colorTableRanges[_colorQuantity] = _selectedColorRange;
-        }
-    });
-
-    _colorTablePath.onChange([this]() {
-        if (std::filesystem::exists(_colorTablePath.value())) {
-            _transferFunction =
-                std::make_unique<TransferFunction>(_colorTablePath.value());
-        }
-        else {
-            LERROR(std::format(
-                "Invalid path '{}' to transfer function. Please enter new path",
-                _colorTablePath.value()
-            ));
-        }
-    });
-
-    _maskingQuantity.onChange([this]() {
-        _shouldUpdateMaskingBuffer = true;
-        if (_maskingQuantity < static_cast<int>(_maskingRanges.size())) {
-            _selectedMaskingRange = _maskingRanges[_maskingQuantity];
-        }
-        else if (!_maskingRanges.empty()) {
-            _selectedMaskingRange = _maskingRanges[0];
-        }
-        else {
-            LERROR("Cannot set selected masking range");
-        }
-    });
-
-    _selectedMaskingRange.onChange([this]() {
-        if (_maskingQuantity < static_cast<int>(_maskingRanges.size())) {
-            _maskingRanges[_maskingQuantity] = _selectedMaskingRange;
-        }
-    });
-
     _jumpToStart.onChange([this]() {
         if (_atLeastOneFileLoaded) {
             global::timeManager->setTimeNextFrame(Time(_files[0].timestamp));
         }
     });
-    setupProperties();
+
+    addProperty(_jumpToStart);
+
+    _saveDownloadsOnShutdown = p.cacheData.value_or(_saveDownloadsOnShutdown);
+    addProperty(_saveDownloadsOnShutdown);
+
+    addPropertySubOwner(_color);
+    addPropertySubOwner(_domain);
+    addPropertySubOwner(_flow);
+    addPropertySubOwner(_masking);
 }
 
 void RenderableFieldlinesSequence::staticallyLoadFiles(
@@ -804,47 +904,6 @@ void RenderableFieldlinesSequence::initializeGL() {
     setRenderBin(Renderable::RenderBin::Overlay);
 }
 
-void RenderableFieldlinesSequence::setupProperties() {
-    addProperty(_colorABlendEnabled);
-    addProperty(_lineWidth);
-    addProperty(_jumpToStart);
-
-    // Add Property Groups
-    addPropertySubOwner(_colorGroup);
-    addPropertySubOwner(_domainGroup);
-    addPropertySubOwner(_flowGroup);
-    addPropertySubOwner(_maskingGroup);
-
-    _colorUniform.setViewOption(Property::ViewOptions::Color);
-    _colorGroup.addProperty(_colorUniform);
-    _colorGroup.addProperty(_colorMethod);
-    _colorGroup.addProperty(_colorQuantity);
-    _selectedColorRange.setViewOption(Property::ViewOptions::MinMaxRange);
-    _colorGroup.addProperty(_selectedColorRange);
-    _colorGroup.addProperty(_colorTablePath);
-
-    _domainGroup.addProperty(_domainEnabled);
-    _domainGroup.addProperty(_domainX);
-    _domainGroup.addProperty(_domainY);
-    _domainGroup.addProperty(_domainZ);
-    _domainGroup.addProperty(_domainR);
-
-    _flowGroup.addProperty(_flowEnabled);
-    _flowGroup.addProperty(_flowReversed);
-    _flowColor.setViewOption(Property::ViewOptions::Color);
-    _flowGroup.addProperty(_flowColor);
-    _flowGroup.addProperty(_flowParticleSize);
-    _flowGroup.addProperty(_flowParticleSpacing);
-    _flowGroup.addProperty(_flowSpeed);
-
-    _maskingGroup.addProperty(_maskingEnabled);
-    _maskingGroup.addProperty(_maskingQuantity);
-    _selectedMaskingRange.setViewOption(Property::ViewOptions::MinMaxRange);
-    _maskingGroup.addProperty(_selectedMaskingRange);
-
-    addProperty(_saveDownloadsOnShutdown);
-}
-
 void RenderableFieldlinesSequence::setModelDependentConstants() {
     float limit = 100.f; // Just used as a default value
     switch (_model) {
@@ -853,7 +912,7 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
             limit = 300.f; // Should include a long magnetotail
             break;
         case Model::Enlil:
-            _flowReversed = true;
+            _flow.reversed = true;
             _scalingFactor = AuToMeter;
             limit = 50.f; // Should include Plutos furthest distance from the Sun
             break;
@@ -864,24 +923,24 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
         default:
             break;
     }
-    _domainX.setMinValue(glm::vec2(-limit));
-    _domainX.setMaxValue(glm::vec2(limit));
+    _domain.x.setMinValue(glm::vec2(-limit));
+    _domain.x.setMaxValue(glm::vec2(limit));
 
-    _domainY.setMinValue(glm::vec2(-limit));
-    _domainY.setMaxValue(glm::vec2(limit));
+    _domain.y.setMinValue(glm::vec2(-limit));
+    _domain.y.setMaxValue(glm::vec2(limit));
 
-    _domainZ.setMinValue(glm::vec2(-limit));
-    _domainZ.setMaxValue(glm::vec2(limit));
+    _domain.z.setMinValue(glm::vec2(-limit));
+    _domain.z.setMaxValue(glm::vec2(limit));
 
     // Radial should range from 0 out to a corner of the cartesian box:
     // sqrt(3) = 1.732..., 1.75 is a nice and round number
-    _domainR.setMinValue(glm::vec2(0.f));
-    _domainR.setMaxValue(glm::vec2(limit * 1.75f));
+    _domain.r.setMinValue(glm::vec2(0.f));
+    _domain.r.setMaxValue(glm::vec2(limit * 1.75f));
 
-    _domainX = glm::vec2(-limit, limit);
-    _domainY = glm::vec2(-limit, limit);
-    _domainZ = glm::vec2(-limit, limit);
-    _domainR = glm::vec2(0.f, limit * 1.5f);
+    _domain.x = glm::vec2(-limit, limit);
+    _domain.y = glm::vec2(-limit, limit);
+    _domain.z = glm::vec2(-limit, limit);
+    _domain.r = glm::vec2(0.f, limit * 1.5f);
 }
 
 void RenderableFieldlinesSequence::deinitializeGL() {
@@ -1048,31 +1107,34 @@ void RenderableFieldlinesSequence::firstUpdate() {
         file->state.extraQuantityNames();
 
     for (size_t i = 0; i < quantities.size(); i++) {
-        _colorQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
-        _maskingQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
+        _color.quantity.addOption(static_cast<int>(i), extraNamesVec[i]);
+        _masking.quantity.addOption(static_cast<int>(i), extraNamesVec[i]);
     }
-    _colorQuantity = _colorQuantityTemp;
-    _maskingQuantity = _maskingQuantityTemp;
+    _color.quantity.setValue(_color.quantityTemp);
+    _masking.quantity.setValue(_masking.quantityTemp);
 
-    if (_colorQuantity < static_cast<int>(_colorTablePaths.size())) {
-        _colorTablePath = _colorTablePaths[_colorQuantity].string();
+    if (_color.quantity < static_cast<int>(_color.colorTablePaths.size())) {
+        _color.colorTablePath = _color.colorTablePaths[_color.quantity].string();
     }
     else {
-        _colorTablePath = _colorTablePaths[0].string();
+        _color.colorTablePath = _color.colorTablePaths[0].string();
     }
 
-    if (std::filesystem::exists(_colorTablePath.value())) {
-        _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.value());
+    if (std::filesystem::exists(_color.colorTablePath.value())) {
+        _color.transferFunction =
+            std::make_unique<TransferFunction>(_color.colorTablePath.value());
     }
     else {
         LWARNING("Invalid path to transfer function, please enter new path");
-        _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
-        _transferFunction =
-            std::make_unique<TransferFunction>(_colorTablePath.stringValue());
+        _color.colorTablePath =
+            FieldlinesSequenceModule::DefaultTransferFunctionFile.string();
+
+        _color.transferFunction =
+            std::make_unique<TransferFunction>(_color.colorTablePath.stringValue());
     }
 
-    _shouldUpdateColorBuffer = true;
-    _shouldUpdateMaskingBuffer = true;
+    _color.shouldUpdateBuffer = true;
+    _masking.shouldUpdateBuffer = true;
 
     _isFirstLoad = false;
 }
@@ -1169,15 +1231,15 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             GL_NONE_BIT
         );
 
-        _shouldUpdateColorBuffer = true;
-        _shouldUpdateMaskingBuffer = true;
+        _color.shouldUpdateBuffer = true;
+        _masking.shouldUpdateBuffer = true;
     }
 
-    if (_shouldUpdateColorBuffer) {
+    if (_color.shouldUpdateBuffer) {
         const FieldlinesState& state = _files[_activeIndex].state;
         bool success = false;
         const std::vector<float>& quantities =
-            state.extraQuantity(_colorQuantity, success);
+            state.extraQuantity(_color.quantity, success);
 
         if (success) {
             glEnableVertexArrayAttrib(_vao, 1);
@@ -1192,18 +1254,18 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
                 GL_NONE_BIT
             );
 
-            _shouldUpdateColorBuffer = false;
+            _color.shouldUpdateBuffer = false;
         }
         else {
             glDisableVertexArrayAttrib(_vao, 1);
         }
     }
 
-    if (_shouldUpdateMaskingBuffer) {
+    if (_masking.shouldUpdateBuffer) {
         const FieldlinesState& state = _files[_activeIndex].state;
         bool success = false;
         const std::vector<float>& quantities =
-            state.extraQuantity(_maskingQuantity, success);
+            state.extraQuantity(_masking.quantity, success);
 
         if (success) {
             glEnableVertexArrayAttrib(_vao, 2);
@@ -1219,7 +1281,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
                 GL_NONE_BIT
             );
 
-            _shouldUpdateMaskingBuffer = false;
+            _masking.shouldUpdateBuffer = false;
         }
         else {
             glDisableVertexArrayAttrib(_vao, 2);
@@ -1250,44 +1312,45 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat)
     );
 
-    _shaderProgram->setUniform("colorMethod", _colorMethod);
-    _shaderProgram->setUniform("lineColor", _colorUniform);
-    _shaderProgram->setUniform("usingDomain", _domainEnabled);
-    _shaderProgram->setUniform("usingMasking", _maskingEnabled);
+    _shaderProgram->setUniform("colorMethod", _color.method);
+    _shaderProgram->setUniform("lineColor", _color.uniformColor);
+    _shaderProgram->setUniform("usingDomain", _domain.enabled);
+    _shaderProgram->setUniform("usingMasking", _masking.enabled);
 
-    if (_colorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
-        _transferFunction->update();
+    if (_color.method == static_cast<int>(ColorMethod::ByQuantity)) {
+        _color.transferFunction->update();
         ghoul::opengl::TextureUnit textureUnit;
-        textureUnit.bind(_transferFunction->texture());
+        textureUnit.bind(_color.transferFunction->texture());
         _shaderProgram->setUniform("transferFunction", textureUnit);
-        _shaderProgram->setUniform("selectedColorRange", _selectedColorRange);
+        _shaderProgram->setUniform("selectedColorRange", _color.selectedRange);
     }
 
-    if (_maskingEnabled) {
-        _shaderProgram->setUniform("maskingRange", _selectedMaskingRange);
+    if (_masking.enabled) {
+        _shaderProgram->setUniform("maskingRange", _masking.selectedRange);
     }
 
-    _shaderProgram->setUniform("domainLimR", _domainR.value() * _scalingFactor);
-    _shaderProgram->setUniform("domainLimX", _domainX.value() * _scalingFactor);
-    _shaderProgram->setUniform("domainLimY", _domainY.value() * _scalingFactor);
-    _shaderProgram->setUniform("domainLimZ", _domainZ.value() * _scalingFactor);
+    _shaderProgram->setUniform("domainLimR", _domain.r.value() * _scalingFactor);
+    _shaderProgram->setUniform("domainLimX", _domain.x.value() * _scalingFactor);
+    _shaderProgram->setUniform("domainLimY", _domain.y.value() * _scalingFactor);
+    _shaderProgram->setUniform("domainLimZ", _domain.z.value() * _scalingFactor);
+
+    glm::vec4 flowColor = _flow.color;
+    flowColor.a *= _flow.opacity();
 
     // Flow / Particles
-    _shaderProgram->setUniform("flowColor", _flowColor);
-    _shaderProgram->setUniform("usingParticles", _flowEnabled);
-    _shaderProgram->setUniform("particleSize", _flowParticleSize);
-    _shaderProgram->setUniform("particleSpacing", _flowParticleSpacing);
-    _shaderProgram->setUniform("particleSpeed", _flowSpeed);
+    _shaderProgram->setUniform("flowColor", flowColor);
+    _shaderProgram->setUniform("usingParticles", _flow.enabled);
+    _shaderProgram->setUniform("particleSize", _flow.particleSize);
+    _shaderProgram->setUniform("particleSpacing", _flow.particleSpacing);
+    _shaderProgram->setUniform("particleSpeed", _flow.speed);
     _shaderProgram->setUniform(
         "time",
-        global::windowDelegate->applicationTime() * (_flowReversed ? -1 : 1)
+        global::windowDelegate->applicationTime() * (_flow.reversed ? -1 : 1)
     );
 
     _shaderProgram->setUniform("opacity", opacity());
 
-    bool additiveBlending = false;
-    if (_colorABlendEnabled) {
-        additiveBlending = true;
+    if (_useAdditiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
@@ -1318,10 +1381,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     glBindVertexArray(0);
     _shaderProgram->deactivate();
 
-    if (additiveBlending) {
-        global::renderEngine->openglStateCache().resetBlendState();
-        global::renderEngine->openglStateCache().resetDepthState();
-    }
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 } // namespace openspace
