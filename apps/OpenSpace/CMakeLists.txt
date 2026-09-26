@@ -121,7 +121,7 @@ if (UNIX)
 endif ()
 
 add_custom_command(TARGET OpenSpace POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
   ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/sgct.schema.json
   ${CMAKE_CURRENT_SOURCE_DIR}/../../config/schema/sgct.schema.json
   COMMAND_EXPAND_LISTS
@@ -138,52 +138,21 @@ if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
   target_compile_definitions(OpenSpace PRIVATE OPENSPACE_HAS_LAUNCHER)
   end_header("Dependency: Profile Editor")
 
-  if (WIN32)
-    # Qt is linked dynamically (LGPL compliance), whether it comes from vcpkg or, with
-    # OPENSPACE_USE_SYSTEM_QT, from the system. The Qt DLLs themselves are picked up by
-    # the $<TARGET_RUNTIME_DLLS:OpenSpace> copy further down, but the runtime plugins
-    # platforms/qwindows.dll, styles, imageformats, tls, ...) are loaded at runtime and
-    # not seen as link dependencies, so windeployqt is run to place them next to the
-    # executable.
-    if (OPENSPACE_USE_SYSTEM_QT)
-      find_program(OPENSPACE_WINDEPLOYQT_EXECUTABLE
-        NAMES windeployqt
-        HINTS "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}"
-        NO_DEFAULT_PATH
-        REQUIRED
-      )
-    else ()
-      file(GLOB _openspace_qt_host_tools_dirs "${_VCPKG_INSTALLED_DIR}/*/tools/Qt6/bin")
-      find_program(OPENSPACE_WINDEPLOYQT_EXECUTABLE
-        NAMES windeployqt
-        HINTS ${_openspace_qt_host_tools_dirs}
-        NO_DEFAULT_PATH
-      )
-      unset(_openspace_qt_host_tools_dirs)
-      find_program(OPENSPACE_WINDEPLOYQT_EXECUTABLE NAMES windeployqt REQUIRED)
-    endif ()
-
-    get_filename_component(_openspace_windeployqt_dir "${OPENSPACE_WINDEPLOYQT_EXECUTABLE}" DIRECTORY)
-    find_program(OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE
-      NAMES windeployqt.debug.bat
-      HINTS ${_openspace_windeployqt_dir}
+  if (WIN32 AND OPENSPACE_USE_SYSTEM_QT)
+    # A system Qt keeps its runtime plugins (platforms/qwindows.dll, styles, imageformats,
+    # tls, ...) inside its own installation, and they are loaded by name at runtime rather
+    # than being link dependencies of OpenSpace. windeployqt is the only thing that knows
+    # where that installation put them, so it places them next to the executable.
+    find_program(OPENSPACE_WINDEPLOYQT_EXECUTABLE
+      NAMES windeployqt
+      HINTS "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}"
       NO_DEFAULT_PATH
+      REQUIRED
     )
-    unset(_openspace_windeployqt_dir)
-    if (NOT OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE)
-      set(OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE ${OPENSPACE_WINDEPLOYQT_EXECUTABLE})
-    endif ()
-
-    if (OPENSPACE_USE_SYSTEM_QT)
-      set(_openspace_windeployqt_config "")
-    else ()
-      set(_openspace_windeployqt_config "$<IF:$<CONFIG:Debug>,--debug,--release>")
-    endif ()
 
     add_custom_command(
       TARGET OpenSpace POST_BUILD
-      COMMAND $<IF:$<CONFIG:Debug>,${OPENSPACE_WINDEPLOYQT_DEBUG_EXECUTABLE},${OPENSPACE_WINDEPLOYQT_EXECUTABLE}>
-        ${_openspace_windeployqt_config}
+      COMMAND ${OPENSPACE_WINDEPLOYQT_EXECUTABLE}
         --no-translations
         --no-compiler-runtime
         --verbose=0
@@ -191,33 +160,19 @@ if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
       COMMENT "Deploying Qt runtime dependencies via windeployqt"
       VERBATIM
     )
-    unset(_openspace_windeployqt_config)
-
-    if (NOT OPENSPACE_USE_SYSTEM_QT)
-      # windeployqt.exe is itself a host tool built for the "x64-windows" (dynamic)
-      # triplet, and it fails to detect that OpenSpace actually links the
-      # "x64-windows-static-md" triplet's Qt (vcpkg splits libs under bin/ from plugins
-      # under Qt6/plugins/, which confuses its usual same-prefix layout heuristic). It
-      # ends up deploying its own host triplet's plugins, which are a different,
-      # ABI-incompatible Qt build (same version number, but "Cannot load library ...:
-      # The specified procedure could not be found" at runtime). Overwrite whatever it
-      # copied with the plugins from the triplet actually linked into OpenSpace.
-      add_custom_command(
-        TARGET OpenSpace POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/$<IF:$<CONFIG:Debug>,debug/,>Qt6/plugins"
-          "$<TARGET_FILE_DIR:OpenSpace>"
-        COMMENT "Deploying Qt runtime plugins"
-        VERBATIM
-      )
-    endif ()
   endif ()
 
-  # A system Qt locates its own plugins through the regular QLibraryInfo plugin path, and
-  # the directory copied here does not even exist in that case.
-  if (UNIX AND NOT OPENSPACE_USE_SYSTEM_QT)
-    add_custom_command(TARGET OpenSpace POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_directory
+  # Qt is linked dynamically (LGPL compliance), whether it comes from vcpkg or, with
+  # OPENSPACE_USE_SYSTEM_QT, from the system. The Qt libraries themselves are picked up by
+  # the $<TARGET_RUNTIME_DLLS:OpenSpace> copy further down on Windows and are found
+  # through the RPATH on Linux, but the runtime plugins (platforms/qwindows.dll, styles,
+  # imageformats, tls, ...) are loaded by name at runtime and are not link dependencies,
+  # so they have to be copied next to the executable, where Qt's default plugin search
+  # path picks them up
+  if (NOT OPENSPACE_USE_SYSTEM_QT)
+    add_custom_command(
+      TARGET OpenSpace POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
         "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/$<IF:$<CONFIG:Debug>,debug/,>Qt6/plugins"
         "$<TARGET_FILE_DIR:OpenSpace>"
       COMMENT "Deploying Qt runtime plugins"
@@ -228,7 +183,7 @@ endif ()
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
-# target as of July 2017, which is needed.
+# target as of July 2017, which is needed
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # wanted by CEF
   set(PROJECT_ARCH "x86_64")
@@ -261,7 +216,7 @@ endif ()
 
 if (WIN32)
   add_custom_command(TARGET OpenSpace POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:OpenSpace> $<TARGET_FILE_DIR:OpenSpace>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:OpenSpace> $<TARGET_FILE_DIR:OpenSpace>
     COMMAND_EXPAND_LISTS
   )
 endif ()
