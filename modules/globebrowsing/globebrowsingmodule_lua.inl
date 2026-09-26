@@ -28,6 +28,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/stringhelper.h>
@@ -593,6 +595,58 @@ namespace {
     }
 
     return res;
+}
+
+/**
+ * Return the ephemeris time (ET seconds past J2000) of sunrise for the current
+ * camera position
+ *
+ * \param useCameraAltitude If true, the camera's altitude is taken into consideration
+ *        when calculating the sunset time. If false, sunrise is calculated for sea level.
+ *        (defaults to true)
+ * \param date If specified sunset will be calculated for the specified date, otherwise
+ *        the simulation date is used. Date should be specified in the following format
+ *        (YYYY-MM-DD)
+ * \return The ephemeris time (ET seconds past J2000) of the sunrise for the current
+ *         camera position
+ */
+[[codegen::luawrap]] double sunriseTime(bool useCameraAltitude = true,
+                                       std::string date = "") {
+    auto [lat, lon, alt] = geoPositionForCamera();
+    if (date.empty()) {
+        date = global::timeManager->time().ISO8601();
+    }
+    std::string dateTrim = date.substr(0, date.find('T'));
+    std::string globe = global::navigationHandler->orbitalNavigator().anchorNode()->identifier();
+    double eventAlt = useCameraAltitude ? alt : 0.0;
+    constexpr bool IsSunrise = true;
+    return SpiceManager::ref().solarEventTime(lat, lon, eventAlt, dateTrim, globe, IsSunrise);
+}
+
+/**
+ * Return the ephemeris time (ET seconds past J2000) of the next sunset for the current
+ * camera position
+ *
+ * \param useCameraAltitude If true, the camera's altitude is taken into consideration
+ *        when calculating the sunset time. If false, sunset is calculated for sea level
+ *        (defaults to true)
+ * \param date If specified sunset will be calculated for the specified date, otherwise
+ *        the simulation date is used. Date should be specified in the following format
+ *        (YYYY-MM-DD)
+ * \return The ephemeris time (ET seconds past J2000) of the next sunset for the current
+ *         camera position
+ */
+[[codegen::luawrap]] double sunsetTime(bool useCameraAltitude = true,
+                                     std::string date = "") {
+    auto [lat, lon, alt] = geoPositionForCamera();
+    if (date.empty()) {
+        date = global::timeManager->time().ISO8601();
+    }
+    std::string dateTrim = date.substr(0, date.find('T'));
+    std::string globe = global::navigationHandler->orbitalNavigator().anchorNode()->identifier();
+    double eventAlt = useCameraAltitude ? alt : 0.0;
+    constexpr bool IsSunrise = false;
+    return SpiceManager::ref().solarEventTime(lat, lon, eventAlt, dateTrim, globe, IsSunrise);
 }
 
 } // namespace
