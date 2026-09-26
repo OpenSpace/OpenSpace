@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "websocketpp",
+  "version": "0.8.2",
+  "port-version": 7,
+  "description": "Header only WebSocket client and server library. This port tracks the OpenSpace fork, which is required by Ghoul; the upstream port was removed from the vcpkg registry.",
+  "homepage": "https://github.com/OpenSpace/websocketpp",
+  "license": "BSD-3-Clause"
+}

@@ -15,7 +15,6 @@
     },
     "overlay-ports": [
       "./support/vcpkg/ports",
-      "./ext/ghoul/support/vcpkg/ports",
       "./apps/OpenSpace/ext/sgct/support/vcpkg/ports",
       "./ext/spice/support/vcpkg/ports",
       "./support/coding/codegen/support/vcpkg/ports"
@@ -25,20 +24,13 @@
     ]
   },
   "dependencies": [
-    "ghoul",
-    "sgct",
-    "spice",
-    "codegen",
-    "curl",
-    "gdal",
-    "geos",
     {
-      "name": "imgui",
-      "default-features": false
+      "name": "assimp",
+      "features": [
+        "draco"
+      ]
     },
-    "kameleon",
-    "mold",
-    "soloud",
+    "catch2",
     "ccfits",
     {
       "name": "cfitsio",
@@ -46,22 +38,46 @@
         "curl"
       ]
     },
+    "codegen",
+    "curl",
     {
       "name": "date",
       "default-features": false
     },
+    {
+      "name": "freetype",
+      "default-features": false
+    },
+    "gdal",
+    "geos",
+    {
+      "name": "imgui",
+      "default-features": false
+    },
+    "glbinding",
+    "glm",
+    "json-schema-validator",
+    "kameleon",
     "kubazip",
+    "lua",
+    "lz4",
+    "mold",
     "nlohmann-json",
     "openjpeg",
     "oscpack",
-    "json-schema-validator",
-    "stbimage",
-    "tinyxml2",
-    "tuio",
+    "scnlib",
+    "sgct",
+    "soloud",
+    "spice",
     {
       "name": "spout2",
       "platform": "windows"
     },
+    "stbimage",
+    "tiny-process-library",
+    "tinyxml2",
+    "tracy",
+    "tuio",
     {
       "name": "vcpkg-cmake",
       "host": true
@@ -69,7 +85,8 @@
     {
       "name": "vcpkg-cmake-config",
       "host": true
-    }
+    },
+    "websocketpp"
   ],
   "features": {
     "qt": {

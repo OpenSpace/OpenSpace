@@ -1,0 +1,4 @@
+websocketpp is header only and provides no CMake package. Locate it with:
+
+    find_path(WEBSOCKETPP_INCLUDE_DIR "websocketpp/version.hpp" REQUIRED)
+    target_include_directories(main SYSTEM PRIVATE ${WEBSOCKETPP_INCLUDE_DIR})

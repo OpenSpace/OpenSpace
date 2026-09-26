@@ -24,6 +24,8 @@
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
 
+add_subdirectory(ghoul)
+
 set(OPENSPACE_SOURCE
   openspace.cpp
   camera/camera.cpp

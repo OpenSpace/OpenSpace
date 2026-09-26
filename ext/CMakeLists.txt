@@ -22,16 +22,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-# Ghoul is resolved through the vcpkg overlay port at
-# ext/ghoul/support/vcpkg/ports/ghoul, which builds the enclosing submodule checkout.
-# The ghoul submodule stays checked out because that port builds from its source path.
-begin_dependency("Ghoul")
-find_package(ghoul CONFIG REQUIRED)
-end_dependency()
-
-# Spice is resolved through the vcpkg overlay port at
-# ext/spice/support/vcpkg/ports/spice, which builds the enclosing submodule checkout.
-# The spice submodule stays checked out because that port builds from its source path.
 begin_dependency("Spice")
 find_package(spice CONFIG REQUIRED)
 end_dependency()

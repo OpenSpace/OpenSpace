@@ -270,10 +270,15 @@ int printFatal(lua_State* L) {
         ));
     }
 
+    if (!std::filesystem::exists(destination)) {
+        std::filesystem::create_directories(destination);
+    }
+
     int ret = zip_extract(source.c_str(), destination.c_str(), nullptr, nullptr);
     if (ret != 0) {
+        const char* error = zip_strerror(ret);
         throw ghoul::lua::LuaError(std::format(
-            "Error while unzipping '{}': {}", source, ret
+            "Error while unzipping '{}': {}", source, error
         ));
     }
 

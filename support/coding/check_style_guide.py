@@ -625,7 +625,7 @@ check_files(
   check_header_file
 )
 check_files(
-  [basePath + 'ext/ghoul/include/**/*.h'],
+  [basePath + 'include/ghoul/**/*.h'],
   [],
   'ghoul',
   check_header_file
@@ -661,7 +661,7 @@ check_files(
   check_inline_file
 )
 check_files(
-  [basePath + 'ext/ghoul/include/**/*.inl'],
+  [basePath + 'include/ghoul/**/*.inl'],
   [],
   'ghoul',
   check_inline_file
@@ -695,9 +695,9 @@ check_files(
   check_source_file
 )
 check_files(
-  [basePath + 'ext/ghoul/src/**/*.cpp'],
+  [basePath + 'src/ghoul/**/*.cpp'],
   [
-    basePath + 'ext/ghoul/src/misc/levmarqsolver.cpp'
+    basePath + 'src/ghoul/misc/levmarqsolver.cpp'
   ],
   'ghoul',
   check_source_file

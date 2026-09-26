@@ -37,10 +37,12 @@ set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 # directory. Changing any of the options below afterwards will not add or remove the
 # corresponding dependency: delete build/<preset>/vcpkg_installed (or the whole build
 # directory) and configure again
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+option(OPENSPACE_HAVE_TESTS "Activate the unit tests" ON)
 option(OPENSPACE_ENABLE_TRACY "Enable profiling with Tracy" OFF)
 option(OPENSPACE_OPENVR_SUPPORT "Build the OpenSpace application with OpenVR support" OFF)
 option(OPENSPACE_USE_SYSTEM_QT "Use a Qt installation provided by the system instead of building Qt through vcpkg" OFF)
+option(GHOUL_HIGH_DEBUG_MODE "Add additional debugging code" ON)
+option(GHOUL_LOGGING_ENABLE_TRACE "Enables the LTRACE macro" ON)
 
 if (OPENSPACE_HAVE_TESTS)
   list(APPEND VCPKG_MANIFEST_FEATURES "tests")
@@ -62,27 +64,16 @@ set(OPENSPACE_VERSION_MAJOR)
 set(OPENSPACE_VERSION_MINOR)
 set(OPENSPACE_VERSION_PATCH)
 
-# The dependencies resolved through vcpkg are located with find_package() from the
-# subdirectory that consumes them (ext/, apps/, individual modules). Their IMPORTED targets
-# have to be visible across sibling directories (for example Ghoul::Ghoul is found in ext/
-# but linked from src/, modules/ and tests/), so promote every find_package target to
-# global scope
 set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON)
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
-include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/message_macros.cmake)
 
 begin_header("Configuring OpenSpace project")
 
 ##########################################################################################
 # Cleanup project                                                                        #
 ##########################################################################################
-if (NOT EXISTS "${PROJECT_SOURCE_DIR}/ext/ghoul/CMakeLists.txt")
-  message(FATAL_ERROR "Git submodules are missing. Please run "
-    "git submodule update --init --recursive to download the missing dependencies."
-  )
-endif ()
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 

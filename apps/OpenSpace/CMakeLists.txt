@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/message_macros.cmake)
 include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 
 # We are getting all_enabled_modules from the handle_applications.cmake file which gets
