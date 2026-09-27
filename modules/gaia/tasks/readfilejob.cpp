@@ -24,9 +24,9 @@
 
 #include <modules/gaia/tasks/readfilejob.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
 #include <cmath>
 #include <string_view>
 #include <unordered_map>

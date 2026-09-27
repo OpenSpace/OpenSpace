@@ -33,7 +33,7 @@
 #include "identifierregistry.h"
 #include "schema/assetschema.h"
 #include "path.h"
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDateTime>

@@ -24,8 +24,8 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 

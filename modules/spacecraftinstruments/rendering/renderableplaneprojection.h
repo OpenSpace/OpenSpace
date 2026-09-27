@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/opengl/ghoul_gl.h>
 #include <filesystem>
 #include <memory>
 

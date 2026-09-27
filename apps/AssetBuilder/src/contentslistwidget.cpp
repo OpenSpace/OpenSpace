@@ -25,7 +25,7 @@
 #include "contentslistwidget.h"
 
 #include "jasset.h"
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QListWidget>

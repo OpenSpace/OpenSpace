@@ -28,10 +28,10 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
+#include <openspace/misc/managedmemoryuniqueptr.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <functional>
 #include <optional>
 #include <tuple>

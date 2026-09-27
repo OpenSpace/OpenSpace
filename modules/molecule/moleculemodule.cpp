@@ -31,13 +31,13 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/templatefactory.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/logging/logmanager.h>
 #include <string_view>
 #include <md_gl.h>
 

@@ -26,16 +26,16 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <fstream>
 #include <iterator>

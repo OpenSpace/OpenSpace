@@ -28,9 +28,9 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/openspace.h>
 #include <QApplication>
 #include <QFile>
 #include <QMessageBox>
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         ghoul::logging::LogManager::ImmediateFlush::Yes
     );
 
-    ghoul::initialize();
+    initialize();
     global::create();
 
     // Register the path of the executable, to make it possible to find other files in the

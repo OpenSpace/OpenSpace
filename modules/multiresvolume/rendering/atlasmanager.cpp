@@ -25,9 +25,9 @@
 #include <modules/multiresvolume/rendering/atlasmanager.h>
 
 #include <modules/multiresvolume/rendering/tsp.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/opengl/texture.h>
 #include <glm/gtx/std_based_type.hpp>
 #include <cmath>
 #include <cstring>

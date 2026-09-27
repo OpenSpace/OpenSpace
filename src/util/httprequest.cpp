@@ -24,8 +24,8 @@
 
 #include <openspace/util/httprequest.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <curl/curl.h>
 #include <array>
 #include <cstdint>

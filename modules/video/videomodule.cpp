@@ -31,11 +31,11 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

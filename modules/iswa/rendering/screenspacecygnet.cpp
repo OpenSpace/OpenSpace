@@ -27,9 +27,9 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
 #include <cmath>
 
 namespace {

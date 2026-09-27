@@ -27,7 +27,7 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <ghoul/opengl/programobjectmanager.h>
+#include <openspace/opengl/programobjectmanager.h>
 #include <utility>
 
 namespace openspace {

@@ -27,7 +27,7 @@
 
 #include <openspace/properties/templateproperty.h>
 
-#include <ghoul/misc/easing.h>
+#include <openspace/misc/easing.h>
 
 namespace openspace {
 

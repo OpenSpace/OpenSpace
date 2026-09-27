@@ -34,10 +34,10 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/settings.h>
 #include <openspace/openspace.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
 #include <sgct/config.h>
 #include <QComboBox>
 #include <QFile>

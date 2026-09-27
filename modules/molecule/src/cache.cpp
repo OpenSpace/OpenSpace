@@ -28,8 +28,8 @@
 #include <modules/molecule/src/loader.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/threadpool.h>
-#include <ghoul/logging/logmanager.h>
 #include <core/md_allocator.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>

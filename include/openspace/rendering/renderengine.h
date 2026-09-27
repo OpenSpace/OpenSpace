@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/opengl/ghoul_gl.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
@@ -36,7 +37,6 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/framebufferrenderer.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <cstdint>
 #include <chrono>
 #include <filesystem>

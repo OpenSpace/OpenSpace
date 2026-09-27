@@ -27,11 +27,11 @@
 
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <unordered_map>
 
 namespace openspace {

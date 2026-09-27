@@ -26,11 +26,11 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {

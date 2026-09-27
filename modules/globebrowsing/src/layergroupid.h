@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 
-#include <ghoul/format.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/format.h>
+#include <openspace/misc/exception.h>
 #include <algorithm>
 #include <array>
 #include <string_view>

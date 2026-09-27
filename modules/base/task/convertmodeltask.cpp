@@ -25,9 +25,9 @@
 #include <modules/base/task/convertmodeltask.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/io/model/modelgeometry.h>
-#include <ghoul/io/model/modelreaderassimp.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/io/model/modelgeometry.h>
+#include <openspace/io/model/modelreaderassimp.h>
+#include <openspace/misc/dictionary.h>
 
 namespace {
     // Converts a 3D model format from a format that is natively supported both by

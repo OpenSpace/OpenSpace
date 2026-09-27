@@ -26,15 +26,15 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/programobject.h>
 #include "SpiceUsr.h"
 #include <algorithm>
 #include <array>

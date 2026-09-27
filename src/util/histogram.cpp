@@ -24,8 +24,8 @@
 
 #include <openspace/util/histogram.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
 #include <algorithm>
 #include <cmath>
 #include <string_view>

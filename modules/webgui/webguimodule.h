@@ -27,11 +27,11 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/misc/process.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <ghoul/misc/process.h>
 #include <functional>
 #include <memory>
 #include <unordered_map>

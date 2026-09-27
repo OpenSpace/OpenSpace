@@ -24,7 +24,7 @@
 
 #include <openspace/properties/vector/ivec2property.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 

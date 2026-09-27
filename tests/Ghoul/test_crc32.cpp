@@ -25,7 +25,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <ghoul/misc/crc32.h>
+#include <openspace/misc/crc32.h>
 #include <cstring>
 #include <random>
 

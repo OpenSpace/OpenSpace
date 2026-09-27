@@ -28,7 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <memory>
 
 namespace ghoul { class Dictionary; }

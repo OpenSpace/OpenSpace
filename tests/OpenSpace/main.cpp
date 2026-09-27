@@ -28,15 +28,15 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/ghoul_lua.h>
+#include <openspace/openspace.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/ghoul.h>
 #include <filesystem>
 #include <iostream>
 
@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
         ghoul::logging::LogLevel::Info,
         ghoul::logging::LogManager::ImmediateFlush::Yes
     );
-    ghoul::initialize();
+    initialize();
     global::create();
 
     // Register the path of the executable,

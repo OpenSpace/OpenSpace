@@ -26,11 +26,11 @@
 #define __OPENSPACE_CORE___SPICEMANAGER___H__
 
 #include <openspace/engine/globals.h>
+#include <openspace/glm.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/boolean.h>
+#include <openspace/misc/exception.h>
 #include <openspace/util/memorymanager.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/exception.h>
 #include <array>
 #include <filesystem>
 #include <map>

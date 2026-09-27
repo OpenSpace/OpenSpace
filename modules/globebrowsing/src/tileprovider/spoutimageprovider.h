@@ -27,8 +27,8 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/texture.h>
 #include <array>
 
 namespace openspace {

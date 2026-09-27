@@ -25,10 +25,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <ghoul/misc/memorypool.h>
-#include <ghoul/misc/templatefactory.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/managedmemoryuniqueptr.h>
+#include <openspace/misc/memorypool.h>
+#include <openspace/misc/templatefactory.h>
 
  /*
   * Test checklist:

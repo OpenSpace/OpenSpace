@@ -25,9 +25,9 @@
 #include <modules/webbrowser/include/webrenderhandler.h>
 
 #include <modules/webbrowser/webbrowsermodule.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/opengl/textureunit.h>
 #include <algorithm>
 
 namespace openspace {

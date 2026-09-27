@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <deque>
 #include <string>
 #include <utility>

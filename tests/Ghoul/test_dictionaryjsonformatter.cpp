@@ -25,8 +25,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <ghoul/misc/dictionaryjsonformatter.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionaryjsonformatter.h>
+#include <openspace/misc/dictionary.h>
 #include <string>
 
 TEST_CASE("DictionaryJsonFormatter: Empty Dictionary", "[dictionaryjsonformatter]") {

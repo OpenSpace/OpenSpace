@@ -25,9 +25,9 @@
 #include <modules/iswa/util/dataprocessorkameleon.h>
 
 #include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
 #include <openspace/properties/misc/selectionproperty.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <filesystem>
 #include <iterator>

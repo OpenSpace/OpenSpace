@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___DATASTRUCTURE___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___DATASTRUCTURE___H__
 
-#include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/glm.h>
+#include <openspace/misc/dictionary.h>
 #include <limits>
 #include <string>
 #include <vector>

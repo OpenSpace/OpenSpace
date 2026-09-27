@@ -24,16 +24,16 @@
 
 #include <openspace/events/event.h>
 
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/tstring.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/logging/logmanager.h>
 #include <filesystem>
 #include <string_view>
 

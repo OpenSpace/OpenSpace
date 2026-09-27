@@ -29,12 +29,12 @@
 #include <openspace/rendering/fadeable.h>
 
 #include <openspace/data/dataloader.h>
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 #include <memory>
 

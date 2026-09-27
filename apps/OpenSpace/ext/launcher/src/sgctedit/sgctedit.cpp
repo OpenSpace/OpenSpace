@@ -27,9 +27,9 @@
 #include <sgctedit/displaywindowunion.h>
 #include <sgctedit/monitorbox.h>
 #include <sgct/math.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
 #include <QApplication>
 #include <QCheckBox>
 #include <QFileDialog>

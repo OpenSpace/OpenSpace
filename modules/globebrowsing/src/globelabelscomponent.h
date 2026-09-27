@@ -28,14 +28,14 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
+#include <openspace/glm.h>
+#include <openspace/font/font.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/glm.h>
-#include <ghoul/font/font.h>
 #include <filesystem>
 #include <memory>
 

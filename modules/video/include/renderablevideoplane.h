@@ -28,7 +28,7 @@
 #include <modules/base/rendering/renderableplane.h>
 
 #include <modules/video/include/videoplayer.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 
 namespace openspace {
 

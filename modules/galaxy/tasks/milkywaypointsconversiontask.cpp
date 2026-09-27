@@ -25,7 +25,7 @@
 #include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionary.h>
 #include <cstdint>
 #include <fstream>
 #include <iostream>

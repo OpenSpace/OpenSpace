@@ -25,11 +25,11 @@
 #include <modules/webbrowser/include/cefhost.h>
 
 #include <modules/webbrowser/include/webbrowserapp.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
 #include <include/cef_app.h>
 #include <filesystem>
 #include <string_view>

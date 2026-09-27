@@ -24,16 +24,16 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/downloadmanager.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/io/texture/texturewriter.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/base64.h>
+#include <openspace/misc/csvreader.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/openspace.h>
 #include <openspace/util/json_helper.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturewriter.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/base64.h>
-#include <ghoul/misc/csvreader.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
 #include <array>
 #include <iterator>
 

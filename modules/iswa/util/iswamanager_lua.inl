@@ -24,10 +24,10 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/rendering/screenspacerenderable.h>
-#include <ghoul/format.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
 #include <memory>
 #include <utility>
 

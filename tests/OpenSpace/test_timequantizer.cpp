@@ -25,9 +25,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "modules/globebrowsing/src/timequantizer.h"
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/filesystem/filesystem.h>
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 

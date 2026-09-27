@@ -27,15 +27,15 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionaryluaformatter.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <exception>
 #include <memory>
 

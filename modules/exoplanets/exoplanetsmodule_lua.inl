@@ -27,11 +27,11 @@
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/csvreader.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/csvreader.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <map>
 #include <string>

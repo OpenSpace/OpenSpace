@@ -27,11 +27,11 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
-#include <ghoul/glm.h>
 #include <deque>
 #include <filesystem>
 #include <limits>

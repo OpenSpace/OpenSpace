@@ -28,11 +28,11 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/camera/camera.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/ghoul_gl.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <array>
 
 namespace ghoul {

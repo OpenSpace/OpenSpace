@@ -24,7 +24,7 @@
 
 #include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <cmath>
 #include <utility>
 

@@ -24,12 +24,12 @@
 
 #include <modules/space/horizonsfile.h>
 
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/httprequest.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/stringhelper.h>
 #include <cmath>
 #include <fstream>
 #include <ios>

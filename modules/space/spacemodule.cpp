@@ -40,6 +40,11 @@
 #include <modules/space/translation/spicetranslation.h>
 #include <modules/space/rotation/spicerotation.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/objectmanager.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/timeframe.h>
@@ -47,11 +52,6 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/objectmanager.h>
-#include <ghoul/misc/templatefactory.h>
 #include <optional>
 
 #include "spacemodule_lua.inl"

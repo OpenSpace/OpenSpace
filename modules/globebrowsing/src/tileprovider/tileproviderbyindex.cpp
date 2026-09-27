@@ -25,8 +25,8 @@
 #include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <algorithm>
 #include <limits>
 #include <utility>

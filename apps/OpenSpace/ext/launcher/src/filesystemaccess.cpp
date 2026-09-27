@@ -24,7 +24,7 @@
 
 #include "filesystemaccess.h"
 
-#include <ghoul/format.h>
+#include <openspace/format.h>
 #include <utility>
 
 FileSystemAccess::FileSystemAccess(std::string fileExtension,

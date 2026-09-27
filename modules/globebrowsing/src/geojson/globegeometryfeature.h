@@ -26,10 +26,10 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYFEATURE___H__
 
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/ghoul_gl.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/texturecomponent.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <chrono>
 #include <memory>
 #include <string>

@@ -27,9 +27,9 @@
 #include <modules/kameleon/include/kameleonhelper.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/volume/rawvolume.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <limits>
 #include <utility>
 

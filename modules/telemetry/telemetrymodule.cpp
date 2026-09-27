@@ -39,9 +39,9 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/misc/dictionary.h>
 #include <chrono>
 #include <functional>
 #include <limits>

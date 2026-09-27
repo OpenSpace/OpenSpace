@@ -27,8 +27,8 @@
 
 #include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
+#include <openspace/glm.h>
 #include <openspace/util/touch.h>
-#include <ghoul/glm.h>
 #include <array>
 
 //#define TOUCH_DEBUG_MODE

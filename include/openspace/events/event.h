@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___EVENT___H__
 #define __OPENSPACE_CORE___EVENT___H__
 
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/tstring.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
 #include <cstdint>
 #include <filesystem>
 #include <string_view>

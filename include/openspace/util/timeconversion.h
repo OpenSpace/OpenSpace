@@ -27,7 +27,7 @@
 
 #include <openspace/util/timeconstants.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <algorithm>
 #include <array>
 #include <string>

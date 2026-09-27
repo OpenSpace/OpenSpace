@@ -22,30 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/cmdparser/commandlineparser.h>
+#include <openspace/cmdparser/multiplecommand.h>
+#include <openspace/cmdparser/singlecommand.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/glm.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/logging/visualstudiooutputlog.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stacktrace.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/openspace.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/task.h>
 #include <openspace/util/taskloader.h>
-#include <openspace/openspace.h>
-#include <ghoul/format.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/glm.h>
-#include <ghoul/cmdparser/commandlineparser.h>
-#include <ghoul/cmdparser/multiplecommand.h>
-#include <ghoul/cmdparser/singlecommand.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/stacktrace.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif // WIN32
@@ -59,7 +59,6 @@
 #include <sgct/projection/nonlinearprojection.h>
 #include <sgct/user.h>
 #include <sgct/window.h>
-#include <ghoul/misc/profiling.h>
 #include <stb_image.h>
 #include <iostream>
 #include <string_view>
@@ -1195,7 +1194,7 @@ int main(int argc, char* argv[]) {
 #endif // WIN32
     }
 
-    ghoul::initialize();
+    initialize();
     global::create();
 
     // Register the path of the executable, to make it possible to find other files in the
@@ -1384,7 +1383,7 @@ int main(int argc, char* argv[]) {
     catch (const SpecificationError& e) {
         LFATALC("main", "Loading of configuration file failed");
         logError(e);
-        ghoul::deinitialize();
+        deinitialize();
         exit(EXIT_FAILURE);
     }
     catch (const ghoul::RuntimeError& e) {
@@ -1393,7 +1392,7 @@ int main(int argc, char* argv[]) {
         if (ghoul::logging::LogManager::isInitialized()) {
             LogMgr.flushLogs();
         }
-        ghoul::deinitialize();
+        deinitialize();
         return EXIT_FAILURE;
     }
 
@@ -1595,12 +1594,12 @@ int main(int argc, char* argv[]) {
         LFATALC("main", e.what());
         Engine::destroy();
         global::openSpaceEngine->deinitialize();
-        ghoul::deinitialize();
+        deinitialize();
         exit(EXIT_FAILURE);
     }
     catch (...) {
         global::openSpaceEngine->deinitialize();
-        ghoul::deinitialize();
+        deinitialize();
         Engine::destroy();
         exit(EXIT_FAILURE);
     }
@@ -1631,6 +1630,6 @@ int main(int argc, char* argv[]) {
     }
 #endif // OPENSPACE_HAS_SPOUT
 
-    ghoul::deinitialize();
+    deinitialize();
     exit(EXIT_SUCCESS);
 }

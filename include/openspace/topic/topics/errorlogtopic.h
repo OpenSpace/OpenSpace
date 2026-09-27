@@ -27,7 +27,7 @@
 
 #include <openspace/topic/topics/topic.h>
 
-#include <ghoul/logging/loglevel.h>
+#include <openspace/logging/loglevel.h>
 #include <optional>
 
 namespace ghoul::logging { class Log; }

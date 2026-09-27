@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
 #include <variant>
 #include <utility>
 

@@ -27,17 +27,17 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
 #include <memory>
 
 namespace {

@@ -28,13 +28,13 @@
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <optional>
 #include <sstream>
 

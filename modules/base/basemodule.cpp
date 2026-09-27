@@ -96,12 +96,12 @@
 #include <modules/base/timeframe/timeframeinterval.h>
 #include <modules/base/timeframe/timeframeunion.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/templatefactory.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texturemanager.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texturemanager.h>
 
 namespace openspace {
 

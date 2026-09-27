@@ -25,12 +25,12 @@
 #include <openspace/rendering/transferfunction.h>
 
 #include <openspace/data/colormaploader.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/opengl/texture.h>
 #include <cmath>
 #include <fstream>
 #include <sstream>

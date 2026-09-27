@@ -25,16 +25,16 @@
 #include <openspace/interaction/keyframerecordinghandler.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/network/messagestructureshelper.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <optional>
 #include <utility>

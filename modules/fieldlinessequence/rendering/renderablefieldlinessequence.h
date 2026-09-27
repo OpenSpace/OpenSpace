@@ -29,6 +29,7 @@
 
 #include <modules/fieldlinessequence/util/commons.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#include <openspace/opengl/ghoul_gl.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
@@ -39,7 +40,6 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <deque>
 #include <memory>
 

@@ -24,9 +24,9 @@
 
 #include <openspace/properties/misc/selectionproperty.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua_helper.h>
 #include <algorithm>
 
 namespace {

@@ -25,9 +25,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <ghoul/cmdparser/commandlineparser.h>
-#include <ghoul/cmdparser/singlecommand.h>
-#include <ghoul/cmdparser/multiplecommand.h>
+#include <openspace/cmdparser/commandlineparser.h>
+#include <openspace/cmdparser/singlecommand.h>
+#include <openspace/cmdparser/multiplecommand.h>
 
 #include <memory>
 

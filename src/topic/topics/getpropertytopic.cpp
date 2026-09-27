@@ -26,10 +26,10 @@
 
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/topic/jsonconverters.h>
-#include <ghoul/logging/logmanager.h>
 
 using nlohmann::json;
 

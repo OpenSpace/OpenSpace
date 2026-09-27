@@ -35,6 +35,12 @@
 #include <openspace/topic/server.h>
 #include <openspace/topic/connection.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringconversion.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
@@ -44,12 +50,6 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringconversion.h>
-#include <ghoul/misc/templatefactory.h>
 #include <algorithm>
 #include <memory>
 #include <optional>

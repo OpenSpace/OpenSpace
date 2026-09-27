@@ -24,7 +24,7 @@
 
 #include "form/matrixwidget.h"
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <QDoubleValidator>
 #include <QGridLayout>
 #include <QIntValidator>

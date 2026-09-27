@@ -29,12 +29,12 @@
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/texture.h>
 #include <optional>
 #include <utility>
 

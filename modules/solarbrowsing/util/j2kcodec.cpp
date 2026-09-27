@@ -24,8 +24,8 @@
 
 #include <modules/solarbrowsing/util/j2kcodec.h>
 
-#include <ghoul/logging/logmanager.h>
 #include <modules/solarbrowsing/util/format_defs.h>
+#include <openspace/logging/logmanager.h>
 #include <chrono>
 #include <format>
 #include <fstream>

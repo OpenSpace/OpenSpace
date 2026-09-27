@@ -29,6 +29,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -39,8 +41,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <algorithm>
 #include <cstdlib>

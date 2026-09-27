@@ -26,11 +26,11 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <optional>
 #include <string>
 #include <utility>

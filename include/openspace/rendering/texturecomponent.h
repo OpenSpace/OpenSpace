@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___TEXTURECOMPONENT___H__
 #define __OPENSPACE_CORE___TEXTURECOMPONENT___H__
 
-#include <ghoul/opengl/texture.h>
+#include <openspace/opengl/texture.h>
 #include <filesystem>
 #include <memory>
 

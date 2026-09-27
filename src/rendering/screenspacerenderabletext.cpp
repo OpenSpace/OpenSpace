@@ -27,8 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/opengl/textureunit.h>
 #include <array>
 #include <optional>
 

@@ -24,8 +24,8 @@
 
 #include <openspace/topic/connectionpool.h>
 
-#include <ghoul/io/socket/socket.h>
-#include <ghoul/io/socket/socketserver.h>
+#include <openspace/io/socket/socket.h>
+#include <openspace/io/socket/socketserver.h>
 #include <algorithm>
 #include <utility>
 

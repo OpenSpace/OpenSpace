@@ -28,13 +28,13 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
+#include <openspace/glm.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
 namespace ghoul {

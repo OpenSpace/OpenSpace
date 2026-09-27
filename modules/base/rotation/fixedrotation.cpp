@@ -25,13 +25,13 @@
 #include <modules/base/rotation/fixedrotation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <optional>
 #include <variant>
 

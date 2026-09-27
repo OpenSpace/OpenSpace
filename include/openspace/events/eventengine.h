@@ -26,8 +26,8 @@
 #define __OPENSPACE_CORE___EVENTENGINE___H__
 
 #include <openspace/events/event.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/memorypool.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/memorypool.h>
 #include <functional>
 #include <optional>
 #include <string>
@@ -43,7 +43,7 @@ public:
     using ScriptCallback = std::function<void(ghoul::Dictionary)>;
 
     struct ActionInfo {
-        Event::Type type;
+        openspace::Event::Type type;
         uint32_t id = std::numeric_limits<uint32_t>::max();
         bool isEnabled = true;
         std::string action;

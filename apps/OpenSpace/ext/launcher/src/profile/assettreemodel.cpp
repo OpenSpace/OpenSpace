@@ -26,7 +26,7 @@
 
 #include "profile/assettreeitem.h"
 #include "filesystemaccess.h"
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/misc/stringhelper.h>
 #include <sstream>
 #include <string_view>
 #include <utility>

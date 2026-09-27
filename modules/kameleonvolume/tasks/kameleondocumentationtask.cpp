@@ -27,11 +27,11 @@
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <openspace/openspace.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryjsonformatter.h>
 #include <openspace/util/task.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <algorithm>
 #include <fstream>
 #include <iostream>

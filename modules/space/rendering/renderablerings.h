@@ -27,12 +27,12 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/glm.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
 namespace ghoul::filesystem { class File; }

@@ -27,12 +27,12 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/glm.h>
 
 namespace openspace {
 

@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/misc/assert.h>
+#include <openspace/opengl/texture.h>
 #include <utility>
 
 namespace openspace {

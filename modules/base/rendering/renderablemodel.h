@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/shadowmapping.h>
 
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -35,7 +36,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
 namespace ghoul::modelgeometry { class ModelGeometry; }

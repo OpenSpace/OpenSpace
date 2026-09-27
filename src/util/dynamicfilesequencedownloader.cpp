@@ -24,14 +24,14 @@
 
 #include <openspace/util/dynamicfilesequencedownloader.h>
 
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/time.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>

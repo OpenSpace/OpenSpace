@@ -30,12 +30,12 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/ghoul_gl.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <md_filter.h>
 #include <md_util.h>
 

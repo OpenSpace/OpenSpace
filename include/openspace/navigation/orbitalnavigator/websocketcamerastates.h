@@ -28,8 +28,8 @@
 #include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
 #include <openspace/interaction/websocketinputstate.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/misc/boolean.h>
+#include <openspace/misc/exception.h>
 #include <array>
 #include <map>
 #include <string>

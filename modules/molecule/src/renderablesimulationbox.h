@@ -27,12 +27,12 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/listproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <md_gl.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>

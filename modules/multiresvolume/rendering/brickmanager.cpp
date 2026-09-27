@@ -24,10 +24,10 @@
 
 #include <modules/multiresvolume/rendering/brickmanager.h>
 
-#include <ghoul/format.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/format.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/opengl/texture.h>
 #include <glm/gtx/std_based_type.hpp>
 #include <algorithm>
 #include <cmath>

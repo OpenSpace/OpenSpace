@@ -29,11 +29,11 @@
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layergroupid.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
 #include <string>
 
 namespace openspace {

@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <type_traits>
 
 namespace {

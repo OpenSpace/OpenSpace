@@ -25,9 +25,9 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 
 #include <modules/spacecraftinstruments/util/sequenceparser.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
 #include <algorithm>
 #include <cstdlib>
 #include <iterator>

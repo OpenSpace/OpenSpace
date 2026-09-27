@@ -25,9 +25,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/misc/exception.h>
 #include <iostream>
 #include <filesystem>
 #include <fstream>

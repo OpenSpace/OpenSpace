@@ -25,9 +25,9 @@
 #include <modules/skybrowser/include/wwtcommunicator.h>
 
 #include <modules/webbrowser/include/browserinstance.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryjsonformatter.h>
 #include <algorithm>
 #include <iterator>
 

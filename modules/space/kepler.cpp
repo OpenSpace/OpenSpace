@@ -24,12 +24,12 @@
 
 #include <modules/space/kepler.h>
 
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/csvreader.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/distanceconstants.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/csvreader.h>
-#include <ghoul/misc/stringhelper.h>
 #include <scn/scan.h>
 #include <fstream>
 #include <optional>

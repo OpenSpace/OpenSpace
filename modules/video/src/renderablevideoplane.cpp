@@ -25,9 +25,9 @@
 #include <modules/video/include/renderablevideoplane.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/textureunit.h>
 #include <cstdlib>
 #include <limits>
 

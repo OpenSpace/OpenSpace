@@ -27,13 +27,13 @@
 #include <modules/sync/syncs/httpsynchronization.h>
 #include <modules/sync/syncs/urlsynchronization.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/resourcesynchronization.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <memory_resource>
 #include <optional>
 #include <string>

@@ -27,11 +27,11 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/layergroupid.h>
 #include <modules/globebrowsing/src/rawtile.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/systemcapabilities/generalcapabilitiescomponent.h>
+#include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 #include <algorithm>
 #include <limits>
 #include <numeric>

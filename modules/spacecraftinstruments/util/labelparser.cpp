@@ -26,14 +26,14 @@
 
 #include <modules/spacecraftinstruments/util/decoder.h>
 #include <modules/spacecraftinstruments/util/image.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timerange.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <fstream>
 #include <string_view>

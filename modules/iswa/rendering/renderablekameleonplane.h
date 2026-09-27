@@ -27,9 +27,9 @@
 
 #include <modules/iswa/rendering/renderabledatacygnet.h>
 
+#include <openspace/opengl/ghoul_gl.h>
 #include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <filesystem>
 #include <tuple>
 

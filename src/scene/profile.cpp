@@ -25,17 +25,17 @@
 #include <openspace/scene/profile.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <filesystem>
 #include <fstream>

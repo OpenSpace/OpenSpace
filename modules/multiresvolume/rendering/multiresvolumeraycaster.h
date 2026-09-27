@@ -27,10 +27,10 @@
 
 #include <openspace/rendering/volumeraycaster.h>
 
+#include <openspace/glm.h>
+#include <openspace/opengl/bufferbinding.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/util/boxgeometry.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/bufferbinding.h>
-#include <ghoul/opengl/textureunit.h>
 #include <memory>
 
 namespace openspace {

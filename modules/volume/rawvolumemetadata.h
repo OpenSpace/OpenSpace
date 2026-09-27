@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__
 
 #include <modules/volume/volumegridtype.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <string>
 
 namespace ghoul { class Dictionary; }

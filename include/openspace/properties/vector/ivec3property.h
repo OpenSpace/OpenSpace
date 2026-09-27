@@ -27,7 +27,7 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <limits>
 
 namespace openspace {

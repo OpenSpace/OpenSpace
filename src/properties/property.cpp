@@ -28,9 +28,9 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/json.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/topic/server.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 
 namespace openspace {

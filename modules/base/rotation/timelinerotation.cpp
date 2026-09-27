@@ -25,10 +25,10 @@
 #include <modules/base/rotation/timelinerotation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/time.h>
-#include <ghoul/misc/dictionary.h>
 #include <optional>
 #include <utility>
 

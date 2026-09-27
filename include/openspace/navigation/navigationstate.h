@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___NAVIGATIONSTATE___H__
 
 #include <openspace/json.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <optional>
 #include <string>
 

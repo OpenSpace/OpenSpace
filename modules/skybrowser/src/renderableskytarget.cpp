@@ -28,13 +28,13 @@
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
 #include <memory>
 #include <utility>
 

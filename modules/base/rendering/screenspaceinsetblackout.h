@@ -27,13 +27,13 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/glm.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
 

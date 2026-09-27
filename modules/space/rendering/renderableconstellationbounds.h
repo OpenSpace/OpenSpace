@@ -27,10 +27,10 @@
 
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
 

@@ -27,7 +27,7 @@
 
 #include <modules/iswa/rendering/renderabledatacygnet.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/opengl/ghoul_gl.h>
 
 namespace openspace {
 

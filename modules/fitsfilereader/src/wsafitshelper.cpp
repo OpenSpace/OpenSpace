@@ -24,9 +24,9 @@
 
 #include <modules/fitsfilereader/include/wsafitshelper.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/opengl/texture.h>
 #include <CCfits>
 #include <algorithm>
 #include <string>

@@ -33,15 +33,15 @@
 #include <modules/volume/volumegridtype.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
 #include <array>
 #include <optional>
 

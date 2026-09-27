@@ -24,16 +24,16 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/format.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryluaformatter.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringconversion.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/time.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/stringconversion.h>
 #include <algorithm>
 #include <numeric>
 #include <tuple>

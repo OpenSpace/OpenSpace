@@ -26,12 +26,12 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <optional>
 #include <utility>
 

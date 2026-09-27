@@ -27,8 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/opengl/programobjectmanager.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <ghoul/opengl/programobjectmanager.h>
 
 namespace openspace {
 

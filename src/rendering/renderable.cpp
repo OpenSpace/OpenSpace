@@ -29,15 +29,15 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 #include <variant>
 #include <utility>
 

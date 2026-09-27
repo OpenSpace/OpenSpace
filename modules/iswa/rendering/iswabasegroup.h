@@ -27,10 +27,10 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/designpattern/event.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/designpattern/event.h>
 #include <memory>
 
 namespace ghoul { class Dictionary; }

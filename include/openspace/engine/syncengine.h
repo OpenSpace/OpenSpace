@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___SYNCENGINE___H__
 #define __OPENSPACE_CORE___SYNCENGINE___H__
 
+#include <openspace/misc/boolean.h>
 #include <openspace/util/syncbuffer.h>
-#include <ghoul/misc/boolean.h>
 #include <cstddef>
 #include <vector>
 

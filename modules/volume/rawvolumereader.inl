@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
 #include <fstream>
 
 namespace openspace {

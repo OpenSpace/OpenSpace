@@ -25,13 +25,13 @@
 #include <modules/spacecraftinstruments/util/hongkangparser.h>
 
 #include <modules/spacecraftinstruments/util/instrumentdecoder.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
 #include <cstdlib>
 #include <fstream>
 #include <ios>

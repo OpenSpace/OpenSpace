@@ -27,9 +27,9 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/openspace.h>
 
 int main(int, char** argv) {
     using namespace openspace;
@@ -39,7 +39,7 @@ int main(int, char** argv) {
         ghoul::logging::LogManager::ImmediateFlush::Yes
     );
 
-    ghoul::initialize();
+    initialize();
     global::create();
 
     // In order to initialize the engine, we need to specify the tokens

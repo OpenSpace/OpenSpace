@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___HELPER___H__
 #define __OPENSPACE_CORE___HELPER___H__
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <memory>
 #include <vector>
 

@@ -27,11 +27,11 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
 

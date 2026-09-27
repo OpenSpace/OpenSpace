@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <array>
 #include <filesystem>
 #include <functional>

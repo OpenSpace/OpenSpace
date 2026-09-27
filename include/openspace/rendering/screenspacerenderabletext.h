@@ -27,12 +27,12 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/font/font.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/opengl/framebufferobject.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/texture.h>
 
 namespace openspace {
 

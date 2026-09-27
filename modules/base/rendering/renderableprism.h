@@ -27,11 +27,11 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <cstdint>
 #include <memory>
 

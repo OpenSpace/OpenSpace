@@ -24,12 +24,12 @@
 
 #include <openspace/engine/downloadmanager.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/misc/thread.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/misc/thread.h>
 #include <curl/curl.h>
 #include <cerrno>
 #include <cstdio>

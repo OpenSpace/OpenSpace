@@ -25,11 +25,11 @@
 #include <openspace/topic/jsonconverters.h>
 
 #include <openspace/interaction/action.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/misc/dictionary.h>
 #include <string>
 #include <string_view>
 

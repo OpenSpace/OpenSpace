@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_VOLUME___TEXTURESLICEVOLUMEREADER___H__
 
 #include <modules/volume/linearlrucache.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <memory>
 #include <string>
 #include <vector>

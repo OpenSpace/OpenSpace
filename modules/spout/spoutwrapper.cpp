@@ -25,12 +25,12 @@
 #include "modules/spout/spoutwrapper.h"
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/texture.h>
 #include <optional>
 #include <string_view>
 #include <utility>

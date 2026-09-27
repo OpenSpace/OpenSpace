@@ -24,8 +24,8 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/format.h>
+#include <openspace/misc/stringhelper.h>
 
 using namespace openspace;
 

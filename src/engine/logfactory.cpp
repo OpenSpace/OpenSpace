@@ -25,13 +25,13 @@
 #include <openspace/engine/logfactory.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/htmllog.h>
-#include <ghoul/logging/log.h>
-#include <ghoul/logging/loglevel.h>
-#include <ghoul/logging/textlog.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/htmllog.h>
+#include <openspace/logging/log.h>
+#include <openspace/logging/loglevel.h>
+#include <openspace/logging/textlog.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
 #include <filesystem>
 #include <optional>
 #include <string_view>

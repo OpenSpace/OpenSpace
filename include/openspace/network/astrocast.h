@@ -27,13 +27,13 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/designpattern/event.h>
+#include <openspace/io/socket/tcpsocket.h>
+#include <openspace/misc/exception.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/designpattern/event.h>
-#include <ghoul/io/socket/tcpsocket.h>
-#include <ghoul/misc/exception.h>
 #include <atomic>
 #include <cstdint>
 #include <deque>

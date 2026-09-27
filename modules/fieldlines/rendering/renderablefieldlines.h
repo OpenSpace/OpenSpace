@@ -27,13 +27,13 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/ghoul_gl.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <memory>
 
 namespace openspace {

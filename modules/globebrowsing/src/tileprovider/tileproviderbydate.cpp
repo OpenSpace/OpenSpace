@@ -26,11 +26,11 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <utility>
 

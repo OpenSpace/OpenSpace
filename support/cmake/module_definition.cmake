@@ -101,18 +101,18 @@ endfunction ()
 # function takes care that they are added to the project
 # External dependencies are found using the find_package function and then linked
 function (handle_module_dependencies target_name module_name)
-  # We always want to link against Ghoul and the core library
-  target_link_libraries(${library_name} PRIVATE Ghoul::Ghoul openspace-core)
+  # We always want to link against core library
+  target_link_libraries(${library_name} PRIVATE openspace-core)
   target_precompile_headers(${library_name} PRIVATE
-    [["ghoul/format.h"]]
-    [["ghoul/glm.h"]]
-    [["ghoul/lua/lua_helper.h"]]
-    [["ghoul/misc/assert.h"]]
-    [["ghoul/misc/boolean.h"]]
-    [["ghoul/misc/exception.h"]]
-    [["ghoul/misc/invariants.h"]]
-    [["ghoul/misc/profiling.h"]]
-    [["ghoul/opengl/ghoul_gl.h"]]
+    <openspace/format.h>
+    <openspace/glm.h>
+    <openspace/lua/lua_helper.h>
+    <openspace/misc/assert.h>
+    <openspace/misc/boolean.h>
+    <openspace/misc/exception.h>
+    <openspace/misc/invariants.h>
+    <openspace/misc/profiling.h>
+    <openspace/opengl/ghoul_gl.h>
     <array>
     <filesystem>
     <memory>

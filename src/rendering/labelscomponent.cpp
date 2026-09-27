@@ -24,14 +24,14 @@
 
 #include <openspace/rendering/labelscomponent.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
 #include <cmath>
 #include <optional>
 

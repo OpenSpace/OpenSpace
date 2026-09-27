@@ -24,9 +24,9 @@
 
 #include <openspace/util/coordinateconversion.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua_helper.h>
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>

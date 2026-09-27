@@ -26,11 +26,11 @@
 
 #include <modules/multiresvolume/rendering/atlasmanager.h>
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <glm/gtx/std_based_type.hpp>
 #include <cstdlib>
 

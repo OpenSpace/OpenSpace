@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <zip/zip.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/misc/stringhelper.h>
 #include <vector>
 
 using namespace openspace;

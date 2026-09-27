@@ -25,14 +25,14 @@
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 
 #include <modules/volume/rendering/volumeclipplanes.h>
+#include <openspace/glm.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/textureunit.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/texture.h>
 #include <string>
 #include <string_view>
 #include <utility>

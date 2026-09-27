@@ -27,13 +27,13 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/glm.h>
 #include <optional>
 
 namespace geos::io { class GeoJSONFeature; }

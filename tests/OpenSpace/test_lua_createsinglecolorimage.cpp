@@ -27,11 +27,11 @@
 #include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <openspace/engine/openspaceengine.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/luastate.h>
+#include <openspace/lua/lua_helper.h>
 #include <filesystem>
 
 #if 0

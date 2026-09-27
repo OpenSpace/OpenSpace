@@ -25,14 +25,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <openspace/engine/globals.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/defer.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/defer.h>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <chrono>
 

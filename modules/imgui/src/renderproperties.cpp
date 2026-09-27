@@ -26,6 +26,10 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/stringconversion.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/list/stringlistproperty.h>
@@ -50,10 +54,6 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/stringconversion.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <array>
 #include <cstring>

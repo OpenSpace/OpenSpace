@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 
 namespace openspace {
 

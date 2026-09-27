@@ -24,9 +24,9 @@
 
 #include <openspace/util/transformationmanager.h>
 
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 #ifdef WIN32

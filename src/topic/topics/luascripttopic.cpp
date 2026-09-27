@@ -27,11 +27,11 @@
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/topic/jsonconverters.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
 #include <stdexcept>
 #include <string_view>
 #include <utility>

@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_CORE___SHADOWMAPPING___H__
 #define __OPENSPACE_CORE___SHADOWMAPPING___H__
 
+#include <openspace/glm.h>
+#include <openspace/opengl/ghoul_gl.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <vector>
 
 namespace ghoul { class Dictionary; }

@@ -24,8 +24,8 @@
 
 #include <modules/volume/volumegridtype.h>
 
-#include <ghoul/format.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/format.h>
+#include <openspace/misc/exception.h>
 
 namespace openspace {
 

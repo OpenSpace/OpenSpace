@@ -26,9 +26,9 @@
 
 #include <modules/space/kepler.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <filesystem>
 #include <optional>
 

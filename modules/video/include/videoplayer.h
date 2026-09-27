@@ -28,14 +28,14 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/syncable.h>
 
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
 #include <client.h>
 #include <render.h>
 #include <chrono>

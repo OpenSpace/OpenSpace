@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___DISTANCECONVERSION___H__
 #define __OPENSPACE_CORE___DISTANCECONVERSION___H__
 
+#include <openspace/misc/assert.h>
 #include <openspace/util/distanceconstants.h>
-#include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <array>
 #include <string>

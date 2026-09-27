@@ -24,11 +24,11 @@
 
 #include <modules/base/timeframe/timeframeunion.h>
 
-#include <openspace/properties/property.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/properties/property.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <functional>
 

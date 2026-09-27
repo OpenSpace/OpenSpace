@@ -26,15 +26,15 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/glm.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/openglstatecache.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <algorithm>
 #include <cmath>
 #include <optional>

@@ -26,8 +26,8 @@
 
 #include "profile/line.h"
 #include <openspace/engine/configuration.h>
+#include <openspace/misc/assert.h>
 #include <openspace/properties/property.h>
-#include <ghoul/misc/assert.h>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>

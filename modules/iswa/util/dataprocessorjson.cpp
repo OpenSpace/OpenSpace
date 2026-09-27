@@ -25,8 +25,8 @@
 #include <modules/iswa/util/dataprocessorjson.h>
 
 #include <openspace/json.h>
+#include <openspace/misc/assert.h>
 #include <openspace/properties/misc/selectionproperty.h>
-#include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <iterator>
 #include <utility>

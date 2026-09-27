@@ -25,7 +25,7 @@
 #include <openspace/engine/settings.h>
 
 #include <openspace/json.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/misc/stringhelper.h>
 #include <fstream>
 #include <sstream>
 

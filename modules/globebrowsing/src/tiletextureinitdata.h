@@ -26,10 +26,10 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__
 
 #include <modules/globebrowsing/src/layergroupid.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/texture.h>
 #include <cstdint>
 
 namespace openspace {

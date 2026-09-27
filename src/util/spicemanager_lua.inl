@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/csvreader.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/format.h>
+#include <openspace/misc/csvreader.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/format.h>
 #include <cstring>
 #include <fstream>
 #include <ios>

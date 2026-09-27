@@ -28,10 +28,10 @@
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/deferredcasterlistener.h>
 
+#include <openspace/glm.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/rendering/shadowmapping.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <map>
 #include <vector>
 

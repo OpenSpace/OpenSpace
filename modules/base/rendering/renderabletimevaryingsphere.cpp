@@ -25,12 +25,12 @@
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <iterator>
 #include <utility>

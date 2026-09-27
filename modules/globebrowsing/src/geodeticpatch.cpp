@@ -25,7 +25,7 @@
 #include <modules/globebrowsing/src/geodeticpatch.h>
 
 #include <modules/globebrowsing/src/tileindex.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>

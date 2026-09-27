@@ -138,8 +138,8 @@ target_link_libraries(
 )
 
 target_precompile_headers(openspace-ui-launcher PRIVATE
+  <openspace/glm.h>
   <openspace/scene/profile.h>
-  <ghoul/glm.h>
   <QAbstractItemDelegate>
   <QAbstractItemModel>
   <QDialog>

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
 
 namespace openspace {
 

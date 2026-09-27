@@ -32,6 +32,13 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
@@ -42,13 +49,6 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
 #include <algorithm>
 #include <cmath>
 #include <memory>

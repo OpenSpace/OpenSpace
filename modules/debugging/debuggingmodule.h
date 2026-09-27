@@ -27,10 +27,10 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/font/font.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <ghoul/font/font.h>
 
 namespace openspace {
 

@@ -45,8 +45,8 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 target_precompile_headers(${statemachine_module} PRIVATE
-  <ghoul/glm.h>
-  <ghoul/lua/ghoul_lua.h>
+  <openspace/glm.h>
+  <openspace/lua/ghoul_lua.h>
   <chrono>
   <filesystem>
   <string>

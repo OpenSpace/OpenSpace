@@ -25,9 +25,9 @@
 #include <openspace/data/speckloader.h>
 
 #include <openspace/data/dataloader.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>

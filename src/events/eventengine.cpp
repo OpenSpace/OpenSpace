@@ -25,11 +25,11 @@
 #include <openspace/events/eventengine.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
 #include <openspace/interaction/actionmanager.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <cstdint>
 #include <string_view>

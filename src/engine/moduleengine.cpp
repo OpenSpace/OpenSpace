@@ -25,16 +25,16 @@
 #include <openspace/engine/moduleengine.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/systemcapabilities/version.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/openspacemodule.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/systemcapabilities/version.h>
 #include <algorithm>
 #include <string_view>
 #include <utility>

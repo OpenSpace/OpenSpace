@@ -28,10 +28,10 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryluaformatter.h>
 #include <array>
 #include <fstream>
 #include <optional>

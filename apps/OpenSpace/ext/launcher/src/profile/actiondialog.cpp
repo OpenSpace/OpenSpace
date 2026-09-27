@@ -26,10 +26,10 @@
 
 #include "profile/line.h"
 #include "profile/scriptlogdialog.h"
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/stringconversion.h>
 #include <openspace/util/keys.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/stringconversion.h>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>

@@ -25,8 +25,8 @@
 #include "sgctedit/displaywindowunion.h"
 
 #include "sgctedit/windowcontrol.h"
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <algorithm>

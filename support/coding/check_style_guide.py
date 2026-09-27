@@ -238,7 +238,7 @@ def check_duplicates(lines, previousSymbols):
 
 def check_glm_header(lines, file):
   Allowed_Files = [
-    'ghoul/glm.h'
+    'openspace/glm.h'
   ]
 
   for f in Allowed_Files:
@@ -250,7 +250,7 @@ def check_glm_header(lines, file):
               '#include "glm/glm.hpp>"' in s]
 
   if len(index) > 0:
-    return 'File used wrong glm include. Use "#include <ghoul/glm.h>" instead'
+    return 'File used wrong glm include. Use "#include <openspace/glm.h>" instead'
   else:
     return ''
 

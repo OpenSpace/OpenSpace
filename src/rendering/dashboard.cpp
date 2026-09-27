@@ -24,10 +24,10 @@
 
 #include <openspace/rendering/dashboard.h>
 
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <utility>
 

@@ -30,6 +30,10 @@
 #include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 #include <openspace/data/dataloader.h>
 #include <openspace/data/datamapping.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -40,10 +44,6 @@
 #include <openspace/rendering/colormappingcomponent.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
 #include <memory>
 #include <unordered_map>

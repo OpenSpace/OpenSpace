@@ -25,11 +25,11 @@
 #include <modules/base/timeframe/timeframeinterval.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
 #include <optional>
 #include <string>
 #include <variant>

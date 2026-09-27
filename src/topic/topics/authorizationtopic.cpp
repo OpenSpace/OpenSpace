@@ -25,8 +25,8 @@
 #include <openspace/topic/topics/authorizationtopic.h>
 
 #include <openspace/documentation/schema.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/topic/connection.h>
-#include <ghoul/logging/logmanager.h>
 #include <stdexcept>
 #include <string_view>
 

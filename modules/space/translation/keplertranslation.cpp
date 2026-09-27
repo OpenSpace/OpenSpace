@@ -25,13 +25,13 @@
 #include <modules/space/translation/keplertranslation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <glm/gtx/transform.hpp>
 #include <cmath>
 #include <cstdlib>

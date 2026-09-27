@@ -25,10 +25,10 @@
 #include <modules/base/rendering/renderableswitch.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <optional>
 
 namespace {

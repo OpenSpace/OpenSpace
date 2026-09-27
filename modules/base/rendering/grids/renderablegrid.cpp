@@ -27,13 +27,13 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/glm.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
 #include <cmath>
 
 namespace {

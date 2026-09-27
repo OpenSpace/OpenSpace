@@ -25,8 +25,8 @@
 #include "splitcombobox.h"
 
 #include "customicons.h"
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
 #include <QStandardItemModel>
 #include <vector>
 

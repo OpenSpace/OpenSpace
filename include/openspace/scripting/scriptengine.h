@@ -27,9 +27,9 @@
 
 #include <openspace/util/syncable.h>
 
+#include <openspace/lua/luastate.h>
+#include <openspace/misc/boolean.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/misc/boolean.h>
 #include <filesystem>
 #include <functional>
 #include <mutex>

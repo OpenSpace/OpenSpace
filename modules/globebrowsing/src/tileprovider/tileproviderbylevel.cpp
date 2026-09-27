@@ -26,9 +26,9 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <algorithm>
 #include <limits>
 #include <utility>

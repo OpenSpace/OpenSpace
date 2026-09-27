@@ -27,10 +27,10 @@
 
 #include <openspace/rendering/screenspacerenderableframebuffer.h>
 
+#include <openspace/misc/managedmemoryuniqueptr.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 
 namespace openspace {
 

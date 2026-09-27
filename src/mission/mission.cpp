@@ -25,12 +25,12 @@
 #include <openspace/mission/mission.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <filesystem>
 #include <utility>

@@ -27,11 +27,11 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/glm.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/threadpool.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/texture.h>
 
 struct md_gl_shaders_t;
 

@@ -27,12 +27,12 @@
 #include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/scene/profile.h>
-#include <ghoul/filesystem/filesystem.h>
 
 // clang-tidy is convinced that it is possible to use emplace_back instead of push_back
 // for the profiole types, but I haven't been able to convince the Visual Studio

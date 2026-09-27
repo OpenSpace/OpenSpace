@@ -27,7 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <ghoul/systemcapabilities/version.h>
+#include <openspace/systemcapabilities/version.h>
 
 namespace ghoul { class Dictionary; }
 

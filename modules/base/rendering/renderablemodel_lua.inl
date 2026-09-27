@@ -22,11 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/io/model/modelreader.h>
-#include <ghoul/io/model/modelreaderassimp.h>
-#include <ghoul/io/model/modelreaderbase.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/io/model/modelreader.h>
+#include <openspace/io/model/modelreaderassimp.h>
+#include <openspace/io/model/modelreaderbase.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
 
 namespace {
 

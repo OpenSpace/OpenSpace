@@ -27,11 +27,11 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <exception>
 #include <fstream>

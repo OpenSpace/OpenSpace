@@ -26,20 +26,20 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/designpattern/event.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/designpattern/event.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/programobject.h>
 #include <cmath>
 #include <cstdlib>
 

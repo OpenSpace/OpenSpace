@@ -25,13 +25,13 @@
 #include <openspace/navigation/pathcurves/avoidcollisioncurve.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/collisionhelper.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <string_view>

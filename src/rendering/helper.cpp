@@ -24,13 +24,13 @@
 
 #include <openspace/rendering/helper.h>
 
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/scene/lightsource.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/closest_point.hpp>
 #include <algorithm>
 #include <cmath>

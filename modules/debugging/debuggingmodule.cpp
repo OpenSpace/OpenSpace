@@ -30,17 +30,17 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 
 #include "debuggingmodule_lua.inl"
 

@@ -23,8 +23,8 @@
  ****************************************************************************************/
 
 #include <openspace/engine/configuration.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/lua/lua_helper.h>
 
 using namespace openspace;
 

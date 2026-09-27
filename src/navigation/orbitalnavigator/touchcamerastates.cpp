@@ -27,7 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/touchinputstate.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
 
 namespace {
     using namespace openspace;

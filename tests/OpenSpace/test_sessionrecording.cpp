@@ -25,8 +25,8 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <filesystem>
 
 using namespace openspace;

@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___SCREENLOG___H__
 #define __OPENSPACE_CORE___SCREENLOG___H__
 
-#include <ghoul/logging/log.h>
+#include <openspace/logging/log.h>
 
-#include <ghoul/misc/profiling.h>
+#include <openspace/misc/profiling.h>
 #include <chrono>
 #include <mutex>
 #include <string_view>

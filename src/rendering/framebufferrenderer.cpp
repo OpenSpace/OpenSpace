@@ -26,6 +26,14 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/deferredcaster.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -34,17 +42,9 @@
 #include <openspace/rendering/shadowmapping.h>
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
+#include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
 #include <filesystem>

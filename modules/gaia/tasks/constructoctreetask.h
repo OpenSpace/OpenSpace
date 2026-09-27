@@ -28,7 +28,7 @@
 #include <openspace/util/task.h>
 
 #include <modules/gaia/rendering/octreemanager.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <filesystem>
 #include <vector>
 

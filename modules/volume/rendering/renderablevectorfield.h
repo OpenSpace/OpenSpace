@@ -28,6 +28,8 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/volume/rawvolume.h>
+#include <openspace/lua/luastate.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -36,8 +38,6 @@
 #include <openspace/properties/vector/uvec3property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
 
 namespace ghoul::opengl {

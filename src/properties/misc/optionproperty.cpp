@@ -24,8 +24,8 @@
 
 #include <openspace/properties/misc/optionproperty.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace {
     using namespace openspace;

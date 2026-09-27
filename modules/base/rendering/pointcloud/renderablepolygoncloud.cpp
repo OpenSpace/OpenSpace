@@ -25,11 +25,11 @@
 #include <modules/base/rendering/pointcloud/renderablepolygoncloud.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/programobject.h>
 #include <array>
 #include <memory>
 

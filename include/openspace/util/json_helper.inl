@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/glm.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <openspace/glm.h>
+#include <openspace/misc/dictionaryjsonformatter.h>
 #include <type_traits>
 
 namespace openspace {

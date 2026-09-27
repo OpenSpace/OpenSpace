@@ -28,14 +28,14 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/crc32.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryluaformatter.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/crc32.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <string>
 #include <utility>
 

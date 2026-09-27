@@ -25,10 +25,10 @@
 #include <openspace/scene/timeframe.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 #include <string>
 
 namespace {

@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___TARGETBROWSERPAIR___H__
 
 #include <modules/skybrowser/include/utility.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <string>
 #include <utility>
 #include <vector>

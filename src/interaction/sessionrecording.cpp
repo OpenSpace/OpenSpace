@@ -24,11 +24,11 @@
 
 #include <openspace/interaction/sessionrecording.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/glm.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <algorithm>
 #include <array>
 #include <cstddef>

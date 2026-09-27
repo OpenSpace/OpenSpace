@@ -27,15 +27,15 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
+#include <openspace/misc/managedmemoryuniqueptr.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/util/ellipsoid.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <atomic>
 #include <chrono>
 #include <functional>

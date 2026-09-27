@@ -24,8 +24,8 @@
 
 #include "sgctedit/windowcontrol.h"
 
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
 #include <sgct/config.h>
 #include <sgct/math.h>
 #include "windowcolors.h"

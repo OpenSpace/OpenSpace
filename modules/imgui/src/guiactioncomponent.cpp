@@ -30,9 +30,9 @@
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringconversion.h>
 #include <openspace/util/keys.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringconversion.h>
 #include <set>
 #include <utility>
 

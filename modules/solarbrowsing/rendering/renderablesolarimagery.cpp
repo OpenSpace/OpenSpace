@@ -32,6 +32,13 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/transferfunction.h>
@@ -39,13 +46,6 @@
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <fstream>
 #include <string_view>
 

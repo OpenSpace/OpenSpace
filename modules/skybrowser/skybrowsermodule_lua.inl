@@ -28,10 +28,10 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/lua/lua_helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
 #include <scn/scan.h>
 
 using namespace openspace;

@@ -25,11 +25,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/glm.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/lua/luastate.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/glm.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>

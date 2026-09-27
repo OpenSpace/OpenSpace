@@ -25,8 +25,8 @@
 #include <modules/debugging/rendering/screenspacedebugplane.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/textureunit.h>
 #include <optional>
 
 namespace {

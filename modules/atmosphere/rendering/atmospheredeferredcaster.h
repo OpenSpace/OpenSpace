@@ -27,9 +27,9 @@
 
 #include <openspace/rendering/deferredcaster.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/textureunit.h>
+#include <openspace/opengl/uniformcache.h>
 #include <vector>
 
 namespace openspace {

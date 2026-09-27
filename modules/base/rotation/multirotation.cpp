@@ -25,9 +25,9 @@
 #include <modules/base/rotation/multirotation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
 #include <utility>
 
 namespace {

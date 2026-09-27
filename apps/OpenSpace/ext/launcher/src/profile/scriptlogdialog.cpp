@@ -27,8 +27,8 @@
 #include "profile/line.h"
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
 #include <QGridLayout>
 #include <QDialogButtonBox>
 #include <QFileDialog>

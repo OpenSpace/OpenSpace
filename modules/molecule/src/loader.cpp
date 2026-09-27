@@ -24,7 +24,7 @@
 
 #include <modules/molecule/src/loader.h>
 
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
 #include <core/md_allocator.h>
 #include <core/md_array.h>
 #include <core/md_log.h>

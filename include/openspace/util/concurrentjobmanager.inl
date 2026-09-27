@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/misc/assert.h>
 #include <openspace/util/job.h>
-#include <ghoul/misc/assert.h>
 
 namespace openspace {
 

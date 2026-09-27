@@ -26,13 +26,13 @@
 
 #include <openspace/data/dataloader.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 #include <sstream>

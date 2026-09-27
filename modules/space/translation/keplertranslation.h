@@ -27,8 +27,8 @@
 
 #include <openspace/scene/translation.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <ghoul/glm.h>
 
 namespace openspace {
 

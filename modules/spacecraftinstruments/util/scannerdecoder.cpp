@@ -24,7 +24,7 @@
 
 #include <modules/spacecraftinstruments/util/scannerdecoder.h>
 
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionary.h>
 #include <utility>
 
 namespace openspace {

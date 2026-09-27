@@ -28,10 +28,10 @@
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringconversion.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringconversion.h>
 #include <algorithm>
 #include <optional>
 #include <utility>

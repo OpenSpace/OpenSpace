@@ -25,8 +25,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/glm.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/glm.h>
 
 TEST_CASE("Dictionary: bool", "[dictionary]") {
     ghoul::Dictionary d;

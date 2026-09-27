@@ -26,13 +26,13 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/downloadeventengine.h>
 #include <openspace/util/httprequest.h>
 #include <zip/zip.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <chrono>
 #include <cstdint>

@@ -24,7 +24,7 @@
 
 #include <openspace/interaction/websocketinputstate.h>
 
-#include <ghoul/misc/invariants.h>
+#include <openspace/misc/invariants.h>
 #include <algorithm>
 #include <numeric>
 

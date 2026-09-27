@@ -57,7 +57,7 @@ else ()
   target_compile_options(GhoulTest PRIVATE "-O0" )
 endif ()
 
-target_link_libraries(GhoulTest PRIVATE Catch2::Catch2 Ghoul)
+target_link_libraries(GhoulTest PRIVATE openspace-core Catch2::Catch2)
 
 target_precompile_headers(GhoulTest PRIVATE
   <catch2/catch_test_macros.hpp>

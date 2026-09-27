@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/ghoul_gl.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
@@ -34,7 +35,6 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/labelscomponent.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <memory>
 
 namespace openspace {

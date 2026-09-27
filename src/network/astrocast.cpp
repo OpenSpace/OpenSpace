@@ -29,6 +29,10 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/format.h>
+#include <openspace/io/socket/tcpsocket.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
@@ -38,10 +42,6 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
-#include <ghoul/format.h>
-#include <ghoul/io/socket/tcpsocket.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>

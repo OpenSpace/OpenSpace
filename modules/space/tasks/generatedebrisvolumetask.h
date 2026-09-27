@@ -30,8 +30,8 @@
 
 #include <modules/space/rendering/renderableorbitalkepler.h>
 #include <modules/space/translation/keplertranslation.h>
+#include <openspace/glm.h>
 #include <openspace/util/time.h>
-#include <ghoul/glm.h>
 #include <string>
 #include <vector>
 

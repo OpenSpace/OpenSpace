@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/opengl/ghoul_gl.h>
 #include <cstddef>
 #include <memory>
 #include <optional>

@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___DOCUMENTATION___H__
 #define __OPENSPACE_CORE___DOCUMENTATION___H__
 
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringconversion.h>
+#include <openspace/misc/boolean.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringconversion.h>
 #include <memory>
 #include <string>
 #include <vector>

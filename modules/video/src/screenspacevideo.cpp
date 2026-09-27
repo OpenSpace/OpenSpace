@@ -25,9 +25,9 @@
 #include <modules/video/include/screenspacevideo.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <filesystem>
 
 namespace {

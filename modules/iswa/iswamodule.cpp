@@ -32,14 +32,14 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

@@ -24,8 +24,8 @@
 
 #include "backgroundimage.h"
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
 #include <QPainter>
 #include <QPixmap>
 #include <random>

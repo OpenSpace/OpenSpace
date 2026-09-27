@@ -27,7 +27,7 @@
 #include "form/collapsiblesection.h"
 #include "form/schemaformwidget.h"
 #include "path.h"
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <QLabel>
 #include <QLineEdit>
 #include <QVBoxLayout>

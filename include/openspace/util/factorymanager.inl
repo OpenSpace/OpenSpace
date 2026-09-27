@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/templatefactory.h>
 
 namespace openspace {
 

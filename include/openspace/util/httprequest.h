@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___HTTPREQUEST___H__
 #define __OPENSPACE_CORE___HTTPREQUEST___H__
 
-#include <ghoul/logging/loglevel.h>
-#include <ghoul/misc/boolean.h>
+#include <openspace/logging/loglevel.h>
+#include <openspace/misc/boolean.h>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>

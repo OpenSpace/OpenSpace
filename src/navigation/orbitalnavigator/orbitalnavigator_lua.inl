@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/lua/lua_helper.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <ghoul/lua/lua_helper.h>
 
 using namespace openspace;
 

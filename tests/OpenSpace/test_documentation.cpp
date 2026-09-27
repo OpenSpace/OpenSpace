@@ -27,8 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/dictionary.h>
 #include <string>
 
 using namespace openspace;

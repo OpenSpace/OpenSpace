@@ -24,8 +24,8 @@
 
 #include <openspace/interaction/joystickinputstate.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/misc/invariants.h>
+#include <openspace/glm.h>
+#include <openspace/misc/invariants.h>
 #include <algorithm>
 #include <numeric>
 

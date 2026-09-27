@@ -27,8 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <ghoul/opengl/programobjectmanager.h>
-#include <ghoul/opengl/texturemanager.h>
+#include <openspace/opengl/programobjectmanager.h>
+#include <openspace/opengl/texturemanager.h>
 
 namespace openspace {
 

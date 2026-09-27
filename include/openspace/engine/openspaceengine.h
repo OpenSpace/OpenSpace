@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/glm.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
@@ -36,7 +37,6 @@
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
 #include <openspace/util/versionchecker.h>
-#include <ghoul/glm.h>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>

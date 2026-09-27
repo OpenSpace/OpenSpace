@@ -28,8 +28,8 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/volume/rendering/volumeclipplane.h>
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <ghoul/glm.h>
 
 namespace ghoul { class Dictionary; }
 

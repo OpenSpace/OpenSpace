@@ -25,12 +25,12 @@
 #include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/httprequest.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
 #include <scn/scan.h>
 #include <atomic>
 #include <ctime>

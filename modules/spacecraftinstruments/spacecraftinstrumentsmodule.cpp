@@ -37,15 +37,15 @@
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 #include <modules/spacecraftinstruments/util/targetdecoder.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/objectmanager.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/objectmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

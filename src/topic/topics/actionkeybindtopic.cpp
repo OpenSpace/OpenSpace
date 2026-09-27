@@ -29,9 +29,9 @@
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/misc/stringconversion.h>
 #include <openspace/topic/jsonconverters.h>
 #include <openspace/util/keys.h>
-#include <ghoul/misc/stringconversion.h>
 #include <algorithm>
 #include <map>
 #include <utility>

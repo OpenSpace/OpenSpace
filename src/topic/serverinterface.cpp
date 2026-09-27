@@ -25,9 +25,9 @@
 #include <openspace/topic/serverinterface.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/websocketserver.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/io/socket/tcpsocketserver.h>
+#include <openspace/io/socket/websocketserver.h>
 
 namespace {
     using namespace openspace;

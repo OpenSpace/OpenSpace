@@ -25,9 +25,9 @@
 #include <modules/gaia/rendering/octreemanager.h>
 
 #include <modules/globebrowsing/src/basictypes.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/distanceconstants.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <algorithm>
 #include <cstdint>
 #include <string_view>

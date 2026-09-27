@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___WEBSOCKETINPUTSTATE___H__
 #define __OPENSPACE_CORE___WEBSOCKETINPUTSTATE___H__
 
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
 #include <array>
 #include <cstdint>
 #include <unordered_map>

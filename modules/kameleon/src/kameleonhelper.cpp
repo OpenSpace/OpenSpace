@@ -24,9 +24,8 @@
 
 #include <modules/kameleon/include/kameleonhelper.h>
 
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <string_view>
 
 #ifdef _MSC_VER

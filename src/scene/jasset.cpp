@@ -25,9 +25,9 @@
 #include <openspace/scene/jasset.h>
 
 #include <openspace/json.h>
+#include <openspace/misc/dictionaryluaformatter.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/json_helper.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
-#include <ghoul/misc/stringhelper.h>
 #include <format>
 #include <fstream>
 #include <iterator>

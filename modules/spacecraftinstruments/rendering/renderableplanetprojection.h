@@ -29,6 +29,7 @@
 
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 #include <modules/spacecraftinstruments/util/image.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
@@ -37,7 +38,6 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/sphere.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
 namespace openspace {

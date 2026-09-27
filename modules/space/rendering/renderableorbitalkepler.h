@@ -28,13 +28,13 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/space/kepler.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/programobject.h>
 #include <limits>
 
 namespace openspace {

@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_CORE___PROPERTY___H__
 #define __OPENSPACE_CORE___PROPERTY___H__
 
+#include <openspace/misc/boolean.h>
+#include <openspace/misc/easing.h>
+#include <openspace/lua/lua_types.h>
 #include <openspace/util/json_helper.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/easing.h>
-#include <ghoul/lua/lua_types.h>
 #include <cstdint>
 #include <functional>
 #include <limits>

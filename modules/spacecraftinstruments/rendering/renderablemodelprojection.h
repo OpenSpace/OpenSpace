@@ -29,7 +29,7 @@
 
 #include <modules/spacecraftinstruments/util/image.h>
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/opengl/uniformcache.h>
 #include <memory>
 
 namespace ghoul::modelgeometry { class ModelGeometry; }

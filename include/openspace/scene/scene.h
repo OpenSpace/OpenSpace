@@ -27,11 +27,11 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/misc/boolean.h>
+#include <openspace/misc/easing.h>
+#include <openspace/misc/managedmemoryuniqueptr.h>
+#include <openspace/misc/map.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/easing.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <ghoul/misc/map.h>
 #include <chrono>
 #include <functional>
 #include <memory>

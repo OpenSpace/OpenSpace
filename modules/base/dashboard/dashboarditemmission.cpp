@@ -26,14 +26,14 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/font/font.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <stack>
 #include <utility>

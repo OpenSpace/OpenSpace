@@ -51,13 +51,13 @@
 
 #include <modules/molecule/src/postprocessing.h>
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
+#include <openspace/opengl/uniformcache.h>
 #include <core/md_allocator.h>
 #include <core/md_str.h>
 #include <core/md_log.h>

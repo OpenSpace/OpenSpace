@@ -28,13 +28,13 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/solarbrowsing/util/structs.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
 namespace ghoul::opengl { class Texture; }

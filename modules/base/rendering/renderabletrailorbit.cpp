@@ -25,11 +25,11 @@
 #include <modules/base/rendering/renderabletrailorbit.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/timeconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/time.h>
-#include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <chrono>
 #include <cmath>

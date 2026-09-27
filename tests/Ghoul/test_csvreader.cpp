@@ -25,8 +25,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/csvreader.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/csvreader.h>
 
 TEST_CASE("CSVReader: Initial", "[csvreader]") {
     const std::filesystem::path test0 = absPath("${UNIT_TEST}/csvreader/test0.csv");

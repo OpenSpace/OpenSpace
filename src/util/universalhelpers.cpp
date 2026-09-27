@@ -24,7 +24,7 @@
 
 #include <openspace/util/universalhelpers.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <algorithm>
 
 namespace openspace {

@@ -28,19 +28,19 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/framebufferobject.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <render_gl.h>
-#include <ghoul/opengl/texture.h>
 #include <cstdlib>
 #include <optional>
 

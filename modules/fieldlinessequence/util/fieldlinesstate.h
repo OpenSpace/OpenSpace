@@ -26,8 +26,8 @@
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
 
 #include <modules/fieldlinessequence/util/commons.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/ghoul_gl.h>
 #include <string>
 #include <vector>
 

@@ -24,9 +24,9 @@
 
 #include <modules/iswa/util/dataprocessortext.h>
 
+#include <openspace/misc/assert.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/properties/misc/selectionproperty.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cmath>
 #include <iterator>

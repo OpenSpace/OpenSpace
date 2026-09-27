@@ -28,6 +28,11 @@
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/transferfunction.h>
@@ -35,11 +40,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/programobject.h>
 #include <format>
 #include <fstream>
 #include <limits>

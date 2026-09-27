@@ -24,13 +24,13 @@
 
 #include <modules/globebrowsing/src/timequantizer.h>
 
+#include <openspace/format.h>
+#include <openspace/glm.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
 #include <date/date.h>
 #include <algorithm>
 #include <charconv>

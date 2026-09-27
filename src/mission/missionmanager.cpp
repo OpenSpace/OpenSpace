@@ -27,9 +27,9 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
 #include <utility>
 
 #include "missionmanager_lua.inl"

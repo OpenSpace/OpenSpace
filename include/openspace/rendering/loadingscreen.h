@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___LOADINGSCREEN___H__
 #define __OPENSPACE_CORE___LOADINGSCREEN___H__
 
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
 #include <openspace/util/screenlog.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
 #include <chrono>
 #include <cstdint>
 #include <memory>

@@ -28,10 +28,10 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/engine/downloadmanager.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/texture.h>
 #include <chrono>
 #include <future>
 #include <memory>

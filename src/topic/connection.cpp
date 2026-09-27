@@ -24,13 +24,13 @@
 
 #include <openspace/topic/connection.h>
 
-#include <openspace/util/factorymanager.h>
+#include <openspace/io/socket/socket.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/topic/topics/topic.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/io/socket/socket.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
+#include <openspace/util/factorymanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "ServerModule: Connection";

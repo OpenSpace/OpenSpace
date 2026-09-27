@@ -28,11 +28,11 @@
 #include <modules/exoplanets/exoplanetsmodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/stringhelper.h>
 #include <glm/gtx/transform.hpp>
 #include <cmath>
 #include <filesystem>

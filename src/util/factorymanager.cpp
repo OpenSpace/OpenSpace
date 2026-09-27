@@ -24,6 +24,7 @@
 
 #include <openspace/util/factorymanager.h>
 
+#include <openspace/misc/assert.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -35,7 +36,6 @@
 #include <openspace/topic/topics/topic.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
 #include <utility>
 
 namespace openspace {

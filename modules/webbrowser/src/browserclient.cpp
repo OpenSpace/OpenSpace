@@ -29,7 +29,7 @@
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 
 namespace openspace {
 

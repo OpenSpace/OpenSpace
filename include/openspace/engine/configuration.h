@@ -25,11 +25,11 @@
 #ifndef __OPENSPACE_CORE___CONFIGURATION___H__
 #define __OPENSPACE_CORE___CONFIGURATION___H__
 
+#include <openspace/glm.h>
+#include <openspace/lua/luastate.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/properties/property.h>
 #include <openspace/util/keys.h>
-#include <ghoul/glm.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/misc/dictionary.h>
 #include <filesystem>
 #include <map>
 #include <string>

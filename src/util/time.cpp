@@ -25,15 +25,15 @@
 #include <openspace/util/time.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timeconversion.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cctype>
 #include <cstring>

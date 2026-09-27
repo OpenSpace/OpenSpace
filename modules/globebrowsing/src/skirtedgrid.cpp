@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/src/skirtedgrid.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <algorithm>
 #include <array>
 #include <string>

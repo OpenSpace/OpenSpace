@@ -25,10 +25,10 @@
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/documentation/documentationengine.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringhelper.h>
 #include <scn/scan.h>
 #include <algorithm>
 #include <cmath>

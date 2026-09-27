@@ -32,12 +32,16 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/font/fontmanager.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/keyframerecordinghandler.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
 #include <openspace/mission/missionmanager.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/astrocast.h>
 #include <openspace/properties/propertyowner.h>
@@ -55,10 +59,6 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/versionchecker.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <array>
 

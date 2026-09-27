@@ -31,8 +31,8 @@
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 
 namespace {
     using namespace openspace;

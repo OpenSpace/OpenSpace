@@ -26,9 +26,9 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/invariants.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 #include <optional>
 
 namespace {

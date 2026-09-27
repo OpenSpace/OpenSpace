@@ -26,9 +26,9 @@
 
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
 #include <modules/globebrowsing/src/rawtiledatareader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
 #include <filesystem>
 
 namespace {

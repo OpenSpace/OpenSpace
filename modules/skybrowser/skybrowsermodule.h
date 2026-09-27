@@ -29,10 +29,10 @@
 
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
+#include <openspace/glm.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 
 namespace openspace {

@@ -27,9 +27,9 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/opengl/framebufferobject.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/texture.h>
 #include <functional>
 
 namespace openspace {

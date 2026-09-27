@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
 
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/opengl/textureunit.h>
+#include <openspace/opengl/uniformcache.h>
 #include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }

@@ -24,7 +24,7 @@
 
 #include "form/colorwidget.h"
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <QColorDialog>
 #include <QDoubleValidator>
 #include <QGridLayout>

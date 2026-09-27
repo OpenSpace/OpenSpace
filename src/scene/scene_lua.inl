@@ -24,8 +24,10 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/managedmemoryuniqueptr.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/scene/scene.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/matrix/dmat2property.h>
@@ -60,9 +62,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <openspace/scene/scene.h>
 #include <algorithm>
 #include <execution>
 #include <stdexcept>

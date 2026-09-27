@@ -30,14 +30,14 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/levmarqsolver.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/levmarqsolver.h>
 #include <glm/gtx/intersect.hpp>
 #include <algorithm>
 #include <format>

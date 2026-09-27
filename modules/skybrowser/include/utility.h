@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__
 
+#include <openspace/glm.h>
+#include <openspace/misc/easing.h>
 #include <openspace/util/distanceconstants.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/easing.h>
 #include <chrono>
 #include <ratio>
 #include <type_traits>

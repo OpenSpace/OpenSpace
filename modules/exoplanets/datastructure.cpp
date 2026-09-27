@@ -26,12 +26,12 @@
 
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
 #include <cmath>
 #include <optional>
 #include <string_view>

@@ -27,10 +27,10 @@
 
 #include <modules/base/rendering/renderabledisc.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <ghoul/glm.h>
 
 namespace openspace {
 

@@ -24,11 +24,11 @@
 
 #include <modules/kameleon/include/kameleonwrapper.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <algorithm>
 #include <cctype>
 #include <cmath>

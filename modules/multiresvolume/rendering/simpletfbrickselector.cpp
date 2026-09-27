@@ -27,10 +27,10 @@
 #include <modules/multiresvolume/rendering/brickcover.h>
 #include <modules/multiresvolume/rendering/histogrammanager.h>
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/transferfunction.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <cmath>
 #include <string_view>

@@ -26,15 +26,15 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/luastate.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/task.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <filesystem>
 #include <string_view>

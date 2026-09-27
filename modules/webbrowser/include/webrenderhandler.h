@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 #define __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/ghoul_gl.h>
 #include <vector>
 
 #ifdef _MSC_VER

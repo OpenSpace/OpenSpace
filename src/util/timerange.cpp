@@ -25,8 +25,8 @@
 #include <openspace/util/timerange.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/misc/dictionary.h>
 #include <stdexcept>
 
 namespace {

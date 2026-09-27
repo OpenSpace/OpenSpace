@@ -57,7 +57,7 @@
 // All values that are defined here are compatible with (and are based on) the
 // definitions GLFW v3.1
 
-#include <ghoul/misc/stringconversion.h>
+#include <openspace/misc/stringconversion.h>
 #include <array>
 #include <cstdint>
 #include <string>

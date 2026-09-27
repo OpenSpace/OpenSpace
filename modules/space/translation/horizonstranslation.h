@@ -27,9 +27,9 @@
 
 #include <openspace/scene/translation.h>
 
+#include <openspace/lua/luastate.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/util/timeline.h>
-#include <ghoul/lua/luastate.h>
 #include <array>
 #include <filesystem>
 

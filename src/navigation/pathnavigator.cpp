@@ -31,6 +31,9 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/query/query.h>
@@ -41,9 +44,6 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/collisionhelper.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <iterator>
 

@@ -25,9 +25,9 @@
 #include <openspace/topic/topics/subscriptiontopic.h>
 
 #include <openspace/documentation/schema.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
-#include <ghoul/logging/logmanager.h>
 #include <string_view>
 
 using nlohmann::json;

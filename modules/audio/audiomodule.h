@@ -27,8 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
 #include <filesystem>
 #include <memory>
 #include <optional>

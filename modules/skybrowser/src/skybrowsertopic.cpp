@@ -29,10 +29,10 @@
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryjsonformatter.h>
 #include <openspace/topic/connection.h>
 #include <openspace/topic/server.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <string_view>
 #include <vector>
 

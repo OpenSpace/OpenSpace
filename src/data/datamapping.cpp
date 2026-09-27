@@ -25,13 +25,13 @@
 #include <openspace/data/datamapping.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/crc32.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringconversion.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/crc32.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringconversion.h>
+#include <openspace/misc/stringhelper.h>
 #include <algorithm>
 
 namespace {

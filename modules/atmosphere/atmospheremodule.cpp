@@ -26,10 +26,10 @@
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/scene.h>
 #include <openspace/engine/globals.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
 
 using namespace openspace;
 

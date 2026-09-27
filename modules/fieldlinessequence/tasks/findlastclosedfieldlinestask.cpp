@@ -28,9 +28,9 @@
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <modules/kameleon/include/kameleonhelper.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/logging/logmanager.h>
 #include <ccmc/Kameleon.h>
 #include <ccmc/Tracer.h>
-#include <ghoul/logging/logmanager.h>
 #include <numbers>
 #include <optional>
 

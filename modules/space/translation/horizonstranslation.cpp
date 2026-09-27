@@ -26,15 +26,15 @@
 
 #include <modules/space/horizonsfile.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <cfloat>
 #include <cstdint>

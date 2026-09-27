@@ -24,10 +24,10 @@
 
 #include <openspace/navigation/pathcurve.h>
 
+#include <openspace/misc/assert.h>
+#include <openspace/misc/integration.h>
+#include <openspace/misc/interpolator.h>
 #include <openspace/navigation/waypoint.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/integration.h>
-#include <ghoul/misc/interpolator.h>
 #include <algorithm>
 #include <cstdlib>
 #include <iterator>

@@ -31,8 +31,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
 #include <glm/gtx/color_space.hpp>
 #include <algorithm>
 #include <cmath>

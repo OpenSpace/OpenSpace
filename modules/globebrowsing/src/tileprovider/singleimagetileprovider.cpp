@@ -25,11 +25,11 @@
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
 #include <limits>
 #include <optional>
 

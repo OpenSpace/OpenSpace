@@ -28,9 +28,9 @@
 #include <modules/imgui/include/renderproperties.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <memory>
 #include <type_traits>

@@ -25,8 +25,8 @@
 #include <openspace/rendering/colormappingcomponent.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <algorithm>
 #include <cmath>
 #include <string_view>

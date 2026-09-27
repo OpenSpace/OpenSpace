@@ -26,13 +26,13 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/shaderobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/shaderobject.h>
 #include <string_view>
 #include <utility>
 

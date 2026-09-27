@@ -28,12 +28,12 @@
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 #include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/task.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
 
 namespace openspace {
 

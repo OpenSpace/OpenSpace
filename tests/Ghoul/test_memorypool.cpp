@@ -25,7 +25,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <ghoul/misc/memorypool.h>
+#include <openspace/misc/memorypool.h>
 
 TEST_CASE("MemoryPool: MemoryPool Default", "[memorypool]") {
     ghoul::MemoryPool<> pool;

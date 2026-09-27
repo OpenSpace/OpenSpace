@@ -25,10 +25,10 @@
 
 #include <catch2/catch_session.hpp>
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/consolelog.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/supportmacros.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/consolelog.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/supportmacros.h>
 #include <filesystem>
 
 using namespace ghoul::filesystem;

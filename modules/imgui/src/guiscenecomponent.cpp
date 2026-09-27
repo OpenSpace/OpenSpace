@@ -27,13 +27,13 @@
 #include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/assert.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/misc/assert.h>
 
 namespace {
     using namespace openspace;

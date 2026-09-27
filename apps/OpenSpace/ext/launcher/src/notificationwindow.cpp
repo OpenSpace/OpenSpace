@@ -26,11 +26,11 @@
 
 #include <openspace/openspace.h>
 #include <openspace/engine/settings.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/loglevel.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/format.h>
+#include <openspace/logging/loglevel.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/stringhelper.h>
 #include <QGuiApplication>
 #include <QTimer>
 #include <scn/scan.h>

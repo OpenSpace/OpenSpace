@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <cstring>
 
 namespace openspace {
