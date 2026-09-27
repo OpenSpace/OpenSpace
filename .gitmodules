@@ -1,19 +1,9 @@
 [submodule "ext/spice"]
 	path = ext/spice
 	url = https://github.com/OpenSpace/Spice.git
-[submodule "apps/OpenSpace-MinVR/ext/minvr"]
-	path = apps/OpenSpace-MinVR/ext/minvr
-	url = https://github.com/OpenSpace/minvr
-	branch = OpenSpace
 [submodule "apps/OpenSpace/ext/sgct"]
 	path = apps/OpenSpace/ext/sgct
 	url = https://github.com/sgct/sgct
-[submodule "apps/OpenSpace-MinVR/ext/glfw"]
-	path = apps/OpenSpace-MinVR/ext/glfw
-	url = https://github.com/opensgct/glfw
-[submodule "support/coding/codegen"]
-	path = support/coding/codegen
-	url = https://github.com/OpenSpace/codegen
 [submodule "documentation"]
 	path = documentation
 	url = https://github.com/OpenSpace/OpenSpace-Documentation-Dist.git

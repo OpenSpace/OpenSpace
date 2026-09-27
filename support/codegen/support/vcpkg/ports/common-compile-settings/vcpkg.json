@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "common-compile-settings",
+  "version-date": "2026-09-11",
+  "description": "CMake helpers that define the C++ compile settings (warnings, conformance flags, language standard) shared by the OpenSpace projects",
+  "homepage": "https://github.com/OpenSpace/common-compile-settings",
+  "license": "MIT"
+}

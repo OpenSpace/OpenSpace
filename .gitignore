@@ -58,3 +58,9 @@ support/runner/**/__pycache__
 
 # mold GLSL, copied out of the mold vcpkg package by modules/molecule/CMakeLists.txt
 /modules/molecule/shaders/mold/
+
+support/codegen/tests/execution/*_codegen.cpp
+support/codegen/tests/execution_enums/*_codegen.cpp
+support/codegen/tests/execution_luawrapper/*_codegen.cpp
+support/codegen/tests/execution_misc/*_codegen.cpp
+support/codegen/tests/execution_structs/*_codegen.cpp

@@ -1,0 +1,10 @@
+codegen provides CMake targets:
+
+  find_package(codegen CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE codegen::codegen-lib)
+
+and the code generator executable as an imported target:
+
+  codegen::codegen-tool
+
+which is installed under tools/codegen and is on the PATH during a vcpkg build.
