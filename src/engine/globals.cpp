@@ -47,6 +47,7 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/assetmanager.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
@@ -55,9 +56,10 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/versionchecker.h>
-#include <ghoul/misc/assert.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <array>
@@ -631,6 +633,12 @@ void destroy() {
 #else // ^^^^ WIN32 / !WIN32 vvvv
     delete server;
 #endif // WIN32
+
+    // Must be destroyed after 'Server', whose topics may still reference it while being
+    // torn down. Allocated separately from the WIN32 buffer above since it can only be
+    // constructed once the ${ASSETS} path token and final ScriptEngine are ready
+    LDEBUGC("Globals", "Destroying 'AssetManager'");
+    delete assetManager;
 
     LDEBUGC("Globals", "Destroying 'SyncEngine'");
 #ifdef WIN32
