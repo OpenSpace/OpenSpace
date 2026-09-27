@@ -38,6 +38,7 @@ endif ()
 add_subdirectory(lib)
 
 add_executable(codegen-tool main.cpp)
+add_executable(codegen::codegen-tool ALIAS codegen-tool)
 target_link_libraries(codegen-tool PRIVATE codegen-lib)
 set_compile_settings(codegen-tool)
 

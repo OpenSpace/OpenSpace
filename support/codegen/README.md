@@ -21,7 +21,7 @@ cmake --build --preset windows-msvc
 
 The configure presets are `windows-msvc`, `windows-ninja-debug`, `windows-ninja-release`, `linux-ninja-debug`, `linux-ninja-release`, `linux-makefiles-debug`, and `linux-makefiles-release`.  Each has a build preset of the same name; the multi-config `windows-msvc` preset additionally provides `windows-msvc-debug` and `windows-msvc-relwithdebinfo`.
 
-The unit tests under `tests/` link `openspace-core` and are only built from within the OpenSpace tree, which adds `support/coding/codegen/tests` directly; this standalone build never builds them.
+The unit tests under `tests/` link `openspace-core` and are only built from within the OpenSpace tree, which adds `support/codegen/tests` directly; this standalone build never builds them.
 
 ### Consuming codegen
 A superproject can pull codegen in as a vcpkg overlay port (`support/vcpkg/ports`) instead of `add_subdirectory`:

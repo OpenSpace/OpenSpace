@@ -23,6 +23,7 @@
 ##########################################################################################
 
 add_library(codegen-lib STATIC)
+add_library(codegen::codegen-lib ALIAS codegen-lib)
 target_sources(
   codegen-lib
   PRIVATE

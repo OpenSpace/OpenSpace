@@ -149,8 +149,8 @@ endif ()
 
 add_subdirectory(ext)
 add_subdirectory(src)
+add_subdirectory(support/codegen)
 
-find_package(codegen CONFIG REQUIRED)
 # It is important that the __codegen.h do not actually exist so
 # that this target is never considered as finished
 add_custom_target(
@@ -185,7 +185,7 @@ endif ()
 if (OPENSPACE_HAVE_TESTS)
   enable_testing()
 
-  add_subdirectory(support/coding/codegen/tests)
+  add_subdirectory(support/codegen/tests)
   set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
   set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
   if (NOT TEST codegentest)

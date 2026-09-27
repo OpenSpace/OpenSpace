@@ -207,7 +207,7 @@ target_sources(
 )
 
 find_package(Catch2 CONFIG REQUIRED)
-target_link_libraries(codegentest PRIVATE Catch2::Catch2 codegen::codegen-lib openspace-core openspace-module-collection)
+target_link_libraries(codegentest PRIVATE Catch2::Catch2 codegen-lib openspace-core openspace-module-collection)
 
 # codegentest only needs the *write* half (stbi_write_*): the *read* half (stbi_load,
 # ...) is already satisfied by assimp, which vendors its own stb_image copy, so linking

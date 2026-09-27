@@ -16,8 +16,7 @@
     "overlay-ports": [
       "./support/vcpkg/ports",
       "./apps/OpenSpace/ext/sgct/support/vcpkg/ports",
-      "./ext/spice/support/vcpkg/ports",
-      "./support/coding/codegen/support/vcpkg/ports"
+      "./ext/spice/support/vcpkg/ports"
     ],
     "overlay-triplets": [
       "./support/vcpkg/triplets"
@@ -38,7 +37,6 @@
         "curl"
       ]
     },
-    "codegen",
     "curl",
     {
       "name": "date",
