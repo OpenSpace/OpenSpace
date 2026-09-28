@@ -187,6 +187,10 @@ bool DataViewer::initializeData(DataSettings settings) {
         return false;
     }
 
+    if (_systemViewer) {
+        _systemViewer->removeAllExoplanetSystems();
+    }
+
     _dataSettings = std::move(settings);
     _data = std::move(data);
     _computedColumns.clear();

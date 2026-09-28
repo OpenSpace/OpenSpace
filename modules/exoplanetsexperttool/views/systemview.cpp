@@ -220,7 +220,11 @@ bool SystemViewer::systemCanBeAdded(const std::string& host) const {
     // TODO: also check against exoplanet list
 }
 
-void SystemViewer::addExoplanetSystem(const std::string& host) const {
+void SystemViewer::addExoplanetSystem(const std::string& host) {
+    if (std::find(_addedHostStars.begin(), _addedHostStars.end(), host) == _addedHostStars.end()) {
+        _addedHostStars.push_back(host);
+    }
+
     std::string dataFile = _dataViewer.currentDataFile().string();
     // Replace backslashes with forward slashes for Lua script compatibility
     std::replace(dataFile.begin(), dataFile.end(), '\\', '/');
@@ -231,7 +235,29 @@ void SystemViewer::addExoplanetSystem(const std::string& host) const {
     ));
 }
 
-void SystemViewer::addOrTargetPlanet(const ExoplanetItem& item) const {
+void SystemViewer::removeExoplanetSystem(const std::string& host) {
+    global::scriptEngine->queueScript(std::format(
+        "openspace.exoplanets.removeExoplanetSystem(\"{}\")",
+        host
+    ));
+    std::erase(_addedHostStars, host);
+}
+
+void SystemViewer::removeAllExoplanetSystems() {
+    for (const std::string& host : _addedHostStars) {
+        global::scriptEngine->queueScript(std::format(
+            "openspace.exoplanets.removeExoplanetSystem(\"{}\")",
+            host
+        ));
+    }
+    _addedHostStars.clear();
+}
+
+const std::vector<std::string>& SystemViewer::addedHostStars() const {
+    return _addedHostStars;
+}
+
+void SystemViewer::addOrTargetPlanet(const ExoplanetItem& item) {
     const std::string identifier = makeIdentifier(item.hostName);
 
     if (systemCanBeAdded(item.hostName)) {

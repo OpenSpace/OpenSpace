@@ -43,9 +43,13 @@ public:
 
     bool systemCanBeAdded(const std::string& host) const;
 
-    void addExoplanetSystem(const std::string& host) const;
-    void addOrTargetPlanet(const ExoplanetItem& item) const;
+    void addExoplanetSystem(const std::string& host);
+    void removeExoplanetSystem(const std::string& host);
+    void removeAllExoplanetSystems();
+    void addOrTargetPlanet(const ExoplanetItem& item);
     void flyToStar(std::string_view hostIdentifier) const;
+
+    const std::vector<std::string>& addedHostStars() const;
 
 private:
     void renderSystemViewContent(const std::string& host);
@@ -58,10 +62,10 @@ private:
     DataViewer& _dataViewer;
 
     std::list<std::string> _shownPlanetSystemWindows;
+    std::vector<std::string> _addedHostStars;
 
     bool _shouldColorOrbits = false;
     bool _highlightDefaultOrbits = false;
-
 };
 
 } // namespace openspace::exoplanets
