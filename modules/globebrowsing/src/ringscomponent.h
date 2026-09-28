@@ -83,6 +83,7 @@ public:
     glm::vec2 textureOffset() const;
     glm::vec3 sunPositionObj() const;
     glm::vec3 camPositionObj() const;
+    glm::vec3 camPositionObjRaw() const;
 
     void setEllipsoidRadii(glm::vec3 radii);
 
@@ -112,7 +113,7 @@ private:
         opacity, ellipsoidRadii
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, sunPositionObj, camPositionObj, textureForwards, textureBackwards,
+        sunPosition, sunPositionObj, camPositionObj, textureForwards, camPositionObjRaw, textureBackwards,
         textureUnlit, textureColor, textureTransparency,
         opacity, ellipsoidRadii
     ) _uniformCacheAdvancedRings;
