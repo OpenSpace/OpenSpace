@@ -1021,7 +1021,6 @@ EXCLUDE_SYMLINKS = NO
 EXCLUDE_PATTERNS = */ext/curl \
                    */ext/date \
                    */ext/json \
-                   */ext/spice \
                    */ext/tinythread \
                    */modules/*/ext/* \
                    */apps/OpenSpace-MinVR/ext/* \

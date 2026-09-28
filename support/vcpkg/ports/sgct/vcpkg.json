@@ -1,0 +1,66 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "sgct",
+  "version": "4.0.0",
+  "description": [
+    "Simple Graphics Cluster Toolkit.",
+    "The scalable and NDI features wrap proprietary SDKs whose licenses do not permit redistribution. They are off by default and a package built with them must not be handed to third parties. SGCT depends on stb_image/stb_image_write through the stbimage overlay port, which compiles their implementation exactly once for the whole superproject, so a consumer that also links another user of stbimage does not hit a duplicate-symbol/ODR conflict."
+  ],
+  "homepage": "https://github.com/SGCT/SGCT/",
+  "license": "BSD-3-Clause",
+  "supports": "!(osx | uwp | android)",
+  "dependencies": [
+    "freetype",
+    "glfw3",
+    "glm",
+    "json-schema-validator",
+    "libpng",
+    "minizip",
+    "nlohmann-json",
+    "openxr-loader",
+    "scnlib",
+    "stbimage",
+    "tinyxml2",
+    "zlib",
+    {
+      "name": "glad",
+      "features": [
+        "extensions",
+        "loader"
+      ]
+    },
+    {
+      "name": "glad",
+      "features": [
+        "wgl"
+      ],
+      "platform": "windows"
+    },
+    {
+      "name": "spout2",
+      "platform": "windows"
+    },
+    {
+      "name": "vulkan",
+      "platform": "windows"
+    },
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ],
+  "features": {
+    "ndi": {
+      "description": "Build SGCT with NDI support. Proprietary SDK, the resulting package cannot be redistributed",
+      "supports": "windows"
+    },
+    "scalable": {
+      "description": "Build SGCT with Scalable SDK support. Proprietary SDK, the resulting package cannot be redistributed",
+      "supports": "windows"
+    }
+  }
+}

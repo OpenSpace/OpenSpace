@@ -1,9 +1,3 @@
-[submodule "ext/spice"]
-	path = ext/spice
-	url = https://github.com/OpenSpace/Spice.git
-[submodule "apps/OpenSpace/ext/sgct"]
-	path = apps/OpenSpace/ext/sgct
-	url = https://github.com/sgct/sgct
 [submodule "documentation"]
 	path = documentation
 	url = https://github.com/OpenSpace/OpenSpace-Documentation-Dist.git

@@ -604,10 +604,6 @@ else()
   install(FILES "${PROJECT_SOURCE_DIR}/apps/OpenSpace/openspace.png" DESTINATION .)
 endif()
 
-if (OPENSPACE_OPENVR_SUPPORT)
-  install(FILES "${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr/bin/win64/openvr_api.dll" DESTINATION bin COMPONENT Runtime)
-endif()
-
 if (OPENSPACE_MODULE_SPOUT)
   install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/" DESTINATION bin COMPONENT Runtime FILES_MATCHING PATTERN "*Spout*.dll")
 endif()

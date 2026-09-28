@@ -29,40 +29,6 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 # it from the main CMakeLists file
 
 #####
-# OpenVR
-#####
-# OPENSPACE_OPENVR_SUPPORT is declared in the top-level CMakeLists.txt (before project())
-# so it can drive the vcpkg "openvr" manifest feature.
-if (OPENSPACE_OPENVR_SUPPORT)
-  begin_header("Dependency: OpenVR")
-  find_package(openvr CONFIG REQUIRED)
-
-  set(SGCT_OPENVR_DEFINITIONS OPENVR_SUPPORT)
-  if (NOT SGCT_OPENVR_INCLUDE_DIRECTORY)
-    if (WIN32)
-      find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
-        NAMES SGCTOpenVR.h
-        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr NO_DEFAULT_PATH
-        REQUIRED
-      )
-    else ()
-      find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
-        NAMES SGCTOpenVR.h
-        PATH_SUFFIXES SGCTOpenVR
-        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr
-        REQUIRED
-      )
-    endif ()
-  else ()
-    set(SGCT_OPENVR_FILES
-      ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.h
-      ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.cpp
-    )
-  endif ()
-  end_header("Dependency: OpenVR")
-endif ()
-
-#####
 # Spout
 #####
 if (SGCT_SPOUT_SUPPORT AND NOT OPENSPACE_MODULE_SPOUT)
@@ -103,16 +69,15 @@ if (UNIX AND NOT APPLE)
   # The packages ship the Qt libraries in the same folder as the executable (see
   # support/cmake/packaging.cmake), which the loader only finds through this RPATH. The
   # build tree keeps the default RPATH pointing at the vcpkg libraries, so running from
-  # bin/ during development is unaffected.
+  # bin/ during development is unaffected
   set_target_properties(OpenSpace PROPERTIES INSTALL_RPATH "$ORIGIN")
 endif ()
 
 begin_header("Dependency: SGCT")
 
-# SGCT is resolved through the vcpkg overlay port at
-# apps/OpenSpace/ext/sgct/support/vcpkg/ports/sgct, which builds the enclosing submodule
-# checkout. The sgct submodule stays checked out because that port builds from its source
-# path (and additional_includes/openvr is still consumed from it above).
+# SGCT is resolved through the vcpkg overlay port at support/vcpkg/ports/sgct, which
+# fetches a pinned commit of https://github.com/SGCT/SGCT from GitHub. To move to a newer
+# SGCT, update REF and SHA512 in that port's portfile.cmake
 find_package(sgct CONFIG REQUIRED)
 target_link_libraries(OpenSpace PRIVATE sgct::sgct)
 
@@ -120,9 +85,11 @@ if (UNIX)
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
 endif ()
 
+# The sgct port installs sgct.schema.json next to its CMake config, which is what
+# ${sgct_DIR} points at
 add_custom_command(TARGET OpenSpace POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/sgct.schema.json
+  ${sgct_DIR}/sgct.schema.json
   ${CMAKE_CURRENT_SOURCE_DIR}/../../config/schema/sgct.schema.json
   COMMAND_EXPAND_LISTS
 )
