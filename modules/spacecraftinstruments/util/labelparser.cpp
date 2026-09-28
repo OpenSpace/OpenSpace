@@ -46,12 +46,9 @@ namespace {
 
 namespace openspace {
 
-LabelParser::LabelParser(std::filesystem::path fileName,
-                         const ghoul::Dictionary& dictionary)
+LabelParser::LabelParser(std::filesystem::path fileName, const Dictionary& dictionary)
     : _fileName(std::move(fileName))
 {
-    using ghoul::Dictionary;
-
     // Get the different instrument types. For each decoder (assuming might have more if
     // hong makes changes)
     for (const std::string_view decoderStr : dictionary.keys()) {
@@ -173,7 +170,7 @@ bool LabelParser::create() {
         double stopTime = 0.0;
         std::string line;
         do {
-            ghoul::getline(file, line);
+            openspace::getline(file, line);
 
             line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
             line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
@@ -225,7 +222,7 @@ bool LabelParser::create() {
                 startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
                 count++;
 
-                ghoul::getline(file, line);
+                openspace::getline(file, line);
                 line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
                 line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
                 line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
@@ -256,7 +253,7 @@ bool LabelParser::create() {
             }
             if (count == static_cast<int>(_specsOfInterest.size())) {
                 const std::vector<std::string> extensions =
-                    ghoul::io::texture::supportedReadExtensions();
+                    io::texture::supportedReadExtensions();
 
                 count = 0;
 

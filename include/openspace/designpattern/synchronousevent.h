@@ -22,73 +22,69 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_exception.hpp>
-#include <catch2/matchers/catch_matchers_string.hpp>
+#ifndef __OPENSPACE_CORE___DESIGN_EVENT___H__
+#define __OPENSPACE_CORE___DESIGN_EVENT___H__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/filesystem/file.h>
-#include <openspace/filesystem/filesystem.h>
-#include <openspace/lua/ghoul_lua.h>
-#include <openspace/lua/luastate.h>
-#include <openspace/lua/lua_helper.h>
-#include <filesystem>
+#include <functional>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-#if 0
+namespace openspace {
 
-using namespace openspace;
+template <typename... T>
+class SynchronousEvent {
+public:
+    using Callback = std::function<void(const T&...)>;
 
-TEST_CASE("CreateSingleColorImage: Create image and check return value",
-          "[createsinglecolorimage]")
-{
-    const std::filesystem::path path = createSingleColorImage(
-        "colorFile",
-        glm::dvec3(1.0, 0.0, 0.0)
-    );
+    /**
+     * Adds a listener callback to the specified topic. When an event is published with
+     * this topic, the callback is called. If this topic does not already exist, it
+     * creates a new key for it in the map of topics.
+     *
+     * \param name The unique name of the subscriber
+     * \param topic The event topic to subscribe to
+     * \param listener Function that should be called when the event is published
+     */
+    void subscribe(std::string name, std::string topic, Callback listener);
 
-    CHECK_THAT(path.string(), Catch::Matchers::ContainsSubstring("colorFile.ppm"));
-}
+    /**
+     * Given a topic and a message, all subscribers callback functions of this event topic
+     * will be called with message as an argument.
+     *
+     * \param topic The event topic to publish to
+     * \param message The message to be used as argument for subscriber callbacks
+     */
+    void publish(const std::string& topic, T... message);
 
-TEST_CASE("CreateSingleColorImage: Faulty color value (invalid values)",
-          "[createsinglecolorimage]")
-{
-    CHECK_THROWS_WITH(
-        createSingleColorImage("notCreatedColorFile", glm::dvec3(255.0, 0.0, 0.0)),
-        Catch::Matchers::Equals(
-            "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
-        )
-    );
-}
+    /**
+     * Unsubscribes the object with given name from a specific topic.
+     *
+     * \param name The subscriber's unique name
+     * \param topic The event to unsubscribe to
+     */
+    void unsubscribe(const std::string& name, const std::string& topic);
 
-TEST_CASE("CreateSingleColorImage: Check if file was created",
-          "[createsinglecolorimage]")
-{
-    const std::filesystem::path path = createSingleColorImage(
-        "colorFile2",
-        glm::dvec3(0.0, 1.0, 0.0)
-    );
-    CHECK(std::filesystem::is_regular_file(path));
-}
+    /**
+     * Unsubscribes the object with given name from all topics.
+     *
+     * \param name The subscriber's unique name
+     */
+    void unsubscribe(const std::string& name);
 
-TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage]") {
-    const std::filesystem::path path = createSingleColorImage(
-        "colorFile",
-        glm::dvec3(1.0, 0.0, 0.0)
-    );
+private:
+    struct Subscriber {
+        std::string name;
+        Callback callback;
+    };
 
-    // Read the PPM file and check the image dimensions
-    // (maybe too hard coded, but cannot load a texture here...)
-    std::ifstream ppmFile = std::ifstream(path, std::ifstream::binary);
-    REQUIRE(ppmFile.is_open());
+    /// Maps event topics to subscriber callbacks
+    std::unordered_map<std::string, std::vector<Subscriber>> _topics;
+};
 
-    std::string version;
-    unsigned int width = 0;
-    unsigned int height = 0;
+} // namespace openspace
 
-    ppmFile >> version >> width >> height;
+#include "synchronousevent.inl"
 
-    CHECK(width == 1);
-    CHECK(height == 1);
-}
+#endif // __OPENSPACE_CORE___DESIGN_EVENT___H__
 
-#endif

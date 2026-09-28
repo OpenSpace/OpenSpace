@@ -95,7 +95,7 @@ namespace {
     }
 
     bool memTrajectoryGetHeader(md_trajectory_o* inst, md_trajectory_header_t* header) {
-        ghoul_assert(inst, "No instance");
+        assert_msg(inst, "No instance");
         MemTrajectory* mem = reinterpret_cast<MemTrajectory*>(inst);
         *header = mem->header;
         return true;
@@ -105,7 +105,7 @@ namespace {
                                 md_trajectory_frame_header_t* header, float* x, float* y,
                                 float* z)
     {
-        ghoul_assert(inst, "No instance");
+        assert_msg(inst, "No instance");
         MemTrajectory* mem = reinterpret_cast<MemTrajectory*>(inst);
         if (idx < 0 || mem->header.num_frames <= idx) {
             return false;
@@ -155,9 +155,9 @@ namespace {
                                   md_trajectory_frame_header_t* header, float* x,
                                   float* y, float* z)
     {
-        ghoul_assert(inst, "No instance");
-        ghoul_assert(data, "No data");
-        ghoul_assert(dataSize == sizeof(int64_t), "Invalid data size");
+        assert_msg(inst, "No instance");
+        assert_msg(data, "No data");
+        assert_msg(dataSize == sizeof(int64_t), "Invalid data size");
 
         const int64_t idx = *reinterpret_cast<const int64_t*>(data);
         return memTrajectoryLoadFrame(inst, idx, header, x, y, z);
@@ -167,8 +167,8 @@ namespace {
                                          md_allocator_i* alloc, bool deperiodizeOnLoad,
                                          const md_molecule_t* mol)
     {
-        ghoul_assert(backingTraj, "No backing trajectory");
-        ghoul_assert(alloc, "No allocator");
+        assert_msg(backingTraj, "No backing trajectory");
+        assert_msg(alloc, "No allocator");
 
         void* data = reinterpret_cast<md_trajectory_i*>(
             md_alloc(alloc, sizeof(md_trajectory_i) + sizeof(MemTrajectory))
@@ -223,7 +223,7 @@ namespace {
     }
 
     void memTrajectoryDestroy(md_trajectory_i* traj) {
-        ghoul_assert(traj, "No trajectory");
+        assert_msg(traj, "No trajectory");
 
         MemTrajectory* mem = reinterpret_cast<MemTrajectory*>(traj->inst);
         md_array_free(mem->x, mem->alloc);
@@ -289,13 +289,13 @@ namespace {
                                      md_trajectory_frame_header_t* header, float* outX,
                                      float* outY, float* outZ)
     {
-        ghoul_assert(inst, "No instance");
-        ghoul_assert(dataSize == sizeof(int64_t), "Invalid data size");
+        assert_msg(inst, "No instance");
+        assert_msg(dataSize == sizeof(int64_t), "Invalid data size");
 
         CachedTrajectory* cached = reinterpret_cast<CachedTrajectory*>(inst);
 
         int64_t idx = *(reinterpret_cast<const int64_t*>(data));
-        ghoul_assert(
+        assert_msg(
             idx >= 0 && idx < md_trajectory_num_frames(cached->cache.traj),
             "Invalid index"
         );
@@ -353,8 +353,8 @@ namespace {
                                             md_allocator_i* alloc, bool deperiodizeOnLoad,
                                             const md_molecule_t* mol)
     {
-        ghoul_assert(backingTraj, "No backing trajectory");
-        ghoul_assert(alloc, "No allocator");
+        assert_msg(backingTraj, "No backing trajectory");
+        assert_msg(alloc, "No allocator");
 
         void* data = md_alloc(alloc, sizeof(md_trajectory_i) + sizeof(CachedTrajectory));
         std::memset(data, 0, sizeof(md_trajectory_i) + sizeof(CachedTrajectory));
@@ -392,9 +392,9 @@ namespace {
 
     void loadSecondaryStructureData(md_trajectory_i* traj, const md_molecule_t* molecule)
     {
-        ghoul_assert(traj, "Missing trajectory");
-        ghoul_assert(traj->inst, "Trajectory has not data");
-        ghoul_assert(molecule, "Missing molecular data");
+        assert_msg(traj, "Missing trajectory");
+        assert_msg(traj->inst, "Trajectory has not data");
+        assert_msg(molecule, "Missing molecular data");
 
         if (molecule->backbone.range_count == 0) {
             return;
@@ -467,7 +467,7 @@ namespace {
 namespace molecule {
 
 const md_molecule_t* loadMolecule(std::filesystem::path file, bool isCoarseGrained) {
-    ghoul_assert(!file.empty(), "No file provided");
+    assert_msg(!file.empty(), "No file provided");
 
     const uint64_t hash = molHash(file, isCoarseGrained);
     auto entry = molecules.find(hash);
@@ -475,16 +475,16 @@ const md_molecule_t* loadMolecule(std::filesystem::path file, bool isCoarseGrain
         return &entry->second;
     }
 
-    md_molecule_api* api = moleculeApi(file);
+    md_molecule_api* api = molecule::moleculeApi(file);
     if (!api) {
-        throw ghoul::RuntimeError("Failed to find molecule loader api", "MOLD");
+        throw RuntimeError("Failed to find molecule loader api", "MOLD");
     }
 
     md_molecule_t mol = {};
     std::string f = file.string();
     str_t str = { f.data(), static_cast<int64_t>(f.length()) };
     if (!api->init_from_file(&mol, str, default_allocator)) {
-        throw ghoul::RuntimeError("Failed to load molecule", "MOLD");
+        throw RuntimeError("Failed to load molecule", "MOLD");
     }
 
     const md_util_postprocess_flags_t flags =
@@ -497,7 +497,7 @@ const md_molecule_t* loadMolecule(std::filesystem::path file, bool isCoarseGrain
 const md_trajectory_i* loadTrajectory(std::filesystem::path file,
                                       const md_molecule_t* mol, bool deperiodizeOnLoad)
 {
-    ghoul_assert(!file.empty(), "No file provided");
+    assert_msg(!file.empty(), "No file provided");
 
     const size_t hash = trajHash(file, deperiodizeOnLoad);
     auto entry = trajectories.find(hash);
@@ -505,20 +505,20 @@ const md_trajectory_i* loadTrajectory(std::filesystem::path file,
         return entry->second;
     }
 
-    md_trajectory_api* api = trajectoryApi(file);
+    md_trajectory_api* api = molecule::trajectoryApi(file);
     if (!api) {
-        throw ghoul::RuntimeError("Failed to find trajectory loader api", "MOLD");
+        throw RuntimeError("Failed to find trajectory loader api", "MOLD");
     }
 
     std::string f = file.string();
     str_t str = { f.data(), static_cast<int64_t>(f.length()) };
     md_trajectory_i* traj = api->create(str, default_allocator);
     if (!traj) {
-        throw ghoul::RuntimeError("Failed to load trajectory", "MOLD");
+        throw RuntimeError("Failed to load trajectory", "MOLD");
     }
 
     if (deperiodizeOnLoad && !mol) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "Deperiodize trajectory was set, but no valid molecule was provided",
             "MOLD"
         );
@@ -558,7 +558,7 @@ const md_trajectory_i* loadTrajectory(std::filesystem::path file,
 }
 
 void prefetchFrames(const md_trajectory_i* traj, std::span<int64_t> frames) {
-    ghoul_assert(traj, "No trajectory provided");
+    assert_msg(traj, "No trajectory provided");
 
     if (!traj->inst) {
         return;

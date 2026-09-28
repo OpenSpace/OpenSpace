@@ -85,8 +85,8 @@ void GlobeGeometryFeature::setOffsets(glm::vec3 offsets) {
     _offsets = std::move(offsets);
 }
 
-void GlobeGeometryFeature::initializeGL(ghoul::opengl::ProgramObject* pointsProgram,
-                                    ghoul::opengl::ProgramObject* linesAndPolygonsProgram)
+void GlobeGeometryFeature::initializeGL(opengl::ProgramObject* pointsProgram,
+                                        opengl::ProgramObject* linesAndPolygonsProgram)
 {
     _pointsProgram = pointsProgram;
     _linesAndPolygonsProgram = linesAndPolygonsProgram;
@@ -145,10 +145,8 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
 
     if (isInitializeStep || !_pointTexture) {
         _pointTexture = std::make_unique<TextureComponent>(2);
-        _pointTexture->setFilterMode(
-            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-        );
-        _pointTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+        _pointTexture->setFilterMode(opengl::Texture::FilterMode::AnisotropicMipMap);
+        _pointTexture->setWrapping(opengl::Texture::WrappingMode::ClampToEdge);
     }
 
     if (std::filesystem::is_regular_file(texture)) {
@@ -168,7 +166,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
     if (!geo) {
         throw std::logic_error("No geometry provided");
     }
-    ghoul_assert(
+    assert_msg(
         (geo && geo->isPuntal()) || (geo && !geo->isCollection()),
         "Non-point geometry can not be a collection"
     );
@@ -241,19 +239,15 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                 _type = GeometryType::Polygon;
             }
             catch (geos::util::IllegalStateException& e) {
-                throw ghoul::RuntimeError(std::format(
-                    "GEOS illegal state error: {}", e.what()
-                ));
+                throw RuntimeError(std::format("GEOS illegal state error: {}", e.what()));
             }
             catch (geos::util::GEOSException& e) {
-                throw ghoul::RuntimeError(std::format(
-                    "Unknown geos error: {}", e.what()
-                ));
+                throw RuntimeError(std::format("Unknown geos error: {}", e.what()));
             }
             break;
         }
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 
     // Reset height values if we don't care about them
@@ -292,7 +286,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
                                   float mainOpacity,
                                   const ExtraRenderData& extraRenderData)
 {
-    ghoul_assert(pass >= 0 && pass < 2, "Render pass variable out of accepted range");
+    assert_msg(pass >= 0 && pass < 2, "Render pass variable out of accepted range");
 
     const float opacity = mainOpacity * _properties.opacity();
     const float fillOpacity = mainOpacity * _properties.fillOpacity();
@@ -321,7 +315,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
             continue;
         }
 
-        ghoul::opengl::ProgramObject* shader = (r.type == RenderType::Points) ?
+        opengl::ProgramObject* shader = (r.type == RenderType::Points) ?
             _pointsProgram : _linesAndPolygonsProgram;
 
         shader->activate();
@@ -364,7 +358,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
                 renderPolygons(r, shouldRenderTwice, pass);
                 break;
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
 
         shader->deactivate();
@@ -381,7 +375,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
                                         const PointRenderMode& renderMode,
                                         float sizeScale) const
 {
-    ghoul_assert(feature.type == RenderType::Points, "Trying to render faulty geometry");
+    assert_msg(feature.type == RenderType::Points, "Trying to render faulty geometry");
     _pointsProgram->setUniform("color", _properties.color());
 
     const float bs = static_cast<float>(_globe.boundingSphere());
@@ -421,7 +415,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
     _pointsProgram->setUniform("cameraPosition", cameraPositionWorld);
     _pointsProgram->setUniform("cameraLookUp", glm::vec3(cameraUpDirWorld));
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_pointTexture->texture());
     _pointsProgram->setUniform("pointTexture", unit);
 
@@ -436,7 +430,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
 }
 
 void GlobeGeometryFeature::renderLines(const RenderFeature& feature) const {
-    ghoul_assert(feature.type == RenderType::Lines, "Trying to render faulty geometry");
+    assert_msg(feature.type == RenderType::Lines, "Trying to render faulty geometry");
 
     const glm::vec3 color = feature.isExtrusionFeature ?
         _properties.fillColor() : _properties.color();
@@ -452,8 +446,8 @@ void GlobeGeometryFeature::renderLines(const RenderFeature& feature) const {
 void GlobeGeometryFeature::renderPolygons(const RenderFeature& feature,
                                           bool shouldRenderTwice, int renderPass) const
 {
-    ghoul_assert(renderPass == 0 || renderPass == 1, "Invalid render pass");
-    ghoul_assert(
+    assert_msg(renderPass == 0 || renderPass == 1, "Invalid render pass");
+    assert_msg(
         feature.type == RenderType::Polygon,
         "Trying to render faulty geometry"
     );
@@ -763,10 +757,10 @@ void GlobeGeometryFeature::initializeRenderFeature(RenderFeature& feature,
     feature.vertices = geodetic2FromVertexList(_globe, vertices);
     feature.heights = heightMapHeightsFromGeodetic2List(_globe, feature.vertices);
 
-    ghoul_assert(_pointsProgram, "Shader program must be initialized");
-    ghoul_assert(_linesAndPolygonsProgram, "Shader program must be initialized");
+    assert_msg(_pointsProgram, "Shader program must be initialized");
+    assert_msg(_linesAndPolygonsProgram, "Shader program must be initialized");
 
-    ghoul::opengl::ProgramObject* program = _linesAndPolygonsProgram;
+    opengl::ProgramObject* program = _linesAndPolygonsProgram;
     if (feature.type == RenderType::Points) {
         program = _pointsProgram;
     }
@@ -844,8 +838,8 @@ std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() con
 }
 
 void GlobeGeometryFeature::bufferDynamicHeightData(const RenderFeature& feature) {
-    ghoul_assert(_pointsProgram, "Shader program must be initialized");
-    ghoul_assert(_linesAndPolygonsProgram, "Shader program must be initialized");
+    assert_msg(_pointsProgram, "Shader program must be initialized");
+    assert_msg(_linesAndPolygonsProgram, "Shader program must be initialized");
 
     glNamedBufferData(
         feature.heightVboId,

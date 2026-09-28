@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,7 +51,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul {
+namespace openspace {
 
 template <typename T>
 T interpolateLinear(double t, const T& p0, const T& p1) {
@@ -84,4 +83,4 @@ T interpolateCatmullRom(double t, const T& p0, const T& p1, const T& p2, const T
     }
 }
 
-} // namespace ghoul
+} // namespace openspace

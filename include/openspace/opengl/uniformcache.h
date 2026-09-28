@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -538,7 +537,7 @@ struct UniformCacheBase {};
         };                                                                               \
     }
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 /**
  * Function that will update the uniform locations of the \p uniformCache based on
@@ -586,7 +585,7 @@ void updateUniformLocations(const ProgramObject& program, T& uniformCache) {
     }
 }
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl
 
 
 // The EXPAND macro is a fix for MSVC's interpretation of the C++11 standard of VA_ARGS

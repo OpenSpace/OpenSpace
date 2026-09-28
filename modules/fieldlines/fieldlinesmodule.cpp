@@ -37,10 +37,10 @@ FieldlinesModule::FieldlinesModule()
     : OpenSpaceModule(Name)
 {}
 
-void FieldlinesModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+void FieldlinesModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    assert_msg(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableFieldlines>("RenderableFieldlines");
 }

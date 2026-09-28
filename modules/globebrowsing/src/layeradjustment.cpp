@@ -114,7 +114,7 @@ LayerAdjustment::LayerAdjustment()
     addVisibleProperties();
 }
 
-void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict) {
+void LayerAdjustment::setValuesFromDictionary(const Dictionary& adjustmentDict) {
     const Parameters p = codegen::bake<Parameters>(adjustmentDict);
 
     if (p.type.has_value()) {

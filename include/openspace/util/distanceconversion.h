@@ -171,7 +171,7 @@ constexpr DistanceUnit distanceUnitFromString(std::string_view unitName) {
         i++;
     }
 
-    throw ghoul::MissingCaseException();
+    throw MissingCaseException();
 }
 
 constexpr std::vector<std::string> distanceUnitList() {
@@ -259,7 +259,7 @@ constexpr double convertMeters(double meters, DistanceUnit requestedUnit) {
         case DistanceUnit::Yottameter:
             return meters / 1'000'000'000'000'000'000'000'000.0;
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 
@@ -332,7 +332,7 @@ constexpr double toMeter(DistanceUnit unit) {
         case DistanceUnit::Yottameter:
             return 1'000'000'000'000'000'000'000'000.0;
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 

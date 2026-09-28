@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +29,7 @@
 #include <string>
 #include <vector>
 
-namespace ghoul {
+namespace openspace {
 
 /**
  * Loads a comma-separated value (CSV) file from the provided \p fileName and returns all
@@ -66,7 +65,7 @@ std::vector<std::vector<std::string>> loadCSVFile(const std::filesystem::path& f
  *        otherwise it is ignored
  * \return A list of set of data values extracted from the CSV file
 
- * \throw ghoul::RuntimeError if one of the \p columns does not exist in the provided CSV
+ * \throw RuntimeError if one of the \p columns does not exist in the provided CSV
  * \pre fileName must not be empty
  * \pre columns must not be empty
  * \post `return.size() == columns.size()`
@@ -87,8 +86,8 @@ std::vector<std::vector<std::string>> loadCSVFile(const std::filesystem::path& f
  *        otherwise it is ignored
  * \return A list of set of data values extracted from the CSV file
 
- * \throw ghoul::RuntimeError if one of the indices is larger than the number of columns
- *        in the CSV file
+ * \throw RuntimeError if one of the indices is larger than the number of columns in the
+ *        CSV file
  * \pre fileName must not be empty
  * \pre columns must not be empty
  * \post `return.size() == columns.size()`
@@ -96,6 +95,6 @@ std::vector<std::vector<std::string>> loadCSVFile(const std::filesystem::path& f
 std::vector<std::vector<std::string>> loadCSVFile(const std::filesystem::path& fileName,
     const std::vector<int>& columns, bool includeFirstLine = false);
 
-} // namespace ghoul
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___CSVREADER___H__

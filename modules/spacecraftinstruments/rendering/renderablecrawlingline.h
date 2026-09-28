@@ -28,14 +28,14 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/glm.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <memory>
 
 namespace openspace {
 
 class RenderableCrawlingLine : public Renderable {
 public:
-    explicit RenderableCrawlingLine(const ghoul::Dictionary& dictionary);
+    explicit RenderableCrawlingLine(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -46,7 +46,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<opengl::ProgramObject> _program;
 
     std::string _instrumentName;
     std::string _source;

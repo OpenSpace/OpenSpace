@@ -48,11 +48,11 @@ StateMachineModule::StateMachineModule()
     : OpenSpaceModule(Name)
 {}
 
-void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
-                                                const ghoul::Dictionary& transitions,
+void StateMachineModule::initializeStateMachine(const Dictionary& states,
+                                                const Dictionary& transitions,
                                                 std::optional<std::string> startState)
 {
-    ghoul::Dictionary dictionary;
+    Dictionary dictionary;
     dictionary.setValue("States", states);
     dictionary.setValue("Transitions", transitions);
 

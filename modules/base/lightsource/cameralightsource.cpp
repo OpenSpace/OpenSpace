@@ -57,7 +57,7 @@ Documentation CameraLightSource::Documentation() {
     );
 }
 
-CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
+CameraLightSource::CameraLightSource(const Dictionary& dictionary)
     : LightSource(dictionary)
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
 {

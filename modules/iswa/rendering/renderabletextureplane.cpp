@@ -46,7 +46,7 @@ Documentation RenderableTexturePlane::Documentation() {
     );
 }
 
-RenderableTexturePlane::RenderableTexturePlane(const ghoul::Dictionary& dictionary)
+RenderableTexturePlane::RenderableTexturePlane(const Dictionary& dictionary)
     : RenderableTextureCygnet(dictionary)
 {}
 
@@ -68,7 +68,7 @@ void RenderableTexturePlane::deinitializeGL() {
 }
 
 void RenderableTexturePlane::setUniforms() {
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_textures[0]);
     _shader->setUniform("texture1", unit);
     _shader->setUniform("transparency", _alpha.value());

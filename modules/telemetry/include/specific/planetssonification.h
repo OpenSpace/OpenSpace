@@ -31,11 +31,11 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 
-namespace ghoul { class Dictionary; }
 namespace osc { struct Blob; }
 
 namespace openspace {
 
+class Dictionary;
 struct LuaLibrary;
 
 class PlanetsSonification : public TelemetryBase {
@@ -63,7 +63,7 @@ public:
      *
      * \param dict The planet that should be added
      */
-    void addPlanet(const ghoul::Dictionary& dict);
+    void addPlanet(const Dictionary& dict);
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the

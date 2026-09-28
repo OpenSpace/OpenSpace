@@ -52,7 +52,7 @@ Documentation MilkywayConversionTask::Documentation() {
     );
 }
 
-MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
+MilkywayConversionTask::MilkywayConversionTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _inFilenamePrefix = p.inFilenamePrefix;
     _inFilenameSuffix = p.inFilenameSuffix;

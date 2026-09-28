@@ -231,7 +231,7 @@ Documentation RenderableSphere::Documentation() {
     );
 }
 
-RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary,
+RenderableSphere::RenderableSphere(const Dictionary& dictionary,
                                    RenderableSettings settings)
     : Renderable(dictionary, std::move(settings))
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
@@ -343,7 +343,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary,
     // is set to false
     if (p.useColorMap.has_value()) {
         if (!p.colorMap.has_value()) {
-            throw ghoul::RuntimeError("No color map path was provided");
+            throw RuntimeError("No color map path was provided");
         }
         _useColorMap = *p.useColorMap;
     }
@@ -355,7 +355,7 @@ void RenderableSphere::initializeGL() {
 
     _shader = BaseModule::ProgramObjectManager.request(
         "Sphere",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "Sphere",
                 absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
@@ -364,7 +364,7 @@ void RenderableSphere::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 
     if (_useColorMap) {
         _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());
@@ -376,7 +376,7 @@ void RenderableSphere::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "Sphere",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -387,7 +387,7 @@ void RenderableSphere::deinitializeGL() {
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     const Orientation orientation = static_cast<Orientation>(_orientation.value());
 
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    using IgnoreError = opengl::ProgramObject::IgnoreError;
     _shader->activate();
     _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
@@ -467,7 +467,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    ghoul::opengl::TextureUnit transferFunctionUnit;
+    opengl::TextureUnit transferFunctionUnit;
     _shader->setUniform("usingTransferFunction", _useColorMap);
     _shader->setUniform("transferFunction", transferFunctionUnit);
     _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
@@ -478,7 +478,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);
     _shader->setUniform(_uniformCache.mirrorTexture, _mirrorTexture.value());
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     bindTexture(unit);
     defer{ unbindTexture(); };
     _shader->setUniform(_uniformCache.colorTexture, unit);
@@ -538,7 +538,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 void RenderableSphere::update(const UpdateData&) {
     if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+        opengl::updateUniformLocations(*_shader, _uniformCache);
     }
     if (!_transferFunction && std::filesystem::exists(_colorMap.value())) [[unlikely]] {
         _transferFunction = std::make_unique<TransferFunction>(_colorMap.value());

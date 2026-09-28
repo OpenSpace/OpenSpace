@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +24,7 @@
 
 #include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 template <bufferbinding::Buffer T>
 unsigned int BufferBinding<T>::_totalActive = 0;
@@ -129,4 +128,4 @@ void BufferBinding<T>::initialize() {
     _isInitialized = true;
 }
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl

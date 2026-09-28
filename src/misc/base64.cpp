@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +26,7 @@
 
 #include <array>
 
-namespace ghoul {
+namespace openspace {
 
 std::vector<uint8_t> decodeBase64(std::string_view base64) {
     // Implementation of this function based on:
@@ -99,4 +98,4 @@ std::vector<uint8_t> decodeBase64(std::string_view base64) {
     return ret;
 }
 
-} // namespace ghoul
+} // namespace openspace

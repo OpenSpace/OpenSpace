@@ -47,7 +47,7 @@
 #include <openspace/misc/profiling.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/openglstatecache.h>
 #include <openspace/opengl/programobject.h>
 #include <openspace/opengl/shaderobject.h>
@@ -481,7 +481,7 @@ RenderEngine::RenderEngine()
         FileSys.registerPathToken(
             "${SCREENSHOTS}",
             newFolder,
-            ghoul::filesystem::FileSystem::Override::Yes
+            filesystem::FileSystem::Override::Yes
         );
         global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
     });
@@ -509,7 +509,7 @@ RenderEngine::RenderEngine()
             FileSys.registerPathToken(
                 "${SCREENSHOTS}",
                 newFolder,
-                ghoul::filesystem::FileSystem::Override::Yes
+                filesystem::FileSystem::Override::Yes
             );
         }
         else {
@@ -518,7 +518,7 @@ RenderEngine::RenderEngine()
             FileSys.registerPathToken(
                 "${SCREENSHOTS}",
                 absPath("${STARTUP_SCREENSHOT}"),
-                ghoul::filesystem::FileSystem::Override::Yes
+                filesystem::FileSystem::Override::Yes
             );
         }
         global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
@@ -559,7 +559,7 @@ void RenderEngine::initialize() {
     _disableMasterRendering = global::configuration->isRenderingOnMasterDisabled;
     _screenshotUseDateTime = global::configuration->shouldUseScreenshotDateTime;
 
-    using namespace ghoul::io;
+    using namespace io;
     ModelReader::ref().addReader(std::make_unique<ModelReaderAssimp>());
     ModelReader::ref().addReader(std::make_unique<ModelReaderBinary>());
 }
@@ -591,7 +591,7 @@ void RenderEngine::initializeGL() {
 
     // Set horizontal FOV value with whatever the field of view (in degrees) is of the
     // initialized window
-    ghoul_assert(
+    assert_msg(
         global::windowDelegate->nWindows() == _windows.size(),
         "Invalid number of windows"
     );
@@ -614,7 +614,7 @@ void RenderEngine::initializeGL() {
         LINFO("Initializing Log");
         auto log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
         _log = log.get();
-        ghoul::logging::LogManager::ref().addLog(std::move(log));
+        logging::LogManager::ref().addLog(std::move(log));
     }
 
     LINFO("Finished initializing GL");
@@ -655,13 +655,13 @@ void RenderEngine::updateScene() {
 void RenderEngine::updateShaderPrograms() {
     ZoneScoped;
 
-    for (ghoul::opengl::ProgramObject* program : _programs) {
+    for (opengl::ProgramObject* program : _programs) {
         try {
             if (program->isDirty()) {
                 program->rebuildFromFile();
             }
         }
-        catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
+        catch (const opengl::ShaderObject::ShaderCompileError& e) {
             LERRORC(e.component, e.what());
         }
     }
@@ -675,11 +675,11 @@ void RenderEngine::updateRenderer() {
     if (windowResized) {
         _renderer.setResolution(renderingResolution());
 
-        using FR = ghoul::fontrendering::FontRenderer;
+        using FR = fontrendering::FontRenderer;
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
         // Override the aspect ratio property value to match that of resized window
-        ghoul_assert(
+        assert_msg(
             global::windowDelegate->nWindows() == _windows.size(),
             "Invalid number of windows"
         );
@@ -702,9 +702,9 @@ void RenderEngine::updateScreenSpaceRenderables() {
         }
         else {
             try {
-                _globalBlackout.imageTexture = ghoul::io::texture::loadTexture(path, 2);
+                _globalBlackout.imageTexture = io::texture::loadTexture(path, 2);
             }
-            catch (const ghoul::RuntimeError& e) {
+            catch (const RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -777,23 +777,23 @@ void RenderEngine::registerShadowCaster(const std::string& shadowGroup,
                                         SceneGraphNode* shadower,
                                         SceneGraphNode* shadowee)
 {
-    ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
-    ghoul_assert(lightSource, "No light source specified");
-    ghoul_assert(shadower, "No shadower specified");
-    ghoul_assert(shadowee, "No shadowee specified");
+    assert_msg(!shadowGroup.empty(), "No shadowGroup specified");
+    assert_msg(lightSource, "No light source specified");
+    assert_msg(shadower, "No shadower specified");
+    assert_msg(shadowee, "No shadowee specified");
 
     _renderer.registerShadowCaster(shadowGroup, lightSource, shadower);
 
     Shadower* sr = dynamic_cast<Shadower*>(shadower->renderable());
     if (!sr) {
-        throw ghoul::RuntimeError("Provided shadower scene graph node is not a shadower");
+        throw RuntimeError("Provided shadower scene graph node is not a shadower");
     }
     sr->setLightSource(lightSource);
     sr->setShadowGroup(shadowGroup);
 
     Shadowee* se = dynamic_cast<Shadowee*>(shadowee->renderable());
     if (!se) {
-        throw ghoul::RuntimeError("Provided shadowee scene graph node is not a shadowee");
+        throw RuntimeError("Provided shadowee scene graph node is not a shadowee");
     }
     se->addShadower(sr);
 }
@@ -802,20 +802,20 @@ void RenderEngine::removeShadowCaster(const std::string& shadowGroup,
                                       SceneGraphNode* shadower,
                                       SceneGraphNode* shadowee)
 {
-    ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
-    ghoul_assert(shadower, "No shadower specified");
-    ghoul_assert(shadowee, "No shadowee specified");
+    assert_msg(!shadowGroup.empty(), "No shadowGroup specified");
+    assert_msg(shadower, "No shadower specified");
+    assert_msg(shadowee, "No shadowee specified");
 
     _renderer.removeShadowCaster(shadowGroup, shadower);
 
     Shadower* sr = dynamic_cast<Shadower*>(shadower->renderable());
     if (!sr) {
-        throw ghoul::RuntimeError("Provided shadower scene graph node is not a shadower");
+        throw RuntimeError("Provided shadower scene graph node is not a shadower");
     }
 
     Shadowee* se = dynamic_cast<Shadowee*>(shadowee->renderable());
     if (!se) {
-        throw ghoul::RuntimeError("Provided shadowee scene graph node is not a shadowee");
+        throw RuntimeError("Provided shadowee scene graph node is not a shadowee");
     }
     se->removeShadower(sr);
 }
@@ -878,7 +878,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     if (renderingEnabled && !delegate.isGuiWindow()) {
         ZoneScopedN("Render ScreenSpace Renderable");
-        const ghoul::GLDebugGroup group("ScreenSpace Renderable");
+        const GLDebugGroup group("ScreenSpace Renderable");
 
         std::vector<ScreenSpaceRenderable*> ssrs;
         ssrs.reserve(global::screenSpaceRenderables->size());
@@ -1004,7 +1004,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
     // t = 1.f -> start of shutdown counter    t = 0.f -> timer has reached shutdown
     const float t = 1.f - (timer / fullTime);
-    const float eased = ghoul::circularEaseOut(t);
+    const float eased = circularEaseOut(t);
     rendering::renderBox(glm::vec2(0.f), glm::vec2(1.f), glm::vec4(0.f, 0.f, 0.f, eased));
 
     // No need to print the text if we are just about to finish since otherwise we'll be
@@ -1027,7 +1027,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         *_fontShutdown,
         penPosition,
         std::format(FirstLine, timer, fullTime),
-        ghoul::fontrendering::CrDirection::Down
+        fontrendering::CrDirection::Down
     );
     // Important: Length of this string is the same as the first line after value
     // expansion to make them visually align
@@ -1065,9 +1065,9 @@ void RenderEngine::setCamera(Camera* camera) {
     _camera = camera;
 }
 
-ghoul::opengl::OpenGLStateCache& RenderEngine::openglStateCache() {
+opengl::OpenGLStateCache& RenderEngine::openglStateCache() {
     if (_openglStateCache == nullptr) {
-        _openglStateCache = ghoul::opengl::OpenGLStateCache::instance();
+        _openglStateCache = opengl::OpenGLStateCache::instance();
     }
     return *_openglStateCache;
 }
@@ -1083,13 +1083,13 @@ bool RenderEngine::isHdrDisabled() const {
 /**
  * Build a program object for rendering with the used renderer.
  */
-std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
+std::unique_ptr<opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
                                                       const std::filesystem::path& vsPath,
                                                       const std::filesystem::path& fsPath,
-                                                                   ghoul::Dictionary data)
+                                                                          Dictionary data)
 {
-    ghoul::Dictionary dict = std::move(data);
+    Dictionary dict = std::move(data);
 
     // Set path to the current renderer's main fragment shader
     dict.setValue("rendererData", _rendererData);
@@ -1098,7 +1098,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // a void main() setting glFragColor, glFragDepth, etc
     dict.setValue("fragmentPath", fsPath);
 
-    using namespace ghoul::opengl;
+    using namespace opengl;
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         name,
         vsPath,
@@ -1115,14 +1115,14 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 /**
  * Build a program object for rendering with the used renderer.
  */
-std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
+std::unique_ptr<opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
                                                       const std::filesystem::path& vsPath,
                                                       const std::filesystem::path& fsPath,
                                                       const std::filesystem::path& csPath,
-                                                                   ghoul::Dictionary data)
+                                                                          Dictionary data)
 {
-    ghoul::Dictionary dict = std::move(data);
+    Dictionary dict = std::move(data);
     dict.setValue("rendererData", _rendererData);
 
     // Parameterize the main fragment shader program with specific contents. `fsPath`
@@ -1130,7 +1130,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // a void main() setting glFragColor, glFragDepth, etc
     dict.setValue("fragmentPath", fsPath);
 
-    using namespace ghoul::opengl;
+    using namespace opengl;
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         name,
         vsPath,
@@ -1145,7 +1145,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     return program;
 }
 
-void RenderEngine::removeRenderProgram(ghoul::opengl::ProgramObject* program) {
+void RenderEngine::removeRenderProgram(opengl::ProgramObject* program) {
     if (!program) {
         return;
     }
@@ -1156,19 +1156,19 @@ void RenderEngine::removeRenderProgram(ghoul::opengl::ProgramObject* program) {
     }
 }
 
-void RenderEngine::setRendererData(ghoul::Dictionary rendererData) {
+void RenderEngine::setRendererData(Dictionary rendererData) {
     _rendererData = std::move(rendererData);
-    for (ghoul::opengl::ProgramObject* program : _programs) {
-        ghoul::Dictionary dict = program->dictionary();
+    for (opengl::ProgramObject* program : _programs) {
+        Dictionary dict = program->dictionary();
         dict.setValue("rendererData", _rendererData);
         program->setDictionary(dict);
     }
 }
 
-void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
+void RenderEngine::setResolveData(Dictionary resolveData) {
     _resolveData = std::move(resolveData);
-    for (ghoul::opengl::ProgramObject* program : _programs) {
-        ghoul::Dictionary dict = program->dictionary();
+    for (opengl::ProgramObject* program : _programs) {
+        Dictionary dict = program->dictionary();
         dict.setValue("resolveData", _resolveData);
         program->setDictionary(dict);
     }
@@ -1312,7 +1312,7 @@ void RenderEngine::renderCameraInformation() {
 
     const OrbitalNavigator& nav = global::navigationHandler->orbitalNavigator();
 
-    using FR = ghoul::fontrendering::FontRenderer;
+    using FR = fontrendering::FontRenderer;
 
     _cameraButtonLocations.rotation = glm::ivec4(
         fontResolution().x - rotationBox.x - XSeparation,
@@ -1367,7 +1367,7 @@ void RenderEngine::renderVersionInformation() {
         return;
     }
 
-    using FR = ghoul::fontrendering::FontRenderer;
+    using FR = fontrendering::FontRenderer;
     glm::vec2 versionBox = glm::vec2(0.f, 0.f);
     if (OPENSPACE_IS_RELEASE_BUILD) {
         if (global::versionChecker->hasLatestVersionInfo()) {
@@ -1532,10 +1532,10 @@ void RenderEngine::renderScreenLog() {
         }
 
         {
-            glm::vec4 color = ghoul::toColor(it.level);
+            glm::vec4 color = toColor(it.level);
             color.a = alpha;
 
-            const std::string_view lvl = ghoul::to_string(it.level);
+            const std::string_view lvl = to_string(it.level);
             std::fill(buf.begin(), buf.end(), char(0));
             char* end = std::format_to(buf.data(), "({})", lvl);
             RenderFont(

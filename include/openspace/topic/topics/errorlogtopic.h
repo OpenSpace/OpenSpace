@@ -30,10 +30,9 @@
 #include <openspace/logging/loglevel.h>
 #include <optional>
 
-namespace ghoul::logging { class Log; }
-
 namespace openspace {
 
+namespace logging { class Log; }
 struct Schema;
 
 class ErrorLogTopic : public Topic {
@@ -59,7 +58,7 @@ private:
     std::optional<int> _dataCallbackHandle;
 
     /// Non-owning but we remove the log from LogManager on destruction
-    ghoul::logging::Log* _log = nullptr;
+    logging::Log* _log = nullptr;
     std::vector<nlohmann::json> _queuedMessages;
     std::mutex _queuedMessagesMutex;
 
@@ -68,7 +67,7 @@ private:
         bool isDateStamping = true;
         bool isCategoryStamping = true;
         bool isLogLevelStamping = true;
-        ghoul::logging::LogLevel logLevel = ghoul::logging::LogLevel::AllLogging;
+        logging::LogLevel logLevel = logging::LogLevel::AllLogging;
     } _logSettings;
 };
 

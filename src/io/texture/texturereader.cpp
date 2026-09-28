@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,8 +35,8 @@
 #include <utility>
 
 namespace {
-    using namespace ghoul;
-    using namespace ghoul::io::texture;
+    using namespace openspace;
+    using namespace openspace::io::texture;
 
     ImageInfo loadImageData(unsigned char* data, int x, int y, int n,
                             std::string_view message)
@@ -85,7 +84,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul::io::texture {
+namespace openspace::io::texture {
 
 MissingReaderException::MissingReaderException(std::string extension,
                                                std::filesystem::path file_)
@@ -116,13 +115,13 @@ InvalidLoadException::InvalidLoadException(void* memory, size_t size)
 {}
 
 ImageInfo loadImage(const std::filesystem::path& filename) {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
+    assert_msg(!filename.empty(), "Filename must not be empty");
 
     std::string extension = std::filesystem::path(filename).extension().string();
     if (!extension.empty()) {
         extension = extension.substr(1);
     }
-    ghoul_assert(!extension.empty(), "Filename must have an extension");
+    assert_msg(!extension.empty(), "Filename must have an extension");
 
     if (!isSupportedReadExtension(extension)) {
         throw MissingReaderException(extension, filename);
@@ -142,8 +141,8 @@ std::future<ImageInfo> loadImageAsync(const std::filesystem::path& filename) {
 }
 
 ImageInfo loadImage(void* memory, size_t size, const std::string& format) {
-    ghoul_assert(memory, "Memory must not be nullptr");
-    ghoul_assert(size > 0, "Size must be > 0");
+    assert_msg(memory, "Memory must not be nullptr");
+    assert_msg(size > 0, "Size must be > 0");
 
     if (!isSupportedReadExtension(format)) {
         throw InvalidLoadException(memory, size);
@@ -195,8 +194,8 @@ std::unique_ptr<opengl::Texture> loadTexture(const std::filesystem::path& filena
                                                                           int nDimensions,
                                              opengl::Texture::SamplerInit samplerSettings)
 {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
-    ghoul_assert(nDimensions >= 1 && nDimensions <= 3, "nDimensions must be 1, 2, or 3");
+    assert_msg(!filename.empty(), "Filename must not be empty");
+    assert_msg(nDimensions >= 1 && nDimensions <= 3, "nDimensions must be 1, 2, or 3");
 
     ImageInfo info = loadImage(filename);
     return loadTexture(info, nDimensions, std::move(samplerSettings));
@@ -215,7 +214,7 @@ ImageInfo imageInfo(const std::filesystem::path& filename) {
     if (!extension.empty()) {
         extension = extension.substr(1);
     }
-    ghoul_assert(!extension.empty(), "Filename must have an extension");
+    assert_msg(!extension.empty(), "Filename must have an extension");
 
     if (!isSupportedReadExtension(extension)) {
         throw MissingReaderException(extension, filename);
@@ -255,4 +254,4 @@ std::vector<std::string> supportedReadExtensions() {
     };
 }
 
-} // namespace ghoul::io::texture
+} // namespace openspace::io::texture

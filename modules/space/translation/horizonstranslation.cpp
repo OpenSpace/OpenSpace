@@ -30,7 +30,7 @@
 #include <openspace/filesystem/filesystem.h>
 #include <openspace/format.h>
 #include <openspace/logging/logmanager.h>
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/lua/lua_helper.h>
 #include <openspace/misc/dictionary.h>
 #include <openspace/misc/exception.h>
@@ -98,7 +98,7 @@ Documentation HorizonsTranslation::Documentation() {
     );
 }
 
-HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
+HorizonsTranslation::HorizonsTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
     , _horizonsFiles(HorizonsTextFileInfo)
 {
@@ -247,7 +247,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
 
     fileStream.read(reinterpret_cast<char*>(&nKeyframes), sizeof(int32_t));
     if (nKeyframes == 0) {
-        throw ghoul::RuntimeError("Error reading cache: No values were loaded");
+        throw RuntimeError("Error reading cache: No values were loaded");
     }
 
     // Read all data in one go
@@ -290,7 +290,7 @@ void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) cons
     // Write how many keyframes are to be written
     int32_t nKeyframes = static_cast<int32_t>(_timeline.nKeyframes());
     if (nKeyframes == 0) {
-        throw ghoul::RuntimeError("Error writing cache: No values were loaded");
+        throw RuntimeError("Error writing cache: No values were loaded");
     }
     fileStream.write(reinterpret_cast<const char*>(&nKeyframes), sizeof(int32_t));
 

@@ -147,7 +147,7 @@ Documentation DashboardItemAngle::Documentation() {
     );
 }
 
-DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
+DashboardItemAngle::DashboardItemAngle(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _source {
         .type = OptionProperty(SourceTypeInfo),

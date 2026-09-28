@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,7 +60,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul {
+namespace openspace {
 
 AssertionException::AssertionException(std::string exp, std::string msg,
                                        std::string file, std::string func, int line)
@@ -111,7 +110,7 @@ void internalAssert(std::string expression, std::string message, std::string fil
         std::cerr <<
             "(I)gnore / Ignore (P)ermanently / (A)ssertion / (S)tacktrace / (E)xit: ";
         std::string inputLine;
-        ghoul::getline(std::cin, inputLine);
+        openspace::getline(std::cin, inputLine);
         if (inputLine.empty()) {
             continue;
         }
@@ -155,4 +154,4 @@ void internalAssert(std::string expression, std::string message, std::string fil
     }
 }
 
-} // namespace ghoul
+} // namespace openspace

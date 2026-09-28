@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +39,7 @@ namespace pmr = std::pmr;
 
 #include <vector>
 
-namespace ghoul {
+namespace openspace {
 
 /**
  * This class represents a MemoryPool with a specific size from which individual memory
@@ -196,7 +195,7 @@ private:
     int _originalNBuckets;
 };
 
-} // namespace ghoul
+} // namespace openspace
 
 #include "memorypool.inl"
 

@@ -84,7 +84,7 @@ Documentation KameleonVolumeToRawTask::Documentation() {
     );
 }
 
-KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary) {
+KameleonVolumeToRawTask::KameleonVolumeToRawTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _inputPath = p.input;
@@ -171,7 +171,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
         time.pop_back();
     }
 
-    ghoul::Dictionary outputMetadata;
+    Dictionary outputMetadata;
     outputMetadata.setValue("Time", time);
     outputMetadata.setValue("Dimensions", glm::dvec3(_dimensions));
     outputMetadata.setValue("LowerDomainBound", glm::dvec3(_lowerDomainBound));
@@ -181,7 +181,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     outputMetadata.setValue("MaxValue", reader.maxValue(_variable));
     outputMetadata.setValue("VisUnit", reader.getVisUnit(_variable));
 
-    std::string metadataString = ghoul::formatLua(outputMetadata);
+    std::string metadataString = formatLua(outputMetadata);
 
     std::fstream f = std::fstream(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;

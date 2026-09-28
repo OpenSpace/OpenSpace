@@ -281,7 +281,7 @@ Documentation RenderableAtmosphere::Documentation() {
     );
 }
 
-RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
+RenderableAtmosphere::RenderableAtmosphere(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 99.f)
     , _groundAverageReflectance(AverageGroundReflectanceInfo, 0.f, 0.f, 1.f)

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +28,7 @@
 #include <algorithm>
 #include <cctype>
 
-namespace ghoul {
+namespace openspace {
 
 std::string toUpperCase(const std::string& s) {
     std::string t;
@@ -142,7 +141,7 @@ void trimSurroundingCharacters(std::string& valueString, const char charToRemove
 std::string replaceAll(std::string string, const std::string& from,
                        const std::string& to)
 {
-    ghoul_assert(!from.empty(), "from must not be the empty string");
+    assert_msg(!from.empty(), "from must not be the empty string");
 
     size_t pos = string.find(from);
     while (pos != std::string::npos) {
@@ -242,4 +241,4 @@ bool containsNonAscii(const std::filesystem::path& p) {
     return false;
 }
 
-} // namespace ghoul
+} // namespace openspace

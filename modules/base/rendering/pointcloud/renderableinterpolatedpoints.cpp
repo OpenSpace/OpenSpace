@@ -249,8 +249,7 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     addProperty(useSpline);
 }
 
-RenderableInterpolatedPoints::RenderableInterpolatedPoints(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableInterpolatedPoints::RenderableInterpolatedPoints(const Dictionary& dictionary)
     : RenderablePointCloud(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -334,7 +333,7 @@ void RenderableInterpolatedPoints::initializeShadersAndGlExtras() {
 void RenderableInterpolatedPoints::deinitializeShaders() {
     BaseModule::ProgramObjectManager.release(
         "RenderablePointCloud_Interpolated",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

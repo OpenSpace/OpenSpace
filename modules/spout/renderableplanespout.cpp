@@ -51,7 +51,7 @@ Documentation RenderablePlaneSpout::Documentation() {
     );
 }
 
-RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
+RenderablePlaneSpout::RenderablePlaneSpout(const Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _spoutReceiver(*this, dictionary)
 {
@@ -88,7 +88,7 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
     _spoutReceiver.updateReceiver();
 }
 
-void RenderablePlaneSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderablePlaneSpout::bindTexture(opengl::TextureUnit& unit) {
     if (_spoutReceiver.isReceiving()) {
         unit.bind(_spoutReceiver.spoutTexture());
     }

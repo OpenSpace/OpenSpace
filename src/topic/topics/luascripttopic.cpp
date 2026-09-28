@@ -37,6 +37,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "LuaScriptTopic";
 
     std::string formatLua(const nlohmann::json::const_iterator& it);
@@ -112,7 +114,7 @@ namespace {
         if (it->is_null()) {
             return "nil";
         }
-        throw ghoul::lua::LuaFormatException("Format error");
+        throw lua::LuaFormatException("Format error");
     }
 
     std::string generateScript(const std::string& function,
@@ -189,7 +191,7 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
 {
     ScriptEngine::Script::Callback callback;
     if (shouldReturn) {
-        callback = [this](const ghoul::Dictionary& data) {
+        callback = [this](const Dictionary& data) {
             if (_connection) {
                 sendData(data);
                 _waitingForReturnValue = false;

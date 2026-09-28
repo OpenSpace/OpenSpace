@@ -37,16 +37,16 @@ std::string_view DoubleProperty::className() const {
     return "DoubleProperty";
 }
 
-ghoul::lua::LuaTypes DoubleProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes DoubleProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void DoubleProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 double DoubleProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<double>(state);
+    return lua::value<double>(state);
 }
 
 std::string DoubleProperty::stringValue() const {

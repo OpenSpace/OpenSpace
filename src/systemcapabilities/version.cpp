@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +33,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul {
+namespace openspace {
     template <>
     std::string to_string(const systemcapabilities::Version& v) {
         if (v.release != 0) {
@@ -44,9 +43,9 @@ namespace ghoul {
             return std::format("{}.{}", v.major, v.minor);
         }
     }
-} // namespace ghoul
+} // namespace openspace
 
-namespace ghoul::systemcapabilities {
+namespace openspace::systemcapabilities {
 
 std::strong_ordering Version::operator<=>(const Version& rhs) const noexcept {
     const unsigned int numThis = packVersion(major, minor, release);
@@ -54,4 +53,4 @@ std::strong_ordering Version::operator<=>(const Version& rhs) const noexcept {
     return numThis <=> numRhs;
 }
 
-} // namespace ghoul::systemcapabilities
+} // namespace openspace::systemcapabilities

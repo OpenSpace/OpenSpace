@@ -109,7 +109,7 @@ int JoystickInputStates::numButtons(const std::string& joystickName) const {
 }
 
 float JoystickInputStates::axis(const std::string& joystickName, int axis) const {
-    ghoul_precondition(axis >= 0, "axis must be 0 or positive");
+    precondition(axis >= 0, "axis must be 0 or positive");
 
     if (joystickName.empty()) {
         const float res = std::accumulate(
@@ -141,7 +141,7 @@ float JoystickInputStates::axis(const std::string& joystickName, int axis) const
 bool JoystickInputStates::button(const std::string& joystickName, int button,
                                  JoystickAction action) const
 {
-    ghoul_precondition(button >= 0, "button must be 0 or positive");
+    precondition(button >= 0, "button must be 0 or positive");
 
     if (joystickName.empty()) {
         const bool res = std::any_of(

@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -38,7 +38,7 @@ namespace openspace {
 
 class RenderableSphericalGrid : public Renderable {
 public:
-    explicit RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphericalGrid(const Dictionary& dictionary);
     ~RenderableSphericalGrid() override = default;
 
     void initialize() override;
@@ -55,7 +55,7 @@ protected:
         float location[3];
     };
 
-    ghoul::opengl::ProgramObject* _gridProgram;
+    opengl::ProgramObject* _gridProgram;
 
     Vec3Property _color;
     IntProperty _longSegments;

@@ -104,7 +104,7 @@ Documentation DashboardItemInputState::Documentation() {
     );
 }
 
-DashboardItemInputState::DashboardItemInputState(const ghoul::Dictionary& dictionary)
+DashboardItemInputState::DashboardItemInputState(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _showWhenEnabled(ShowWhenEnabledInfo, true)
     , _showWhenDisabled(ShowWhenDisabledInfo, true)
@@ -173,7 +173,7 @@ void DashboardItemInputState::update() {
         }
     }
 
-    _buffer = ghoul::join(std::move(text), "\n");
+    _buffer = join(std::move(text), "\n");
 }
 
 } // namespace openspace

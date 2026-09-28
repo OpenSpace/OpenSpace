@@ -61,7 +61,7 @@ namespace {
     }
 
     bool importGetNextLine(ImportElement& elem, std::istringstream& iss) {
-        ghoul::getline(iss, elem.line);
+        openspace::getline(iss, elem.line);
         const bool ok = iss.good();
         if (!ok) {
             elem.line = "";

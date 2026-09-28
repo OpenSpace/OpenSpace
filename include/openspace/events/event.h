@@ -94,7 +94,7 @@ struct Event {
 
 template <typename T>
 T* asType(Event* e) {
-    ghoul_assert(e->type == T::Type, "Wrong type requested, check 'isType'");
+    assert_msg(e->type == T::Type, "Wrong type requested, check 'isType'");
     return static_cast<T*>(e);
 }
 
@@ -106,7 +106,7 @@ bool isType(Event* e) {
 std::string_view toString(Event::Type type);
 Event::Type fromString(std::string_view str);
 
-ghoul::Dictionary toParameter(const Event& e);
+Dictionary toParameter(const Event& e);
 
 void logAllEvents(const Event* e);
 

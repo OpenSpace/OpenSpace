@@ -40,8 +40,10 @@
 #include <vector>
 
 namespace {
+    using namespace openspace;
+
     bool startsWith(std::string lhs, std::string_view rhs) noexcept {
-        lhs = ghoul::toLowerCase(lhs);
+        lhs = toLowerCase(lhs);
         return (rhs.size() <= lhs.size()) && (lhs.substr(0, rhs.size()) == rhs);
     }
 
@@ -72,11 +74,11 @@ namespace {
 namespace openspace::dataloader::speck {
 
 Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> specs) {
-    ghoul_assert(std::filesystem::exists(path), "File must exist");
+    assert_msg(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format("Failed to open speck file '{}'", path));
+        throw RuntimeError(std::format("Failed to open speck file '{}'", path));
     }
 
     Dataset res;
@@ -86,7 +88,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 
     std::string line;
     // First phase: Loading the header information
-    while (ghoul::getline(file, line)) {
+    while (openspace::getline(file, line)) {
         currentLineNumber++;
 
         // Guard against wrong line endings (copying files between operating systems)
@@ -129,7 +131,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             // texturevar <idx>
             // where <idx> is the data value index where the texture index is stored
             if (res.textureDataIndex != -1) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error loading speck file '{}': Texturevar defined twice", path
                 ));
             }
@@ -148,7 +150,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             // starts. There are 6 values stored in total, xyz + uvw
 
             if (res.orientationDataIndex != -1) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error loading speck file '{}': Orientation index defined twice", path
                 ));
             }
@@ -176,7 +178,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             // 2:   texture 1 M1.sgi
             // The parameter in #1 is currently being ignored
 
-            std::vector<std::string> tokens = ghoul::tokenizeString(line, ' ');
+            std::vector<std::string> tokens = tokenizeString(line, ' ');
             int nNonEmptyTokens = static_cast<int>(std::count_if(
                 tokens.begin(),
                 tokens.end(),
@@ -184,7 +186,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             ));
 
             if (nNonEmptyTokens > 4) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error loading speck file {}: Too many arguments for texture on line "
                     "{}", path, currentLineNumber
                 ));
@@ -205,7 +207,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 
             for (const Dataset::Texture& t : res.textures) {
                 if (t.index == texture.index) {
-                    throw ghoul::RuntimeError(std::format(
+                    throw RuntimeError(std::format(
                         "Error loading speck file '{}': Texture index '{}' defined twice",
                         path, texture.index
                     ));
@@ -224,7 +226,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         // If we get this far, we had an illegal header as it wasn't an empty line and
         // didn't start with either '#' denoting a comment line, and didn't start with
         // either the 'datavar', 'texturevar', 'polyorivar', or 'texture' keywords
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error in line {} while reading the header information of file '{}'. Line is "
             "neither a comment line, nor starts with one of the supported keywords for "
             "SPECK files", currentLineNumber, path
@@ -246,9 +248,9 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
     );
 
     // For the first line, we already loaded it and rejected it above, so if we do another
-    // ghoul::getline, we'd miss the first data value line
+    // openspace::getline, we'd miss the first data value line
     bool isFirst = true;
-    while (isFirst || ghoul::getline(file, line)) {
+    while (isFirst || openspace::getline(file, line)) {
         currentLineNumber++;
         isFirst = false;
 
@@ -272,7 +274,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         // If the first character is a digit, we have left the preamble and are in the
         // data section of the file
         if (!std::isdigit(line[0]) && line[0] != '-') {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Error loading speck file '{}': Header information and datasegment "
                 "intermixed", path
             ));
@@ -296,7 +298,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         if (!str.good()) {
             // Need to subtract one of the line number here as we increase the current
             // line count in the beginning of the while loop we are currently in
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Error loading position information out of data line {} in file '{}'. "
                 "Value was not a number", currentLineNumber - 1, path
             ));
@@ -329,7 +331,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
                     // Need to subtract one of the line number here as we increase the
                     // current line count in the beginning of the while loop we are
                     // currently in
-                    throw ghoul::RuntimeError(std::format(
+                    throw RuntimeError(std::format(
                         "Error loading data value {} out of data line {} in file '{}'. "
                         "Value was not a number", i, currentLineNumber - 1, path
                     ));
@@ -342,7 +344,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         }
 
         std::string rest;
-        ghoul::getline(str, rest);
+        openspace::getline(str, rest);
         if (!rest.empty()) {
 
             strip(rest);
@@ -355,9 +357,9 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 #ifdef _DEBUG
     if (!res.entries.empty()) {
         size_t nValues = res.entries[0].data.size();
-        ghoul_assert(nDataValues == nValues, "nDataValues calculation went wrong");
+        assert_msg(nDataValues == nValues, "nDataValues calculation went wrong");
         for (const Dataset::Entry& e : res.entries) {
-            ghoul_assert(
+            assert_msg(
                 e.data.size() == nDataValues,
                 "Row had different number of data values"
             );
@@ -369,18 +371,18 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 }
 
 Labelset loadLabelFile(std::filesystem::path path) {
-    ghoul_assert(std::filesystem::exists(path), "File must exist");
+    assert_msg(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format("Failed to open dataset file '{}'", path));
+        throw RuntimeError(std::format("Failed to open dataset file '{}'", path));
     }
 
     Labelset res;
 
     std::string line;
     // First phase: Loading the header information
-    while (ghoul::getline(file, line)) {
+    while (openspace::getline(file, line)) {
         // Ignore empty line or commented-out lines
         if (line.empty() || line[0] == '#') {
             continue;
@@ -407,7 +409,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
             // really sure how these configuration files work, but they don't seem to be
             // included in the speck file)
             if (res.textColorIndex != -1) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error loading label file '{}': Textcolor defined twice", path
                 ));
             }
@@ -420,9 +422,9 @@ Labelset loadLabelFile(std::filesystem::path path) {
     }
 
     // For the first line, we already loaded it and rejected it above, so if we do another
-    // ghoul::getline, we'd miss the first data value line
+    // openspace::getline, we'd miss the first data value line
     bool isFirst = true;
-    while (isFirst || ghoul::getline(file, line)) {
+    while (isFirst || openspace::getline(file, line)) {
         isFirst = false;
 
         // Ignore empty line or commented-out lines
@@ -445,7 +447,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
         // If the first character is a digit, we have left the preamble and are in the
         // data section of the file
         if (!std::isdigit(line[0]) && line[0] != '-') {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Error loading label file '{}': Header information and datasegment "
                 "intermixed", path
             ));
@@ -460,7 +462,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
         str >> entry.position.x >> entry.position.y >> entry.position.z;
 
         std::string rest;
-        ghoul::getline(str, rest);
+        openspace::getline(str, rest);
         strip(rest);
 
         if (startsWith(rest, "id")) {
@@ -474,7 +476,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
             rest = rest.substr(index);
         }
         if (!startsWith(rest, "text")) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Error loading label file '{}': File contains an unsupported value "
                 "between positions and text label", path
             ));

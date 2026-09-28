@@ -249,7 +249,7 @@ Documentation RenderableVectorField::Documentation() {
     );
 }
 
-RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)
+RenderableVectorField::ColorSettings::ColorSettings(const Dictionary& dictionary)
     : PropertyOwner({ "Coloring", "Coloring" })
     , colorModeOption(ColorModeInfo)
     , colorMap(ColorMapInfo)
@@ -302,7 +302,7 @@ RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dic
     }
 }
 
-RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary)
+RenderableVectorField::RenderableVectorField(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorSettings(dictionary)
     , _stride(StrideInfo, 1, 1, 16)
@@ -314,12 +314,12 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     if (p.mode == Parameters::Mode::Volume && !p.volume.has_value()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "When selecting the `Volume` mode, a `Volume` table must be specified."
         );
     }
     if (p.mode == Parameters::Mode::Sparse && !p.sparse.has_value()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "When selecting the `Sparse` mode, a `Sparse` table must be specified."
         );
     }
@@ -389,9 +389,7 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     // Subscribe to changes in the Lua script file
     _luaScriptFile.onChange([this]() {
         _vectorFieldIsDirty = true;
-        _luaScriptFileHandle = std::make_unique<ghoul::filesystem::File>(
-            _luaScriptFile.value()
-        );
+        _luaScriptFileHandle = std::make_unique<filesystem::File>(_luaScriptFile.value());
         _luaScriptFileHandle->setCallback([this]() {
             _vectorFieldIsDirty = true;
         });
@@ -408,7 +406,7 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
 void RenderableVectorField::initialize() {
     std::filesystem::path dataFile = absPath(_sourceFile);
     if (!std::filesystem::is_regular_file(dataFile)) {
-        throw ghoul::RuntimeError(std::format("Could not load data file '{}'", dataFile));
+        throw RuntimeError(std::format("Could not load data file '{}'", dataFile));
     }
 
     switch (_mode) {
@@ -421,7 +419,7 @@ void RenderableVectorField::initialize() {
             computeSparseFieldLines();
             break;
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 
     applyLuaFilter();
@@ -479,7 +477,7 @@ void RenderableVectorField::initializeGL() {
     );
     glVertexArrayAttribBinding(_vao, magAttribLocation, 0);
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 }
 
 void RenderableVectorField::deinitializeGL() {
@@ -512,7 +510,7 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.fixedColor, _colorSettings.fixedColor);
     _program->setUniform(_uniformCache.magDomain, _colorSettings.colorMagnitudeDomain);
 
-    ghoul::opengl::TextureUnit colorUnit;
+    opengl::TextureUnit colorUnit;
     if (_colorTexture) {
         colorUnit.bind(*_colorTexture);
         _program->setUniform(_uniformCache.colorTexture, colorUnit);
@@ -535,7 +533,7 @@ void RenderableVectorField::update(const UpdateData&) {
                 computeSparseFieldLines();
                 break;
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
         applyLuaFilter();
 
@@ -548,7 +546,7 @@ void RenderableVectorField::update(const UpdateData&) {
 
         if (_program->isDirty()) [[unlikely]] {
             _program->rebuildFromFile();
-            ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+            opengl::updateUniformLocations(*_program, _uniformCache);
         }
 
         _vectorFieldIsDirty = false;
@@ -560,9 +558,9 @@ void RenderableVectorField::update(const UpdateData&) {
         if (!_colorSettings.colorMap.value().empty()) {
             _colorTexture = dataloader::colormap::loadColorMapTexture(
                 absPath(_colorSettings.colorMap),
-                ghoul::opengl::Texture::SamplerInit {
-                    .filter = ghoul::opengl::Texture::FilterMode::Nearest,
-                    .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                opengl::Texture::SamplerInit {
+                    .filter = opengl::Texture::FilterMode::Nearest,
+                    .wrapping = opengl::Texture::WrappingMode::ClampToEdge
                 }
             );
 
@@ -587,7 +585,7 @@ void RenderableVectorField::applyLuaFilter() {
     }
 
     // Load the Lua script
-    ghoul::lua::runScriptFile(_state, path);
+    lua::runScriptFile(_state, path);
     // Check if a filter function was provided
     lua_getglobal(_state, "filter");
     const bool isFunction = lua_isfunction(_state, -1);
@@ -604,9 +602,9 @@ void RenderableVectorField::applyLuaFilter() {
                 // Get the filter function
                 lua_getglobal(state, "filter");
                 // First argument (x,y,z) is the averaged position of the arrow
-                ghoul::lua::push(state, i.position);
+                lua::push(state, i.position);
                 // Second argument (vx, vy, vz) is the averaged direction vector
-                ghoul::lua::push(state, i.direction);
+                lua::push(state, i.direction);
 
                 const int success = lua_pcall(state, 2, 1, 0);
 
@@ -616,7 +614,7 @@ void RenderableVectorField::applyLuaFilter() {
                     ));
                 }
 
-                const bool shouldBeKept = ghoul::lua::value<bool>(state);
+                const bool shouldBeKept = lua::value<bool>(state);
                 return !shouldBeKept;
             }
         ),
@@ -714,7 +712,7 @@ void RenderableVectorField::computeVolumeFieldLines() {
     setBoundingSphere(computeBoundingSphere(_volume.minDomain, _volume.maxDomain));
 
     if (_instances.empty()) {
-        throw ghoul::RuntimeError("Couldn't compute vector field segments");
+        throw RuntimeError("Couldn't compute vector field segments");
     }
 }
 
@@ -765,7 +763,7 @@ void RenderableVectorField::computeSparseFieldLines() {
     setBoundingSphere(computeBoundingSphere(minDomain, maxDomain));
 
     if (_instances.empty()) {
-        throw ghoul::RuntimeError("Couldn't compute vector field segments");
+        throw RuntimeError("Couldn't compute vector field segments");
     }
 }
 
@@ -788,9 +786,9 @@ void RenderableVectorField::loadVolumeData(const std::filesystem::path& path) {
 }
 
 void RenderableVectorField::loadCSVData(const std::filesystem::path& path) {
-    std::vector<std::vector<std::string>> rows = ghoul::loadCSVFile(path, true);
+    std::vector<std::vector<std::string>> rows = loadCSVFile(path, true);
     if (rows.size() < 2) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error loading data file '{}'. No data items read", path
         ));
     }
@@ -831,7 +829,7 @@ void RenderableVectorField::loadCSVData(const std::filesystem::path& path) {
     if (!xColumn.has_value() || !yColumn.has_value() || !zColumn.has_value() ||
         !vxColumn.has_value() || !vyColumn.has_value() || !vzColumn.has_value())
     {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error loading data file '{}'. Missing position or direction column", path
         ));
     }

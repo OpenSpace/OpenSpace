@@ -145,7 +145,7 @@ namespace {
             case FrametimeType::FPSAvg:
                 return formatAverageFps(buffer);
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }
 
@@ -194,7 +194,7 @@ Documentation DashboardItemFramerate::Documentation() {
     );
 }
 
-DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
+DashboardItemFramerate::DashboardItemFramerate(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _frametimeType(FrametimeInfo)
     , _clearCache(ClearCacheInfo)

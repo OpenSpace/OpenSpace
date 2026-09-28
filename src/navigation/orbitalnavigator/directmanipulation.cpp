@@ -66,7 +66,7 @@ namespace {
         int nDOF = 0;
         const Camera* camera = nullptr;
         const SceneGraphNode* node = nullptr;
-        ghoul::LMstat stats;
+        LMstat stats;
     };
 
     /**
@@ -85,18 +85,18 @@ namespace {
     DirectManipulation::VelocityStates parseCameraParameterList(std::vector<double>& par,
                                                                 int nDof)
     {
-        ghoul_assert(par.size() >= 2, "There should be at least 2 camera parameters");
+        assert_msg(par.size() >= 2, "There should be at least 2 camera parameters");
 
         DirectManipulation::VelocityStates result;
         result.orbit = glm::dvec2(par[0], par[1]);
 
         if (nDof > 2) {
-            ghoul_assert(par.size() >= 4, "There should be at least 4 camera parameters");
+            assert_msg(par.size() >= 4, "There should be at least 4 camera parameters");
             result.zoom = par[2];
             result.roll = par[3];
 
             if (nDof > 4) {
-                ghoul_assert(par.size() == 6, "There should be 6 camera parameters");
+                assert_msg(par.size() == 6, "There should be 6 camera parameters");
                 result.roll = 0.0;
                 result.pan = glm::dvec2(par[4], par[5]);
             }
@@ -128,7 +128,7 @@ namespace {
      * optimization to find camera parameters that keep touch points stationary on the
      * object's surface.
      */
-    double distToMinimize(double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
+    double distToMinimize(double* par, int x, void* fdata, LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
 
         // Apply transform to camera and find the screen point of the updated camera state
@@ -166,7 +166,7 @@ namespace {
     /**
      * Gradient of distToMinimize w.r.t `par` (using forward difference).
      */
-    void gradient(double* g, double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
+    void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
         double f0 = distToMinimize(par, x, fdata, lmstat);
         // Scale value to find minimum step size h, dependent on planet size
@@ -325,7 +325,7 @@ DirectManipulation::DirectManipulation()
     _defaultRenderableTypes.onChange([this]() {
         _sortedDefaultRenderableTypes.clear();
         for (const std::string& s : _defaultRenderableTypes.value()) {
-            ghoul::TemplateFactory<Renderable>* fRenderable =
+            TemplateFactory<Renderable>* fRenderable =
                 FactoryManager::ref().factory<Renderable>();
 
             if (!fRenderable->hasClass(s)) {
@@ -344,7 +344,7 @@ DirectManipulation::DirectManipulation()
     global::callback::touchDetected->emplace_back(
         [this](TouchInput input) {
             const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
-            ghoul_assert(anchor != nullptr, "Must have an anchor");
+            assert_msg(anchor != nullptr, "Must have an anchor");
 
             std::optional<glm::dvec3> sp = computeSurfacePoint(input.pos, anchor);
             bool isValid = sp.has_value();
@@ -385,7 +385,7 @@ void DirectManipulation::updateCameraFromInput() {
         global::interactionHandler->touchInputState().touchPoints();
 
     const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
-    ghoul_assert(anchor != nullptr, "Must have an anchor");
+    assert_msg(anchor != nullptr, "Must have an anchor");
 
     std::vector<TouchPoint> touchPoints;
     touchPoints.reserve(touchInputs.size());
@@ -552,8 +552,8 @@ CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& ve
                                                         const Camera* camera,
                                                         const SceneGraphNode* anchor)
 {
-    ghoul_assert(camera != nullptr, "Camera must not be null");
-    ghoul_assert(anchor != nullptr, "Anchor node must not be null");
+    assert_msg(camera != nullptr, "Camera must not be null");
+    assert_msg(anchor != nullptr, "Anchor node must not be null");
 
     const glm::dvec3 anchorPos = anchor->worldPosition();
 
@@ -598,7 +598,7 @@ CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& ve
         const glm::dvec3 lookUpWhenFacingCenter = rot.globalRotation *
             camera->lookUpVectorCameraSpace();
 
-        rot.globalRotation = ghoul::lookAtQuaternion(
+        rot.globalRotation = lookAtQuaternion(
             glm::dvec3(0.0),
             newPositionToCenter,
             lookUpWhenFacingCenter
@@ -662,13 +662,13 @@ DirectManipulation::solveVelocitiesFromTouchPoints(
 {
     ZoneScopedN("Direct touch input solver");
 
-    ghoul_assert(
+    assert_msg(
         _selectedNodeSurfacePoints.size() >= touchPoints.size(),
         "Number of touch inputs must match the number of 'selected bodies'"
     );
 
     // Initialize LM solver
-    ghoul::LMstat lmStat;
+    LMstat lmStat;
     initializeLevmarqStats(&lmStat);
 
     int nFingers = std::min(static_cast<int>(touchPoints.size()), 3);
@@ -699,7 +699,7 @@ DirectManipulation::solveVelocitiesFromTouchPoints(
     // Find best transform values for the new camera state and store them in parameters
     std::vector<double> param(6, 0.0);
 
-    bool lmSuccess = ghoul::levmarq(
+    bool lmSuccess = levmarq(
         nDof,
         param.data(),
         static_cast<int>(screenPoints.size()),

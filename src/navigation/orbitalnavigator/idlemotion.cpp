@@ -178,7 +178,7 @@ IdleMotion::IdleMotion()
     });
     addProperty(_dampenInterpolationTime);
 
-    _dampenInterpolator.setTransferFunction(ghoul::quadraticEaseInOut<double>);
+    _dampenInterpolator.setTransferFunction(quadraticEaseInOut<double>);
 }
 
 void IdleMotion::resetIdleMotionOnCamera() {
@@ -254,7 +254,7 @@ void IdleMotion::apply(const SceneGraphNode* anchor, double deltaTime, double sp
             break;
         }
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 
@@ -275,7 +275,7 @@ void IdleMotion::triggerIdleMotion(std::string_view motionKey) {
             motion = IdleMotion::Motion::OrbitAroundUpVector;
         }
         else {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "No existing IdleMotion with identifier '{}'", motionKey
             ));
         }
@@ -288,7 +288,7 @@ void IdleMotion::triggerIdleMotion(std::string_view motionKey) {
 void IdleMotion::orbitAnchor(const SceneGraphNode* anchor, double angle,
                              glm::dvec3& position, glm::dquat& globalRotation)
 {
-    ghoul_assert(anchor != nullptr, "Node to orbit must be set");
+    assert_msg(anchor != nullptr, "Node to orbit must be set");
 
     // Apply a rotation to the right, in camera space
     const glm::dvec3 eulerAngles = glm::dvec3(0.0, -1.0, 0.0) * angle;
@@ -310,7 +310,7 @@ void IdleMotion::orbitAroundAxis(const SceneGraphNode* anchor, const glm::dvec3&
                                  double angle, glm::dvec3& position,
                                  glm::dquat& globalRotation)
 {
-    ghoul_assert(anchor != nullptr, "Node to orbit must be set");
+    assert_msg(anchor != nullptr, "Node to orbit must be set");
 
     if (std::abs(angle) < AngleEpsilon) {
         return;

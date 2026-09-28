@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +28,7 @@
 #include <limits>
 #include <utility>
 
-namespace ghoul::io {
+namespace openspace::io {
 
 ModelAnimation::ModelAnimation(std::string name, double duration)
     : _name(std::move(name))
@@ -215,4 +214,4 @@ float ModelAnimation::timeScale() const {
     return _timeScale;
 }
 
-} // namespace ghoul::io
+} // namespace openspace::io

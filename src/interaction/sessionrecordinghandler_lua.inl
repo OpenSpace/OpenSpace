@@ -51,11 +51,11 @@ namespace {
                                         std::optional<bool> overwrite)
 {
     if (recordFilePath.empty()) {
-        throw ghoul::lua::LuaError("Filepath string is empty");
+        throw lua::LuaError("Filepath string is empty");
     }
 
     if (dataMode != "Ascii" && dataMode != "Binary") {
-        throw ghoul::lua::LuaError(std::format("Invalid data mode {}", dataMode));
+        throw lua::LuaError(std::format("Invalid data mode {}", dataMode));
     }
 
     global::sessionRecordingHandler->stopRecording(
@@ -77,11 +77,11 @@ namespace {
                                         std::optional<int> screenshotFps = std::nullopt)
 {
     if (file.empty()) {
-        throw ghoul::lua::LuaError("Filepath string is empty");
+        throw lua::LuaError("Filepath string is empty");
     }
 
     if (!std::filesystem::is_regular_file(file)) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Cannot find the specified playback file '{}'", file
         ));
     }

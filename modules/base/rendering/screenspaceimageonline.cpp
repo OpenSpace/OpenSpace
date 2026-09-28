@@ -70,7 +70,7 @@ Documentation ScreenSpaceImageOnline::Documentation() {
     );
 }
 
-ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
+ScreenSpaceImageOnline::ScreenSpaceImageOnline(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _textureIsDirty(false)
     , _texturePath(TextureInfo)
@@ -118,14 +118,14 @@ void ScreenSpaceImageOnline::update() {
         }
 
         try {
-            _texture = ghoul::io::texture::loadTexture(
+            _texture = io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
-                ghoul::opengl::Texture::SamplerInit{
+                opengl::Texture::SamplerInit{
                     // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-                    //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                    //.filter = opengl::Texture::FilterMode::AnisotropicMipMap,
+                    .filter = opengl::Texture::FilterMode::LinearMipMap
                 },
                 imageFile.format
             );
@@ -133,7 +133,7 @@ void ScreenSpaceImageOnline::update() {
             _objectSize = _texture->dimensions();
             _textureIsDirty = false;
         }
-        catch (const ghoul::io::texture::InvalidLoadException& e) {
+        catch (const io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }
@@ -156,7 +156,7 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
     );
 }
 
-void ScreenSpaceImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceImageOnline::bindTexture(opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
         unit.bind(*_texture);
     }

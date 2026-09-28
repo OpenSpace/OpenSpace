@@ -43,16 +43,16 @@ std::string_view DVec4Property::className() const {
     return "DVec4Property";
 }
 
-ghoul::lua::LuaTypes DVec4Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes DVec4Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void DVec4Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::dvec4 DVec4Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::dvec4>(state);
+    return lua::value<glm::dvec4>(state);
 }
 
 std::string DVec4Property::stringValue() const {

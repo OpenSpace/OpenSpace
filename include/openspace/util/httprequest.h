@@ -120,7 +120,7 @@ public:
      * \pre \p url must not be empty
      */
     explicit HttpRequest(std::string url,
-        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
+        logging::LogLevel failureVerbosity = logging::LogLevel::Error);
 
     /**
      * Registers a callback that will be called when the header for the request has been
@@ -193,7 +193,7 @@ private:
     std::string _url;
 
     /// The verbosity of the log message that is used if the download fails
-    const ghoul::logging::LogLevel _failureVerbosity;
+    const logging::LogLevel _failureVerbosity;
 };
 
 /**
@@ -217,7 +217,7 @@ public:
      * \pre \p url must not be empty
      */
     explicit HttpDownload(std::string url,
-        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
+        logging::LogLevel failureVerbosity = logging::LogLevel::Error);
 
     /**
      * Virtual destructor that will cancel the ongoing download and block until the
@@ -377,7 +377,7 @@ public:
      */
     HttpFileDownload(std::string url, std::filesystem::path destinationPath,
         Overwrite overwrite = Overwrite::No,
-        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
+        logging::LogLevel failureVerbosity = logging::LogLevel::Error);
 
     /**
      * This destructor will cancel any ongoing download and wait for its completion, so it
@@ -453,7 +453,7 @@ public:
      * \param failureVerbosity The level at which error should be logged if they appear
      */
     explicit HttpMemoryDownload(std::string url,
-        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
+        logging::LogLevel failureVerbosity = logging::LogLevel::Error);
 
     /**
      * This destructor will cancel any ongoing download and wait for its completion, so it

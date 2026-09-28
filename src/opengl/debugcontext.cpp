@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +27,8 @@
 #include <utility>
 
 namespace {
-    using namespace ghoul;
-    using namespace ghoul::opengl;
+    using namespace openspace;
+    using namespace openspace::opengl;
 
     void internalCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei,
                           const GLchar* message, const GLvoid* userParam)
@@ -39,7 +38,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 void setDebugOutput(DebugOutput debug, SynchronousOutput synchronous) {
     if (debug) {
@@ -72,8 +71,8 @@ void setDebugMessageControl(Source source, Type type, Severity severity, Enabled
 void setDebugMessageControl(Source source, Type type,
                             const std::vector<unsigned int>& identifiers, Enabled enabled)
 {
-    ghoul_assert(source != Source::DontCare, "source must not be Source::Dontcare");
-    ghoul_assert(type != Type::DontCare, "type must not be Type::Dontcare");
+    assert_msg(source != Source::DontCare, "source must not be Source::Dontcare");
+    assert_msg(type != Type::DontCare, "type must not be Type::Dontcare");
 
     static_assert(
         std::is_same_v<unsigned int, GLuint>,
@@ -100,4 +99,4 @@ void setDebugCallback(CallbackFunction callback) {
     glDebugMessageCallback(internalCallback, &storage);
 }
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl

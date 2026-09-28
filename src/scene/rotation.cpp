@@ -46,8 +46,7 @@ namespace {
 
         // The time frame in which this `Rotation` is applied. If the in-game time is
         // outside this range, no rotation will be applied.
-        std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_timeframe")]];
+        std::optional<Dictionary> timeFrame [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "rotation_codegen.cpp"
@@ -58,9 +57,7 @@ Documentation Rotation::Documentation() {
     return codegen::doc<Parameters>("core_rotation");
 }
 
-ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
-{
+mm_unique_ptr<Rotation> Rotation::createFromDictionary(const Dictionary& dictionary) {
     ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -71,10 +68,10 @@ ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
         &global::memoryManager->PersistentMemory
     );
     result->_type = p.type;
-    return ghoul::mm_unique_ptr<Rotation>(result);
+    return mm_unique_ptr<Rotation>(result);
 }
 
-Rotation::Rotation(const ghoul::Dictionary& dictionary)
+Rotation::Rotation(const Dictionary& dictionary)
     : PropertyOwner({ "Rotation" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

@@ -36,8 +36,7 @@ namespace {
  * documentation for details. The optional thrid argument is the identifier of the desired
  * initial state. If left out, the first state in the list will be used.
  */
-[[codegen::luawrap]] void createStateMachine(ghoul::Dictionary states,
-                                             ghoul::Dictionary transitions,
+[[codegen::luawrap]] void createStateMachine(Dictionary states, Dictionary transitions,
                                              std::optional<std::string> startState)
 {
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
@@ -118,8 +117,7 @@ namespace {
             "StateMachine",
             std::format(
                 "Currently in state: '{}'. Can transition to states: [ {} ]",
-                currentState,
-                ghoul::join(transitions, ",")
+                currentState, join(transitions, ",")
             )
         );
     }

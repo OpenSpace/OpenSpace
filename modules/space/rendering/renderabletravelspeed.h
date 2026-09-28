@@ -39,7 +39,7 @@ class SceneGraphNode;
 
 class RenderableTravelSpeed : public Renderable {
 public:
-    explicit RenderableTravelSpeed(const ghoul::Dictionary& dictionary);
+    explicit RenderableTravelSpeed(const Dictionary& dictionary);
 
     static openspace::Documentation Documentation();
     void initializeGL() override;
@@ -69,7 +69,7 @@ private:
     double _arrivalTime = -1.0;
     double _timeSinceStart = -1.0;
 
-    ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
+    opengl::ProgramObject* _shaderProgram = nullptr;
     // The vertex attribute location for position must correlate to layout location in
     // vertex shader
     GLuint _vao = 0;

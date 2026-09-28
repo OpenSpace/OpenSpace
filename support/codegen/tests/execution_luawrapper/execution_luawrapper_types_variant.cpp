@@ -32,7 +32,7 @@
 #include <array>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     [[codegen::luawrap]] void funcVariantBool(std::variant<bool, int> arg) {
@@ -88,7 +88,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncVariantBool;
+    LuaLibrary::Function func = codegen::lua::FuncVariantBool;
     CHECK(func.name == "funcVariantBool");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -99,7 +99,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, true);
+    lua::push(state, true);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -110,7 +110,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncVariantInt;
+    LuaLibrary::Function func = codegen::lua::FuncVariantInt;
     CHECK(func.name == "funcVariantInt");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -121,7 +121,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, 2);
+    lua::push(state, 2);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -132,7 +132,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncVariantDoubleDvec3StringDouble;
+    LuaLibrary::Function func = codegen::lua::FuncVariantDoubleDvec3StringDouble;
     CHECK(func.name == "funcVariantDoubleDvec3StringDouble");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -143,7 +143,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, 2.2);
+    lua::push(state, 2.2);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -154,7 +154,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncVariantDoubleDvec3StringDvec3;
+    LuaLibrary::Function func = codegen::lua::FuncVariantDoubleDvec3StringDvec3;
     CHECK(func.name == "funcVariantDoubleDvec3StringDvec3");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -165,7 +165,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, glm::dvec3(1.1, 2.2, 3.3));
+    lua::push(state, glm::dvec3(1.1, 2.2, 3.3));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -178,7 +178,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncVariantDoubleDvec3StringString;
+    LuaLibrary::Function func = codegen::lua::FuncVariantDoubleDvec3StringString;
     CHECK(func.name == "funcVariantDoubleDvec3StringString");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -189,7 +189,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, "abc"s);
+    lua::push(state, "abc"s);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -200,7 +200,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnVariantBoolIntBool;
+    LuaLibrary::Function func = codegen::lua::ReturnVariantBoolIntBool;
     CHECK(func.name == "returnVariantBoolIntBool");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Boolean | Integer");
@@ -211,7 +211,7 @@ TEST_CASE(
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::variant<bool, int> val = ghoul::lua::value<std::variant<bool, int>>(state);
+    std::variant<bool, int> val = lua::value<std::variant<bool, int>>(state);
     REQUIRE(std::holds_alternative<bool>(val));
     CHECK(std::get<bool>(val) == true);
     lua_close(state);
@@ -222,7 +222,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnVariantBoolIntInt;
+    LuaLibrary::Function func = codegen::lua::ReturnVariantBoolIntInt;
     CHECK(func.name == "returnVariantBoolIntInt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Boolean | Integer");
@@ -233,7 +233,7 @@ TEST_CASE(
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::variant<bool, int> val = ghoul::lua::value<std::variant<bool, int>>(state);
+    std::variant<bool, int> val = lua::value<std::variant<bool, int>>(state);
     REQUIRE(std::holds_alternative<int>(val));
     CHECK(std::get<int>(val) == 1);
     lua_close(state);
@@ -244,7 +244,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnVariantDvec3FloatStringDouble;
+    LuaLibrary::Function func = codegen::lua::ReturnVariantDvec3FloatStringDouble;
     CHECK(func.name == "returnVariantDvec3FloatStringDouble");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Number | vec3 | String");
@@ -256,7 +256,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     std::variant<double, glm::dvec3, std::string> val =
-        ghoul::lua::value<std::variant<double, glm::dvec3, std::string>>(state);
+        lua::value<std::variant<double, glm::dvec3, std::string>>(state);
     REQUIRE(std::holds_alternative<double>(val));
     CHECK(std::get<double>(val) == 1.1);
     lua_close(state);
@@ -267,7 +267,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnVariantDvec3FloatStringDvec3;
+    LuaLibrary::Function func = codegen::lua::ReturnVariantDvec3FloatStringDvec3;
     CHECK(func.name == "returnVariantDvec3FloatStringDvec3");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Number | vec3 | String");
@@ -279,7 +279,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     std::variant<double, glm::dvec3, std::string> val =
-        ghoul::lua::value<std::variant<double, glm::dvec3, std::string>>(state);
+        lua::value<std::variant<double, glm::dvec3, std::string>>(state);
     REQUIRE(std::holds_alternative<glm::dvec3>(val));
     CHECK(std::get<glm::dvec3>(val) == glm::dvec3(1.1, 2.2, 3.3));
     lua_close(state);
@@ -290,7 +290,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnVariantDvec3FloatStringString;
+    LuaLibrary::Function func = codegen::lua::ReturnVariantDvec3FloatStringString;
     CHECK(func.name == "returnVariantDvec3FloatStringString");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Number | vec3 | String");
@@ -302,7 +302,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     std::variant<double, glm::dvec3, std::string> val =
-        ghoul::lua::value<std::variant<double, glm::dvec3, std::string>>(state);
+        lua::value<std::variant<double, glm::dvec3, std::string>>(state);
     REQUIRE(std::holds_alternative<std::string>(val));
     CHECK(std::get<std::string>(val) == "abc");
     lua_close(state);

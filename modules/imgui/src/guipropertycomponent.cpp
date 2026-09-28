@@ -281,7 +281,7 @@ void GuiPropertyComponent::render() {
 
     if (_useTreeLayout) {
         for ([[maybe_unused]] PropertyOwner* owner : owners) {
-            ghoul_assert(
+            assert_msg(
                 dynamic_cast<SceneGraphNode*>(owner),
                 "When using the tree layout, all owners must be SceneGraphNodes"
             );
@@ -358,8 +358,7 @@ void GuiPropertyComponent::render() {
                 // We know that we are done now since we stable_sort:ed them above
                 break;
             }
-            const std::vector<std::string> paths =
-                ghoul::tokenizeString(gui.substr(1), '/');
+            const std::vector<std::string> paths = tokenizeString(gui.substr(1), '/');
             addPathToTree(root, paths, nOwner);
         }
 

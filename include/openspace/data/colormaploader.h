@@ -39,20 +39,20 @@ ColorMap loadCmapFile(std::filesystem::path path);
  *
  * This function supports two types of colormap formats:
  * - `.cmap` files: Custom color map format parsed by `loadCmapFile`
- * - Standard image formats: Any 1D texture format supported by `ghoul::io::texture::loadTexture`
+ * - Standard image formats: Any 1D texture format supported by
+ *   `io::texture::loadTexture`
  *
  * \param filename The path to the color map file to load. Must have a valid file
  *                 extension
  * \param samplerSettings Optional sampler settings to apply to the texture
  * \return A unique pointer to the loaded OpenGL texture
  *
- * \throw ghoul::io::texture::MissingReaderException if the file extension is not
- *        supported
+ * \throw io::texture::MissingReaderException if the file extension is not supported
  * \pre The filename must have a file extension
  */
-std::unique_ptr<ghoul::opengl::Texture> loadColorMapTexture(
+std::unique_ptr<opengl::Texture> loadColorMapTexture(
     const std::filesystem::path& filename,
-    ghoul::opengl::Texture::SamplerInit samplerSettings = {});
+    opengl::Texture::SamplerInit samplerSettings = {});
 
 } // namespace openspace::dataloader::colormap
 

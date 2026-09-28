@@ -118,14 +118,14 @@ IswaDataGroup::~IswaDataGroup() {}
 void IswaDataGroup::registerProperties() {
     _useLog.onChange([this]() {
         LDEBUG(std::format("Group {} published useLogChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("useLog", _useLog.value());
         _groupEvent.publish("useLogChanged", d);
     });
 
     _useHistogram.onChange([this]() {
         LDEBUG(std::format("Group {} published useHistogramChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("useHistogram", _useHistogram.value());
         _groupEvent.publish("useHistogramChanged", d);
     });
@@ -143,35 +143,35 @@ void IswaDataGroup::registerProperties() {
             // If autofilter is turned off, register backgroundValues
             _backgroundValues.setVisibility(Property::Visibility::Always);
         }
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("autoFilter", _autoFilter.value());
         _groupEvent.publish("autoFilterChanged", d);
     });
 
     _normValues.onChange([this]() {
         LDEBUG(std::format("Group {} published normValuesChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("normValues", glm::dvec2(_normValues.value()));
         _groupEvent.publish("normValuesChanged", d);
     });
 
     _backgroundValues.onChange([this]() {
         LDEBUG(std::format("Group {} published backgroundValuesChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("backgroundValues", glm::dvec2(_backgroundValues.value()));
         _groupEvent.publish("backgroundValuesChanged", d);
     });
 
     _transferFunctionsFile.onChange([this]() {
         LDEBUG(std::format("Group {} published transferFunctionsChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("transferFunctionsChanged", _transferFunctionsFile.value());
         _groupEvent.publish("transferFunctionsChanged", d);
     });
 
     _dataOptions.onChange([this]() {
         LDEBUG(std::format("Group {} published dataOptionsChanged", identifier()));
-        ghoul::Dictionary dict;
+        Dictionary dict;
         std::set<std::string> set = _dataOptions;
         std::vector<std::string> vec(set.begin(), set.end());
         dict.setValue("dataOptions", vec);

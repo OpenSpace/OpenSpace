@@ -54,7 +54,7 @@ Documentation DashboardItemText::Documentation() {
     );
 }
 
-DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
+DashboardItemText::DashboardItemText(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _text(TextInfo, "")
 {

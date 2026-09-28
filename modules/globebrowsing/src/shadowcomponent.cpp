@@ -91,13 +91,13 @@ Documentation ShadowComponent::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_shadowscomponent");
 }
 
-ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
+ShadowComponent::ShadowComponent(const Dictionary& dictionary)
     : PropertyOwner({ "ShadowsComponent" })
     , _saveDepthTexture(SaveDepthTextureInfo)
     , _distanceFraction(DistanceFractionInfo, 20, 1, 10000)
     , _enabled(EnabledInfo, true)
 {
-    using ghoul::filesystem::File;
+    using filesystem::File;
 
     // @TODO (abock, 2021-03-25)  This is not really a nice solution as this key name is
     // coded into the RenderableGlobe. Instead, the parent should unpack the dictionary

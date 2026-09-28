@@ -38,7 +38,7 @@ MatrixWidget::MatrixWidget(int nComponents, int nColumns, bool isInteger, QWidge
     : QWidget(parent)
     , _isInteger(isInteger)
 {
-    ghoul_assert(
+    assert_msg(
         nComponents == 2 || nComponents == 3 || nComponents == 4 || nComponents == 9 ||
         nComponents == 16,
         "Invalid number of components"
@@ -90,7 +90,7 @@ std::vector<double> MatrixWidget::values() const {
 }
 
 void MatrixWidget::setValues(const std::vector<double>& vals) {
-    ghoul_assert(vals.size() == _fields.size(), "Wrong number of values");
+    assert_msg(vals.size() == _fields.size(), "Wrong number of values");
     for (size_t i = 0; i < _fields.size(); i++) {
         // Suppress per-field textEdited so setText doesn't emit valueChanged
         // N times; we emit it once after the loop instead

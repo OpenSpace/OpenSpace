@@ -32,7 +32,7 @@
 #include <array>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     [[codegen::luawrap]] void funcDouble(double arg) {
@@ -131,7 +131,7 @@ namespace {
 
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  double", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDouble;
+    LuaLibrary::Function func = codegen::lua::FuncDouble;
     CHECK(func.name == "funcDouble");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -142,7 +142,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  double", "[Execution][LuaWrapper]") 
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, 1.1);
+    lua::push(state, 1.1);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -153,7 +153,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncDoubleDefaulted;
+    LuaLibrary::Function func = codegen::lua::FuncDoubleDefaulted;
     CHECK(func.name == "funcDoubleDefaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -165,7 +165,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, 2.2);
+    lua::push(state, 2.2);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -176,7 +176,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncDoubleDefaulted;
+    LuaLibrary::Function func = codegen::lua::FuncDoubleDefaulted;
     CHECK(func.name == "funcDoubleDefaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -198,7 +198,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncDoubleDefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncDoubleDefaultedCheck;
     CHECK(func.name == "funcDoubleDefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -212,7 +212,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, false, 3.3);
+    lua::push(state, false, 3.3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -223,7 +223,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncDoubleDefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncDoubleDefaultedCheck;
     CHECK(func.name == "funcDoubleDefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -237,14 +237,14 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, true);
+    lua::push(state, true);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  doubleMap", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDoubleMap;
+    LuaLibrary::Function func = codegen::lua::FuncDoubleMap;
     CHECK(func.name == "funcDoubleMap");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -256,11 +256,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  doubleMap", "[Execution][LuaWrapper]
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, "key1", 1.1);
+    lua::push(state, "key1", 1.1);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key2", 2.2);
+    lua::push(state, "key2", 2.2);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key3", 3.3);
+    lua::push(state, "key3", 3.3);
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -268,7 +268,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  doubleMap", "[Execution][LuaWrapper]
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  doubleOptional", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDoubleOptional;
+    LuaLibrary::Function func = codegen::lua::FuncDoubleOptional;
     CHECK(func.name == "funcDoubleOptional");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -279,7 +279,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  doubleOptional", "[Execution][LuaWra
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, 1.1);
+    lua::push(state, 1.1);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -290,7 +290,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncDoubleOptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::FuncDoubleOptionalNullopt;
     CHECK(func.name == "funcDoubleOptionalNullopt");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -307,7 +307,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  doubleVector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDoubleVector;
+    LuaLibrary::Function func = codegen::lua::FuncDoubleVector;
     CHECK(func.name == "funcDoubleVector");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -319,11 +319,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  doubleVector", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, 1.1);
+    lua::push(state, 1, 1.1);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, 2.2);
+    lua::push(state, 2, 2.2);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, 3.3);
+    lua::push(state, 3, 3.3);
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -331,7 +331,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  doubleVector", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  doubleArray1", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDoubleArray1;
+    LuaLibrary::Function func = codegen::lua::FuncDoubleArray1;
     CHECK(func.name == "funcDoubleArray1");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -343,12 +343,12 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  doubleArray1", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, 1.1);
+    lua::push(state, 1, 1.1);
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(state, std::array<double, 1> { 1.1 } );
+    lua::push(state, std::array<double, 1> { 1.1 } );
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
@@ -356,7 +356,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  doubleArray1", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  doubleArray2", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDoubleArray2;
+    LuaLibrary::Function func = codegen::lua::FuncDoubleArray2;
     CHECK(func.name == "funcDoubleArray2");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -368,20 +368,20 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  doubleArray2", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, 1.1);
+    lua::push(state, 1, 1.1);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, 2.2);
+    lua::push(state, 2, 2.2);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, 3.3);
+    lua::push(state, 3, 3.3);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, 4.4);
+    lua::push(state, 4, 4.4);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, 5.5);
+    lua::push(state, 5, 5.5);
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(state, std::array<double, 5> { 1.1, 2.2, 3.3, 4.4, 5.5 });
+    lua::push(state, std::array<double, 5> { 1.1, 2.2, 3.3, 4.4, 5.5 });
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
@@ -389,7 +389,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  doubleArray2", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  doubleArray3", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDoubleArray3;
+    LuaLibrary::Function func = codegen::lua::FuncDoubleArray3;
     CHECK(func.name == "funcDoubleArray3");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -401,30 +401,30 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  doubleArray3", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, 1.1);
+    lua::push(state, 1, 1.1);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, 2.2);
+    lua::push(state, 2, 2.2);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, 3.3);
+    lua::push(state, 3, 3.3);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, 4.4);
+    lua::push(state, 4, 4.4);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, 5.5);
+    lua::push(state, 5, 5.5);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 6, 6.6);
+    lua::push(state, 6, 6.6);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 7, 7.7);
+    lua::push(state, 7, 7.7);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 8, 8.8);
+    lua::push(state, 8, 8.8);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 9, 9.9);
+    lua::push(state, 9, 9.9);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 10, 10.10);
+    lua::push(state, 10, 10.10);
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(
+    lua::push(
         state,
         std::array<double, 10> { 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10 });
     func.function(state);
@@ -435,7 +435,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  doubleArray3", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  double", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnDouble;
+    LuaLibrary::Function func = codegen::lua::ReturnDouble;
     CHECK(func.name == "returnDouble");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Number");
@@ -446,13 +446,13 @@ TEST_CASE("Execution/LuaWrapper/Return:  double", "[Execution][LuaWrapper]") {
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    const double val = ghoul::lua::value<double>(state);
+    const double val = lua::value<double>(state);
     CHECK(val == 1.1);
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  doubleMap", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnDoubleMap;
+    LuaLibrary::Function func = codegen::lua::ReturnDoubleMap;
     CHECK(func.name == "returnDoubleMap");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String -> Number");
@@ -464,7 +464,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  doubleMap", "[Execution][LuaWrapper]") 
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     const std::map<std::string, double>& val =
-        ghoul::lua::value<std::map<std::string, double>>(state);
+        lua::value<std::map<std::string, double>>(state);
     CHECK(val.size() == 3);
     REQUIRE(val.find("key1") != val.end());
     CHECK(val.find("key1")->second == 1.1);
@@ -480,7 +480,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnDoubleOptional;
+    LuaLibrary::Function func = codegen::lua::ReturnDoubleOptional;
     CHECK(func.name == "returnDoubleOptional");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Number?");
@@ -491,7 +491,7 @@ TEST_CASE(
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    const double val = ghoul::lua::value<double>(state);
+    const double val = lua::value<double>(state);
     CHECK(val == 1.1);
     lua_close(state);
 }
@@ -501,7 +501,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnDoubleOptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::ReturnDoubleOptionalNullopt;
     CHECK(func.name == "returnDoubleOptionalNullopt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Number?");
@@ -516,7 +516,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  doubleVector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnDoubleVector;
+    LuaLibrary::Function func = codegen::lua::ReturnDoubleVector;
     CHECK(func.name == "returnDoubleVector");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Number[]");
@@ -527,7 +527,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  doubleVector", "[Execution][LuaWrapper]
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::vector<double> val = ghoul::lua::value<std::vector<double>>(state);
+    std::vector<double> val = lua::value<std::vector<double>>(state);
     REQUIRE(val.size() == 3);
     CHECK(val[0] == 1.1);
     CHECK(val[1] == 2.2);

@@ -50,8 +50,8 @@ Property::Property(PropertyInfo info)
     , _id(Identifier++)
 #endif // _DEBUG
 {
-    ghoul_assert(!_identifier.empty(), "Identifier must not be empty");
-    ghoul_assert(!_guiName.empty(), "guiName must not be empty");
+    assert_msg(!_identifier.empty(), "Identifier must not be empty");
+    assert_msg(!_guiName.empty(), "guiName must not be empty");
 
     setVisibility(info.visibility);
     setNeedsConfirmation(info.needsConfirmation);
@@ -76,8 +76,8 @@ const std::type_info& Property::type() const {
     return typeid(void);
 }
 
-ghoul::lua::LuaTypes Property::typeLua() const {
-    return ghoul::lua::LuaTypes::None;
+lua::LuaTypes Property::typeLua() const {
+    return lua::LuaTypes::None;
 }
 
 std::string Property::stringValue() const {
@@ -153,7 +153,7 @@ std::string Property::jsonValue() const {
 }
 
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
-    ghoul_assert(callback, "The callback must not be empty");
+    assert_msg(callback, "The callback must not be empty");
 
     const OnChangeHandle handle = _currentHandleValue++;
     _onChangeCallbacks.emplace_back(handle, std::move(callback));
@@ -161,7 +161,7 @@ Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
 }
 
 Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
-    ghoul_assert(callback, "The callback must not be empty");
+    assert_msg(callback, "The callback must not be empty");
 
     const OnDeleteHandle handle = _currentHandleValue++;
     _onDeleteCallbacks.emplace_back(handle, std::move(callback));
@@ -171,7 +171,7 @@ Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
 Property::OnMetaDataChangeHandle Property::onMetaDataChange(
                                                            std::function<void()> callback)
 {
-    ghoul_assert(callback, "The callback must not be empty");
+    assert_msg(callback, "The callback must not be empty");
 
     const OnMetaDataChangeHandle handle = _currentHandleValue++;
     _onMetaDataChangeCallbacks.emplace_back(handle, std::move(callback));
@@ -191,7 +191,7 @@ void Property::removeOnChange(OnChangeHandle handle) {
             }
         );
 
-        ghoul_assert(
+        assert_msg(
             it != _onChangeCallbacks.end(),
             "handle must be a valid callback handle"
         );
@@ -209,7 +209,7 @@ void Property::removeOnDelete(OnDeleteHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _onDeleteCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -230,7 +230,7 @@ void Property::removeOnMetaDataChange(OnMetaDataChangeHandle handle) {
             }
         );
 
-        ghoul_assert(
+        assert_msg(
             it != _onMetaDataChangeCallbacks.end(),
             "handle must be a valid callback handle"
         );
@@ -338,7 +338,7 @@ nlohmann::json Property::generateAdditionalJsonDescription() const {
 }
 
 void Property::setLuaInterpolationTarget(lua_State*) {}
-void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
+void Property::interpolateValue(float, EasingFunc<float>) {}
 
 nlohmann::json Property::MetaDataSchema() {
     return nlohmann::json::parse(R"(

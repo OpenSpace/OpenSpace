@@ -24,7 +24,7 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/lua/lua_helper.h>
 
 namespace openspace {
@@ -37,16 +37,16 @@ std::string_view BoolProperty::className() const {
     return "BoolProperty";
 }
 
-ghoul::lua::LuaTypes BoolProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Boolean;
+lua::LuaTypes BoolProperty::typeLua() const {
+    return lua::LuaTypes::Boolean;
 }
 
 void BoolProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 bool BoolProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<bool>(state);
+    return lua::value<bool>(state);
 }
 
 std::string BoolProperty::stringValue() const {

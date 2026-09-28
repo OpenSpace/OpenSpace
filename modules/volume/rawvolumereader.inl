@@ -84,7 +84,7 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool inve
 
     std::ifstream file = std::ifstream(_path, std::ios::binary);
     if (file.fail()) {
-        throw ghoul::FileNotFoundError("Volume file not found");
+        throw FileNotFoundError("Volume file not found");
     }
 
     glm::uvec3 dims = dimensions();
@@ -98,7 +98,7 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool inve
     }
 
     if (file.fail()) {
-        throw ghoul::RuntimeError("Error reading volume file");
+        throw RuntimeError("Error reading volume file");
     }
 
     if (invertZ) {

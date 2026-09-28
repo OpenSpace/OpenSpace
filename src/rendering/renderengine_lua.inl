@@ -34,7 +34,7 @@ namespace {
 /**
  * Will create a ScreenSpaceRenderable from a lua Table and add it in the RenderEngine.
  */
-[[codegen::luawrap]] void addScreenSpaceRenderable(ghoul::Dictionary screenSpace) {
+[[codegen::luawrap]] void addScreenSpaceRenderable(Dictionary screenSpace) {
     std::unique_ptr<ScreenSpaceRenderable> s =
         ScreenSpaceRenderable::createFromDictionary(screenSpace);
     global::renderEngine->addScreenSpaceRenderable(std::move(s));
@@ -46,16 +46,16 @@ namespace {
  * the name from the table.
  */
 [[codegen::luawrap]] void removeScreenSpaceRenderable(
-                                  std::variant<std::string, ghoul::Dictionary> identifier)
+                                         std::variant<std::string, Dictionary> identifier)
 {
     std::string identifierStr;
     if (std::holds_alternative<std::string>(identifier)) {
         identifierStr = std::get<std::string>(identifier);
     }
     else {
-        ghoul::Dictionary d = std::get<ghoul::Dictionary>(identifier);
+        Dictionary d = std::get<Dictionary>(identifier);
         if (!d.hasValue<std::string>("Identifier")) {
-            throw ghoul::lua::LuaError("Passed table does not contain an Identifier");
+            throw lua::LuaError("Passed table does not contain an Identifier");
         }
         identifierStr = d.value<std::string>("Identifier");
     }

@@ -86,7 +86,7 @@ void EventTopic::handleJson(const nlohmann::json& json) {
 
             _subscribedEvents[type] = true;
 
-            auto onCallback = [this, event](ghoul::Dictionary params) {
+            auto onCallback = [this, event](Dictionary params) {
                 // Include the fired event to the caller
                 params.setValue("event", event);
                 sendData(params);

@@ -118,7 +118,7 @@ Documentation RenderableHabitableZone::Documentation() {
     );
 }
 
-RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictionary)
+RenderableHabitableZone::RenderableHabitableZone(const Dictionary& dictionary)
     : RenderableDisc(dictionary)
     , _teff(EffectiveTemperatureInfo, 5780.f, 0.f, 7.5e4f)
     , _luminosity(LuminosityInfo, 1.f, 0.f, 1e8f)
@@ -165,7 +165,7 @@ void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.conservativeBounds, _conservativeBounds);
     _shader->setUniform(_uniformCache.showOptimistic, _showOptimistic);
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_texture->texture());
     _shader->setUniform(_uniformCache.transferFunctionTexture, unit);
 
@@ -193,7 +193,7 @@ void RenderableHabitableZone::initializeShader() {
 }
 
 void RenderableHabitableZone::updateUniformLocations() {
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderableHabitableZone::computeZone() {

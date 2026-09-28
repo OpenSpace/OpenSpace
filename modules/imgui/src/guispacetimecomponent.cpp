@@ -141,7 +141,7 @@ void GuiSpaceTimeComponent::render() {
     if (!nodes.empty()) {
         // Only check if we found the current focus node if we have any nodes at all only
         // then it would be a real error
-        ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
+        assert_msg(iCurrentFocus != nodes.end(), "Focus node not found");
     }
     int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
 

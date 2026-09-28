@@ -36,7 +36,7 @@
 #include <openspace/io/texture/texturereader.h>
 #include <openspace/logging/consolelog.h>
 #include <openspace/logging/logmanager.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/openspace.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/rotation.h>
@@ -91,9 +91,9 @@ void performTasks(const std::string& path) {
 int main(int argc, char** argv) {
     using namespace openspace;
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
+    logging::LogManager::initialize(
+        logging::LogLevel::Debug,
+        logging::LogManager::ImmediateFlush::Yes
     );
     initialize();
     global::create();
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
+        filesystem::FileSystem::Override::Yes
     );
 
     std::filesystem::path configFile = findConfiguration();
@@ -118,14 +118,14 @@ int main(int argc, char** argv) {
     registerPathTokens(*global::configuration);
     global::openSpaceEngine->initialize();
 
-    ghoul::cmdparser::CommandlineParser commandlineParser(
+    cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",
-        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+        cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
     std::optional<std::string> tasksPath;
     commandlineParser.addCommand(
-        std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        std::make_unique<cmdparser::SingleCommand<std::string>>(
             tasksPath,
             "--task",
             "-t",

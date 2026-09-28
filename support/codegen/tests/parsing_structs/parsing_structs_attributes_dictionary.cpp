@@ -32,49 +32,49 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
     constexpr std::string_view Source = R"(
     struct [[codegen::Dictionary(Attributes)]] Parameters {
         // referenceValue documentation
-        ghoul::Dictionary referenceValue [[codegen::reference("abc")]];
+        Dictionary referenceValue [[codegen::reference("abc")]];
 
         // referenceValueOptional documentation
-        std::optional<ghoul::Dictionary> referenceValueOptional
+        std::optional<Dictionary> referenceValueOptional
             [[codegen::reference("abc")]];
 
         // referenceValueVector documentation
-        std::vector<ghoul::Dictionary> referenceValueVector [[codegen::reference("abc")]];
+        std::vector<Dictionary> referenceValueVector [[codegen::reference("abc")]];
 
         // referenceValueOptionalVector documentation
-        std::optional<std::vector<ghoul::Dictionary>> referenceValueOptionalVector
+        std::optional<std::vector<Dictionary>> referenceValueOptionalVector
             [[codegen::reference("abc")]];
 
         // referenceValueMap documentation
-        std::map<std::string, ghoul::Dictionary> referenceValueMap
+        std::map<std::string, Dictionary> referenceValueMap
             [[codegen::reference("abc")]];
 
         // referenceValueVectorMap documentation
-        std::map<std::string, std::vector<ghoul::Dictionary>> referenceValueVectorMap
+        std::map<std::string, std::vector<Dictionary>> referenceValueVectorMap
             [[codegen::reference("abc")]];
 
         // referenceValuePrivate documentation
-        ghoul::Dictionary referenceValuePrivate
+        Dictionary referenceValuePrivate
             [[codegen::reference("abc"), codegen::private()]];
 
         // referenceValueOptionalPrivate documentation
-        std::optional<ghoul::Dictionary> referenceValueOptionalPrivate
+        std::optional<Dictionary> referenceValueOptionalPrivate
             [[codegen::reference("abc"), codegen::private()]];
 
         // referenceValueVectorPrivate documentation
-        std::vector<ghoul::Dictionary> referenceValueVectorPrivate
+        std::vector<Dictionary> referenceValueVectorPrivate
             [[codegen::reference("abc"), codegen::private()]];
 
         // referenceValueOptionalVectorPrivate documentation
-        std::optional<std::vector<ghoul::Dictionary>> referenceValueOptionalVectorPrivate
+        std::optional<std::vector<Dictionary>> referenceValueOptionalVectorPrivate
             [[codegen::reference("abc"), codegen::private()]];
 
         // referenceValueMapPrivate documentation
-        std::map<std::string, ghoul::Dictionary> referenceValueMapPrivate
+        std::map<std::string, Dictionary> referenceValueMapPrivate
             [[codegen::reference("abc"), codegen::private()]];
 
         // referenceValueVectorMapPrivate documentation
-        std::map<std::string, std::vector<ghoul::Dictionary>> referenceValueVectorMapPrivate
+        std::map<std::string, std::vector<Dictionary>> referenceValueVectorMapPrivate
             [[codegen::reference("abc"), codegen::private()]];
 
 })";
@@ -99,7 +99,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValue");
         CHECK(var->key == "\"ReferenceValue\"");
-        CHECK(generateTypename(var->type) == "ghoul::Dictionary");
+        CHECK(generateTypename(var->type) == "openspace::Dictionary");
         CHECK(var->comment == "referenceValue documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 
@@ -126,7 +126,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValueOptional");
         CHECK(var->key == "\"ReferenceValueOptional\"");
-        CHECK(generateTypename(var->type) == "std::optional<ghoul::Dictionary>");
+        CHECK(generateTypename(var->type) == "std::optional<openspace::Dictionary>");
         CHECK(var->comment == "referenceValueOptional documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 
@@ -153,7 +153,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValueVector");
         CHECK(var->key == "\"ReferenceValueVector\"");
-        CHECK(generateTypename(var->type) == "std::vector<ghoul::Dictionary>");
+        CHECK(generateTypename(var->type) == "std::vector<openspace::Dictionary>");
         CHECK(var->comment == "referenceValueVector documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 
@@ -180,7 +180,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValueOptionalVector");
         CHECK(var->key == "\"ReferenceValueOptionalVector\"");
-        CHECK(generateTypename(var->type) == "std::optional<std::vector<ghoul::Dictionary>>");
+        CHECK(generateTypename(var->type) == "std::optional<std::vector<openspace::Dictionary>>");
         CHECK(var->comment == "referenceValueOptionalVector documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 
@@ -207,7 +207,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValueMap");
         CHECK(var->key == "\"ReferenceValueMap\"");
-        CHECK(generateTypename(var->type) == "std::map<std::string, ghoul::Dictionary>");
+        CHECK(generateTypename(var->type) == "std::map<std::string, openspace::Dictionary>");
         CHECK(var->comment == "referenceValueMap documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 
@@ -233,7 +233,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValueVectorMap");
         CHECK(var->key == "\"ReferenceValueVectorMap\"");
-        CHECK(generateTypename(var->type) == "std::map<std::string, std::vector<ghoul::Dictionary>>");
+        CHECK(generateTypename(var->type) == "std::map<std::string, std::vector<openspace::Dictionary>>");
         CHECK(var->comment == "referenceValueVectorMap documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 
@@ -259,7 +259,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValuePrivate");
         CHECK(var->key == "\"ReferenceValuePrivate\"");
-        CHECK(generateTypename(var->type) == "ghoul::Dictionary");
+        CHECK(generateTypename(var->type) == "openspace::Dictionary");
         CHECK(var->comment == "referenceValuePrivate documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 
@@ -286,7 +286,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValueOptionalPrivate");
         CHECK(var->key == "\"ReferenceValueOptionalPrivate\"");
-        CHECK(generateTypename(var->type) == "std::optional<ghoul::Dictionary>");
+        CHECK(generateTypename(var->type) == "std::optional<openspace::Dictionary>");
         CHECK(var->comment == "referenceValueOptionalPrivate documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 
@@ -313,7 +313,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValueVectorPrivate");
         CHECK(var->key == "\"ReferenceValueVectorPrivate\"");
-        CHECK(generateTypename(var->type) == "std::vector<ghoul::Dictionary>");
+        CHECK(generateTypename(var->type) == "std::vector<openspace::Dictionary>");
         CHECK(var->comment == "referenceValueVectorPrivate documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 
@@ -340,7 +340,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValueOptionalVectorPrivate");
         CHECK(var->key == "\"ReferenceValueOptionalVectorPrivate\"");
-        CHECK(generateTypename(var->type) == "std::optional<std::vector<ghoul::Dictionary>>");
+        CHECK(generateTypename(var->type) == "std::optional<std::vector<openspace::Dictionary>>");
         CHECK(var->comment == "referenceValueOptionalVectorPrivate documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 
@@ -367,7 +367,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValueMapPrivate");
         CHECK(var->key == "\"ReferenceValueMapPrivate\"");
-        CHECK(generateTypename(var->type) == "std::map<std::string, ghoul::Dictionary>");
+        CHECK(generateTypename(var->type) == "std::map<std::string, openspace::Dictionary>");
         CHECK(var->comment == "referenceValueMapPrivate documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 
@@ -393,7 +393,7 @@ TEST_CASE("Parsing/Structs/Attribute/Dictionary", "[Parsing][Structs]") {
         REQUIRE(var);
         CHECK(var->name == "referenceValueVectorMapPrivate");
         CHECK(var->key == "\"ReferenceValueVectorMapPrivate\"");
-        CHECK(generateTypename(var->type) == "std::map<std::string, std::vector<ghoul::Dictionary>>");
+        CHECK(generateTypename(var->type) == "std::map<std::string, std::vector<openspace::Dictionary>>");
         CHECK(var->comment == "referenceValueVectorMapPrivate documentation");
         CHECK(var->attributes.reference == "\"abc\"");
 

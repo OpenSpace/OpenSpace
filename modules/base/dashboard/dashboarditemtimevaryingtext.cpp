@@ -81,8 +81,7 @@ Documentation DashboardItemTimeVaryingText::Documentation() {
     );
 }
 
-DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(
-                                                      const ghoul::Dictionary& dictionary)
+DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _formatString(FormatStringInfo, "{}")
     , _dataFile(DataFileInfo, "")
@@ -171,7 +170,7 @@ void DashboardItemTimeVaryingText::update() {
 void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath) {
     std::ifstream file = std::ifstream(filePath);
     if (!file.is_open()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Time varying text, '{}' is not a valid JSON file", filePath
         ));
     }
@@ -180,7 +179,7 @@ void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath)
     file >> jsonData;
 
     if (jsonData.find("data") == jsonData.end()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error loading JSON file. No 'data' was found in '{}'", filePath
         ));
     }

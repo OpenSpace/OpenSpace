@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +28,7 @@
 #include <openspace/misc/boolean.h>
 #include <openspace/misc/dictionary.h>
 #include <openspace/misc/exception.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/shaderobject.h>
 #include <openspace/glm.h>
 #include <filesystem>
@@ -39,7 +38,7 @@
 #include <string_view>
 #include <vector>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 /**
  * This class is a wrapper for an OpenGL program object storing an array of OpenGL
@@ -57,7 +56,7 @@ namespace ghoul::opengl {
  * #setIgnoreSubroutineLocationError, and #setIgnoreSubroutineUniformLocationError) that
  * enables/disables the logging in case one of the resources was not found during the
  * function call. All other sanity checks will only be performed if the library is
- * compiled with the `GHL_DEBUG` macro being defined.
+ * compiled with the `OPENSPACE_DEBUG` macro being defined.
  */
 class ProgramObject {
 public:
@@ -3389,7 +3388,7 @@ public:
      * location `i` will be set with the value `indices[i]`. This method will return
      * `true` if the number of elements in `indices` equals the number of subroutine
      * uniforms in the attached shader. The checks for valid input are only performed if
-     * the `GHL_DEBUG` macro is set. This method will call the OpenGL function
+     * the `OPENSPACE_DEBUG` macro is set. This method will call the OpenGL function
      * `glUniformSubroutinesuiv`.
      *
      * \param shaderType The type of shader object that will be queried for the compatible
@@ -3411,7 +3410,7 @@ public:
      * \p shaderType. Each active subroutine uniform name in this shader has to have an
      * entry in the map, and each entry in the map has to specify a uniform subroutine
      * name in that shader. The checks for valid input are only performed if the
-     * `GHL_DEBUG` macro is set. This method will call the OpenGL function
+     * `OPENSPACE_DEBUG` macro is set. This method will call the OpenGL function
      * `glUniformSubroutinesuiv`.
      *
      * \param shaderType The type of shader object that will be queried for the compatible
@@ -3468,6 +3467,6 @@ private:
     bool _programIsDirty = true;
 };
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl
 
 #endif // __OPENSPACE_CORE___PROGRAMOBJECT___H__

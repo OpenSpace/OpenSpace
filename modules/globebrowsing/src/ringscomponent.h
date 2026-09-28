@@ -32,7 +32,7 @@
 #include <openspace/filesystem/file.h>
 #include <openspace/glm.h>
 #include <openspace/misc/dictionary.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/texture.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
@@ -42,10 +42,9 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <functional>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
 
+namespace opengl { class ProgramObject; }
 struct Documentation;
 struct RenderData;
 struct UpdateData;
@@ -55,7 +54,7 @@ public:
     // Callback for when readiness state changes
     using ReadinessChangeCallback = std::function<void()>;
 
-    explicit RingsComponent(const ghoul::Dictionary& dictionary);
+    explicit RingsComponent(const Dictionary& dictionary);
 
     void initialize();
     void initializeGL();
@@ -76,11 +75,11 @@ public:
     void onReadinessChange(ReadinessChangeCallback callback);
 
     // Texture access methods for globe rendering
-    ghoul::opengl::Texture* textureForwards() const;
-    ghoul::opengl::Texture* textureBackwards() const;
-    ghoul::opengl::Texture* textureUnlit() const;
-    ghoul::opengl::Texture* textureColor() const;
-    ghoul::opengl::Texture* textureTransparency() const;
+    opengl::Texture* textureForwards() const;
+    opengl::Texture* textureBackwards() const;
+    opengl::Texture* textureUnlit() const;
+    opengl::Texture* textureColor() const;
+    opengl::Texture* textureTransparency() const;
     glm::vec2 textureOffset() const;
     glm::vec3 sunPositionObj() const;
     glm::vec3 camPositionObj() const;
@@ -106,8 +105,8 @@ private:
     FloatProperty _zFightingPercentage;
     IntProperty _nShadowSamples;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
+    std::unique_ptr<opengl::ProgramObject> _shader;
+    std::unique_ptr<opengl::ProgramObject> _geometryOnlyShader;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
         sunPosition, sunPositionObj, ringTexture,
         opacity, ellipsoidRadii
@@ -119,20 +118,20 @@ private:
     ) _uniformCacheAdvancedRings;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) _geomUniformCache;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::opengl::Texture> _textureForwards;
-    std::unique_ptr<ghoul::opengl::Texture> _textureBackwards;
-    std::unique_ptr<ghoul::opengl::Texture> _textureUnlit;
-    std::unique_ptr<ghoul::opengl::Texture> _textureTransparency;
-    std::unique_ptr<ghoul::opengl::Texture> _textureColor;
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
-    std::unique_ptr<ghoul::filesystem::File> _textureFileForwards;
-    std::unique_ptr<ghoul::filesystem::File> _textureFileBackwards;
-    std::unique_ptr<ghoul::filesystem::File> _textureFileUnlit;
-    std::unique_ptr<ghoul::filesystem::File> _textureFileColor;
-    std::unique_ptr<ghoul::filesystem::File> _textureFileTransparency;
+    std::unique_ptr<opengl::Texture> _texture;
+    std::unique_ptr<opengl::Texture> _textureForwards;
+    std::unique_ptr<opengl::Texture> _textureBackwards;
+    std::unique_ptr<opengl::Texture> _textureUnlit;
+    std::unique_ptr<opengl::Texture> _textureTransparency;
+    std::unique_ptr<opengl::Texture> _textureColor;
+    std::unique_ptr<filesystem::File> _textureFile;
+    std::unique_ptr<filesystem::File> _textureFileForwards;
+    std::unique_ptr<filesystem::File> _textureFileBackwards;
+    std::unique_ptr<filesystem::File> _textureFileUnlit;
+    std::unique_ptr<filesystem::File> _textureFileColor;
+    std::unique_ptr<filesystem::File> _textureFileTransparency;
 
-    ghoul::Dictionary _ringsDictionary;
+    Dictionary _ringsDictionary;
     bool _textureIsDirty = false;
     bool _isAdvancedTextureEnabled = false;
     GLuint _vao = 0;

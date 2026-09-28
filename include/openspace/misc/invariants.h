@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,16 +30,16 @@
 #include <openspace/misc/assert.h>
 #include <openspace/misc/defer.h>
 
-#define ghoul_precondition(__condition__, __message__) \
-    ghoul_assert(__condition__, "Precondition failed: " __message__)
+#define precondition(__condition__, __message__) \
+    assert_msg(__condition__, "Precondition failed: " __message__)
 
-#define ghoul_postcondition(__condition__, __message__) \
-    defer { ghoul_assert(__condition__, "Postcondition failed: " __message__); };
+#define postcondition(__condition__, __message__) \
+    defer { assert_msg(__condition__, "Postcondition failed: " __message__); };
 
 #else // ^^^^ DEBUG // !DEBUG vvvv
 
-#define ghoul_precondition(__condition__, __message__)
-#define ghoul_postcondition(__condition__, __message__)
+#define precondition(__condition__, __message__)
+#define postcondition(__condition__, __message__)
 
 #endif // DEBUG
 

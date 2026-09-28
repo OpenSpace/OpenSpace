@@ -30,6 +30,8 @@
 #include <filesystem>
 #include <fstream>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(BasicTypes)]] Parameters {
         // bool value documentation
@@ -159,7 +161,7 @@ namespace {
         glm::dmat4 dmat4Value;
 
         // dict value documentation
-        ghoul::Dictionary dictValue;
+        Dictionary dictValue;
     };
 } // namespace
 #include "execution_structs_basic_types_codegen.cpp"
@@ -179,7 +181,7 @@ TEST_CASE("Execution/Structs/Basic/Types:  Bake", "[Execution][Structs]") {
     std::filesystem::create_directories(tmpFolder);
 
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("BoolValue", true);
     d.setValue("IntValue", 1.0);
     d.setValue("IntValue2", 2);
@@ -291,7 +293,7 @@ TEST_CASE("Execution/Structs/Basic/Types:  Bake", "[Execution][Structs]") {
         )
     );
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("a", 1);
         e.setValue("b", 2.0);
         d.setValue("DictValue", e);

@@ -54,10 +54,10 @@ Documentation Task::Documentation() {
     return codegen::doc<Parameters>("core_task");
 }
 
-std::unique_ptr<Task> Task::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Task> Task::createFromDictionary(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    ghoul::TemplateFactory<Task>* factory = FactoryManager::ref().factory<Task>();
+    TemplateFactory<Task>* factory = FactoryManager::ref().factory<Task>();
     Task* task = factory->create(p.type, dictionary);
     return std::unique_ptr<Task>(task);
 }

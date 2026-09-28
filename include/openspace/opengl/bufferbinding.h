@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,10 +25,10 @@
 #ifndef __OPENSPACE_CORE___BUFFERBINDING___H__
 #define __OPENSPACE_CORE___BUFFERBINDING___H__
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <vector>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 namespace bufferbinding {
     enum class Buffer {
@@ -115,8 +114,8 @@ private:
 
     /**
      * Initializes the maximum number of buffer bindings using
-     * #ghoul::systemcapabilities::SystemCapabilities and marks all buffer bindings as
-     * unused. This method is called the first time a BufferBinding is created.
+     * #systemcapabilities::SystemCapabilities and marks all buffer bindings as unused.
+     * This method is called the first time a BufferBinding is created.
      */
     static void initialize();
 
@@ -141,7 +140,7 @@ private:
     static std::vector<bool> _busyBindings;
 };
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl
 
 #include "bufferbinding.inl"
 

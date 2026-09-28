@@ -96,22 +96,22 @@ void sortJson(nlohmann::json& json, std::string_view key) {
         json.begin(),
         json.end(),
         [&key](const nlohmann::json& lhs, const nlohmann::json& rhs) {
-            const std::string lhsString = ghoul::toLowerCase(lhs[key].get<std::string>());
-            const std::string rhsString = ghoul::toLowerCase(rhs[key].get<std::string>());
+            const std::string lhsString = toLowerCase(lhs[key].get<std::string>());
+            const std::string rhsString = toLowerCase(rhs[key].get<std::string>());
             return rhsString > lhsString;
         }
     );
 }
 
-ghoul::Dictionary jsonToDictionary(const nlohmann::json& json) {
+Dictionary jsonToDictionary(const nlohmann::json& json) {
     if (!json.is_object()) {
-        throw ghoul::RuntimeError("Provided JSON is not an object type");
+        throw RuntimeError("Provided JSON is not an object type");
     }
 
     using Func = std::function<
-        void(ghoul::Dictionary& dict, std::string key, const nlohmann::json& j)
+        void(Dictionary& dict, std::string key, const nlohmann::json& j)
     >;
-    Func addToDict = [&addToDict](ghoul::Dictionary& dict, std::string key,
+    Func addToDict = [&addToDict](Dictionary& dict, std::string key,
                                   const nlohmann::json& j)
     {
         switch (j.type()) {
@@ -119,14 +119,14 @@ ghoul::Dictionary jsonToDictionary(const nlohmann::json& json) {
         case nlohmann::json::value_t::discarded:
                 break;
             case nlohmann::json::value_t::object: {
-                ghoul::Dictionary subDict = jsonToDictionary(j);
+                Dictionary subDict = jsonToDictionary(j);
                 dict.setValue(std::move(key), std::move(subDict));
                 break;
             }
             case nlohmann::json::value_t::array: {
                 // We can't represent arrays with different types, so we have to use a
                 // Dictionary for that instead
-                ghoul::Dictionary subDict;
+                Dictionary subDict;
                 for (size_t i = 0; i < j.size(); i++) {
                     const nlohmann::json& value = j[i];
                     // We add 1 to the key to make Lua happy :-/
@@ -147,7 +147,7 @@ ghoul::Dictionary jsonToDictionary(const nlohmann::json& json) {
                 dict.setValue(std::move(key), j.get<double>());
                 break;
             case nlohmann::json::value_t::binary:
-                throw ghoul::RuntimeError(
+                throw RuntimeError(
                     "Binary format conversion to Dictionary is unsupported. Please "
                     "create an issue with an example of the file that lead to this error"
                 );
@@ -155,7 +155,7 @@ ghoul::Dictionary jsonToDictionary(const nlohmann::json& json) {
     };
 
 
-    ghoul::Dictionary result;
+    Dictionary result;
     for (auto& [key, value] : json.get<nlohmann::json::object_t>()) {
         addToDict(result, key, value);
     }

@@ -53,7 +53,7 @@
 
 #include <openspace/filesystem/filesystem.h>
 #include <openspace/logging/logmanager.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/programobject.h>
 #include <openspace/opengl/texture.h>
 #include <openspace/opengl/textureunit.h>
@@ -68,6 +68,8 @@
 #include <cstring>
 
 namespace {
+    using namespace openspace;
+
     // @TODO: Use half-res render targets for SSAO
     // @TODO: Use shared textures for all postprocessing operations
     // @TODO: Use some kind of unified pipeline for all post processing operations
@@ -81,130 +83,130 @@ namespace {
 
         struct {
             GLuint fbo = 0;
-            std::unique_ptr<ghoul::opengl::Texture> texColor[2];
+            std::unique_ptr<opengl::Texture> texColor[2];
             // These are dedicated and cannot be use as intermediate buffers by other
             // shaders
-            std::unique_ptr<ghoul::opengl::Texture> texTemporalBuffer[2];
+            std::unique_ptr<opengl::Texture> texTemporalBuffer[2];
         } targets;
 
         struct {
             GLuint fbo = 0;
-            std::unique_ptr<ghoul::opengl::Texture> texTilemax;
-            std::unique_ptr<ghoul::opengl::Texture> texNeighbormax;
+            std::unique_ptr<opengl::Texture> texTilemax;
+            std::unique_ptr<opengl::Texture> texNeighbormax;
         } velocity;
 
         struct {
             GLuint fbo = 0;
-            std::unique_ptr<ghoul::opengl::Texture> texture;
-            std::unique_ptr<ghoul::opengl::ProgramObject> program;
+            std::unique_ptr<opengl::Texture> texture;
+            std::unique_ptr<opengl::ProgramObject> program;
             UniformCache(clipInfo, texDepth, isPerspective) uniforms;
         } linearDepth;
 
         struct {
-            std::unique_ptr<ghoul::opengl::Texture> texRandom;
+            std::unique_ptr<opengl::Texture> texRandom;
             GLuint uboHbaoData = 0;
 
             struct {
                 GLuint fbo = 0;
-                std::unique_ptr<ghoul::opengl::Texture> texture;
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                std::unique_ptr<opengl::Texture> texture;
+                std::unique_ptr<opengl::ProgramObject> program;
                 UniformCache(texLinearDepth, texNormal, texRandom, texCoordsScale,
                     isPerspective) uniforms;
             } hbao;
 
             struct {
                 GLuint fbo = 0;
-                std::unique_ptr<ghoul::opengl::Texture> texture;
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                std::unique_ptr<opengl::Texture> texture;
+                std::unique_ptr<opengl::ProgramObject> program;
                 UniformCache(texLinearDepth, texAo, sharpness, invResDir,
                     texCoordsScale) uniforms;
             } blur;
         } ssao;
 
         struct {
-            std::unique_ptr<ghoul::opengl::ProgramObject> program;
+            std::unique_ptr<opengl::ProgramObject> program;
             UniformCache(texDepth, texColor, texNormal, invProjMat, lightDir,
                 lightCol) uniforms;
         } shading;
 
         struct {
-            std::unique_ptr<ghoul::opengl::ProgramObject> program;
+            std::unique_ptr<opengl::ProgramObject> program;
             UniformCache(texHalfRes, texColor, texDepth, texelSize, focusDepth,
                 focusScale, time) uniforms;
 
             struct {
                 GLuint fbo = 0;
-                std::unique_ptr<ghoul::opengl::Texture> colorCoc;
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                std::unique_ptr<opengl::Texture> colorCoc;
+                std::unique_ptr<opengl::ProgramObject> program;
                 UniformCache(texDepth, texColor, focusPoint, focusScale) uniforms;
             } halfRes;
         } bokehDof;
 
         struct {
             struct {
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                std::unique_ptr<opengl::ProgramObject> program;
                 UniformCache(tex) uniforms;
             } passthrough;
 
             struct {
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                std::unique_ptr<opengl::ProgramObject> program;
                 UniformCache(tex, exposure, gamma) uniforms;
             } exposureGamma;
 
             struct {
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                std::unique_ptr<opengl::ProgramObject> program;
                 UniformCache(tex, exposure, gamma) uniforms;
             } filmic;
 
             struct {
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                std::unique_ptr<opengl::ProgramObject> program;
                 UniformCache(tex, exposure, gamma) uniforms;
             } aces;
         } tonemapping;
 
         struct {
             struct {
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                std::unique_ptr<opengl::ProgramObject> program;
                 UniformCache(texLinearDepth, texMain, texPrev, texVel, texVelNeighbormax,
                     texelSize, time, feedbackMin, feedbackMax, motionScale,
                     jitterUv) uniforms;
             } withMotionBlur;
             struct {
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                std::unique_ptr<opengl::ProgramObject> program;
                 UniformCache(texLinearDepth, texMain, texPrev, texVel, texelSize,
                     feedbackMin, feedbackMax, jitterUv) uniforms;
             } noMotionBlur;
         } temporal;
 
         struct {
-            std::unique_ptr<ghoul::opengl::ProgramObject> program;
+            std::unique_ptr<opengl::ProgramObject> program;
             UniformCache(tex, inverseScreenSize) uniforms;
         } fxaa;
 
         struct {
             struct {
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                std::unique_ptr<opengl::ProgramObject> program;
                 UniformCache(tex) uniforms;
             } tex;
 
             struct {
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                std::unique_ptr<opengl::ProgramObject> program;
                 UniformCache(texColor, texDepth) uniforms;
             } texDepth;
         } blit;
 
         struct {
-            std::unique_ptr<ghoul::opengl::ProgramObject> program;
+            std::unique_ptr<opengl::ProgramObject> program;
             UniformCache(texVel, texVelTexelSize) uniforms;
         } blitTilemax;
 
         struct {
-            std::unique_ptr<ghoul::opengl::ProgramObject> program;
+            std::unique_ptr<opengl::ProgramObject> program;
             UniformCache(texVel, texVelTexelSize) uniforms;
         } blitNeighbormax;
 
         struct {
-            std::unique_ptr<ghoul::opengl::ProgramObject> program;
+            std::unique_ptr<opengl::ProgramObject> program;
             UniformCache(tex) uniforms;
         } sharpen;
     } glObj;
@@ -225,8 +227,8 @@ namespace {
         return P[2][3] == 0.f;
     }
 
-    void blitTexture(const ghoul::opengl::Texture& tex) {
-        ghoul::opengl::TextureUnit texUnit;
+    void blitTexture(const opengl::Texture& tex) {
+        opengl::TextureUnit texUnit;
         texUnit.bind(tex);
 
         glObj.blit.tex.program->activate();
@@ -237,13 +239,11 @@ namespace {
         glBindVertexArray(0);
     }
 
-    void blitTexture(const ghoul::opengl::Texture& tex,
-                     const ghoul::opengl::Texture& depth)
-    {
-        ghoul::opengl::TextureUnit texUnit;
+    void blitTexture(const opengl::Texture& tex, const opengl::Texture& depth) {
+        opengl::TextureUnit texUnit;
         texUnit.bind(tex);
 
-        ghoul::opengl::TextureUnit depthUnit;
+        opengl::TextureUnit depthUnit;
         depthUnit.bind(depth);
 
         glObj.blit.texDepth.program->activate();
@@ -299,31 +299,31 @@ namespace {
     };
 } // namespace
 
-namespace postprocessing {
+namespace openspace::postprocessing {
 
 void initialize(int width, int height) {
     glCreateVertexArrays(1, &glObj.vao);
 
-    glObj.linearDepth.program = ghoul::opengl::ProgramObject::Build(
+    glObj.linearDepth.program = opengl::ProgramObject::Build(
         "Linearize Depth",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/linearize_depth_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *glObj.linearDepth.program,
         glObj.linearDepth.uniforms
     );
 
-    glObj.linearDepth.texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    glObj.linearDepth.texture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::Red,
+            .format = opengl::Texture::Format::Red,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .filter = opengl::Texture::FilterMode::LinearMipMap,
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
@@ -335,54 +335,54 @@ void initialize(int width, int height) {
         0
     );
 
-    glObj.targets.texColor[0] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    glObj.targets.texColor[0] = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGB,
+            .format = opengl::Texture::Format::RGB,
             .dataType = GL_FLOAT,
             .internalFormat = GL_R11F_G11F_B10F
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
-    glObj.targets.texColor[1] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    glObj.targets.texColor[1] = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGB,
+            .format = opengl::Texture::Format::RGB,
             .dataType = GL_FLOAT,
             .internalFormat = GL_R11F_G11F_B10F
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
-        }
-    );
-
-    glObj.targets.texTemporalBuffer[0] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
-            .dimensions = glm::uvec3(width, height, 1),
-            .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGB,
-            .dataType = GL_FLOAT,
-            .internalFormat = GL_R11F_G11F_B10F
-        },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
-    glObj.targets.texTemporalBuffer[1] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    glObj.targets.texTemporalBuffer[0] = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGB,
+            .format = opengl::Texture::Format::RGB,
             .dataType = GL_FLOAT,
             .internalFormat = GL_R11F_G11F_B10F
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
+        }
+    );
+
+    glObj.targets.texTemporalBuffer[1] = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
+            .dimensions = glm::uvec3(width, height, 1),
+            .type = GL_TEXTURE_2D,
+            .format = opengl::Texture::Format::RGB,
+            .dataType = GL_FLOAT,
+            .internalFormat = GL_R11F_G11F_B10F
+        },
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
@@ -426,133 +426,130 @@ void initialize(int width, int height) {
     glObj.texWidth = width;
     glObj.texHeight = height;
 
-    glObj.sharpen.program = ghoul::opengl::ProgramObject::Build(
+    glObj.sharpen.program = opengl::ProgramObject::Build(
         "Sharpen",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/sharpen_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.sharpen.program, glObj.sharpen.uniforms);
+    opengl::updateUniformLocations(*glObj.sharpen.program, glObj.sharpen.uniforms);
 
-    ghoul::Dictionary blur;
+    Dictionary blur;
     blur.setValue("UseMotionBlur", 1);
-    glObj.temporal.withMotionBlur.program = ghoul::opengl::ProgramObject::Build(
+    glObj.temporal.withMotionBlur.program = opengl::ProgramObject::Build(
         "Temporal AA + Motion blur",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/temporal_aa_fs.glsl"),
         blur
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *glObj.temporal.withMotionBlur.program,
         glObj.temporal.withMotionBlur.uniforms
     );
 
-    ghoul::Dictionary noBlur;
+    Dictionary noBlur;
     noBlur.setValue("UseMotionBlur", 0);
-    glObj.temporal.noMotionBlur.program = ghoul::opengl::ProgramObject::Build(
+    glObj.temporal.noMotionBlur.program = opengl::ProgramObject::Build(
         "Temporal AA",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/temporal_aa_fs.glsl"),
         noBlur
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *glObj.temporal.noMotionBlur.program,
         glObj.temporal.noMotionBlur.uniforms
     );
 
-    glObj.blit.tex.program = ghoul::opengl::ProgramObject::Build(
+    glObj.blit.tex.program = opengl::ProgramObject::Build(
         "Blit Texture",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/blit_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
-        *glObj.blit.tex.program,
-        glObj.blit.tex.uniforms
-    );
+    opengl::updateUniformLocations(*glObj.blit.tex.program, glObj.blit.tex.uniforms);
 
-    glObj.blit.texDepth.program = ghoul::opengl::ProgramObject::Build(
+    glObj.blit.texDepth.program = opengl::ProgramObject::Build(
         "Blit Texture with Depth",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/blit_depth_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *glObj.blit.texDepth.program,
         glObj.blit.texDepth.uniforms
     );
 
-    glObj.shading.program = ghoul::opengl::ProgramObject::Build(
+    glObj.shading.program = opengl::ProgramObject::Build(
         "Deferred Shading",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/deferred_shading_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.shading.program, glObj.shading.uniforms);
+    opengl::updateUniformLocations(*glObj.shading.program, glObj.shading.uniforms);
 
-    glObj.fxaa.program = ghoul::opengl::ProgramObject::Build(
+    glObj.fxaa.program = opengl::ProgramObject::Build(
         "FXAA",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/fxaa_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.fxaa.program, glObj.fxaa.uniforms);
+    opengl::updateUniformLocations(*glObj.fxaa.program, glObj.fxaa.uniforms);
 
-    glObj.tonemapping.passthrough.program = ghoul::opengl::ProgramObject::Build(
+    glObj.tonemapping.passthrough.program = opengl::ProgramObject::Build(
         "Tonemap Passthrough",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/tonemap_passthrough_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *glObj.tonemapping.passthrough.program,
         glObj.tonemapping.passthrough.uniforms
     );
 
-    glObj.tonemapping.exposureGamma.program = ghoul::opengl::ProgramObject::Build(
+    glObj.tonemapping.exposureGamma.program = opengl::ProgramObject::Build(
         "Tonemap Exposure Gamma",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/tonemap_exposure_gamma_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *glObj.tonemapping.exposureGamma.program,
         glObj.tonemapping.exposureGamma.uniforms
     );
 
-    glObj.tonemapping.filmic.program = ghoul::opengl::ProgramObject::Build(
+    glObj.tonemapping.filmic.program = opengl::ProgramObject::Build(
         "Tonemap Filmic",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/tonemap_filmic_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *glObj.tonemapping.filmic.program,
         glObj.tonemapping.filmic.uniforms
     );
 
-    glObj.tonemapping.aces.program = ghoul::opengl::ProgramObject::Build(
+    glObj.tonemapping.aces.program = opengl::ProgramObject::Build(
         "Tonemap ACES",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/tonemap_aces_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *glObj.tonemapping.aces.program,
         glObj.tonemapping.aces.uniforms
     );
 
-    glObj.bokehDof.halfRes.program = ghoul::opengl::ProgramObject::Build(
+    glObj.bokehDof.halfRes.program = opengl::ProgramObject::Build(
         "DOF prepass",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/dof_halfres_prepass_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *glObj.bokehDof.halfRes.program,
         glObj.bokehDof.halfRes.uniforms
     );
 
-    glObj.bokehDof.halfRes.colorCoc = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    glObj.bokehDof.halfRes.colorCoc = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width / 2, height / 2, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT,
             .internalFormat = GL_RGBA16F
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
@@ -564,71 +561,68 @@ void initialize(int width, int height) {
         0
     );
 
-    glObj.bokehDof.program = ghoul::opengl::ProgramObject::Build(
+    glObj.bokehDof.program = opengl::ProgramObject::Build(
         "DOF Bokeh",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/dof_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
-        *glObj.bokehDof.program,
-        glObj.bokehDof.uniforms
-    );
+    opengl::updateUniformLocations(*glObj.bokehDof.program, glObj.bokehDof.uniforms);
 
 
-    ghoul::Dictionary tileSize;
+    Dictionary tileSize;
     tileSize.setValue("TileSize", VelocityTileSize);
-    glObj.blitTilemax.program = ghoul::opengl::ProgramObject::Build(
+    glObj.blitTilemax.program = opengl::ProgramObject::Build(
         "Tilemax",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/vel_tilemax_fs.glsl"),
         tileSize
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *glObj.blitTilemax.program,
         glObj.blitTilemax.uniforms
     );
 
-    glObj.blitNeighbormax.program = ghoul::opengl::ProgramObject::Build(
+    glObj.blitNeighbormax.program = opengl::ProgramObject::Build(
         "Tilemax",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/vel_neighbormax_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *glObj.blitNeighbormax.program,
         glObj.blitNeighbormax.uniforms
     );
 
-    glObj.velocity.texTilemax = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    glObj.velocity.texTilemax = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(
                 glObj.texWidth / VelocityTileSize,
                 glObj.texHeight / VelocityTileSize,
                 1
             ),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RG,
+            .format = opengl::Texture::Format::RG,
             .dataType = GL_FLOAT,
             .internalFormat = GL_RG16F
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
-    glObj.velocity.texNeighbormax = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    glObj.velocity.texNeighbormax = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(
                 glObj.texWidth / VelocityTileSize,
                 glObj.texHeight / VelocityTileSize,
                 1
             ),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RG,
+            .format = opengl::Texture::Format::RG,
             .dataType = GL_FLOAT,
             .internalFormat = GL_RG16F
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
@@ -646,25 +640,19 @@ void initialize(int width, int height) {
         0
     );
 
-    glObj.ssao.hbao.program = ghoul::opengl::ProgramObject::Build(
+    glObj.ssao.hbao.program = opengl::ProgramObject::Build(
         "SSAO Perspective",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/ssao_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
-        *glObj.ssao.hbao.program,
-        glObj.ssao.hbao.uniforms
-    );
+    opengl::updateUniformLocations(*glObj.ssao.hbao.program, glObj.ssao.hbao.uniforms);
 
-    glObj.ssao.blur.program = ghoul::opengl::ProgramObject::Build(
+    glObj.ssao.blur.program = opengl::ProgramObject::Build(
         "SSAO Blur",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/ssao_blur_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(
-        *glObj.ssao.blur.program,
-        glObj.ssao.blur.uniforms
-    );
+    opengl::updateUniformLocations(*glObj.ssao.blur.program, glObj.ssao.blur.uniforms);
 
     // Initialize random textures
     constexpr int AORandomTexSize = 4;
@@ -683,41 +671,41 @@ void initialize(int width, int height) {
         buffer[i * 4 + 3] = 0;
     }
 
-    glObj.ssao.texRandom = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    glObj.ssao.texRandom = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(AORandomTexSize, AORandomTexSize, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_SHORT,
             .internalFormat = GL_RGBA16_SNORM
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .filter = ghoul::opengl::Texture::FilterMode::Nearest
+        opengl::Texture::SamplerInit {
+            .filter = opengl::Texture::FilterMode::Nearest
         },
         reinterpret_cast<std::byte*>(buffer.data())
     );
 
-    glObj.ssao.hbao.texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    glObj.ssao.hbao.texture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::Red,
+            .format = opengl::Texture::Format::Red,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
-    glObj.ssao.blur.texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    glObj.ssao.blur.texture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::Red,
+            .format = opengl::Texture::Format::Red,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
@@ -879,9 +867,9 @@ void shutdown() {
     glObj.sharpen.program = nullptr;
 }
 
-void applySsao(const ghoul::opengl::Texture& linearDepthTex,
-               const ghoul::opengl::Texture& normalTex, const glm::mat4& projMatrix,
-               float intensity, float radius, float bias, float normalBias)
+void applySsao(const opengl::Texture& linearDepthTex, const opengl::Texture& normalTex,
+               const glm::mat4& projMatrix, float intensity, float radius, float bias,
+               float normalBias)
 {
     const bool isOrtho = isOrthoProjMatrix(projMatrix);
     const float sharpness = 3.f / std::sqrt(radius);
@@ -941,21 +929,21 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
     glViewport(0, 0, width, height);
 
 
-    ghoul::opengl::TextureUnit linearDepthUnit;
+    opengl::TextureUnit linearDepthUnit;
     linearDepthUnit.bind(linearDepthTex);
 
-    ghoul::opengl::TextureUnit normalUnit;
+    opengl::TextureUnit normalUnit;
     normalUnit.bind(normalTex);
 
     // HBAO
     {
-        ghoul::opengl::ProgramObject& program = *glObj.ssao.hbao.program;
+        opengl::ProgramObject& program = *glObj.ssao.hbao.program;
         auto& uniforms = glObj.ssao.hbao.uniforms;
 
-        ghoul::GLDebugGroup<1> group("HBAO");
+        GLDebugGroup<1> group("HBAO");
         program.activate();
 
-        ghoul::opengl::TextureUnit randomUnit;
+        opengl::TextureUnit randomUnit;
         randomUnit.bind(*glObj.ssao.texRandom);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, glObj.ssao.uboHbaoData);
@@ -980,7 +968,7 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
 
     // Blur
     {
-        ghoul::opengl::ProgramObject& program = *glObj.ssao.blur.program;
+        opengl::ProgramObject& program = *glObj.ssao.blur.program;
         auto& uniforms = glObj.ssao.blur.uniforms;
 
         program.activate();
@@ -996,7 +984,7 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
 
         // First pass
         {
-            ghoul::GLDebugGroup<1> group("BLUR 1st");
+            GLDebugGroup<1> group("BLUR 1st");
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.ssao.blur.fbo);
             glViewport(0, 0, width, height);
             glClearColor(0, 0, 0, 0);
@@ -1007,7 +995,7 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
 
         // Second pass
         {
-            ghoul::GLDebugGroup<1> group("BLUR 2nd");
+            GLDebugGroup<1> group("BLUR 2nd");
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
             glViewport(
                 lastViewport[0],
@@ -1033,14 +1021,13 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
     }
 }
 
-void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
-                     const ghoul::opengl::Texture& colorTex,
-                     const ghoul::opengl::Texture& velocityTex,
-                     const ghoul::opengl::Texture& velocityNeighbormaxTex,
+void applyTemporalAa(const opengl::Texture& linearDepthTex,
+                     const opengl::Texture& colorTex, const opengl::Texture& velocityTex,
+                     const opengl::Texture& velocityNeighbormaxTex,
                      const glm::vec2& currJitter, const glm::vec2& prevJitter,
                      float feedbackMin, float feedbackMax, float motionScale, float time)
 {
-    ghoul::GLDebugGroup<1> group(
+    GLDebugGroup<1> group(
         motionScale != 0.f ? "Temporal AA + Motion Blur" : "Temporal AA"
     );
 
@@ -1065,16 +1052,16 @@ void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
         jitterUvPrev.y
     );
 
-    ghoul::opengl::TextureUnit linearDepthUnit;
+    opengl::TextureUnit linearDepthUnit;
     linearDepthUnit.bind(linearDepthTex);
 
-    ghoul::opengl::TextureUnit colorUnit;
+    opengl::TextureUnit colorUnit;
     colorUnit.bind(colorTex);
 
-    ghoul::opengl::TextureUnit tempBufferUnit;
+    opengl::TextureUnit tempBufferUnit;
     tempBufferUnit.bind(*glObj.targets.texTemporalBuffer[srcBuf]);
 
-    ghoul::opengl::TextureUnit velocityUnit;
+    opengl::TextureUnit velocityUnit;
     velocityUnit.bind(velocityTex);
 
     int boundBuffer;
@@ -1090,10 +1077,10 @@ void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
     glNamedFramebufferDrawBuffers(glObj.targets.fbo, 2, drawBuffers);
 
     if (motionScale != 0.f) {
-        ghoul::opengl::ProgramObject& program = *glObj.temporal.withMotionBlur.program;
+        opengl::ProgramObject& program = *glObj.temporal.withMotionBlur.program;
         auto& uniforms = glObj.temporal.withMotionBlur.uniforms;
 
-        ghoul::opengl::TextureUnit velocityNeighbormaxUnit;
+        opengl::TextureUnit velocityNeighbormaxUnit;
         velocityNeighbormaxUnit.bind(velocityNeighbormaxTex);
 
         program.activate();
@@ -1114,7 +1101,7 @@ void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
         glBindVertexArray(0);
     }
     else {
-        ghoul::opengl::ProgramObject& program = *glObj.temporal.noMotionBlur.program;
+        opengl::ProgramObject& program = *glObj.temporal.noMotionBlur.program;
         auto& uniforms = glObj.temporal.noMotionBlur.uniforms;
 
         program.activate();
@@ -1134,9 +1121,9 @@ void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
 }
 
 void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& P) {
-    ghoul_assert(settings.inputTextures.color, "No color texture provided");
-    ghoul_assert(settings.inputTextures.depth, "No depth texture provided");
-    ghoul_assert(settings.inputTextures.normal, "No normal texture provided");
+    assert_msg(settings.inputTextures.color, "No color texture provided");
+    assert_msg(settings.inputTextures.depth, "No depth texture provided");
+    assert_msg(settings.inputTextures.normal, "No normal texture provided");
 
     // For seeding noise
     static float time = 0.f;
@@ -1190,10 +1177,10 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     glBindVertexArray(glObj.vao);
 
     {
-        ghoul::opengl::ProgramObject& program = *glObj.linearDepth.program;
+        opengl::ProgramObject& program = *glObj.linearDepth.program;
         auto& uniforms = glObj.linearDepth.uniforms;
 
-        ghoul::GLDebugGroup<1> group("Linearize Depth");
+        GLDebugGroup<1> group("Linearize Depth");
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.linearDepth.fbo);
         glViewport(0, 0, glObj.texWidth, glObj.texHeight);
         glClearColor(far, 0, 0, 0);
@@ -1202,7 +1189,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
 
-        ghoul::opengl::TextureUnit unit;
+        opengl::TextureUnit unit;
         unit.bind(*settings.inputTextures.depth);
 
         program.activate();
@@ -1219,7 +1206,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     glEnable(GL_BLEND);
 
     {
-        ghoul::GLDebugGroup<1> group("Generate Linear Depth Mipmaps");
+        GLDebugGroup<1> group("Generate Linear Depth Mipmaps");
         glBindTexture(GL_TEXTURE_2D, *glObj.linearDepth.texture);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
@@ -1235,12 +1222,12 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
 
         // Blit Tilemax
         {
-            ghoul::opengl::ProgramObject& program = *glObj.blitTilemax.program;
+            opengl::ProgramObject& program = *glObj.blitTilemax.program;
             auto& uniforms = glObj.blitTilemax.uniforms;
 
-            ghoul::GLDebugGroup<1> group("Velocity: Tilemax");
+            GLDebugGroup<1> group("Velocity: Tilemax");
 
-            ghoul::opengl::TextureUnit velocityUnit;
+            opengl::TextureUnit velocityUnit;
             velocityUnit.bind(*settings.inputTextures.velocity);
 
             program.activate();
@@ -1258,13 +1245,13 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
 
         // Blit Neighbormax
         {
-            ghoul::opengl::ProgramObject& program = *glObj.blitNeighbormax.program;
+            opengl::ProgramObject& program = *glObj.blitNeighbormax.program;
             auto& uniforms = glObj.blitNeighbormax.uniforms;
 
-            ghoul::GLDebugGroup<1> group("Velocity: Neighbormax");
+            GLDebugGroup<1> group("Velocity: Neighbormax");
             glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
-            ghoul::opengl::TextureUnit velocityUnit;
+            opengl::TextureUnit velocityUnit;
             velocityUnit.bind(*glObj.velocity.texTilemax);
 
             program.activate();
@@ -1284,7 +1271,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     }
 
     GLenum dstBuffer = GL_COLOR_ATTACHMENT1;
-    ghoul::opengl::Texture* srcTexture = glObj.targets.texColor[0].get();
+    opengl::Texture* srcTexture = glObj.targets.texColor[0].get();
 
     auto swapTarget = [&dstBuffer, &srcTexture]() {
         dstBuffer =
@@ -1301,7 +1288,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     glViewport(0, 0, width, height);
 
     if (settings.background.enabled) {
-        ghoul::GLDebugGroup<1> group("Clear HDR");
+        GLDebugGroup<1> group("Clear HDR");
         glDrawBuffer(dstBuffer);
         glClearColor(
             settings.background.r,
@@ -1321,17 +1308,17 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
 
     // Shading
     {
-        ghoul::opengl::ProgramObject& program = *glObj.shading.program;
+        opengl::ProgramObject& program = *glObj.shading.program;
         auto& uniforms = glObj.shading.uniforms;
 
-        ghoul::GLDebugGroup<1> group("Shading");
-        ghoul::opengl::TextureUnit depthUnit;
+        GLDebugGroup<1> group("Shading");
+        opengl::TextureUnit depthUnit;
         depthUnit.bind(*settings.inputTextures.depth);
 
-        ghoul::opengl::TextureUnit colorUnit;
+        opengl::TextureUnit colorUnit;
         colorUnit.bind(*settings.inputTextures.color);
 
-        ghoul::opengl::TextureUnit normalUnit;
+        opengl::TextureUnit normalUnit;
         normalUnit.bind(*settings.inputTextures.normal);
 
         program.activate();
@@ -1348,7 +1335,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     }
 
     if (settings.ambientOcclusion[0].enabled) {
-        ghoul::GLDebugGroup<1> group("SSAO 1");
+        GLDebugGroup<1> group("SSAO 1");
         applySsao(
             *glObj.linearDepth.texture,
             *settings.inputTextures.normal,
@@ -1360,7 +1347,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         );
     }
     if (settings.ambientOcclusion[1].enabled) {
-        ghoul::GLDebugGroup<1> group("SSAO 2");
+        GLDebugGroup<1> group("SSAO 2");
         applySsao(
             *glObj.linearDepth.texture,
             *settings.inputTextures.normal,
@@ -1396,10 +1383,10 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         );
 
         {
-            ghoul::GLDebugGroup<1> group("Sharpen");
+            GLDebugGroup<1> group("Sharpen");
             swapTarget();
             glDrawBuffer(dstBuffer);
-            ghoul::opengl::TextureUnit srcUnit;
+            opengl::TextureUnit srcUnit;
             srcUnit.bind(*srcTexture);
 
             glObj.sharpen.program->activate();
@@ -1412,7 +1399,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     }
 
     if (settings.inputTextures.emissive) {
-        ghoul::GLDebugGroup<1> group("Add Emissive");
+        GLDebugGroup<1> group("Add Emissive");
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
         blitTexture(*settings.inputTextures.emissive);
@@ -1422,25 +1409,25 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     if (settings.depthOfField.enabled) {
         swapTarget();
         glDrawBuffer(dstBuffer);
-        ghoul::GLDebugGroup<1> groupDof("DOF");
+        GLDebugGroup<1> groupDof("DOF");
         int prevFbo;
         glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevFbo);
 
-        ghoul::opengl::TextureUnit linearDepthUnit;
+        opengl::TextureUnit linearDepthUnit;
         linearDepthUnit.bind(*glObj.linearDepth.texture);
 
         {
-            ghoul::opengl::ProgramObject& program = *glObj.bokehDof.halfRes.program;
+            opengl::ProgramObject& program = *glObj.bokehDof.halfRes.program;
             auto& uniforms = glObj.bokehDof.halfRes.uniforms;
 
-            ghoul::GLDebugGroup<1> groupPrepass("DOF Prepass");
+            GLDebugGroup<1> groupPrepass("DOF Prepass");
             int prevViewport[4];
             glGetIntegerv(GL_VIEWPORT, prevViewport);
             glViewport(0, 0, glObj.texWidth / 2, glObj.texHeight / 2);
 
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.bokehDof.halfRes.fbo);
 
-            ghoul::opengl::TextureUnit colorUnit;
+            opengl::TextureUnit colorUnit;
             colorUnit.bind(*srcTexture);
 
             program.activate();
@@ -1463,13 +1450,13 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         }
 
         {
-            ghoul::opengl::ProgramObject& program = *glObj.bokehDof.program;
+            opengl::ProgramObject& program = *glObj.bokehDof.program;
             auto& uniforms = glObj.bokehDof.uniforms;
 
-            ghoul::opengl::TextureUnit colorCocUnit;
+            opengl::TextureUnit colorCocUnit;
             colorCocUnit.bind(*glObj.bokehDof.halfRes.colorCoc);
 
-            ghoul::opengl::TextureUnit srcUnit;
+            opengl::TextureUnit srcUnit;
             srcUnit.bind(*srcTexture);
 
             program.activate();
@@ -1492,14 +1479,14 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
 
     // Tonemapping
     {
-        ghoul::GLDebugGroup<1> group("Tonemapping");
+        GLDebugGroup<1> group("Tonemapping");
         swapTarget();
         glDrawBuffer(dstBuffer);
         const Tonemapping tonemapping =
             settings.tonemapping.enabled ?
             settings.tonemapping.mode :
             Tonemapping::Passthrough;
-        ghoul::opengl::TextureUnit srcUnit;
+        opengl::TextureUnit srcUnit;
         srcUnit.bind(*srcTexture);
 
         switch (tonemapping) {
@@ -1563,7 +1550,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     }
 
     if (settings.inputTextures.postTonemap) {
-        ghoul::GLDebugGroup<1> group("Add Post Tonemap");
+        GLDebugGroup<1> group("Add Post Tonemap");
         glEnable(GL_BLEND);
         glColorMask(1, 1, 1, 1);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1574,13 +1561,13 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     prevJitter = jitter;
 
     if (settings.fxaa.enabled) {
-        ghoul::opengl::ProgramObject& program = *glObj.fxaa.program;
+        opengl::ProgramObject& program = *glObj.fxaa.program;
         auto& uniforms = glObj.fxaa.uniforms;
 
         swapTarget();
         glDrawBuffer(dstBuffer);
-        ghoul::GLDebugGroup<1> group("FXAA");
-        ghoul::opengl::TextureUnit unit;
+        GLDebugGroup<1> group("FXAA");
+        opengl::TextureUnit unit;
         unit.bind(*srcTexture);
 
         program.activate();
@@ -1594,7 +1581,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
 
     // Activate backbuffer or whatever was bound before
     {
-        ghoul::GLDebugGroup<1> group("PostProcess Blit Result");
+        GLDebugGroup<1> group("PostProcess Blit Result");
 
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
         glViewport(lastViewport[0], lastViewport[1], lastViewport[2], lastViewport[3]);
@@ -1622,4 +1609,4 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     glColorMask(lastColormask[0], lastColormask[1], lastColormask[2], lastColormask[3]);
 }
 
-} // namespace postprocessing
+} // namespace openspace::postprocessing

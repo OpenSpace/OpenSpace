@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +31,7 @@
 #include <memory>
 #include <vector>
 
-namespace ghoul::systemcapabilities {
+namespace openspace::systemcapabilities {
 
 /**
  * The SystemCapabilities class allows access to the functionality the system provides.
@@ -43,7 +42,7 @@ namespace ghoul::systemcapabilities {
  * the application, but most values can be considered to be static and cache-able. New
  * components can be added using the #addComponent and retrieved using the #component
  * method. Each type of component can only be added once to the SystemCapabilities. The
- * second insertion will log a warning if `GHL_DEBUG` is defined.
+ * second insertion will log a warning if `OPENSPACE_DEBUG` is defined.
  */
 class SystemCapabilities {
 public:
@@ -73,7 +72,7 @@ public:
 
     /**
      * Calling this method will trigger the
-     * #ghoul::systemcapabilities::SystemCapabilitiesComponent::detectCapabilities of all
+     * #systemcapabilities::SystemCapabilitiesComponent::detectCapabilities of all
      * registered components (#addComponent). If the capabilities have been detected
      * previously and a new component is added, a following call will redetect the
      * capabilities of all components, thus, multiple calls to this function will perform
@@ -85,7 +84,7 @@ public:
      * Logs all of the detected capabilities of the log, group by the individual
      * SystemCapabilitiesComponent%s. The verbosity of the log is controlled by the
      * \p verbosity. This method will, in turn, call the
-     * #ghoul::systemcapabilities::SystemCapabilitiesComponent::capabilities of all the
+     * #systemcapabilities::SystemCapabilitiesComponent::capabilities of all the
      * registered SystemCapabilitiesComponent%s.
      *
      * \param verbosity The verbosity of the resulting log entries
@@ -97,9 +96,9 @@ public:
      * Adds the passed `component` to this SystemCapabilities and assumes
      * ownership of this object. This method will not automatically detect the
      * capabilities in this component; this has to be done using the
-     * #ghoul::systemcapabilities::SystemCapabilitiesComponent::detectCapabilities
-     * method. A specific subclass of SystemCapabilitiesComponent can only be added once
-     * to the SystemCapabilities.
+     * #systemcapabilities::SystemCapabilitiesComponent::detectCapabilities method. A
+     * specific subclass of SystemCapabilitiesComponent can only be added once to the
+     * SystemCapabilities.
      *
      * \param component The component that will be added to this SystemCapabilities
      *        object
@@ -135,9 +134,9 @@ private:
     static bool _isInitialized;
 };
 
-} // namespace ghoul::systemcapabilities
+} // namespace openspace::systemcapabilities
 
-#define SysCap (ghoul::systemcapabilities::SystemCapabilities::ref())
+#define SysCap (systemcapabilities::SystemCapabilities::ref())
 
 #include "systemcapabilities.inl"
 

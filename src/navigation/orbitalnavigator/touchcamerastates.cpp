@@ -141,7 +141,7 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
         }
         case InteractionType::Pinch: {
             // Add zooming velocity
-            ghoul_assert(touchPoints.size() > 1, "Pinch needs at least two touch points");
+            assert_msg(touchPoints.size() > 1, "Pinch needs at least two touch points");
 
             const TouchInput& startFinger1 = touchPoints[1].firstInput();
             const TouchInput& endFinger1 = touchPoints[1].latestInput();
@@ -186,7 +186,7 @@ TouchCameraStates::computeVelocities(const std::vector<TouchInputHolder>& touchP
         }
         case InteractionType::Pan: {
             // Add local rotation velocity
-            ghoul_assert(touchPoints.size() > 1, "Pan needs at least two touch points");
+            assert_msg(touchPoints.size() > 1, "Pan needs at least two touch points");
 
             // Here we don't use the difference between the first and current position,
             // but instead the speed of the movement, to allow for more responsive panning
@@ -210,7 +210,7 @@ TouchCameraStates::InteractionType
 TouchCameraStates::interpretInteraction(const std::vector<TouchInputHolder>& inputs,
                                         const std::vector<TouchInput>& lastProcessed)
 {
-    ghoul_assert(!inputs.empty(), "Cannot interpret interaction of no input");
+    assert_msg(!inputs.empty(), "Cannot interpret interaction of no input");
 
     if (inputs.size() != lastProcessed.size() || inputs.empty() || lastProcessed.empty()) {
         // Not a valid gesture. Probably just a tap.

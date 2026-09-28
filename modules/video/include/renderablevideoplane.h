@@ -34,7 +34,7 @@ namespace openspace {
 
 class RenderableVideoPlane : public RenderablePlane {
 public:
-    explicit RenderableVideoPlane(const ghoul::Dictionary& dictionary);
+    explicit RenderableVideoPlane(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -45,7 +45,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
 private:
     VideoPlayer _videoPlayer;

@@ -31,6 +31,8 @@
 #include <fstream>
 #include <optional>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(BasicTypesOptional)]] Parameters {
         // bool value documentation
@@ -157,7 +159,7 @@ namespace {
         std::optional<glm::dmat4> dmat4Value;
 
         // dict value documentation
-        std::optional<ghoul::Dictionary> dictValue;
+        std::optional<Dictionary> dictValue;
     };
 } // namespace
 #include "execution_structs_basic_types_optional_codegen.cpp"
@@ -176,7 +178,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional:  Bake", "[Execution][Structs]
     std::filesystem::path tmpFolder = (path / "codegen_execution_basic_optional");
     std::filesystem::create_directories(tmpFolder);
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("BoolValue", true);
     d.setValue("IntValue", 2.0);
     d.setValue("DoubleValue", 3.1);
@@ -287,7 +289,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional:  Bake", "[Execution][Structs]
         )
     );
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("a", 1);
         e.setValue("b", 2.0);
         d.setValue("DictValue", e);
@@ -448,7 +450,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional:  Bake", "[Execution][Structs]
     REQUIRE(p.dictValue->hasValue<double>("b"));
     CHECK(p.dictValue->value<double>("b") == 2.0);
 
-    const ghoul::Dictionary e;
+    const Dictionary e;
     const Parameters p2 = codegen::bake<Parameters>(e);
     CHECK(!p2.boolValue.has_value());
     CHECK(!p2.intValue.has_value());

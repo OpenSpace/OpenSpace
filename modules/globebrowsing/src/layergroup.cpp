@@ -99,12 +99,12 @@ void LayerGroup::update() {
     }
 }
 
-Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
+Layer* LayerGroup::addLayer(const Dictionary& layerDict) {
     ZoneScoped;
 
     const TestResult res = testSpecification(Layer::Documentation(), layerDict);
     if (!res.success) {
-        LERROR("Error adding layer. " + ghoul::to_string(res));
+        LERROR("Error adding layer. " + to_string(res));
     }
 
     if (!layerDict.hasValue<std::string>("Identifier")) {
@@ -148,8 +148,8 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     auto compareZIndexSubOwners = [](const PropertyOwner* a, const PropertyOwner* b) {
         const Layer* aLayer = dynamic_cast<const Layer*>(a);
         const Layer* bLayer = dynamic_cast<const Layer*>(b);
-        ghoul_assert(aLayer, "a is not a layer");
-        ghoul_assert(bLayer, "b is not a layer");
+        assert_msg(aLayer, "a is not a layer");
+        assert_msg(bLayer, "b is not a layer");
 
         return aLayer->zIndex() < bLayer->zIndex();
     };
@@ -197,7 +197,7 @@ void LayerGroup::scheduleDeleteLayer(const std::string& layerName) {
 
 void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     if (_layers.size() == 1) {
-        ghoul_assert(
+        assert_msg(
             oldPosition == newPosition,
             "There is only one item but different positions"
         );
@@ -223,7 +223,7 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
 
     // There is a separate check at the top of the function to ensure that there is more
     // than one item
-    ghoul_assert(!_layers.empty(), "The list should not be empty at this point");
+    assert_msg(!_layers.empty(), "The list should not be empty at this point");
     if (newLayerPos == _layers.begin()) {
         // If the layer is moved to the first spot in the list
         Layer* nextLayer = _layers.begin()->get();
@@ -243,7 +243,7 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     }
 
     _layers.insert(newLayerPos, std::move(layer));
-    ghoul_assert(
+    assert_msg(
         std::is_sorted(
             _layers.cbegin(),
             _layers.cend(),
@@ -266,9 +266,9 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     // two layers with different types and the uniforms between the two types are not
     // compatible
     LayerManager* manager = dynamic_cast<LayerManager*>(_owner);
-    ghoul_assert(manager, "Hierarchy error: Layer. Owner is not LayerManager");
+    assert_msg(manager, "Hierarchy error: Layer. Owner is not LayerManager");
     RenderableGlobe* renderable = dynamic_cast<RenderableGlobe*>(manager->owner());
-    ghoul_assert(manager, "Hierarchy error: LayerManager. Owner is not RenderableGlobe");
+    assert_msg(manager, "Hierarchy error: LayerManager. Owner is not RenderableGlobe");
     renderable->invalidateShader();
 
     // Notify that the layers are in a different order

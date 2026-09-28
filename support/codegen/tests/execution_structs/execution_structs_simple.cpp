@@ -40,7 +40,7 @@ namespace {
 
 
 TEST_CASE("Execution/Structs/Simple:  Bake", "[Execution][Structs]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("Value", 5.0);
 
     const Parameters p = codegen::bake<Parameters>(d);

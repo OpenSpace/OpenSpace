@@ -79,7 +79,7 @@ namespace {
                     case Renderable::RenderBin::Overlay:
                         return "Overlay";
                     default:
-                        throw ghoul::MissingCaseException();
+                        throw MissingCaseException();
                 }
             }(bin);
             ImGui::Text("RenderBin: %s", binStr.c_str());

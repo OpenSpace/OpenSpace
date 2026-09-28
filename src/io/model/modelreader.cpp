@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +42,7 @@ namespace {
     constexpr std::string_view _loggerCat = "ModelReader";
 } // namespace
 
-namespace ghoul::io {
+namespace openspace::io {
 
 ModelReader::MissingReaderException::MissingReaderException(std::string extension,
                                                             std::filesystem::path file_)
@@ -66,14 +65,14 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReader::loadModel(
 {
     ZoneScoped;
 
-    ghoul_assert(!_readers.empty(), "No readers were registered before");
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
+    assert_msg(!_readers.empty(), "No readers were registered before");
+    assert_msg(!filename.empty(), "Filename must not be empty");
 
     std::string extension = filename.extension().string();
     if (!extension.empty()) {
         extension = extension.substr(1);
     }
-    ghoul_assert(!extension.empty(), "Filename must have an extension");
+    assert_msg(!extension.empty(), "Filename must have an extension");
 
     ModelReaderBase* reader = readerForExtension(extension);
 
@@ -164,4 +163,4 @@ ModelReaderBase* ModelReader::readerForExtension(const std::string& extension) {
     return nullptr;
 }
 
-} // namespace ghoul::io
+} // namespace openspace::io

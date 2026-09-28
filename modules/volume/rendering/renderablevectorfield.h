@@ -40,18 +40,17 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <filesystem>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
-
 namespace openspace {
 
+namespace opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace opengl
 struct Documentation;
 
 class RenderableVectorField : public Renderable {
 public:
-   explicit RenderableVectorField(const ghoul::Dictionary& dictionary);
+   explicit RenderableVectorField(const Dictionary& dictionary);
 
    ~RenderableVectorField() override = default;
 
@@ -115,14 +114,14 @@ private:
         std::string vzColumnName;
     } _sparse;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<opengl::ProgramObject> _program;
     UniformCache(
         modelViewProjection, arrowScale, colorMode, magDomain, colorTexture, opacity,
         fixedColor
     ) _uniformCache;
 
     struct ColorSettings : PropertyOwner {
-        explicit ColorSettings(const ghoul::Dictionary& dictionary);
+        explicit ColorSettings(const Dictionary& dictionary);
         OptionProperty colorModeOption;
         StringProperty colorMap;
         Vec2Property colorMagnitudeDomain;
@@ -137,16 +136,16 @@ private:
 
     BoolProperty _filterByLua;
     StringProperty _luaScriptFile;
-    std::unique_ptr<ghoul::filesystem::File> _luaScriptFileHandle;
+    std::unique_ptr<filesystem::File> _luaScriptFileHandle;
 
-    ghoul::lua::LuaState _state;
+    lua::LuaState _state;
 
     std::filesystem::path _sourceFile;
     std::vector<ArrowInstance> _instances;
 
     GLuint _vao = 0;
     GLuint _vectorFieldVbo = 0;
-    std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
+    std::unique_ptr<opengl::Texture> _colorTexture;
 
     bool _vectorFieldIsDirty = true;
     bool _textureIsDirty = true;

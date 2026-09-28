@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +40,7 @@ struct IWbemLocator;
 struct IWbemServices;
 #endif // WIN32
 
-namespace ghoul::systemcapabilities {
+namespace openspace::systemcapabilities {
 
 /**
  * This class is the base class of all components that can detect a specific set of
@@ -254,9 +253,9 @@ protected:
 #endif // WIN32
 };
 
-} // namespace ghoul::systemcapabilities
+} // namespace openspace::systemcapabilities
 
-namespace ghoul {
+namespace openspace {
     template <>
     inline std::string to_string(
                       const systemcapabilities::SystemCapabilitiesComponent::Verbosity& v)
@@ -283,6 +282,6 @@ namespace ghoul {
         else if (string == "Full") { return Verbosity::Full; }
         throw RuntimeError(std::format("Unknown verbosity '{}'", string));
     }
-} // namespace ghoul
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SYSTEMCAPABILITIESCOMPONENT___H__

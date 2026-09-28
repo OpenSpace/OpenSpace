@@ -63,7 +63,7 @@ void EventEngine::postFrameCleanup() {
 }
 
 void EventEngine::registerEventAction(Event::Type type, std::string identifier,
-                                      std::optional<ghoul::Dictionary> filter)
+                                      std::optional<Dictionary> filter)
 {
     ActionInfo ai = {
         .type = type,
@@ -94,7 +94,7 @@ void EventEngine::registerEventTopic(size_t topicId, Event::Type type,
 }
 
 void EventEngine::unregisterEventAction(Event::Type type, const std::string& identifier,
-                                        const std::optional<ghoul::Dictionary>& filter)
+                                        const std::optional<Dictionary>& filter)
 {
     const auto it = _eventActions.find(type);
     if (it != _eventActions.end()) {
@@ -131,7 +131,7 @@ void EventEngine::unregisterEventAction(uint32_t identifier) {
     }
 
     // If we get this far, we haven't found the identifier
-    throw ghoul::RuntimeError(std::format(
+    throw RuntimeError(std::format(
         "Could not find event with identifier '{}'", identifier
     ));
 }
@@ -215,7 +215,7 @@ void EventEngine::triggerActions() const {
     while (e) {
         const auto it = _eventActions.find(e->type);
         if (it != _eventActions.end()) {
-            const ghoul::Dictionary params = toParameter(*e);
+            const Dictionary params = toParameter(*e);
             for (const ActionInfo& ai : it->second) {
                 if (ai.isEnabled &&
                     (!ai.filter.has_value() || params.isSubset(*ai.filter)))
@@ -246,7 +246,7 @@ void EventEngine::triggerTopics() const {
         const auto it = _eventTopics.find(e->type);
 
         if (it != _eventTopics.end()) {
-            const ghoul::Dictionary params = toParameter(*e);
+            const Dictionary params = toParameter(*e);
             for (const TopicInfo& ti : it->second) {
                 ti.callback(params);
             }

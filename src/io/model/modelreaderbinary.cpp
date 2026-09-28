@@ -1,15 +1,14 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
  * without restriction, including without limitation the rights to use, copy, modify,    *
  * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
- * permit persons to whom the Software is furnished to do so, subject to the llowing   *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
  * conditions:                                                                           *
  *                                                                                       *
  * The above copyright notice and this permission notice shall be included in all copies *
@@ -30,7 +29,7 @@
 #include <openspace/io/model/modelmesh.h>
 #include <openspace/io/model/modelnode.h>
 #include <openspace/logging/logmanager.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/texture.h>
 #include <cstdint>
 #include <fstream>
@@ -38,7 +37,7 @@
 #include <cstddef>
 
 namespace {
-    using namespace ghoul;
+    using namespace openspace;
 
     constexpr std::string_view _loggerCat = "ModelReaderBinary";
     constexpr int8_t CurrentModelVersion = 12;
@@ -79,14 +78,14 @@ namespace {
     }
 } // namespace
 
-namespace ghoul::io {
+namespace openspace::io {
 
 std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderBinary::loadModel(
                                                     const std::filesystem::path& filename,
                                                                 bool forceRenderInvisible,
                                                         bool notifyInvisibleDropped) const
 {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
+    assert_msg(!filename.empty(), "Filename must not be empty");
 
     std::ifstream fileStream = std::ifstream(filename, std::ifstream::binary);
     if (!fileStream.good()) {
@@ -616,4 +615,4 @@ std::vector<std::string> ModelReaderBinary::supportedExtensions() const {
     };
 }
 
-} // namespace ghoul::io
+} // namespace openspace::io

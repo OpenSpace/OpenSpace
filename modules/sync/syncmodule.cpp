@@ -61,7 +61,7 @@ Documentation SyncModule::Documentation() {
 
 SyncModule::SyncModule() : OpenSpaceModule(Name) {}
 
-void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
+void SyncModule::internalInitialize(const Dictionary& configuration) {
     const Parameters p = codegen::bake<Parameters>(configuration);
 
     if (p.httpSynchronizationRepositories.has_value()) {
@@ -70,13 +70,13 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
 
     _synchronizationRoot = absPath(p.synchronizationRoot);
 
-    ghoul::TemplateFactory<ResourceSynchronization>* fSynchronization =
+    TemplateFactory<ResourceSynchronization>* fSynchronization =
         FactoryManager::ref().factory<ResourceSynchronization>();
-    ghoul_assert(fSynchronization, "ResourceSynchronization factory was not created");
+    assert_msg(fSynchronization, "ResourceSynchronization factory was not created");
 
     fSynchronization->registerClass(
         "HttpSynchronization",
-        [this](bool, const ghoul::Dictionary& dictionary, pmr::memory_resource* pool) {
+        [this](bool, const Dictionary& dictionary, pmr::memory_resource* pool) {
             if (pool) {
                 void* ptr = pool->allocate(sizeof(HttpSynchronization));
                 return new (ptr) HttpSynchronization(
@@ -97,7 +97,7 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
 
     fSynchronization->registerClass(
         "UrlSynchronization",
-        [this](bool, const ghoul::Dictionary& dictionary, pmr::memory_resource* pool) {
+        [this](bool, const Dictionary& dictionary, pmr::memory_resource* pool) {
             if (pool) {
                 void* ptr = pool->allocate(sizeof(UrlSynchronization));
                 return new (ptr) UrlSynchronization(dictionary, _synchronizationRoot);

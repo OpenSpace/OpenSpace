@@ -188,7 +188,7 @@ bool AsyncTileDataProvider::shouldBeDeleted() const {
 void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileDataReader) {
     ZoneScoped;
 
-    ghoul_assert(_enqueuedTileRequests.empty(), "No enqueued requests left");
+    assert_msg(_enqueuedTileRequests.empty(), "No enqueued requests left");
 
     // Reset raw tile data reader
     if (resetRawTileDataReader == ResetRawTileDataReader::Yes) {

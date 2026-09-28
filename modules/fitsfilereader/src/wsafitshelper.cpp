@@ -41,9 +41,8 @@ namespace {
 
 namespace openspace {
 
-std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
-                                                        const std::filesystem::path& path,
-                                                                        size_t layerIndex,
+std::unique_ptr<opengl::Texture> loadTextureFromFits(const std::filesystem::path& path,
+                                                     size_t layerIndex,
                                                     const std::pair<float, float>& minMax)
 {
     try {
@@ -90,14 +89,14 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
             imageData[i] = normalizedValue;
         }
 
-        auto texture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
+        auto texture = std::make_unique<opengl::Texture>(
+            opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(fitsValues->width, fitsValues->height, 1),
                 .type = GL_TEXTURE_2D,
-                .format = ghoul::opengl::Texture::Format::Red,
+                .format = opengl::Texture::Format::Red,
                 .dataType = GL_FLOAT
             },
-            ghoul::opengl::Texture::SamplerInit {
+            opengl::Texture::SamplerInit {
                 .swizzleMask = std::array<GLenum, 4> { GL_RED, GL_RED, GL_RED, GL_ONE }
             },
             reinterpret_cast<std::byte*>(imageData.data())

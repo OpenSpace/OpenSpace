@@ -28,13 +28,12 @@
 #include <openspace/glm.h>
 #include <filesystem>
 
-namespace ghoul::opengl {
-    class Texture;
-    class ProgramObject;
-} // namespace ghoul::opengl
-
 namespace openspace {
 
+namespace opengl {
+    class Texture;
+    class ProgramObject;
+} // namespace opengl
 struct RaycastData;
 struct RenderData;
 
@@ -46,27 +45,27 @@ public:
      * Render the volume's entry points (front face of the bounding geometry).
      */
     virtual void renderEntryPoints(const RenderData& data,
-        ghoul::opengl::ProgramObject& program) = 0;
+        opengl::ProgramObject& program) = 0;
 
     /**
      * Render the volume's exit points (back face of the bounding geometry).
      */
     virtual void renderExitPoints(const RenderData& data,
-        ghoul::opengl::ProgramObject& program) = 0;
+        opengl::ProgramObject& program) = 0;
 
     /**
      * Prepare the volume for the ABuffer's resolve step. Make sure textures are up to
      * date, bind them to texture units, set program uniforms etc.
      */
     virtual void preRaycast(const RaycastData& data,
-        ghoul::opengl::ProgramObject& program);
+        opengl::ProgramObject& program);
 
     /**
      * Clean up for the volume after the ABuffer's resolve step. Make sure texture units
      * are deinitialized, etc.
      */
     virtual void postRaycast(const RaycastData& data,
-        ghoul::opengl::ProgramObject& program);
+        opengl::ProgramObject& program);
 
     /**
      * Return true if the camera is inside the volume. Also set localPosition to the

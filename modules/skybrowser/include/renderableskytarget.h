@@ -36,7 +36,7 @@ namespace openspace {
 
 class RenderableSkyTarget : public RenderablePlane {
 public:
-    explicit RenderableSkyTarget(const ghoul::Dictionary& dictionary);
+    explicit RenderableSkyTarget(const Dictionary& dictionary);
 
     void initializeGL() override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;

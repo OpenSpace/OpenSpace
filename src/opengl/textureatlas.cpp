@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +26,10 @@
 
 #include <openspace/format.h>
 #include <openspace/misc/assert.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <utility>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 TextureAtlas::InvalidRegionException::InvalidRegionException(std::string msg)
     : RuntimeError(std::move(msg), "TextureAtlas")
@@ -41,15 +40,15 @@ TextureAtlas::TextureAtlas(glm::ivec3 size)
 {
     // Limitations to the depth are due to the fact that the atlas is represented by a
     // single texture on the GPU (which only allows up to four channels)
-    ghoul_assert(_size.x > 4, "Width has to be bigger than 4");
-    ghoul_assert(_size.y > 4, "Height has to be bigger than 4");
-    ghoul_assert(_size.z >= 1, "Depth has to be positive");
-    ghoul_assert(_size.z <= 4, "Depth has to be smaller or equal to 4");
+    assert_msg(_size.x > 4, "Width has to be bigger than 4");
+    assert_msg(_size.y > 4, "Height has to be bigger than 4");
+    assert_msg(_size.z >= 1, "Depth has to be positive");
+    assert_msg(_size.z <= 4, "Depth has to be smaller or equal to 4");
 
     // Since we are using uint16 as the index type in the handle type, we can't support
     // textures with a bigger size than 65535 (which would be a big texture *anyway*)
-    ghoul_assert(_size.x <= std::numeric_limits<uint16_t>::max(), "Texture.x too large");
-    ghoul_assert(_size.y <= std::numeric_limits<uint16_t>::max(), "Texture.y too large");
+    assert_msg(_size.x <= std::numeric_limits<uint16_t>::max(), "Texture.x too large");
+    assert_msg(_size.y <= std::numeric_limits<uint16_t>::max(), "Texture.y too large");
 
     _nodes.emplace_back(1, 1, _size.x - 2);
     _data.resize(_size.x * _size.y * _size.z);
@@ -100,7 +99,7 @@ void TextureAtlas::initialize() {
             .filter = Texture::FilterMode::Nearest
         }
     );
-    ghoul_assert(_texture, "Error creating Texture");
+    assert_msg(_texture, "Error creating Texture");
 }
 
 void TextureAtlas::deinitialize() {
@@ -132,7 +131,7 @@ void TextureAtlas::clear() {
 }
 
 TextureAtlas::RegionHandle TextureAtlas::newRegion(int width, int height) {
-    ghoul_assert(_texture, "TextureAtlas has not been initialized");
+    assert_msg(_texture, "TextureAtlas has not been initialized");
 
     // We assign an area that is one pixel bigger to allow for a margin around each region
     width += 1;
@@ -198,11 +197,11 @@ TextureAtlas::RegionHandle TextureAtlas::newRegion(int width, int height) {
 
     // Make the location information retrievable
 
-    ghoul_assert(
+    assert_msg(
         glm::all(glm::greaterThanEqual(region, glm::ivec4(0))),
         "Invalid region"
     );
-    ghoul_assert(
+    assert_msg(
         glm::all(glm::lessThan(region, glm::ivec4(std::numeric_limits<uint16_t>::max()))),
         "Invalid region"
     );
@@ -214,8 +213,8 @@ TextureAtlas::RegionHandle TextureAtlas::newRegion(int width, int height) {
 }
 
 void TextureAtlas::setRegionData(RegionHandle handle, void* data) {
-    ghoul_assert(data, "Data must not be a nullptr");
-    ghoul_assert(_texture, "TextureAtlas has not been initialized");
+    assert_msg(data, "Data must not be a nullptr");
+    assert_msg(_texture, "TextureAtlas has not been initialized");
 
     const glm::u16vec4& region = _handleInformation[handle];
 
@@ -224,13 +223,13 @@ void TextureAtlas::setRegionData(RegionHandle handle, void* data) {
     const uint16_t width = region.z;
     const uint16_t height = region.w;
 
-    ghoul_assert(x > 0, "x argument out of bounds");
-    ghoul_assert(x < (_size.x - 1), "x argument out of bounds");
-    ghoul_assert((x + width) <= (_size.x - 1), "x arguments out of bounds");
+    assert_msg(x > 0, "x argument out of bounds");
+    assert_msg(x < (_size.x - 1), "x argument out of bounds");
+    assert_msg((x + width) <= (_size.x - 1), "x arguments out of bounds");
 
-    ghoul_assert(y > 0, "y argument out of bounds");
-    ghoul_assert(y < (_size.y - 1), "y argument out of bounds");
-    ghoul_assert((y + height) <= (_size.y - 1), "y argument out of bounds");
+    assert_msg(y > 0, "y argument out of bounds");
+    assert_msg(y < (_size.y - 1), "y argument out of bounds");
+    assert_msg((y + height) <= (_size.y - 1), "y argument out of bounds");
 
     // As the incoming data is a single stream of bytes, we need to chop it up into chunks
     // of length 'width'. We have 'height' of these chunks that need to be copied into our
@@ -250,7 +249,7 @@ TextureAtlas::TextureCoordinatesResult TextureAtlas::textureCoordinates(
                                                                       RegionHandle handle,
                                                         const glm::ivec4& windowing) const
 {
-    ghoul_assert(_texture, "TextureAtlas has not been initialized");
+    assert_msg(_texture, "TextureAtlas has not been initialized");
 
     const glm::u16vec4& region = _handleInformation[handle];
 
@@ -306,4 +305,4 @@ void TextureAtlas::atlasMerge() {
     }
 }
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl

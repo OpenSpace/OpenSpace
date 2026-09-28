@@ -130,7 +130,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
         // A translation used to compute locations along the path.
-        ghoul::Dictionary translation [[codegen::reference("core_translation")]];
+        Dictionary translation [[codegen::reference("core_translation")]];
 
         // [[codegen::verbatim(LineColorInfo.description)]]
         glm::vec3 color [[codegen::color()]];
@@ -201,7 +201,7 @@ RenderableTrail::Appearance::Appearance()
     addProperty(lineFadeAmount);
 }
 
-RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
+RenderableTrail::RenderableTrail(const Dictionary& dictionary)
     : Renderable(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -250,7 +250,7 @@ void RenderableTrail::initializeGL() {
 
     _programObject = BaseModule::ProgramObjectManager.request(
         "EphemerisProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "EphemerisProgram",
                 absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
@@ -259,13 +259,13 @@ void RenderableTrail::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache);
+    opengl::updateUniformLocations(*_programObject, _uniformCache);
 }
 
 void RenderableTrail::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         "EphemerisProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -307,7 +307,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
             case RenderInformation::VertexSorting::NewestFirst: return 0;
             case RenderInformation::VertexSorting::OldestFirst: return 1;
             case RenderInformation::VertexSorting::NoSorting:   return 2;
-            default:                                  throw ghoul::MissingCaseException();
+            default:                                         throw MissingCaseException();
         }
     }(info.sorting);
 

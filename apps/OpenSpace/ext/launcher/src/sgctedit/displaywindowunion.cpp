@@ -125,7 +125,7 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
     for (size_t i = 0; i < nWindows; i++) {
         const sgct::config::Window& w = cluster.nodes.front().windows[i];
         WindowControl* wCtrl = _windowControls[i];
-        ghoul_assert(wCtrl, "No window control");
+        assert_msg(wCtrl, "No window control");
 
         //
         // Get monitor index for the window
@@ -231,7 +231,7 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
 void DisplayWindowUnion::applyWindowSettings(std::vector<sgct::config::Window>& windows) {
     windows.resize(_nWindowsDisplayed);
     for (size_t wIdx = 0; wIdx < _nWindowsDisplayed; wIdx++) {
-        ghoul_assert(_windowControls[wIdx], "No window control");
+        assert_msg(_windowControls[wIdx], "No window control");
         _windowControls[wIdx]->generateWindowInformation(windows[wIdx]);
     }
 }

@@ -435,7 +435,7 @@ GeoJsonProperties::GeoJsonProperties()
     addPropertySubOwner(tessellation);
 }
 
-void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary,
+void GeoJsonProperties::createFromDictionary(const Dictionary& dictionary,
                                              const RenderableGlobe& globe)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

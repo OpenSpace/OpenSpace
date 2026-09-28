@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +31,7 @@
 
 #include <string_view>
 
-namespace ghoul {
+namespace openspace {
 
 enum class EasingFunction : uint8_t {
     // @FRAGILE(abock):  The cpp expects the values to be in this order and start at 0
@@ -73,7 +72,7 @@ template <typename T>
 
 /**
  * Returns the enum for the passed \p name of an easing function. If \p name is not a
- * valid easing function name, a ghoul::MissingCaseException is raised.
+ * valid easing function name, a MissingCaseException is raised.
  *
  * \param name The name for which the easing function enum should be returned
  * \return The enum value for the easing function named \p name
@@ -546,7 +545,7 @@ template <typename T>
 template <typename T>
 [[nodiscard]] T bounceEaseInOut(T p);
 
-} // namespace ghoul
+} // namespace openspace
 
 #include "easing.inl"
 

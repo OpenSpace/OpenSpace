@@ -52,19 +52,19 @@ IswaModule::IswaModule()
     });
 }
 
-void IswaModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+void IswaModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    assert_msg(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableTexturePlane>("RenderableTexturePlane");
     fRenderable->registerClass<RenderableDataPlane>("RenderableDataPlane");
     fRenderable->registerClass<RenderableKameleonPlane>("RenderableKameleonPlane");
     fRenderable->registerClass<RenderableDataSphere>("RenderableDataSphere");
 
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+    TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fScreenSpaceRenderable, "No fScreenSpaceRenderable factory existed");
+    assert_msg(fScreenSpaceRenderable, "No fScreenSpaceRenderable factory existed");
 
     fScreenSpaceRenderable->registerClass<ScreenSpaceCygnet>("ScreenSpaceCygnet");
 }

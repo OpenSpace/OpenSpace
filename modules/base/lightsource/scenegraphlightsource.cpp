@@ -79,7 +79,7 @@ Documentation SceneGraphLightSource::Documentation() {
     );
 }
 
-SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)
+SceneGraphLightSource::SceneGraphLightSource(const Dictionary& dictionary)
     : LightSource(dictionary)
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
     , _nodeIdentifier(NodeInfo, "")

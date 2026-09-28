@@ -29,7 +29,7 @@
 #include <openspace/filesystem/file.h>
 #include <openspace/format.h>
 #include <openspace/logging/logmanager.h>
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/lua/lua_helper.h>
 #include <openspace/misc/dictionary.h>
 #include <openspace/scripting/scriptengine.h>
@@ -74,7 +74,7 @@ Documentation LuaRotation::Documentation() {
     );
 }
 
-LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)
+LuaRotation::LuaRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
     , _luaScriptFile(ScriptInfo)
 {
@@ -82,7 +82,7 @@ LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)
 
     _luaScriptFile.onChange([this]() {
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
+        _fileHandle = std::make_unique<filesystem::File>(_luaScriptFile.value());
         _fileHandle->setCallback([this]() { requireUpdate(); });
     });
 
@@ -93,7 +93,7 @@ LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)
 }
 
 glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
-    ghoul::lua::runScriptFile(_state, _luaScriptFile.value());
+    lua::runScriptFile(_state, _luaScriptFile.value());
 
     // Get the scaling function
     lua_getglobal(_state, "rotation");
@@ -109,15 +109,15 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     }
 
     // First argument is the number of seconds past the J2000 epoch in ingame time
-    ghoul::lua::push(_state, data.time.j2000Seconds());
+    lua::push(_state, data.time.j2000Seconds());
 
     // Second argument is the number of seconds past the J2000 epoch of the last frame
-    ghoul::lua::push(_state, data.previousFrameTime.j2000Seconds());
+    lua::push(_state, data.previousFrameTime.j2000Seconds());
 
     // Third argument is the number of milliseconds past the J2000 epoch in wallclock
     using namespace std::chrono;
     auto now = high_resolution_clock::now();
-    ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
+    lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
 
     // Execute the scaling function
     const int success = lua_pcall(_state, 3, 1, 0);
@@ -127,7 +127,7 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
             std::format("Error executing 'rotation': {}", lua_tostring(_state, -1))
         );
     }
-    const glm::dmat3 rotation = ghoul::lua::value<glm::dmat3>(_state);
+    const glm::dmat3 rotation = lua::value<glm::dmat3>(_state);
     return rotation;
 }
 

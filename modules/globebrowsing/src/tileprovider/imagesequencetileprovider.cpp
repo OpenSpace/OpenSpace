@@ -82,7 +82,7 @@ Documentation ImageSequenceTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_imagesequence");
 }
 
-ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& dictionary)
+ImageSequenceTileProvider::ImageSequenceTileProvider(const Dictionary& dictionary)
     : _index(IndexInfo, 0, 0)
     , _nImages(NumImagesInfo, 0, 0)
     , _currentImage(CurrentImageInfo)

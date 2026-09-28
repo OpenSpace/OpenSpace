@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +24,7 @@
 
 #include <openspace/format.h>
 #include <openspace/glm.h>
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/misc/assert.h>
 #include <openspace/misc/defer.h>
 #include <openspace/misc/dictionary.h>
@@ -39,7 +38,7 @@
 #include <variant>
 #include <vector>
 
-namespace ghoul::lua {
+namespace openspace::lua {
 
 namespace internal {
 
@@ -111,7 +110,7 @@ constexpr void extractValues(lua_State* L, std::tuple<Ts...>& tuple, int baseLoc
 
 template <size_t I = 0, typename... Ts>
 constexpr void pushTupleValues(lua_State* L, const std::tuple<Ts...>& tuple) {
-    ghoul::lua::push(L, static_cast<int>(I + 1), std::get<I>(tuple));
+    lua::push(L, static_cast<int>(I + 1), std::get<I>(tuple));
     lua_settable(L, -3);
     if constexpr (I + 1 != sizeof...(Ts)) {
         pushTupleValues<I + 1, Ts...>(L, tuple);
@@ -196,7 +195,7 @@ void pushDictionaryHelper(lua_State* L, const Dictionary& d, std::string_view ke
         using T = std::variant_alternative_t<I, Dictionary::Types>;
         bool has = d.hasValue<T>(key);
         if (has) {
-            ghoul::lua::push(L, d.value<T>(key));
+            lua::push(L, d.value<T>(key));
             return;
         }
         else {
@@ -474,7 +473,7 @@ void push(lua_State* L, T value) {
     else if constexpr (is_string_map<T>::value) {
         lua_newtable(L);
         for (const std::pair<const std::string, typename T::mapped_type>& p : value) {
-            ghoul::lua::push(L, p.first, p.second);
+            lua::push(L, p.first, p.second);
             lua_settable(L, -3);
         }
     }
@@ -482,10 +481,10 @@ void push(lua_State* L, T value) {
         lua_newtable(L);
         for (size_t i = 1; i <= value.size(); i++) {
             if constexpr (std::is_same_v<typename T::value_type, bool>) {
-                ghoul::lua::push(L, static_cast<int>(i), static_cast<bool>(value[i - 1]));
+                lua::push(L, static_cast<int>(i), static_cast<bool>(value[i - 1]));
             }
             else {
-                ghoul::lua::push(L, static_cast<int>(i), value[i - 1]);
+                lua::push(L, static_cast<int>(i), value[i - 1]);
             }
             lua_settable(L, -3);
         }
@@ -494,10 +493,10 @@ void push(lua_State* L, T value) {
         lua_newtable(L);
         for (size_t i = 1; i <= value.size(); i++) {
             if constexpr (std::is_same_v<typename T::value_type, bool>) {
-                ghoul::lua::push(L, static_cast<int>(i), static_cast<bool>(value[i - 1]));
+                lua::push(L, static_cast<int>(i), static_cast<bool>(value[i - 1]));
             }
             else {
-                ghoul::lua::push(L, static_cast<int>(i), value[i - 1]);
+                lua::push(L, static_cast<int>(i), value[i - 1]);
             }
             lua_settable(L, -3);
         }
@@ -509,7 +508,7 @@ void push(lua_State* L, T value) {
     else if constexpr (std::is_same_v<T, Dictionary>) {
         lua_newtable(L);
         for (std::string_view key : value.keys()) {
-            ghoul::lua::push(L, key);
+            lua::push(L, key);
             pushDictionaryHelper(L, value, key);
             lua_settable(L, -3);
         }
@@ -1003,7 +1002,7 @@ bool hasValue(lua_State* L, int location) {
 
 template <typename T>
 T value(lua_State* L, int location, PopValue shouldPopValue) {
-    ghoul_precondition(L != nullptr, "L must not be nullptr");
+    precondition(L != nullptr, "L must not be nullptr");
 
     if constexpr (internal::is_optional<T>::value) {
         const int n = lua_gettop(L);
@@ -1030,7 +1029,7 @@ T value(lua_State* L, int location, PopValue shouldPopValue) {
 
 template <typename... Ts>
 constexpr std::tuple<Ts...> values(lua_State* L, int location, PopValue shouldPopValue) {
-    ghoul_precondition(L != nullptr, "L must not be nullptr");
+    precondition(L != nullptr, "L must not be nullptr");
 
     // Verify that we don't have a situation where we have non-optional parameters, then
     // optional parameters, and then non-optional parameters again as that will bork up
@@ -1056,15 +1055,15 @@ constexpr std::tuple<Ts...> values(lua_State* L, int location, PopValue shouldPo
 
 template <typename T>
 T* userData(lua_State* L, int location) {
-    ghoul_precondition(L != nullptr, "L must not be nullptr");
+    precondition(L != nullptr, "L must not be nullptr");
     return reinterpret_cast<T*>(lua_touserdata(L, lua_upvalueindex(location)));
 }
 
 template <typename... Ts>
 void push(lua_State* L, Ts... arguments) {
-    ghoul_precondition(L != nullptr, "L must not be nullptr");
+    precondition(L != nullptr, "L must not be nullptr");
 
     (internal::push(L, arguments), ...);
 }
 
-} // namespace ghoul::lua
+} // namespace openspace::lua

@@ -468,7 +468,7 @@ void PlanetsSonification::stop() {
     _toggleAll = false;
 }
 
-void PlanetsSonification::addPlanet(const ghoul::Dictionary& dict) {
+void PlanetsSonification::addPlanet(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
     DataBody planet = DataBody(p.name);
 
@@ -547,7 +547,7 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
             settings[MoonsIndex] = _neptuneProperty.moonsEnabled;
             break;
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
             break;
     }
 

@@ -56,7 +56,7 @@ Documentation RenderableVideoSphere::Documentation() {
     );
 }
 
-RenderableVideoSphere::RenderableVideoSphere(const ghoul::Dictionary& dictionary)
+RenderableVideoSphere::RenderableVideoSphere(const Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _videoPlayer(dictionary)
 {
@@ -88,7 +88,7 @@ void RenderableVideoSphere::update(const UpdateData& data) {
     _videoPlayer.update();
 }
 
-void RenderableVideoSphere::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderableVideoSphere::bindTexture(opengl::TextureUnit& unit) {
     unit.bind(*_videoPlayer.frameTexture());
 }
 

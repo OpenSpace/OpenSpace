@@ -62,10 +62,10 @@ namespace {
 
     BooleanType(ShouldLogError);
 
-    class ConnectionLostError final : public ghoul::RuntimeError {
+    class ConnectionLostError final : public RuntimeError {
     public:
         explicit ConnectionLostError(ShouldLogError shouldLogError_ = ShouldLogError::Yes)
-            : ghoul::RuntimeError("Astrocast connection lost", "Astrocast")
+            : RuntimeError("Astrocast connection lost", "Astrocast")
             , shouldLogError(shouldLogError_)
         {}
 
@@ -151,7 +151,7 @@ namespace {
         );
     }
 
-    bool sendMessage(const Astrocast::Message& message, ghoul::io::TcpSocket& socket) {
+    bool sendMessage(const Astrocast::Message& message, io::TcpSocket& socket) {
         const uint8_t messageTypeOut = static_cast<uint8_t>(message.type);
         const uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
         std::vector<char> payload;
@@ -185,8 +185,7 @@ namespace {
         return res;
     }
 
-    void sendDataMessage(const Astrocast::DataMessage& dataMessage,
-                         ghoul::io::TcpSocket& socket)
+    void sendDataMessage(const Astrocast::DataMessage& dataMessage, io::TcpSocket& socket)
     {
         const uint8_t dataMessageTypeOut = static_cast<uint8_t>(dataMessage.type);
         const double dataMessageTimestamp = dataMessage.timestamp;
@@ -303,7 +302,7 @@ Astrocast::Astrocast()
     , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
     , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
-    , _connectionEvent(std::make_shared<ghoul::Event<>>())
+    , _connectionEvent(std::make_shared<SynchronousEvent<>>())
 {
     addProperty(_name);
     addProperty(_serverName);
@@ -331,7 +330,7 @@ void Astrocast::connect() {
     setStatus(Status::Connecting);
 
     std::string p = _port.value();
-    _socket = std::make_unique<ghoul::io::TcpSocket>(_address, std::atoi(p.c_str()));
+    _socket = std::make_unique<io::TcpSocket>(_address, std::atoi(p.c_str()));
 
     _socket->connect();
 
@@ -866,7 +865,7 @@ const std::string& Astrocast::hostName() {
     return _hostName;
 }
 
-ghoul::Event<>& Astrocast::connectionEvent() {
+SynchronousEvent<>& Astrocast::connectionEvent() {
     return *_connectionEvent;
 }
 

@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/src/layergroupid.h>
 #include <openspace/glm.h>
 #include <openspace/misc/boolean.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/texture.h>
 #include <cstdint>
 
@@ -43,7 +43,7 @@ public:
     BooleanType(ShouldAllocateDataOnCPU);
 
     TileTextureInitData(size_t width, size_t height, GLenum type,
-        ghoul::opengl::Texture::Format textureFormat,
+        opengl::Texture::Format textureFormat,
         ShouldAllocateDataOnCPU allocCpu = ShouldAllocateDataOnCPU::No);
 
     TileTextureInitData(const TileTextureInitData& original) = default;
@@ -56,7 +56,7 @@ public:
 
     const glm::ivec3 dimensions;
     const GLenum glType;
-    const ghoul::opengl::Texture::Format ghoulTextureFormat;
+    const opengl::Texture::Format textureFormat;
     const size_t nRasters;
     const size_t bytesPerDatum;
     const size_t bytesPerPixel;

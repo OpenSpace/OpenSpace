@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,8 +40,8 @@
 #include <utility>
 
 namespace {
-    using namespace ghoul;
-    using namespace ghoul::fontrendering;
+    using namespace openspace;
+    using namespace openspace::fontrendering;
 
     // Sizes in FT are given in 1/64th of pt
     constexpr float PointConversionFactor = 64.f;
@@ -117,7 +116,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul::fontrendering {
+namespace openspace::fontrendering {
 
 Font::Glyph::Glyph(wchar_t character_, int width_, int height_, float leftBearing_,
                    float topBearing_, float advanceX_, float advanceY_,
@@ -156,8 +155,8 @@ Font::Font(std::filesystem::path filename, float pointSize, opengl::TextureAtlas
 {
     ZoneScoped;
 
-    ghoul_assert(!_name.empty(), "Filename must not be empty");
-    ghoul_assert(_pointSize > 0.f, "Need positive point size");
+    assert_msg(!_name.empty(), "Filename must not be empty");
+    assert_msg(_pointSize > 0.f, "Need positive point size");
 
     // Get font metrics at higher resolution for increased accuracy
     constexpr float HighFaceResolutionFactor = 100.f;
@@ -326,7 +325,7 @@ void Font::loadGlyphs(std::vector<wchar_t> characters) {
         unsigned int height = 0;
 
         const FT_UInt glyphIndex = FT_Get_Char_Index(face, charcode);
-        ghoul_assert(glyphIndex != 0, "Glyph index not found");
+        assert_msg(glyphIndex != 0, "Glyph index not found");
 
         const FT_Error error = FT_Load_Glyph(face, glyphIndex, FT_LOAD_FORCE_AUTOHINT);
         handleError(error, library, face, nullptr, _name, _pointSize);
@@ -514,4 +513,4 @@ void Font::generateKerning() {
     }
 }
 
-} // namespace ghoul::fontrendering
+} // namespace openspace::fontrendering

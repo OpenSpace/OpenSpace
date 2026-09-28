@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,8 +33,8 @@
 #endif // WIN32
 
 namespace {
-    using namespace ghoul;
-    using namespace ghoul::thread;
+    using namespace openspace;
+    using namespace openspace::thread;
 
     int convertThreadPriorityLevel([[maybe_unused]] ThreadPriorityClass c,
                                    ThreadPriorityLevel p) {
@@ -96,7 +95,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul::thread {
+namespace openspace::thread {
 
 void setPriority(std::thread& t, ThreadPriorityClass priorityClass,
                  ThreadPriorityLevel priorityLevel)
@@ -138,4 +137,4 @@ void setThreadBackground(std::thread& t, Background background) {
 void setThreadBackground(std::thread&, Background) {}
 #endif // WIN32
 
-} // namespace ghoul::thread
+} // namespace openspace::thread

@@ -240,7 +240,7 @@ void SettingsDialog::createWidgets() {
                     _currentEdit.visibility = Visibility::Developer;
                 }
                 else {
-                    throw ghoul::MissingCaseException();
+                    throw MissingCaseException();
                 }
 
                 updateSaveButton();

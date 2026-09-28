@@ -80,7 +80,7 @@ Documentation RenderableCrawlingLine::Documentation() {
     );
 }
 
-RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictionary)
+RenderableCrawlingLine::RenderableCrawlingLine(const Dictionary& dictionary)
     : Renderable(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

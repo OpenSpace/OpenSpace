@@ -76,7 +76,7 @@ FieldlinesState FieldlinesState::createStateFromOsfls(const std::string& path) {
     FieldlinesState s;
     const bool success = s.loadStateFromOsfls(path);
     if (!success) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Failed to load state from osfls file {}", path
         ));
     }

@@ -51,7 +51,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    explicit RenderableConstellationsBase(const ghoul::Dictionary& dictionary);
+    explicit RenderableConstellationsBase(const Dictionary& dictionary);
 
     /**
      * Callback method that gets triggered when `_constellationSelection` changes.

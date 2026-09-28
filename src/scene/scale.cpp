@@ -42,8 +42,7 @@ namespace {
 
         // The time frame in which this `Scale` is applied. If the in-game time is outside
         // this range, no scaling will be applied.
-        std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_timeframe")]];
+        std::optional<Dictionary> timeFrame [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "scale_codegen.cpp"
@@ -54,9 +53,7 @@ Documentation Scale::Documentation() {
     return codegen::doc<Parameters>("core_scale");
 }
 
-ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
-{
+mm_unique_ptr<Scale> Scale::createFromDictionary(const Dictionary& dictionary) {
     ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -69,10 +66,10 @@ ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
     result->setIdentifier("Scale");
     result->_type = p.type;
 
-    return ghoul::mm_unique_ptr<Scale>(result);
+    return mm_unique_ptr<Scale>(result);
 }
 
-Scale::Scale(const ghoul::Dictionary& dictionary)
+Scale::Scale(const Dictionary& dictionary)
     : PropertyOwner({ "Scale" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

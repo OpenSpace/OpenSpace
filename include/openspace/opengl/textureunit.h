@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +26,11 @@
 #define __OPENSPACE_CORE___TEXTUREUNIT___H__
 
 #include <openspace/misc/exception.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <string>
 #include <vector>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 /**
  * This class manages Texture Units and is a wrapper around `GL_TEXTURE0`, `GL_TEXTURE1`,
@@ -98,8 +97,8 @@ private:
 
     /**
      * Initializes the maximum number of texture units using
-     * ghoul::systemcapabilities::SystemCapabilities and marks all texture units as
-     * unused. This method is called the first time a TextureUnit is created.
+     * systemcapabilities::SystemCapabilities and marks all texture units as unused. This
+     * method is called the first time a TextureUnit is created.
      */
     static void initialize();
 
@@ -128,6 +127,6 @@ private:
     static std::vector<bool> _busyUnits;
 };
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl
 
 #endif // __OPENSPACE_CORE___TEXTUREUNIT___H__

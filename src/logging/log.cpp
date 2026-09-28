@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +36,7 @@
 #include <sys/time.h>
 #endif // WIN32
 
-namespace ghoul::logging {
+namespace openspace::logging {
 
 Log::Log(TimeStamping timeStamping, DateStamping dateStamping,
          CategoryStamping categoryStamping, LogLevelStamping logLevelStamping,
@@ -154,4 +153,4 @@ std::string Log::createFullMessageString(LogLevel level, std::string_view catego
 
 void Log::flush() {}
 
-} // namespace ghoul::logging
+} // namespace openspace::logging

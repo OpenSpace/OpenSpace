@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,12 +29,12 @@
 #include <openspace/misc/boolean.h>
 #include <openspace/misc/exception.h>
 #include <openspace/misc/stringconversion.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <string>
 #include <type_traits>
 #include <vector>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 /**
  * A boolean value determining whether we want to enable or disable the debug output.
@@ -192,9 +191,9 @@ using CallbackFunction = void (*)(Source source, Type type, Severity severity,
  */
 void setDebugCallback(CallbackFunction callback);
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl
 
-namespace ghoul {
+namespace openspace {
 
 /**
  * Converts a string with a \p value into a opengl::debug::Source object.
@@ -216,7 +215,7 @@ constexpr opengl::Source from_string(std::string_view value) {
     if (value == "Other") { return opengl::Source::Other; }
     if (value == "Don't care") { return opengl::Source::DontCare; }
 
-    throw ghoul::RuntimeError(std::format("Unrecognized debug source '{}'", value));
+    throw RuntimeError(std::format("Unrecognized debug source '{}'", value));
 }
 
 /**
@@ -269,7 +268,7 @@ constexpr opengl::Severity from_string(std::string_view value) {
  * are: "API", "Window System", "Shader Compiler", "Third Party", "Application", "Other",
  * and "Don't care".
  *
- * \param value The ghoul::opengl::debug::Source that is converted into a string
+ * \param value The opengl::debug::Source that is converted into a string
  * \return The string representation of the \p value
  */
 template <>
@@ -291,7 +290,7 @@ inline std::string to_string(const opengl::Source& value) {
  * are: "Error", "Deprecated", "Undefined", "Portability", "Performance", "Marker",
  * "Push group", "Pop group", "Other", and "Don't care".
  *
- * \param value The ghoul::opengl::debug::Type that is converted into a string
+ * \param value The opengl::debug::Type that is converted into a string
  * \return The string representation of the \p value
  */
 template <>
@@ -315,7 +314,7 @@ inline std::string to_string(const opengl::Type& value) {
  * Converts the \p value object into its string representation. The valid return values
  * are: "High", "Medium", "Low", and "Notification".
  *
- * \param value The ghoul::opengl::debug::Severity that is converted into a string
+ * \param value The opengl::debug::Severity that is converted into a string
  * \return The string representation of the \p value
  */
 template <>
@@ -329,6 +328,6 @@ inline std::string to_string(const opengl::Severity& value) {
     }
 }
 
-} // namespace ghoul
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___DEBUGCONTEXT___H__

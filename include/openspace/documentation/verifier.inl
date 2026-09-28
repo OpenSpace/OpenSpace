@@ -35,19 +35,19 @@
 namespace openspace {
 
 template <>
-TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dict,
+TestResult TemplateVerifier<glm::ivec2>::operator()(const Dictionary& dict,
     const std::string& key) const;
 
 template <>
-TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dict,
+TestResult TemplateVerifier<glm::ivec3>::operator()(const Dictionary& dict,
     const std::string& key) const;
 
 template <>
-TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dict,
+TestResult TemplateVerifier<glm::ivec4>::operator()(const Dictionary& dict,
     const std::string& key) const;
 
 template <typename T>
-TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
+TestResult TemplateVerifier<T>::operator()(const Dictionary& dict,
                                            const std::string& key) const
 {
     TestResult res;
@@ -242,7 +242,7 @@ OperatorVerifier<T, Operator>::OperatorVerifier(typename T::Type val)
 {}
 
 template <typename T, typename Operator>
-TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& dict,
+TestResult OperatorVerifier<T, Operator>::operator()(const Dictionary& dict,
                                                      const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
@@ -299,32 +299,32 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
 
 template <typename T>
 std::string LessVerifier<T>::documentation() const {
-    return std::format("Less than: {}", ghoul::to_string(value));
+    return std::format("Less than: {}", openspace::to_string(value));
 }
 
 template <typename T>
 std::string LessEqualVerifier<T>::documentation() const {
-    return std::format("Less or equal to: {}", ghoul::to_string(value));
+    return std::format("Less or equal to: {}", openspace::to_string(value));
 }
 
 template <typename T>
 std::string GreaterVerifier<T>::documentation() const {
-    return std::format("Greater than: {}", ghoul::to_string(value));
+    return std::format("Greater than: {}", openspace::to_string(value));
 }
 
 template <typename T>
 std::string GreaterEqualVerifier<T>::documentation() const {
-    return std::format("Greater or equal to: {}", ghoul::to_string(value));
+    return std::format("Greater or equal to: {}", openspace::to_string(value));
 }
 
 template <typename T>
 std::string EqualVerifier<T>::documentation() const {
-    return std::format("Equal to: {}", ghoul::to_string(value));
+    return std::format("Equal to: {}", openspace::to_string(value));
 }
 
 template <typename T>
 std::string UnequalVerifier<T>::documentation() const {
-    return std::format("Unequal to: {}", ghoul::to_string(value));
+    return std::format("Unequal to: {}", openspace::to_string(value));
 }
 
 template <typename T>
@@ -333,7 +333,7 @@ InListVerifier<T>::InListVerifier(std::vector<typename T::Type> vals)
 {}
 
 template <typename T>
-TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
+TestResult InListVerifier<T>::operator()(const Dictionary& dict,
                                          const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
@@ -426,7 +426,7 @@ NotInListVerifier<T>::NotInListVerifier(std::vector<typename T::Type> vals)
 {}
 
 template <typename T>
-TestResult NotInListVerifier<T>::operator()(const ghoul::Dictionary& dict,
+TestResult NotInListVerifier<T>::operator()(const Dictionary& dict,
                                             const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
@@ -511,31 +511,31 @@ InRangeVerifier<T>::InRangeVerifier(typename T::Type l, typename T::Type u)
     if constexpr (std::is_same_v<IntVector2Verifier, T> ||
                   std::is_same_v<DoubleVector2Verifier, T>)
     {
-        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
-        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+        assert_msg(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        assert_msg(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
     }
     else if constexpr (std::is_same_v<IntVector3Verifier, T> ||
                        std::is_same_v<DoubleVector3Verifier, T>)
     {
-        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
-        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
-        ghoul_assert(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
+        assert_msg(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        assert_msg(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+        assert_msg(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
     }
     else if constexpr (std::is_same_v<IntVector4Verifier, T> ||
                        std::is_same_v<DoubleVector4Verifier, T>)
     {
-        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
-        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
-        ghoul_assert(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
-        ghoul_assert(lower.w <= upper.w, "lower must be smaller or equal to upper for w");
+        assert_msg(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        assert_msg(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+        assert_msg(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
+        assert_msg(lower.w <= upper.w, "lower must be smaller or equal to upper for w");
     }
     else {
-        ghoul_assert(lower <= upper, "lower must be smaller or equal to upper");
+        assert_msg(lower <= upper, "lower must be smaller or equal to upper");
     }
 }
 
 template <typename T>
-TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
+TestResult InRangeVerifier<T>::operator()(const Dictionary& dict,
                                           const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
@@ -596,7 +596,7 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
 template <typename T>
 std::string InRangeVerifier<T>::documentation() const {
     return std::format(
-        "In range: ( {}, {})", ghoul::to_string(lower), ghoul::to_string(upper)
+        "In range: ( {}, {})", openspace::to_string(lower), openspace::to_string(upper)
     );
 }
 
@@ -608,32 +608,33 @@ NotInRangeVerifier<T>::NotInRangeVerifier(typename T::Type l, typename T::Type u
     if constexpr (std::is_same_v<IntVector2Verifier, T> ||
                   std::is_same_v<DoubleVector2Verifier, T>)
     {
-        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
-        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+        assert_msg(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        assert_msg(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
     }
     else if constexpr (std::is_same_v<IntVector3Verifier, T> ||
                        std::is_same_v<DoubleVector3Verifier, T>)
     {
-        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
-        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
-        ghoul_assert(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
+        assert_msg(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        assert_msg(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+        assert_msg(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
     }
     else if constexpr (std::is_same_v<IntVector4Verifier, T> ||
                        std::is_same_v<DoubleVector4Verifier, T>)
     {
-        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
-        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
-        ghoul_assert(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
-        ghoul_assert(lower.w <= upper.w, "lower must be smaller or equal to upper for w");
+        assert_msg(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        assert_msg(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+        assert_msg(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
+        assert_msg(lower.w <= upper.w, "lower must be smaller or equal to upper for w");
     }
     else {
-        ghoul_assert(lower <= upper, "lower must be smaller or equal to upper");
+        assert_msg(lower <= upper, "lower must be smaller or equal to upper");
     }
 }
 
 template <typename T>
-TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
-                                             const std::string& key) const {
+TestResult NotInRangeVerifier<T>::operator()(const Dictionary& dict,
+                                             const std::string& key) const
+{
     TestResult res = T::operator()(dict, key);
     if (!res.success) {
         return res;
@@ -693,7 +694,8 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
 template <typename T>
 std::string NotInRangeVerifier<T>::documentation() const {
     return std::format(
-        "Not in range: ( {}, {} )", ghoul::to_string(lower), ghoul::to_string(upper)
+        "Not in range: ( {}, {} )",
+        openspace::to_string(lower), openspace::to_string(upper)
     );
 }
 

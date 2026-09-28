@@ -42,7 +42,7 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
         // Iterate over key bindings
         auto ret = _keyLua.equal_range({ key, modifier });
         for (auto it = ret.first; it != ret.second; it++) {
-            ghoul_assert(!it->second.empty(), "Action must not be empty");
+            assert_msg(!it->second.empty(), "Action must not be empty");
             if (!global::actionManager->hasAction(it->second)) {
                 // Silently ignoring the unknown action as the user might have intended to
                 // bind a key to multiple actions, only one of which could be defined
@@ -50,7 +50,7 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
             }
             global::actionManager->triggerAction(
                 it->second,
-                ghoul::Dictionary(),
+                Dictionary(),
                 ActionManager::ShouldBeSynchronized::Yes,
                 ActionManager::ShouldBeLogged::Yes
             );
@@ -73,7 +73,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string actio
         );
     }
 #endif // WIN32
-    ghoul_assert(!action.empty(), "Action must not be empty");
+    assert_msg(!action.empty(), "Action must not be empty");
 
     const KeyWithModifier km = { key, modifier };
     _keyLua.insert({ km, std::move(action) });

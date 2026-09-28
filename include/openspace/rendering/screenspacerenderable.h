@@ -37,16 +37,13 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <memory>
 
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-        class TextureUnit;
-    } // namespace opengl
-    class Dictionary;
-} // namespace ghoul
-
 namespace openspace {
 
+namespace opengl {
+    class ProgramObject;
+    class TextureUnit;
+} // namespace opengl
+class Dictionary;
 struct Documentation;
 struct RenderData;
 
@@ -60,12 +57,12 @@ struct RenderData;
 class ScreenSpaceRenderable : public PropertyOwner, public Fadeable {
 public:
     static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+        const Dictionary& dictionary);
 
     static constexpr std::string_view KeyName = "Name";
     static constexpr std::string_view KeyIdentifier = "Identifier";
 
-    explicit ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceRenderable(const Dictionary& dictionary);
     ~ScreenSpaceRenderable() override;
 
     struct RenderData {
@@ -104,7 +101,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void createShaders(ghoul::Dictionary dict = ghoul::Dictionary());
+    void createShaders(Dictionary dict = Dictionary());
     std::string makeUniqueIdentifier(std::string name);
 
     virtual glm::mat4 scaleMatrix();
@@ -121,7 +118,7 @@ protected:
     void draw(const glm::mat4& modelTransform, const RenderData& renderData,
         bool useAcceleratedRendering = false);
 
-    virtual void bindTexture(ghoul::opengl::TextureUnit& unit) = 0;
+    virtual void bindTexture(opengl::TextureUnit& unit) = 0;
     virtual void unbindTexture();
 
     /**
@@ -173,7 +170,7 @@ protected:
 
     glm::ivec2 _objectSize = glm::ivec2(0);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<opengl::ProgramObject> _shader;
 
 private:
     UniformCache(color, opacity, blackoutFactor, hue, value, saturation, mvpMatrix, tex,

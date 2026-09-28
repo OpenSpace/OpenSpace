@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,7 +20,7 @@
  * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ ****************************************************************************************/
 
 #ifndef __OPENSPACE_CORE___THREAD___H__
 #define __OPENSPACE_CORE___THREAD___H__
@@ -29,7 +28,7 @@
 #include <openspace/misc/boolean.h>
 #include <thread>
 
-namespace ghoul::thread {
+namespace openspace::thread {
 
 /**
  * Determines the priority class for a specific threads. The available classes described
@@ -67,8 +66,8 @@ BooleanType(Background);
  * \param priorityClass The ThreadPriorityClass that is to be set for \p t
  * \param priorityLevel The ThreadPriorityLevel that is to be set for \p t
  *
- * \throw ghoul::RuntimeError If a non-recoverable error occurs while setting the thread
- *        class or level
+ * \throw RuntimeError If a non-recoverable error occurs while setting the thread class or
+ *        level
  */
 void setPriority(std::thread& t, ThreadPriorityClass priorityClass,
     ThreadPriorityLevel priorityLevel
@@ -86,6 +85,6 @@ void setPriority(std::thread& t, ThreadPriorityClass priorityClass,
  */
 void setThreadBackground(std::thread& t, Background background);
 
-} // namespace ghoul::thread
+} // namespace openspace::thread
 
 #endif // __OPENSPACE_CORE___THREAD___H__

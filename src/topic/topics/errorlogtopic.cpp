@@ -37,7 +37,7 @@ namespace openspace {
 
 ErrorLogTopic::~ErrorLogTopic() {
     if (_log) {
-        ghoul::logging::LogManager::ref().removeLog(_log);
+        logging::LogManager::ref().removeLog(_log);
         _log = nullptr;
     }
     if (_dataCallbackHandle.has_value()) {
@@ -55,8 +55,7 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json) {
         if (settingsJson != json.end()) {
             if (auto ll = settingsJson->find("logLevel"); ll != settingsJson->end()) {
                 std::string level = ll->get<std::string>();
-                _logSettings.logLevel =
-                    ghoul::from_string<ghoul::logging::LogLevel>(level);
+                _logSettings.logLevel = from_string<logging::LogLevel>(level);
             }
 
             if (auto ts = settingsJson->find("timeStamping"); ts != settingsJson->end()) {
@@ -89,16 +88,16 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json) {
     if (event == "stop_subscription") {
         _isSubscribedTo = false;
 
-        ghoul::logging::LogManager::ref().removeLog(_log);
+        logging::LogManager::ref().removeLog(_log);
         _log = nullptr;
     }
 
     if (event == "update_log_level") {
-        ghoul::logging::LogManager::ref().removeLog(_log);
+        logging::LogManager::ref().removeLog(_log);
         _log = nullptr;
 
         std::string level = json.at("logLevel").get<std::string>();
-        _logSettings.logLevel = ghoul::from_string<ghoul::logging::LogLevel>(level);
+        _logSettings.logLevel = from_string<logging::LogLevel>(level);
         createLog();
     }
 }
@@ -110,9 +109,11 @@ void ErrorLogTopic::createLog() {
 
     // _logSettings is an anonymous struct hence the use of auto
     const auto logSettings = _logSettings;
-    auto onLogging = [this, logSettings](std::string_view timeStamp, std::string_view dateStamp,
-                            std::string_view category, ghoul::logging::LogLevel level,
-                            std::string_view message)
+    auto onLogging = [this, logSettings](std::string_view timeStamp,
+                                         std::string_view dateStamp,
+                                         std::string_view category,
+                                         logging::LogLevel level,
+                                         std::string_view message)
     {
         nlohmann::json payload;
         payload["message"] = message;
@@ -130,7 +131,7 @@ void ErrorLogTopic::createLog() {
         }
 
         if (logSettings.isLogLevelStamping) {
-            payload["level"] = ghoul::to_string(level);
+            payload["level"] = to_string(level);
         }
 
         // Queue the message to be sent
@@ -140,7 +141,7 @@ void ErrorLogTopic::createLog() {
 
     auto log = std::make_unique<NotificationLog>(onLogging, _logSettings.logLevel);
     _log = log.get();
-    ghoul::logging::LogManager::ref().addLog(std::move(log));
+    logging::LogManager::ref().addLog(std::move(log));
 
     if (!_dataCallbackHandle.has_value()) {
         _dataCallbackHandle = global::server->addPreSyncCallback(

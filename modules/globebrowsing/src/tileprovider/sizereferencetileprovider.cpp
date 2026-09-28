@@ -50,7 +50,7 @@ Documentation SizeReferenceTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_sizereference");
 }
 
-SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
+SizeReferenceTileProvider::SizeReferenceTileProvider(const Dictionary& dictionary)
     : TextTileProvider(tileTextureInitData(layers::Group::ID::ColorLayers, false))
 {
     ZoneScoped;

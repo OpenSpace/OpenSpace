@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,14 +31,14 @@
 #include <typeinfo>
 #include <utility>
 
-namespace ghoul::systemcapabilities {
+namespace openspace::systemcapabilities {
 
 SystemCapabilities SystemCapabilities::_systemCapabilities;
 bool SystemCapabilities::_isInitialized = false;
 
 SystemCapabilities::CapabilitiesComponentNotFoundError::
 CapabilitiesComponentNotFoundError()
-    : ghoul::RuntimeError("SystemCapabilities not found", "SystemCapabilities")
+    : RuntimeError("SystemCapabilities not found", "SystemCapabilities")
 {}
 
 SystemCapabilities& SystemCapabilities::ref() {
@@ -85,7 +84,7 @@ void SystemCapabilities::logCapabilities(
 void SystemCapabilities::addComponent(
                                    std::unique_ptr<SystemCapabilitiesComponent> component)
 {
-    ghoul_assert(component != nullptr, "Component must not be nullptr");
+    assert_msg(component != nullptr, "Component must not be nullptr");
 
     const auto it = std::find_if(
         _components.cbegin(),
@@ -98,8 +97,8 @@ void SystemCapabilities::addComponent(
         }
     );
 
-    ghoul_assert(it == _components.cend(), "Component must not have been added before");
+    assert_msg(it == _components.cend(), "Component must not have been added before");
     _components.push_back(std::move(component));
 }
 
-} // namespace ghoul::systemcapabilities
+} // namespace openspace::systemcapabilities

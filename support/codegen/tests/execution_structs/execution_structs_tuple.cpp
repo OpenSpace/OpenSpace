@@ -31,6 +31,8 @@
 #include <tuple>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(Tuple)]] Parameters {
         // boolDouble value documentation
@@ -97,28 +99,28 @@ namespace {
 TEST_CASE("Execution/Structs/Tuple:  Bake", "[Execution][Structs]") {
     using namespace std::string_literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", true);
         e.setValue("2", 1.2);
         d.setValue("BoolDoubleValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 2.2);
         e.setValue("2", "abc"s);
         d.setValue("FloatStringValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(1.0, 2.0));
         e.setValue("2", glm::dvec3(3.0, 4.0, 5.0));
         e.setValue("3", glm::dvec4(6.0, 7.0, 8.0, 9.0));
         d.setValue("IvecsValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(1.1, 2.2));
         e.setValue("2", glm::dvec3(3.3, 4.4, 5.5));
         e.setValue("3", glm::dvec4(6.6, 7.7, 8.8, 9.9));
@@ -128,14 +130,14 @@ TEST_CASE("Execution/Structs/Tuple:  Bake", "[Execution][Structs]") {
         d.setValue("Vecmat1", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dmat2x2(1.1, 2.2, 3.3, 4.4));
         e.setValue("2", glm::dmat3x3(5.5, 6.6, 7.7, 8.8, 9.9, 10.10, 11.11, 12.12, 13.13));
         e.setValue("3", glm::dmat2x4(14.14, 15.15, 16.16, 17.17, 18.18, 19.19, 20.20, 21.21));
         d.setValue("Vecmat2", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(1.1, 2.2));
         e.setValue("2", glm::dvec3(3.3, 4.4, 5.5));
         e.setValue("3", glm::dvec4(6.6, 7.7, 8.8, 9.9));
@@ -147,9 +149,9 @@ TEST_CASE("Execution/Structs/Tuple:  Bake", "[Execution][Structs]") {
         d.setValue("RestValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("1", "abc"s);
             f.setValue("2", "def"s);
             f.setValue("3", "ghi"s);
@@ -159,10 +161,10 @@ TEST_CASE("Execution/Structs/Tuple:  Bake", "[Execution][Structs]") {
         d.setValue("TupleVector", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "abc"s);
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("1", "def"s);
             f.setValue("2", "ghi"s);
             f.setValue("3", "jkl"s);
@@ -171,25 +173,25 @@ TEST_CASE("Execution/Structs/Tuple:  Bake", "[Execution][Structs]") {
         d.setValue("TupleVector2", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 1.0);
         e.setValue("2", "abc"s);
         d.setValue("MultipleTupleA", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "abc"s);
         e.setValue("2", 1.0);
         d.setValue("MultipleTupleB", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 1.0);
         e.setValue("2", "abc"s);
         d.setValue("MultipleTupleA2", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "Value2"s);
         e.setValue("2", 1.1);
         d.setValue("TupleEnumFloat", e);
@@ -237,19 +239,19 @@ TEST_CASE("Execution/Structs/Tuple:  Bake", "[Execution][Structs]") {
     CHECK(!p1.optionalTupleEnumFloat.has_value());
 
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", true);
         e.setValue("2", 2.0);
         d.setValue("OptionalValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "abc"s);
         e.setValue("2", 2.0);
         d.setValue("MultipleTupleB2", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "Value3"s);
         e.setValue("2", 1.1);
         d.setValue("OptionalTupleEnumFloat", e);

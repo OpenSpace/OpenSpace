@@ -95,7 +95,7 @@ void BrowserInstance::initialize() {
 }
 
 void BrowserInstance::loadUrl(const std::string& url) {
-    ghoul_assert(_isInitialized, "BrowserInstance should be initialized");
+    assert_msg(_isInitialized, "BrowserInstance should be initialized");
 
     if (!url.empty()) {
         LDEBUG(std::format("Loading URL '{}'", url));

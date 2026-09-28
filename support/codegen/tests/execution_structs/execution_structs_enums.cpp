@@ -30,6 +30,8 @@
 #include <optional>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(Enums)]] Parameters {
         // enum A documentation
@@ -85,12 +87,12 @@ namespace {
 TEST_CASE("Execution/Structs/Enums:  Bake", "[Execution][Structs]") {
     using namespace std::string_literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("EnumAValue", "Value1"s);
     d.setValue("EnumBValue", "value2"s);
 
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "Value3"s);
         e.setValue("2", "value2"s);
         e.setValue("3", "Value1"s);

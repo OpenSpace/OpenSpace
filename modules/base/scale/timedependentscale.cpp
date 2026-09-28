@@ -92,7 +92,7 @@ Documentation TimeDependentScale::Documentation() {
     );
 }
 
-TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
+TimeDependentScale::TimeDependentScale(const Dictionary& dictionary)
     : Scale(dictionary)
     , _referenceDate(ReferenceDateInfo, "")
     , _speed(SpeedInfo, 1.0, 0.0, 1e12)

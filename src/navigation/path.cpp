@@ -63,7 +63,7 @@ namespace {
         auto isEnabled = [](const Renderable* r) {
             Property* prop = r->property("Enabled");
             BoolProperty* boolProp = dynamic_cast<BoolProperty*>(prop);
-            ghoul_assert(boolProp, "Enabled is not a boolean property");
+            assert_msg(boolProp, "Enabled is not a boolean property");
             return boolProp;
         };
 
@@ -139,11 +139,11 @@ namespace {
 
         // (NavigationState): A navigation state that will be the target of the resulting
         // path.
-        std::optional<ghoul::Dictionary> navigationState
+        std::optional<Dictionary> navigationState
             [[codegen::reference("core_navigationstate")]];
 
         // A navigation state that determines the start state for the camera path.
-        std::optional<ghoul::Dictionary> startState
+        std::optional<Dictionary> startState
             [[codegen::reference("core_navigationstate")]];
 
         enum class [[codegen::map(openspace::Path::Type)]] PathType {
@@ -211,8 +211,8 @@ Path::Path(Waypoint start, Waypoint end, Type type, std::optional<float> duratio
     // rotations for short paths. Unless of course someone specified a duration, then use
     // that one.
     if (_type == Type::Linear && !duration.has_value()) {
-        const glm::dvec3 a = ghoul::viewDirection(_start.rotation());
-        const glm::dvec3 b = ghoul::viewDirection(_end.rotation());
+        const glm::dvec3 a = viewDirection(_start.rotation());
+        const glm::dvec3 b = viewDirection(_end.rotation());
         const float angle = static_cast<float>(std::acos(glm::dot(a, b)));
 
         // Seconds per pi angles. Per default, it takes 5 seconds to turn 90 degrees
@@ -315,7 +315,7 @@ bool Path::hasReachedEnd() const {
     const bool isPositionFinished = (_traveledDistance / pathLength()) >= 1.0;
 
     constexpr double RotationEpsilon = 0.0001;
-    const bool isRotationFinished = ghoul::isSameOrientation(
+    const bool isRotationFinished = isSameOrientation(
         _prevPose.rotation,
         _end.rotation(),
         RotationEpsilon
@@ -334,7 +334,7 @@ void Path::resetPlaybackVariables() {
 CameraPose Path::linearInterpolatedPose(double distance, double displacement,
                                         double speedScale)
 {
-    ghoul_assert(_type == Type::Linear, "Path type must be linear");
+    assert_msg(_type == Type::Linear, "Path type must be linear");
     const double relativeDistance = distance / pathLength();
 
     const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
@@ -402,13 +402,13 @@ glm::dquat Path::interpolateRotation(double t) const {
         case Type::AvoidCollisionWithLookAt:
             return lookAtTargetsRotation(t);
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 
 glm::dquat Path::easedSlerpRotation(double t) const {
     double tScaled = shiftAndScale(t, 0.1, 0.9);
-    tScaled = ghoul::sineEaseInOut(tScaled);
+    tScaled = sineEaseInOut(tScaled);
     return glm::slerp(_start.rotation(), _end.rotation(), tScaled);
 }
 
@@ -426,28 +426,28 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
     if (t < t1) {
         // Compute a position in front of the camera at the start orientation
         const double inFrontDistance = glm::distance(startPos, startNodePos);
-        const glm::dvec3 viewDir = ghoul::viewDirection(_start.rotation());
+        const glm::dvec3 viewDir = viewDirection(_start.rotation());
         const glm::dvec3 inFrontOfStart = startPos + inFrontDistance * viewDir;
 
         const double tScaled = std::clamp(t / t1, 0.0, 1.0);
-        const double tEased = ghoul::cubicEaseInOut(tScaled);
-        lookAtPos = ghoul::interpolateLinear(tEased, inFrontOfStart, startNodePos);
+        const double tEased = cubicEaseInOut(tScaled);
+        lookAtPos = interpolateLinear(tEased, inFrontOfStart, startNodePos);
     }
     else if (t <= t2) {
         const double tScaled = std::clamp((t - t1) / (t2 - t1), 0.0, 1.0);
-        const double tEased = ghoul::cubicEaseInOut(tScaled);
-        lookAtPos = ghoul::interpolateLinear(tEased, startNodePos, endNodePos);
+        const double tEased = cubicEaseInOut(tScaled);
+        lookAtPos = interpolateLinear(tEased, startNodePos, endNodePos);
     }
     else {
         // (t > t2)
         // Compute a position in front of the camera at the end orientation
         const double inFrontDistance = glm::distance(endPos, endNodePos);
-        const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
+        const glm::dvec3 viewDir = viewDirection(_end.rotation());
         const glm::dvec3 inFrontOfEnd = endPos + inFrontDistance * viewDir;
 
         const double tScaled = std::clamp((t - t2) / (1.0 - t2), 0.0, 1.0);
-        const double tEased = ghoul::cubicEaseInOut(tScaled);
-        lookAtPos = ghoul::interpolateLinear(tEased, endNodePos, inFrontOfEnd);
+        const double tEased = cubicEaseInOut(tScaled);
+        lookAtPos = interpolateLinear(tEased, endNodePos, inFrontOfEnd);
     }
 
     // Handle up vector separately
@@ -455,12 +455,12 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
     // camera, but just the "hint" up vector for the lookAt. This leads to fast rolling
     // when the up vector gets close to the camera's forward vector. Should be improved so
     // any rolling is spread out over the entire motion instead
-    const double tUp = ghoul::sineEaseInOut(t);
+    const double tUp = sineEaseInOut(t);
     const glm::dvec3 startUp = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
     const glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
-    const glm::dvec3 up = ghoul::interpolateLinear(tUp, startUp, endUp);
+    const glm::dvec3 up = interpolateLinear(tUp, startUp, endUp);
 
-    return ghoul::lookAtQuaternion(_curve->positionAt(t), lookAtPos, up);
+    return lookAtQuaternion(_curve->positionAt(t), lookAtPos, up);
 }
 
 double Path::speedAlongPath(double traveledDistance) const {
@@ -517,7 +517,7 @@ double Path::speedAlongPath(double traveledDistance) const {
         dampeningFactor = remainingDistance / closeUpDistance;
     }
     dampeningFactor = std::clamp(dampeningFactor, 0.0, 1.0);
-    dampeningFactor = ghoul::sineEaseOut(dampeningFactor);
+    dampeningFactor = sineEaseOut(dampeningFactor);
 
     // Prevent multiplying with 0 (and hence a speed of 0.0 => no movement)
     dampeningFactor += 0.01;
@@ -528,7 +528,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     return _speedFactorFromDuration * speed * dampeningFactor;
 }
 
-Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
+Path createPathFromDictionary(const Dictionary& dictionary,
                               std::optional<Path::Type> forceType)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -555,14 +555,14 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     switch (p.targetType) {
         case Parameters::TargetType::NavigationState: {
             if (!p.navigationState.has_value()) {
-                throw ghoul::RuntimeError("A navigation state is required");
+                throw RuntimeError("A navigation state is required");
             }
 
             const NavigationState navigationState = NavigationState(*p.navigationState);
 
             const SceneGraphNode* targetNode = sceneGraphNode(navigationState.anchor);
             if (!targetNode) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Could not find anchor node '{}' in provided navigation state",
                     navigationState.anchor
                 ));
@@ -573,14 +573,14 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
         }
         case Parameters::TargetType::Node: {
             if (!p.target.has_value()) {
-                throw ghoul::RuntimeError("A target node is required");
+                throw RuntimeError("A target node is required");
             }
 
             const std::string nodeIdentifier = p.target.value();
             const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
 
             if (!targetNode) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Could not find target node '{}'", nodeIdentifier
                 ));
             }

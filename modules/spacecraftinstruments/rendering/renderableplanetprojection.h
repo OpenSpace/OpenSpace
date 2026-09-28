@@ -44,14 +44,14 @@ namespace openspace {
 
 class RenderablePlanetProjection : public Renderable {
 public:
-    explicit RenderablePlanetProjection(const ghoul::Dictionary& dict);
+    explicit RenderablePlanetProjection(const Dictionary& dict);
 
     void initializeGL() override;
     void deinitializeGL() override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
-    ghoul::opengl::Texture& baseTexture() const;
+    opengl::Texture& baseTexture() const;
 
     static openspace::Documentation Documentation();
 
@@ -61,7 +61,7 @@ private:
     void createSphere();
 
     glm::mat4 attitudeParameters(double time, const glm::vec3& up);
-    void imageProjectGPU(const ghoul::opengl::Texture& projectionTexture,
+    void imageProjectGPU(const opengl::Texture& projectionTexture,
         const glm::mat4& projectorMatrix);
 
     ProjectionComponent _projectionComponent;
@@ -74,8 +74,8 @@ private:
     StringProperty _addHeightMapTexturePath;
     bool _heightMapTextureDirty = false;
 
-    ghoul::opengl::ProgramObject* _programObject = nullptr;
-    ghoul::opengl::ProgramObject* _fboProgramObject = nullptr;
+    opengl::ProgramObject* _programObject = nullptr;
+    opengl::ProgramObject* _fboProgramObject = nullptr;
     UniformCache(sunPos, modelTransform, modelViewProjectionTransform, hasBaseMap,
         hasHeightMap, heightExaggeration, meridianShift, ambientBrightness,
         projectionFading, baseTexture, projectionTexture,
@@ -84,8 +84,8 @@ private:
     UniformCache(projectionTexture, projectorMatrix, modelTransform, boresight,
         radius, segments) _fboUniformCache;
 
-    std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
+    std::unique_ptr<opengl::Texture> _baseTexture;
+    std::unique_ptr<opengl::Texture> _heightMapTexture;
 
     FloatProperty _heightExaggeration;
     BoolProperty _meridianShift;

@@ -26,7 +26,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <openspace/glm.h>
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/lua/lua_helper.h>
 #include <random>
 #include <iostream>
@@ -34,6 +34,8 @@
 namespace {
     constexpr int NumberFuzzTests = 1000;
 } // namespace
+
+using namespace openspace;
 
 TEST_CASE("LuaConversion: LuaExecution", "[luaconversion]") {
     lua_State* state = luaL_newstate();
@@ -57,9 +59,9 @@ TEMPLATE_TEST_CASE("LuaConversion", "[luaconversion]", bool, char, signed char,
 
     const T val(1);
 
-    ghoul::lua::push(state, val);
+    lua::push(state, val);
 
-    const T value = ghoul::lua::value<T>(state);
+    const T value = lua::value<T>(state);
     CHECK(value == Catch::Approx(val));
 
     lua_close(state);
@@ -68,9 +70,9 @@ TEMPLATE_TEST_CASE("LuaConversion", "[luaconversion]", bool, char, signed char,
 TEST_CASE("LuaConversion: Const char*", "[luaconversion]") {
     lua_State* state = luaL_newstate();
 
-    ghoul::lua::push(state, "value");
+    lua::push(state, "value");
 
-    const char* value = ghoul::lua::value<const char*>(state);
+    const char* value = lua::value<const char*>(state);
     CHECK(std::string_view(value) == "value");
 
     lua_close(state);
@@ -83,9 +85,9 @@ TEMPLATE_TEST_CASE("LuaConversion: String", "[luaconversion]", std::string,
 
     lua_State* state = luaL_newstate();
 
-    ghoul::lua::push(state, T("value"));
+    lua::push(state, T("value"));
 
-    const T value = ghoul::lua::value<T>(state);
+    const T value = lua::value<T>(state);
     CHECK(value == "value");
 
     lua_close(state);
@@ -94,9 +96,9 @@ TEMPLATE_TEST_CASE("LuaConversion: String", "[luaconversion]", std::string,
 TEST_CASE("LuaConversion: String", "[luaconversion]") {
     lua_State* state = luaL_newstate();
 
-    ghoul::lua::push(state, "value");
+    lua::push(state, "value");
 
-    const std::string value = ghoul::lua::value<std::string>(state);
+    const std::string value = lua::value<std::string>(state);
     CHECK(value == "value");
 
     lua_close(state);
@@ -117,10 +119,10 @@ TEMPLATE_TEST_CASE("LuaConversion - Glm Types", "[luaconversion]", glm::vec2, gl
 
     const T val(1);
 
-    ghoul::lua::push(state, val);
+    lua::push(state, val);
 
-    const T value = ghoul::lua::value<T>(state);
-    CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+    const T value = lua::value<T>(state);
+    CHECK(to_string(value) == to_string(val));
     CHECK(value == val);
 
     lua_close(state);
@@ -142,9 +144,9 @@ TEMPLATE_TEST_CASE("LuaConversion Fuzz <short", "[luaconversion]", char, signed 
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
+        const T value = lua::value<T>(state);
         CHECK(value == val);
     }
 
@@ -167,9 +169,9 @@ TEMPLATE_TEST_CASE("LuaConversion Fuzz >short", "[luaconversion]", short, unsign
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
+        const T value = lua::value<T>(state);
         CHECK(value == val);
     }
 
@@ -193,9 +195,9 @@ TEMPLATE_TEST_CASE("LuaConversion Fuzz Limited Signed", "[luaconversion]", long,
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
+        const T value = lua::value<T>(state);
         CHECK(value == val);
     }
 
@@ -219,9 +221,9 @@ TEMPLATE_TEST_CASE("LuaConversion Fuzz Limited Unsigned", "[luaconversion]",
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
+        const T value = lua::value<T>(state);
         CHECK(value == val);
     }
 
@@ -244,9 +246,9 @@ TEMPLATE_TEST_CASE("LuaConversion Float Fuzz", "[luaconversion]", float, double,
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
+        const T value = lua::value<T>(state);
         CHECK(value == Catch::Approx(val));
 
         if (typeid(T) == typeid(long double)) {
@@ -276,10 +278,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Vec2 Float Fuzz", "[luaconversion]", glm::vec
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -301,10 +303,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Vec2 Fuzz", "[luaconversion]", glm::ivec2, gl
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -327,10 +329,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Vec3 Float Fuzz", "[luaconversion]", glm::vec
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen), dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -352,10 +354,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Vec3 Fuzz", "[luaconversion]", glm::ivec3, gl
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen), dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -378,10 +380,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Vec4 Float Fuzz", "[luaconversion]", glm::vec
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen), dis(gen), dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -403,10 +405,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Vec4 Fuzz", "[luaconversion]", glm::ivec4, gl
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen), dis(gen), dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -429,10 +431,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Mat2x2 Fuzz", "[luaconversion]", glm::mat2x2,
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen), dis(gen), dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -456,10 +458,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Mat3x3 Fuzz", "[luaconversion]", glm::mat3x3,
         const T val = T(dis(gen), dis(gen), dis(gen), dis(gen), dis(gen), dis(gen),
             dis(gen), dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -484,10 +486,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Mat4x4 Fuzz", "[luaconversion]", glm::mat4x4,
             dis(gen), dis(gen), dis(gen), dis(gen), dis(gen), dis(gen), dis(gen),
             dis(gen), dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -510,10 +512,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Mat2x3 & Mat3x2 Fuzz", "[luaconversion]", glm
     for (int i = 0; i < NumberFuzzTests; i++) {
         const T val = T(dis(gen), dis(gen), dis(gen), dis(gen), dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -537,10 +539,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Mat3x4 & Mat4x3 Fuzz", "[luaconversion]", glm
         const T val = T(dis(gen), dis(gen), dis(gen), dis(gen), dis(gen), dis(gen),
             dis(gen), dis(gen), dis(gen), dis(gen), dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -564,10 +566,10 @@ TEMPLATE_TEST_CASE("LuaConversion: Mat2x4 & Mat4x2 Fuzz", "[luaconversion]", glm
         const T val = T(dis(gen), dis(gen), dis(gen), dis(gen), dis(gen), dis(gen),
             dis(gen), dis(gen));
 
-        ghoul::lua::push(state, val);
+        lua::push(state, val);
 
-        const T value = ghoul::lua::value<T>(state);
-        CHECK(ghoul::to_string(value) == ghoul::to_string(val));
+        const T value = lua::value<T>(state);
+        CHECK(to_string(value) == to_string(val));
         CHECK(value == val);
     }
 
@@ -579,63 +581,63 @@ TEST_CASE("LuaConversion: Variant", "[luaconversion]") {
 
     using T1 = std::variant<double, std::string, glm::ivec2>;
     {
-        ghoul::lua::push(state, "abc");
-        T1 v = ghoul::lua::value<T1>(state);
+        lua::push(state, "abc");
+        T1 v = lua::value<T1>(state);
         REQUIRE(std::holds_alternative<std::string>(v));
         CHECK(std::get<std::string>(v) == "abc");
     }
     {
-        ghoul::lua::push(state, 2.2);
-        T1 v = ghoul::lua::value<T1>(state);
+        lua::push(state, 2.2);
+        T1 v = lua::value<T1>(state);
         REQUIRE(std::holds_alternative<double>(v));
         CHECK(std::get<double>(v) == 2.2);
     }
     {
-        ghoul::lua::push(state, glm::ivec2(3, 4));
-        T1 v = ghoul::lua::value<T1>(state);
+        lua::push(state, glm::ivec2(3, 4));
+        T1 v = lua::value<T1>(state);
         REQUIRE(std::holds_alternative<glm::ivec2>(v));
         CHECK(std::get<glm::ivec2>(v) == glm::ivec2(3, 4));
     }
 
-    using T2 = std::variant<ghoul::Dictionary, int, bool>;
+    using T2 = std::variant<Dictionary, int, bool>;
     {
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", 1.1);
-        ghoul::lua::push(state, d);
-        T2 v = ghoul::lua::value<T2>(state);
-        REQUIRE(std::holds_alternative<ghoul::Dictionary>(v));
-        REQUIRE(std::get<ghoul::Dictionary>(v).hasValue<double>("a"));
-        CHECK(std::get<ghoul::Dictionary>(v).value<double>("a") == 1.1);
+        lua::push(state, d);
+        T2 v = lua::value<T2>(state);
+        REQUIRE(std::holds_alternative<Dictionary>(v));
+        REQUIRE(std::get<Dictionary>(v).hasValue<double>("a"));
+        CHECK(std::get<Dictionary>(v).value<double>("a") == 1.1);
     }
     {
-        ghoul::lua::push(state, 2);
-        T2 v = ghoul::lua::value<T2>(state);
+        lua::push(state, 2);
+        T2 v = lua::value<T2>(state);
         REQUIRE(std::holds_alternative<int>(v));
         CHECK(std::get<int>(v) == 2);
     }
     {
-        ghoul::lua::push(state, true);
-        T2 v = ghoul::lua::value<T2>(state);
+        lua::push(state, true);
+        T2 v = lua::value<T2>(state);
         REQUIRE(std::holds_alternative<bool>(v));
         CHECK(std::get<bool>(v) == true);
     }
 
     using T3 = std::variant<std::string, double, glm::ivec2>;
     {
-        ghoul::lua::push(state, "abc");
-        T3 v = ghoul::lua::value<T3>(state);
+        lua::push(state, "abc");
+        T3 v = lua::value<T3>(state);
         REQUIRE(std::holds_alternative<std::string>(v));
         CHECK(std::get<std::string>(v) == "abc");
     }
     {
-        ghoul::lua::push(state, 2.2);
-        T3 v = ghoul::lua::value<T3>(state);
+        lua::push(state, 2.2);
+        T3 v = lua::value<T3>(state);
         REQUIRE(std::holds_alternative<double>(v));
         CHECK(std::get<double>(v) == 2.2);
     }
     {
-        ghoul::lua::push(state, glm::ivec2(3, 4));
-        T3 v = ghoul::lua::value<T3>(state);
+        lua::push(state, glm::ivec2(3, 4));
+        T3 v = lua::value<T3>(state);
         REQUIRE(std::holds_alternative<glm::ivec2>(v));
         CHECK(std::get<glm::ivec2>(v) == glm::ivec2(3, 4));
     }
@@ -649,13 +651,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, double>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", 1.1);
         d.setValue("b", 2.2);
         d.setValue("c", 3.3);
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -668,13 +670,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, float>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", 1.1);
         d.setValue("b", 2.2);
         d.setValue("c", 3.3);
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -689,13 +691,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
         using namespace std::string_literals;
         using namespace std::string_view_literals;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", "abc"s);
         d.setValue("b", "def"s);
         d.setValue("c", "ghi"s);
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -710,13 +712,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
         using namespace std::string_literals;
         using namespace std::string_view_literals;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", "abc"s);
         d.setValue("b", "def"s);
         d.setValue("c", "ghi"s);
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -729,13 +731,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::vec2>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dvec2(1.1, 2.2));
         d.setValue("b", glm::dvec2(3.3, 4.4));
         d.setValue("c", glm::dvec2(5.5, 6.6));
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -748,13 +750,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::vec3>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dvec3(1.1, 2.2, 3.3));
         d.setValue("b", glm::dvec3(4.4, 5.5, 6.6));
         d.setValue("c", glm::dvec3(7.7, 8.8, 9.9));
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -767,13 +769,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::vec4>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dvec4(1.1, 2.2, 3.3, 4.4));
         d.setValue("b", glm::dvec4(5.5, 6.6, 7.7, 8.8));
         d.setValue("c", glm::dvec4(9.9, 10.10, 11.11, 12.12));
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -786,13 +788,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::ivec2>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dvec2(1.0, 2.0));
         d.setValue("b", glm::dvec2(3.0, 4.0));
         d.setValue("c", glm::dvec2(5.0, 6.0));
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -805,13 +807,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::ivec3>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dvec3(1.0, 2.0, 3.0));
         d.setValue("b", glm::dvec3(4.0, 5.0, 6.0));
         d.setValue("c", glm::dvec3(7.0, 8.0, 9.0));
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -824,13 +826,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::ivec4>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dvec4(1.0, 2.0, 3.0, 4.0));
         d.setValue("b", glm::dvec4(5.0, 6.0, 7.0, 8.0));
         d.setValue("c", glm::dvec4(9.0, 10.0, 11.0, 12.0));
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -843,13 +845,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::mat2x2>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dmat2x2(1.1, 2.2, 3.3, 4.4));
         d.setValue("b", glm::dmat2x2(5.5, 6.6, 7.7, 8.8));
         d.setValue("c", glm::dmat2x2(9.9, 10.10, 11.11, 12.12));
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -862,13 +864,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::mat2x3>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dmat2x3(1.1, 2.2, 3.3, 4.4, 5.5, 6.6));
         d.setValue("b", glm::dmat2x3(7.7, 8.8, 9.9, 10.10, 11.11, 12.12));
         d.setValue("c", glm::dmat2x3(13.13, 14.14, 15.15, 16.16, 17.17, 18.18));
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -881,7 +883,7 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::mat2x4>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dmat2x4(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8));
         d.setValue(
             "b",
@@ -892,8 +894,8 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
             glm::dmat2x4(17.17, 18.18, 19.19, 20.20, 21.21, 22.22, 23.23, 24.24)
         );
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -912,13 +914,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::mat3x2>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dmat3x2(1.1, 2.2, 3.3, 4.4, 5.5, 6.6));
         d.setValue("b", glm::dmat3x2(7.7, 8.8, 9.9, 10.10, 11.11, 12.12));
         d.setValue("c", glm::dmat3x2(13.13, 14.14, 15.15, 16.16, 17.17, 18.18));
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -931,7 +933,7 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::mat3x3>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dmat3x3(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9));
         d.setValue(
             "b",
@@ -942,8 +944,8 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
             glm::dmat3x3(19.19, 20.20, 21.21, 22.22, 23.23, 24.24, 25.25, 26.26, 27.27)
         );
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -972,7 +974,7 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::mat3x4>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue(
             "a",
             glm::dmat3x4(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10, 11.11, 12.12)
@@ -996,8 +998,8 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
             )
         );
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -1034,7 +1036,7 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::mat4x2>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", glm::dmat4x2(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8));
         d.setValue(
             "b",
@@ -1045,8 +1047,8 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
             glm::dmat4x2(17.17, 18.18, 19.19, 20.20, 21.21, 22.22, 23.23, 24.24)
         );
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -1065,7 +1067,7 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::mat4x3>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue(
             "a",
             glm::dmat4x3(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10, 11.11, 12.12)
@@ -1087,8 +1089,8 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
             )
         );
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -1122,7 +1124,7 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, glm::mat4x4>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue(
             "a",
             glm::dmat4x4(
@@ -1151,8 +1153,8 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
             )
         );
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -1189,13 +1191,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, int>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", 1.0);
         d.setValue("b", 2.0);
         d.setValue("c", 3.0);
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -1206,35 +1208,35 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
         CHECK(v["c"] == 3);
     }
     {
-        using T = std::map<std::string, ghoul::Dictionary>;
+        using T = std::map<std::string, Dictionary>;
         using namespace std::string_literals;
         using namespace std::string_view_literals;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("foo", "bar"s);
             d.setValue("a", e);
         }
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("bar", "foo"s);
             d.setValue("b", e);
         }
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 2);
         REQUIRE(v.find("a") != v.end());
         {
-            const ghoul::Dictionary e = v["a"];
+            const Dictionary e = v["a"];
             REQUIRE(e.hasKey("foo"));
             REQUIRE(e.hasValue<std::string>("foo"));
             CHECK(e.value<std::string>("foo") == "bar"sv);
         }
         {
-            const ghoul::Dictionary e = v["b"];
+            const Dictionary e = v["b"];
             REQUIRE(e.hasKey("bar"));
             REQUIRE(e.hasValue<std::string>("bar"));
             CHECK(e.value<std::string>("bar") == "foo"sv);
@@ -1243,13 +1245,13 @@ TEST_CASE("LuaConversion: StringMap", "[luaconversion]") {
     {
         using T = std::map<std::string, std::vector<int>>;
 
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("a", std::vector<int>{ 1, 2, 3 });
         d.setValue("b", std::vector<int>{ 4, 5, 6 });
         d.setValue("c", std::vector<int>{ 7, 8, 9 });
 
-        ghoul::lua::push(state, d);
-        T v = ghoul::lua::value<T>(state);
+        lua::push(state, d);
+        T v = lua::value<T>(state);
 
         REQUIRE(v.size() == 3);
         REQUIRE(v.find("a") != v.end());
@@ -1267,25 +1269,25 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
 
     {
         std::vector<double> d = { 1.1, 2.2, 3.3 };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<double>>(state);
+        auto v = lua::value<std::vector<double>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
     {
         std::vector<float> d = { 1.1f, 2.2f, 3.3f };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<float>>(state);
+        auto v = lua::value<std::vector<float>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
     {
         std::vector<int> d = { 1, 2, 3 };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<int>>(state);
+        auto v = lua::value<std::vector<int>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1293,9 +1295,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
         using namespace std::string_literals;
 
         std::vector<std::string> d = { "abc"s, "def"s, "ghi"s };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<std::string>>(state);
+        auto v = lua::value<std::vector<std::string>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1303,9 +1305,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
         using namespace std::string_literals;
 
         std::vector<std::filesystem::path> d = { "abc"s, "def"s, "ghi"s };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<std::filesystem::path>>(state);
+        auto v = lua::value<std::vector<std::filesystem::path>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1315,9 +1317,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::vec2(3.3f, 4.4f),
             glm::vec2(5.5f, 6.6f)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::vec2>>(state);
+        auto v = lua::value<std::vector<glm::vec2>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1327,9 +1329,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::vec3(4.4f, 5.5f, 6.6f),
             glm::vec3(7.7f, 8.8f, 9.9f)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::vec3>>(state);
+        auto v = lua::value<std::vector<glm::vec3>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1339,9 +1341,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::vec4(5.5f, 6.6f, 7.7f, 8.8f),
             glm::vec4(9.9f, 10.10f, 11.11f, 12.12f)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::vec4>>(state);
+        auto v = lua::value<std::vector<glm::vec4>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1351,9 +1353,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::ivec2(3, 4),
             glm::ivec2(5, 6)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::ivec2>>(state);
+        auto v = lua::value<std::vector<glm::ivec2>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1363,9 +1365,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::ivec3(4, 5, 6),
             glm::ivec3(7, 8, 9)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::ivec3>>(state);
+        auto v = lua::value<std::vector<glm::ivec3>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1375,9 +1377,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::ivec4(5, 6, 7, 8),
             glm::ivec4(9, 10, 11, 12)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::ivec4>>(state);
+        auto v = lua::value<std::vector<glm::ivec4>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1387,9 +1389,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::uvec2(3, 4),
             glm::uvec2(5, 6)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::uvec2>>(state);
+        auto v = lua::value<std::vector<glm::uvec2>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1399,9 +1401,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::uvec3(4, 5, 6),
             glm::uvec3(7, 8, 9)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::uvec3>>(state);
+        auto v = lua::value<std::vector<glm::uvec3>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1411,9 +1413,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::uvec4(5, 6, 7, 8),
             glm::uvec4(9, 10, 11, 12)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::uvec4>>(state);
+        auto v = lua::value<std::vector<glm::uvec4>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1423,9 +1425,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::mat2x2(5.5f, 6.6f, 7.7f, 8.8f),
             glm::mat2x2(9.9f, 10.10f, 11.11f, 12.12f)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::mat2x2>>(state);
+        auto v = lua::value<std::vector<glm::mat2x2>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1435,9 +1437,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::mat2x3(7.7f, 8.8f, 9.9f, 10.10f, 11.11f, 12.12f),
             glm::mat2x3(13.13f, 14.14f, 15.15f, 16.16f, 17.17f, 18.18f)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::mat2x3>>(state);
+        auto v = lua::value<std::vector<glm::mat2x3>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1447,9 +1449,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::mat2x4(9.9f, 10.10f, 11.11f, 12.12f, 13.13f, 14.14f, 15.15f, 16.16f),
             glm::mat2x4(17.17f, 18.18f, 19.19f, 20.20f, 21.21f, 22.22f, 23.23f, 24.24f)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::mat2x4>>(state);
+        auto v = lua::value<std::vector<glm::mat2x4>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1459,9 +1461,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::mat3x2(7.7f, 8.8f, 9.9f, 10.10f, 11.11f, 12.12f),
             glm::mat3x2(13.13f, 14.14f, 15.15f, 16.16f, 17.17f, 18.18f)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::mat3x2>>(state);
+        auto v = lua::value<std::vector<glm::mat3x2>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1479,9 +1481,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
                 25.25f, 26.26f, 27.27f
             )
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::mat3x3>>(state);
+        auto v = lua::value<std::vector<glm::mat3x3>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1506,9 +1508,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
                 34.34f, 35.35f, 36.36f
             )
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::mat3x4>>(state);
+        auto v = lua::value<std::vector<glm::mat3x4>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1518,9 +1520,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::mat4x2(9.9f, 10.10f, 11.11f, 12.12f, 13.13f, 14.14f, 15.15f, 16.16f),
             glm::mat4x2(17.17f, 18.18f, 19.19f, 20.20f, 21.21f, 22.22f, 23.23f, 24.24f)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::mat4x2>>(state);
+        auto v = lua::value<std::vector<glm::mat4x2>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1542,9 +1544,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
                 33.33f, 34.34f, 35.35f, 36.36f
             )
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::mat4x3>>(state);
+        auto v = lua::value<std::vector<glm::mat4x3>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1569,9 +1571,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
                 45.45f, 46.46f, 47.47f, 48.48f
             )
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::mat4x4>>(state);
+        auto v = lua::value<std::vector<glm::mat4x4>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1581,9 +1583,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::dmat2x2(5.5, 6.6, 7.7, 8.8),
             glm::dmat2x2(9.9, 10.10, 11.11, 12.12)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::dmat2x2>>(state);
+        auto v = lua::value<std::vector<glm::dmat2x2>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1593,9 +1595,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::dmat2x3(7.7, 8.8, 9.9, 10.10, 11.11, 12.12),
             glm::dmat2x3(13.13, 14.14, 15.15, 16.16, 17.17, 18.18)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::dmat2x3>>(state);
+        auto v = lua::value<std::vector<glm::dmat2x3>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1605,9 +1607,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::dmat2x4(9.9, 10.10, 11.11, 12.12, 13.13, 14.14, 15.15, 16.16),
             glm::dmat2x4(17.17, 18.18, 19.19, 20.20, 21.21, 22.22, 23.23, 24.24)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::dmat2x4>>(state);
+        auto v = lua::value<std::vector<glm::dmat2x4>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1617,9 +1619,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::dmat3x2(7.7, 8.8, 9.9, 10.10, 11.11, 12.12),
             glm::dmat3x2(13.13, 14.14, 15.15, 16.16, 17.17, 18.18)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::dmat3x2>>(state);
+        auto v = lua::value<std::vector<glm::dmat3x2>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1637,9 +1639,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
                 25.25, 26.26, 27.27
             )
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::dmat3x3>>(state);
+        auto v = lua::value<std::vector<glm::dmat3x3>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1664,9 +1666,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
                 34.34, 35.35, 36.36
             )
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::dmat3x4>>(state);
+        auto v = lua::value<std::vector<glm::dmat3x4>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1676,9 +1678,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
             glm::dmat4x2(9.9, 10.10, 11.11, 12.12, 13.13, 14.14, 15.15, 16.16),
             glm::dmat4x2(17.17, 18.18, 19.19, 20.20, 21.21, 22.22, 23.23, 24.24)
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::dmat4x2>>(state);
+        auto v = lua::value<std::vector<glm::dmat4x2>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1700,9 +1702,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
                 33.33, 34.34, 35.35, 36.36
             )
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::dmat4x3>>(state);
+        auto v = lua::value<std::vector<glm::dmat4x3>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }
@@ -1727,9 +1729,9 @@ TEST_CASE("LuaConversion: Vector", "[luaconversion]") {
                 45.45, 46.46, 47.47, 48.48
             )
         };
-        ghoul::lua::push(state, d);
+        lua::push(state, d);
 
-        auto v = ghoul::lua::value<std::vector<glm::dmat4x4>>(state);
+        auto v = lua::value<std::vector<glm::dmat4x4>>(state);
         REQUIRE(v.size() == 3);
         CHECK(v == d);
     }

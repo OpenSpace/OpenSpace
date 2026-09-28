@@ -113,8 +113,7 @@ Documentation RenderableConstellationBounds::Documentation() {
     );
 }
 
-RenderableConstellationBounds::RenderableConstellationBounds(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableConstellationBounds::RenderableConstellationBounds(const Dictionary& dictionary)
     : RenderableConstellationsBase(dictionary)
     , _vertexFilename(VertexInfo)
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -173,7 +172,7 @@ void RenderableConstellationBounds::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/constellationbounds_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     glCreateBuffers(1, &_vbo);
     glNamedBufferStorage(
@@ -246,7 +245,7 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
 bool RenderableConstellationBounds::loadData() {
     const bool success = loadVertexFile();
     if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
+        throw RuntimeError("Error loading data");
     }
     return success;
 }
@@ -272,7 +271,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
     // new constellation name, at which point the currentBound is stored away, a new,
     // empty ConstellationBound is created and set at the currentBound
     while (file.good()) {
-        ghoul::getline(file, currentLine);
+        openspace::getline(file, currentLine);
         if (currentLine.empty()) {
             continue;
         }

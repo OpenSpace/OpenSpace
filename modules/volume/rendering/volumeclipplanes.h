@@ -31,13 +31,13 @@
 #include <openspace/glm.h>
 #include <openspace/properties/scalar/intproperty.h>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
+
+class Dictionary;
 
 class VolumeClipPlanes : public PropertyOwner {
 public:
-    explicit VolumeClipPlanes(const ghoul::Dictionary& dictionary);
+    explicit VolumeClipPlanes(const Dictionary& dictionary);
     ~VolumeClipPlanes() override = default;
 
     void initialize();

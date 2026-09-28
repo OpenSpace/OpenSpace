@@ -52,7 +52,7 @@ namespace {
 
     // Parses a single notification entry out of the list of lines
     Entry parseEntry(std::vector<std::string>::const_iterator& curr) {
-        ghoul_assert(!curr->empty(), "First line must not be empty");
+        assert_msg(!curr->empty(), "First line must not be empty");
 
         std::string date = *curr;
         std::string text;
@@ -69,7 +69,7 @@ namespace {
     std::vector<Entry> parseEntries(const std::string& data) {
         std::vector<Entry> entries;
 
-        std::vector<std::string> lines = ghoul::tokenizeString(data, '\n');
+        std::vector<std::string> lines = openspace::tokenizeString(data, '\n');
         if (lines.empty() || lines[0].empty()) {
             // The notification file is empty and we don't want to show anything
             return entries;
@@ -86,7 +86,7 @@ namespace {
 
     std::string formatEntry(const Entry& e, date::year_month_day lastStartedDate) {
         auto r = scn::scan<int, int, int>(e.date, "{}-{}-{}");
-        ghoul_assert(r, "Invalid date");
+        assert_msg(r, "Invalid date");
         auto& [year, month, day] = r->values();
         const date::year_month_day ymd = date::year_month_day(
             date::year(year),
@@ -143,7 +143,7 @@ NotificationWindow::NotificationWindow(QWidget* parent)
 
     _request = std::make_unique<HttpMemoryDownload>(
         URL,
-        ghoul::logging::LogLevel::NoLogging
+        logging::LogLevel::NoLogging
     );
     _request->start(std::chrono::seconds(1));
 

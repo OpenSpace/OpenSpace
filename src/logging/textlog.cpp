@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +28,7 @@
 #include <openspace/misc/assert.h>
 #include <openspace/misc/profiling.h>
 
-namespace ghoul::logging {
+namespace openspace::logging {
 
 TextLog::TextLog(const std::filesystem::path& filename, int nLogRotation,
                  Append writeToAppend, TimeStamping timeStamping,
@@ -38,10 +37,10 @@ TextLog::TextLog(const std::filesystem::path& filename, int nLogRotation,
     : Log(timeStamping, dateStamping, categoryStamping, logLevelStamping, minimumLogLevel)
     , _printFooter(writeToAppend)
 {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
-    ghoul_assert(nLogRotation > 0, "Log rotation must be positive");
+    assert_msg(!filename.empty(), "Filename must not be empty");
+    assert_msg(nLogRotation > 0, "Log rotation must be positive");
     if (nLogRotation > 0) {
-        ghoul_assert(writeToAppend == Append::No, "We can't log rotate when appending");
+        assert_msg(writeToAppend == Append::No, "We can't log rotate when appending");
     }
 
     _file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
@@ -109,4 +108,4 @@ void TextLog::writeLine(const std::string& line) {
     _file << line;
 }
 
-} // namespace ghoul::logging
+} // namespace openspace::logging

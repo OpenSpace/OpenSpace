@@ -30,6 +30,8 @@
 #include <optional>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(Substructs)]] Parameters {
         // struct A documentation
@@ -83,27 +85,27 @@ namespace {
 TEST_CASE("Execution/Structs/Substruct:  Bake", "[Execution][Structs]") {
     using namespace std::string_literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("Value", 5.0);
         d.setValue("StructAValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("Valval", 2.1);
         d.setValue("StructBValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("Eulav", "text"s);
             f.setValue("Lavlav", true);
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("Eulav", "text2"s);
             f.setValue("Lavlav", false);
             e.setValue("2", f);
@@ -111,18 +113,18 @@ TEST_CASE("Execution/Structs/Substruct:  Bake", "[Execution][Structs]") {
         d.setValue("StructCValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("A", "abc"s);
         e.setValue("B", 2.0);
 
-        ghoul::Dictionary f;
+        Dictionary f;
         f.setValue("A", "def"s);
         f.setValue("B", 3.0);
 
         d.setValue("StructDValue", e);
 
         {
-            ghoul::Dictionary g;
+            Dictionary g;
             g.setValue("1", e);
             g.setValue("2", f);
             d.setValue("StructDVectorValue", g);

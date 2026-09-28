@@ -32,7 +32,7 @@
 #include <array>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     [[codegen::luawrap]] void funcIvec3(glm::ivec3 arg) {
@@ -135,7 +135,7 @@ namespace {
 
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncIvec3;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3;
     CHECK(func.name == "funcIvec3");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -146,7 +146,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3", "[Execution][LuaWrapper]") {
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, glm::ivec3(1, 2, 3));
+    lua::push(state, glm::ivec3(1, 2, 3));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -157,7 +157,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncIvec3Defaulted;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3Defaulted;
     CHECK(func.name == "funcIvec3Defaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -169,7 +169,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, glm::ivec3(1, 2, 3));
+    lua::push(state, glm::ivec3(1, 2, 3));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -180,7 +180,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncIvec3Defaulted;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3Defaulted;
     CHECK(func.name == "funcIvec3Defaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -202,7 +202,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncIvec3DefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3DefaultedCheck;
     CHECK(func.name == "funcIvec3DefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -216,7 +216,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, false, glm::ivec3(4, 5, 6));
+    lua::push(state, false, glm::ivec3(4, 5, 6));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -227,7 +227,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncIvec3DefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3DefaultedCheck;
     CHECK(func.name == "funcIvec3DefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -241,14 +241,14 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, true);
+    lua::push(state, true);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Map", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncIvec3Map;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3Map;
     CHECK(func.name == "funcIvec3Map");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -260,11 +260,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Map", "[Execution][LuaWrapper]"
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, "key1", glm::ivec3(1, 2, 3));
+    lua::push(state, "key1", glm::ivec3(1, 2, 3));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key2", glm::ivec3(4, 5, 6));
+    lua::push(state, "key2", glm::ivec3(4, 5, 6));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key3", glm::ivec3(7, 8, 9));
+    lua::push(state, "key3", glm::ivec3(7, 8, 9));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -272,7 +272,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Map", "[Execution][LuaWrapper]"
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Optional", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncIvec3Optional;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3Optional;
     CHECK(func.name == "funcIvec3Optional");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -283,7 +283,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Optional", "[Execution][LuaWrap
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, glm::ivec3(1, 2, 3));
+    lua::push(state, glm::ivec3(1, 2, 3));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -294,7 +294,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncIvec3OptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3OptionalNullopt;
     CHECK(func.name == "funcIvec3OptionalNullopt");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -311,7 +311,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Vector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncIvec3Vector;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3Vector;
     CHECK(func.name == "funcIvec3Vector");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -323,11 +323,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Vector", "[Execution][LuaWrappe
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::ivec3(1, 2, 3));
+    lua::push(state, 1, glm::ivec3(1, 2, 3));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, glm::ivec3(4, 5, 6));
+    lua::push(state, 2, glm::ivec3(4, 5, 6));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, glm::ivec3(7, 8, 9));
+    lua::push(state, 3, glm::ivec3(7, 8, 9));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -335,7 +335,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Vector", "[Execution][LuaWrappe
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Array1", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncIvec3Array1;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3Array1;
     CHECK(func.name == "funcIvec3Array1");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -347,12 +347,12 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Array1", "[Execution][LuaWrappe
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::ivec3(1, 2, 3));
+    lua::push(state, 1, glm::ivec3(1, 2, 3));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(state, std::array<glm::ivec3, 1> { glm::ivec3(1, 2, 3) });
+    lua::push(state, std::array<glm::ivec3, 1> { glm::ivec3(1, 2, 3) });
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
@@ -360,7 +360,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Array1", "[Execution][LuaWrappe
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Array2", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncIvec3Array2;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3Array2;
     CHECK(func.name == "funcIvec3Array2");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -372,20 +372,20 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Array2", "[Execution][LuaWrappe
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::ivec3(1, 2, 3));
+    lua::push(state, 1, glm::ivec3(1, 2, 3));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, glm::ivec3(4, 5, 6));
+    lua::push(state, 2, glm::ivec3(4, 5, 6));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, glm::ivec3(7, 8, 9));
+    lua::push(state, 3, glm::ivec3(7, 8, 9));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, glm::ivec3(10, 11, 12));
+    lua::push(state, 4, glm::ivec3(10, 11, 12));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, glm::ivec3(13, 14, 15));
+    lua::push(state, 5, glm::ivec3(13, 14, 15));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(
+    lua::push(
         state,
         std::array<glm::ivec3, 5> {
             glm::ivec3(1, 2, 3),
@@ -402,7 +402,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Array2", "[Execution][LuaWrappe
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Array3", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncIvec3Array3;
+    LuaLibrary::Function func = codegen::lua::FuncIvec3Array3;
     CHECK(func.name == "funcIvec3Array3");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -414,30 +414,30 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Array3", "[Execution][LuaWrappe
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::ivec3(1, 2, 3));
+    lua::push(state, 1, glm::ivec3(1, 2, 3));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, glm::ivec3(4, 5, 6));
+    lua::push(state, 2, glm::ivec3(4, 5, 6));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, glm::ivec3(7, 8, 9));
+    lua::push(state, 3, glm::ivec3(7, 8, 9));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, glm::ivec3(10, 11, 12));
+    lua::push(state, 4, glm::ivec3(10, 11, 12));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, glm::ivec3(13, 14, 15));
+    lua::push(state, 5, glm::ivec3(13, 14, 15));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 6, glm::ivec3(16, 17, 18));
+    lua::push(state, 6, glm::ivec3(16, 17, 18));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 7, glm::ivec3(19, 20, 21));
+    lua::push(state, 7, glm::ivec3(19, 20, 21));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 8, glm::ivec3(22, 23, 24));
+    lua::push(state, 8, glm::ivec3(22, 23, 24));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 9, glm::ivec3(25, 26, 27));
+    lua::push(state, 9, glm::ivec3(25, 26, 27));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 10, glm::ivec3(28, 29, 30));
+    lua::push(state, 10, glm::ivec3(28, 29, 30));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(
+    lua::push(
         state,
         std::array<glm::ivec3, 10> {
             glm::ivec3(1, 2, 3),
@@ -459,7 +459,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  ivec3Array3", "[Execution][LuaWrappe
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  ivec3", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnIvec3;
+    LuaLibrary::Function func = codegen::lua::ReturnIvec3;
     CHECK(func.name == "returnIvec3");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "ivec3");
@@ -470,13 +470,13 @@ TEST_CASE("Execution/LuaWrapper/Return:  ivec3", "[Execution][LuaWrapper]") {
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    glm::ivec3 val = ghoul::lua::value<glm::ivec3>(state);
+    glm::ivec3 val = lua::value<glm::ivec3>(state);
     CHECK(val == glm::ivec3(1, 2, 3));
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  ivec3Map", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnIvec3Map;
+    LuaLibrary::Function func = codegen::lua::ReturnIvec3Map;
     CHECK(func.name == "returnIvec3Map");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String -> ivec3");
@@ -488,7 +488,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  ivec3Map", "[Execution][LuaWrapper]") {
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     std::map<std::string, glm::ivec3> val =
-        ghoul::lua::value<std::map<std::string, glm::ivec3>>(state);
+        lua::value<std::map<std::string, glm::ivec3>>(state);
     CHECK(val.size() == 3);
     REQUIRE(val.find("key1") != val.end());
     CHECK(val.find("key1")->second == glm::ivec3(1, 2, 3));
@@ -504,7 +504,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnIvec3Optional;
+    LuaLibrary::Function func = codegen::lua::ReturnIvec3Optional;
     CHECK(func.name == "returnIvec3Optional");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "ivec3?");
@@ -515,7 +515,7 @@ TEST_CASE(
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    glm::ivec3 val = ghoul::lua::value<glm::ivec3>(state);
+    glm::ivec3 val = lua::value<glm::ivec3>(state);
     CHECK(val == glm::ivec3(1, 2, 3));
     lua_close(state);
 }
@@ -525,7 +525,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnIvec3OptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::ReturnIvec3OptionalNullopt;
     CHECK(func.name == "returnIvec3OptionalNullopt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "ivec3?");
@@ -540,7 +540,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  ivec3Vector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnIvec3Vector;
+    LuaLibrary::Function func = codegen::lua::ReturnIvec3Vector;
     CHECK(func.name == "returnIvec3Vector");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "ivec3[]");
@@ -551,7 +551,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  ivec3Vector", "[Execution][LuaWrapper]"
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::vector<glm::ivec3> val = ghoul::lua::value<std::vector<glm::ivec3>>(state);
+    std::vector<glm::ivec3> val = lua::value<std::vector<glm::ivec3>>(state);
     REQUIRE(val.size() == 3);
     CHECK(val[0] == glm::ivec3(1, 2, 3));
     CHECK(val[1] == glm::ivec3(4, 5, 6));

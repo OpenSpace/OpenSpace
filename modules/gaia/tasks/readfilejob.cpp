@@ -62,9 +62,7 @@ void ReadFileJob::execute() {
     );
 
     if (!table) {
-        throw ghoul::RuntimeError(std::format(
-            "Failed to open Fits file '{}'", _inFilePath
-        ));
+        throw RuntimeError(std::format("Failed to open Fits file '{}'", _inFilePath));
     }
 
     const int nStars = table->readRows - _firstRow + 1;

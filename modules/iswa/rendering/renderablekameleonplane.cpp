@@ -29,7 +29,7 @@
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/json.h>
-#include <openspace/designpattern/event.h>
+#include <openspace/designpattern/synchronousevent.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/filesystem/filesystem.h>
@@ -99,7 +99,7 @@ Documentation RenderableKameleonPlane::Documentation() {
     );
 }
 
-RenderableKameleonPlane::RenderableKameleonPlane(const ghoul::Dictionary& dictionary)
+RenderableKameleonPlane::RenderableKameleonPlane(const Dictionary& dictionary)
     : RenderableDataCygnet(dictionary)
     , _fieldlines(FieldLineSeedsInfo)
     , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
@@ -375,11 +375,11 @@ void RenderableKameleonPlane::subscribeToGroup() {
     RenderableDataCygnet::subscribeToGroup();
 
     // Add additional Events specific to KameleonPlane
-    ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
+    SynchronousEvent<Dictionary>& groupEvent = _group->groupEvent();
     groupEvent.subscribe(
         identifier(),
         "resolutionChanged",
-        [this](ghoul::Dictionary dict) {
+        [this](const Dictionary& dict) {
             LDEBUG(identifier() + " Event resolutionChanged");
             if (dict.hasKey("resolution") && dict.hasValue<double>("resolution")) {
                 _resolution = static_cast<float>(dict.value<double>("resolution"));
@@ -390,7 +390,7 @@ void RenderableKameleonPlane::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "cdfChanged",
-        [this](ghoul::Dictionary dict) {
+        [this](const Dictionary& dict) {
             LDEBUG(identifier() + " Event cdfChanged");
             if (dict.hasKey("path") && dict.hasValue<std::string>("path")) {
                 const std::string& path = dict.value<std::string>("path");

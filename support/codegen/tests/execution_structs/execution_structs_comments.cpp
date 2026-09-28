@@ -31,6 +31,8 @@
 #include <variant>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     std::string A = "A";
     std::string Long = "Long";

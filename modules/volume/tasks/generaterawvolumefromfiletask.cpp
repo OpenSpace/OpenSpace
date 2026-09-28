@@ -79,8 +79,7 @@ Documentation GenerateRawVolumeFromFileTask::Documentation() {
     );
 }
 
-GenerateRawVolumeFromFileTask::GenerateRawVolumeFromFileTask(
-                                                      const ghoul::Dictionary& dictionary)
+GenerateRawVolumeFromFileTask::GenerateRawVolumeFromFileTask(const Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -195,8 +194,8 @@ void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCall
         .domainUnit = "m",
     };
 
-    const ghoul::Dictionary outputDictionary = metadata.dictionary();
-    const std::string metadataString = ghoul::formatLua(outputDictionary);
+    const Dictionary outputDictionary = metadata.dictionary();
+    const std::string metadataString = formatLua(outputDictionary);
 
     std::fstream f = std::fstream(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;

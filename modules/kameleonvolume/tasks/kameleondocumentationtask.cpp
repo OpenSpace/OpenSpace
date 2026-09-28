@@ -67,8 +67,7 @@ Documentation KameleonDocumentationTask::Documentation() {
     );
 }
 
-KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)
-{
+KameleonDocumentationTask::KameleonDocumentationTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _inputPath = p.input;
     _outputPath = p.output;
@@ -83,15 +82,15 @@ std::string KameleonDocumentationTask::description() {
 
 void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressCallback) {
     KameleonVolumeReader reader = KameleonVolumeReader(_inputPath.string());
-    ghoul::Dictionary kameleonDictionary = reader.readMetaData();
+    Dictionary kameleonDictionary = reader.readMetaData();
     progressCallback(0.33f);
 
-    ghoul::Dictionary dictionary;
+    Dictionary dictionary;
     dictionary.setValue("kameleon", std::move(kameleonDictionary));
     dictionary.setValue("version", std::string(OPENSPACE_VERSION));
     dictionary.setValue("input", _inputPath.string());
 
-    std::string json = ghoul::formatJson(dictionary);
+    std::string json = formatJson(dictionary);
     progressCallback(0.66f);
 
     std::ifstream handlebarsInput = std::ifstream(absPath(HandlebarsFilename));

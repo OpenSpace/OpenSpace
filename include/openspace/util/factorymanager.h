@@ -34,22 +34,22 @@
 namespace openspace {
 
 /**
- * Singleton factory class that handles a variety of ghoul::TemplateFactory%s and makes
- * them available through the #addFactory and #factory methods. Each
- * ghoul::TemplateFactory can only be added once and can be accessed by its type.
+ * Singleton factory class that handles a variety of TemplateFactory%s and makes them
+ * available through the #addFactory and #factory methods. Each TemplateFactory can only
+ * be added once and can be accessed by its type.
  */
 class FactoryManager {
 public:
     struct FactoryInfo {
-        std::unique_ptr<ghoul::TemplateFactoryBase> factory;
+        std::unique_ptr<TemplateFactoryBase> factory;
         std::string name;
     };
 
     /**
-     * This exception is thrown if the ghoul::TemplateFactory could not be found in the
-     * #factory method.
+     * This exception is thrown if the TemplateFactory could not be found in the #factory
+     * method.
      */
-    struct FactoryNotFoundError final : public ghoul::RuntimeError {
+    struct FactoryNotFoundError final : public RuntimeError {
         /**
          * Constructor for FactoryNotFoundError, the \p type is a human-readable (-ish)
          * type descriptor for the type `T` for the TemplateFactory that could
@@ -61,7 +61,7 @@ public:
          */
         explicit FactoryNotFoundError(std::string t);
 
-        /// The type describing the ghoul::TemplateFactory that could not be found
+        /// The type describing the TemplateFactory that could not be found
         std::string type;
     };
 
@@ -76,7 +76,7 @@ public:
     static void initialize();
 
     /**
-     * Deinitializes the static member and all the registered ghoul::TemplateFactory%s.
+     * Deinitializes the static member and all the registered TemplateFactory%s.
      *
      * \pre The FactoryManager must have been initialized before
      */
@@ -111,18 +111,17 @@ public:
     void addFactory(std::string name);
 
     /**
-     * This method provides access to all registered ghoul::TemplateFactory%s through
-     * their type. The method will always return a proper ghoul::TemplateFactory or throw
-     * an error if the appropriate ghoul::TemplateFactory was not registered.
+     * This method provides access to all registered TemplateFactory%s through their type.
+     * The method will always return a proper TemplateFactory or throw an error if the
+     * appropriate TemplateFactory was not registered.
      *
-     * \tparam T The type that the requested ghoul::TemplateFactory should create
-     * \return The ghoul::TemplateFactory that will create the pass type `T`
+     * \tparam T The type that the requested TemplateFactory should create
+     * \return The TemplateFactory that will create the pass type `T`
      *
-     * \throw FactoryNotFoundError If the requested ghoul::TemplateFactory could not be
-     *        found
+     * \throw FactoryNotFoundError If the requested TemplateFactory could not be found
      */
     template <class T>
-    ghoul::TemplateFactory<T>* factory() const;
+    TemplateFactory<T>* factory() const;
 
     const std::vector<FactoryInfo>& factories() const;
 

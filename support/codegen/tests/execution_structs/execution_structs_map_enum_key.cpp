@@ -31,6 +31,8 @@
 #include <map>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(MapEnumKey)]] Parameters {
         enum class KeyType {
@@ -52,16 +54,16 @@ namespace {
         std::optional<std::vector<std::map<KeyType, std::string>>> optionalVectorMap;
 
         // dictMap documentation
-        std::map<KeyType, ghoul::Dictionary> dictMap;
+        std::map<KeyType, Dictionary> dictMap;
 
         // optionalDictMap documentation
-        std::optional<std::map<KeyType, ghoul::Dictionary>> optionalDictMap;
+        std::optional<std::map<KeyType, Dictionary>> optionalDictMap;
 
         // vectorDictMap documentation
-        std::vector<std::map<KeyType, ghoul::Dictionary>> vectorDictMap;
+        std::vector<std::map<KeyType, Dictionary>> vectorDictMap;
 
         // optionalVectorDictMap documentation
-        std::optional<std::vector<std::map<KeyType, ghoul::Dictionary>>> optionalVectorDictMap;
+        std::optional<std::vector<std::map<KeyType, Dictionary>>> optionalVectorDictMap;
     };
 } // namespace
 #include "execution_structs_map_enum_key_codegen.cpp"
@@ -70,37 +72,37 @@ namespace {
 TEST_CASE("Execution/Structs/Map Enum Key:  Bake", "[Execution][Structs]") {
     using namespace std::literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("Key1", "1"s);
         e.setValue("Key2", "2"s);
         e.setValue("Key3", "3"s);
         d.setValue("SimpleMap", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("Key1", "4"s);
         e.setValue("Key2", "5"s);
         e.setValue("Key3", "6"s);
         d.setValue("OptionalMap", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("Key1", "7"s);
             f.setValue("Key2", "8"s);
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("Key1", "9"s);
             f.setValue("Key2", "10"s);
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("Key1", "11"s);
             f.setValue("Key2", "12"s);
             e.setValue("3", f);
@@ -108,21 +110,21 @@ TEST_CASE("Execution/Structs/Map Enum Key:  Bake", "[Execution][Structs]") {
         d.setValue("VectorMap", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("Key1", "13"s);
             f.setValue("Key2", "14"s);
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("Key1", "15"s);
             f.setValue("Key2", "16"s);
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("Key1", "17"s);
             f.setValue("Key2", "18"s);
             e.setValue("3", f);
@@ -130,23 +132,23 @@ TEST_CASE("Execution/Structs/Map Enum Key:  Bake", "[Execution][Structs]") {
         d.setValue("OptionalVectorMap", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("A", "1"s);
             f.setValue("B", "2"s);
             f.setValue("C", "3"s);
             e.setValue("Key1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("D", "4"s);
             f.setValue("E", "5"s);
             f.setValue("F", "6"s);
             e.setValue("Key2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("G", "7"s);
             f.setValue("H", "8"s);
             f.setValue("I", "9"s);
@@ -155,23 +157,23 @@ TEST_CASE("Execution/Structs/Map Enum Key:  Bake", "[Execution][Structs]") {
         d.setValue("DictMap", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("A", "1"s);
             f.setValue("B", "2"s);
             f.setValue("C", "3"s);
             e.setValue("Key1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("D", "4"s);
             f.setValue("E", "5"s);
             f.setValue("F", "6"s);
             e.setValue("Key2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("G", "7"s);
             f.setValue("H", "8"s);
             f.setValue("I", "9"s);
@@ -180,25 +182,25 @@ TEST_CASE("Execution/Structs/Map Enum Key:  Bake", "[Execution][Structs]") {
         d.setValue("OptionalDictMap", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A", "1"s);
                 g.setValue("B", "2"s);
                 g.setValue("C", "3"s);
                 f.setValue("Key1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D", "4"s);
                 g.setValue("E", "5"s);
                 g.setValue("F", "6"s);
                 f.setValue("Key2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G", "7"s);
                 g.setValue("H", "8"s);
                 g.setValue("I", "9"s);
@@ -207,23 +209,23 @@ TEST_CASE("Execution/Structs/Map Enum Key:  Bake", "[Execution][Structs]") {
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A2", "1"s);
                 g.setValue("B2", "2"s);
                 g.setValue("C2", "3"s);
                 f.setValue("Key1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D2", "4"s);
                 g.setValue("E2", "5"s);
                 g.setValue("F2", "6"s);
                 f.setValue("Key2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G2", "7"s);
                 g.setValue("H2", "8"s);
                 g.setValue("I2", "9"s);
@@ -232,23 +234,23 @@ TEST_CASE("Execution/Structs/Map Enum Key:  Bake", "[Execution][Structs]") {
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A3", "1"s);
                 g.setValue("B3", "2"s);
                 g.setValue("C3", "3"s);
                 f.setValue("Key1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D3", "4"s);
                 g.setValue("E3", "5"s);
                 g.setValue("F3", "6"s);
                 f.setValue("Key2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G3", "7"s);
                 g.setValue("H3", "8"s);
                 g.setValue("I3", "9"s);
@@ -259,25 +261,25 @@ TEST_CASE("Execution/Structs/Map Enum Key:  Bake", "[Execution][Structs]") {
         d.setValue("VectorDictMap", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A", "1"s);
                 g.setValue("B", "2"s);
                 g.setValue("C", "3"s);
                 f.setValue("Key1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D", "4"s);
                 g.setValue("E", "5"s);
                 g.setValue("F", "6"s);
                 f.setValue("Key2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G", "7"s);
                 g.setValue("H", "8"s);
                 g.setValue("I", "9"s);
@@ -286,23 +288,23 @@ TEST_CASE("Execution/Structs/Map Enum Key:  Bake", "[Execution][Structs]") {
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A2", "1"s);
                 g.setValue("B2", "2"s);
                 g.setValue("C2", "3"s);
                 f.setValue("Key1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D2", "4"s);
                 g.setValue("E2", "5"s);
                 g.setValue("F2", "6"s);
                 f.setValue("Key2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G2", "7"s);
                 g.setValue("H2", "8"s);
                 g.setValue("I2", "9"s);
@@ -311,23 +313,23 @@ TEST_CASE("Execution/Structs/Map Enum Key:  Bake", "[Execution][Structs]") {
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A3", "1"s);
                 g.setValue("B3", "2"s);
                 g.setValue("C3", "3"s);
                 f.setValue("Key1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D3", "4"s);
                 g.setValue("E3", "5"s);
                 g.setValue("F3", "6"s);
                 f.setValue("Key2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G3", "7"s);
                 g.setValue("H3", "8"s);
                 g.setValue("I3", "9"s);

@@ -31,11 +31,11 @@ namespace openspace {
 
 class MemoryManager {
 public:
-    ghoul::MemoryPool<8 * 1024 * 1024> PersistentMemory;
+    MemoryPool<8 * 1024 * 1024> PersistentMemory;
 
     // This should be replaced with a std::pmr::memory_resource wrapper around our own
     // Memory pool so that we can get a high-water mark out of it
-    ghoul::MemoryPool<100 * 4096, false, true> TemporaryMemory;
+    MemoryPool<100 * 4096, false, true> TemporaryMemory;
 };
 
 } // namespace openspace

@@ -136,7 +136,7 @@ TimeManager::TimeManager()
 }
 
 void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
-    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
+    precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
     const OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::CameraPath) {
@@ -166,7 +166,7 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
 }
 
 void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) {
-    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
+    precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
     const float duration = global::timeManager->defaultTimeInterpolationDuration();
 
@@ -596,7 +596,7 @@ void TimeManager::clearDeltaTimesKeybindings() {
             LWARNING(std::format(
                 "Updating keybindings for new delta time steps: More than one action "
                 "was bound to key '{}'. The following actions are removed: {}",
-                ghoul::to_string(kb), names
+                to_string(kb), names
             ));
         }
         global::keybindingManager->removeKeyBinding(kb);
@@ -667,7 +667,7 @@ void TimeManager::removeTimeChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _timeChangeCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -684,7 +684,7 @@ void TimeManager::removeDeltaTimeChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _deltaTimeChangeCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -701,7 +701,7 @@ void TimeManager::removeDeltaTimeStepsChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _deltaTimeStepsChangeCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -718,7 +718,7 @@ void TimeManager::removeTimeJumpCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _timeJumpCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -735,7 +735,7 @@ void TimeManager::removeTimelineChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _timelineChangeCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -964,7 +964,7 @@ void TimeManager::setTimeFromProfile(const Profile& p) {
         {
             const std::string t = Time::currentWallTime();
             std::variant<std::string, double> t2 = Time::advancedTime(t, p.time->value);
-            ghoul_assert(std::holds_alternative<std::string>(t2), "Wrong type");
+            assert_msg(std::holds_alternative<std::string>(t2), "Wrong type");
             _currentTime.data() = Time(std::get<std::string>(t2));
             break;
         }

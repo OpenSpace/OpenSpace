@@ -29,7 +29,7 @@
 
 namespace openspace {
 
-ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) {
+ScannerDecoder::ScannerDecoder(const Dictionary& dictionary) {
     for (size_t k = 0; k < dictionary.size(); k++) {
         _spiceIDs.push_back(dictionary.value<std::string>(std::to_string(k + 1)));
     }

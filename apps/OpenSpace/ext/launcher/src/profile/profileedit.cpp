@@ -92,7 +92,7 @@ namespace {
             );
 
             std::string name = it != actions.end() ? it->name : "Unknown action";
-            results += std::format("{} ({})<br>", name, ghoul::to_string(k.key));
+            results += std::format("{} ({})<br>", name, openspace::to_string(k.key));
         }
         return results;
     }

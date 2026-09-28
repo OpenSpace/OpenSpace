@@ -31,6 +31,8 @@
 #include <variant>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(D1)]] Parameters1 {
         int abc;
@@ -44,7 +46,7 @@ namespace {
 
 
 TEST_CASE("Execution/Structs/Multiple:  Parameters", "[Execution][Structs]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("Abc", 1);
     d.setValue("Def", 2);
 

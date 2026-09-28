@@ -28,7 +28,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/common-compile-settings/common-compi
 function (set_openspace_compile_settings target)
   set_compile_settings(${target})
 
-  if (GHOUL_ENABLE_EDIT_CONTINUE)
+  if (OPENSPACE_ENABLE_EDIT_CONTINUE)
     target_compile_options(${target} PRIVATE
       "/ZI"       # Edit and continue support
     )

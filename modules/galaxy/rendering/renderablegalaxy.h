@@ -28,7 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/glm.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -43,7 +43,7 @@ class GalaxyRaycaster;
 
 class RenderableGalaxy : public Renderable {
 public:
-    explicit RenderableGalaxy(const ghoul::Dictionary& dictionary);
+    explicit RenderableGalaxy(const Dictionary& dictionary);
     ~RenderableGalaxy() override = default;
 
     void initialize() override;
@@ -79,8 +79,8 @@ private:
     FloatProperty _downScaleVolumeRendering;
     FloatProperty _numberOfRayCastingSteps;
 
-    std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
-    std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
+    std::unique_ptr<opengl::Texture> _pointSpreadFunctionTexture;
+    std::unique_ptr<filesystem::File> _pointSpreadFunctionFile;
 
     std::filesystem::path _volumeFilename;
     glm::ivec3 _volumeDimensions = glm::ivec3(0);
@@ -90,13 +90,13 @@ private:
 
     std::unique_ptr<GalaxyRaycaster> _raycaster;
     std::unique_ptr<RawVolume<glm::tvec4<GLubyte>>> _volume;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<opengl::Texture> _texture;
     glm::mat4 _pointTransform = glm::mat4(1.f);
     glm::vec3 _aspect = glm::vec3(0.f);
     float _opacityCoefficient = 0.f;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _billboardsProgram;
+    std::unique_ptr<opengl::ProgramObject> _pointsProgram;
+    std::unique_ptr<opengl::ProgramObject> _billboardsProgram;
     UniformCache(
         modelMatrix, viewProjectionMatrix, eyePosition, opacityCoefficient
     ) _uniformCachePoints;

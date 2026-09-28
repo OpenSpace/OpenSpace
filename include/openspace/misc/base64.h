@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +29,7 @@
 #include <string_view>
 #include <vector>
 
-namespace ghoul {
+namespace openspace {
 
 /**
  * Decodes a Base64-encoded string. This function takes a Base64-encoded input string and
@@ -41,6 +40,6 @@ namespace ghoul {
  */
 std::vector<uint8_t> decodeBase64(std::string_view base64);
 
-} // namespace ghoul
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___BASE64___H__

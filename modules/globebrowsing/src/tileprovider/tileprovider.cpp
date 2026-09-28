@@ -34,7 +34,7 @@
 namespace {
     using namespace openspace;
 
-    std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
+    std::unique_ptr<opengl::Texture> DefaultTileTexture;
     Tile DefaultTile = Tile {
         .texture = nullptr,
         .metaData = std::nullopt,
@@ -47,22 +47,22 @@ namespace openspace {
 unsigned int TileProvider::NumTileProviders = 0;
 
 std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
     ZoneScoped;
 
     layers::Layer::ID layerTypeID = layers::Layer::ID::DefaultTileProvider;
     if (dictionary.hasValue<std::string>("Type")) {
         const std::string type = dictionary.value<std::string>("Type");
-        layerTypeID = ghoul::from_string<layers::Layer::ID>(type);
+        layerTypeID = from_string<layers::Layer::ID>(type);
     }
 
     const std::string_view type =
         layers::Layers[static_cast<int>(layerTypeID)].identifier;
 
-    ghoul::TemplateFactory<TileProvider>* factory =
+    TemplateFactory<TileProvider>* factory =
         FactoryManager::ref().factory<TileProvider>();
-    ghoul_assert(factory, "TileProvider factory not created");
+    assert_msg(factory, "TileProvider factory not created");
 
     TileProvider* result = factory->create(type, dictionary);
     return std::unique_ptr<TileProvider>(result);
@@ -71,8 +71,8 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
 void TileProvider::initializeDefaultTile() {
     ZoneScoped;
 
-    ghoul_assert(!DefaultTile.texture, "Default tile should not have been created");
-    using namespace ghoul::opengl;
+    assert_msg(!DefaultTile.texture, "Default tile should not have been created");
+    using namespace opengl;
 
     // Create pixel data
     const TileTextureInitData initData = TileTextureInitData(
@@ -83,16 +83,16 @@ void TileProvider::initializeDefaultTile() {
         TileTextureInitData::ShouldAllocateDataOnCPU::Yes
     );
 
-    // Create ghoul texture
+    // Create texture
     DefaultTileTexture = std::make_unique<Texture>(
-        ghoul::opengl::Texture::FormatInit {
+        opengl::Texture::FormatInit {
             .dimensions = initData.dimensions,
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+        opengl::Texture::SamplerInit {
+            .filter = opengl::Texture::FilterMode::LinearMipMap
         }
     );
 
@@ -113,7 +113,7 @@ TileProvider::TileProvider() : PropertyOwner({ "TileProvider", "Tile Provider" }
 void TileProvider::initialize() {
     ZoneScoped;
 
-    ghoul_assert(!isInitialized, "TileProvider can only be initialized once");
+    assert_msg(!isInitialized, "TileProvider can only be initialized once");
 
     if (TileProvider::NumTileProviders >
         static_cast<unsigned int>(std::numeric_limits<uint16_t>::max()) - 1)
@@ -211,7 +211,7 @@ void TileProvider::internalDeinitialize() {}
 ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
     ZoneScoped;
 
-    ghoul_assert(isInitialized, "TileProvider was not initialized");
+    assert_msg(isInitialized, "TileProvider was not initialized");
 
     constexpr auto ascendToParent = [](TileIndex& ti, TileUvTransform& uv) {
         uv.uvOffset *= 0.5;
@@ -235,8 +235,8 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
 ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
     ZoneScoped;
 
-    ghoul_assert(isInitialized, "TileProvider was not initialized");
-    ghoul_assert(pileSize >= 0, "pileSize must be positive");
+    assert_msg(isInitialized, "TileProvider was not initialized");
+    assert_msg(pileSize >= 0, "pileSize must be positive");
 
     ChunkTilePile pile;
     std::fill(pile.begin(), pile.end(), std::nullopt);

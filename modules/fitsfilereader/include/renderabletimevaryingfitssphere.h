@@ -46,7 +46,7 @@ public:
         DynamicDownloading
     };
 
-    explicit RenderableTimeVaryingFitsSphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableTimeVaryingFitsSphere(const Dictionary& dictionary);
 
     void deinitializeGL() override;
 
@@ -56,7 +56,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
 private:
     struct File {
@@ -67,7 +67,7 @@ private:
         FileStatus status = FileStatus::Downloaded;
         std::filesystem::path path;
         double time = 0.0;
-        std::unique_ptr<ghoul::opengl::Texture> texture;
+        std::unique_ptr<opengl::Texture> texture;
         glm::vec2 dataMinMax = { 0.f, 1.f };
         bool operator<(const File& other) const noexcept {
             return time < other.time;
@@ -78,7 +78,7 @@ private:
     void showCorrectFileName();
     void extractMandatoryInfoFromSourceFolder();
     void readFileFromFits(std::filesystem::path path);
-    glm::vec2 minMaxTextureDataValues(std::unique_ptr<ghoul::opengl::Texture>& t);
+    glm::vec2 minMaxTextureDataValues(std::unique_ptr<opengl::Texture>& t);
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
     void updateDynamicDownloading(double currentTime, double deltaTime);
@@ -120,7 +120,7 @@ private:
 
     bool _firstUpdate = true;
     bool _layerOptionsAdded = false;
-    ghoul::opengl::Texture* _texture = nullptr;
+    opengl::Texture* _texture = nullptr;
     bool _textureIsDirty = true;
 };
 

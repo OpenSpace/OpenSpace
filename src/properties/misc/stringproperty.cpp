@@ -24,7 +24,7 @@
 
 #include <openspace/properties/misc/stringproperty.h>
 
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/lua/lua_helper.h>
 
 namespace openspace {
@@ -37,16 +37,16 @@ std::string_view StringProperty::className() const {
     return "StringProperty";
 }
 
-ghoul::lua::LuaTypes StringProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::String;
+lua::LuaTypes StringProperty::typeLua() const {
+    return lua::LuaTypes::String;
 }
 
 void StringProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 std::string StringProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<std::string>(state);
+    return lua::value<std::string>(state);
 }
 
 std::string StringProperty::stringValue() const {

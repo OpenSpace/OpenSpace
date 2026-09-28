@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,7 +48,7 @@ namespace {
     };
 } // namespace
 
-namespace ghoul::fontrendering {
+namespace openspace::fontrendering {
 
 FontManager::FontManager(glm::ivec3 atlasDimensions)
     : _textureAtlas(std::move(atlasDimensions))
@@ -66,8 +65,8 @@ void FontManager::deinitialize() {
 unsigned int FontManager::registerFontPath(std::string_view fontName,
                                            std::filesystem::path filePath)
 {
-    ghoul_assert(!fontName.empty(), "Fontname must not be empty");
-    ghoul_assert(!filePath.empty(), "Filepath must not be empty");
+    assert_msg(!fontName.empty(), "Fontname must not be empty");
+    assert_msg(!filePath.empty(), "Filepath must not be empty");
 
     const unsigned int hash = hashCRC32(fontName);
     const auto it = _fontPaths.find(hash);
@@ -94,7 +93,7 @@ std::shared_ptr<Font> FontManager::font(std::string_view name, float fontSize,
                                         Outline withOutline, LoadGlyphs loadGlyphs)
 {
     ZoneScoped;
-    ghoul_assert(!name.empty(), "Name must not be empty");
+    assert_msg(!name.empty(), "Name must not be empty");
 
     unsigned int hash = hashCRC32(name);
     const auto itPath = _fontPaths.find(hash);
@@ -161,4 +160,4 @@ std::shared_ptr<Font> FontManager::font(unsigned int hashName, float fontSize,
     return f;
 }
 
-} // namespace ghoul::fontrendering
+} // namespace openspace::fontrendering

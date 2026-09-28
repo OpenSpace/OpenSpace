@@ -32,6 +32,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     // Provides the ability to override the contents for tiles at specific indices. A
     // default tile provider has to be specified that is used by default for the entire
     // globe. If a tile provider is specified for a specific tile, then the default tile
@@ -42,8 +44,7 @@ namespace {
     // This tile provider can be used to, for example, show an inset image that is merged
     // with a larger globe-spanning image.
     struct [[codegen::Dictionary(TileProviderByIndex)]] Parameters {
-        ghoul::Dictionary defaultTileProvider
-            [[codegen::reference("globebrowsing_layer")]];
+        Dictionary defaultTileProvider [[codegen::reference("globebrowsing_layer")]];
 
         // An IndexProvider is a tile provider that is only valid for a specific
         // combination of x, y, and level. Whenever a globe tries to render a tile and
@@ -71,7 +72,7 @@ namespace {
 
             // The dictionary that describes the TileProvider to be used by the provided
             // `index`.
-            ghoul::Dictionary tileProvider [[codegen::reference("globebrowsing_layer")]];
+            Dictionary tileProvider [[codegen::reference("globebrowsing_layer")]];
         };
 
         // The list of all TileProviders and the indices at which they are used.
@@ -92,7 +93,7 @@ Documentation TileProviderByIndex::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_byindex");
 }
 
-TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
+TileProviderByIndex::TileProviderByIndex(const Dictionary& dictionary) {
     ZoneScoped;
 
     Parameters p = codegen::bake<Parameters>(dictionary);

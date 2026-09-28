@@ -102,7 +102,7 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     std::ofstream file = std::ofstream(_path, std::ios::binary);
 
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format("Could not create file '{}'", _path));
+        throw RuntimeError(std::format("Could not create file '{}'", _path));
     }
 
     file.write(buffer, length);

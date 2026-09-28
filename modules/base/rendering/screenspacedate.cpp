@@ -78,7 +78,7 @@ Documentation ScreenSpaceDate::Documentation() {
     );
 }
 
-ScreenSpaceDate::ScreenSpaceDate(const ghoul::Dictionary& dictionary)
+ScreenSpaceDate::ScreenSpaceDate(const Dictionary& dictionary)
     : ScreenSpaceRenderableText(dictionary)
     , _formatString(FormatStringInfo, "Date: {}")
     , _timeFormat(TimeFormatInfo, "YYYY MON DD HR:MN:SC.### UTC ::RND")

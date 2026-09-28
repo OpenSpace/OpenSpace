@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +36,7 @@
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/assert.h>
 #include <openspace/misc/defer.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <assimp/anim.h>
 #include <assimp/color4.h>
 #include <assimp/Importer.hpp>
@@ -54,8 +53,8 @@
 #include <utility>
 
 namespace {
-    using namespace ghoul;
-    using namespace ghoul::io;
+    using namespace openspace;
+    using namespace openspace::io;
 
     constexpr std::string_view _loggerCat = "ModelReaderAssimp";
     constexpr int TreeTabLength = 2;
@@ -745,14 +744,14 @@ namespace {
 
 } // namespace
 
-namespace ghoul::io {
+namespace openspace::io {
 
 std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                                                     const std::filesystem::path& filename,
                                                                 bool forceRenderInvisible,
                                                         bool notifyInvisibleDropped) const
 {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
+    assert_msg(!filename.empty(), "Filename must not be empty");
 
     std::filesystem::path modelDirectory = filename.parent_path();
 
@@ -907,4 +906,4 @@ std::vector<std::string> ModelReaderAssimp::supportedExtensions() const {
     };
 }
 
-} // namespace ghoul::io
+} // namespace openspace::io

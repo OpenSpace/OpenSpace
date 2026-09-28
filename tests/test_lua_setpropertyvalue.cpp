@@ -92,7 +92,7 @@ TEST_CASE("SetPropertyValueSingle: Wrong Type", "[setpropertyvalue]") {
             "openspace.setPropertyValueSingle('base.p1', 'abc')"
         );
         triggerScriptRun();
-        int errorCounter = LogMgr.messageCounter(ghoul::logging::LogLevel::Error);
+        int errorCounter = LogMgr.messageCounter(logging::LogLevel::Error);
         CHECK(errorCounter == 1);
     }
 }
@@ -111,7 +111,7 @@ TEST_CASE("SetPropertyValueSingle: Non-existing", "[setpropertyvalue]") {
             "openspace.setPropertyValueSingle('base.p2', 1.0)"
         );
         triggerScriptRun();
-        int errorCounter = LogMgr.messageCounter(ghoul::logging::LogLevel::Error);
+        int errorCounter = LogMgr.messageCounter(logging::LogLevel::Error);
         CHECK(errorCounter == 1);
     }
 }
@@ -203,7 +203,7 @@ TEST_CASE("SetPropertyValueSingle: Easing", "[setpropertyvalue]") {
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
         CHECK(p1 > 1.f);
-        const double t = ghoul::exponentialEaseOut(0.1);
+        const double t = exponentialEaseOut(0.1);
         const double v = glm::mix(1.0, 2.0, t);
         CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
     }
@@ -426,7 +426,7 @@ TEST_CASE("SetPropertyValue: Wrong Type", "[setpropertyvalue]") {
             "openspace.setPropertyValue('base.p1', 'abc')"
         );
         triggerScriptRun();
-        int errorCounter = LogMgr.messageCounter(ghoul::logging::LogLevel::Error);
+        int errorCounter = LogMgr.messageCounter(logging::LogLevel::Error);
         CHECK(errorCounter == 2);
     }
 }
@@ -446,7 +446,7 @@ TEST_CASE("SetPropertyValue: Non-existing", "[setpropertyvalue]") {
             "openspace.setPropertyValue('base.p2', 1.0)"
         );
         triggerScriptRun();
-        int errorCounter = LogMgr.messageCounter(ghoul::logging::LogLevel::Error);
+        int errorCounter = LogMgr.messageCounter(logging::LogLevel::Error);
         CHECK(errorCounter == 1);
     }
 }
@@ -537,7 +537,7 @@ TEST_CASE("SetPropertyValue: Easing", "[setpropertyvalue]") {
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
         CHECK(p1 > 1.f);
-        const double t = ghoul::exponentialEaseOut(0.1);
+        const double t = exponentialEaseOut(0.1);
         const double v = glm::mix(1.0, 2.0, t);
         CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
     }
@@ -1209,7 +1209,7 @@ TEST_CASE("SetPropertyValue: Wildcard Easing Multiple", "[setpropertyvalue]") {
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
-        const double t = ghoul::exponentialEaseOut(0.1);
+        const double t = exponentialEaseOut(0.1);
         const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 > 1.f);
         CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
@@ -1239,7 +1239,7 @@ TEST_CASE("SetPropertyValue: Wildcard Easing Multiple", "[setpropertyvalue]") {
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
-        const double t = ghoul::exponentialEaseOut(0.1);
+        const double t = exponentialEaseOut(0.1);
         const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 > 1.f);
         CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
@@ -1269,7 +1269,7 @@ TEST_CASE("SetPropertyValue: Wildcard Easing Multiple", "[setpropertyvalue]") {
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
-        const double t = ghoul::exponentialEaseOut(0.1);
+        const double t = exponentialEaseOut(0.1);
         const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 > 1.f);
         CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
@@ -1317,7 +1317,7 @@ TEST_CASE("SetPropertyValue: Wildcard Easing Multiple/2", "[setpropertyvalue]") 
         CHECK(p21 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
-        const double t = ghoul::exponentialEaseOut(0.1);
+        const double t = exponentialEaseOut(0.1);
         const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 > 1.f);
         CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
@@ -2156,7 +2156,7 @@ TEST_CASE("SetPropertyValue: Tags Easing Multiple", "[setpropertyvalue]") {
         CHECK(p31 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
-        const double t = ghoul::exponentialEaseOut(0.1);
+        const double t = exponentialEaseOut(0.1);
         const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 > 1.f);
         CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
@@ -2755,7 +2755,7 @@ TEST_CASE("SetPropertyValue: Tags Intersection Easing Multiple", "[setpropertyva
         CHECK(p41 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
-        const double t = ghoul::exponentialEaseOut(0.1);
+        const double t = exponentialEaseOut(0.1);
         const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 == 1.f);
         CHECK(p2 == 1.f);
@@ -3457,7 +3457,7 @@ TEST_CASE("SetPropertyValue: Tags Union Easing Multiple", "[setpropertyvalue]") 
         CHECK(p51 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
-        const double t = ghoul::exponentialEaseOut(0.1);
+        const double t = exponentialEaseOut(0.1);
         const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 > 1.f);
         CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));
@@ -4100,7 +4100,7 @@ TEST_CASE("SetPropertyValue: Tags Negation Easing Multiple", "[setpropertyvalue]
         CHECK(p41 == 1.f);
         triggerScriptRun();
         updateInterpolations(std::chrono::milliseconds(100));
-        const double t = ghoul::exponentialEaseOut(0.1);
+        const double t = exponentialEaseOut(0.1);
         const double v = glm::mix(1.0, 2.0, t);
         CHECK(p1 > 1.f);
         CHECK_THAT(p1, Catch::Matchers::WithinAbs(v, 0.075));

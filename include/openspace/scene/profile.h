@@ -67,7 +67,7 @@ Addon loadAddonFromFile(const std::filesystem::path& path);
 
 class Profile {
 public:
-    struct ParsingError final : public ghoul::RuntimeError {
+    struct ParsingError final : public RuntimeError {
         enum class Severity { Info, Warning, Error };
 
         ParsingError(Severity severity_, std::string msg);

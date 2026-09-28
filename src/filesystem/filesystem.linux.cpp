@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,7 +51,7 @@ namespace {
     constexpr int BufferLength = 1024 * (EventSize + 16);
 } // namespace
 
-namespace ghoul::filesystem {
+namespace openspace::filesystem {
 
 int FileSystem::FileChangeInfo::NextIdentifier = 0;
 
@@ -165,6 +164,6 @@ void FileSystem::inotifyWatcher() {
     }
 }
 
-} // namespace ghoul::filesystem
+} // namespace openspace::filesystem
 
 #endif // WIN32

@@ -31,6 +31,8 @@
 #include <variant>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(Variant)]] Parameters {
         // optional variant vector documentation
@@ -44,13 +46,13 @@ TEST_CASE("Execution/Structs/Optional/Variant/Vector:  Bake", "[Execution][Struc
     using namespace std::string_literals;
 
     {
-        const ghoul::Dictionary d;
+        const Dictionary d;
         const Parameters p = codegen::bake<Parameters>(d);
         CHECK(!p.ovv.has_value());
     }
 
     {
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("Ovv", "abc"s);
         const Parameters p = codegen::bake<Parameters>(d);
         REQUIRE(p.ovv.has_value());
@@ -58,8 +60,8 @@ TEST_CASE("Execution/Structs/Optional/Variant/Vector:  Bake", "[Execution][Struc
         CHECK(std::get<std::string>(*p.ovv) == "abc");
     }
     {
-        ghoul::Dictionary d;
-        ghoul::Dictionary e;
+        Dictionary d;
+        Dictionary e;
         e.setValue("1", "def"s);
         e.setValue("2", "ghi"s);
         d.setValue("Ovv", e);

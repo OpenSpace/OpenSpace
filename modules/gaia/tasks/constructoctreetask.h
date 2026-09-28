@@ -36,7 +36,7 @@ namespace openspace {
 
 class ConstructOctreeTask : public Task {
 public:
-    explicit ConstructOctreeTask(const ghoul::Dictionary& dictionary);
+    explicit ConstructOctreeTask(const Dictionary& dictionary);
     ~ConstructOctreeTask() override = default;
 
     std::string description() override;

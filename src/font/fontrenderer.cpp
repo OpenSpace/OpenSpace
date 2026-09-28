@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -207,7 +206,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul::fontrendering {
+namespace openspace::fontrendering {
 
 std::unique_ptr<FontRenderer> FontRenderer::_defaultRenderer = nullptr;
 std::unique_ptr<FontRenderer> FontRenderer::_defaultProjectionRenderer = nullptr;
@@ -217,7 +216,7 @@ FontRenderer::FontRenderer(std::unique_ptr<opengl::ProgramObject> program,
     : _framebufferSize(std::move(framebufferSize))
     , _program(std::move(program))
 {
-    ghoul_assert(_program, "No program provided");
+    assert_msg(_program, "No program provided");
 
     //
     // Configure the OpenGL objects for the orthogonal font rendering
@@ -410,11 +409,11 @@ std::unique_ptr<FontRenderer> FontRenderer::createProjectionSubjectText() {
 
 void FontRenderer::initialize() {
     LDEBUG("Creating default FontRenderer");
-    ghoul_assert(!_defaultRenderer, "Default FontRenderer was already initialized");
+    assert_msg(!_defaultRenderer, "Default FontRenderer was already initialized");
     _defaultRenderer = createDefault();
 
     LDEBUG("Creating default projection FontRenderer");
-    ghoul_assert(
+    assert_msg(
         !_defaultProjectionRenderer,
         "Default projection Fontrenderer was already initialized"
     );
@@ -431,12 +430,12 @@ bool FontRenderer::isInitialized() {
 }
 
 FontRenderer& FontRenderer::defaultRenderer() {
-    ghoul_assert(_defaultRenderer != nullptr, "FontRenderer was not initialized");
+    assert_msg(_defaultRenderer != nullptr, "FontRenderer was not initialized");
     return *_defaultRenderer;
 }
 
 FontRenderer& FontRenderer::defaultProjectionRenderer() {
-    ghoul_assert(
+    assert_msg(
         _defaultProjectionRenderer != nullptr,
         "Projection FontRenderer was not initialized"
     );
@@ -819,8 +818,8 @@ void FontRenderer::setFramebufferSize(glm::vec2 framebufferSize) {
     _framebufferSize = std::move(framebufferSize);
 }
 
-glm::vec2 RenderFont(ghoul::fontrendering::Font& font, glm::vec2& pos,
-                     std::string_view text, const glm::vec4& color, CrDirection direction,
+glm::vec2 RenderFont(fontrendering::Font& font, glm::vec2& pos, std::string_view text,
+                     const glm::vec4& color, CrDirection direction,
                      const glm::vec4& outlineColor)
 {
     const FontRenderer::BoundingBoxInformation r = FontRenderer::defaultRenderer().render(
@@ -885,4 +884,4 @@ glm::vec2 RenderFont(Font& font, const glm::vec2& pos, std::string_view text) {
     return RenderFont(font, pos, text, Color, OutlineColor);
 }
 
-} // namespace ghoul::fontrendering
+} // namespace openspace::fontrendering

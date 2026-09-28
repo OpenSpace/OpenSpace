@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +28,7 @@
 #include <openspace/misc/assert.h>
 #include <utility>
 
-namespace ghoul::cmdparser {
+namespace openspace::cmdparser {
 
 CommandlineCommand::CommandExecutionException::CommandExecutionException(std::string msg)
     : RuntimeError(std::move(msg), "Command")
@@ -49,10 +48,10 @@ CommandlineCommand::CommandlineCommand(std::string name, std::string shortName,
     , _nArguments(argumentNum)
     , _allowsMultipleCalls(allowMultipleCalls)
 {
-    ghoul_assert(!_name.empty(), "Name must not be empty");
-    ghoul_assert(_name[0] == '-', "Name must start with a '-'");
+    assert_msg(!_name.empty(), "Name must not be empty");
+    assert_msg(_name[0] == '-', "Name must start with a '-'");
     if (!_shortName.empty()) {
-        ghoul_assert(_shortName[0] == '-', "Short name must start with a '-'");
+        assert_msg(_shortName[0] == '-', "Short name must start with a '-'");
     }
 }
 
@@ -116,4 +115,4 @@ void CommandlineCommand::checkParameters(const std::vector<std::string>& param) 
     }
 }
 
-} // namespace ghoul::cmdparser
+} // namespace openspace::cmdparser

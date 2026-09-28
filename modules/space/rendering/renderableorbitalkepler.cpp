@@ -330,7 +330,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     addProperty(outlineWidth);
 }
 
-RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
+RenderableOrbitalKepler::RenderableOrbitalKepler(const Dictionary& dict)
     : Renderable(dict)
     , _nThreads(std::max(1u, std::thread::hardware_concurrency() / 2u))
     , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
@@ -469,7 +469,7 @@ void RenderableOrbitalKepler::initializeGL() {
     // Program for line rendering
     _trailProgram = SpaceModule::ProgramObjectManager.request(
         "OrbitalKeplerTrails",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
            return global::renderEngine->buildRenderProgram(
                "OrbitalKeplerTrails",
                absPath("${MODULE_SPACE}/shaders/keplertrails_vs.glsl"),
@@ -481,7 +481,7 @@ void RenderableOrbitalKepler::initializeGL() {
     // Program for point rendering
     _pointProgram = SpaceModule::ProgramObjectManager.request(
         "OrbitalKeplerPoints",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "OrbitalKeplerPoints",
                 absPath("${MODULE_SPACE}/shaders/keplerpoints_vs.glsl"),
@@ -491,8 +491,8 @@ void RenderableOrbitalKepler::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_trailProgram, _uniformTrailCache);
-    ghoul::opengl::updateUniformLocations(*_pointProgram, _uniformPointCache);
+    opengl::updateUniformLocations(*_trailProgram, _uniformTrailCache);
+    opengl::updateUniformLocations(*_pointProgram, _uniformPointCache);
 
     _updateDataBuffersAtNextRender = true;
 }
@@ -503,14 +503,14 @@ void RenderableOrbitalKepler::deinitializeGL() {
 
     SpaceModule::ProgramObjectManager.release(
         "OrbitalKeplerTrails",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
 
     SpaceModule::ProgramObjectManager.release(
         "OrbitalKeplerPoints",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -698,7 +698,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     _nOrbits = static_cast<unsigned int>(_parameters.size());
 
     if (_startRenderIdx >= _nOrbits) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Start index {} out of range [0, {}]", _startRenderIdx.value(), _nOrbits
         ));
     }
@@ -706,7 +706,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     long long endElement = _startRenderIdx + _sizeRender - 1;
     endElement = (endElement >= _nOrbits) ? _nOrbits - 1 : endElement;
     if (endElement < 0 || endElement >= _nOrbits) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "End index {} out of range [0, {}]", endElement, _nOrbits
         ));
     }
@@ -721,7 +721,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         if (_startRenderIdx >= _parameters.size() ||
             (_startRenderIdx + _sizeRender) > _parameters.size())
         {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Tried to load {} objects but only {} are available",
                 _startRenderIdx + _sizeRender, _parameters.size()
             ));

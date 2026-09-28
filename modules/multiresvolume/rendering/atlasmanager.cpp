@@ -54,14 +54,14 @@ AtlasManager::AtlasManager(TSP* tsp)
         _freeAtlasCoords[i] = i;
     }
 
-    _textureAtlas = new ghoul::opengl::Texture(
-        ghoul::opengl::Texture::FormatInit {
+    _textureAtlas = new opengl::Texture(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(_atlasDim, _atlasDim, _atlasDim),
             .type = GL_TEXTURE_3D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
 
     glCreateBuffers(2, _pboHandle);
@@ -175,7 +175,7 @@ void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex,
             int level = _nOtLevels - static_cast<int>(
                 floor(log1p((7.0 * (float(brickIndex % _nOtNodes))))/log(8)) - 1
             );
-            ghoul_assert(atlasCoords <= 0x0FFFFFFF, "@MISSING");
+            assert_msg(atlasCoords <= 0x0FFFFFFF, "@MISSING");
             unsigned int atlasData = (level << 28) + atlasCoords;
             _brickMap.emplace(brickIndex, atlasData);
             _nStreamedBricks++;
@@ -241,8 +241,8 @@ void AtlasManager::pboToAtlas(BufferIndex bufferIndex) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-ghoul::opengl::Texture& AtlasManager::textureAtlas() {
-    ghoul_assert(_textureAtlas != nullptr, "Texture atlas is nullptr");
+opengl::Texture& AtlasManager::textureAtlas() {
+    assert_msg(_textureAtlas != nullptr, "Texture atlas is nullptr");
     return *_textureAtlas;
 }
 

@@ -34,9 +34,9 @@
 #include <string>
 #include <vector>
 
-namespace ghoul::filesystem { class File; }
-
 namespace openspace {
+
+namespace filesystem { class File; }
 
 class DownloadManager {
 public:

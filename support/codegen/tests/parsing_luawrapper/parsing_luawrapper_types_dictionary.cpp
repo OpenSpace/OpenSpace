@@ -30,7 +30,7 @@
 
 TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary", "[Parsing][LuaWrapper]") {
     constexpr std::string_view Source = R"(
-    [[codegen::luawrap]] void func(ghoul::Dictionary arg) {
+    [[codegen::luawrap]] void func(Dictionary arg) {
     }
 )";
 
@@ -74,7 +74,7 @@ TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary", "[Parsing][LuaWrapper]") 
 TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary defaulted", "[Parsing][LuaWrapper]")
 {
     constexpr std::string_view Source = R"(
-    [[codegen::luawrap]] void func(ghoul::Dictionary arg = ghoul::Dictionary()) {
+    [[codegen::luawrap]] void func(Dictionary arg = Dictionary()) {
     }
 )";
 
@@ -119,7 +119,7 @@ TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary defaulted", "[Parsing][LuaW
 
 TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary map", "[Parsing][LuaWrapper]") {
     constexpr std::string_view Source = R"(
-    [[codegen::luawrap]] void func(std::map<std::string, ghoul::Dictionary> arg) {
+    [[codegen::luawrap]] void func(std::map<std::string, Dictionary> arg) {
     }
 )";
 
@@ -166,7 +166,7 @@ TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary map", "[Parsing][LuaWrapper
 
 TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary optional", "[Parsing][LuaWrapper]") {
     constexpr std::string_view Source = R"(
-    [[codegen::luawrap]] void func(std::optional<ghoul::Dictionary> arg) {
+    [[codegen::luawrap]] void func(std::optional<Dictionary> arg) {
     }
 )";
 
@@ -211,7 +211,7 @@ TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary optional", "[Parsing][LuaWr
 
 TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary vector", "[Parsing][LuaWrapper]") {
     constexpr std::string_view Source = R"(
-    [[codegen::luawrap]] void func(std::vector<ghoul::Dictionary> arg) {
+    [[codegen::luawrap]] void func(std::vector<Dictionary> arg) {
     }
 )";
 
@@ -256,13 +256,13 @@ TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary vector", "[Parsing][LuaWrap
 
 TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary array", "[Parsing][LuaWrapper]") {
     constexpr std::string_view Source = R"(
-    [[codegen::luawrap]] void func1(std::array<ghoul::Dictionary, 1> arg) {
+    [[codegen::luawrap]] void func1(std::array<Dictionary, 1> arg) {
     }
 
-    [[codegen::luawrap]] void func2(std::array<ghoul::Dictionary, 5> arg) {
+    [[codegen::luawrap]] void func2(std::array<Dictionary, 5> arg) {
     }
 
-    [[codegen::luawrap]] void func3(std::array<ghoul::Dictionary, 10> arg) {
+    [[codegen::luawrap]] void func3(std::array<Dictionary, 10> arg) {
     }
 )";
 
@@ -376,8 +376,8 @@ TEST_CASE("Parsing/LuaWrapper/Arguments:  dictionary array", "[Parsing][LuaWrapp
 
 TEST_CASE("Parsing/LuaWrapper/Return:  dictionary", "[Parsing][LuaWrapper]") {
     constexpr std::string_view Source = R"(
-    [[codegen::luawrap]] ghoul::Dictionary foo() {
-        return ghoul::Dictionary();
+    [[codegen::luawrap]] Dictionary foo() {
+        return Dictionary();
     }
 )";
 
@@ -402,8 +402,8 @@ TEST_CASE("Parsing/LuaWrapper/Return:  dictionary", "[Parsing][LuaWrapper]") {
 
 TEST_CASE("Parsing/LuaWrapper/Return:  dictionary map", "[Parsing][LuaWrapper]") {
     constexpr std::string_view Source = R"(
-    [[codegen::luawrap]] std::map<std::string, ghoul::Dictionary> foo() {
-        return { "test", ghoul::Dictionary() };
+    [[codegen::luawrap]] std::map<std::string, Dictionary> foo() {
+        return { "test", Dictionary() };
     }
 )";
 
@@ -432,8 +432,8 @@ TEST_CASE("Parsing/LuaWrapper/Return:  dictionary map", "[Parsing][LuaWrapper]")
 
 TEST_CASE("Parsing/LuaWrapper/Return:  dictionary optional", "[Parsing][LuaWrapper]") {
     constexpr std::string_view Source = R"(
-    [[codegen::luawrap]] std::optional<ghoul::Dictionary> foo() {
-        return ghoul::Dictionary();
+    [[codegen::luawrap]] std::optional<Dictionary> foo() {
+        return Dictionary();
     }
 )";
 
@@ -460,8 +460,8 @@ TEST_CASE("Parsing/LuaWrapper/Return:  dictionary optional", "[Parsing][LuaWrapp
 
 TEST_CASE("Parsing/LuaWrapper/Return:  dictionary vector", "[Parsing][LuaWrapper]") {
     constexpr std::string_view Source = R"(
-    [[codegen::luawrap]] std::vector<ghoul::Dictionary> foo() {
-        return { ghoul::Dictionary() };
+    [[codegen::luawrap]] std::vector<Dictionary> foo() {
+        return { Dictionary() };
     }
 )";
 
@@ -488,15 +488,15 @@ TEST_CASE("Parsing/LuaWrapper/Return:  dictionary vector", "[Parsing][LuaWrapper
 
 TEST_CASE("Parsing/LuaWrapper/Return:  dictionary array", "[Parsing][LuaWrapper]") {
     constexpr std::string_view Source = R"(
-    [[codegen::luawrap]] std::array<ghoul::Dictionary, 1> foo1() {
+    [[codegen::luawrap]] std::array<Dictionary, 1> foo1() {
         return {};
     }
 
-    [[codegen::luawrap]] std::array<ghoul::Dictionary, 5> foo2() {
+    [[codegen::luawrap]] std::array<Dictionary, 5> foo2() {
         return {};
     }
 
-    [[codegen::luawrap]] std::array<ghoul::Dictionary, 10> foo3() {
+    [[codegen::luawrap]] std::array<Dictionary, 10> foo3() {
         return {};
     }
 )";

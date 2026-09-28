@@ -46,11 +46,11 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
     : PropertyOwner({ std::move(name) })
 {}
 
-void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
+void OpenSpaceModule::initialize(const Dictionary& configuration) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    const std::string upperIdentifier = ghoul::toUpperCase(identifier());
+    const std::string upperIdentifier = toUpperCase(identifier());
 
     std::string moduleToken = std::format("${{{}{}}}", ModuleBaseToken, upperIdentifier);
 
@@ -106,14 +106,14 @@ std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {
 }
 
 std::filesystem::path OpenSpaceModule::modulePath() const {
-    const std::string moduleIdentifier = ghoul::toLowerCase(identifier());
+    const std::string moduleIdentifier = toLowerCase(identifier());
 
     // First try the internal module directory
     const std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);
     return std::filesystem::is_directory(path) ? path : "";
 }
 
-void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}
+void OpenSpaceModule::internalInitialize(const Dictionary&) {}
 
 void OpenSpaceModule::internalInitializeGL() {}
 

@@ -129,7 +129,7 @@ void WebsocketCameraStates::setAxisMapping(int axis, AxisType mapping,
                                           AxisInvert shouldInvert,
                                           AxisNormalize shouldNormalize)
 {
-    ghoul_assert(axis < WebsocketInputState::MaxAxes, "axis must be < MaxAxes");
+    assert_msg(axis < WebsocketInputState::MaxAxes, "axis must be < MaxAxes");
 
     _axisMapping[axis].type = mapping;
     _axisMapping[axis].invert = shouldInvert;

@@ -27,7 +27,7 @@
 #include <openspace/filesystem/filesystem.h>
 #include <openspace/format.h>
 #include <openspace/misc/profiling.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/programobject.h>
 #include <openspace/opengl/textureunit.h>
 #include <openspace/opengl/texture.h>
@@ -48,7 +48,7 @@ namespace {
 
 namespace openspace {
 
-GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture,
+GalaxyRaycaster::GalaxyRaycaster(opengl::Texture& texture,
                              const std::optional<std::filesystem::path>& raycastingShader)
     : _boundingBox(glm::vec3(1.f))
     , _texture(texture)
@@ -63,7 +63,7 @@ void GalaxyRaycaster::initialize() {
 }
 
 void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
-                                        ghoul::opengl::ProgramObject& program)
+                                        opengl::ProgramObject& program)
 {
     program.setUniform("modelViewTransform", modelViewTransform(data));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
@@ -77,7 +77,7 @@ void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
 }
 
 void GalaxyRaycaster::renderExitPoints(const RenderData& data,
-                                       ghoul::opengl::ProgramObject& program)
+                                       opengl::ProgramObject& program)
 {
     program.setUniform("modelViewTransform", modelViewTransform(data));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
@@ -104,7 +104,7 @@ glm::dmat4 GalaxyRaycaster::modelViewTransform(const RenderData& data) {
 }
 
 void GalaxyRaycaster::preRaycast(const RaycastData& data,
-                                 ghoul::opengl::ProgramObject& program)
+                                 opengl::ProgramObject& program)
 {
     program.setUniform(std::format("aspect{}", data.id), _aspect);
     program.setUniform(std::format("maxStepSize{}", data.id), _stepSize);
@@ -112,12 +112,12 @@ void GalaxyRaycaster::preRaycast(const RaycastData& data,
     program.setUniform(std::format("absorptionMultiply{}", data.id), _absorptionMultiply);
     program.setUniform(std::format("emissionMultiply{}", data.id), _emissionMultiply);
 
-    _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+    _textureUnit = std::make_unique<opengl::TextureUnit>();
     _textureUnit->bind(_texture);
     program.setUniform(std::format("galaxyTexture{}", data.id), *_textureUnit);
 }
 
-void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {
+void GalaxyRaycaster::postRaycast(const RaycastData&, opengl::ProgramObject&) {
     _textureUnit = nullptr;
 }
 

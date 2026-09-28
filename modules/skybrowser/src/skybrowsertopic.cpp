@@ -211,7 +211,7 @@ Schema SkyBrowserTopic::Schema() {
 
 void SkyBrowserTopic::sendBrowserData() {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    ghoul::Dictionary data;
+    Dictionary data;
 
     // Set general data
     data.setValue("selectedBrowserId", module->selectedBrowserId());
@@ -219,15 +219,15 @@ void SkyBrowserTopic::sendBrowserData() {
 
     // Pass data for all the browsers and the corresponding targets
     const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
-    ghoul::Dictionary targets;
+    Dictionary targets;
     for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
         const std::string id = pair->browserId();
-        const ghoul::Dictionary target = pair->dataAsDictionary();
+        const Dictionary target = pair->dataAsDictionary();
         targets.setValue(id, target);
     }
     data.setValue("browsers", targets);
 
-    std::string jsonString = ghoul::formatJson(data);
+    std::string jsonString = formatJson(data);
 
     // Only send message if data actually changed
     if (jsonString != _lastUpdateJsonString) {

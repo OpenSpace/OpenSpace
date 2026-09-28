@@ -68,7 +68,7 @@ public:
     using TransformMatrix = std::array<double, 36>;
     using KernelHandle = unsigned int;
 
-    struct SpiceException final : public ghoul::RuntimeError {
+    struct SpiceException final : public RuntimeError {
         explicit SpiceException(std::string msg);
     };
 
@@ -435,7 +435,7 @@ public:
         const char (&format)[N] = "YYYY MON DDTHR:MN:SC.### ::RND") const
     {
         static_assert(N != 0, "Format must not be empty");
-        ghoul_assert(N >= bufferSize - 1, "Buffer size too small");
+        assert_msg(N >= bufferSize - 1, "Buffer size too small");
 
         timout_c(ephemerisTime, format, bufferSize, outBuf);
         if (failed_c()) {

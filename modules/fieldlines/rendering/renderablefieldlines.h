@@ -28,7 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/misc/dictionary.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -42,7 +42,7 @@ struct LinePoint;
 
 class RenderableFieldlines : public Renderable {
 public:
-    explicit RenderableFieldlines(const ghoul::Dictionary& dictionary);
+    explicit RenderableFieldlines(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -65,7 +65,7 @@ private:
     OptionProperty _seedPointSource;
     StringProperty _seedPointSourceFile;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<opengl::ProgramObject> _program;
 
     std::filesystem::path _file;
     std::vector<std::string> _variables;

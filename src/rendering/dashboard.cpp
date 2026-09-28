@@ -108,7 +108,7 @@ void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
 }
 
 void Dashboard::removeDashboardItem(int index) {
-    ghoul_assert(index < static_cast<int>(_items.size()), "Invalid index");
+    assert_msg(index < static_cast<int>(_items.size()), "Invalid index");
 
     removePropertySubOwner(_items[index].get());
     _items.erase(_items.begin() + index);
@@ -136,7 +136,7 @@ bool Dashboard::hasItem(int index) const {
 }
 
 const DashboardItem& Dashboard::item(int index) const {
-    ghoul_assert(index < static_cast<int>(_items.size()), "Invalid index");
+    assert_msg(index < static_cast<int>(_items.size()), "Invalid index");
 
     return *_items[index];
 }

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,7 +56,7 @@ namespace {
 } // namespace
 
 std::filesystem::path absPath(std::string path) {
-    ghoul_assert(!path.empty(), "Path must not be empty");
+    assert_msg(!path.empty(), "Path must not be empty");
     const std::filesystem::path expanded = FileSys.expandPathTokens(std::move(path));
     const std::filesystem::path absolute = std::filesystem::absolute(expanded);
     return absolute.lexically_normal();
@@ -71,7 +70,7 @@ std::filesystem::path absPath(const char* path) {
     return absPath(std::string(path));
 }
 
-namespace ghoul::filesystem {
+namespace openspace::filesystem {
 
 FileSystem* FileSystem::_instance = nullptr;
 
@@ -99,12 +98,12 @@ FileSystem::~FileSystem() {
 }
 
 void FileSystem::initialize() {
-    ghoul_assert(!isInitialized(), "FileSystem is already initialized");
+    assert_msg(!isInitialized(), "FileSystem is already initialized");
     _instance = new FileSystem;
 }
 
 void FileSystem::deinitialize() {
-    ghoul_assert(isInitialized(), "FileSystem is not initialized");
+    assert_msg(isInitialized(), "FileSystem is not initialized");
     delete _instance;
     _instance = nullptr;
 }
@@ -114,19 +113,19 @@ bool FileSystem::isInitialized() {
 }
 
 FileSystem& FileSystem::ref() {
-    ghoul_assert(isInitialized(), "FileSystem is not initialized");
+    assert_msg(isInitialized(), "FileSystem is not initialized");
     return *_instance;
 }
 
 void FileSystem::registerPathToken(std::string token, std::filesystem::path path,
                                    Override override)
 {
-    ghoul_assert(!token.empty(), "Token must not be empty");
-    ghoul_assert(token.find("${") == 0, "Token must start with '${'");
-    ghoul_assert(token[token.size() - 1] == '}', "Token must end with '}'");
+    assert_msg(!token.empty(), "Token must not be empty");
+    assert_msg(token.find("${") == 0, "Token must start with '${'");
+    assert_msg(token[token.size() - 1] == '}', "Token must end with '}'");
 
     if (!override) {
-        ghoul_assert(
+        assert_msg(
             _tokenMap.find(token) == _tokenMap.end(),
             "Token must not have been registered before"
         );
@@ -218,7 +217,7 @@ bool FileSystem::hasRegisteredToken(const std::string& token) const {
 }
 
 bool FileSystem::containsToken(const std::string& path) const {
-    ghoul_assert(!path.empty(), "Path must not be empty");
+    assert_msg(!path.empty(), "Path must not be empty");
 
     const bool hasOpeningBrace = path.contains("${");
     const bool hasClosingBrace = path.contains('}');
@@ -226,18 +225,18 @@ bool FileSystem::containsToken(const std::string& path) const {
 }
 
 void FileSystem::createCacheManager(const std::filesystem::path& directory) {
-    ghoul_assert(
+    assert_msg(
         std::filesystem::is_directory(directory),
         "Cache directory did not exist"
     );
-    ghoul_assert(!_cacheManager, "CacheManager was already created");
+    assert_msg(!_cacheManager, "CacheManager was already created");
 
     _cacheManager = std::make_unique<CacheManager>(directory);
-    ghoul_assert(_cacheManager, "CacheManager creation failed");
+    assert_msg(_cacheManager, "CacheManager creation failed");
 }
 
 void FileSystem::destroyCacheManager() {
-    ghoul_assert(_cacheManager, "CacheManager was not created");
+    assert_msg(_cacheManager, "CacheManager was not created");
     _cacheManager = nullptr;
 }
 
@@ -325,8 +324,8 @@ std::vector<std::filesystem::path> walkDirectory(const std::filesystem::path& pa
                                                  Recursive recursive, Sorted sorted,
                                  std::function<bool(const std::filesystem::path&)> filter)
 {
-    ghoul_assert(std::filesystem::exists(path), "Path does not exist");
-    ghoul_assert(std::filesystem::is_directory(path), "Path is not a directory");
+    assert_msg(std::filesystem::exists(path), "Path does not exist");
+    assert_msg(std::filesystem::is_directory(path), "Path is not a directory");
 
     namespace fs = std::filesystem;
     std::vector<std::filesystem::path> result;
@@ -391,4 +390,4 @@ bool isSubdirectory(std::filesystem::path p, std::filesystem::path root) {
     return false;
 }
 
-} // namespace ghoul::filesystem
+} // namespace openspace::filesystem

@@ -309,7 +309,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     addProperty(_alignmentOption);
 }
 
-void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
+void GlobeLabelsComponent::initialize(const Dictionary& dictionary,
                                       RenderableGlobe* globe)
 {
     ZoneScoped;
@@ -357,8 +357,8 @@ void GlobeLabelsComponent::initializeFonts() {
     _font = global::fontManager->font(
         "Mono",
         static_cast<float>(_fontSize),
-        ghoul::fontrendering::FontManager::Outline::Yes,
-        ghoul::fontrendering::FontManager::LoadGlyphs::Yes
+        fontrendering::FontManager::Outline::Yes,
+        fontrendering::FontManager::LoadGlyphs::Yes
     );
 }
 
@@ -411,14 +411,14 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
 
         std::string sline;
         while (!csvLabelFile.eof()) {
-            ghoul::getline(csvLabelFile, sline);
+            openspace::getline(csvLabelFile, sline);
             if (sline.size() <= 10) {
                 continue;
             }
 
             std::istringstream iss = std::istringstream(sline);
             std::string token;
-            ghoul::getline(iss, token, ',');
+            openspace::getline(iss, token, ',');
 
             // First line is just the Header
             if (token == "Feature_Name") {
@@ -444,22 +444,22 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             }
 
             // Target is not used
-            ghoul::getline(iss, token, ',');
+            openspace::getline(iss, token, ',');
 
             // Diameter
-            ghoul::getline(iss, token, ',');
+            openspace::getline(iss, token, ',');
             lEntry.diameter = std::stof(token);
 
             // Latitude
-            ghoul::getline(iss, token, ',');
+            openspace::getline(iss, token, ',');
             lEntry.latitude = std::stof(token);
 
             // Longitude
-            ghoul::getline(iss, token, ',');
+            openspace::getline(iss, token, ',');
             lEntry.longitude = std::stof(token);
 
             // Coord System
-            ghoul::getline(iss, token, ',');
+            openspace::getline(iss, token, ',');
             const std::string_view coordinateSystem = token;
             const size_t found = coordinateSystem.find("West");
             if (found != std::string::npos) {
@@ -468,9 +468,9 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
 
             // Clean white spaces
             std::istringstream issFeature = std::istringstream(lEntry.feature);
-            ghoul::getline(issFeature, token, '=');
+            openspace::getline(issFeature, token, '=');
             if (token.empty()) {
-                ghoul::getline(issFeature, token, '=');
+                openspace::getline(issFeature, token, '=');
             }
             std::strncpy(lEntry.feature, token.c_str(), 255);
 
@@ -664,7 +664,7 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
             const glm::dmat4 modelviewTransform = glm::dmat4(
                 data.camera.combinedViewMatrix()) * _globe->modelTransform();
 
-            ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
+            fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
                 .enableDepth = true,
                 .enableFalseDepth = true,
                 .disableTransmittance = true,
@@ -683,7 +683,7 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                 .cameraLookUp = data.camera.lookUpVectorWorldSpace()
             };
 
-            ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
+            fontrendering::FontRenderer::defaultProjectionRenderer().render(
                 *_font,
                 position,
                 lEntry.feature,

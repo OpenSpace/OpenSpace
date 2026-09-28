@@ -49,7 +49,7 @@ namespace {
 namespace openspace::dataloader::csv {
 
 Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> specs) {
-    ghoul_assert(std::filesystem::exists(filePath), "File must exist");
+    assert_msg(std::filesystem::exists(filePath), "File must exist");
 
     auto readFloatData = [](const std::string& str) -> float {
         float result = 0.f;
@@ -74,7 +74,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 
     LDEBUG("Parsing CSV file");
 
-    std::vector<std::vector<std::string>> rows = ghoul::loadCSVFile(filePath, true);
+    std::vector<std::vector<std::string>> rows = loadCSVFile(filePath, true);
     if (rows.size() < 2) {
         LWARNING(std::format(
             "Error loading data file '{}'. No data items read", filePath
@@ -152,13 +152,13 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     bool hasTextureIndex = (res.textureDataIndex >= 0);
 
     if (hasProvidedTextureFile && !hasTextureIndex && !specs->textureColumn.has_value()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error loading data file {}. No texture column was specified in the data "
             "mapping", filePath
         ));
     }
     if (!hasProvidedTextureFile && hasTextureIndex) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error loading data file {}. Missing texture map file location in data "
             "mapping", filePath
         ));
@@ -235,7 +235,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
     if (hasProvidedTextureFile) {
         const std::filesystem::path path = *specs->textureMap;
         if (!std::filesystem::is_regular_file(path)) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Failed to open texture map file {}", path
             ));
         }
@@ -248,13 +248,11 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
                                                  const std::set<int>& texturesInData)
 {
-    ghoul_assert(std::filesystem::exists(path), "File must exist");
+    assert_msg(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format(
-            "Failed to open texture map file {}", path
-        ));
+        throw RuntimeError(std::format("Failed to open texture map file {}", path));
     }
 
     int currentLineNumber = 0;
@@ -262,15 +260,15 @@ std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
     std::vector<Dataset::Texture> res;
 
     std::string line;
-    while (ghoul::getline(file, line)) {
-        ghoul::trimWhitespace(line);
+    while (openspace::getline(file, line)) {
+        trimWhitespace(line);
         currentLineNumber++;
 
         if (line.empty() || line.starts_with("#")) {
             continue;
         }
 
-        std::vector<std::string> tokens = ghoul::tokenizeString(line, ' ');
+        std::vector<std::string> tokens = tokenizeString(line, ' ');
         int nNonEmptyTokens = static_cast<int>(std::count_if(
             tokens.begin(),
             tokens.end(),
@@ -278,7 +276,7 @@ std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
         ));
 
         if (nNonEmptyTokens > 2) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Error loading texture map file {}: Line {} has too many parameters. "
                 "Expected 2: an integer index followed by a filename, where the file "
                 "name may not include whitespaces", path, currentLineNumber
@@ -294,7 +292,7 @@ std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
 
         for (const Dataset::Texture& t : res) {
             if (t.index == texture.index) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error loading texture map file {}: Texture index '{}' defined twice",
                     path, texture.index
                 ));

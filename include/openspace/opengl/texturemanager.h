@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,13 +28,13 @@
 #include <openspace/misc/objectmanager.h>
 #include <openspace/opengl/texture.h>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 class TextureManager : public ObjectManager<Texture> {
 public:
     TextureManager();
 };
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl
 
 #endif // __OPENSPACE_CORE___TEXTUREMANAGER___H__

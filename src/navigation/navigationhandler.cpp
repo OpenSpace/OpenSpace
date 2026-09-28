@@ -119,7 +119,7 @@ void NavigationHandler::deinitialize() {
 }
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {
-    ghoul_assert(node, "Focus node must not be nullptr");
+    assert_msg(node, "Focus node must not be nullptr");
     _orbitalNavigator.setFocusNode(node);
     _camera->setPosition(anchorNode()->worldPosition());
 }
@@ -207,7 +207,7 @@ void NavigationHandler::triggerFadeToTransition(std::string transitionScript,
 }
 
 void NavigationHandler::updateCamera(double deltaTime) {
-    ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
+    assert_msg(_camera != nullptr, "Camera must not be nullptr");
 
     // If there is a state to set, do so immediately and then return
     if (_pendingState.has_value()) {
@@ -242,7 +242,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
 }
 
 void NavigationHandler::applyPendingState() {
-    ghoul_assert(_pendingState.has_value(), "Pending pose must have a value");
+    assert_msg(_pendingState.has_value(), "Pending pose must have a value");
 
     std::variant<NodeCameraStateSpec, NavigationState> pending = *_pendingState;
     if (std::holds_alternative<NavigationState>(pending)) {
@@ -305,7 +305,7 @@ void NavigationHandler::updateCameraTransitions() {
     auto triggerApproachEvent = [this](const SceneGraphNode* node) {
         using namespace std::string_literals;
         if (!node->onApproachAction().empty()) {
-            ghoul::Dictionary dict;
+            Dictionary dict;
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Approaching"s);
             for (const std::string& action : node->onApproachAction()) {
@@ -329,7 +329,7 @@ void NavigationHandler::updateCameraTransitions() {
     auto triggerReachEvent = [this](const SceneGraphNode* node) {
         using namespace std::string_literals;
         if (!node->onReachAction().empty()) {
-            ghoul::Dictionary dict;
+            Dictionary dict;
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Reaching"s);
             for (const std::string& action : node->onReachAction()) {
@@ -353,7 +353,7 @@ void NavigationHandler::updateCameraTransitions() {
     auto triggerRecedeEvent = [this](const SceneGraphNode* node) {
         using namespace std::string_literals;
         if (!node->onRecedeAction().empty()) {
-            ghoul::Dictionary dict;
+            Dictionary dict;
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Receding"s);
             for (const std::string& action : node->onRecedeAction()) {
@@ -377,7 +377,7 @@ void NavigationHandler::updateCameraTransitions() {
     auto triggerExitEvent = [this](const SceneGraphNode* node) {
         using namespace std::string_literals;
         if (!node->onExitAction().empty()) {
-            ghoul::Dictionary dict;
+            Dictionary dict;
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Exiting"s);
             for (const std::string& action : node->onExitAction()) {
@@ -461,7 +461,7 @@ NavigationState NavigationHandler::navigationState() const {
     const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
         _orbitalNavigator.anchorNode() :
         sceneGraph()->root();
-    ghoul_assert(
+    assert_msg(
         referenceFrame,
         "The root will always exist and the anchor node ought to be reset when removed"
     );
@@ -517,7 +517,7 @@ NavigationState NavigationHandler::navigationState(
 void NavigationHandler::saveNavigationState(const std::filesystem::path& filepath,
                                         const std::string& referenceFrameIdentifier) const
 {
-    ghoul_precondition(!filepath.empty(), "File path must not be empty");
+    precondition(!filepath.empty(), "File path must not be empty");
 
     NavigationState state;
     if (!referenceFrameIdentifier.empty()) {
@@ -545,7 +545,7 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
     std::ofstream ofs(absolutePath);
 
     if (!ofs.good()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error saving navigation state to '{}'", filepath
         ));
     }
@@ -564,7 +564,7 @@ NavigationState NavigationHandler::loadNavigationState(const std::string& filepa
     }
 
     if (!std::filesystem::is_regular_file(absolutePath)) {
-        throw ghoul::FileNotFoundError(absolutePath, "NavigationState");
+        throw FileNotFoundError(absolutePath, "NavigationState");
     }
 
     std::ifstream f = std::ifstream(absolutePath);
@@ -574,7 +574,7 @@ NavigationState NavigationHandler::loadNavigationState(const std::string& filepa
     );
 
     if (contents.empty()) {
-        throw::ghoul::RuntimeError(std::format(
+        throw::RuntimeError(std::format(
             "Failed reading camera state from file: {}. File is empty", absolutePath
         ));
     }

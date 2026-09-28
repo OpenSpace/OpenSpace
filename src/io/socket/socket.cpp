@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +24,7 @@
 
 #include <openspace/io/socket/socket.h>
 
-namespace ghoul::io {
+namespace openspace::io {
 
 std::atomic<int> Socket::_nextSocketId = std::atomic<int>(0);
 
@@ -35,4 +34,4 @@ int Socket::socketId() const {
     return _socketId;
 }
 
-} // namespace ghoul::io
+} // namespace openspace::io

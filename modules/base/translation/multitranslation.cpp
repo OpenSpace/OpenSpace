@@ -31,11 +31,12 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     // Combines multiple translations that are applied one after the other.
     struct [[codegen::Dictionary(MultiTranslation)]] Parameters {
         // The list of translations that are applied one after the other.
-        std::vector<ghoul::Dictionary> translations
-            [[codegen::reference("core_translation")]];
+        std::vector<Dictionary> translations [[codegen::reference("core_translation")]];
     };
 } // namespace
 #include "multitranslation_codegen.cpp"
@@ -49,15 +50,14 @@ Documentation MultiTranslation::Documentation() {
     );
 }
 
-MultiTranslation::MultiTranslation(const ghoul::Dictionary& dictionary)
+MultiTranslation::MultiTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     int i = 0;
-    for (const ghoul::Dictionary& trans : p.translations) {
-        ghoul::mm_unique_ptr<Translation> translation =
-            Translation::createFromDictionary(trans);
+    for (const Dictionary& trans : p.translations) {
+        mm_unique_ptr<Translation> translation = Translation::createFromDictionary(trans);
         translation->setGuiName(std::format("{}: {}", i, translation->guiName()));
         translation->setIdentifier(std::format("{}_{}", i, translation->identifier()));
         addPropertySubOwner(translation.get());
@@ -68,13 +68,13 @@ MultiTranslation::MultiTranslation(const ghoul::Dictionary& dictionary)
 
 void MultiTranslation::initialize() {
     Translation::initialize();
-    for (const ghoul::mm_unique_ptr<Translation>& translation : _translations) {
+    for (const mm_unique_ptr<Translation>& translation : _translations) {
         translation->initialize();
     }
 }
 
 void MultiTranslation::update(const UpdateData& data) {
-    for (const ghoul::mm_unique_ptr<Translation>& translation : _translations) {
+    for (const mm_unique_ptr<Translation>& translation : _translations) {
         translation->update(data);
     }
     Translation::update(data);
@@ -82,7 +82,7 @@ void MultiTranslation::update(const UpdateData& data) {
 
 glm::dvec3 MultiTranslation::position(const UpdateData& data) const {
     glm::dvec3 res = glm::dvec3(1.0);
-    for (const ghoul::mm_unique_ptr<Translation>& translation : _translations) {
+    for (const mm_unique_ptr<Translation>& translation : _translations) {
         res += translation->position(data);
     }
     return res;

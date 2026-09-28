@@ -39,7 +39,7 @@
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/glm.h>
 #include <openspace/misc/memorypool.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
@@ -95,7 +95,7 @@ enum class ShadowCompType {
  */
 class RenderableGlobe : public Renderable, public Shadowee {
 public:
-    explicit RenderableGlobe(const ghoul::Dictionary& dictionary);
+    explicit RenderableGlobe(const Dictionary& dictionary);
     ~RenderableGlobe() override = default;
 
     void initializeGL() override;
@@ -210,11 +210,11 @@ private:
     int desiredLevelByAvailableTileData(const Chunk& chunk) const;
 
 
-    void calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
+    void calculateEclipseShadows(opengl::ProgramObject& programObject,
         const RenderData& data, ShadowCompType stype);
 
-    void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
-        const Chunk& chunk, const RenderData& data);
+    void setCommonUniforms(opengl::ProgramObject& programObject, const Chunk& chunk,
+        const RenderData& data);
 
     void recompileShaders();
 
@@ -266,7 +266,7 @@ private:
     glm::dmat4 _cachedModelTransform = glm::dmat4(1.0);
     glm::dmat4 _cachedInverseModelTransform = glm::dmat4(1.0);
 
-    ghoul::ReusableTypedMemoryPool<Chunk, 256> _chunkPool;
+    ReusableTypedMemoryPool<Chunk, 256> _chunkPool;
 
     std::vector<const Chunk*> _globalChunkBuffer;
     std::vector<const Chunk*> _localChunkBuffer;
@@ -277,7 +277,7 @@ private:
 
     // Two different shader programs. One for global and one for local rendering
     struct {
-        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        std::unique_ptr<opengl::ProgramObject> program;
         bool updatedSinceLastCall = false;
         UniformCache(skirtLength, minLatLon, lonLatScalingFactor) uniformCache;
 
@@ -285,7 +285,7 @@ private:
     } _globalRenderer;
 
     struct {
-        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        std::unique_ptr<opengl::ProgramObject> program;
         bool updatedSinceLastCall = false;
         UniformCache(skirtLength, p01, p11, p00, p10,
             patchNormalCameraSpace) uniformCache;
@@ -317,7 +317,7 @@ private:
 
     // Labels
     GlobeLabelsComponent _globeLabelsComponent;
-    ghoul::Dictionary _labelsDictionary;
+    Dictionary _labelsDictionary;
 };
 
 } // namespace openspace

@@ -57,7 +57,7 @@ Documentation SingleImageProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_singleimage");
 }
 
-SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
+SingleImageProvider::SingleImageProvider(const Dictionary& dictionary)
     : _filePath(FilePathInfo)
 {
     ZoneScoped;
@@ -89,15 +89,13 @@ void SingleImageProvider::reset() {
         return;
     }
 
-    _tileTexture = ghoul::io::texture::loadTexture(
+    _tileTexture = io::texture::loadTexture(
         _filePath.value(),
         2,
-        { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
+        { .filter = opengl::Texture::FilterMode::AnisotropicMipMap }
     );
     if (!_tileTexture) {
-        throw ghoul::RuntimeError(std::format(
-            "Unable to load texture '{}'", _filePath.value()
-        ));
+        throw RuntimeError(std::format("Unable to load texture '{}'", _filePath.value()));
     }
 
     _tile = {

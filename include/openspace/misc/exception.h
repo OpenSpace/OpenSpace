@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,12 +30,11 @@
 #include <filesystem>
 #include <string>
 
-namespace ghoul {
+namespace openspace {
 
 /**
- * Superclass for all exceptions that are thrown in Ghoul. The total message of the
- * exception consists of the `message` prefixed with the `component` that threw the
- * exception if it was set.
+ * Superclass for all internal exception. The total message of the exception consists of
+ * the `message` prefixed with the `component` that threw the exception if it was set.
  */
 struct RuntimeError : public std::runtime_error {
     /**
@@ -78,6 +76,6 @@ struct FileNotFoundError final : public RuntimeError {
     const std::filesystem::path file;
 };
 
-} // namespace ghoul
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___EXCEPTION___H__

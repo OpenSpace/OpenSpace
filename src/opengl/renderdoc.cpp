@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +33,7 @@
 #include <dlfcn.h>
 #endif // WIN32
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 void loadRenderDoc() {
     pRENDERDOC_GetAPI getApi = nullptr;
@@ -70,4 +69,4 @@ void loadRenderDoc() {
     LINFOC("RenderDoc", std::format("Loaded API {}.{}.{}", major, minor, patch));
 }
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl

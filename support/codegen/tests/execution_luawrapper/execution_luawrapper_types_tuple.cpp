@@ -32,7 +32,7 @@
 #include <array>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     [[codegen::luawrap]] void tupleVec3(std::tuple<glm::dvec3> arg) {
@@ -477,7 +477,7 @@ namespace {
 
 
 TEST_CASE("Execution/LuaWrapper/Arguments: tuple(vec3)", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::TupleVec3;
+    LuaLibrary::Function func = codegen::lua::TupleVec3;
     CHECK(func.name == "tupleVec3");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -488,14 +488,14 @@ TEST_CASE("Execution/LuaWrapper/Arguments: tuple(vec3)", "[Execution][LuaWrapper
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::tuple(glm::dvec3(1.1, 2.2, 3.3)));
+    lua::push(state, std::tuple(glm::dvec3(1.1, 2.2, 3.3)));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments: tuple(bool, int)", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::TupleBoolInt;
+    LuaLibrary::Function func = codegen::lua::TupleBoolInt;
     CHECK(func.name == "tupleBoolInt");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -506,7 +506,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments: tuple(bool, int)", "[Execution][LuaWr
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::tuple(true, 1));
+    lua::push(state, std::tuple(true, 1));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -517,7 +517,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleDoubleFloatStringDouble;
+    LuaLibrary::Function func = codegen::lua::TupleDoubleFloatStringDouble;
     CHECK(func.name == "tupleDoubleFloatStringDouble");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -528,7 +528,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::tuple(1.1, 2.2f, "abc", 3.3));
+    lua::push(state, std::tuple(1.1, 2.2f, "abc", 3.3));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -539,7 +539,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleVec3Defaulted;
+    LuaLibrary::Function func = codegen::lua::TupleVec3Defaulted;
     CHECK(func.name == "tupleVec3Defaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -550,7 +550,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::tuple(glm::dvec3(1.1, 2.2, 3.3)));
+    lua::push(state, std::tuple(glm::dvec3(1.1, 2.2, 3.3)));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -561,7 +561,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleBoolIntDefaulted;
+    LuaLibrary::Function func = codegen::lua::TupleBoolIntDefaulted;
     CHECK(func.name == "tupleBoolIntDefaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -572,7 +572,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::tuple(true, 1));
+    lua::push(state, std::tuple(true, 1));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -583,7 +583,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleDoubleFloatStringDoubleDefaulted;
+    LuaLibrary::Function func = codegen::lua::TupleDoubleFloatStringDoubleDefaulted;
     CHECK(func.name == "tupleDoubleFloatStringDoubleDefaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -594,7 +594,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::tuple(1.1, 2.2f, "abc", 3.3));
+    lua::push(state, std::tuple(1.1, 2.2f, "abc", 3.3));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -605,7 +605,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleVec3DefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::TupleVec3DefaultedCheck;
     CHECK(func.name == "tupleVec3DefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -618,11 +618,11 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, false, std::tuple(glm::dvec3(4.4, 5.5, 6.6)));
+    lua::push(state, false, std::tuple(glm::dvec3(4.4, 5.5, 6.6)));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(state, true);
+    lua::push(state, true);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -633,7 +633,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleBoolIntDefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::TupleBoolIntDefaultedCheck;
     CHECK(func.name == "tupleBoolIntDefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -646,11 +646,11 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, false, std::tuple(false, 2));
+    lua::push(state, false, std::tuple(false, 2));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(state, true);
+    lua::push(state, true);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -662,7 +662,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleDoubleFloatStringDoubleDefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::TupleDoubleFloatStringDoubleDefaultedCheck;
     CHECK(func.name == "tupleDoubleFloatStringDoubleDefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -675,18 +675,18 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, false, std::tuple(4.4, 5.5f, "def", 6.6));
+    lua::push(state, false, std::tuple(4.4, 5.5f, "def", 6.6));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(state, true);
+    lua::push(state, true);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments: tuple(vec3) map", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::TupleVec3Map;
+    LuaLibrary::Function func = codegen::lua::TupleVec3Map;
     CHECK(func.name == "tupleVec3Map");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -702,8 +702,8 @@ TEST_CASE("Execution/LuaWrapper/Arguments: tuple(vec3) map", "[Execution][LuaWra
         { "key2", std::tuple(glm::dvec3(4.4, 5.5, 6.6)) },
         { "key3", std::tuple(glm::dvec3(7.7, 8.8, 9.9)) }
     };
-    ghoul::lua::push(state, m);
-    const std::string s = ghoul::lua::stackInformation(state);
+    lua::push(state, m);
+    const std::string s = lua::stackInformation(state);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -714,7 +714,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleBoolIntMap;
+    LuaLibrary::Function func = codegen::lua::TupleBoolIntMap;
     CHECK(func.name == "tupleBoolIntMap");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -730,7 +730,7 @@ TEST_CASE(
         { "key2", std::tuple(false, 2) },
         { "key3", std::tuple(true, 3) }
     };
-    ghoul::lua::push(state, m);
+    lua::push(state, m);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -741,7 +741,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleDoubleFloatStringDoubleMap;
+    LuaLibrary::Function func = codegen::lua::TupleDoubleFloatStringDoubleMap;
     CHECK(func.name == "tupleDoubleFloatStringDoubleMap");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -757,7 +757,7 @@ TEST_CASE(
         { "key2", std::tuple(4.4, 5.5f, "def", 6.6) },
         { "key3", std::tuple(7.7, 8.8f, "ghi", 9.9) }
     };
-    ghoul::lua::push(state, m);
+    lua::push(state, m);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -768,7 +768,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleVec3Optional;
+    LuaLibrary::Function func = codegen::lua::TupleVec3Optional;
     CHECK(func.name == "tupleVec3Optional");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -779,7 +779,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::tuple(glm::dvec3(1.1, 2.2, 3.3)));
+    lua::push(state, std::tuple(glm::dvec3(1.1, 2.2, 3.3)));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -790,7 +790,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleBoolIntOptional;
+    LuaLibrary::Function func = codegen::lua::TupleBoolIntOptional;
     CHECK(func.name == "tupleBoolIntOptional");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -801,7 +801,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::tuple(true, 1));
+    lua::push(state, std::tuple(true, 1));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -812,7 +812,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleDoubleFloatStringDoubleOptional;
+    LuaLibrary::Function func = codegen::lua::TupleDoubleFloatStringDoubleOptional;
     CHECK(func.name == "tupleDoubleFloatStringDoubleOptional");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -823,7 +823,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::tuple(1.1, 2.2f, "abc", 3.3));
+    lua::push(state, std::tuple(1.1, 2.2f, "abc", 3.3));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -834,7 +834,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleVec3Vector;
+    LuaLibrary::Function func = codegen::lua::TupleVec3Vector;
     CHECK(func.name == "tupleVec3Vector");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -850,7 +850,7 @@ TEST_CASE(
         std::tuple(glm::dvec3(4.4, 5.5, 6.6)),
         std::tuple(glm::dvec3(7.7, 8.8, 9.9))
     };
-    ghoul::lua::push(state, vec);
+    lua::push(state, vec);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -861,7 +861,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleBoolIntVector;
+    LuaLibrary::Function func = codegen::lua::TupleBoolIntVector;
     CHECK(func.name == "tupleBoolIntVector");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -877,7 +877,7 @@ TEST_CASE(
         std::tuple(false, 2),
         std::tuple(true, 3)
     };
-    ghoul::lua::push(state, vec);
+    lua::push(state, vec);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -888,7 +888,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleDoubleFloatStringDoubleVector;
+    LuaLibrary::Function func = codegen::lua::TupleDoubleFloatStringDoubleVector;
     CHECK(func.name == "tupleDoubleFloatStringDoubleVector");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -904,7 +904,7 @@ TEST_CASE(
         std::tuple(4.4, 5.5f, "def", 6.6),
         std::tuple(7.7, 8.8f, "ghi", 9.9)
     };
-    ghoul::lua::push(state, vec);
+    lua::push(state, vec);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -915,7 +915,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleVec3Array1;
+    LuaLibrary::Function func = codegen::lua::TupleVec3Array1;
     CHECK(func.name == "tupleVec3Array1");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -929,7 +929,7 @@ TEST_CASE(
     const std::array<std::tuple<glm::dvec3>, 1> arr = {
         std::tuple(glm::dvec3(1.1, 2.2, 3.3))
     };
-    ghoul::lua::push(state, arr);
+    lua::push(state, arr);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -940,7 +940,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleBoolIntArray1;
+    LuaLibrary::Function func = codegen::lua::TupleBoolIntArray1;
     CHECK(func.name == "tupleBoolIntArray1");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -954,7 +954,7 @@ TEST_CASE(
     const std::array<std::tuple<bool, int>, 1> arr = {
         std::tuple(true, 1)
     };
-    ghoul::lua::push(state, arr);
+    lua::push(state, arr);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -965,7 +965,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleDoubleFloatStringDoubleArray1;
+    LuaLibrary::Function func = codegen::lua::TupleDoubleFloatStringDoubleArray1;
     CHECK(func.name == "tupleDoubleFloatStringDoubleArray1");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -979,7 +979,7 @@ TEST_CASE(
     const std::array<std::tuple<double, float, std::string, double>, 1> arr = {
         std::tuple(1.1, 2.2f, "abc", 3.3)
     };
-    ghoul::lua::push(state, arr);
+    lua::push(state, arr);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -990,7 +990,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleVec3Array5;
+    LuaLibrary::Function func = codegen::lua::TupleVec3Array5;
     CHECK(func.name == "tupleVec3Array5");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -1008,7 +1008,7 @@ TEST_CASE(
         std::tuple(glm::dvec3(10.10, 11.11, 12.12)),
         std::tuple(glm::dvec3(13.13, 14.14, 15.15))
     };
-    ghoul::lua::push(state, arr);
+    lua::push(state, arr);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -1019,7 +1019,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleBoolIntArray5;
+    LuaLibrary::Function func = codegen::lua::TupleBoolIntArray5;
     CHECK(func.name == "tupleBoolIntArray5");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -1037,7 +1037,7 @@ TEST_CASE(
         std::tuple(false, 4),
         std::tuple(true, 5)
     };
-    ghoul::lua::push(state, arr);
+    lua::push(state, arr);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -1048,7 +1048,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleDoubleFloatStringDoubleArray5;
+    LuaLibrary::Function func = codegen::lua::TupleDoubleFloatStringDoubleArray5;
     CHECK(func.name == "tupleDoubleFloatStringDoubleArray5");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -1066,7 +1066,7 @@ TEST_CASE(
         std::tuple(10.10, 11.11f, "jkl", 12.12),
         std::tuple(13.13, 14.14f, "mno", 15.15)
     };
-    ghoul::lua::push(state, arr);
+    lua::push(state, arr);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -1077,7 +1077,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleVec3Array10;
+    LuaLibrary::Function func = codegen::lua::TupleVec3Array10;
     CHECK(func.name == "tupleVec3Array10");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -1100,7 +1100,7 @@ TEST_CASE(
         std::tuple(glm::dvec3(25.25, 26.26, 27.27)),
         std::tuple(glm::dvec3(28.28, 29.29, 30.30))
     };
-    ghoul::lua::push(state, arr);
+    lua::push(state, arr);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -1111,7 +1111,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleBoolIntArray10;
+    LuaLibrary::Function func = codegen::lua::TupleBoolIntArray10;
     CHECK(func.name == "tupleBoolIntArray10");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -1134,7 +1134,7 @@ TEST_CASE(
         std::tuple(true, 9),
         std::tuple(false, 10),
     };
-    ghoul::lua::push(state, arr);
+    lua::push(state, arr);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -1145,7 +1145,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::TupleDoubleFloatStringDoubleArray10;
+    LuaLibrary::Function func = codegen::lua::TupleDoubleFloatStringDoubleArray10;
     CHECK(func.name == "tupleDoubleFloatStringDoubleArray10");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -1168,14 +1168,14 @@ TEST_CASE(
         std::tuple(25.25, 26.26f, "yzz", 27.27),
         std::tuple(28.28, 29.29f, "ABC", 30.30)
     };
-    ghoul::lua::push(state, arr);
+    lua::push(state, arr);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  tuple(vec3)", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnTupleVec3;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleVec3;
     CHECK(func.name == "returnTupleVec3");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(vec3)");
@@ -1186,13 +1186,13 @@ TEST_CASE("Execution/LuaWrapper/Return:  tuple(vec3)", "[Execution][LuaWrapper]"
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    const std::tuple<glm::dvec3> val = ghoul::lua::value<std::tuple<glm::dvec3>>(state);
+    const std::tuple<glm::dvec3> val = lua::value<std::tuple<glm::dvec3>>(state);
     CHECK(std::get<0>(val) == glm::dvec3(1.1, 2.2, 3.3));
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  tuple(bool,int)", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnTupleBoolInt;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleBoolInt;
     CHECK(func.name == "returnTupleBoolInt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(Boolean, Integer)");
@@ -1202,9 +1202,9 @@ TEST_CASE("Execution/LuaWrapper/Return:  tuple(bool,int)", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     func.function(state);
-    std::string abc = ghoul::lua::stackInformation(state);
+    std::string abc = lua::stackInformation(state);
     REQUIRE(lua_gettop(state) == 1);
-    const std::tuple<bool, int> val = ghoul::lua::value<std::tuple<bool, int>>(state);
+    const std::tuple<bool, int> val = lua::value<std::tuple<bool, int>>(state);
     CHECK(std::get<0>(val) == true);
     CHECK(std::get<1>(val) == 1);
     lua_close(state);
@@ -1215,7 +1215,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleDoubleFloatStringDouble;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleDoubleFloatStringDouble;
     CHECK(func.name == "returnTupleDoubleFloatStringDouble");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(Number, Number, String, Number)");
@@ -1227,7 +1227,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     const std::tuple<double, float, std::string, double> val =
-        ghoul::lua::value<std::tuple<double, float, std::string, double>>(state);
+        lua::value<std::tuple<double, float, std::string, double>>(state);
     CHECK(std::get<0>(val) == 1.1);
     CHECK(std::get<1>(val) == 2.2f);
     CHECK(std::get<2>(val) == "abc");
@@ -1240,7 +1240,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleVec3Map;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleVec3Map;
     CHECK(func.name == "returnTupleVec3Map");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String -> (vec3)");
@@ -1252,7 +1252,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     const std::map<std::string, std::tuple<glm::dvec3>> val =
-        ghoul::lua::value<std::map<std::string, std::tuple<glm::dvec3>>>(state);
+        lua::value<std::map<std::string, std::tuple<glm::dvec3>>>(state);
     REQUIRE(val.size() == 3);
     CHECK(val.find("key1") != val.end());
     CHECK(std::get<0>(val.find("key1")->second).x == 1.1);
@@ -1274,7 +1274,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleBoolIntMap;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleBoolIntMap;
     CHECK(func.name == "returnTupleBoolIntMap");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String -> (Boolean, Integer)");
@@ -1286,7 +1286,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     const std::map<std::string, std::tuple<bool, int>> val =
-        ghoul::lua::value<std::map<std::string, std::tuple<bool, int>>>(state);
+        lua::value<std::map<std::string, std::tuple<bool, int>>>(state);
     REQUIRE(val.size() == 3);
     CHECK(val.find("key1") != val.end());
     CHECK(std::get<0>(val.find("key1")->second) == true);
@@ -1305,7 +1305,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleDoubleFloatStringDoubleMap;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleDoubleFloatStringDoubleMap;
     CHECK(func.name == "returnTupleDoubleFloatStringDoubleMap");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String -> (Number, Number, String, Number)");
@@ -1317,7 +1317,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     const std::map<std::string, std::tuple<double, float, std::string, double>> val =
-        ghoul::lua::value<
+        lua::value<
             std::map<std::string, std::tuple<double, float, std::string, double>>
         >(state);
     REQUIRE(val.size() == 3);
@@ -1344,7 +1344,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleVec3Vector;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleVec3Vector;
     CHECK(func.name == "returnTupleVec3Vector");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(vec3)[]");
@@ -1356,7 +1356,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     const std::vector<std::tuple<glm::dvec3>> val =
-        ghoul::lua::value<std::vector<std::tuple<glm::dvec3>>>(state);
+        lua::value<std::vector<std::tuple<glm::dvec3>>>(state);
     REQUIRE(val.size() == 3);
     CHECK(std::get<0>(val[0]).x == 1.1);
     CHECK(std::get<0>(val[0]).y == 2.2);
@@ -1375,7 +1375,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleBoolIntVector;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleBoolIntVector;
     CHECK(func.name == "returnTupleBoolIntVector");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(Boolean, Integer)[]");
@@ -1387,7 +1387,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     const std::vector<std::tuple<bool, int>> val =
-        ghoul::lua::value<std::vector<std::tuple<bool, int>>>(state);
+        lua::value<std::vector<std::tuple<bool, int>>>(state);
     REQUIRE(val.size() == 3);
     CHECK(std::get<0>(val[0]) == true);
     CHECK(std::get<1>(val[0]) == 1);
@@ -1403,7 +1403,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleDoubleFloatStringDoubleVector;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleDoubleFloatStringDoubleVector;
     CHECK(func.name == "returnTupleDoubleFloatStringDoubleVector");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(Number, Number, String, Number)[]");
@@ -1415,7 +1415,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     const std::vector<std::tuple<double, float, std::string, double>> val =
-        ghoul::lua::value<std::vector<std::tuple<double, float, std::string, double>>>(
+        lua::value<std::vector<std::tuple<double, float, std::string, double>>>(
             state
         );
     REQUIRE(val.size() == 3);
@@ -1439,7 +1439,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleVec3Optional;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleVec3Optional;
     CHECK(func.name == "returnTupleVec3Optional");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(vec3)?");
@@ -1451,7 +1451,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     const std::optional<std::tuple<glm::dvec3>> val =
-        ghoul::lua::value<std::optional<std::tuple<glm::dvec3>>>(state);
+        lua::value<std::optional<std::tuple<glm::dvec3>>>(state);
     REQUIRE(val.has_value());
     CHECK(std::get<0>(*val).x == 1.1);
     CHECK(std::get<0>(*val).y == 2.2);
@@ -1464,7 +1464,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleBoolIntOptional;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleBoolIntOptional;
     CHECK(func.name == "returnTupleBoolIntOptional");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(Boolean, Integer)?");
@@ -1476,7 +1476,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     const std::optional<std::tuple<bool, int>> val =
-        ghoul::lua::value<std::optional<std::tuple<bool, int>>>(state);
+        lua::value<std::optional<std::tuple<bool, int>>>(state);
     REQUIRE(val.has_value());
     CHECK(std::get<0>(*val) == true);
     CHECK(std::get<1>(*val) == 1);
@@ -1488,7 +1488,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleDoubleFloatStringDoubleOptional;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleDoubleFloatStringDoubleOptional;
     CHECK(func.name == "returnTupleDoubleFloatStringDoubleOptional");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(Number, Number, String, Number)?");
@@ -1500,7 +1500,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     const std::optional<std::tuple<double, float, std::string, double>> val =
-        ghoul::lua::value<std::optional<std::tuple<double, float, std::string, double>>>(
+        lua::value<std::optional<std::tuple<double, float, std::string, double>>>(
             state
         );
     REQUIRE(val.has_value());
@@ -1516,7 +1516,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleVec3OptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleVec3OptionalNullopt;
     CHECK(func.name == "returnTupleVec3OptionalNullopt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(vec3)?");
@@ -1528,7 +1528,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 0);
     const std::optional<std::tuple<glm::dvec3>> val =
-        ghoul::lua::value<std::optional<std::tuple<glm::dvec3>>>(state);
+        lua::value<std::optional<std::tuple<glm::dvec3>>>(state);
     CHECK(!val.has_value());
     lua_close(state);
 }
@@ -1538,7 +1538,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleBoolIntOptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::ReturnTupleBoolIntOptionalNullopt;
     CHECK(func.name == "returnTupleBoolIntOptionalNullopt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(Boolean, Integer)?");
@@ -1550,7 +1550,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 0);
     const std::optional<std::tuple<bool, int>> val =
-        ghoul::lua::value<std::optional<std::tuple<bool, int>>>(state);
+        lua::value<std::optional<std::tuple<bool, int>>>(state);
     CHECK(!val.has_value());
     lua_close(state);
 }
@@ -1560,7 +1560,8 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnTupleDoubleFloatStringDoubleOptionalNullopt;
+    LuaLibrary::Function func =
+        codegen::lua::ReturnTupleDoubleFloatStringDoubleOptionalNullopt;
     CHECK(func.name == "returnTupleDoubleFloatStringDoubleOptionalNullopt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "(Number, Number, String, Number)?");
@@ -1572,7 +1573,7 @@ TEST_CASE(
     func.function(state);
     REQUIRE(lua_gettop(state) == 0);
     const std::optional<std::tuple<double, float, std::string, double>> val =
-        ghoul::lua::value<std::optional<std::tuple<double, float, std::string, double>>>(
+        lua::value<std::optional<std::tuple<double, float, std::string, double>>>(
             state
         );
     CHECK(!val.has_value());

@@ -41,7 +41,7 @@ namespace openspace {
 
 class RenderableOrbitalKepler : public Renderable {
 public:
-    explicit RenderableOrbitalKepler(const ghoul::Dictionary& dictionary);
+    explicit RenderableOrbitalKepler(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -128,8 +128,8 @@ private:
     /// The backend storage for the vertex buffer object containing all points
     std::vector<TrailVBOLayout> _vertexBufferData;
 
-    ghoul::opengl::ProgramObject* _trailProgram = nullptr;
-    ghoul::opengl::ProgramObject* _pointProgram = nullptr;
+    opengl::ProgramObject* _trailProgram = nullptr;
+    opengl::ProgramObject* _pointProgram = nullptr;
     UIntProperty _segmentQuality;
     UIntProperty _startRenderIdx;
     UIntProperty _sizeRender;

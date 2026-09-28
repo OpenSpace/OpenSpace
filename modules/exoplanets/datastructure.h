@@ -147,7 +147,7 @@ struct ExoplanetSystem {
     std::vector<std::string> planetNames;
     std::vector<ExoplanetDataEntry> planetsData;
 
-    ghoul::Dictionary toDataDictionary() const;
+    Dictionary toDataDictionary() const;
     static openspace::Documentation Documentation();
 };
 

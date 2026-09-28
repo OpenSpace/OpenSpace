@@ -124,7 +124,7 @@ Documentation DefaultTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_default");
 }
 
-DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
+DefaultTileProvider::DefaultTileProvider(const Dictionary& dictionary)
     : _filePath(FilePathInfo, "")
     , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
 {
@@ -216,7 +216,7 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData,
 Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped;
 
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     if (tileIndex.level > maxLevel()) {
         return {
             .texture = nullptr,
@@ -239,7 +239,7 @@ Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
 }
 
 Tile::Status DefaultTileProvider::tileStatus(const TileIndex& index) {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     const RawTileDataReader& reader = _asyncTextureDataProvider->rawTileDataReader();
 
     if (index.level > reader.maxChunkLevel()) {
@@ -256,12 +256,12 @@ Tile::Status DefaultTileProvider::tileStatus(const TileIndex& index) {
 }
 
 TileDepthTransform DefaultTileProvider::depthTransform() {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     return _asyncTextureDataProvider->rawTileDataReader().depthTransform();
 }
 
 void DefaultTileProvider::update() {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     _asyncTextureDataProvider->update();
 
     std::optional<RawTile> tile = _asyncTextureDataProvider->popFinishedRawTile();
@@ -272,7 +272,7 @@ void DefaultTileProvider::update() {
         };
         MemoryAwareTileCache* tileCache =
             global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
-        ghoul_assert(!tileCache->exist(key), "Tile must not be existing in cache");
+        assert_msg(!tileCache->exist(key), "Tile must not be existing in cache");
         tileCache->createTileAndPut(key, std::move(*tile));
     }
 
@@ -286,22 +286,22 @@ void DefaultTileProvider::update() {
 
 void DefaultTileProvider::reset() {
     global::moduleEngine->module<GlobeBrowsingModule>()->tileCache()->clear();
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     _asyncTextureDataProvider->prepareToBeDeleted();
 }
 
 int DefaultTileProvider::minLevel() {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     return 1;
 }
 
 int DefaultTileProvider::maxLevel() {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     return _asyncTextureDataProvider->rawTileDataReader().maxChunkLevel();
 }
 
 float DefaultTileProvider::noDataValueAsFloat() {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     return _asyncTextureDataProvider->noDataValueAsFloat();
 }
 

@@ -30,12 +30,10 @@
 #include <functional>
 #include <memory>
 
-namespace ghoul {
-    namespace filesystem { class File; }
-    namespace opengl { class Texture; }
-} // namespace ghoul
-
 namespace openspace {
+
+namespace filesystem { class File; }
+namespace opengl { class Texture; }
 
 class TransferFunction {
 public:
@@ -48,7 +46,7 @@ public:
     TransferFunction(TransferFunction&& rhs) = default;
 
     void setPath(const std::filesystem::path& filepath);
-    ghoul::opengl::Texture& texture();
+    opengl::Texture& texture();
     void update();
     glm::vec4 sample(size_t offset);
     size_t width();
@@ -59,8 +57,8 @@ private:
     void setTextureFromImage();
 
     std::filesystem::path _filepath;
-    std::unique_ptr<ghoul::filesystem::File> _file;
-    std::shared_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<filesystem::File> _file;
+    std::shared_ptr<opengl::Texture> _texture;
     bool _needsUpdate = false;
     TfChangedCallback _tfChangedCallback;
 };

@@ -33,7 +33,7 @@
 #include <openspace/glm.h>
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/profiling.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <md_filter.h>
@@ -291,7 +291,7 @@ Documentation RenderableMolecule::Documentation() {
     );
 }
 
-RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
+RenderableMolecule::RenderableMolecule(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _localEpoch(global::timeManager->time().j2000Seconds())
     , _repProps({ "Representations" })
@@ -512,7 +512,7 @@ void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view
 
     const md_molecule_t* molecule = molecule::loadMolecule(molFile, _coarseGrained);
     if (!molecule) {
-        throw ghoul::RuntimeError("Failed to initialize molecule: Failed to load file");
+        throw RuntimeError("Failed to initialize molecule: Failed to load file");
     }
 
     // We deep copy the contents, so we can freely modify the fields (coordinates etc)

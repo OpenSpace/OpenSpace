@@ -43,16 +43,16 @@ std::string_view Vec2Property::className() const {
     return "Vec2Property";
 }
 
-ghoul::lua::LuaTypes Vec2Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes Vec2Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void Vec2Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::vec2 Vec2Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::vec2>(state);
+    return lua::value<glm::vec2>(state);
 }
 
 std::string Vec2Property::stringValue() const {

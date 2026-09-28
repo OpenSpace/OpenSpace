@@ -27,7 +27,7 @@
 
 #include <modules/fieldlinessequence/util/commons.h>
 #include <openspace/glm.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <string>
 #include <vector>
 

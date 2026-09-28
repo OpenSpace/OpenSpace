@@ -27,7 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
@@ -42,20 +42,16 @@
 #include <filesystem>
 #include <memory>
 
-namespace ghoul {
-    namespace fontrendering { class Font; }
-    namespace opengl {
-        class ProgramObject;
-        class OpenGLStateCache;
-    } // namespace opengl
-    class Dictionary;
-    class SharedMemory;
-} // namespace ghoul
-
 namespace openspace {
 
+namespace fontrendering { class Font; }
+namespace opengl {
+    class ProgramObject;
+    class OpenGLStateCache;
+} // namespace opengl
 class Camera;
 class DeferredcasterManager;
+class Dictionary;
 struct LuaLibrary;
 class RaycasterManager;
 class Scene;
@@ -63,6 +59,7 @@ class SceneGraphNode;
 class SceneManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
+class SharedMemory;
 struct ShutdownInformation;
 
 class RenderEngine : public PropertyOwner {
@@ -80,7 +77,7 @@ public:
     Scene* scene();
     void updateScene();
 
-    ghoul::opengl::OpenGLStateCache& openglStateCache();
+    opengl::OpenGLStateCache& openglStateCache();
 
     void updateShaderPrograms();
     void updateRenderer();
@@ -103,17 +100,15 @@ public:
     ScreenSpaceRenderable* screenSpaceRenderable(std::string_view identifier);
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
-        const std::string& name, const std::filesystem::path& vsPath,
-        const std::filesystem::path& fsPath,
-        ghoul::Dictionary data = ghoul::Dictionary());
+    std::unique_ptr<opengl::ProgramObject> buildRenderProgram(const std::string& name,
+        const std::filesystem::path& vsPath, const std::filesystem::path& fsPath,
+        Dictionary data = Dictionary());
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
-        const std::string& name, const std::filesystem::path& vsPath,
-        const std::filesystem::path& fsPath, const std::filesystem::path& csPath,
-        ghoul::Dictionary data = ghoul::Dictionary());
+    std::unique_ptr<opengl::ProgramObject> buildRenderProgram(const std::string& name,
+        const std::filesystem::path& vsPath, const std::filesystem::path& fsPath,
+        const std::filesystem::path& csPath, Dictionary data = Dictionary());
 
-    void removeRenderProgram(ghoul::opengl::ProgramObject* program);
+    void removeRenderProgram(opengl::ProgramObject* program);
 
     /**
      * Set the camera to use for rendering.
@@ -124,13 +119,13 @@ public:
      * Lets the renderer update the data to be brought into the rendererer programs as a
      * 'rendererData' variable in the dictionary.
      */
-    void setRendererData(ghoul::Dictionary rendererData);
+    void setRendererData(Dictionary rendererData);
 
     /**
     * Lets the renderer update the data to be brought into the post rendererer programs as
     * a 'resolveData' variable in the dictionary.
     */
-    void setResolveData(ghoul::Dictionary resolveData);
+    void setResolveData(Dictionary resolveData);
 
     /**
      * Take a screenshot and store in the ${SCREENSHOTS} directory.
@@ -179,11 +174,11 @@ private:
     Scene* _scene = nullptr;
 
     FramebufferRenderer _renderer;
-    ghoul::Dictionary _rendererData;
-    ghoul::Dictionary _resolveData;
+    Dictionary _rendererData;
+    Dictionary _resolveData;
     ScreenLog* _log = nullptr;
 
-    ghoul::opengl::OpenGLStateCache* _openglStateCache = nullptr;
+    opengl::OpenGLStateCache* _openglStateCache = nullptr;
 
     BoolProperty _showOverlayOnClients;
     BoolProperty _showLog;
@@ -205,7 +200,7 @@ private:
         StringProperty imagePath;
         BoolProperty applyToMaster;
         bool imageIsDirty = false;
-        std::unique_ptr<ghoul::opengl::Texture> imageTexture;
+        std::unique_ptr<opengl::Texture> imageTexture;
     };
     Blackout _globalBlackout;
 
@@ -239,12 +234,12 @@ private:
     uint64_t _frameNumber = 0;
     unsigned int _latestScreenshotNumber = 0;
 
-    std::vector<ghoul::opengl::ProgramObject*> _programs;
+    std::vector<opengl::ProgramObject*> _programs;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontCameraInfo;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontVersionInfo;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontShutdown;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontLog;
+    std::shared_ptr<fontrendering::Font> _fontCameraInfo;
+    std::shared_ptr<fontrendering::Font> _fontVersionInfo;
+    std::shared_ptr<fontrendering::Font> _fontShutdown;
+    std::shared_ptr<fontrendering::Font> _fontLog;
 
     struct {
         glm::ivec4 rotation = glm::ivec4(0);

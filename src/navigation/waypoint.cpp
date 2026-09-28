@@ -243,7 +243,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
         lookAtPos = cameraPos - stepDir * 0.1 * startToEndDist;
     }
 
-    const glm::dquat targetRot = ghoul::lookAtQuaternion(cameraPos, lookAtPos, up);
+    const glm::dquat targetRot = lookAtQuaternion(cameraPos, lookAtPos, up);
 
     return Waypoint(cameraPos, targetRot, spec.identifier);
 }

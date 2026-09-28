@@ -64,7 +64,7 @@ namespace openspace {
 
 HongKangParser::HongKangParser(std::string name, std::filesystem::path fileName,
                                std::string spacecraft,
-                               const ghoul::Dictionary& translationDictionary,
+                               const Dictionary& translationDictionary,
                                std::vector<std::string> potentialTargets)
     : _defaultCaptureImage(absPath("${DATA}/placeholder.png"))
     , _name(std::move(name))
@@ -78,20 +78,20 @@ HongKangParser::HongKangParser(std::string name, std::filesystem::path fileName,
         // Create dictionary containing all {playbookKeys , spice IDs}
         if (decoderType == "Instrument") {
             if (!translationDictionary.hasKey(decoderType) ||
-                !translationDictionary.hasValue<ghoul::Dictionary>(decoderType))
+                !translationDictionary.hasValue<Dictionary>(decoderType))
             {
                 continue;
             }
 
-            const ghoul::Dictionary typeDictionary =
-                translationDictionary.value<ghoul::Dictionary>(decoderType);
+            const Dictionary typeDictionary =
+                translationDictionary.value<Dictionary>(decoderType);
             // For each playbook call -> create a Decoder object
             for (std::string_view key : typeDictionary.keys()) {
                 const std::string& currentKey = std::format("{}.{}", decoderType, key);
 
-                ghoul::Dictionary decoderDictionary;
-                if (translationDictionary.hasValue<ghoul::Dictionary>(currentKey)) {
-                    decoderDictionary = translationDictionary.value<ghoul::Dictionary>(
+                Dictionary decoderDictionary;
+                if (translationDictionary.hasValue<Dictionary>(currentKey)) {
+                    decoderDictionary = translationDictionary.value<Dictionary>(
                         currentKey
                     );
                 }
@@ -111,7 +111,7 @@ HongKangParser::HongKangParser(std::string name, std::filesystem::path fileName,
 
 std::string HongKangParser::findPlaybookSpecifiedTarget(std::string line) {
     // Remember to add this Lua later...
-    line = ghoul::toUpperCase(line);
+    line = toUpperCase(line);
     const std::vector<std::string>& ptarg = _potentialTargets;
     std::string target;
     for (const std::string& p : ptarg) {
@@ -132,13 +132,13 @@ bool HongKangParser::create() {
     // Check input for errors
     const bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
     if (!hasObserver) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             std::format("SPICE has no observer '{}' in kernel pool", _spacecraft),
             "HongKangParser"
         );
     }
     if (_potentialTargets.empty()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "List of potential target is missing in order to parse the event file",
             "HongKangParser"
         );
@@ -162,7 +162,7 @@ bool HongKangParser::create() {
 
     std::string line;
     while (!file.eof()) {
-        ghoul::getline(file, line);
+        openspace::getline(file, line);
 
         const std::string event = line.substr(0, line.find_first_of(' '));
 
@@ -234,7 +234,7 @@ bool HongKangParser::create() {
                         );
 
                         TimeRange scanRange = TimeRange(scanStart, scanStop);
-                        ghoul_assert(scanRange.isDefined(), "Invalid time range");
+                        assert_msg(scanRange.isDefined(), "Invalid time range");
                         _instrumentTimes.emplace_back(it->first, scanRange);
 
                         // Store individual image
@@ -260,7 +260,7 @@ bool HongKangParser::create() {
             if (captureStart != -1) {
                 // End of capture sequence for camera, store end time of this sequence
                 TimeRange cameraRange = TimeRange(captureStart, time);
-                ghoul_assert(cameraRange.isDefined(), "Invalid time range");
+                assert_msg(cameraRange.isDefined(), "Invalid time range");
                 _instrumentTimes.emplace_back(previousCamera, std::move(cameraRange));
                 captureStart = -1;
             }

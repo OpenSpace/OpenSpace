@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,7 +67,7 @@ namespace {
     constexpr char DefaultDelimiter = '\n';
 } // namespace
 
-namespace ghoul::io {
+namespace openspace::io {
 
 std::atomic<bool> TcpSocket::_initializedNetworkApi = false;
 
@@ -506,4 +505,4 @@ bool TcpSocket::putBytes(const char* buffer, size_t size) {
     return _isConnected || _isConnecting;
 }
 
-} // namespace ghoul::io
+} // namespace openspace::io

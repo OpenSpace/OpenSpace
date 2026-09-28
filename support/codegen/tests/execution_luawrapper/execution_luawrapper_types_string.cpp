@@ -32,7 +32,7 @@
 #include <array>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     [[codegen::luawrap]] void funcString(std::string arg) {
@@ -133,7 +133,7 @@ namespace {
 TEST_CASE("Execution/LuaWrapper/Arguments:  string", "[Execution][LuaWrapper]") {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncString;
+    LuaLibrary::Function func = codegen::lua::FuncString;
     CHECK(func.name == "funcString");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -144,7 +144,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  string", "[Execution][LuaWrapper]") 
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, "abc"s);
+    lua::push(state, "abc"s);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -157,7 +157,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncStringDefaulted;
+    LuaLibrary::Function func = codegen::lua::FuncStringDefaulted;
     CHECK(func.name == "funcStringDefaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -169,7 +169,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, "abc"s);
+    lua::push(state, "abc"s);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -180,7 +180,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncStringDefaulted;
+    LuaLibrary::Function func = codegen::lua::FuncStringDefaulted;
     CHECK(func.name == "funcStringDefaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -204,7 +204,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncStringDefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncStringDefaultedCheck;
     CHECK(func.name == "funcStringDefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -218,7 +218,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, false, "def"s);
+    lua::push(state, false, "def"s);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -231,7 +231,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncStringDefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncStringDefaultedCheck;
     CHECK(func.name == "funcStringDefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -245,7 +245,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, true);
+    lua::push(state, true);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -254,7 +254,7 @@ TEST_CASE(
 TEST_CASE("Execution/LuaWrapper/Arguments:  stringMap", "[Execution][LuaWrapper]") {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncStringMap;
+    LuaLibrary::Function func = codegen::lua::FuncStringMap;
     CHECK(func.name == "funcStringMap");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -266,11 +266,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  stringMap", "[Execution][LuaWrapper]
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, "key1", "abc"s);
+    lua::push(state, "key1", "abc"s);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key2", "def"s);
+    lua::push(state, "key2", "def"s);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key3", "ghi"s);
+    lua::push(state, "key3", "ghi"s);
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -280,7 +280,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  stringMap", "[Execution][LuaWrapper]
 TEST_CASE("Execution/LuaWrapper/Arguments:  stringOptional", "[Execution][LuaWrapper]") {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncStringOptional;
+    LuaLibrary::Function func = codegen::lua::FuncStringOptional;
     CHECK(func.name == "funcStringOptional");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -291,7 +291,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  stringOptional", "[Execution][LuaWra
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, "abc"s);
+    lua::push(state, "abc"s);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -302,7 +302,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncStringOptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::FuncStringOptionalNullopt;
     CHECK(func.name == "funcStringOptionalNullopt");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -321,7 +321,7 @@ TEST_CASE(
 TEST_CASE("Execution/LuaWrapper/Arguments:  stringVector", "[Execution][LuaWrapper]") {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncStringVector;
+    LuaLibrary::Function func = codegen::lua::FuncStringVector;
     CHECK(func.name == "funcStringVector");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -333,11 +333,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  stringVector", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, "abc"s);
+    lua::push(state, 1, "abc"s);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, "def"s);
+    lua::push(state, 2, "def"s);
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, "ghi"s);
+    lua::push(state, 3, "ghi"s);
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -345,7 +345,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  stringVector", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  stringArray1", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncStringArray1;
+    LuaLibrary::Function func = codegen::lua::FuncStringArray1;
     CHECK(func.name == "funcStringArray1");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -357,7 +357,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  stringArray1", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, "abc");
+    lua::push(state, 1, "abc");
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -365,7 +365,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  stringArray1", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  stringArray2", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncStringArray2;
+    LuaLibrary::Function func = codegen::lua::FuncStringArray2;
     CHECK(func.name == "funcStringArray2");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -377,15 +377,15 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  stringArray2", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, "abc");
+    lua::push(state, 1, "abc");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, "def");
+    lua::push(state, 2, "def");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, "ghi");
+    lua::push(state, 3, "ghi");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, "jkl");
+    lua::push(state, 4, "jkl");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, "mno");
+    lua::push(state, 5, "mno");
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -393,7 +393,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  stringArray2", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  stringArray3", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncStringArray3;
+    LuaLibrary::Function func = codegen::lua::FuncStringArray3;
     CHECK(func.name == "funcStringArray3");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -405,25 +405,25 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  stringArray3", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, "abc");
+    lua::push(state, 1, "abc");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, "def");
+    lua::push(state, 2, "def");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, "ghi");
+    lua::push(state, 3, "ghi");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, "jkl");
+    lua::push(state, 4, "jkl");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, "mno");
+    lua::push(state, 5, "mno");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 6, "pqr");
+    lua::push(state, 6, "pqr");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 7, "stu");
+    lua::push(state, 7, "stu");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 8, "vwx");
+    lua::push(state, 8, "vwx");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 9, "yzz");
+    lua::push(state, 9, "yzz");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 10, "ABC");
+    lua::push(state, 10, "ABC");
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -431,7 +431,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  stringArray3", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  string", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnString;
+    LuaLibrary::Function func = codegen::lua::ReturnString;
     CHECK(func.name == "returnString");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String");
@@ -442,13 +442,13 @@ TEST_CASE("Execution/LuaWrapper/Return:  string", "[Execution][LuaWrapper]") {
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::string val = ghoul::lua::value<std::string>(state);
+    std::string val = lua::value<std::string>(state);
     CHECK(val == "abc");
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  stringMap", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnStringMap;
+    LuaLibrary::Function func = codegen::lua::ReturnStringMap;
     CHECK(func.name == "returnStringMap");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String -> String");
@@ -460,7 +460,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  stringMap", "[Execution][LuaWrapper]") 
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     std::map<std::string, std::string> val =
-        ghoul::lua::value<std::map<std::string, std::string>>(state);
+        lua::value<std::map<std::string, std::string>>(state);
     CHECK(val.size() == 3);
     REQUIRE(val.find("key1") != val.end());
     CHECK(val.find("key1")->second == "abc");
@@ -476,7 +476,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnStringOptional;
+    LuaLibrary::Function func = codegen::lua::ReturnStringOptional;
     CHECK(func.name == "returnStringOptional");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String?");
@@ -487,7 +487,7 @@ TEST_CASE(
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::string val = ghoul::lua::value<std::string>(state);
+    std::string val = lua::value<std::string>(state);
     CHECK(val == "abc");
     lua_close(state);
 }
@@ -497,7 +497,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnStringOptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::ReturnStringOptionalNullopt;
     CHECK(func.name == "returnStringOptionalNullopt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String?");
@@ -512,7 +512,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  stringVector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnStringVector;
+    LuaLibrary::Function func = codegen::lua::ReturnStringVector;
     CHECK(func.name == "returnStringVector");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String[]");
@@ -523,7 +523,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  stringVector", "[Execution][LuaWrapper]
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::vector<std::string> val = ghoul::lua::value<std::vector<std::string>>(state);
+    std::vector<std::string> val = lua::value<std::vector<std::string>>(state);
     REQUIRE(val.size() == 3);
     CHECK(val[0] == "abc");
     CHECK(val[1] == "def");

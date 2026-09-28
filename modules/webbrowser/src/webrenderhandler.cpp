@@ -42,7 +42,7 @@ void WebRenderHandler::reshape(int w, int h) {
     if (w == _windowSize.x && h == _windowSize.y) {
         return;
     }
-    ghoul_assert(w > 0 && h > 0, std::format("Reshaped browser to {} x {}", w, h));
+    assert_msg(w > 0 && h > 0, std::format("Reshaped browser to {} x {}", w, h));
     _windowSize = glm::ivec2(w, h);
     _needsRepaint = true;
 }
@@ -58,7 +58,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
     // This should never happen - if accelerated rendering is on the OnAcceleratePaint
     // method should be called. But we instatiate the web render handler and the browser
     // instance in different places so room for error
-    ghoul_assert(!_acceleratedRendering, "Accelerated rendering flag is turned on");
+    assert_msg(!_acceleratedRendering, "Accelerated rendering flag is turned on");
 
     const size_t bufferSize = static_cast<size_t>(w * h);
 
@@ -118,7 +118,7 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser>,
     // This should never happen - if accelerated rendering is off the OnPaint method
     // should be called. But we instatiate the web render handler and the browser instance
     // in different places so there is room for error
-    ghoul_assert(_acceleratedRendering, "Accelerated rendering flag is turned off");
+    assert_msg(_acceleratedRendering, "Accelerated rendering flag is turned off");
 
     if (dirtyRects.empty()) {
         return;
@@ -268,7 +268,7 @@ bool WebRenderHandler::hasContent(int x, int y) {
         // Map the PBO to the CPU memory space
         GLubyte* pixels = reinterpret_cast<GLubyte*>(glMapNamedBuffer(pbo, GL_READ_ONLY));
 
-        ghoul_assert(pixels, "Could not read pixels from the GPU for the cef gui.");
+        assert_msg(pixels, "Could not read pixels from the GPU for the cef gui.");
         if (pixels) {
             // Access the specific pixel data
             int index = (y * _windowSize.x + x) * 4;
@@ -299,7 +299,7 @@ bool WebRenderHandler::isTextureReady() const {
     return !_needsRepaint;
 }
 
-void WebRenderHandler::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void WebRenderHandler::bindTexture(opengl::TextureUnit& unit) {
     unit.bind(_texture);
 }
 

@@ -27,7 +27,7 @@
 #include <modules/volume/rendering/volumeclipplanes.h>
 #include <openspace/glm.h>
 #include <openspace/filesystem/filesystem.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/programobject.h>
 #include <openspace/opengl/textureunit.h>
 #include <openspace/opengl/texture.h>
@@ -47,8 +47,7 @@ namespace {
 
 namespace openspace {
 
-BasicVolumeRaycaster::BasicVolumeRaycaster(
-                                    std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
+BasicVolumeRaycaster::BasicVolumeRaycaster(std::shared_ptr<opengl::Texture> volumeTexture,
                                        std::shared_ptr<TransferFunction> transferFunction,
                                              std::shared_ptr<VolumeClipPlanes> clipPlanes)
     : _clipPlanes(std::move(clipPlanes))
@@ -66,7 +65,7 @@ void BasicVolumeRaycaster::initialize() {
 void BasicVolumeRaycaster::deinitialize() {}
 
 void BasicVolumeRaycaster::renderEntryPoints(const RenderData& data,
-                                             ghoul::opengl::ProgramObject& program)
+                                             opengl::ProgramObject& program)
 {
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
@@ -90,7 +89,7 @@ glm::dmat4 BasicVolumeRaycaster::modelViewTransform(const RenderData& data) {
 }
 
 void BasicVolumeRaycaster::renderExitPoints(const RenderData& data,
-                                            ghoul::opengl::ProgramObject& program)
+                                            opengl::ProgramObject& program)
 {
     program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
@@ -107,7 +106,7 @@ void BasicVolumeRaycaster::renderExitPoints(const RenderData& data,
 }
 
 void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
-                                      ghoul::opengl::ProgramObject& program)
+                                      opengl::ProgramObject& program)
 {
     if (!_volumeTexture || !_transferFunction) {
         return;
@@ -119,11 +118,11 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
     const std::string id = std::to_string(data.id);
 
     _transferFunction->update();
-    _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+    _tfUnit = std::make_unique<opengl::TextureUnit>();
     _tfUnit->bind(_transferFunction->texture());
     program.setUniform("transferFunction_" + id, *_tfUnit);
 
-    _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+    _textureUnit = std::make_unique<opengl::TextureUnit>();
     _textureUnit->bind(*_volumeTexture);
     program.setUniform("volumeTexture_" + id, *_textureUnit);
 
@@ -141,8 +140,7 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
     program.setUniform("rUpperBound_" + id, _rUpperBound);
 }
 
-void BasicVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&)
-{
+void BasicVolumeRaycaster::postRaycast(const RaycastData&, opengl::ProgramObject&) {
     _textureUnit = nullptr;
     _tfUnit = nullptr;
 }
@@ -183,12 +181,12 @@ void BasicVolumeRaycaster::setTransferFunction(
 }
 
 void BasicVolumeRaycaster::setVolumeTexture(
-                                    std::shared_ptr<ghoul::opengl::Texture> volumeTexture)
+                                           std::shared_ptr<opengl::Texture> volumeTexture)
 {
     _volumeTexture = std::move(volumeTexture);
 }
 
-std::shared_ptr<ghoul::opengl::Texture> BasicVolumeRaycaster::volumeTexture() const {
+std::shared_ptr<opengl::Texture> BasicVolumeRaycaster::volumeTexture() const {
     return _volumeTexture;
 }
 

@@ -27,23 +27,21 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 
-namespace ghoul {
-    namespace filesystem { class File; }
-    namespace opengl { class TextureUnit; }
-} // namespace ghoul
-
 namespace openspace {
+
+namespace filesystem { class File; }
+namespace opengl { class TextureUnit; }
 
 class RenderablePlane : public Renderable {
 public:
-    explicit RenderablePlane(const ghoul::Dictionary& dictionary,
+    explicit RenderablePlane(const Dictionary& dictionary,
 
     RenderableSettings settings = RenderableSettings());
 
@@ -62,7 +60,7 @@ protected:
         FixedRotation
     };
 
-    virtual void bindTexture(ghoul::opengl::TextureUnit& unit);
+    virtual void bindTexture(opengl::TextureUnit& unit);
     virtual void unbindTexture();
     void createPlane();
     glm::dmat4 rotationMatrix(const RenderData& data) const;
@@ -75,7 +73,7 @@ protected:
     Vec3Property _multiplyColor;
 
     struct DistanceScalingSettings : PropertyOwner {
-        explicit DistanceScalingSettings(const ghoul::Dictionary& dictionary);
+        explicit DistanceScalingSettings(const Dictionary& dictionary);
 
         BoolProperty scaleByDistance;
         FloatProperty apparentSizeMultiplier;
@@ -85,7 +83,7 @@ protected:
 
     DistanceScalingSettings _distanceScalingSettings;
 
-    ghoul::opengl::ProgramObject* _shader = nullptr;
+    opengl::ProgramObject* _shader = nullptr;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

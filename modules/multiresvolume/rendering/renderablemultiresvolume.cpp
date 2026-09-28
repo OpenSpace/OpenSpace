@@ -176,7 +176,7 @@ Documentation RenderableMultiresVolume::Documentation() {
     );
 }
 
-RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dictionary)
+RenderableMultiresVolume::RenderableMultiresVolume(const Dictionary& dictionary)
     :  Renderable(dictionary)
     , _useGlobalTime(UseGlobalTimeInfo, false)
     , _loop(LoopInfo, false)
@@ -388,7 +388,7 @@ void RenderableMultiresVolume::initializeGL() {
     onEnabledChange(onChange);
 
     if (!success) {
-        throw ghoul::RuntimeError("Error during initialization");
+        throw RuntimeError("Error during initialization");
     }
 }
 
@@ -510,7 +510,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         std::chrono::duration<double> frameDuration = frameEnd - _frameStart;
 
         // Make sure that the directory exists
-        ghoul::filesystem::File file(_statsFileName);
+        filesystem::File file(_statsFileName);
         std::filesystem::path directory =
             std::filesystem::path(_statsFileName).parent_path();
         std::filesystem::create_directories(directory);

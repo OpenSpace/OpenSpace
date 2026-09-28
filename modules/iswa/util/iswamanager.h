@@ -27,7 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/designpattern/event.h>
+#include <openspace/designpattern/synchronousevent.h>
 #include <openspace/engine/downloadmanager.h>
 #include <filesystem>
 #include <future>
@@ -96,7 +96,7 @@ public:
 
     static LuaLibrary luaLibrary();
 
-    ghoul::Event<>& iswaEvent();
+    SynchronousEvent<>& iswaEvent();
 
     void addCdfFiles(std::string path);
     void setBaseUrl(std::string bUrl);
@@ -124,7 +124,7 @@ private:
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
     std::map<std::string, std::vector<CdfInfo>> _cdfInformation;
 
-    ghoul::Event<> _iswaEvent;
+    SynchronousEvent<> _iswaEvent;
 
     std::string _baseUrl;
 

@@ -43,16 +43,16 @@ std::string_view IVec4Property::className() const {
     return "IVec4Property";
 }
 
-ghoul::lua::LuaTypes IVec4Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes IVec4Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void IVec4Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::ivec4 IVec4Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::ivec4>(state);
+    return lua::value<glm::ivec4>(state);
 }
 
 std::string IVec4Property::stringValue() const {

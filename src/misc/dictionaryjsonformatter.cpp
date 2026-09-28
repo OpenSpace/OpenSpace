@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +39,7 @@
 #include <utility>
 
 namespace {
-    using namespace ghoul;
+    using namespace openspace;
 
     std::string formatNumber(double d) {
         // std::format will represent infinite values with 'inf' and NaNs with 'nan'.
@@ -170,7 +169,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul {
+namespace openspace {
 
 JsonFormattingError::JsonFormattingError(std::string msg)
     : RuntimeError(std::move(msg), "Dictionary")
@@ -226,4 +225,4 @@ std::string formatJson(const Dictionary& dictionary) {
     }
 }
 
-} // namespace ghoul
+} // namespace openspace

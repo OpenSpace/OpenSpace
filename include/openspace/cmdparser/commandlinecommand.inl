@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +25,11 @@
 #include <openspace/misc/assert.h>
 #include <sstream>
 
-namespace ghoul::cmdparser {
+namespace openspace::cmdparser {
 
 template <class T>
 T CommandlineCommand::cast(const std::string& s) const {
-    ghoul_assert(!s.empty(), "s must not be empty");
+    assert_msg(!s.empty(), "s must not be empty");
     std::istringstream iss(s);
     T t;
     iss >> std::dec >> t;
@@ -48,4 +47,4 @@ template <class T>
     return !iss.fail();
 }
 
-} // namespace ghoul::cmdparser
+} // namespace openspace::cmdparser

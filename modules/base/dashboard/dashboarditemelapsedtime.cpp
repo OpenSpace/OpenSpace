@@ -112,7 +112,7 @@ Documentation DashboardItemElapsedTime::Documentation() {
     );
 }
 
-DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dictionary)
+DashboardItemElapsedTime::DashboardItemElapsedTime(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _formatString(FormatStringInfo, "Elapsed time: {}")
     , _referenceTime(ReferenceTimeInfo)

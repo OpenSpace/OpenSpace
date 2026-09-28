@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GHOUL___DICTIONARYFORMATTER___H__
-#define __GHOUL___DICTIONARYFORMATTER___H__
+#ifndef __OPENSPACE_CORE___DICTIONARYFORMATTER___H__
+#define __OPENSPACE_CORE___DICTIONARYFORMATTER___H__
 
 #include <string>
 
-namespace ghoul {
+namespace openspace {
 
 class Dictionary;
 
@@ -48,6 +47,6 @@ public:
     virtual std::string format(const Dictionary& dictionary) const = 0;
 };
 
-}  // namespace ghoul
+}  // namespace openspace
 
-#endif // __GHOUL___DICTIONARYFORMATTER___H__
+#endif // __OPENSPACE_CORE___DICTIONARYFORMATTER___H__

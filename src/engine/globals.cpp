@@ -76,7 +76,7 @@ namespace {
         sizeof(OpenSpaceEngine) +
         sizeof(DownloadEventEngine) +
         sizeof(EventEngine) +
-        sizeof(ghoul::fontrendering::FontManager) +
+        sizeof(fontrendering::FontManager) +
         sizeof(Dashboard) +
         sizeof(DeferredcasterManager) +
         sizeof(DownloadManager) +
@@ -124,7 +124,7 @@ void create() {
 
 #ifdef WIN32
     memoryManager = new (currentPos) MemoryManager;
-    ghoul_assert(memoryManager, "No memoryManager");
+    assert_msg(memoryManager, "No memoryManager");
     currentPos += sizeof(MemoryManager);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     memoryManager = new MemoryManager;
@@ -132,7 +132,7 @@ void create() {
 
 #ifdef WIN32
     syncEngine = new (currentPos) SyncEngine(4096);
-    ghoul_assert(syncEngine, "No syncEngine");
+    assert_msg(syncEngine, "No syncEngine");
     currentPos += sizeof(SyncEngine);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     syncEngine = new SyncEngine(4096);
@@ -140,7 +140,7 @@ void create() {
 
 #ifdef WIN32
     server = new (currentPos) Server;
-    ghoul_assert(server, "No server");
+    assert_msg(server, "No server");
     currentPos += sizeof(Server);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     server = new Server;
@@ -148,7 +148,7 @@ void create() {
 
 #ifdef WIN32
     openSpaceEngine = new (currentPos) OpenSpaceEngine;
-    ghoul_assert(openSpaceEngine, "No openSpaceEngine");
+    assert_msg(openSpaceEngine, "No openSpaceEngine");
     currentPos += sizeof(OpenSpaceEngine);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     openSpaceEngine = new OpenSpaceEngine;
@@ -156,7 +156,7 @@ void create() {
 
 #ifdef WIN32
     downloadEventEngine = new (currentPos) DownloadEventEngine;
-    ghoul_assert(downloadEventEngine, "No downloadEventEngine");
+    assert_msg(downloadEventEngine, "No downloadEventEngine");
     currentPos += sizeof(DownloadEventEngine);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     downloadEventEngine = new DownloadEventEngine;
@@ -164,23 +164,23 @@ void create() {
 
 #ifdef WIN32
     eventEngine = new (currentPos) EventEngine;
-    ghoul_assert(eventEngine, "No eventEngine");
+    assert_msg(eventEngine, "No eventEngine");
     currentPos += sizeof(EventEngine);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     eventEngine = new EventEngine;
 #endif // WIN32
 
 #ifdef WIN32
-    fontManager = new (currentPos) ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
-    ghoul_assert(fontManager, "No fontManager");
-    currentPos += sizeof(ghoul::fontrendering::FontManager);
+    fontManager = new (currentPos) fontrendering::FontManager({ 1536, 1536, 1 });
+    assert_msg(fontManager, "No fontManager");
+    currentPos += sizeof(fontrendering::FontManager);
 #else // ^^^^ WIN32 / !WIN32 vvvv
-    fontManager = new ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
+    fontManager = new fontrendering::FontManager({ 1536, 1536, 1 });
 #endif // WIN32
 
 #ifdef WIN32
     dashboard = new (currentPos) Dashboard;
-    ghoul_assert(dashboard, "No dashboard");
+    assert_msg(dashboard, "No dashboard");
     currentPos += sizeof(Dashboard);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     dashboard = new Dashboard;
@@ -188,7 +188,7 @@ void create() {
 
 #ifdef WIN32
     deferredcasterManager = new (currentPos) DeferredcasterManager;
-    ghoul_assert(deferredcasterManager, "No deferredcasterManager");
+    assert_msg(deferredcasterManager, "No deferredcasterManager");
     currentPos += sizeof(DeferredcasterManager);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     deferredcasterManager = new DeferredcasterManager;
@@ -196,7 +196,7 @@ void create() {
 
 #ifdef WIN32
     downloadManager = new (currentPos) DownloadManager;
-    ghoul_assert(downloadManager, "No downloadManager");
+    assert_msg(downloadManager, "No downloadManager");
     currentPos += sizeof(DownloadManager);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     downloadManager = new DownloadManager;
@@ -204,7 +204,7 @@ void create() {
 
 #ifdef WIN32
     luaConsole = new (currentPos) LuaConsole;
-    ghoul_assert(luaConsole, "No luaConsole");
+    assert_msg(luaConsole, "No luaConsole");
     currentPos += sizeof(LuaConsole);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     luaConsole = new LuaConsole;
@@ -212,7 +212,7 @@ void create() {
 
 #ifdef WIN32
     missionManager = new (currentPos) MissionManager;
-    ghoul_assert(missionManager, "No missionManager");
+    assert_msg(missionManager, "No missionManager");
     currentPos += sizeof(MissionManager);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     missionManager = new MissionManager;
@@ -220,7 +220,7 @@ void create() {
 
 #ifdef WIN32
     moduleEngine = new (currentPos) ModuleEngine;
-    ghoul_assert(moduleEngine, "No moduleEngine");
+    assert_msg(moduleEngine, "No moduleEngine");
     currentPos += sizeof(ModuleEngine);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     moduleEngine = new ModuleEngine;
@@ -228,7 +228,7 @@ void create() {
 
 #ifdef WIN32
     astrocast = new (currentPos) Astrocast;
-    ghoul_assert(astrocast, "No astrocast");
+    assert_msg(astrocast, "No astrocast");
     currentPos += sizeof(Astrocast);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     astrocast = new Astrocast;
@@ -236,7 +236,7 @@ void create() {
 
 #ifdef WIN32
     raycasterManager = new (currentPos) RaycasterManager;
-    ghoul_assert(raycasterManager, "No raycasterManager");
+    assert_msg(raycasterManager, "No raycasterManager");
     currentPos += sizeof(RaycasterManager);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     raycasterManager = new RaycasterManager;
@@ -244,7 +244,7 @@ void create() {
 
 #ifdef WIN32
     renderEngine = new (currentPos) RenderEngine;
-    ghoul_assert(renderEngine, "No renderEngine");
+    assert_msg(renderEngine, "No renderEngine");
     currentPos += sizeof(RenderEngine);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     renderEngine = new RenderEngine;
@@ -253,7 +253,7 @@ void create() {
 #ifdef WIN32
     screenSpaceRenderables =
         new (currentPos) std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
-    ghoul_assert(screenSpaceRenderables, "No screenSpaceRenderables");
+    assert_msg(screenSpaceRenderables, "No screenSpaceRenderables");
     currentPos += sizeof(std::vector<std::unique_ptr<ScreenSpaceRenderable>>);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     screenSpaceRenderables = new std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
@@ -261,7 +261,7 @@ void create() {
 
 #ifdef WIN32
     timeManager = new (currentPos) TimeManager;
-    ghoul_assert(timeManager, "No timeManager");
+    assert_msg(timeManager, "No timeManager");
     currentPos += sizeof(TimeManager);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     timeManager = new TimeManager;
@@ -269,7 +269,7 @@ void create() {
 
 #ifdef WIN32
     versionChecker = new (currentPos) VersionChecker;
-    ghoul_assert(versionChecker, "No versionChecker");
+    assert_msg(versionChecker, "No versionChecker");
     currentPos += sizeof(VersionChecker);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     versionChecker = new VersionChecker;
@@ -277,7 +277,7 @@ void create() {
 
 #ifdef WIN32
     windowDelegate = new (currentPos) WindowDelegate;
-    ghoul_assert(windowDelegate, "No windowDelegate");
+    assert_msg(windowDelegate, "No windowDelegate");
     currentPos += sizeof(WindowDelegate);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     windowDelegate = new WindowDelegate;
@@ -285,7 +285,7 @@ void create() {
 
 #ifdef WIN32
     configuration = new (currentPos) Configuration;
-    ghoul_assert(configuration, "No configuration");
+    assert_msg(configuration, "No configuration");
     currentPos += sizeof(Configuration);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     configuration = new Configuration;
@@ -293,7 +293,7 @@ void create() {
 
 #ifdef WIN32
     actionManager = new (currentPos) ActionManager;
-    ghoul_assert(actionManager, "No action manager");
+    assert_msg(actionManager, "No action manager");
     currentPos += sizeof(ActionManager);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     actionManager = new ActionManager;
@@ -301,7 +301,7 @@ void create() {
 
 #ifdef WIN32
     interactionHandler = new (currentPos) InteractionHandler;
-    ghoul_assert(interactionHandler, "No interactionHandler");
+    assert_msg(interactionHandler, "No interactionHandler");
     currentPos += sizeof(InteractionHandler);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     interactionHandler = new InteractionHandler;
@@ -309,7 +309,7 @@ void create() {
 
 #ifdef WIN32
     keybindingManager = new (currentPos) KeybindingManager;
-    ghoul_assert(keybindingManager, "No keybindingManager");
+    assert_msg(keybindingManager, "No keybindingManager");
     currentPos += sizeof(KeybindingManager);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     keybindingManager = new KeybindingManager;
@@ -317,7 +317,7 @@ void create() {
 
 #ifdef WIN32
     keyframeRecording = new (currentPos) KeyframeRecordingHandler;
-    ghoul_assert(keyframeRecording, "No keyframeRecording");
+    assert_msg(keyframeRecording, "No keyframeRecording");
     currentPos += sizeof(KeyframeRecordingHandler);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     keyframeRecording = new KeyframeRecordingHandler;
@@ -325,7 +325,7 @@ void create() {
 
 #ifdef WIN32
     navigationHandler = new (currentPos) NavigationHandler;
-    ghoul_assert(navigationHandler, "No navigationHandler");
+    assert_msg(navigationHandler, "No navigationHandler");
     currentPos += sizeof(NavigationHandler);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     navigationHandler = new NavigationHandler;
@@ -333,7 +333,7 @@ void create() {
 
 #ifdef WIN32
     sessionRecordingHandler = new (currentPos) SessionRecordingHandler;
-    ghoul_assert(sessionRecordingHandler, "No sessionRecording");
+    assert_msg(sessionRecordingHandler, "No sessionRecording");
     currentPos += sizeof(SessionRecordingHandler);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     sessionRecordingHandler = new SessionRecordingHandler;
@@ -341,7 +341,7 @@ void create() {
 
 #ifdef WIN32
     rootPropertyOwner = new (currentPos) PropertyOwner({ "" });
-    ghoul_assert(rootPropertyOwner, "No rootPropertyOwner");
+    assert_msg(rootPropertyOwner, "No rootPropertyOwner");
     currentPos += sizeof(PropertyOwner);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     rootPropertyOwner = new PropertyOwner({ "" });
@@ -350,7 +350,7 @@ void create() {
 #ifdef WIN32
     screenSpaceRootPropertyOwner =
         new (currentPos) PropertyOwner({ "ScreenSpace" });
-    ghoul_assert(screenSpaceRootPropertyOwner, "No screenSpaceRootPropertyOwner");
+    assert_msg(screenSpaceRootPropertyOwner, "No screenSpaceRootPropertyOwner");
     currentPos += sizeof(PropertyOwner);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     screenSpaceRootPropertyOwner = new PropertyOwner({ "ScreenSpace" });
@@ -358,7 +358,7 @@ void create() {
 
 #ifdef WIN32
     userPropertyOwner = new (currentPos) PropertyOwner({ "UserProperties" });
-    ghoul_assert(userPropertyOwner, "No userPropertyOwner");
+    assert_msg(userPropertyOwner, "No userPropertyOwner");
     currentPos += sizeof(PropertyOwner);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     userPropertyOwner = new PropertyOwner({ "UserProperties" });
@@ -366,7 +366,7 @@ void create() {
 
 #ifdef WIN32
     scriptEngine = new (currentPos) ScriptEngine;
-    ghoul_assert(scriptEngine, "No scriptEngine");
+    assert_msg(scriptEngine, "No scriptEngine");
     currentPos += sizeof(ScriptEngine);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     scriptEngine = new ScriptEngine;
@@ -374,7 +374,7 @@ void create() {
 
 #ifdef WIN32
     scriptScheduler = new (currentPos) ScriptScheduler;
-    ghoul_assert(scriptScheduler, "No scriptScheduler");
+    assert_msg(scriptScheduler, "No scriptScheduler");
     currentPos += sizeof(ScriptScheduler);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     scriptScheduler = new ScriptScheduler;
@@ -382,7 +382,7 @@ void create() {
 
 #ifdef WIN32
     profile = new (currentPos) Profile;
-    ghoul_assert(profile, "No profile");
+    assert_msg(profile, "No profile");
     //currentPos += sizeof(Profile);
 #else // ^^^^ WIN32 / !WIN32 vvvv
     profile = new Profile;

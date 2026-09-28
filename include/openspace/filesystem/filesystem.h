@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +38,7 @@
 #include <thread>
 #endif // WIN32
 
-namespace ghoul::filesystem {
+namespace openspace::filesystem {
 
 #ifdef WIN32
 struct DirectoryHandle;
@@ -284,7 +283,7 @@ private:
     static FileSystem* _instance;
 };
 
-#define FileSys (ghoul::filesystem::FileSystem::ref())
+#define FileSys (openspace::filesystem::FileSystem::ref())
 
 BooleanType(Recursive);
 BooleanType(Sorted);
@@ -321,7 +320,7 @@ std::vector<std::filesystem::path> walkDirectory(const std::filesystem::path& pa
  */
 bool isSubdirectory(std::filesystem::path p, std::filesystem::path root);
 
-} // namespace ghoul::filesystem
+} // namespace openspace::filesystem
 
 
 /**

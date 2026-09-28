@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,7 +64,7 @@ namespace {
     struct is_any : std::disjunction<std::is_same<T, Ts>...> {};
 } // namespace
 
-namespace ghoul {
+namespace openspace {
 
 template <typename T>
 struct glm_components : public std::integral_constant<glm::length_t, 0> {};
@@ -174,7 +173,7 @@ glm::tmat4x3<valType> createFillMat4x3(valType v) {
     return glm::tmat4x3<valType>(v, v, v, v, v, v, v, v, v, v, v, v);
 }
 
-} // namespace ghoul
+} // namespace openspace
 
 template <>
 struct std::formatter<glm::bvec2> {

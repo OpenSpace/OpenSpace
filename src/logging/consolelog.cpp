@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +35,7 @@
 #include <Windows.h>
 #endif // WIN32
 
-namespace ghoul::logging {
+namespace openspace::logging {
 
 ConsoleLog::ConsoleLog(ColorOutput colorOutput, LogLevel minimumLogLevel)
     : Log(
@@ -194,4 +193,4 @@ void ConsoleLog::resetColor() {
     setColorForLevel(LogLevel::Info);
 }
 
-} // namespace ghoul::logging
+} // namespace openspace::logging

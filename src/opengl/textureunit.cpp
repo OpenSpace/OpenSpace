@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +29,7 @@
 #include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 #include <utility>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 TextureUnit::TextureUnitError::TextureUnitError(std::string msg)
     : RuntimeError(std::move(msg), "TextureUnit")
@@ -64,7 +63,7 @@ void TextureUnit::unassign() {
         _assigned = false;
         _busyUnits.at(_number) = false;
 
-        ghoul_assert(_totalActive > 0, "No active texture units");
+        assert_msg(_totalActive > 0, "No active texture units");
         --_totalActive;
     }
 }
@@ -106,4 +105,4 @@ void TextureUnit::initialize() {
     _isInitialized = true;
 }
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl

@@ -42,16 +42,16 @@ SpoutModule::SpoutModule()
     : OpenSpaceModule(Name)
 {}
 
-void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
+void SpoutModule::internalInitialize(const Dictionary&) {
 #ifdef WIN32
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
+    TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
+    assert_msg(fSsRenderable, "ScreenSpaceRenderable factory was not created");
     fSsRenderable->registerClass<ScreenSpaceSpout>("ScreenSpaceSpout");
 
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    assert_msg(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
     fRenderable->registerClass<RenderableSphereSpout>("RenderableSphereSpout");
 #endif // WIN32

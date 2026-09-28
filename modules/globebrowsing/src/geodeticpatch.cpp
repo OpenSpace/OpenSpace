@@ -117,7 +117,7 @@ Geodetic2 GeodeticPatch::corner(Quad q) const {
         case NORTH_EAST:  return Geodetic2{ .lat = maxLat(), .lon = maxLon() };
         case SOUTH_WEST:  return Geodetic2{ .lat = minLat(), .lon = minLon() };
         case SOUTH_EAST:  return Geodetic2{ .lat = minLat(), .lon = maxLon() };
-        default:          throw ghoul::MissingCaseException();
+        default:          throw MissingCaseException();
     }
 }
 

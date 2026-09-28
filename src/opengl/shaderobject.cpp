@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +29,7 @@
 #include <fstream>
 #include <utility>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 ShaderObject::ShaderObjectError::ShaderObjectError(std::string msg)
     : RuntimeError(std::move(msg), "ShaderObject")
@@ -125,7 +124,7 @@ void ShaderObject::rebuildFromFile() {
     std::string contents = _preprocessor.process();
 
     // If in debug mode, output the source to file
-#ifdef GHL_DEBUG
+#ifdef OPENSPACE_DEBUG
     std::filesystem::path generatedFilename;
 
     std::filesystem::path base;
@@ -142,14 +141,14 @@ void ShaderObject::rebuildFromFile() {
     }
     else {
         // Either the cachemanager wasn't initialized or the filename could not be fetched
-        generatedFilename += ".GhoulGenerated.glsl";
+        generatedFilename += ".Generated.glsl";
     }
 
     std::ofstream os;
     os.exceptions(std::ofstream::failbit | std::ofstream::badbit);
     os.open(generatedFilename);
     os << contents;
-#endif // GHL_DEBUG
+#endif // OPENSPACE_DEBUG
 
     const char* contentPtr = contents.c_str();
     glShaderSource(_id, 1, &contentPtr, nullptr);
@@ -199,4 +198,4 @@ std::string_view ShaderObject::stringForShaderType(ShaderType type) {
     }
 }
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl

@@ -40,9 +40,9 @@
 namespace {
     using namespace openspace;
 
-    struct RangeError final : public ghoul::RuntimeError {
+    struct RangeError final : public RuntimeError {
         explicit RangeError(std::string off) :
-            ghoul::RuntimeError(
+            RuntimeError(
                 std::format("Value '{}' out of range", off),
                 "KeplerTranslation"
             )
@@ -195,7 +195,7 @@ Documentation KeplerTranslation::Documentation() {
     );
 }
 
-KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
+KeplerTranslation::KeplerTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
     , _eccentricity(EccentricityInfo, 0.0, 0.0, 1.0)
     , _semiMajorAxis(SemiMajorAxisInfo, 0.0, 0.0, 1e6)
@@ -295,7 +295,7 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly, double eccentrici
         return solveIteration(solver, e, 0.0, 8);
     }
     else {
-        ghoul_assert(false, "Eccentricity must not be >= 1.0");
+        assert_msg(false, "Eccentricity must not be >= 1.0");
         LERRORC("KeplerTranslation", "Eccentricity must not be >= 1.0");
         return 0.0;
     }

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace ghoul::io {
+namespace openspace::io {
 
 template <typename T>
 bool TcpSocket::get(T* buffer, size_t nItems) {
@@ -45,4 +44,4 @@ bool TcpSocket::put(const T* buffer, size_t nItems) {
     return putBytes(reinterpret_cast<const char*>(buffer), nItems * sizeof(T));
 }
 
-} // namespace ghoul::io
+} // namespace openspace::io

@@ -174,7 +174,7 @@ Documentation RenderableTrailOrbit::Documentation() {
     );
 }
 
-RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
+RenderableTrailOrbit::RenderableTrailOrbit(const Dictionary& dictionary)
     : RenderableTrail(dictionary)
     , _forceFullOrbitTrail(ForceFullOrbitTrailInfo, false)
     , _limitToTimeRange(LimitToTimeRangeInfo, true)

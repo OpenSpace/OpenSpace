@@ -36,13 +36,13 @@ class Mat3Property : public NumericalProperty<glm::mat3x3> {
 public:
     explicit Mat3Property(PropertyInfo info, glm::mat3x3 value = glm::mat3x3(0.f),
         glm::mat3x3 minValue =
-            ghoul::createFillMat3x3<float>(std::numeric_limits<float>::lowest()),
+            createFillMat3x3<float>(std::numeric_limits<float>::lowest()),
         glm::mat3x3 maxValue =
-            ghoul::createFillMat3x3<float>(std::numeric_limits<float>::max()),
-        glm::mat3x3 stepValue = ghoul::createFillMat3x3<float>(0.01f));
+            createFillMat3x3<float>(std::numeric_limits<float>::max()),
+        glm::mat3x3 stepValue = createFillMat3x3<float>(0.01f));
 
     std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+    lua::LuaTypes typeLua() const override final;
 
     void getLuaValue(lua_State* state) const override final;
 

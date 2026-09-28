@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___BLOCKPLANEINTERSECTIONGEOMETRY___H__
 #define __OPENSPACE_CORE___BLOCKPLANEINTERSECTIONGEOMETRY___H__
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/glm.h>
 #include <vector>
 

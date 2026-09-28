@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,19 +29,19 @@
 // Freetype has a weird way of reporting errors, so this is the best way to do this
 
 #undef __FTERRORS_H__
-#define FT_ERRORDEF(e, v, s)  ghoul::fontrendering::Error{ e, s },
+#define FT_ERRORDEF(e, v, s)  openspace::fontrendering::Error{ e, s },
 #define FT_ERROR_START_LIST     {
 #define FT_ERROR_END_LIST       };
 
 namespace {
-    ghoul::fontrendering::Error errors[] =
+    openspace::fontrendering::Error errors[] =
     #include FT_ERRORS_H
 } // namespace
 
-namespace ghoul::fontrendering {
+namespace openspace::fontrendering {
 
 Error error(int errorType) {
     return errors[errorType];
 }
 
-} // namespace ghoul::fontrendering
+} // namespace openspace::fontrendering

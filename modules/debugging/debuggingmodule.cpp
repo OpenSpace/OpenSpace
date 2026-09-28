@@ -139,7 +139,7 @@ DebuggingModule::DebuggingModule()
                     case WindowDelegate::Frustum::Mono:     return "";
                     case WindowDelegate::Frustum::LeftEye:  return "(left)";
                     case WindowDelegate::Frustum::RightEye: return "(right)";
-                    default:                          throw ghoul::MissingCaseException();
+                    default:                                throw MissingCaseException();
 
                 }
             }(frustum);
@@ -158,10 +158,10 @@ DebuggingModule::DebuggingModule()
     );
 }
 
-void DebuggingModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
+void DebuggingModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
+    assert_msg(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
     fSsRenderable->registerClass<ScreenSpaceDebugPlane>("ScreenSpaceDebugPlane");
 }

@@ -52,7 +52,7 @@ Documentation Transition::Documentation() {
     return codegen::doc<Parameters>("statemachine_transition");
 }
 
-Transition::Transition(const ghoul::Dictionary& dictionary) {
+Transition::Transition(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _from = p.from;
     _to = p.to;

@@ -47,14 +47,12 @@ namespace {
 /**
  * Adds a Screen Space Cygnets.
  */
-[[codegen::luawrap]] void addScreenSpaceCygnet(ghoul::Dictionary d) {
+[[codegen::luawrap]] void addScreenSpaceCygnet(Dictionary d) {
     int id = static_cast<int>(d.value<double>("CygnetId"));
     std::map<int, std::shared_ptr<CygnetInfo>> cygnetInformation =
         IswaManager::ref().cygnetInformation();
     if (cygnetInformation.find(id) == cygnetInformation.end()) {
-        throw ghoul::lua::LuaError(
-            "Could not find Cygnet with id = " + std::to_string(id)
-        );
+        throw lua::LuaError("Could not find Cygnet with id = " + std::to_string(id));
     }
 
     std::shared_ptr<CygnetInfo> info = cygnetInformation[id];
@@ -63,7 +61,7 @@ namespace {
     info->selected = true;
 
     if (global::renderEngine->screenSpaceRenderable(name)) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "A cygnet with the name '{}' already exist", name
         ));
     }
@@ -95,9 +93,7 @@ namespace {
     std::map<int, std::shared_ptr<CygnetInfo>> cygnetInformation =
         IswaManager::ref().cygnetInformation();
     if (cygnetInformation.find(id) == cygnetInformation.end()) {
-        throw ghoul::lua::LuaError(
-            "Could not find Cygnet with id = " + std::to_string(id)
-        );
+        throw lua::LuaError("Could not find Cygnet with id = " + std::to_string(id));
     }
 
     std::shared_ptr<CygnetInfo> info = cygnetInformation[id];

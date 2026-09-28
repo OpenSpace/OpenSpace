@@ -46,7 +46,7 @@ Documentation RenderableDataPlane::Documentation() {
     );
 }
 
-RenderableDataPlane::RenderableDataPlane(const ghoul::Dictionary& dictionary)
+RenderableDataPlane::RenderableDataPlane(const Dictionary& dictionary)
     : RenderableDataCygnet(dictionary)
 {}
 

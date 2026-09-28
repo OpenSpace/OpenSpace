@@ -147,7 +147,7 @@ Documentation GlobeTranslation::Documentation() {
     );
 }
 
-GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
+GlobeTranslation::GlobeTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
     , _sceneGraphNode(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)

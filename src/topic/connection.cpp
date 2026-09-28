@@ -38,14 +38,14 @@ namespace {
 
 namespace openspace {
 
-Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address,
+Connection::Connection(std::unique_ptr<io::Socket> s, std::string address,
                        bool authorized, const std::string& password)
     : _socket(std::move(s))
     , _address(std::move(address))
     , _isAuthorized(authorized)
     , _password(password)
 {
-    ghoul_assert(_socket, "Socket must not be nullptr");
+    assert_msg(_socket, "Socket must not be nullptr");
 }
 
 void Connection::handleMessage(const std::string& message) {
@@ -110,7 +110,7 @@ void Connection::handleJson(const nlohmann::json& json) {
         else {
             // Older API version which did not have versioning
             _socket->disconnect();
-            throw ghoul::RuntimeError("Unsupported API version");
+            throw RuntimeError("Unsupported API version");
         }
     }
 
@@ -145,7 +145,7 @@ void Connection::handleJson(const nlohmann::json& json) {
             return;
         }
 
-        ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
+        TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
 
         std::unique_ptr<Topic> topic = std::unique_ptr<Topic>(fTopic->create(type));
         topic->initialize(shared_from_this(), topicId);
@@ -196,7 +196,7 @@ std::thread& Connection::thread() {
     return _thread;
 }
 
-ghoul::io::Socket* Connection::socket() {
+io::Socket* Connection::socket() {
     return _socket.get();
 }
 
@@ -224,7 +224,7 @@ Topic* Connection::findTopicByType(const std::string& type) {
 }
 
 Connection::ApiVersion Connection::apiVersion() const {
-    ghoul_assert(
+    assert_msg(
         _connectedApiVersion.has_value(),
         "No API version received via 'apiHandshake' message"
     );

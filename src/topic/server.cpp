@@ -73,7 +73,7 @@ namespace {
     struct [[codegen::Dictionary(Server)]] Parameters {
 
         // The interfaces that are allowed to connect.
-        std::optional<std::vector<ghoul::Dictionary>> interfaces
+        std::optional<std::vector<Dictionary>> interfaces
             [[codegen::reference("core_serverinterface")]];
 
         // The IP addresses that are allowed to connect.
@@ -124,9 +124,8 @@ ServerInterface* Server::serverInterfaceByIdentifier(const std::string& identifi
     return si->get();
 }
 
-void Server::initialize(const ghoul::Dictionary& configuration) {
-
-    ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
+void Server::initialize(const Dictionary& configuration) {
+    TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
 
     // Add the topics to the topic factory
     fTopic->registerClass<ActionKeybindTopic>("actionsKeybinds");
@@ -156,7 +155,7 @@ void Server::initialize(const ghoul::Dictionary& configuration) {
         return;
     }
 
-    for (const ghoul::Dictionary& interface : p.interfaces.value()) {
+    for (const Dictionary& interface : p.interfaces.value()) {
         std::unique_ptr<ServerInterface> serverInterface =
             ServerInterface::createFromDictionary(interface);
 
@@ -177,13 +176,13 @@ void Server::preSync() {
             continue;
         }
 
-        ghoul::io::SocketServer* socketServer = serverInterface->server();
+        io::SocketServer* socketServer = serverInterface->server();
 
         if (!socketServer) {
             continue;
         }
 
-        std::unique_ptr<ghoul::io::Socket> socket;
+        std::unique_ptr<io::Socket> socket;
         while ((socket = socketServer->nextPendingSocket())) {
             const std::string address = socket->address();
             if (serverInterface->clientIsBlocked(address)) {
@@ -252,7 +251,7 @@ void Server::disconnectAll() {
         Connection& connection = *connectionData.connection;
         if (connection.socket() && connection.socket()->isConnected()) {
             connection.socket()->disconnect(
-                static_cast<int>(ghoul::io::WebSocket::ClosingReason::ClosingAll)
+                static_cast<int>(io::WebSocket::ClosingReason::ClosingAll)
             );
         }
     }
@@ -297,7 +296,7 @@ void Server::removePreSyncCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _preSyncCallbacks.end(),
         "handle must be a valid callback handle"
     );

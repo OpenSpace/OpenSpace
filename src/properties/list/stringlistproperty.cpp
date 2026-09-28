@@ -24,7 +24,7 @@
 
 #include <openspace/properties/list/stringlistproperty.h>
 
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/lua/lua_helper.h>
 
 namespace openspace {
@@ -37,16 +37,16 @@ std::string_view StringListProperty::className() const {
     return "StringListProperty";
 }
 
-ghoul::lua::LuaTypes StringListProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes StringListProperty::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void StringListProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 std::vector<std::string> StringListProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<std::vector<std::string>>(state);
+    return lua::value<std::vector<std::string>>(state);
 }
 
 std::string StringListProperty::stringValue() const {

@@ -31,11 +31,10 @@
 #include <utility>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
 class BrowserInstance;
+class Dictionary;
 
 class WwtCommunicator {
 public:
@@ -66,7 +65,7 @@ public:
 
 private:
     void executeJavascript(const std::string& script) const;
-    void sendMessageToWwt(const ghoul::Dictionary& msg) const;
+    void sendMessageToWwt(const Dictionary& msg) const;
 
     bool _isImageCollectionLoaded = false;
     std::deque<std::pair<std::string, double>> _selectedImages;

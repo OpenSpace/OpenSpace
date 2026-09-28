@@ -33,11 +33,11 @@ namespace {
  */
 [[codegen::luawrap]] void loadFile(std::string fileName) {
     if (fileName.empty()) {
-        throw ghoul::lua::LuaError("Filepath string is empty");
+        throw lua::LuaError("Filepath string is empty");
     }
 
-    ghoul::Dictionary scriptsDict;
-    scriptsDict.setValue("Scripts", ghoul::lua::loadDictionaryFromFile(fileName));
+    Dictionary scriptsDict;
+    scriptsDict.setValue("Scripts", lua::loadDictionaryFromFile(fileName));
     testSpecificationAndThrow(
         ScriptScheduler::Documentation(),
         scriptsDict,
@@ -46,7 +46,7 @@ namespace {
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     for (size_t i = 1; i <= scriptsDict.size(); i++) {
-        ghoul::Dictionary d = scriptsDict.value<ghoul::Dictionary>(std::to_string(i));
+        Dictionary d = scriptsDict.value<Dictionary>(std::to_string(i));
 
         ScriptScheduler::ScheduledScript script = ScriptScheduler::ScheduledScript(d);
         scripts.push_back(script);
@@ -89,15 +89,15 @@ namespace {
 /**
  * Returns the list of all scheduled scripts.
  */
-[[codegen::luawrap]] std::vector<ghoul::Dictionary> scheduledScripts() {
+[[codegen::luawrap]] std::vector<Dictionary> scheduledScripts() {
     std::vector<ScriptScheduler::ScheduledScript> scripts =
         global::scriptScheduler->allScripts();
 
-    std::vector<ghoul::Dictionary> result;
+    std::vector<Dictionary> result;
     result.reserve(scripts.size());
 
     for (const ScriptScheduler::ScheduledScript& script : scripts) {
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("Time", script.time);
         if (!script.forwardScript.empty()) {
             d.setValue("ForwardScript", script.forwardScript);

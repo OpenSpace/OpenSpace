@@ -39,13 +39,10 @@
 #include <filesystem>
 #include <memory>
 
-namespace ghoul {
-    namespace opengl { class ProgramObject; }
-    class Dictionary;
-} // namespace ghoul
-
 namespace openspace {
 
+namespace opengl { class ProgramObject; }
+class Dictionary;
 struct Documentation;
 class RenderableGlobe;
 struct RenderData;
@@ -55,7 +52,7 @@ public:
     GlobeLabelsComponent();
     ~GlobeLabelsComponent() override = default;
 
-    void initialize(const ghoul::Dictionary& dictionary, RenderableGlobe* globe);
+    void initialize(const Dictionary& dictionary, RenderableGlobe* globe);
 
     void initializeFonts();
 
@@ -101,7 +98,7 @@ private:
     Labels _labels;
 
     // Font
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::shared_ptr<fontrendering::Font> _font;
 
     // Globe
     RenderableGlobe* _globe = nullptr;

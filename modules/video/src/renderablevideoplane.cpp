@@ -55,7 +55,7 @@ Documentation RenderableVideoPlane::Documentation() {
     );
 }
 
-RenderableVideoPlane::RenderableVideoPlane(const ghoul::Dictionary& dictionary)
+RenderableVideoPlane::RenderableVideoPlane(const Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _videoPlayer(dictionary)
 {
@@ -106,7 +106,7 @@ void RenderableVideoPlane::update(const UpdateData& data) {
     RenderablePlane::update(data);
 }
 
-void RenderableVideoPlane::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderableVideoPlane::bindTexture(opengl::TextureUnit& unit) {
     unit.bind(*_videoPlayer.frameTexture());
 }
 

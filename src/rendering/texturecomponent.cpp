@@ -39,25 +39,25 @@ namespace openspace {
 TextureComponent::TextureComponent(int nDimensions)
     : _nDimensions(nDimensions)
 {
-    ghoul_assert(
+    assert_msg(
         _nDimensions >= 1 && _nDimensions <= 4,
         "nDimensions must be 1, 2, or 3"
     );
 }
 
-const ghoul::opengl::Texture* TextureComponent::texture() const {
+const opengl::Texture* TextureComponent::texture() const {
     return _texture.get();
 }
 
-ghoul::opengl::Texture* TextureComponent::texture() {
+opengl::Texture* TextureComponent::texture() {
     return _texture.get();
 }
 
-void TextureComponent::setFilterMode(ghoul::opengl::Texture::FilterMode filterMode) {
+void TextureComponent::setFilterMode(opengl::Texture::FilterMode filterMode) {
     _filterMode = filterMode;
 }
 
-void TextureComponent::setWrapping(ghoul::opengl::Texture::WrappingMode wrapping) {
+void TextureComponent::setWrapping(opengl::Texture::WrappingMode wrapping) {
     _wrappingMode = wrapping;
 }
 
@@ -70,17 +70,17 @@ void TextureComponent::loadFromFile(const std::filesystem::path& path) {
         return;
     }
 
-    _texture = ghoul::io::texture::loadTexture(
+    _texture = io::texture::loadTexture(
         path,
         _nDimensions,
-        ghoul::opengl::Texture::SamplerInit {
+        opengl::Texture::SamplerInit {
             .filter = _filterMode,
             .wrapping = _wrappingMode
         }
     );
     LDEBUG(std::format("Loaded texture from '{}'", path));
 
-    _textureFile = std::make_unique<ghoul::filesystem::File>(path);
+    _textureFile = std::make_unique<filesystem::File>(path);
     if (_shouldWatchFile) {
         _textureFile->setCallback([this]() { _fileIsDirty = true; });
     }

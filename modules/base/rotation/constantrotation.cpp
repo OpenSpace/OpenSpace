@@ -69,7 +69,7 @@ Documentation ConstantRotation::Documentation() {
     );
 }
 
-ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)
+ConstantRotation::ConstantRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
     , _rotationAxis(
         RotationInfo,

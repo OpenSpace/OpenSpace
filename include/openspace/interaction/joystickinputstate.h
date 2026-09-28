@@ -151,28 +151,26 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
     bool button(const std::string& joystickName, int button, JoystickAction action) const;
 };
 
+template <>
+inline std::string to_string(const openspace::JoystickAction& value) {
+    switch (value) {
+        case openspace::JoystickAction::Idle:    return "Idle";
+        case openspace::JoystickAction::Press:   return "Press";
+        case openspace::JoystickAction::Repeat:  return "Repeat";
+        case openspace::JoystickAction::Release: return "Release";
+        default:                                 throw MissingCaseException();
+    }
+}
+
+template <>
+constexpr openspace::JoystickAction from_string(std::string_view string) {
+    if (string == "Idle")         { return openspace::JoystickAction::Idle; }
+    else if (string == "Press")   { return openspace::JoystickAction::Press; }
+    else if (string == "Repeat")  { return openspace::JoystickAction::Repeat; }
+    else if (string == "Release") { return openspace::JoystickAction::Release; }
+    throw RuntimeError(std::format("Unknown action '{}'", string));
+}
+
 } // namespace openspace
-
-namespace ghoul {
-    template <>
-    inline std::string to_string(const openspace::JoystickAction& value) {
-        switch (value) {
-            case openspace::JoystickAction::Idle:    return "Idle";
-            case openspace::JoystickAction::Press:   return "Press";
-            case openspace::JoystickAction::Repeat:  return "Repeat";
-            case openspace::JoystickAction::Release: return "Release";
-            default:                                 throw MissingCaseException();
-        }
-    }
-
-    template <>
-    constexpr openspace::JoystickAction from_string(std::string_view string) {
-        if (string == "Idle")         { return openspace::JoystickAction::Idle; }
-        else if (string == "Press")   { return openspace::JoystickAction::Press; }
-        else if (string == "Repeat")  { return openspace::JoystickAction::Repeat; }
-        else if (string == "Release") { return openspace::JoystickAction::Release; }
-        throw RuntimeError(std::format("Unknown action '{}'", string));
-    }
-} // namespace ghoul
 
 #endif // __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__

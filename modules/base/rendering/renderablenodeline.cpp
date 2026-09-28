@@ -163,7 +163,7 @@ Documentation RenderableNodeLine::Documentation() {
     );
 }
 
-RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
+RenderableNodeLine::RenderableNodeLine(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _start(StartNodeInfo, "Root")
     , _end(EndNodeInfo, "Root")
@@ -277,7 +277,7 @@ std::string RenderableNodeLine::end() const {
 void RenderableNodeLine::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
         "NodeLineProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "NodeLineProgram",
                 absPath("${MODULE_BASE}/shaders/line_vs.glsl"),
@@ -303,7 +303,7 @@ void RenderableNodeLine::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "NodeLineProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

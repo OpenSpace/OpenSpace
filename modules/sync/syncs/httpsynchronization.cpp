@@ -80,7 +80,7 @@ Documentation HttpSynchronization::Documentation() {
     return codegen::doc<Parameters>("sync_synchronization_http");
 }
 
-HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
+HttpSynchronization::HttpSynchronization(const Dictionary& dict,
                                          std::filesystem::path synchronizationRoot,
                                       std::vector<std::string> synchronizationRepositories
 )
@@ -222,7 +222,7 @@ bool HttpSynchronization::isEachFileDownloaded() {
     // Optionally list of already synched files
 
     if (ossyncVersion == OssyncVersionNumber) {
-        ghoul::getline(file >> std::ws, line);
+        openspace::getline(file >> std::ws, line);
         if (line == SynchronizationToken) {
             return true;
         }

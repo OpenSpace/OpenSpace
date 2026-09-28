@@ -107,7 +107,7 @@ Documentation TimeFrameInterval::Documentation() {
     );
 }
 
-TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
+TimeFrameInterval::TimeFrameInterval(const Dictionary& dictionary)
     : _hasStart(HasStartInfo, false)
     , _start(StartInfo, 0, 0, 1E9)
     , _jumpToStart(JumpToStartInfo)

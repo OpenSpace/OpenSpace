@@ -32,7 +32,7 @@
 #include <array>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     [[codegen::luawrap]] void funcDvec4(glm::dvec4 arg) {
@@ -135,7 +135,7 @@ namespace {
 
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDvec4;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4;
     CHECK(func.name == "funcDvec4");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -146,7 +146,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4", "[Execution][LuaWrapper]") {
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, glm::dvec4(1.1, 2.2, 3.3, 4.4));
+    lua::push(state, glm::dvec4(1.1, 2.2, 3.3, 4.4));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -157,7 +157,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncDvec4Defaulted;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4Defaulted;
     CHECK(func.name == "funcDvec4Defaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -169,7 +169,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, glm::dvec4(1.1, 2.2, 3.3, 4.4));
+    lua::push(state, glm::dvec4(1.1, 2.2, 3.3, 4.4));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -180,7 +180,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncDvec4Defaulted;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4Defaulted;
     CHECK(func.name == "funcDvec4Defaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -202,7 +202,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncDvec4DefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4DefaultedCheck;
     CHECK(func.name == "funcDvec4DefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -216,7 +216,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, false, glm::dvec4(5.5, 6.6, 7.7, 8.8));
+    lua::push(state, false, glm::dvec4(5.5, 6.6, 7.7, 8.8));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -227,7 +227,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncDvec4DefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4DefaultedCheck;
     CHECK(func.name == "funcDvec4DefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -241,14 +241,14 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, true);
+    lua::push(state, true);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Map", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDvec4Map;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4Map;
     CHECK(func.name == "funcDvec4Map");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -260,11 +260,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Map", "[Execution][LuaWrapper]"
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, "key1", glm::dvec4(1.1, 2.2, 3.3, 4.4));
+    lua::push(state, "key1", glm::dvec4(1.1, 2.2, 3.3, 4.4));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key2", glm::dvec4(5.5, 6.6, 7.7, 8.8));
+    lua::push(state, "key2", glm::dvec4(5.5, 6.6, 7.7, 8.8));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key3", glm::dvec4(9.9, 10.10, 11.11, 12.12));
+    lua::push(state, "key3", glm::dvec4(9.9, 10.10, 11.11, 12.12));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -272,7 +272,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Map", "[Execution][LuaWrapper]"
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Optional", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDvec4Optional;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4Optional;
     CHECK(func.name == "funcDvec4Optional");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -283,7 +283,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Optional", "[Execution][LuaWrap
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, glm::dvec4(1.1, 2.2, 3.3, 4.4));
+    lua::push(state, glm::dvec4(1.1, 2.2, 3.3, 4.4));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -294,7 +294,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncDvec4OptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4OptionalNullopt;
     CHECK(func.name == "funcDvec4OptionalNullopt");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -311,7 +311,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Vector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDvec4Vector;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4Vector;
     CHECK(func.name == "funcDvec4Vector");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -323,11 +323,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Vector", "[Execution][LuaWrappe
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::dvec4(1.1, 2.2, 3.3, 4.4));
+    lua::push(state, 1, glm::dvec4(1.1, 2.2, 3.3, 4.4));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, glm::dvec4(5.5, 6.6, 7.7, 8.8));
+    lua::push(state, 2, glm::dvec4(5.5, 6.6, 7.7, 8.8));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, glm::dvec4(9.9, 10.10, 11.11, 12.12));
+    lua::push(state, 3, glm::dvec4(9.9, 10.10, 11.11, 12.12));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -335,7 +335,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Vector", "[Execution][LuaWrappe
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Array1", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDvec4Array1;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4Array1;
     CHECK(func.name == "funcDvec4Array1");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -347,12 +347,12 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Array1", "[Execution][LuaWrappe
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::dvec4(1.1, 2.2, 3.3, 4.4));
+    lua::push(state, 1, glm::dvec4(1.1, 2.2, 3.3, 4.4));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(state, std::array<glm::dvec4, 1> { glm::dvec4(1.1, 2.2, 3.3, 4.4) });
+    lua::push(state, std::array<glm::dvec4, 1> { glm::dvec4(1.1, 2.2, 3.3, 4.4) });
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
@@ -360,7 +360,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Array1", "[Execution][LuaWrappe
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Array2", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDvec4Array2;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4Array2;
     CHECK(func.name == "funcDvec4Array2");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -372,20 +372,20 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Array2", "[Execution][LuaWrappe
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::dvec4(1.1, 2.2, 3.3, 4.4));
+    lua::push(state, 1, glm::dvec4(1.1, 2.2, 3.3, 4.4));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, glm::dvec4(5.5, 6.6, 7.7, 8.8));
+    lua::push(state, 2, glm::dvec4(5.5, 6.6, 7.7, 8.8));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, glm::dvec4(9.9, 10.10, 11.11, 12.12));
+    lua::push(state, 3, glm::dvec4(9.9, 10.10, 11.11, 12.12));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, glm::dvec4(13.13, 14.14, 15.15, 16.16));
+    lua::push(state, 4, glm::dvec4(13.13, 14.14, 15.15, 16.16));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, glm::dvec4(17.17, 18.18, 19.19, 20.20));
+    lua::push(state, 5, glm::dvec4(17.17, 18.18, 19.19, 20.20));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(
+    lua::push(
         state,
         std::array<glm::dvec4, 5> {
             glm::dvec4(1.1, 2.2, 3.3, 4.4),
@@ -402,7 +402,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Array2", "[Execution][LuaWrappe
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Array3", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncDvec4Array3;
+    LuaLibrary::Function func = codegen::lua::FuncDvec4Array3;
     CHECK(func.name == "funcDvec4Array3");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -414,30 +414,30 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Array3", "[Execution][LuaWrappe
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::dvec4(1.1, 2.2, 3.3, 4.4));
+    lua::push(state, 1, glm::dvec4(1.1, 2.2, 3.3, 4.4));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, glm::dvec4(5.5, 6.6, 7.7, 8.8));
+    lua::push(state, 2, glm::dvec4(5.5, 6.6, 7.7, 8.8));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, glm::dvec4(9.9, 10.10, 11.11, 12.12));
+    lua::push(state, 3, glm::dvec4(9.9, 10.10, 11.11, 12.12));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, glm::dvec4(13.13, 14.14, 15.15, 16.16));
+    lua::push(state, 4, glm::dvec4(13.13, 14.14, 15.15, 16.16));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, glm::dvec4(17.17, 18.18, 19.19, 20.20));
+    lua::push(state, 5, glm::dvec4(17.17, 18.18, 19.19, 20.20));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 6, glm::dvec4(21.21, 22.22, 23.23, 24.24));
+    lua::push(state, 6, glm::dvec4(21.21, 22.22, 23.23, 24.24));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 7, glm::dvec4(25.25, 26.26, 27.27, 28.28));
+    lua::push(state, 7, glm::dvec4(25.25, 26.26, 27.27, 28.28));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 8, glm::dvec4(29.29, 30.30, 31.31, 32.32));
+    lua::push(state, 8, glm::dvec4(29.29, 30.30, 31.31, 32.32));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 9, glm::dvec4(33.33, 34.34, 35.35, 36.36));
+    lua::push(state, 9, glm::dvec4(33.33, 34.34, 35.35, 36.36));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 10, glm::dvec4(37.37, 38.38, 39.39, 40.40));
+    lua::push(state, 10, glm::dvec4(37.37, 38.38, 39.39, 40.40));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(
+    lua::push(
         state,
         std::array<glm::dvec4, 10> {
             glm::dvec4(1.1, 2.2, 3.3, 4.4),
@@ -459,7 +459,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  dvec4Array3", "[Execution][LuaWrappe
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  dvec4", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnDvec4;
+    LuaLibrary::Function func = codegen::lua::ReturnDvec4;
     CHECK(func.name == "returnDvec4");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "vec4");
@@ -470,13 +470,13 @@ TEST_CASE("Execution/LuaWrapper/Return:  dvec4", "[Execution][LuaWrapper]") {
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    glm::dvec4 val = ghoul::lua::value<glm::dvec4>(state);
+    glm::dvec4 val = lua::value<glm::dvec4>(state);
     CHECK(val == glm::dvec4(1.1, 2.2, 3.3, 4.4));
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  dvec4Map", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnDvec4Map;
+    LuaLibrary::Function func = codegen::lua::ReturnDvec4Map;
     CHECK(func.name == "returnDvec4Map");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String -> vec4");
@@ -488,7 +488,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  dvec4Map", "[Execution][LuaWrapper]") {
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     std::map<std::string, glm::dvec4> val =
-        ghoul::lua::value<std::map<std::string, glm::dvec4>>(state);
+        lua::value<std::map<std::string, glm::dvec4>>(state);
     CHECK(val.size() == 3);
     REQUIRE(val.find("key1") != val.end());
     CHECK(val.find("key1")->second == glm::dvec4(1.1, 2.2, 3.3, 4.4));
@@ -504,7 +504,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnDvec4Optional;
+    LuaLibrary::Function func = codegen::lua::ReturnDvec4Optional;
     CHECK(func.name == "returnDvec4Optional");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "vec4?");
@@ -515,7 +515,7 @@ TEST_CASE(
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    glm::dvec4 val = ghoul::lua::value<glm::dvec4>(state);
+    glm::dvec4 val = lua::value<glm::dvec4>(state);
     CHECK(val == glm::dvec4(1.1, 2.2, 3.3, 4.4));
     lua_close(state);
 }
@@ -525,7 +525,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnDvec4OptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::ReturnDvec4OptionalNullopt;
     CHECK(func.name == "returnDvec4OptionalNullopt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "vec4?");
@@ -540,7 +540,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  dvec4Vector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnDvec4Vector;
+    LuaLibrary::Function func = codegen::lua::ReturnDvec4Vector;
     CHECK(func.name == "returnDvec4Vector");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "vec4[]");
@@ -551,7 +551,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  dvec4Vector", "[Execution][LuaWrapper]"
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::vector<glm::dvec4> val = ghoul::lua::value<std::vector<glm::dvec4>>(state);
+    std::vector<glm::dvec4> val = lua::value<std::vector<glm::dvec4>>(state);
     REQUIRE(val.size() == 3);
     CHECK(val[0] == glm::dvec4(1.1, 2.2, 3.3, 4.4));
     CHECK(val[1] == glm::dvec4(5.5, 6.6, 7.7, 8.8));

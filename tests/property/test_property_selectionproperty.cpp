@@ -24,7 +24,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/lua/luastate.h>
 #include <openspace/lua/lua_helper.h>
 #include <openspace/misc/dictionaryjsonformatter.h>
@@ -135,8 +135,8 @@ TEST_CASE("SelectionProperty: Set Lua Value", "[selectionproperty]") {
     SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    const ghoul::lua::LuaState L;
-    ghoul::lua::push(L, std::vector{ "a", "b" });
+    const lua::LuaState L;
+    lua::push(L, std::vector{ "a", "b" });
 
     p.setLuaValue(L);
 
@@ -147,8 +147,8 @@ TEST_CASE("SelectionProperty: Set Lua Value - Duplicates", "[selectionproperty]"
     SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    const ghoul::lua::LuaState L;
-    ghoul::lua::push(L, std::vector{ "a", "a", "b" });
+    const lua::LuaState L;
+    lua::push(L, std::vector{ "a", "a", "b" });
 
     p.setLuaValue(L);
 
@@ -159,8 +159,8 @@ TEST_CASE("SelectionProperty: Set Lua Value - Invalid Key", "[selectionproperty]
     SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    const ghoul::lua::LuaState L;
-    ghoul::lua::push(L, std::vector{ "a", "d" });
+    const lua::LuaState L;
+    lua::push(L, std::vector{ "a", "d" });
 
     p.setLuaValue(L);
 
@@ -174,20 +174,20 @@ TEST_CASE("SelectionProperty: Get Lua Value", "[selectionproperty]") {
     const std::set<std::string> list{ "a", "b" };
     p.setValue(list);
 
-    const ghoul::lua::LuaState L;
+    const lua::LuaState L;
     p.getLuaValue(L);
 
-    ghoul::Dictionary reference;
+    Dictionary reference;
     int i = 1;
     for (const std::string& k : list) {
-        reference.setValue(ghoul::to_string(i), k);
+        reference.setValue(to_string(i), k);
         i++;
     }
 
-    ghoul::Dictionary res = ghoul::lua::value<ghoul::Dictionary>(L);
+    Dictionary res = lua::value<Dictionary>(L);
 
     // Also test JSON representation for meaningful output
-    CHECK(ghoul::formatJson(res) == ghoul::formatJson(reference));
+    CHECK(formatJson(res) == formatJson(reference));
     CHECK(res == reference);
 }
 
@@ -195,14 +195,14 @@ TEST_CASE("SelectionProperty: Get Empty Lua Value", "[selectionproperty]") {
     SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    const ghoul::lua::LuaState L;
+    const lua::LuaState L;
     p.getLuaValue(L);
 
-    ghoul::Dictionary res = ghoul::lua::value<ghoul::Dictionary>(L);
-    ghoul::Dictionary emptyDict;
+    Dictionary res = lua::value<Dictionary>(L);
+    Dictionary emptyDict;
 
     // Also test JSON representation for meaningful output
-    CHECK(ghoul::formatJson(res) == ghoul::formatJson(emptyDict));
+    CHECK(formatJson(res) == formatJson(emptyDict));
     CHECK(res == emptyDict);
 }
 

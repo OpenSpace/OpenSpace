@@ -29,16 +29,16 @@ namespace openspace {
 
 template <typename T>
 void FactoryManager::addFactory(std::string name) {
-    ghoul_assert(!name.empty(), "Name must not be empty");
-    auto f = std::make_unique<ghoul::TemplateFactory<T>>();
+    assert_msg(!name.empty(), "Name must not be empty");
+    auto f = std::make_unique<TemplateFactory<T>>();
     _factories.push_back({ std::move(f), std::move(name) });
 }
 
 template <class T>
-ghoul::TemplateFactory<T>* FactoryManager::factory() const {
+TemplateFactory<T>* FactoryManager::factory() const {
     for (const FactoryInfo& f : _factories) {
         if (f.factory->baseClassType() == typeid(T))
-            return dynamic_cast<ghoul::TemplateFactory<T>*>(f.factory.get());
+            return dynamic_cast<TemplateFactory<T>*>(f.factory.get());
     }
 
     throw FactoryNotFoundError(typeid(T).name());

@@ -31,6 +31,8 @@
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "AuthorizationTopic";
 
     enum class Status {
@@ -44,7 +46,7 @@ namespace {
             case Status::Authorized: return "authorized";
             case Status::IncorrectKey: return "incorrectKey";
             case Status::BadRequest: return "badRequest";
-            default: throw ghoul::MissingCaseException();
+            default: throw MissingCaseException();
         }
     }
 

@@ -54,7 +54,7 @@ Documentation ReadSpeckTask::Documentation() {
     return codegen::doc<Parameters>("gaia_task_readspeck", Task::Documentation());
 }
 
-ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
+ReadSpeckTask::ReadSpeckTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _inFilePath = p.inFilePath;
     _outFilePath = p.outFilePath;

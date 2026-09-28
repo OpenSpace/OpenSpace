@@ -26,15 +26,14 @@
 #define __OPENSPACE_CORE___SHADOWMAPPING___H__
 
 #include <openspace/glm.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 class SceneGraphNode;
 
@@ -55,7 +54,7 @@ struct ShadowInfo {
  */
 class Shadower {
 public:
-    explicit Shadower(const ghoul::Dictionary& dictionary);
+    explicit Shadower(const Dictionary& dictionary);
     virtual ~Shadower() = default;
 
     bool isCastingShadow() const;

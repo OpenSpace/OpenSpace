@@ -48,7 +48,7 @@ namespace {
             : _profilePath(absPath("${PROFILES}"))
             , _userProfilePath(absPath("${USER_PROFILES}"))
         {
-            using Override = ghoul::filesystem::FileSystem::Override;
+            using Override = filesystem::FileSystem::Override;
 
             std::filesystem::create_directories(absPath("${TEMPORARY}/empty"));
 
@@ -61,7 +61,7 @@ namespace {
         }
 
         ~PathTokenPushPopStack() {
-            using Override = ghoul::filesystem::FileSystem::Override;
+            using Override = filesystem::FileSystem::Override;
 
             FileSys.registerPathToken("${PROFILES}", _profilePath, Override::Yes);
             FileSys.registerPathToken(

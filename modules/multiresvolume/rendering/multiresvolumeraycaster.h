@@ -50,13 +50,13 @@ public:
     void initialize();
     void deinitialize();
     void renderEntryPoints(const RenderData& data,
-        ghoul::opengl::ProgramObject& program) override;
+        opengl::ProgramObject& program) override;
     void renderExitPoints(const RenderData& data,
-        ghoul::opengl::ProgramObject& program) override;
+        opengl::ProgramObject& program) override;
     void preRaycast(const RaycastData& data,
-        ghoul::opengl::ProgramObject& program) override;
+        opengl::ProgramObject& program) override;
     void postRaycast(const RaycastData& data,
-        ghoul::opengl::ProgramObject& program) override;
+        opengl::ProgramObject& program) override;
     bool isCameraInside(const RenderData& data, glm::vec3& localPosition) override;
 
     std::filesystem::path boundsVertexShaderPath() const override;
@@ -76,10 +76,10 @@ private:
     std::shared_ptr<AtlasManager> _atlasManager;
     std::shared_ptr<TransferFunction> _transferFunction;
 
-    std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
-    std::unique_ptr<ghoul::opengl::TextureUnit> _atlasUnit;
+    std::unique_ptr<opengl::TextureUnit> _tfUnit;
+    std::unique_ptr<opengl::TextureUnit> _atlasUnit;
     std::unique_ptr<
-        ghoul::opengl::BufferBinding<ghoul::opengl::bufferbinding::Buffer::ShaderStorage>
+        opengl::BufferBinding<opengl::bufferbinding::Buffer::ShaderStorage>
     > _atlasMapBinding;
 };
 

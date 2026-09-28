@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +28,7 @@
 #include <openspace/io/socket/websocket.h>
 #include <utility>
 
-namespace ghoul::io {
+namespace openspace::io {
 
 WebSocketServer::WebSocketServer() {
     // Set up WebSocket++ logging
@@ -83,4 +82,4 @@ std::unique_ptr<Socket> WebSocketServer::awaitPendingSocket() {
     return std::unique_ptr<Socket>(awaitPendingWebSocket());
 }
 
-} // namespace ghoul::io
+} // namespace openspace::io

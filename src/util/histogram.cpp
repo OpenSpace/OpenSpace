@@ -193,7 +193,7 @@ float Histogram::interpolate(float bin) const {
 }
 
 float Histogram::sample(int binIndex) const {
-    ghoul_assert(binIndex >= 0 && binIndex < _numBins, "binIndex out of range");
+    assert_msg(binIndex >= 0 && binIndex < _numBins, "binIndex out of range");
     return _data[binIndex];
 }
 

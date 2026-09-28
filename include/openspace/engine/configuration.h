@@ -46,7 +46,7 @@ struct Configuration {
     Configuration& operator=(const Configuration&) = delete;
     Configuration& operator=(Configuration&&) = default;
 
-    ghoul::Dictionary createDictionary();
+    Dictionary createDictionary();
 
     std::string windowConfiguration = "${CONFIG}/single.json";
     std::string asset;
@@ -80,7 +80,7 @@ struct Configuration {
         std::string level = "Info";
         bool forceImmediateFlush = false;
         std::string capabilitiesVerbosity = "Default";
-        std::vector<ghoul::Dictionary> logs;
+        std::vector<Dictionary> logs;
     };
     Logging logging;
 
@@ -131,9 +131,9 @@ struct Configuration {
     };
     LayerServer layerServer = LayerServer::All;
 
-    std::map<std::string, ghoul::Dictionary> moduleConfigurations;
+    std::map<std::string, Dictionary> moduleConfigurations;
 
-    ghoul::Dictionary server;
+    Dictionary server;
 
     struct OpenGLDebugContext {
         bool isActive = false;
@@ -160,7 +160,7 @@ struct Configuration {
     HTTPProxy httpProxy;
 
     static openspace::Documentation Documentation();
-    ghoul::lua::LuaState state;
+    lua::LuaState state;
 };
 
 std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");

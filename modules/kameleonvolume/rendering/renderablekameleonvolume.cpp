@@ -165,7 +165,7 @@ namespace {
         // [[codegen::verbatim(UpperValueBoundInfo.description)]]
         std::optional<float> upperValueBound;
 
-        std::optional<ghoul::Dictionary> clipPlanes;
+        std::optional<Dictionary> clipPlanes;
 
         // [[codegen::verbatim(CacheInfo.description)]]
         std::optional<bool> cache;
@@ -188,7 +188,7 @@ Documentation RenderableKameleonVolume::Documentation() {
     );
 }
 
-RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
+RenderableKameleonVolume::RenderableKameleonVolume(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _dimensions(DimensionsInfo)
     , _variable(VariableInfo)
@@ -232,9 +232,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     _autoValueBounds = !p.lowerValueBound.has_value() || !p.upperValueBound.has_value();
 
 
-    _clipPlanes = std::make_shared<VolumeClipPlanes>(
-        p.clipPlanes.value_or(ghoul::Dictionary())
-    );
+    _clipPlanes = std::make_shared<VolumeClipPlanes>(p.clipPlanes.value_or(Dictionary()));
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
@@ -403,7 +401,7 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
         }
     }
 
-    ghoul::Dictionary dict = reader.readMetaData();
+    Dictionary dict = reader.readMetaData();
     _rawVolume = reader.readFloatVolume(
         _dimensions,
         _variable,
@@ -424,14 +422,14 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
         out[i] = std::clamp((in[i] - min) / diff, 0.f, 1.f);
     }
 
-    _volumeTexture = std::make_shared<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _volumeTexture = std::make_shared<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = _dimensions,
             .type = GL_TEXTURE_3D,
-            .format = ghoul::opengl::Texture::Format::Red,
+            .format = opengl::Texture::Format::Red,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit {},
+        opengl::Texture::SamplerInit {},
         reinterpret_cast<std::byte*>(_normalizedVolume->data())
     );
 }

@@ -27,7 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -36,25 +36,24 @@
 #include <filesystem>
 #include <memory>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
-
 namespace openspace {
 
+namespace opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace opengl
+class Dictionary;
 struct Documentation;
 
 class ProjectionComponent : public PropertyOwner {
 public:
     ProjectionComponent();
 
-    void initialize(const std::string& identifier, const ghoul::Dictionary& dictionary);
+    void initialize(const std::string& identifier, const Dictionary& dictionary);
     bool initializeGL();
     void deinitialize();
 
-    ghoul::opengl::Texture& depthTexture() const;
+    opengl::Texture& depthTexture() const;
     void imageProjectBegin();
     void imageProjectEnd();
     void depthMapRenderBegin();
@@ -65,7 +64,7 @@ public:
     bool auxiliaryRendertarget();
     bool depthRendertarget();
 
-    std::shared_ptr<ghoul::opengl::Texture> loadProjectionTexture(
+    std::shared_ptr<opengl::Texture> loadProjectionTexture(
         const std::filesystem::path& texturePath, bool isPlaceholder = false);
 
     glm::mat4 computeProjectorMatrix(const glm::vec3& loc, const glm::dvec3& aim,
@@ -82,7 +81,7 @@ public:
     void clearAllProjections();
     void generateMipMap();
 
-    ghoul::opengl::Texture& projectionTexture() const;
+    opengl::Texture& projectionTexture() const;
 
     std::string projectorId() const;
     std::string projecteeId() const;
@@ -108,8 +107,8 @@ protected:
     bool _textureSizeDirty = false;
     bool _mipMapDirty = false;
 
-    std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
-    std::shared_ptr<ghoul::opengl::Texture> _placeholderTexture;
+    std::unique_ptr<opengl::Texture> _projectionTexture;
+    std::shared_ptr<opengl::Texture> _placeholderTexture;
 
     float _projectionTextureAspectRatio = 1.f;
 
@@ -130,7 +129,7 @@ protected:
 
     struct {
         bool isEnabled = false;
-        std::unique_ptr<ghoul::opengl::Texture> texture;
+        std::unique_ptr<opengl::Texture> texture;
     } _shadowing;
 
     struct {
@@ -138,9 +137,9 @@ protected:
         GLuint fbo = 0;
         GLuint vao = 0;
         GLuint vbo = 0;
-        std::unique_ptr<ghoul::opengl::ProgramObject> program;
-        std::unique_ptr<ghoul::opengl::Texture> texture;
-        std::unique_ptr<ghoul::opengl::Texture> stencilTexture;
+        std::unique_ptr<opengl::ProgramObject> program;
+        std::unique_ptr<opengl::Texture> texture;
+        std::unique_ptr<opengl::Texture> stencilTexture;
     } _dilation;
 };
 

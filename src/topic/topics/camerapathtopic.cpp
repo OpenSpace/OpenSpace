@@ -118,7 +118,7 @@ void CameraPathTopic::sendCameraPathData() {
     const Path* path = pathNavigator.currentPath();
 
     if (!path) {
-        ghoul_assert(path, "Path must exist");
+        assert_msg(path, "Path must exist");
         return;
     }
 

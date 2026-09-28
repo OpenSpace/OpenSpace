@@ -29,20 +29,17 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/glm.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <array>
 
-namespace ghoul {
-    namespace filesystem { class File; }
-    namespace opengl { class ProgramObject; }
-    class Dictionary;
-} // namespace ghoul
-
 namespace openspace {
 
+namespace filesystem { class File; }
+namespace opengl { class ProgramObject; }
+class Dictionary;
 struct Documentation;
 struct RenderData;
 struct UpdateData;
@@ -54,7 +51,7 @@ public:
         GLuint shadowDepthTexture = 0;
     };
 
-    explicit ShadowComponent(const ghoul::Dictionary& dictionary);
+    explicit ShadowComponent(const Dictionary& dictionary);
 
     void initialize();
     void initializeGL();

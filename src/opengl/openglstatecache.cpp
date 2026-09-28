@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +27,7 @@
 #include <openspace/format.h>
 #include <openspace/misc/assert.h>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 OpenGLStateCache* OpenGLStateCache::_singleton = nullptr;
 GLint OpenGLStateCache::_maxAttachBuffers = 8;
@@ -99,7 +98,7 @@ void OpenGLStateCache::loadCurrentGLState() {
 }
 
 void OpenGLStateCache::resetCachedStates() const {
-    ghoul_assert(_cacheInitialized, "OpenGL State cache is not initialized");
+    assert_msg(_cacheInitialized, "OpenGL State cache is not initialized");
 
     resetViewportState();
     resetColorState();
@@ -195,7 +194,7 @@ void OpenGLStateCache::resetColorState() const {
 }
 
 void OpenGLStateCache::setColorState(GLfloat clearColor[4], GLboolean clampColor) {
-    ghoul_assert(clearColor != nullptr, "color must not be nullptr");
+    assert_msg(clearColor != nullptr, "color must not be nullptr");
 
     if (!std::equal_to<>()(clearColor[0], _colorClearValue[0]) ||
         !std::equal_to<>()(clearColor[1], _colorClearValue[1]) ||
@@ -230,7 +229,7 @@ void OpenGLStateCache::resetViewportState() const {
 }
 
 void OpenGLStateCache::setDefaultFramebuffer(GLuint defaultFB) {
-    ghoul_assert(
+    assert_msg(
         defaultFB < std::numeric_limits<GLuint>::max(),
         "The default Framebuffer must be a valid number"
     );
@@ -239,7 +238,7 @@ void OpenGLStateCache::setDefaultFramebuffer(GLuint defaultFB) {
 }
 
 void OpenGLStateCache::setViewportState(const GLint viewportCoords[4])  {
-    ghoul_assert(viewportCoords != nullptr, "viewportCoords must not be nullptr");
+    assert_msg(viewportCoords != nullptr, "viewportCoords must not be nullptr");
 
     if (viewportCoords[0] != _viewport[0] || viewportCoords[1] != _viewport[1] ||
         viewportCoords[2] != _viewport[2] || viewportCoords[3] != _viewport[3])
@@ -254,7 +253,7 @@ void OpenGLStateCache::setViewportState(const GLint viewportCoords[4])  {
 }
 
 void OpenGLStateCache::viewport(GLint viewport[4]) const {
-    ghoul_assert(viewport != nullptr, "viewport must not be nullptr");
+    assert_msg(viewport != nullptr, "viewport must not be nullptr");
 
     viewport[0] = _viewport[0];
     viewport[1] = _viewport[1];
@@ -266,4 +265,4 @@ GLuint OpenGLStateCache::defaultFramebuffer() const {
     return _defaultFramebuffer;
 }
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl

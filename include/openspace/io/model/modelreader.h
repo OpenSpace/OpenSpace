@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +27,9 @@
 
 #include <openspace/misc/exception.h>
 
-namespace ghoul::modelgeometry { class ModelGeometry; }
+namespace openspace::modelgeometry { class ModelGeometry; }
 
-namespace ghoul::io {
+namespace openspace::io {
 
 class ModelReaderBase;
 
@@ -122,6 +121,6 @@ private:
     std::vector<std::unique_ptr<ModelReaderBase>> _readers;
 };
 
-} // namespace ghoul::io
+} // namespace openspace::io
 
 #endif // __OPENSPACE_CORE___MODELREADER___H__

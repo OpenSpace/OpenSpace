@@ -91,7 +91,7 @@ namespace {
 
 namespace openspace {
 
-NavigationState::NavigationState(const ghoul::Dictionary& dictionary) {
+NavigationState::NavigationState(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     anchor = p.anchor;
@@ -118,14 +118,14 @@ NavigationState::NavigationState(const nlohmann::json& json) {
     if (auto it = json.find("position"); it->is_array()) {
         std::vector<double> values = it->get<std::vector<double>>();
         if (values.size() != 3) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Expected {} values, got {}", 3, values.size()
             ));
         }
         position = glm::dvec3(values[0], values[1], values[2]);
     }
     else {
-        ghoul_assert(it->is_object(), "Not an object");
+        assert_msg(it->is_object(), "Not an object");
         position.x = (*it)["x"].get<double>();
         position.y = (*it)["y"].get<double>();
         position.z = (*it)["z"].get<double>();
@@ -151,14 +151,14 @@ NavigationState::NavigationState(const nlohmann::json& json) {
         if (it->is_array()) {
             std::vector<double> values = it->get<std::vector<double>>();
             if (values.size() != 3) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Expected {} values, got {}", 3, values.size()
                 ));
             }
             up = glm::dvec3(values[0], values[1], values[2]);
         }
         else {
-            ghoul_assert(it->is_object(), "Not an object");
+            assert_msg(it->is_object(), "Not an object");
             up = glm::dvec3();
             up->x = (*it)["x"].get<double>();
             up->y = (*it)["y"].get<double>();
@@ -249,8 +249,8 @@ CameraPose NavigationState::cameraPose() const {
     return resultingPose;
 }
 
-ghoul::Dictionary NavigationState::dictionary() const {
-    ghoul::Dictionary cameraDict;
+Dictionary NavigationState::dictionary() const {
+    Dictionary cameraDict;
     cameraDict.setValue("Position", position);
     cameraDict.setValue("Anchor", anchor);
 

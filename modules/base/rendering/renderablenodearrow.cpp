@@ -286,7 +286,7 @@ RenderableNodeArrow::Shading::Shading()
     addProperty(specularIntensity);
 }
 
-RenderableNodeArrow::RenderableNodeArrow(const ghoul::Dictionary& dictionary)
+RenderableNodeArrow::RenderableNodeArrow(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _start(StartNodeInfo)
     , _end(EndNodeInfo)
@@ -366,7 +366,7 @@ RenderableNodeArrow::RenderableNodeArrow(const ghoul::Dictionary& dictionary)
 void RenderableNodeArrow::initializeGL() {
     _shaderProgram = BaseModule::ProgramObjectManager.request(
         "NodeDirectionLineProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "NodeDirectionLineProgram",
                 absPath("${MODULE_BASE}/shaders/arrow_vs.glsl"),
@@ -379,7 +379,7 @@ void RenderableNodeArrow::initializeGL() {
 void RenderableNodeArrow::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         "NodeDirectionLineProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +35,7 @@ namespace {
     constexpr int ClearByte = 0xF0;
 } // namespace
 
-namespace ghoul {
+namespace openspace {
 
 template <int BucketSize, bool InjectDebugMemory, bool NoDealloc>
 MemoryPool<BucketSize, InjectDebugMemory, NoDealloc>::MemoryPool(int nBuckets)
@@ -109,7 +108,7 @@ void* MemoryPool<BucketSize, InjectDebugMemory, NoDealloc>::do_allocate(size_t b
 {
     ZoneScoped;
 
-    ghoul_assert(
+    assert_msg(
         bytes <= BucketSize,
         "Cannot allocate larger memory blocks than available in a bucket"
     );
@@ -250,7 +249,7 @@ template <typename T, int BucketSizeItems, bool InjectDebugMemory>
 std::vector<void*>
 ReusableTypedMemoryPool<T, BucketSizeItems, InjectDebugMemory>::allocate(int n)
 {
-    ghoul_assert(n >= 0, "Need to allocate positive size");
+    assert_msg(n >= 0, "Need to allocate positive size");
     // Hackish implementation to support larger allocations than number of items in a
     // bucket; probably not likely to happen
     if (n > BucketSizeItems) {
@@ -318,4 +317,4 @@ void ReusableTypedMemoryPool<T, BucketSizeItems, InjectDebugMemory>::free(T* ptr
     }
 }
 
-} // namespace ghoul
+} // namespace openspace

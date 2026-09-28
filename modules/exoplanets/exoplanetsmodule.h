@@ -68,7 +68,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void internalInitialize(const ghoul::Dictionary& dict) override;
+    void internalInitialize(const Dictionary& dict) override;
 
     StringProperty _exoplanetsDataFolder;
     StringProperty _bvColorMapPath;

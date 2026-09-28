@@ -129,7 +129,7 @@ Documentation RenderablePrism::Documentation() {
     );
 }
 
-RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
+RenderablePrism::RenderablePrism(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _nShapeSegments(SegmentsInfo, 6, 3, 32)
     , _nLines(LinesInfo, 6, 0, 32)
@@ -181,7 +181,7 @@ void RenderablePrism::initializeGL() {
         absPath("${MODULE_BASE}/shaders/prism_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/prism_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 
     glCreateVertexArrays(1, &_vao);
     glEnableVertexArrayAttrib(_vao, 0);
@@ -260,7 +260,7 @@ void RenderablePrism::updateVertexData() {
     }
 
     // Indices for Base shape
-    ghoul_assert(
+    assert_msg(
         _nShapeSegments.value() <= std::numeric_limits<uint8_t>::max(),
         "Too many shape segments"
     );
@@ -340,7 +340,7 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
 void RenderablePrism::update(const UpdateData& data) {
     if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+        opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     if (_prismIsDirty) [[unlikely]] {

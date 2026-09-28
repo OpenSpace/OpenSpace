@@ -38,10 +38,10 @@ MultiresVolumeModule::MultiresVolumeModule()
     : OpenSpaceModule(Name)
 {}
 
-void MultiresVolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+void MultiresVolumeModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    assert_msg(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableMultiresVolume>("RenderableMultiresVolume");
 }

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,10 +34,10 @@
 #include <tuple>
 #include <utility>
 
-namespace ghoul { class Dictionary; }
+namespace openspace { class Dictionary; }
 struct lua_State;
 
-namespace ghoul::lua {
+namespace openspace::lua {
 
 struct LuaError final : public RuntimeError {
     explicit LuaError(std::string msg);
@@ -145,23 +144,22 @@ int luaError(lua_State* state, const std::string& message);
 
 
 /**
- * Loads a Lua script into the given #ghoul::Dictionary, extending the passed in
- * dictionary. This method will overwrite values with the same keys, but will not remove
- * any other keys from the dictionary. The script contained in the file must return a
- * single table, which is then parsed and included into the #ghoul::Dictionary. The single
- * restriction on the script is that it can only contain a pure array-style table (= only
- * indexed by numbers) or a pure dictionary-style table (= no numbering indices).
+ * Loads a Lua script into the given #Dictionary, extending the passed in dictionary. This
+ * method will overwrite values with the same keys, but will not remove any other keys
+ * from the dictionary. The script contained in the file must return a single table, which
+ * is then parsed and included into the #Dictionary. The single restriction on the script
+ * is that it can only contain a pure array-style table (= only indexed by numbers) or a
+ * pure dictionary-style table (= no numbering indices).
  *
  * \param filename The filename pointing to the script that is executed
- * \param dictionary The #ghoul::Dictionary into which the values from the script are
- *        added
+ * \param dictionary The #Dictionary into which the values from the script are added
  * \param state If this is set to a valid lua_State, this state is used instead of
  *        creating a new state. It is the callers responsibility to ensure that the passed
  *        state is valid if this parameter is not `nullptr`. After calling this
  *        method, the stack of the passed state will be empty after this function returns
  *
- * \throw FormattingException If the #ghoul::Dictionary contains mixed keys of both type
- *        `string` and type `number`
+ * \throw FormattingException If the #Dictionary contains mixed keys of both type `string`
+ *        and type `number`
  * \throw FormattingException If the script did not return anything else but a table
  * \throw LuaRuntimeException If there was an error initializing a new Lua state if it was
  *        necessary
@@ -173,21 +171,20 @@ void loadDictionaryFromFile(const std::filesystem::path& filename, Dictionary& d
     lua_State* state = nullptr);
 
 /**
- * Loads a Lua script and returns it as a #ghoul::Dictionary. The script contained in the
- * file must return a single table, which is then parsed and included into the
- * #ghoul::Dictionary. The single restriction on the script is that it can only contain a
- * pure array-style table (= only indexed by numbers) or a pure dictionary-style table
- * (= no numbering indices).
+ * Loads a Lua script and returns it as a #Dictionary. The script contained in the file
+ * must return a single table, which is then parsed and included into the #Dictionary. The
+ * single restriction on the script is that it can only contain a pure array-style table
+ * (= only indexed by numbers) or a pure dictionary-style table (= no numbering indices).
  *
  * \param filename The filename pointing to the script that is executed
  * \param state If this is set to a valid lua_State, this state is used instead of
  *        creating a new state. It is the callers responsibility to ensure that the passed
  *        state is valid if this parameter is not `nullptr`. After calling this method,
  *        the stack of the passed state will be empty after this function returns
- * \return The ghoul::Dictionary described by the Lua script
+ * \return The Dictionary described by the Lua script
  *
- * \throw FormattingException If the #ghoul::Dictionary contains mixed keys of both type
- *        `string` and type `number`
+ * \throw FormattingException If the #Dictionary contains mixed keys of both type `string`
+ *        and type `number`
  * \throw FormattingException If the script did not return anything else but a table
  * \throw LuaRuntimeException If there was an error initializing a new Lua state if it was
  *        necessary
@@ -199,23 +196,22 @@ Dictionary loadDictionaryFromFile(const std::filesystem::path& filename,
     lua_State* state = nullptr);
 
 /**
- * Loads a Lua configuration into the given #ghoul::Dictionary, extending the passed in
+ * Loads a Lua configuration into the given #Dictionary, extending the passed in
  * dictionary. This method will overwrite values with the same keys, but will not remove
  * any other keys from the dictionary. The script contained in the string must return a
- * single table, which is then parsed and included into the #ghoul::Dictionary. The single
+ * single table, which is then parsed and included into the #Dictionary. The single
  * restriction on the script is that it can only contain a pure array-style table (= only
  * indexed by numbers) or a pure dictionary-style table (= no numbering indices).
  *
  * \param script The source code of the script that is executed
- * \param dictionary The #ghoul::Dictionary into which the values from the script are
- *        added
+ * \param dictionary The #Dictionary into which the values from the script are added
  * \param state If this is set to a valid lua_State, this state is used instead of
  *        creating a new state. It is the callers responsibility to ensure that the passed
  *        state is valid. After calling this method, the stack of the passed state will be
  *        empty
  *
- * \throw ghoul::lua::FormattingException If the #ghoul::Dictionary contains mixed keys of
- *        both type `string` and type `number`
+ * \throw lua::FormattingException If the #Dictionary contains mixed keys of both type
+ *        `string` and type `number`
  * \throw FormattingException If the script did not return anything else but a table
  * \pre \p script must not be empty
  * \post \p state%'s stack is empty
@@ -224,15 +220,13 @@ void loadDictionaryFromString(const std::string& script, Dictionary& dictionary,
     lua_State* state = nullptr);
 
 /**
- * Loads a Lua state into the given #ghoul::Dictionary, extending the passed in
- * dictionary with numeric keys based on the stack indices. This method will overwrite
- * values with the same keys, but will not remove any other keys from the dictionary.
- * The script contained in the string may return mulitple values which will be included
- * into the #ghoul::Dictionary.
+ * Loads a Lua state into the given #Dictionary, extending the passed in dictionary with
+ * numeric keys based on the stack indices. This method will overwrite values with the
+ * same keys, but will not remove any other keys from the dictionary. The script contained
+ * in the string may return mulitple values which will be included into the #Dictionary.
  *
  * \param script The source code of the script that is executed
- * \param dictionary The #ghoul::Dictionary into which the values from the script are
- *        added
+ * \param dictionary The #Dictionary into which the values from the script are added
  * \param state If this is set to a valid lua_State, this state is used instead of
  *        creating a new state. It is the callers responsibility to ensure that the passed
  *        state is valid. After calling this method, the stack of the passed state will be
@@ -247,20 +241,20 @@ void loadArrayDictionaryFromString(const std::string& script, Dictionary& dictio
     lua_State* state = nullptr);
 
 /**
- * Loads a Lua script and returns it as a #ghoul::Dictionary. The script contained in the
- * string must return a single table, which is then parsed. The single restriction on the
- * script is that it can only contain a pure array-style table (= only indexed by numbers)
- * or a pure dictionary-style table (= no numbering indices).
+ * Loads a Lua script and returns it as a #Dictionary. The script contained in the string
+ * must return a single table, which is then parsed. The single restriction on the script
+ * is that it can only contain a pure array-style table (= only indexed by numbers) or a
+ * pure dictionary-style table (= no numbering indices).
  *
  * \param script The source code of the script that is executed
  * \param state If this is set to a valid lua_State, this state is used instead of
  *        creating a new state. It is the callers responsibility to ensure that the passed
  *        state is valid. After calling this method, the stack of the passed state will be
  *        empty
- * \return The ghoul::Dictionary described by the Lua script
+ * \return The Dictionary described by the Lua script
  *
- * \throw ghoul::lua::FormattingException If the #ghoul::Dictionary contains mixed keys of
- *        both type `string` and type `number`
+ * \throw lua::FormattingException If the #Dictionary contains mixed keys of both type
+ *        `string` and type `number`
  * \throw FormattingException If the script did not return anything else but a table
  * \pre \p script must not be empty
  * \post \p state%'s stack is empty
@@ -269,9 +263,9 @@ Dictionary loadDictionaryFromString(const std::string& script,
     lua_State* state = nullptr);
 
 /**
- * Loads a Lua state and returns it as a #ghoul::Dictionary, extending the passed in
- * dictionary with numeric keys based on the stack indices. The script contained in the
- * string may return mulitple values which will be included into the #ghoul::Dictionary.
+ * Loads a Lua state and returns it as a #Dictionary, extending the passed in dictionary
+ * with numeric keys based on the stack indices. The script contained in the string may
+ * return mulitple values which will be included into the #Dictionary.
  *
  * \param script The source code of the script that is executed
  * \param state If this is set to a valid lua_State, this state is used instead of
@@ -288,15 +282,14 @@ Dictionary loadArrayDictionaryFromString(const std::string& script,
     lua_State* state = nullptr);
 
 /**
- * Uses the Lua \p state to populate the provided ghoul::Dictionary%, extending the passed
+ * Uses the Lua \p state to populate the provided Dictionary%, extending the passed
  * \p dictionary. This method will overwrite values with the same keys, but will not
  * remove any other keys from the dictionary. The \p state must have a single table object
  * at the top of the stack. The table can only contain a pure array-style table (= only
  * indexed by numbers) or a pure dictionary-style table (= no numbering indices).
  *
  * \param state The Lua state that is used to populate the \p dictionary
- * \param dictionary The #ghoul::Dictionary into which the values from the stack are
- *        added
+ * \param dictionary The #Dictionary into which the values from the stack are added
  * \param relativeLocation The stack index of the item to extract. Defaults to -1 (topmost
  *        item)
  *
@@ -309,14 +302,14 @@ void luaDictionaryFromState(lua_State* state, Dictionary& dictionary,
     int relativeLocation = -1);
 
 /**
- * Uses the Lua \p state to populate the return ghoul::Dictionary%. The \p state must have
- * a single table object at the top of the stack. The table can only contain a pure
+ * Uses the Lua \p state to populate the return Dictionary. The \p state must have a
+ * single table object at the top of the stack. The table can only contain a pure
  * array-style table (= only indexed by numbers) or a pure dictionary-style table (= no
  * numbering indices).
  *
  * \param state The Lua state that is used to populate the \p dictionary
  * \param location The stack index of the item to extract. Defaults to -1 (topmost item)
- * \return The #ghoul::Dictionary into which the values from the stack are added
+ * \return The #Dictionary into which the values from the stack are added
  *
  * \throw LuaFormatException If the \p dictionary contains mixed keys of both type
  *        `string` and type `number`
@@ -326,14 +319,13 @@ void luaDictionaryFromState(lua_State* state, Dictionary& dictionary,
 Dictionary luaDictionaryFromState(lua_State* state, int location = -1);
 
 /**
- * Uses the Lua \p state to populate the provided ghoul::Dictionary%, extending the passed
+ * Uses the Lua \p state to populate the provided Dictionary%, extending the passed
  * \p dictionary with numeric keys based on the values indices on the stack. This method
  * will overwrite values with the same keys, but will not remove any other keys from the
  * dictionary. The \p state may have multiple items on the stack.
  *
  * \param state The Lua state that is used to populate the \p dictionary
- * \param dictionary The #ghoul::Dictionary into which the values from the stack are
- *        added
+ * \param dictionary The #Dictionary into which the values from the stack are added
  *
  * \pre \p state must not be `nullptr`
  * \post \p state%'s stack is unchanged
@@ -417,21 +409,21 @@ void runScript(lua_State* state, std::string_view script);
 /**
  * Checks the number of arguments on the Lua stack against the \p expected number of
  * parameters. If the numbers do not agree, an error is logged and a
- * ghoul::lua::LuaExecutionException is raised.
+ * lua::LuaExecutionException is raised.
  *
  * \param L The Lua stack from which the arguments are checked
  * \param expected The number of expected arguments
  * \param component The name of the component that is used for the error message
  * \return The number of arguments
  *
- * \throw ghoul::lua::LuaExecutionException if the number of arguments is wrong
+ * \throw lua::LuaExecutionException if the number of arguments is wrong
  */
 int checkArgumentsAndThrow(lua_State* L, int expected, const char* component = nullptr);
 
 /**
  * Checks if the number of arguments on the Lua stack is equal to \p expected1 or
  * \p expected2 parameters. If the numbers do not agree, an error is logged and a
- * ghoul::lua::LuaExecutionException is raised.
+ * lua::LuaExecutionException is raised.
  *
  * \param L The Lua stack from which the arguments are checked
  * \param expected1 The first allowed number of expected arguments
@@ -439,7 +431,7 @@ int checkArgumentsAndThrow(lua_State* L, int expected, const char* component = n
  * \param component The name of the component that is used for the error message
  * \return The number of arguments
  *
- * \throw ghoul::lua::LuaExecutionException if the number of arguments is wrong
+ * \throw lua::LuaExecutionException if the number of arguments is wrong
  */
 int checkArgumentsAndThrow(lua_State* L, int expected1, int expected2,
     const char* component = nullptr);
@@ -447,14 +439,14 @@ int checkArgumentsAndThrow(lua_State* L, int expected1, int expected2,
 /**
  * Checks if the number of arguments on the Lua stack is in the \p range of allowed
  * values. If the numbers do not agree, an error is logged and a
- * ghoul::lua::LuaExecutionException is raised.
+ * lua::LuaExecutionException is raised.
  *
  * \param L The Lua stack from which the arguments are checked
  * \param range The inclusive range that the number of arguments are tested against
  * \param component The name of the component that is used for the error message
  * \return The number of arguments
  *
- * \throw ghoul::lua::LuaExecutionException if the number of arguments is wrong
+ * \throw lua::LuaExecutionException if the number of arguments is wrong
  */
 int checkArgumentsAndThrow(lua_State* L, std::pair<int, int> range,
     const char* component = nullptr);
@@ -462,7 +454,7 @@ int checkArgumentsAndThrow(lua_State* L, std::pair<int, int> range,
 /**
  * Checks if the number of arguments on the Lua stack is in either equal to \p expected or
  * inside the \p range of allowed values. If the numbers do not agree, an error is logged
- * and a ghoul::lua::LuaExecutionException is raised.
+ * and a lua::LuaExecutionException is raised.
  *
  * \param L The Lua stack from which the arguments are checked
  * \param expected The expected value
@@ -470,7 +462,7 @@ int checkArgumentsAndThrow(lua_State* L, std::pair<int, int> range,
  * \param component The name of the component that is used for the error message
  * \return The number of arguments
  *
- * \throw ghoul::lua::LuaExecutionException if the number of arguments is wrong
+ * \throw lua::LuaExecutionException if the number of arguments is wrong
  */
 int checkArgumentsAndThrow(lua_State* L, int expected, std::pair<int, int> range,
     const char* component = nullptr);
@@ -616,7 +608,7 @@ namespace internal {
     T valueInner(lua_State* L, int location = 1);
 } // namespace internal
 
-} // namespace ghoul::lua
+} // namespace openspace::lua
 
 #include "lua_helper.inl"
 

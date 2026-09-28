@@ -144,14 +144,14 @@ bool BrickManager::initialize() {
     dims.push_back(_atlasDim);
     dims.push_back(_atlasDim);
     dims.push_back(_atlasDim);
-    _textureAtlas = new ghoul::opengl::Texture(
-        ghoul::opengl::Texture::FormatInit {
+    _textureAtlas = new opengl::Texture(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(_atlasDim, _atlasDim, _atlasDim),
             .type = GL_TEXTURE_3D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
 
     _atlasInitialized = true;
@@ -380,7 +380,7 @@ void BrickManager::pboToAtlas(BufferIndex pboIndex) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-ghoul::opengl::Texture* BrickManager::textureAtlas() {
+opengl::Texture* BrickManager::textureAtlas() {
     return _textureAtlas;
 }
 

@@ -126,8 +126,7 @@ namespace {
         std::optional<glm::vec2> size;
 
         // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderablegrid_codegen.cpp"
@@ -141,7 +140,7 @@ Documentation RenderableGrid::Documentation() {
     );
 }
 
-RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
+RenderableGrid::RenderableGrid(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _highlightColor(HighlightColorInfo, glm::vec3(0.8f), glm::vec3(0.f), glm::vec3(1.f))
@@ -202,7 +201,7 @@ void RenderableGrid::initialize() {
 void RenderableGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
         "GridProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "GridProgram",
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
@@ -231,7 +230,7 @@ void RenderableGrid::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

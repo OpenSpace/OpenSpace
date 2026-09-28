@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +38,7 @@
 #endif // WIN32
 
 namespace {
-    using namespace ghoul;
+    using namespace openspace;
 
 #ifdef WIN32
     /**
@@ -94,8 +93,8 @@ namespace {
     VARIANT* query(IWbemServices* services, const std::string& wmiClass,
                    const std::string& attribute)
     {
-        ghoul_assert(!wmiClass.empty(), "wmiClass must not be empty");
-        ghoul_assert(!attribute.empty(), "Attribute must not be empty");
+        assert_msg(!wmiClass.empty(), "wmiClass must not be empty");
+        assert_msg(!attribute.empty(), "Attribute must not be empty");
 
         VARIANT* result = nullptr;
         IEnumWbemClassObject* enumerator = nullptr;
@@ -147,7 +146,7 @@ namespace {
 #endif // WIN32
 } // namespace
 
-namespace ghoul::systemcapabilities {
+namespace openspace::systemcapabilities {
 
 #ifdef WIN32
 IWbemLocator* SystemCapabilitiesComponent::_iwbemLocator = nullptr;
@@ -181,7 +180,7 @@ SystemCapabilitiesComponent::~SystemCapabilitiesComponent() {
 void SystemCapabilitiesComponent::initializeWMI() {
     constexpr std::string_view _loggerCat = "SystemCapabilitiesComponent.WMI";
 
-    ghoul_assert(!isWMIInitialized(), "WMI must not have been initialized");
+    assert_msg(!isWMIInitialized(), "WMI must not have been initialized");
 
     LDEBUG("Begin initializing WMI");
     // This code is based on
@@ -256,7 +255,7 @@ void SystemCapabilitiesComponent::initializeWMI() {
 }
 
 void SystemCapabilitiesComponent::deinitializeWMI() {
-    ghoul_assert(isWMIInitialized(), "WMI must have been initialized");
+    assert_msg(isWMIInitialized(), "WMI must have been initialized");
 
     LDEBUGC("SystemCapabilitiesComponent.WMI", "Deinitializing WMI");
     if (_iwbemLocator) {
@@ -312,4 +311,4 @@ void SystemCapabilitiesComponent::queryWMI(const std::string& wmiClass,
 
 #endif // WIN32
 
-} // namespace ghoul::systemcapabilities
+} // namespace openspace::systemcapabilities

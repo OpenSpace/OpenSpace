@@ -41,7 +41,7 @@ namespace openspace {
  */
 class RenderableInterpolatedPoints : public RenderablePointCloud {
 public:
-    explicit RenderableInterpolatedPoints(const ghoul::Dictionary& dictionary);
+    explicit RenderableInterpolatedPoints(const Dictionary& dictionary);
     ~RenderableInterpolatedPoints() override = default;
 
     static openspace::Documentation Documentation();

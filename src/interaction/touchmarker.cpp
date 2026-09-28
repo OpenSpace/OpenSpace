@@ -94,7 +94,7 @@ void TouchMarker::initializeGL() {
         absPath("${SHADERS}/core/touchmarker_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void TouchMarker::deinitializeGL() {

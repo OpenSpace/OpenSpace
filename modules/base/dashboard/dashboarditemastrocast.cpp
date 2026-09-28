@@ -52,7 +52,7 @@ Documentation DashboardItemAstrocast::Documentation() {
     );
 }
 
-DashboardItemAstrocast::DashboardItemAstrocast(const ghoul::Dictionary& dictionary)
+DashboardItemAstrocast::DashboardItemAstrocast(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
 {}
 

@@ -125,7 +125,7 @@ json GetPropertyTopic::propertyFromKey(const std::string& key) {
         return response;
     }
 
-    throw ghoul::RuntimeError(std::format("Property '{}' not found", key));
+    throw RuntimeError(std::format("Property '{}' not found", key));
 }
 
 } // namespace openspace

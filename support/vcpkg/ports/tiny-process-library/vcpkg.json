@@ -3,7 +3,7 @@
   "name": "tiny-process-library",
   "version": "2.0.4",
   "port-version": 100,
-  "description": "A small platform independent library to create and stop new processes in C++. This port tracks the OpenSpace fork, which is required by Ghoul.",
+  "description": "A small platform independent library to create and stop new processes in C++.",
   "homepage": "https://github.com/OpenSpace/tiny-process-library",
   "license": "MIT",
   "supports": "!uwp",

@@ -31,7 +31,7 @@
 #include <openspace/scripting/lualibrary.h>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     enum class [[codegen::enum]] Enum {
@@ -148,7 +148,7 @@ namespace {
 
 
 TEST_CASE("Execution/LuaWrapper/Arguments-Enums:  void", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncVoid;
+    LuaLibrary::Function func = codegen::lua::FuncVoid;
     CHECK(func.name == "funcVoid");
     CHECK(func.arguments.empty());
     CHECK(func.returnType.empty());
@@ -167,7 +167,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncSingleArgument;
+    LuaLibrary::Function func = codegen::lua::FuncSingleArgument;
     CHECK(func.name == "funcSingleArgument");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "e");
@@ -178,7 +178,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, "B");
+    lua::push(state, "B");
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -189,7 +189,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncMultipleArguments;
+    LuaLibrary::Function func = codegen::lua::FuncMultipleArguments;
     CHECK(func.name == "funcMultipleArguments");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "e");
@@ -202,7 +202,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, "B", "C");
+    lua::push(state, "B", "C");
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -213,7 +213,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncOptionalMultiple;
+    LuaLibrary::Function func = codegen::lua::FuncOptionalMultiple;
     CHECK(func.name == "funcOptionalMultiple");
     REQUIRE(func.arguments.size() == 3);
     CHECK(func.arguments[0].name == "hasValue");
@@ -228,11 +228,11 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, true, "B", "C");
+    lua::push(state, true, "B", "C");
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(state, false, "B");
+    lua::push(state, false, "B");
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -243,7 +243,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncVectorArguments;
+    LuaLibrary::Function func = codegen::lua::FuncVectorArguments;
     CHECK(func.name == "funcVectorArguments");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "n");
@@ -258,12 +258,12 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, 0, es);
+    lua::push(state, 0, es);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
     es.emplace_back("B");
-    ghoul::lua::push(state, 1, es);
+    lua::push(state, 1, es);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
@@ -271,7 +271,7 @@ TEST_CASE(
     es.emplace_back("A");
     es.emplace_back("B");
     es.emplace_back("C");
-    ghoul::lua::push(state, 3, es);
+    lua::push(state, 3, es);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -282,7 +282,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncOptionalVectorArguments;
+    LuaLibrary::Function func = codegen::lua::FuncOptionalVectorArguments;
     CHECK(func.name == "funcOptionalVectorArguments");
     REQUIRE(func.arguments.size() == 3);
     CHECK(func.arguments[0].name == "hasValue");
@@ -299,12 +299,12 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, true, 0, es);
+    lua::push(state, true, 0, es);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
     es.emplace_back("B");
-    ghoul::lua::push(state, true, 1, es);
+    lua::push(state, true, 1, es);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
@@ -312,7 +312,7 @@ TEST_CASE(
     es.emplace_back("A");
     es.emplace_back("B");
     es.emplace_back("C");
-    ghoul::lua::push(state, true, 3, es);
+    lua::push(state, true, 3, es);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -325,7 +325,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncMapArguments;
+    LuaLibrary::Function func = codegen::lua::FuncMapArguments;
     CHECK(func.name == "funcMapArguments");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "es");
@@ -336,12 +336,12 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::Dictionary es;
+    Dictionary es;
     es.setValue("first", "A"s);
     es.setValue("second", "B"s);
     es.setValue("third", "C"s);
 
-    ghoul::lua::push(state, es);
+    lua::push(state, es);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -352,7 +352,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncReturnValue;
+    LuaLibrary::Function func = codegen::lua::FuncReturnValue;
     CHECK(func.name == "funcReturnValue");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "v");
@@ -363,19 +363,19 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, 1);
+    lua::push(state, 1);
     func.function(state);
     CHECK(lua_gettop(state) == 1);
-    CHECK(ghoul::lua::value<std::string>(state) == "A");
+    CHECK(lua::value<std::string>(state) == "A");
 
-    ghoul::lua::push(state, 2);
+    lua::push(state, 2);
     func.function(state);
     CHECK(lua_gettop(state) == 1);
-    CHECK(ghoul::lua::value<std::string>(state) == "B");
+    CHECK(lua::value<std::string>(state) == "B");
 
-    ghoul::lua::push(state, 3);
+    lua::push(state, 3);
     func.function(state);
     CHECK(lua_gettop(state) == 1);
-    CHECK(ghoul::lua::value<std::string>(state) == "C");
+    CHECK(lua::value<std::string>(state) == "C");
     lua_close(state);
 }

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -85,7 +84,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul::logging {
+namespace openspace::logging {
 
 BufferLog::MemoryExhaustionException::MemoryExhaustionException(int sizeTotal,
                                                                 int sizeRequested)
@@ -101,8 +100,8 @@ BufferLog::BufferLog(void* address, size_t bufferSize)
     : _buffer(address)
     , _totalSize(bufferSize)
 {
-    ghoul_assert(address, "Address must not be nullptr");
-    ghoul_assert(bufferSize > 0, "Total size must be positive");
+    assert_msg(address, "Address must not be nullptr");
+    assert_msg(bufferSize > 0, "Total size must be positive");
 
     initializeBuffer();
     Header& h = header(_buffer);
@@ -114,8 +113,8 @@ BufferLog::BufferLog(void* address, size_t bufferSize, MemoryExhaustedCallback c
     , _totalSize(bufferSize)
     , _callback(std::move(callback))
 {
-    ghoul_assert(address, "Address must not be nullptr");
-    ghoul_assert(bufferSize > 0, "Total size must be positive");
+    assert_msg(address, "Address must not be nullptr");
+    assert_msg(bufferSize > 0, "Total size must be positive");
 
     initializeBuffer();
     Header& h = header(_buffer);
@@ -151,7 +150,7 @@ void BufferLog::resetBuffer() {
 }
 
 void BufferLog::log(unsigned long long timestamp, const std::string& message) {
-    ghoul_assert(!message.empty(), "Message must not be empty");
+    assert_msg(!message.empty(), "Message must not be empty");
 
     Header& h = header(_buffer);
     // This is the full size of the incoming message. +1 for the terminating \0 character
@@ -221,8 +220,8 @@ size_t BufferLog::usedSize() const {
 }
 
 void BufferLog::setBuffer(void* buffer, size_t bufferSize) {
-    ghoul_assert(buffer, "Buffer must not be nullptr");
-    ghoul_assert(bufferSize > 0, "Total size must be positive");
+    assert_msg(buffer, "Buffer must not be nullptr");
+    assert_msg(bufferSize > 0, "Total size must be positive");
 
     Header& h = header(_buffer);
     // If test_and_set returns 'true', someone else is in the critical section unless we
@@ -258,4 +257,4 @@ void BufferLog::writeToDisk(const std::string& filename) {
     }
 }
 
-} // namespace ghoul::logging
+} // namespace openspace::logging

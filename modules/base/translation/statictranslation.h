@@ -33,7 +33,7 @@ namespace openspace {
 
 class StaticTranslation : public Translation {
 public:
-    explicit StaticTranslation(const ghoul::Dictionary& dictionary);
+    explicit StaticTranslation(const Dictionary& dictionary);
 
     glm::dvec3 position(const UpdateData& data) const override;
     static openspace::Documentation Documentation();

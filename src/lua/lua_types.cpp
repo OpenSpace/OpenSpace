@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +24,10 @@
 
 #include <openspace/lua/lua_types.h>
 
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <stdexcept>
 
-namespace ghoul::lua {
+namespace openspace::lua {
 
 LuaTypes fromLuaType(int type) {
     switch (type) {
@@ -50,4 +49,4 @@ bool typeMatch(LuaTypes lhs, LuaTypes rhs) noexcept {
     return (lhs & rhs) != 0;
 }
 
-} // namespace ghoul::lua
+} // namespace openspace::lua

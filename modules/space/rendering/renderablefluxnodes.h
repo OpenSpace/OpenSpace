@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
@@ -45,7 +45,7 @@ namespace openspace {
 
 class RenderableFluxNodes : public Renderable {
 public:
-    explicit RenderableFluxNodes(const ghoul::Dictionary& dictionary);
+    explicit RenderableFluxNodes(const Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -132,7 +132,7 @@ private:
     /// OpenGL Vertex Buffer Object containing the positions to filter the nodes
     GLuint _vboFilter = 0;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+    std::unique_ptr<opengl::ProgramObject> _shaderProgram;
 
     /// Transfer function used to color lines when _colorMethod is set to by_flux_value
     std::unique_ptr<TransferFunction> _transferFunction;

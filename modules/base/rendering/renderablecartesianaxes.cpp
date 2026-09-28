@@ -92,7 +92,7 @@ Documentation RenderableCartesianAxes::Documentation() {
     );
 }
 
-RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictionary)
+RenderableCartesianAxes::RenderableCartesianAxes(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _program(nullptr)
     , _xColor(XColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -119,7 +119,7 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
 void RenderableCartesianAxes::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
         "CartesianAxesProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "CartesianAxesProgram",
                 absPath("${MODULE_BASE}/shaders/axes_vs.glsl"),
@@ -163,7 +163,7 @@ void RenderableCartesianAxes::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "CartesianAxesProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +36,6 @@ struct Data {
 
 // Just a list of random strings to test
 constexpr Data TestStrings[] = {
-    { "Ghoul",  2275704949 }, { "String", 2568140703 }, { "TestString", 1470758616 },
     { "Hashing" , 107888401 }, { "HashingString", 2912793972 }, { "C++", 1464987298 },
     { "C66Pkzdzpi", 2356802799 }, { "xEkpgXmTJu", 1718269938 }, { "51ljrJvP5K", 3387307192 },
     { "7IAhEwMYax", 2058753453 }, { "ijU5EcCeZE", 3773846330 }, { "qakUu5AySX", 4092950936 },
@@ -207,14 +205,16 @@ constexpr Data TestStrings[] = {
     { "WxeFIFoXPL", 2000045289 }, { "hr2LmF9FjL", 3241800974 }, { "AMv6Kg4gaJ", 2316368142 },
     { "T33FH0acrS", 203057196 },  { "v94eDwXkeq", 3905846404 }
 };
+
 } // namespace
 
+using namespace openspace;
 
 TEST_CASE("HashFixedEquality", "[crc32]") {
     for (const Data& d : TestStrings) {
-        const unsigned int stringHash = ghoul::hashCRC32(std::string(d.string));
-        const unsigned int charHash = ghoul::hashCRC32(d.string);
-        const unsigned int bufferHash = ghoul::hashCRC32(
+        const unsigned int stringHash = hashCRC32(std::string(d.string));
+        const unsigned int charHash = hashCRC32(d.string);
+        const unsigned int bufferHash = hashCRC32(
             d.string,
             static_cast<unsigned int>(strlen(d.string))
         );
@@ -226,12 +226,12 @@ TEST_CASE("HashFixedEquality", "[crc32]") {
 
 TEST_CASE("CRC32: StaticTest", "[crc32]") {
     // This stops compiling when hashCRC32 stops being constexpr
-    static_assert(ghoul::hashCRC32("spCfJJa98L") == 1031192370, "spCfJJa98L");
-    static_assert(ghoul::hashCRC32("erNxvzgXcX") == 1755727136, "erNxvzgXcX");
-    static_assert(ghoul::hashCRC32("fvGbUrm730") == 1714459546, "fvGbUrm730");
-    static_assert(ghoul::hashCRC32("WxeFIFoXPL") == 2000045289, "WxeFIFoXPL");
-    static_assert(ghoul::hashCRC32("hr2LmF9FjL") == 3241800974, "hr2LmF9FjL");
-    static_assert(ghoul::hashCRC32("AMv6Kg4gaJ") == 2316368142, "AMv6Kg4gaJ");
+    static_assert(hashCRC32("spCfJJa98L") == 1031192370, "spCfJJa98L");
+    static_assert(hashCRC32("erNxvzgXcX") == 1755727136, "erNxvzgXcX");
+    static_assert(hashCRC32("fvGbUrm730") == 1714459546, "fvGbUrm730");
+    static_assert(hashCRC32("WxeFIFoXPL") == 2000045289, "WxeFIFoXPL");
+    static_assert(hashCRC32("hr2LmF9FjL") == 3241800974, "hr2LmF9FjL");
+    static_assert(hashCRC32("AMv6Kg4gaJ") == 2316368142, "AMv6Kg4gaJ");
 }
 
 TEST_CASE("CRC32: HashRandomEquality", "[crc32]") {
@@ -258,9 +258,9 @@ TEST_CASE("CRC32: HashRandomEquality", "[crc32]") {
             }
 
             std::string string(data.begin(), data.end());
-            const unsigned int stringHash = ghoul::hashCRC32(string);
-            const unsigned int charHash = ghoul::hashCRC32(string.data());
-            const unsigned int bufferHash = ghoul::hashCRC32(data.data(), j);
+            const unsigned int stringHash = hashCRC32(string);
+            const unsigned int charHash = hashCRC32(string.data());
+            const unsigned int bufferHash = hashCRC32(data.data(), j);
             CHECK(stringHash == charHash);
             CHECK(stringHash == bufferHash);
         }

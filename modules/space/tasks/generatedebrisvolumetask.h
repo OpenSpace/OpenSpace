@@ -39,7 +39,7 @@ namespace openspace {
 
 class GenerateDebrisVolumeTask : public Task {
 public:
-    GenerateDebrisVolumeTask(const ghoul::Dictionary& dictionary);
+    GenerateDebrisVolumeTask(const Dictionary& dictionary);
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static Documentation documentation();

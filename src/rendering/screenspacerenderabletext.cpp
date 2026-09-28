@@ -69,11 +69,11 @@ Documentation ScreenSpaceRenderableText::Documentation() {
     );
 }
 
-ScreenSpaceRenderableText::ScreenSpaceRenderableText(const ghoul::Dictionary& dictionary)
+ScreenSpaceRenderableText::ScreenSpaceRenderableText(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _fontName(FontNameInfo, "Mono")
     , _fontSize(FontSizeInfo, 15.f, 6.f, 144.f, 1.f)
-    , _fontRenderer(ghoul::fontrendering::FontRenderer::createDefault())
+    , _fontRenderer(fontrendering::FontRenderer::createDefault())
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -95,13 +95,13 @@ ScreenSpaceRenderableText::ScreenSpaceRenderableText(const ghoul::Dictionary& di
 void ScreenSpaceRenderableText::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
 
-    _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
+    _framebuffer = std::make_unique<opengl::FramebufferObject>();
 }
 
 void ScreenSpaceRenderableText::deinitializeGL() {
     _framebuffer->activate();
     _framebuffer->detachAll();
-    ghoul::opengl::FramebufferObject::deactivate();
+    opengl::FramebufferObject::deactivate();
 
     _texture = nullptr;
 
@@ -127,14 +127,14 @@ void ScreenSpaceRenderableText::render(const RenderData& renderData) {
         static_cast<GLint>(size.y)
     );
 
-    const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+    const GLint defaultFBO = opengl::FramebufferObject::getActiveObject();
     _framebuffer->activate();
 
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glm::vec2 pos = glm::vec2(0.f, size.y / 4.f);
     _fontRenderer->render(*_font, pos, _buffer);
-    ghoul::opengl::FramebufferObject::deactivate();
+    opengl::FramebufferObject::deactivate();
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -164,20 +164,20 @@ void ScreenSpaceRenderableText::updateFramebuffer() {
 
     _framebuffer->activate();
     // Create a texture that has 2 times the size to create a buffer
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _texture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(bbox.x, bbox.y, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
-    ghoul::opengl::FramebufferObject::deactivate();
+    opengl::FramebufferObject::deactivate();
 }
 
-void ScreenSpaceRenderableText::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceRenderableText::bindTexture(opengl::TextureUnit& unit) {
     unit.bind(*_texture);
 }
 

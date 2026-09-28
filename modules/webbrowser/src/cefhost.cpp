@@ -101,7 +101,7 @@ CefHost::CefHost(const std::string& helperLocation, bool enableRemoteDebugging) 
     const CefMainArgs args;
     const bool success = CefInitialize(args, settings, app.get(), nullptr);
     if (!success) {
-        throw ghoul::RuntimeError("Failed initializing CEF Browser");
+        throw RuntimeError("Failed initializing CEF Browser");
     }
     LDEBUG("Initializing CEF... done");
 }

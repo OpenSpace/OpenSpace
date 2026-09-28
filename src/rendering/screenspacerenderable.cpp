@@ -32,7 +32,7 @@
 #include <openspace/misc/assert.h>
 #include <openspace/misc/dictionary.h>
 #include <openspace/misc/profiling.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/programobject.h>
 #include <openspace/opengl/texture.h>
 #include <openspace/opengl/textureunit.h>
@@ -310,7 +310,7 @@ Documentation ScreenSpaceRenderable::Documentation() {
 }
 
 std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -345,7 +345,7 @@ std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
     return name;
 }
 
-ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
+ScreenSpaceRenderable::ScreenSpaceRenderable(const Dictionary& dictionary)
     : PropertyOwner({ "" })
     , _enabled(EnabledInfo, true)
     , _renderableType(TypeInfo)
@@ -506,7 +506,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
             }
         }
         else {
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
         }
     }
 
@@ -570,9 +570,9 @@ float ScreenSpaceRenderable::scale() const {
     return _placement.scale;
 }
 
-void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
+void ScreenSpaceRenderable::createShaders(Dictionary dict) {
     auto res = global::windowDelegate->currentDrawBufferResolution();
-    ghoul::Dictionary rendererData;
+    Dictionary rendererData;
     rendererData.setValue(
         "fragmentRendererPath",
         std::string("${SHADERS}/framebuffer/renderframebuffer_fs.glsl")
@@ -590,14 +590,14 @@ void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
         "fragmentPath",
         std::string("${SHADERS}/core/screenspace_fs.glsl")
     );
-    _shader = ghoul::opengl::ProgramObject::Build(
+    _shader = opengl::ProgramObject::Build(
         "ScreenSpaceProgram",
         absPath("${SHADERS}/core/screenspace_vs.glsl"),
         absPath("${SHADERS}/render_fs.glsl"),
         dict
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
@@ -745,7 +745,7 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
     );
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     bindTexture(unit);
     _shader->setUniform(_uniformCache.tex, unit);
 

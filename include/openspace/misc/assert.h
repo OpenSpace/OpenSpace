@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +28,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace ghoul {
+namespace openspace {
 
 /**
  * Exception that gets thrown if an assertion is triggered and the user selects the
@@ -48,7 +47,7 @@ struct MissingCaseException final : public std::logic_error {
 };
 
 /**
- * Ghoul internal assert command. Is called by the #ghoul_assert macro.
+ * Internal assert command. Is called by the #assert_msg macro.
  *
  * \param expression The expression that caused the assertion
  * \param message The message that was provided for the assertion
@@ -59,9 +58,9 @@ struct MissingCaseException final : public std::logic_error {
 void internalAssert(std::string expression, std::string message, std::string file,
     std::string function, int line);
 
-} // namespace ghoul
+} // namespace openspace
 
-#if !(defined(NDEBUG) || defined(DEBUG)) || defined(GHOUL_ASSERT)
+#if !(defined(NDEBUG) || defined(DEBUG)) || defined(OPENSPACE_ASSERT)
 /**
 * @defgroup ASSERT_MACRO_GROUP Assertion Macros
 *
@@ -69,9 +68,9 @@ void internalAssert(std::string expression, std::string message, std::string fil
 */
 
 #if defined(__GNUC__) || defined(__clang__)
-#  define GHL_ASSERT_FUNCTION __PRETTY_FUNCTION__
+#  define OS_ASSERT_FUNCTION __PRETTY_FUNCTION__
 #else // ^^^^ GNUC || __clang__ // !(GNUC || __clang__) vvvv
-#  define GHL_ASSERT_FUNCTION __FUNCTION__
+#  define OS_ASSERT_FUNCTION __FUNCTION__
 #endif // defined(__GNUC__) || defined(__clang__)
 
 /**
@@ -81,37 +80,38 @@ void internalAssert(std::string expression, std::string message, std::string fil
  * have any sideeffects.
  */
 
-#ifdef GHL_THROW_ON_ASSERT
-#define ghoul_assert(__condition__, __message__)                                         \
+#ifdef OPENSPACE_THROW_ON_ASSERT
+#define assert_msg(__condition__, __message__)                                           \
     do {                                                                                 \
         if (!(__condition__)) {                                                          \
-            throw ghoul::AssertionException(                                             \
+            throw AssertionException(                                                    \
                 #__condition__,                                                          \
                 __message__,                                                             \
                 __FILE__,                                                                \
-                GHL_ASSERT_FUNCTION,                                                     \
+                OS_ASSERT_FUNCTION,                                                      \
                 __LINE__                                                                 \
             );                                                                           \
         }                                                                                \
     } while (false)
-#else // ^^^^ GHL_THROW_ON_ASSERT // !GHL_THROW_ON_ASSERT vvvv
-#define ghoul_assert(__condition__, __message__)                                         \
+#else // ^^^^ OPENSPACE_THROW_ON_ASSERT // !OPENSPACE_THROW_ON_ASSERT vvvv
+#define assert_msg(__condition__, __message__)                                           \
     do {                                                                                 \
         if (!(__condition__)) {                                                          \
-            ghoul::internalAssert(                                                       \
+            openspace::internalAssert(                                                   \
                 #__condition__,                                                          \
                 __message__,                                                             \
                 __FILE__,                                                                \
-                GHL_ASSERT_FUNCTION,                                                     \
+                OS_ASSERT_FUNCTION,                                                      \
                 __LINE__                                                                 \
             );                                                                           \
         }                                                                                \
     } while (false)
 
-#endif // GHL_THROW_ON_ASSERT
-#else // ^^^^ NDEBUG || DEBUG || GHOUL_ASSERT // !(NDEBUG || DEBUG || GHOUL_ASSERT) vvvv
-#define ghoul_assert(__condition__, __message__) {}
-#endif // NDEBUG || DEBUG || GHOUL_ASSERT
+#endif // OPENSPACE_THROW_ON_ASSERT
+#else // ^^^^ NDEBUG || DEBUG || OPENSPACE_ASSERT
+      // !(NDEBUG || DEBUG || OPENSPACE_ASSERT) vvvv
+#define assert_msg(__condition__, __message__) {}
+#endif // NDEBUG || DEBUG || OPENSPACE_ASSERT
 
 /** @}  */
 

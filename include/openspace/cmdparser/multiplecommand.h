@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +27,7 @@
 
 #include <openspace/cmdparser/commandlinecommand.h>
 
-namespace ghoul::cmdparser {
+namespace openspace::cmdparser {
 
 template <typename... T>
 class MultipleCommand : public CommandlineCommand {};
@@ -317,7 +316,7 @@ protected:
     int& _ptr;
 };
 
-} // namespace ghoul::cmdparser
+} // namespace openspace::cmdparser
 
 #include "multiplecommand.inl"
 

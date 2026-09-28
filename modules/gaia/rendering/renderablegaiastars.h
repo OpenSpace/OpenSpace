@@ -30,7 +30,7 @@
 #include <modules/gaia/rendering/octreemanager.h>
 #include <openspace/glm.h>
 #include <openspace/opengl/bufferbinding.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
@@ -41,13 +41,13 @@
 #include <filesystem>
 #include <memory>
 
-namespace ghoul::filesystem { class File; }
-
 namespace openspace {
+
+namespace filesystem { class File; }
 
 class RenderableGaiaStars : public Renderable {
 public:
-    explicit RenderableGaiaStars(const ghoul::Dictionary& dictionary);
+    explicit RenderableGaiaStars(const Dictionary& dictionary);
     ~RenderableGaiaStars() override = default;
 
     void initializeGL() override;
@@ -103,11 +103,11 @@ private:
     int readBinaryOctreeStructureFile(const std::filesystem::path& folderPath);
 
     StringProperty _filePath;
-    std::unique_ptr<ghoul::filesystem::File> _dataFile;
+    std::unique_ptr<filesystem::File> _dataFile;
 
     StringProperty _colorTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
-    std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
+    std::unique_ptr<opengl::Texture> _colorTexture;
+    std::unique_ptr<filesystem::File> _colorTextureFile;
 
     FloatProperty _luminosityMultiplier;
     FloatProperty _cutOffThreshold;
@@ -136,23 +136,23 @@ private:
     FloatProperty _maxGpuMemoryPercent;
     FloatProperty _maxCpuMemoryPercent;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<opengl::ProgramObject> _program;
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
         cutOffThreshold, time, colorTexture, nChunksToRender, valuesPerStar,
         maxStarsPerNode, posXThreshold, posYThreshold, posZThreshold, gMagThreshold,
         bpRpThreshold, distThreshold, opacity)
         _uniformCache;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
+    std::unique_ptr<opengl::ProgramObject> _programTM;
     UniformCache(renderedTexture, screenSize, filterSize, sigma, pixelWeightThreshold,
         projection) _uniformCacheTM;
-    std::unique_ptr<ghoul::opengl::Texture> _fboTexture;
+    std::unique_ptr<opengl::Texture> _fboTexture;
 
     OctreeManager _octreeManager;
-    std::unique_ptr<ghoul::opengl::BufferBinding<
-        ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboIdxBinding;
-    std::unique_ptr<ghoul::opengl::BufferBinding<
-        ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboDataBinding;
+    std::unique_ptr<opengl::BufferBinding<
+        opengl::bufferbinding::Buffer::ShaderStorage>> _ssboIdxBinding;
+    std::unique_ptr<opengl::BufferBinding<
+        opengl::bufferbinding::Buffer::ShaderStorage>> _ssboDataBinding;
 
     bool _dataIsDirty = true;
     bool _buffersAreDirty = true;

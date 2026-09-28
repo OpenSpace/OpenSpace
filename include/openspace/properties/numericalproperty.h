@@ -53,8 +53,7 @@ public:
 
     void setLuaInterpolationTarget(lua_State* state) override;
 
-    void interpolateValue(float t,
-        ghoul::EasingFunc<float> easingFunc = nullptr) override;
+    void interpolateValue(float t, EasingFunc<float> easingFunc = nullptr) override;
 
 protected:
     static nlohmann::json MetaDataSchema();

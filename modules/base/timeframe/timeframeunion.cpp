@@ -52,8 +52,7 @@ namespace {
     // simpler TimeFrames themselves.
     struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {
         // [[codegen::verbatim(TimeFramesInfo.description)]]
-        std::vector<ghoul::Dictionary> timeFrames
-            [[codegen::reference("core_timeframe")]];
+        std::vector<Dictionary> timeFrames [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "timeframeunion_codegen.cpp"
@@ -67,11 +66,11 @@ Documentation TimeFrameUnion::Documentation() {
     );
 }
 
-TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {
+TimeFrameUnion::TimeFrameUnion(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     for (size_t i = 0; i < p.timeFrames.size(); i++) {
-        const ghoul::Dictionary& frame = p.timeFrames[i];
+        const Dictionary& frame = p.timeFrames[i];
         _timeFrames.push_back(TimeFrame::createFromDictionary(frame));
         TimeFrame& subFrame = *_timeFrames.back();
         subFrame.setIdentifier(std::format("{}", i));
@@ -84,7 +83,7 @@ TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {
 }
 
 void TimeFrameUnion::update(const Time& time) {
-    for (const ghoul::mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
+    for (const mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
         tf->update(time);
     }
 

@@ -60,7 +60,7 @@ TEST_CASE("PropertyValue: Basic", "[propertyvalue]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.propertyValue('base.p1')",
-            .callback = [&p1](ghoul::Dictionary d) {
+            .callback = [&p1](Dictionary d) {
                 REQUIRE(d.size() == 1);
                 REQUIRE(d.hasKey("1"));
                 REQUIRE(d.hasValue<double>("1"));
@@ -86,7 +86,7 @@ TEST_CASE("PropertyValue: Empty", "[propertyvalue]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.propertyValue('other-name')",
-            .callback = [](ghoul::Dictionary d) {
+            .callback = [](Dictionary d) {
                 CHECK(d.size() == 0);
             }
         });
@@ -100,7 +100,7 @@ TEST_CASE("PropertyValue: Empty", "[propertyvalue]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.propertyValue('base.other-name')",
-            .callback = [](ghoul::Dictionary d) {
+            .callback = [](Dictionary d) {
                 CHECK(d.size() == 0);
             }
         });

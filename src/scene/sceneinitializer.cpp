@@ -74,7 +74,7 @@ void SceneInitializer::initializeNode(SceneGraphNode* node) {
             try {
                 node->initialize();
             }
-            catch (const ghoul::RuntimeError& e) {
+            catch (const RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
             const std::unique_lock lock(_mutex);

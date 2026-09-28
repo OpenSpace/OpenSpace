@@ -31,10 +31,9 @@
 #include <utility>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct ImageData;
 class RenderableSkyTarget;
 class SceneGraphNode;
@@ -98,7 +97,7 @@ public:
     void setImageCollectionIsLoaded(bool isLoaded);
     void setPointSpaceCraft(bool shouldPoint);
 
-    ghoul::Dictionary dataAsDictionary() const;
+    Dictionary dataAsDictionary() const;
 
     // WorldWide Telescope image handling
     void setImageOrder(const std::string& imageUrl, int order);

@@ -51,15 +51,13 @@ TimeRange::TimeRange(double startTime, double endTime)
     , end(endTime)
 {}
 
-TimeRange::TimeRange(const ghoul::Dictionary& dict) {
+TimeRange::TimeRange(const Dictionary& dict) {
     if (!initializeFromDictionary(dict, *this)) {
         throw std::runtime_error("Unable to read TimeRange from dictionary");
     }
 }
 
-bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict,
-                                         TimeRange& timeRange)
-{
+bool TimeRange::initializeFromDictionary(const Dictionary& dict, TimeRange& timeRange) {
     const Parameters p = codegen::bake<Parameters>(dict);
     timeRange.start = SpiceManager::ref().ephemerisTimeFromDate(p.start);
     timeRange.end = SpiceManager::ref().ephemerisTimeFromDate(p.end);

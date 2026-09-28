@@ -36,7 +36,7 @@ namespace openspace {
 
 class RenderableHabitableZone : public RenderableDisc {
 public:
-    explicit RenderableHabitableZone(const ghoul::Dictionary& dictionary);
+    explicit RenderableHabitableZone(const Dictionary& dictionary);
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 

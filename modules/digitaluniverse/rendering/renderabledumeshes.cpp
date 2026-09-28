@@ -181,7 +181,7 @@ Documentation RenderableDUMeshes::Documentation() {
     );
 }
 
-RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
+RenderableDUMeshes::RenderableDUMeshes(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
@@ -262,7 +262,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 void RenderableDUMeshes::initialize() {
     const bool success = loadData();
     if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
+        throw RuntimeError("Error loading data");
     }
 }
 
@@ -278,7 +278,7 @@ void RenderableDUMeshes::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     createMeshes();
 
@@ -287,8 +287,8 @@ void RenderableDUMeshes::initializeGL() {
         _font = global::fontManager->font(
             "Mono",
             static_cast<float>(FontSize),
-            ghoul::fontrendering::FontManager::Outline::Yes,
-            ghoul::fontrendering::FontManager::LoadGlyphs::No
+            fontrendering::FontManager::Outline::Yes,
+            fontrendering::FontManager::LoadGlyphs::No
         );
     }
 }
@@ -303,7 +303,7 @@ void RenderableDUMeshes::deinitializeGL() {
 
     DigitalUniverseModule::ProgramObjectManager.release(
         "RenderableDUMeshes",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -359,7 +359,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
 {
     const float scale = static_cast<float>(toMeter(_unit));
 
-    const ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
+    const fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
         .enableDepth = true,
         .enableFalseDepth = false,
         .scale = std::pow(10.f, _textSize),
@@ -378,7 +378,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
     for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         glm::vec3 scaledPos(e.position);
         scaledPos *= scale;
-        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
+        fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
             e.text,
@@ -431,7 +431,7 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
 void RenderableDUMeshes::update(const UpdateData&) {
     if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 
@@ -469,7 +469,7 @@ bool RenderableDUMeshes::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        ghoul::getline(file, line);
+        openspace::getline(file, line);
 
         if (file.eof()) {
             break;
@@ -534,13 +534,13 @@ bool RenderableDUMeshes::readSpeckFile() {
                 str >> dummy;
             } while (dummy != "{");
 
-            ghoul::getline(file, line);
+            openspace::getline(file, line);
             std::stringstream dim = std::stringstream(line);
             dim >> mesh.numU >> mesh.numV;
 
             // We can now read the vertices data
             for (int l = 0; l < mesh.numU * mesh.numV; l++) {
-                ghoul::getline(file, line);
+                openspace::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;
                 }
@@ -577,7 +577,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                 maxRadius = std::max(maxRadius, r);
             }
 
-            ghoul::getline(file, line);
+            openspace::getline(file, line);
             if (line.substr(0, 1) == "}") {
                 _renderingMeshesMap.insert({ meshIndex++, mesh });
             }

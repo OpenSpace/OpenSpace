@@ -37,16 +37,16 @@ std::string_view FloatProperty::className() const {
     return "FloatProperty";
 }
 
-ghoul::lua::LuaTypes FloatProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes FloatProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void FloatProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 float FloatProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<float>(state);
+    return lua::value<float>(state);
 }
 
 std::string FloatProperty::stringValue() const {

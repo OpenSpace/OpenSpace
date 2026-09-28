@@ -115,7 +115,7 @@ Documentation RenderableSkyTarget::Documentation() {
     );
 }
 
-RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
+RenderableSkyTarget::RenderableSkyTarget(const Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _crossHairSize(crossHairSizeInfo, 2.f, 1.f, 10.f)
     , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
@@ -152,7 +152,7 @@ void RenderableSkyTarget::initializeGL() {
     std::string ProgramName = identifier() + "Shader";
     _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
-        [ProgramName]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [ProgramName]() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_SKYBROWSER}/shaders/target_vs.glsl"),

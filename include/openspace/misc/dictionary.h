@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +35,7 @@
 #include <variant>
 #include <vector>
 
-namespace ghoul {
+namespace openspace {
 
 template <typename T, typename... U>
 concept IsAnyOf = (std::same_as<T, U> || ...);
@@ -277,6 +276,6 @@ extern template bool Dictionary::hasValue<glm::dmat4x2>(std::string_view) const;
 extern template bool Dictionary::hasValue<glm::dmat4x3>(std::string_view) const;
 extern template bool Dictionary::hasValue<glm::dmat4x4>(std::string_view) const;
 
-} // namespace ghoul
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___DICTIONARY___H__

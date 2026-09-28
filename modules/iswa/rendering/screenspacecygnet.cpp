@@ -46,7 +46,7 @@ Documentation ScreenSpaceCygnet::Documentation() {
     return codegen::doc<Parameters>("iswa_screenspace_cygnet");
 }
 
-ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
+ScreenSpaceCygnet::ScreenSpaceCygnet(const Dictionary& dictionary)
     : ScreenSpaceImageOnline(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

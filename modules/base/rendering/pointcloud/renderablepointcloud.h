@@ -31,7 +31,7 @@
 #include <openspace/data/dataloader.h>
 #include <openspace/data/datamapping.h>
 #include <openspace/glm.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/texture.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
@@ -52,7 +52,7 @@ namespace openspace {
 
 struct TextureFormat {
     glm::uvec2 resolution;
-    ghoul::opengl::Texture::Format format;
+    opengl::Texture::Format format;
     GLenum internalFormat;
 
     friend bool operator==(const TextureFormat& l, const TextureFormat& r);
@@ -68,7 +68,7 @@ struct TextureFormatHash {
  */
 class RenderablePointCloud : public Renderable {
 public:
-    explicit RenderablePointCloud(const ghoul::Dictionary& dictionary);
+    explicit RenderablePointCloud(const Dictionary& dictionary);
     ~RenderablePointCloud() override = default;
 
     void initialize() override;
@@ -169,7 +169,7 @@ protected:
     bool _hasLabels = false;
 
     struct SizeSettings : PropertyOwner {
-        explicit SizeSettings(const ghoul::Dictionary& dictionary);
+        explicit SizeSettings(const Dictionary& dictionary);
 
         std::unique_ptr<SizeMappingComponent> sizeMapping;
 
@@ -182,7 +182,7 @@ protected:
     SizeSettings _sizeSettings;
 
     struct ColorSettings : PropertyOwner {
-        explicit ColorSettings(const ghoul::Dictionary& dictionary);
+        explicit ColorSettings(const Dictionary& dictionary);
         Vec3Property pointColor;
         std::unique_ptr<ColorMappingComponent> colorMapping;
         BoolProperty enableOutline;
@@ -194,7 +194,7 @@ protected:
     ColorSettings _colorSettings;
 
     struct Fading : PropertyOwner {
-        explicit Fading(const ghoul::Dictionary& dictionary);
+        explicit Fading(const Dictionary& dictionary);
         Vec2Property fadeInDistances;
         BoolProperty enabled;
         BoolProperty invert;
@@ -223,7 +223,7 @@ protected:
     TextureInputMode _textureMode = TextureInputMode::Single;
     std::filesystem::path _texturesDirectory;
 
-    ghoul::opengl::ProgramObject* _program = nullptr;
+    opengl::ProgramObject* _program = nullptr;
 
     UniformCache(
         cameraViewMatrix, projectionMatrix, modelMatrix, cameraPosition, cameraLookUp,
@@ -256,7 +256,7 @@ protected:
     GLuint _vbo = 0;
 
     /// List of (unique) loaded textures. The other maps refer to the index in this vector
-    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+    std::vector<std::unique_ptr<opengl::Texture>> _textures;
     std::unordered_map<std::string, size_t> _textureNameToIndex;
 
     /// Texture index in dataset to index in vector of textures

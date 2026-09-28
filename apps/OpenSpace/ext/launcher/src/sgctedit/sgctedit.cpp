@@ -293,7 +293,7 @@ void SgctEdit::saveCluster() {
         };
     }
 
-    ghoul_assert(!_cluster.nodes.empty(), "There must be at least one node");
+    assert_msg(!_cluster.nodes.empty(), "There must be at least one node");
     sgct::config::Node& node = _cluster.nodes.back();
 
     //
@@ -376,7 +376,7 @@ void SgctEdit::saveCluster() {
 
     //
     // Save the cluster configuration
-    ghoul_assert(!_configurationFilename.empty(), "Filename must not be empty");
+    assert_msg(!_configurationFilename.empty(), "Filename must not be empty");
     std::ofstream outFile;
     outFile.open(_configurationFilename, std::ofstream::out);
     if (outFile.good()) {

@@ -67,12 +67,12 @@ TransformationManager::~TransformationManager() {
 }
 
 void TransformationManager::initialize() {
-    ghoul_assert(!isInitialized(), "TransformationManager is already initialized");
+    assert_msg(!isInitialized(), "TransformationManager is already initialized");
     _instance = new TransformationManager;
 }
 
 void TransformationManager::deinitialize() {
-    ghoul_assert(isInitialized(), "TransformationManager is not initialized");
+    assert_msg(isInitialized(), "TransformationManager is not initialized");
     delete _instance;
     _instance = nullptr;
 }
@@ -82,7 +82,7 @@ bool TransformationManager::isInitialized() {
 }
 
 TransformationManager& TransformationManager::ref() {
-    ghoul_assert(isInitialized(), "TransformationManager is not initialized");
+    assert_msg(isInitialized(), "TransformationManager is not initialized");
     return *_instance;
 }
 

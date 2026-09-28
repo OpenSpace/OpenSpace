@@ -67,11 +67,11 @@ namespace {
             std::string s = std::get<std::string>(object);
             bods2c_c(s.c_str(), &id, &success);
             if (!success) {
-                throw ghoul::RuntimeError(std::format("Error finding object '{}'", s));
+                throw RuntimeError(std::format("Error finding object '{}'", s));
             }
         }
         else {
-            ghoul_assert(std::holds_alternative<int>(object), "Additional variant type");
+            assert_msg(std::holds_alternative<int>(object), "Additional variant type");
             id = std::get<int>(object);
         }
 
@@ -115,7 +115,7 @@ namespace {
                 buffer.resize(SpiceErrorBufferSize);
                 getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                 reset_c();
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error loading kernel {}. {}", kernel, buffer
                 ));
             }
@@ -134,7 +134,7 @@ namespace {
                     buffer.resize(SpiceErrorBufferSize);
                     getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                     reset_c();
-                    throw ghoul::RuntimeError(std::format(
+                    throw RuntimeError(std::format(
                         "Error finding SPK coverage '{}'. {}", kernel, buffer
                     ));
                 }
@@ -151,7 +151,7 @@ namespace {
                         buffer.resize(SpiceErrorBufferSize);
                         getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                         reset_c();
-                        throw ghoul::RuntimeError(std::format(
+                        throw RuntimeError(std::format(
                             "Error finding window {} in SPK '{}'. {}", j, kernel, buffer
                         ));
                     }
@@ -202,11 +202,11 @@ namespace {
             std::string s = std::get<std::string>(object);
             bods2c_c(s.c_str(), &id, &success);
             if (!success) {
-                throw ghoul::RuntimeError(std::format("Error finding object '{}'", s));
+                throw RuntimeError(std::format("Error finding object '{}'", s));
             }
         }
         else {
-            ghoul_assert(std::holds_alternative<int>(object), "Additional variant type");
+            assert_msg(std::holds_alternative<int>(object), "Additional variant type");
             id = std::get<int>(object);
         }
 
@@ -251,7 +251,7 @@ namespace {
                 buffer.resize(SpiceErrorBufferSize);
                 getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                 reset_c();
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error loading kernel {}. {}", kernel, buffer
                 ));
             }
@@ -270,7 +270,7 @@ namespace {
                     buffer.resize(SpiceErrorBufferSize);
                     getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                     reset_c();
-                    throw ghoul::RuntimeError(std::format(
+                    throw RuntimeError(std::format(
                         "Error finding CK coverage '{}'. {}", kernel, buffer
                     ));
                 }
@@ -287,7 +287,7 @@ namespace {
                         buffer.resize(SpiceErrorBufferSize);
                         getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
                         reset_c();
-                        throw ghoul::RuntimeError(std::format(
+                        throw RuntimeError(std::format(
                             "Error finding window {} in SPK '{}'. {}", j, kernel, buffer
                         ));
                     }
@@ -328,7 +328,7 @@ namespace {
         );
 
         // 2. If `i`'s end time is after `i+1`'s begin time, we can merge these two
-        ghoul_assert(ranges.size() > 1, "Too few items. Possible underflow");
+        assert_msg(ranges.size() > 1, "Too few items. Possible underflow");
         for (size_t i = 0; i < ranges.size() - 1; i++) {
             TimeRange& curr = ranges[i];
             TimeRange& next = ranges[i + 1];
@@ -416,7 +416,7 @@ Documentation TimeFrameKernel::Documentation() {
     );
 }
 
-TimeFrameKernel::TimeFrameKernel(const ghoul::Dictionary& dictionary)
+TimeFrameKernel::TimeFrameKernel(const Dictionary& dictionary)
     : _initialization(dictionary)
 {
     // Baking the dictionary here to detect any error
@@ -428,7 +428,7 @@ bool TimeFrameKernel::initialize() {
 
     // Either the SPK or the CK variable must be specified
     if (!p.spk.has_value() && !p.ck.has_value()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "Either the SPK or the CK (or both) values must be specified for the "
             "TimeFrameKernel. Neither was specified."
         );

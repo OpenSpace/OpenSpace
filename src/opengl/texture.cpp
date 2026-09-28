@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -18,7 +17,7 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
  * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
  * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR .OTHER LIABILITY, WHETHER IN AN ACTION OF *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
@@ -30,8 +29,8 @@
 #include <cstring>
 
 namespace {
-    using namespace ghoul;
-    using namespace ghoul::opengl;
+    using namespace openspace;
+    using namespace openspace::opengl;
 
     struct FormatError : public RuntimeError {
         explicit FormatError(Texture::Format format, GLenum dataType)
@@ -198,7 +197,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 Texture::Texture(FormatInit format, SamplerInit sampler, const std::byte* data,
                  int pixelAlignment, KeepMemory keepMemory)
@@ -214,9 +213,9 @@ Texture::Texture(FormatInit format, SamplerInit sampler, const std::byte* data,
     , _mipMapLevel(sampler.mipMapLevel.value_or(8))
     , _pixelAlignment(std::move(pixelAlignment))
 {
-    ghoul_assert(_dimensions.x >= 1, "X dimension must be positive");
-    ghoul_assert(_dimensions.y >= 1, "Y dimension must be positive");
-    ghoul_assert(_dimensions.z >= 1, "Z dimension must be positive");
+    assert_msg(_dimensions.x >= 1, "X dimension must be positive");
+    assert_msg(_dimensions.y >= 1, "Y dimension must be positive");
+    assert_msg(_dimensions.z >= 1, "Z dimension must be positive");
 
     initialize(data);
 
@@ -380,7 +379,7 @@ void Texture::initialize(const std::byte* data) {
 }
 
 void Texture::uploadTexture(const std::byte* data) const {
-    ghoul_assert(data, "Data must be provided");
+    assert_msg(data, "Data must be provided");
 
     glBindTexture(_type, _id);
     glPixelStorei(GL_UNPACK_ALIGNMENT, _pixelAlignment);
@@ -499,9 +498,7 @@ Texture::Format Texture::formatFromNumChannels(int nChannels) {
         case 3: return Texture::Format::RGB;
         case 4: return Texture::Format::RGBA;
         default:
-            throw ghoul::RuntimeError(
-                std::format("Unsupported channel count: {}", nChannels)
-            );
+            throw RuntimeError(std::format("Unsupported channel count: {}", nChannels));
     }
 }
 
@@ -545,19 +542,19 @@ void Texture::setPixelData(const std::byte* pixels, int pixelAlignment,
 
 template <class T>
 const T& Texture::texel(const glm::uvec3& pos) const {
-    ghoul_assert(
+    assert_msg(
         sizeof(T) == bytesPerPixel(_format, _dataType),
         "Size of T must be equal to texel size"
     );
-    ghoul_assert(
+    assert_msg(
         pos.x < _dimensions.x,
         "x must be smaller than the width of the Texture"
     );
-    ghoul_assert(
+    assert_msg(
         pos.y < _dimensions.y,
         "y must be smaller than the height of the Texture"
     );
-    ghoul_assert(
+    assert_msg(
         pos.z < _dimensions.z,
         "z must be smaller than the depth of the Texture"
     );
@@ -567,12 +564,12 @@ const T& Texture::texel(const glm::uvec3& pos) const {
 }
 
 glm::vec4 Texture::texelAsFloat(const glm::uvec3& pos) const {
-    ghoul_assert(
+    assert_msg(
         (pos.z * _dimensions.x * _dimensions.y) + (pos.y * _dimensions.x) + pos.x
         < glm::compMul(_dimensions),
         "x, y, and z must be inside the texture dimensions"
     );
-    ghoul_assert(!_pixels.empty(), "No texture was downloaded before call");
+    assert_msg(!_pixels.empty(), "No texture was downloaded before call");
 
     switch (_format) {
         case Format::Red:
@@ -625,7 +622,7 @@ glm::vec4 Texture::texelAsFloat(const glm::uvec3& pos) const {
                     return { t, 0.f, 0.f, 1.f };
                 }
                 default:
-                    ghoul_assert(false, "Missing case label");
+                    assert_msg(false, "Missing case label");
                     throw MissingCaseException();
             }
         case Format::RG:
@@ -688,7 +685,7 @@ glm::vec4 Texture::texelAsFloat(const glm::uvec3& pos) const {
                     return { t.r, t.g, 0.f, 1.f };
                 }
                 default:
-                    ghoul_assert(false, "Missing case label");
+                    assert_msg(false, "Missing case label");
                     throw MissingCaseException();
             }
         case Format::RGB:
@@ -763,7 +760,7 @@ glm::vec4 Texture::texelAsFloat(const glm::uvec3& pos) const {
                     return { t.r, t.g, t.b, 1.f };
                 }
                 default:
-                    ghoul_assert(false, "Missing case label");
+                    assert_msg(false, "Missing case label");
                     throw MissingCaseException();
             }
         case Format::RGBA:
@@ -876,4 +873,4 @@ template const glm::tvec4<int16_t>& Texture::texel(const glm::uvec3& pos) const;
 template const glm::tvec4<int32_t>& Texture::texel(const glm::uvec3& pos) const;
 template const glm::tvec4<float>& Texture::texel(const glm::uvec3& pos) const;
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl

@@ -43,7 +43,7 @@ class TransferFunction;
 
 class RenderableIswaCygnet : public Renderable {
 public:
-    explicit RenderableIswaCygnet(const ghoul::Dictionary& dictionary);
+    explicit RenderableIswaCygnet(const Dictionary& dictionary);
     virtual ~RenderableIswaCygnet();
 
     void initializeGL() override;
@@ -120,8 +120,8 @@ protected:
     FloatProperty _alpha;
     TriggerProperty _delete;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+    std::unique_ptr<opengl::ProgramObject> _shader;
+    std::vector<std::unique_ptr<opengl::Texture>> _textures;
     bool _textureDirty = false;
 
     std::vector<TransferFunction> _transferFunctions;

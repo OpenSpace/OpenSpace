@@ -30,11 +30,10 @@
 
 namespace openspace {
 
-std::unique_ptr<Decoder> Decoder::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary,
-                                                                    std::string_view type)
+std::unique_ptr<Decoder> Decoder::createFromDictionary(const Dictionary& dictionary,
+                                                       std::string_view type)
 {
-    ghoul::TemplateFactory<Decoder>* factory = FactoryManager::ref().factory<Decoder>();
+    TemplateFactory<Decoder>* factory = FactoryManager::ref().factory<Decoder>();
     Decoder* result = factory->create(type, dictionary);
     return std::unique_ptr<Decoder>(result);
 }

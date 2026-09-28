@@ -61,9 +61,7 @@ namespace {
 
 namespace openspace {
 
-RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
-{
+RawVolumeMetadata RawVolumeMetadata::createFromDictionary(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     RawVolumeMetadata metadata;
@@ -100,8 +98,8 @@ RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
     return metadata;
 }
 
-ghoul::Dictionary RawVolumeMetadata::dictionary() const {
-    ghoul::Dictionary dict;
+Dictionary RawVolumeMetadata::dictionary() const {
+    Dictionary dict;
     dict.setValue("Dimensions", glm::dvec3(dimensions));
     dict.setValue("GridType", gridTypeToString(gridType));
 

@@ -64,7 +64,7 @@ Documentation Shadower::Documentation() {
     return codegen::doc<Parameters>("core_shadower");
 }
 
-Shadower::Shadower(const ghoul::Dictionary& dictionary)
+Shadower::Shadower(const Dictionary& dictionary)
     : _castShadow(CastShadowInfo, false)
     , _frustumSize(FrustumSizeInfo, 1.f)
 {
@@ -81,7 +81,7 @@ bool Shadower::isCastingShadow() const {
 }
 
 void Shadower::setLightSource(const SceneGraphNode* lightSource) {
-    ghoul_assert(lightSource, "No light source provided");
+    assert_msg(lightSource, "No light source provided");
     _lightSource = std::move(lightSource);
 }
 
@@ -102,7 +102,7 @@ double Shadower::shadowFrustumSize() const {
 }
 
 void Shadowee::addShadower(const Shadower* shadower) {
-    ghoul_precondition(shadower, "Shadower must not be nullptr");
+    precondition(shadower, "Shadower must not be nullptr");
 
     if (std::find(_shadowers.begin(), _shadowers.end(), shadower) == _shadowers.end()) {
         _shadowers.push_back(shadower);
@@ -111,7 +111,7 @@ void Shadowee::addShadower(const Shadower* shadower) {
 }
 
 void Shadowee::removeShadower(const Shadower* shadower) {
-    ghoul_precondition(shadower, "Shadower must not be nullptr");
+    precondition(shadower, "Shadower must not be nullptr");
 
     auto it = std::find(_shadowers.begin(), _shadowers.end(), shadower);
     if (it != _shadowers.end()) {

@@ -40,7 +40,7 @@ public:
         glm::vec2 stepValue = glm::vec2(0.01f));
 
     std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+    lua::LuaTypes typeLua() const override final;
 
     void getLuaValue(lua_State* state) const override final;
 

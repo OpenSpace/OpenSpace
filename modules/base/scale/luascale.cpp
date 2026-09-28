@@ -29,7 +29,7 @@
 #include <openspace/filesystem/file.h>
 #include <openspace/format.h>
 #include <openspace/logging/logmanager.h>
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/lua/lua_helper.h>
 #include <openspace/misc/dictionary.h>
 #include <openspace/scripting/scriptengine.h>
@@ -73,7 +73,7 @@ Documentation LuaScale::Documentation() {
     );
 }
 
-LuaScale::LuaScale(const ghoul::Dictionary& dictionary)
+LuaScale::LuaScale(const Dictionary& dictionary)
     : Scale(dictionary)
     , _luaScriptFile(ScriptInfo)
 {
@@ -81,7 +81,7 @@ LuaScale::LuaScale(const ghoul::Dictionary& dictionary)
 
     _luaScriptFile.onChange([this]() {
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
+        _fileHandle = std::make_unique<filesystem::File>(_luaScriptFile.value());
         _fileHandle->setCallback([this]() { requireUpdate(); });
     });
     addProperty(_luaScriptFile);
@@ -91,7 +91,7 @@ LuaScale::LuaScale(const ghoul::Dictionary& dictionary)
 }
 
 glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
-    ghoul::lua::runScriptFile(_state, _luaScriptFile.value());
+    lua::runScriptFile(_state, _luaScriptFile.value());
 
     // Get the scaling function
     lua_getglobal(_state, "scale");
@@ -107,15 +107,15 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     }
 
     // First argument is the number of seconds past the J2000 epoch in ingame time
-    ghoul::lua::push(_state, data.time.j2000Seconds());
+    lua::push(_state, data.time.j2000Seconds());
 
     // Second argument is the number of seconds past the J2000 epoch of last frame
-    ghoul::lua::push(_state, data.previousFrameTime.j2000Seconds());
+    lua::push(_state, data.previousFrameTime.j2000Seconds());
 
     // Third argument is the number of milliseconds past the J2000 epoch in wallclock
     using namespace std::chrono;
     const auto now = std::chrono::high_resolution_clock::now();
-    ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
+    lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
 
     // Execute the scaling function
     const int success = lua_pcall(_state, 3, 1, 0);
@@ -126,7 +126,7 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
         );
     }
 
-    const glm::dvec3 scale = ghoul::lua::value<glm::dvec3>(_state);
+    const glm::dvec3 scale = lua::value<glm::dvec3>(_state);
     return scale;
 }
 

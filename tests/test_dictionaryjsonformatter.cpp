@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,15 +28,17 @@
 #include <openspace/misc/dictionary.h>
 #include <string>
 
+using namespace openspace;
+
 TEST_CASE("DictionaryJsonFormatter: Empty Dictionary", "[dictionaryjsonformatter]") {
-    const ghoul::Dictionary d;
-    std::string res = ghoul::formatJson(d);
+    const Dictionary d;
+    std::string res = formatJson(d);
     CHECK(res == "{}");
 }
 
 TEST_CASE("DictionaryJsonFormatter: Simple Dictionary", "[dictionaryjsonformatter]") {
     using namespace std::string_literals;
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("boolFalse", false);
     d.setValue("boolTrue", true);
     d.setValue("int", 1);
@@ -47,7 +48,7 @@ TEST_CASE("DictionaryJsonFormatter: Simple Dictionary", "[dictionaryjsonformatte
     d.setValue("vec4", glm::dvec4(0.0));
     d.setValue("string", ""s);
 
-    std::string res = ghoul::formatJson(d);
+    std::string res = formatJson(d);
     CHECK(
         res ==
         "{\"boolFalse\":false,\"boolTrue\":true,"
@@ -59,12 +60,12 @@ TEST_CASE("DictionaryJsonFormatter: Simple Dictionary", "[dictionaryjsonformatte
 
 TEST_CASE("DictionaryJsonFormatter: Dictionary with Ivec", "[dictionaryjsonformatter]") {
     using namespace std::string_literals;
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("ivec2", glm::ivec2(0));
     d.setValue("ivec3", glm::ivec3(0));
     d.setValue("ivec4", glm::ivec4(0));
 
-    std::string res = ghoul::formatJson(d);
+    std::string res = formatJson(d);
     CHECK(
         res ==
         "{\"ivec2\":[0,0],\"ivec3\":[0,0,0],"
@@ -74,12 +75,12 @@ TEST_CASE("DictionaryJsonFormatter: Dictionary with Ivec", "[dictionaryjsonforma
 
 TEST_CASE("DictionaryJsonFormatter: std::vectors", "[dictionaryjsonformatter]") {
     using namespace std::string_literals;
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("iVector", std::vector<int>{ 1, 2, 3, 4, 5 });
     d.setValue("dVector", std::vector<double>{ 0.1, 0.2, 0.3, 0.4, 0.5 });
     d.setValue("empty", std::vector<double>{});
 
-    std::string res = ghoul::formatJson(d);
+    std::string res = formatJson(d);
     CHECK(
         res ==
         "{\"dVector\":[0.1,0.2,0.3,0.4,0.5],"
@@ -90,7 +91,7 @@ TEST_CASE("DictionaryJsonFormatter: std::vectors", "[dictionaryjsonformatter]") 
 
 TEST_CASE("DictionaryJsonFormatter: Matrices", "[dictionaryjsonformatter]") {
     using namespace std::string_literals;
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("dmat2x2", glm::dmat2(0.0));
     d.setValue("dmat2x3", glm::dmat2x3(0.0));
     d.setValue("dmat2x4", glm::dmat2x4(0.0));
@@ -103,7 +104,7 @@ TEST_CASE("DictionaryJsonFormatter: Matrices", "[dictionaryjsonformatter]") {
     d.setValue("dmat4x2", glm::dmat4x2(0.0));
     d.setValue("dmat4x3", glm::dmat4x3(0.0));
 
-    std::string res = ghoul::formatJson(d);
+    std::string res = formatJson(d);
     CHECK(
         res ==
         "{\"dmat2x2\":[0,0,0,0],\"dmat2x3\":[0,0,0,0,0,0],\"dmat2x4\":[0,0,0,0,0,0,0,0],"
@@ -115,27 +116,27 @@ TEST_CASE("DictionaryJsonFormatter: Matrices", "[dictionaryjsonformatter]") {
 }
 
 TEST_CASE("DictionaryJsonFormatter: Dictionary with nan", "[dictionaryjsonformatter]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("nanValue", std::numeric_limits<double>::quiet_NaN());
 
-    std::string res = ghoul::formatJson(d);
+    std::string res = formatJson(d);
     CHECK(res == "{\"nanValue\":null}");
 }
 
 TEST_CASE("DictionaryJsonFormatter: Dictionary with infinity",
           "[dictionaryjsonformatter]")
 {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("infinity", std::numeric_limits<double>::infinity());
 
-    std::string res = ghoul::formatJson(d);
+    std::string res = formatJson(d);
     CHECK(res == "{\"infinity\":null}");
 }
 
 TEST_CASE("DictionaryJsonFormatter: Nested Dictionary", "[dictionaryjsonformatter]") {
     using namespace std::string_literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("int", 1);
     d.setValue("double", 2.2);
     d.setValue("vec2", glm::dvec2(0.0));
@@ -143,7 +144,7 @@ TEST_CASE("DictionaryJsonFormatter: Nested Dictionary", "[dictionaryjsonformatte
     d.setValue("vec4", glm::dvec4(0.0));
     d.setValue("string", ""s);
 
-    ghoul::Dictionary e;
+    Dictionary e;
     e.setValue("int", 1);
     e.setValue("double", 2.2);
     e.setValue("vec2", glm::dvec2(0.0));
@@ -152,7 +153,7 @@ TEST_CASE("DictionaryJsonFormatter: Nested Dictionary", "[dictionaryjsonformatte
     e.setValue("string", ""s);
     e.setValue("dict", d);
 
-    ghoul::Dictionary f;
+    Dictionary f;
     f.setValue("int", 1);
     f.setValue("double", 2.2);
     f.setValue("vec2", glm::dvec2(0.0));
@@ -161,7 +162,7 @@ TEST_CASE("DictionaryJsonFormatter: Nested Dictionary", "[dictionaryjsonformatte
     f.setValue("string", ""s);
     f.setValue("dict", e);
 
-    ghoul::Dictionary g;
+    Dictionary g;
     g.setValue("int", 1);
     g.setValue("double", 2.2);
     g.setValue("vec2", glm::dvec2(0.0));
@@ -172,7 +173,7 @@ TEST_CASE("DictionaryJsonFormatter: Nested Dictionary", "[dictionaryjsonformatte
     g.setValue("dict2", f);
     g.setValue("dict3", f);
 
-    std::string res = ghoul::formatJson(g);
+    std::string res = formatJson(g);
 
     CHECK(
         res ==

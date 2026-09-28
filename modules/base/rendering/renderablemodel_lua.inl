@@ -46,25 +46,26 @@ namespace {
      * \param filepath The model file on disk whose model tree should be printed.
      */
 [[codegen::luawrap]] void printModelTree(std::filesystem::path filepath) {
-    ghoul_assert(!filepath.empty(), "Filepath must not be empty");
+    using namespace openspace;
+
+    assert_msg(!filepath.empty(), "Filepath must not be empty");
 
     std::string extension = filepath.extension().string();
     if (!extension.empty()) {
         extension = extension.substr(1);
     }
-    ghoul_assert(!extension.empty(), "Filepath must have an extension");
+    assert_msg(!extension.empty(), "Filepath must have an extension");
 
-    ghoul::io::ModelReaderBase* reader =
-        ghoul::io::ModelReader::ref().readerForExtension(extension);
+    io::ModelReaderBase* reader = io::ModelReader::ref().readerForExtension(extension);
 
     if (!reader) {
-        throw ghoul::io::ModelReader::MissingReaderException(extension, filepath);
+        throw io::ModelReader::MissingReaderException(extension, filepath);
     }
 
     // (malej 2026-05-29) Only the ModelReaderAssimp can print model trees
-    ghoul::io::ModelReaderAssimp* typedReader;
+    io::ModelReaderAssimp* typedReader;
     try {
-        typedReader = &dynamic_cast<ghoul::io::ModelReaderAssimp&>(*reader);
+        typedReader = &dynamic_cast<io::ModelReaderAssimp&>(*reader);
     }
     catch (std::exception& e) {
         LERRORC("RenderableModel", std::format("Cannot find a suitable reader to print "

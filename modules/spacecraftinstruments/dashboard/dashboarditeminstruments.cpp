@@ -84,7 +84,7 @@ Documentation DashboardItemInstruments::Documentation() {
     );
 }
 
-DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dictionary)
+DashboardItemInstruments::DashboardItemInstruments(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _activeColor(
         ActiveColorInfo,
@@ -136,7 +136,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             penPosition,
             "Next instrument activity:",
             glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
-            ghoul::fontrendering::CrDirection::Down
+            fontrendering::CrDirection::Down
         );
 
         std::pair<double, std::string_view> remainingConv = simplifyTime(remaining);
@@ -160,7 +160,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                 t * 100
             ),
             glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
-            ghoul::fontrendering::CrDirection::Down
+            fontrendering::CrDirection::Down
         );
 
         std::string str = SpiceManager::ref().dateFromEphemerisTime(
@@ -173,7 +173,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             penPosition,
             std::format("Data acquisition time: {}", str),
             glm::vec4(_activeColor.value(), 1.f),
-            ghoul::fontrendering::CrDirection::Down
+            fontrendering::CrDirection::Down
         );
     }
     const std::pair<double, std::string>& nextTarget = sequencer.nextTarget(currentTime);
@@ -198,7 +198,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             "Next image: [{:02d}:{:02d}:{:02d}]", tlh.count(), tlm.count(), tls.count()
         ),
         targetColor,
-        ghoul::fontrendering::CrDirection::Down
+        fontrendering::CrDirection::Down
     );
 
     penPosition.y -= _font->height();
@@ -213,7 +213,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         penPosition,
         "Active Instruments:",
         glm::vec4(_activeColor.value(), 1.f),
-        ghoul::fontrendering::CrDirection::Down
+        fontrendering::CrDirection::Down
     );
 
     for (const std::pair<std::string, bool>& m : activeMap) {
@@ -227,7 +227,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                 penPosition,
                 std::format("    {:5s}", m.first),
                 glm::vec4(_activeColor.value(), 1.f),
-                ghoul::fontrendering::CrDirection::Down
+                fontrendering::CrDirection::Down
             );
         }
         else {
@@ -237,7 +237,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                 penPosition,
                 std::format("    {:5s}", m.first),
                 glm::vec4(0.3f, 0.3f, 0.3f, 1.f),
-                ghoul::fontrendering::CrDirection::Down
+                fontrendering::CrDirection::Down
             );
         }
     }

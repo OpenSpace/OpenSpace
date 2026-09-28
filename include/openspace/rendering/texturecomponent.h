@@ -29,9 +29,9 @@
 #include <filesystem>
 #include <memory>
 
-namespace ghoul::filesystem { class File; }
-
 namespace openspace {
+
+namespace filesystem { class File; }
 
 class TextureComponent {
 public:
@@ -40,11 +40,11 @@ public:
      */
     explicit TextureComponent(int nDimensions);
 
-    const ghoul::opengl::Texture* texture() const;
-    ghoul::opengl::Texture* texture();
+    const opengl::Texture* texture() const;
+    opengl::Texture* texture();
 
-    void setFilterMode(ghoul::opengl::Texture::FilterMode filterMode);
-    void setWrapping(ghoul::opengl::Texture::WrappingMode wrapping);
+    void setFilterMode(opengl::Texture::FilterMode filterMode);
+    void setWrapping(opengl::Texture::WrappingMode wrapping);
     void setShouldWatchFileForChanges(bool value);
 
     /**
@@ -61,13 +61,11 @@ public:
     void update();
 
 private:
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<filesystem::File> _textureFile;
+    std::unique_ptr<opengl::Texture> _texture;
 
-    ghoul::opengl::Texture::FilterMode _filterMode =
-        ghoul::opengl::Texture::FilterMode::LinearMipMap;
-    ghoul::opengl::Texture::WrappingMode _wrappingMode =
-        ghoul::opengl::Texture::WrappingMode::Repeat;
+    opengl::Texture::FilterMode _filterMode = opengl::Texture::FilterMode::LinearMipMap;
+    opengl::Texture::WrappingMode _wrappingMode = opengl::Texture::WrappingMode::Repeat;
 
     bool _shouldWatchFile = true;
 

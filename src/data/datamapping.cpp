@@ -67,8 +67,8 @@ namespace {
 
         // Per default, allow both lower case and upper case versions of column names
         if (!mapping.has_value() || !mapping->isCaseSensitive) {
-            column = ghoul::toLowerCase(column);
-            testColumn = ghoul::toLowerCase(testColumn);
+            column = toLowerCase(column);
+            testColumn = toLowerCase(testColumn);
         }
 
         return testColumn == column;
@@ -77,8 +77,8 @@ namespace {
     bool isSameStringColumn(const std::string& left, const std::string& right,
                             bool isCaseSensitive)
     {
-        std::string l = isCaseSensitive ? ghoul::toLowerCase(left) : left;
-        std::string r = isCaseSensitive ? ghoul::toLowerCase(right) : right;
+        std::string l = isCaseSensitive ? toLowerCase(left) : left;
+        std::string r = isCaseSensitive ? toLowerCase(right) : right;
         return (l == r);
     }
 
@@ -154,7 +154,7 @@ Documentation DataMapping::Documentation() {
     return codegen::doc<Parameters>("core_dataloader_datamapping");
 }
 
-DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionary) {
+DataMapping DataMapping::createFromDictionary(const Dictionary& dictionary) {
     ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -209,7 +209,7 @@ std::string generateHashString(const DataMapping& dm) {
     for (const std::string_view c : dm.excludeColumns) {
         a += c;
     }
-    unsigned int excludeColumnsHash = ghoul::hashCRC32(a);
+    unsigned int excludeColumnsHash = hashCRC32(a);
 
     return std::format(
         "DM|{}|{}|{}|{}|{}|{}|{}|{}",
@@ -218,7 +218,7 @@ std::string generateHashString(const DataMapping& dm) {
         dm.zColumnName.value_or(""),
         dm.nameColumn.value_or(""),
         dm.textureColumn.value_or(""),
-        dm.missingDataValue.has_value() ? ghoul::to_string(*dm.missingDataValue) : "",
+        dm.missingDataValue.has_value() ? to_string(*dm.missingDataValue) : "",
         dm.isCaseSensitive ? 1 : 0,
         excludeColumnsHash
     );

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +34,7 @@
 #include <utility>
 
 namespace {
-    using namespace ghoul;
+    using namespace openspace;
 
     std::string readFirstValidLine(std::ifstream& file) {
         std::string line;
@@ -52,7 +51,7 @@ namespace {
                                                           bool includeFirstLine,
                                                           const std::vector<int>& indices)
     {
-        ghoul_assert(file.good(), "File handle should be good");
+        assert_msg(file.good(), "File handle should be good");
 
         std::vector<std::vector<std::string>> result;
 
@@ -124,8 +123,8 @@ namespace {
                     // And it is at the last position so we have our winner
                     lineValues[i] = totalValue + ", " + lineValues[j];
                     // Remove the beginning and end "
-                    ghoul_assert(lineValues[i].front() == '"', "Unexpected line");
-                    ghoul_assert(lineValues[i].back() == '"', "Unexpected line");
+                    assert_msg(lineValues[i].front() == '"', "Unexpected line");
+                    assert_msg(lineValues[i].back() == '"', "Unexpected line");
                     lineValues[i].erase(lineValues[i].begin());
                     lineValues[i].pop_back();
                     lineValues.erase(lineValues.begin() + j);
@@ -150,12 +149,12 @@ namespace {
     }
 } // namespace
 
-namespace ghoul {
+namespace openspace {
 
 std::vector<std::vector<std::string>> loadCSVFile(const std::filesystem::path& fileName,
                                                   bool includeFirstLine)
 {
-    ghoul_assert(!fileName.empty(), "fileName must not be empty");
+    assert_msg(!fileName.empty(), "fileName must not be empty");
 
     std::ifstream file;
     file.exceptions(std::ifstream::badbit);
@@ -168,8 +167,8 @@ std::vector<std::vector<std::string>> loadCSVFile(const std::filesystem::path& f
                                                   const std::vector<std::string>& columns,
                                                   bool includeFirstLine)
 {
-    ghoul_assert(!fileName.empty(), "fileName must not be empty");
-    ghoul_assert(!columns.empty(), "columns must not be empty");
+    assert_msg(!fileName.empty(), "fileName must not be empty");
+    assert_msg(!columns.empty(), "columns must not be empty");
 
     std::ifstream file;
     file.exceptions(std::ifstream::badbit);
@@ -215,8 +214,8 @@ std::vector<std::vector<std::string>> loadCSVFile(const std::filesystem::path& f
                                                   const std::vector<int>& columns,
                                                   bool includeFirstLine)
 {
-    ghoul_assert(!fileName.empty(), "fileName must not be empty");
-    ghoul_assert(!columns.empty(), "columns must not be empty");
+    assert_msg(!fileName.empty(), "fileName must not be empty");
+    assert_msg(!columns.empty(), "columns must not be empty");
 
     std::ifstream file;
     file.exceptions(std::ifstream::badbit);
@@ -225,4 +224,4 @@ std::vector<std::vector<std::string>> loadCSVFile(const std::filesystem::path& f
     return internalLoadCSV(file, includeFirstLine, columns);
 }
 
-} // namespace ghoul
+} // namespace openspace

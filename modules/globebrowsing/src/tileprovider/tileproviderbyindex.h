@@ -34,7 +34,7 @@ namespace openspace {
 
 class TileProviderByIndex : public TileProvider {
 public:
-    explicit TileProviderByIndex(const ghoul::Dictionary& dictionary);
+    explicit TileProviderByIndex(const Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;

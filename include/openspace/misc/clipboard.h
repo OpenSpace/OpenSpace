@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +28,7 @@
 #include <string>
 #include <string_view>
 
-namespace ghoul {
+namespace openspace {
 
 /**
  * Determines the selection area to which a clipboard action is applied to. Note that this
@@ -65,6 +64,6 @@ std::string clipboardText(SelectionArea selectionArea = SelectionArea::Clipboard
 void setClipboardText(std::string_view text,
     SelectionArea selectionArea = SelectionArea::Clipboard);
 
-} // namespace ghoul
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___CLIPBOARD___H__

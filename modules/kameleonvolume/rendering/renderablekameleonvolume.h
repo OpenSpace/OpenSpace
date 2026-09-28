@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -46,7 +46,7 @@ class VolumeClipPlanes;
 
 class RenderableKameleonVolume : public Renderable {
 public:
-    explicit RenderableKameleonVolume(const ghoul::Dictionary& dictionary);
+    explicit RenderableKameleonVolume(const Dictionary& dictionary);
     ~RenderableKameleonVolume();
 
     void initializeGL() override;
@@ -94,7 +94,7 @@ private:
     std::unique_ptr<RawVolume<GLfloat>> _normalizedVolume;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
-    std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
+    std::shared_ptr<opengl::Texture> _volumeTexture;
     std::shared_ptr<TransferFunction> _transferFunction;
 };
 

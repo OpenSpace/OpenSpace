@@ -100,7 +100,7 @@ ScriptScheduler::ScriptScheduler()
     addProperty(_shouldRunAllTimeJump);
 }
 
-ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict) {
+ScriptScheduler::ScheduledScript::ScheduledScript(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     time = Time::convertTime(p.time);

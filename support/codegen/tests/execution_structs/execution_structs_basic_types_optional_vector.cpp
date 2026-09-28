@@ -32,6 +32,8 @@
 #include <optional>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(BasicTypesOptionalVector)]] Parameters {
         // bool value documentation
@@ -160,7 +162,7 @@ namespace {
         std::optional<std::vector<glm::dmat4>> dmat4Value;
 
         // dict value documentation
-        std::optional<std::vector<ghoul::Dictionary>> dictValue;
+        std::optional<std::vector<Dictionary>> dictValue;
     };
 } // namespace
 #include "execution_structs_basic_types_optional_vector_codegen.cpp"
@@ -202,163 +204,163 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         (path / "codegen_execution_basic_types_optional_vector_3");
     std::filesystem::create_directories(tmpFolder3);
 
-    ghoul::Dictionary d;
+    Dictionary d;
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", true);
         v.setValue("2", false);
         v.setValue("3", true);
         d.setValue("BoolValue", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", 2.0);
         v.setValue("2", 3.0);
         v.setValue("3", 4.0);
         d.setValue("IntValue", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", 5.1);
         v.setValue("2", 5.2);
         v.setValue("3", 5.3);
         d.setValue("DoubleValue", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", 6.1);
         v.setValue("2", 6.2);
         v.setValue("3", 6.3);
         d.setValue("FloatValue", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", "abc"s);
         v.setValue("2", "def"s);
         v.setValue("3", "ghi"s);
         d.setValue("StringValue", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", "jkl"s);
         v.setValue("2", "mno"s);
         v.setValue("3", "pqr"s);
         d.setValue("StringNotEmptyValue", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", tmpFile1);
         v.setValue("2", tmpFile2);
         v.setValue("3", tmpFile3);
         d.setValue("PathValue", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", tmpFolder1);
         v.setValue("2", tmpFolder2);
         v.setValue("3", tmpFolder3);
         d.setValue("DirectoryValue", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dvec2(7.0, 8.0));
         v.setValue("2", glm::dvec2(9.0, 10.0));
         v.setValue("3", glm::dvec2(11.0, 12.0));
         d.setValue("Ivec2Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dvec3(13.0, 14.0, 15.0));
         v.setValue("2", glm::dvec3(16.0, 17.0, 18.0));
         v.setValue("3", glm::dvec3(19.0, 20.0, 21.0));
         d.setValue("Ivec3Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dvec4(22.0, 23.0, 24.0, 25.0));
         v.setValue("2", glm::dvec4(26.0, 27.0, 28.0, 29.0));
         v.setValue("3", glm::dvec4(30.0, 31.0, 32.0, 33.0));
         d.setValue("Ivec4Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dvec2(34.1, 34.2));
         v.setValue("2", glm::dvec2(35.1, 35.2));
         v.setValue("3", glm::dvec2(36.1, 36.2));
         d.setValue("Dvec2Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dvec3(37.1, 37.2, 37.3));
         v.setValue("2", glm::dvec3(38.1, 38.2, 38.3));
         v.setValue("3", glm::dvec3(39.1, 39.2, 39.3));
         d.setValue("Dvec3Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dvec4(40.1, 40.2, 40.3, 40.4));
         v.setValue("2", glm::dvec4(41.1, 41.2, 41.3, 41.4));
         v.setValue("3", glm::dvec4(42.1, 42.2, 42.3, 42.4));
         d.setValue("Dvec4Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dvec2(43.1, 43.2));
         v.setValue("2", glm::dvec2(44.1, 44.2));
         v.setValue("3", glm::dvec2(45.1, 45.2));
         d.setValue("Vec2Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dvec3(46.1, 46.2, 46.3));
         v.setValue("2", glm::dvec3(47.1, 47.2, 47.3));
         v.setValue("3", glm::dvec3(48.1, 48.2, 48.3));
         d.setValue("Vec3Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dvec4(49.1, 49.2, 49.3, 49.4));
         v.setValue("2", glm::dvec4(50.1, 50.2, 50.3, 50.4));
         v.setValue("3", glm::dvec4(51.1, 51.2, 51.3, 51.4));
         d.setValue("Vec4Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat2x2(52.1, 52.2, 52.3, 52.4));
         v.setValue("2", glm::dmat2x2(53.1, 53.2, 53.3, 53.4));
         v.setValue("3", glm::dmat2x2(54.1, 54.2, 54.3, 54.4));
         d.setValue("Mat2x2Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat2x2(152.1, 152.2, 152.3, 152.4));
         v.setValue("2", glm::dmat2x2(153.1, 153.2, 153.3, 153.4));
         v.setValue("3", glm::dmat2x2(154.1, 154.2, 154.3, 154.4));
         d.setValue("Mat2Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat2x3(55.1, 55.2, 55.3, 55.4, 55.5, 55.6));
         v.setValue("2", glm::dmat2x3(56.1, 56.2, 56.3, 56.4, 56.5, 56.6));
         v.setValue("3", glm::dmat2x3(57.1, 57.2, 57.3, 57.4, 57.5, 57.6));
         d.setValue("Mat2x3Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat2x4(58.1, 58.2, 58.3, 58.4, 58.5, 58.6, 58.7, 58.8));
         v.setValue("2", glm::dmat2x4(59.1, 59.2, 59.3, 59.4, 59.5, 59.6, 59.7, 59.8));
         v.setValue("3", glm::dmat2x4(60.1, 60.2, 60.3, 60.4, 60.5, 60.6, 60.7, 60.8));
         d.setValue("Mat2x4Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat3x2(61.1, 61.2, 61.3, 61.4, 61.5, 61.6));
         v.setValue("2", glm::dmat3x2(62.1, 62.2, 62.3, 62.4, 62.5, 62.6));
         v.setValue("3", glm::dmat3x2(63.1, 63.2, 63.3, 63.4, 63.5, 63.6));
         d.setValue("Mat3x2Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat3x3(64.1, 64.2, 64.3, 64.4, 64.5, 64.6, 64.7, 64.8, 64.9)
@@ -374,7 +376,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Mat3x3Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat3x3(164.1, 164.2, 164.3, 164.4, 164.5, 164.6, 164.7, 164.8, 164.9)
@@ -390,7 +392,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Mat3Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat3x4(
@@ -412,14 +414,14 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Mat3x4Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat4x2(70.1, 70.2, 70.3, 70.4, 70.5, 70.6, 70.7, 70.8));
         v.setValue("2", glm::dmat4x2(71.1, 71.2, 71.3, 71.4, 71.5, 71.6, 71.7, 71.8));
         v.setValue("3", glm::dmat4x2(72.1, 72.2, 72.3, 72.4, 72.5, 72.6, 72.7, 72.8));
         d.setValue("Mat4x2Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat4x3(
@@ -441,7 +443,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Mat4x3Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat4x4(
@@ -466,7 +468,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Mat4x4Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat4x4(
@@ -491,42 +493,42 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Mat4Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat2x2(79.1, 79.2, 79.3, 79.4));
         v.setValue("2", glm::dmat2x2(80.1, 80.2, 80.3, 80.4));
         v.setValue("3", glm::dmat2x2(81.1, 81.2, 81.3, 81.4));
         d.setValue("Dmat2x2Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat2x2(179.1, 179.2, 179.3, 179.4));
         v.setValue("2", glm::dmat2x2(180.1, 180.2, 180.3, 180.4));
         v.setValue("3", glm::dmat2x2(181.1, 181.2, 181.3, 181.4));
         d.setValue("Dmat2Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat2x3(82.1, 82.2, 82.3, 82.4, 82.5, 82.6));
         v.setValue("2", glm::dmat2x3(83.1, 83.2, 83.3, 83.4, 83.5, 83.6));
         v.setValue("3", glm::dmat2x3(84.1, 84.2, 84.3, 84.4, 84.5, 84.6));
         d.setValue("Dmat2x3Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat2x4(85.1, 85.2, 85.3, 85.4, 85.5, 85.6, 85.7, 85.8));
         v.setValue("2", glm::dmat2x4(86.1, 86.2, 86.3, 86.4, 86.5, 86.6, 86.7, 86.8));
         v.setValue("3", glm::dmat2x4(87.1, 87.2, 87.3, 87.4, 87.5, 87.6, 87.7, 87.8));
         d.setValue("Dmat2x4Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat3x2(88.1, 88.2, 88.3, 88.4, 88.5, 88.6));
         v.setValue("2", glm::dmat3x2(89.1, 89.2, 89.3, 89.4, 89.5, 89.6));
         v.setValue("3", glm::dmat3x2(90.1, 90.2, 90.3, 90.4, 90.5, 90.6));
         d.setValue("Dmat3x2Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat3x3(91.1, 91.2, 91.3, 91.4, 91.5, 91.6, 91.7, 91.8, 91.9)
@@ -542,7 +544,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Dmat3x3Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat3x3(191.1, 191.2, 191.3, 191.4, 191.5, 191.6, 191.7, 191.8, 191.9)
@@ -558,7 +560,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Dmat3Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat3x4(
@@ -580,14 +582,14 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Dmat3x4Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", glm::dmat4x2(97.1, 97.2, 97.3, 97.4, 97.5, 97.6, 97.7, 97.8));
         v.setValue("2", glm::dmat4x2(98.1, 98.2, 98.3, 98.4, 98.5, 98.6, 98.7, 98.8));
         v.setValue("3", glm::dmat4x2(99.1, 99.2, 99.3, 99.4, 99.5, 99.6, 99.7, 99.8));
         d.setValue("Dmat4x2Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat4x3(
@@ -612,7 +614,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Dmat4x3Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat4x4(
@@ -637,7 +639,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Dmat4x4Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue(
             "1",
             glm::dmat4x4(
@@ -662,21 +664,21 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
         d.setValue("Dmat4Value", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("a", 1);
             e.setValue("b", 2.0);
             v.setValue("1", e);
         }
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("a", 3);
             e.setValue("b", 4.0);
             v.setValue("2", e);
         }
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("a", 5);
             e.setValue("b", 6.0);
             v.setValue("3", e);
@@ -1062,7 +1064,7 @@ TEST_CASE("Execution/Structs/Basic/Types/Optional/Vector:  Bake", "[Execution][S
     CHECK(p.dictValue->at(2).value<double>("b") == 6.0);
 
 
-    const ghoul::Dictionary e;
+    const Dictionary e;
     const Parameters p2 = codegen::bake<Parameters>(e);
     CHECK(!p2.boolValue.has_value());
     CHECK(!p2.intValue.has_value());

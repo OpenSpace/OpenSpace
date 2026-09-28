@@ -76,7 +76,7 @@ Documentation ScreenSpaceImageLocal::Documentation() {
     );
 }
 
-ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary)
+ScreenSpaceImageLocal::ScreenSpaceImageLocal(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _texturePath(TexturePathInfo)
     , _textureIsDirty(_enabled)
@@ -110,13 +110,13 @@ void ScreenSpaceImageLocal::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
 
     if (!_isLoadingLazily) {
-        _texture = ghoul::io::texture::loadTexture(
+        _texture = io::texture::loadTexture(
             absPath(_texturePath),
             2,
-            ghoul::opengl::Texture::SamplerInit{
+            opengl::Texture::SamplerInit{
                 // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-                //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                //.filter = opengl::Texture::FilterMode::AnisotropicMipMap,
+                .filter = opengl::Texture::FilterMode::LinearMipMap
             }
         );
         _objectSize = _texture->dimensions();
@@ -137,13 +137,13 @@ void ScreenSpaceImageLocal::update() {
     }
 
     if (_textureIsDirty && !_texturePath.value().empty()) [[unlikely]] {
-        _texture = ghoul::io::texture::loadTexture(
+        _texture = io::texture::loadTexture(
             absPath(_texturePath),
             2,
-            ghoul::opengl::Texture::SamplerInit{
+            opengl::Texture::SamplerInit{
                 // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-                //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                //.filter = opengl::Texture::FilterMode::AnisotropicMipMap,
+                .filter = opengl::Texture::FilterMode::LinearMipMap
             }
         );
         _objectSize = _texture->dimensions();
@@ -151,7 +151,7 @@ void ScreenSpaceImageLocal::update() {
     }
 }
 
-void ScreenSpaceImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceImageLocal::bindTexture(opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
         unit.bind(*_texture);
     }

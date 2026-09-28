@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___TSP___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___TSP___H__
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <filesystem>
 #include <fstream>
 #include <ios>

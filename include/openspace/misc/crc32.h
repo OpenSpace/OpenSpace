@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +34,7 @@
 #include <string>
 #include <string_view>
 
-namespace ghoul {
+namespace openspace {
 
 /**
  * Computes the CRC-32 hash of the zero terminated string \p s. If the passed value \p s
@@ -81,7 +80,7 @@ unsigned int hashCRC32File(const std::string& file);
  */
 constexpr unsigned int operator ""_crc32(const char* s, size_t len);
 
-} // namespace ghoul
+} // namespace openspace
 
 #include "crc32.inl"
 

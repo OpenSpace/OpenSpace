@@ -78,7 +78,7 @@ public:
      */
     std::vector<LuaLibrary> luaLibraries() const override;
 
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void internalInitialize(const Dictionary& dictionary) override;
     void internalDeinitialize() override;
 
     /**

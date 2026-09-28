@@ -55,14 +55,14 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
 
 private:
     void startProcess();
     void stopProcess();
     void notifyEndpointListeners(const std::string& endpoint, bool exists);
 
-    std::unique_ptr<ghoul::Process> _process;
+    std::unique_ptr<Process> _process;
     BoolProperty _enabled;
     StringProperty _entryPoint;
     StringListProperty _directories;

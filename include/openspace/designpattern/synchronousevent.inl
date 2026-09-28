@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +24,12 @@
 
 #include <utility>
 
-namespace ghoul {
+namespace openspace {
 
 template <class... T>
-void Event<T...>::subscribe(std::string name, std::string topic, Callback callback) {
+void SynchronousEvent<T...>::subscribe(std::string name, std::string topic,
+                                       Callback callback)
+{
     auto it = _topics.find(topic);
     if (it == _topics.end()) {
         _topics.insert({ std::move(topic), { { std::move(name), std::move(callback) } }});
@@ -39,7 +40,7 @@ void Event<T...>::subscribe(std::string name, std::string topic, Callback callba
 }
 
 template <class... T>
-void Event<T...>::publish(const std::string& topic, T... message) {
+void SynchronousEvent<T...>::publish(const std::string& topic, T... message) {
     // If the topic exists...
     if (_topics.find(topic) != _topics.end()) {
         // ...go through all subscribers and send them the message
@@ -50,7 +51,9 @@ void Event<T...>::publish(const std::string& topic, T... message) {
 }
 
 template <class... T>
-void Event<T...>::unsubscribe(const std::string& name, const std::string& topic) {
+void SynchronousEvent<T...>::unsubscribe(const std::string& name,
+                                         const std::string& topic)
+{
     if (_topics.find(topic) != _topics.end()) {
         // Search through the whole array of subscribers to given topic and remove all
         // callbacks that the corresponds to the subscribers name
@@ -66,7 +69,7 @@ void Event<T...>::unsubscribe(const std::string& name, const std::string& topic)
 }
 
 template <class... T>
-void Event<T...>::unsubscribe(const std::string& name) {
+void SynchronousEvent<T...>::unsubscribe(const std::string& name) {
     // Search through all topics to erase all callbacks that belong to the object with
     // given name
     for (std::pair<const std::string, std::vector<Subscriber>>& topic : _topics) {
@@ -80,4 +83,4 @@ void Event<T...>::unsubscribe(const std::string& name) {
     }
 }
 
-} // namespace ghoul
+} // namespace openspace

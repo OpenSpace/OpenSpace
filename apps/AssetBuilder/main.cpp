@@ -38,9 +38,9 @@
 using namespace openspace;
 
 int main(int argc, char* argv[]) {
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
+    logging::LogManager::initialize(
+        logging::LogLevel::Debug,
+        logging::LogManager::ImmediateFlush::Yes
     );
 
     initialize();
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
+        filesystem::FileSystem::Override::Yes
     );
 
     std::filesystem::path cfgPath = findConfiguration();

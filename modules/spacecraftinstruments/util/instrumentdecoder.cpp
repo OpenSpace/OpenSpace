@@ -43,9 +43,9 @@ namespace {
 
 namespace openspace {
 
-InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
+InstrumentDecoder::InstrumentDecoder(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _type = ghoul::toUpperCase(p.detectorType);
+    _type = toUpperCase(p.detectorType);
 
     if (p.stopCommand.has_value() && _type == "SCANNER") {
         _stopCommand = *p.stopCommand;

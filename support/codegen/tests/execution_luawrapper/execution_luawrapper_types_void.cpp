@@ -32,7 +32,7 @@
 #include <array>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     [[codegen::luawrap]] void funcVoid() {
@@ -42,7 +42,7 @@ namespace {
 
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  void", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncVoid;
+    LuaLibrary::Function func = codegen::lua::FuncVoid;
     CHECK(func.name == "funcVoid");
     CHECK(func.arguments.empty());
     CHECK(func.returnType.empty());

@@ -89,7 +89,7 @@ TouchModule::~TouchModule() {
     // intentionally left empty
 }
 
-void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
+void TouchModule::internalInitialize(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     _tuioPort = p.tuioPort.value_or(_tuioPort);

@@ -51,9 +51,9 @@ VersionChecker::~VersionChecker() {
 }
 
 void VersionChecker::requestLatestVersion(const std::string& url) {
-    using GCC = ghoul::systemcapabilities::GeneralCapabilitiesComponent;
+    using GCC = systemcapabilities::GeneralCapabilitiesComponent;
     std::string operatingSystem = SysCap.component<GCC>().operatingSystemString();
-    operatingSystem = ghoul::encodeUrl(operatingSystem);
+    operatingSystem = encodeUrl(operatingSystem);
 
     std::string builtInProfiles = absPath("${PROFILES}").string();
 
@@ -107,11 +107,11 @@ void VersionChecker::cancel() {
         std::istringstream versionData(versionString);
 
         std::string token;
-        ghoul::getline(versionData, token, '.');
+        openspace::getline(versionData, token, '.');
         const int major = std::atoi(token.c_str());
-        ghoul::getline(versionData, token, '.');
+        openspace::getline(versionData, token, '.');
         const int minor = std::atoi(token.c_str());
-        ghoul::getline(versionData, token, '.');
+        openspace::getline(versionData, token, '.');
         const int patch = std::atoi(token.c_str());
 
         _latestVersion = { major, minor, patch };

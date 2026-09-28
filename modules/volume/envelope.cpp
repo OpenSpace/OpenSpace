@@ -24,7 +24,7 @@
 
 #include <modules/volume/envelope.h>
 
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/lua/lua_helper.h>
 #include <algorithm>
 #include <cmath>
@@ -214,12 +214,12 @@ nlohmann::json Envelope::jsonEnvelope() const {
 void Envelope::setEnvelopeLuaTable(lua_State* state) const {
     for (auto iter = _points.begin(); iter != _points.end(); iter++) {
         lua_newtable(state);
-        ghoul::lua::push(state, iter->colorHex);
+        lua::push(state, iter->colorHex);
         lua_setfield(state, -2, "color");
         lua_newtable(state);
-        ghoul::lua::push(state, iter->position.first);
+        lua::push(state, iter->position.first);
         lua_setfield(state, -2, "x");
-        ghoul::lua::push(state, iter->position.second);
+        lua::push(state, iter->position.second);
         lua_setfield(state, -2, "y");
         lua_setfield(state, -2, "position");
         lua_setfield(

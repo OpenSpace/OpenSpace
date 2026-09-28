@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +27,10 @@
 #include <openspace/misc/dictionary.h>
 #include <openspace/glm.h>
 
+using namespace openspace;
+
 TEST_CASE("Dictionary: bool", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", true);
     d.setValue("b", false);
 
@@ -43,7 +44,7 @@ TEST_CASE("Dictionary: bool", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: int", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", 1);
     d.setValue("b", 2);
     d.setValue("c", 3);
@@ -62,7 +63,7 @@ TEST_CASE("Dictionary: int", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: double", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", 1.1);
     d.setValue("b", 2.2);
     d.setValue("c", 3.3);
@@ -84,7 +85,7 @@ TEST_CASE("Dictionary: std::string", "[dictionary]") {
     using namespace std::string_literals;
     using namespace std::string_view_literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", "abc"s);
     d.setValue("b", "def"s);
     d.setValue("c", "ghi"s);
@@ -106,23 +107,23 @@ TEST_CASE("Dictionary: Dictionary", "[dictionary]") {
     using namespace std::string_literals;
     using namespace std::string_view_literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("foo", 1);
         e.setValue("bar", 2.2);
         e.setValue("foobar", "abc"s);
         d.setValue("a", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("foo", 3);
         e.setValue("bar", 4.4);
         e.setValue("foobar", "def"s);
         d.setValue("b", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("foo", 5);
         e.setValue("bar", 6.6);
         e.setValue("foobar", "ghi"s);
@@ -131,8 +132,8 @@ TEST_CASE("Dictionary: Dictionary", "[dictionary]") {
 
     {
         REQUIRE(d.hasKey("a"));
-        REQUIRE(d.hasValue<ghoul::Dictionary>("a"));
-        const ghoul::Dictionary e = d.value<ghoul::Dictionary>("a");
+        REQUIRE(d.hasValue<Dictionary>("a"));
+        const Dictionary e = d.value<Dictionary>("a");
         REQUIRE(e.hasKey("foo"));
         REQUIRE(e.hasValue<int>("foo"));
         CHECK(e.value<int>("foo") == 1);
@@ -145,8 +146,8 @@ TEST_CASE("Dictionary: Dictionary", "[dictionary]") {
     }
     {
         REQUIRE(d.hasKey("b"));
-        REQUIRE(d.hasValue<ghoul::Dictionary>("b"));
-        const ghoul::Dictionary e = d.value<ghoul::Dictionary>("b");
+        REQUIRE(d.hasValue<Dictionary>("b"));
+        const Dictionary e = d.value<Dictionary>("b");
         REQUIRE(e.hasKey("foo"));
         REQUIRE(e.hasValue<int>("foo"));
         CHECK(e.value<int>("foo") == 3);
@@ -159,8 +160,8 @@ TEST_CASE("Dictionary: Dictionary", "[dictionary]") {
     }
     {
         REQUIRE(d.hasKey("c"));
-        REQUIRE(d.hasValue<ghoul::Dictionary>("c"));
-        const ghoul::Dictionary e = d.value<ghoul::Dictionary>("c");
+        REQUIRE(d.hasValue<Dictionary>("c"));
+        const Dictionary e = d.value<Dictionary>("c");
         REQUIRE(e.hasKey("foo"));
         REQUIRE(e.hasValue<int>("foo"));
         CHECK(e.value<int>("foo") == 5);
@@ -174,7 +175,7 @@ TEST_CASE("Dictionary: Dictionary", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: std::vector<int>", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", std::vector<int>{ 1, 2, 3 });
     d.setValue("b", std::vector<int>{ 4, 5, 6 });
     d.setValue("c", std::vector<int>{ 7, 8, 9 });
@@ -193,7 +194,7 @@ TEST_CASE("Dictionary: std::vector<int>", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: std::vector<double>", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", std::vector<double>{ 1.1, 2.2, 3.3 });
     d.setValue("b", std::vector<double>{ 4.4, 5.5, 6.6 });
     d.setValue("c", std::vector<double>{ 7.7, 8.8, 9.9 });
@@ -214,7 +215,7 @@ TEST_CASE("Dictionary: std::vector<double>", "[dictionary]") {
 TEST_CASE("Dictionary: std::vector<std::string>", "[dictionary]") {
     using namespace std::string_literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", std::vector<std::string>{ "abc"s, "def"s, "ghi"s });
     d.setValue("b", std::vector<std::string>{ "jkl"s, "mno"s, "pqr"s });
     d.setValue("c", std::vector<std::string>{ "stu"s, "vwx"s, "yzz" });
@@ -242,7 +243,7 @@ TEST_CASE("Dictionary: std::vector<std::string>", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::ivec2", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::ivec2(1, 2));
     d.setValue("b", glm::ivec2(3, 4));
     d.setValue("c", glm::ivec2(5, 6));
@@ -261,7 +262,7 @@ TEST_CASE("Dictionary: glm::ivec2", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::ivec3", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::ivec3(1, 2, 3));
     d.setValue("b", glm::ivec3(4, 5, 6));
     d.setValue("c", glm::ivec3(7, 8, 9));
@@ -280,7 +281,7 @@ TEST_CASE("Dictionary: glm::ivec3", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::ivec4", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::ivec4(1, 2, 3, 4));
     d.setValue("b", glm::ivec4(5, 6, 7, 8));
     d.setValue("c", glm::ivec4(9, 10, 11, 12));
@@ -299,7 +300,7 @@ TEST_CASE("Dictionary: glm::ivec4", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dvec2", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::dvec2(1.1, 2.2));
     d.setValue("b", glm::dvec2(3.3, 4.4));
     d.setValue("c", glm::dvec2(5.5, 6.6));
@@ -318,7 +319,7 @@ TEST_CASE("Dictionary: glm::dvec2", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dvec3", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::dvec3(1.1, 2.2, 3.3));
     d.setValue("b", glm::dvec3(4.4, 5.5, 6.6));
     d.setValue("c", glm::dvec3(7.7, 8.8, 9.9));
@@ -337,7 +338,7 @@ TEST_CASE("Dictionary: glm::dvec3", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dvec4", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::dvec4(1.1, 2.2, 3.3, 4.4));
     d.setValue("b", glm::dvec4(5.5, 6.6, 7.7, 8.8));
     d.setValue("c", glm::dvec4(9.9, 10.10, 11.11, 12.12));
@@ -356,7 +357,7 @@ TEST_CASE("Dictionary: glm::dvec4", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dmat2x2", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::dmat2x2(1.1, 2.2, 3.3, 4.4));
     d.setValue("b", glm::dmat2x2(5.5, 6.6, 7.7, 8.8));
     d.setValue("c", glm::dmat2x2(9.9, 10.10, 11.11, 12.12));
@@ -375,7 +376,7 @@ TEST_CASE("Dictionary: glm::dmat2x2", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dmat2x3", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::dmat2x3(1.1, 2.2, 3.3, 4.4, 5.5, 6.6));
     d.setValue("b", glm::dmat2x3(7.7, 8.8, 9.9, 10.10, 11.11, 12.12));
     d.setValue("c", glm::dmat2x3(13.13, 14.14, 15.15, 16.16, 17.17, 18.18));
@@ -397,7 +398,7 @@ TEST_CASE("Dictionary: glm::dmat2x3", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dmat2x4", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::dmat2x4(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8));
     d.setValue(
         "b",
@@ -431,7 +432,7 @@ TEST_CASE("Dictionary: glm::dmat2x4", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dmat3x2", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::dmat3x2(1.1, 2.2, 3.3, 4.4, 5.5, 6.6));
     d.setValue("b", glm::dmat3x2(7.7, 8.8, 9.9, 10.10, 11.11, 12.12));
     d.setValue("c", glm::dmat3x2(13.13, 14.14, 15.15, 16.16, 17.17, 18.18));
@@ -457,7 +458,7 @@ TEST_CASE("Dictionary: glm::dmat3x2", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dmat3x3", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::dmat3x3(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9));
     d.setValue(
         "b",
@@ -491,7 +492,7 @@ TEST_CASE("Dictionary: glm::dmat3x3", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dmat3x4", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue(
         "a",
         glm::dmat3x4(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10, 11.11, 12.12)
@@ -548,7 +549,7 @@ TEST_CASE("Dictionary: glm::dmat3x4", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dmat4x2", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("a", glm::dmat4x2(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8));
     d.setValue(
         "b",
@@ -581,7 +582,7 @@ TEST_CASE("Dictionary: glm::dmat4x2", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dmat4x3", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue(
         "a",
         glm::dmat4x3(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10, 11.11, 12.12)
@@ -634,7 +635,7 @@ TEST_CASE("Dictionary: glm::dmat4x3", "[dictionary]") {
 }
 
 TEST_CASE("Dictionary: glm::dmat4x4", "[dictionary]") {
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue(
         "a",
         glm::dmat4x4(

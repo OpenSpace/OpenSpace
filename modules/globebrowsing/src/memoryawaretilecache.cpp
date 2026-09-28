@@ -79,9 +79,9 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    GLenum toGlTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
+    GLenum toGlTextureFormat(GLenum glType, opengl::Texture::Format format) {
         switch (format) {
-            case ghoul::opengl::Texture::Format::Red:
+            case opengl::Texture::Format::Red:
                 switch (glType) {
                     case GL_BYTE:           return GL_R8;
                     case GL_UNSIGNED_BYTE:  return GL_R8;
@@ -89,9 +89,9 @@ namespace {
                     case GL_UNSIGNED_INT:   return GL_R32UI;
                     case GL_FLOAT:          return GL_R32F;
                     case GL_HALF_FLOAT:     return GL_R16F;
-                    default:                throw ghoul::MissingCaseException();
+                    default:                throw MissingCaseException();
                 }
-            case ghoul::opengl::Texture::Format::RG:
+            case opengl::Texture::Format::RG:
                 switch (glType) {
                     case GL_BYTE:           return GL_RG8;
                     case GL_UNSIGNED_BYTE:  return GL_RG8;
@@ -99,9 +99,9 @@ namespace {
                     case GL_UNSIGNED_INT:   return GL_RG32UI;
                     case GL_FLOAT:          return GL_RG32F;
                     case GL_HALF_FLOAT:     return GL_RG16F;
-                    default:                throw ghoul::MissingCaseException();
+                    default:                throw MissingCaseException();
                 }
-            case ghoul::opengl::Texture::Format::RGB:
+            case opengl::Texture::Format::RGB:
                 switch (glType) {
                     case GL_BYTE:           return GL_RGB8;
                     case GL_UNSIGNED_BYTE:  return GL_RGB8;
@@ -109,9 +109,9 @@ namespace {
                     case GL_UNSIGNED_INT:   return GL_RGB32UI;
                     case GL_FLOAT:          return GL_RGB32F;
                     case GL_HALF_FLOAT:     return GL_RGB16F;
-                    default:                throw ghoul::MissingCaseException();
+                    default:                throw MissingCaseException();
                 }
-            case ghoul::opengl::Texture::Format::RGBA:
+            case opengl::Texture::Format::RGBA:
                 switch (glType) {
                     case GL_BYTE:           return GL_RGBA8;
                     case GL_UNSIGNED_BYTE:  return GL_RGBA8;
@@ -119,9 +119,9 @@ namespace {
                     case GL_UNSIGNED_INT:   return GL_RGBA32UI;
                     case GL_FLOAT:          return GL_RGBA32F;
                     case GL_HALF_FLOAT:     return GL_RGBA16F;
-                    default:                throw ghoul::MissingCaseException();
+                    default:                throw MissingCaseException();
                 }
-            case ghoul::opengl::Texture::Format::BGR:
+            case opengl::Texture::Format::BGR:
                 switch (glType) {
                     case GL_BYTE:           return GL_RGB8;
                     case GL_UNSIGNED_BYTE:  return GL_RGB8;
@@ -129,9 +129,9 @@ namespace {
                     case GL_UNSIGNED_INT:   return GL_RGB32UI;
                     case GL_FLOAT:          return GL_RGB32F;
                     case GL_HALF_FLOAT:     return GL_RGB16F;
-                    default:                throw ghoul::MissingCaseException();
+                    default:                throw MissingCaseException();
                 }
-            case ghoul::opengl::Texture::Format::BGRA:
+            case opengl::Texture::Format::BGRA:
                 switch (glType) {
                     case GL_BYTE:           return GL_RGBA8;
                     case GL_UNSIGNED_BYTE:  return GL_RGBA8;
@@ -139,10 +139,10 @@ namespace {
                     case GL_UNSIGNED_INT:   return GL_RGBA32UI;
                     case GL_FLOAT:          return GL_RGBA32F;
                     case GL_HALF_FLOAT:     return GL_RGBA16F;
-                    default:                throw ghoul::MissingCaseException();
+                    default:                throw MissingCaseException();
                 }
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }
 } // namespace
@@ -169,29 +169,29 @@ void MemoryAwareTileCache::TextureContainer::reset() {
     _textures.clear();
     _freeTexture = 0;
 
-    using namespace ghoul::systemcapabilities;
+    using namespace openspace::systemcapabilities;
 
-    const ghoul::opengl::Texture::FilterMode mode =
+    const opengl::Texture::FilterMode mode =
         OpenGLCap.gpuVendor() == OpenGLCapabilitiesComponent::Vendor::AmdATI ?
-        ghoul::opengl::Texture::FilterMode::Linear :
-        ghoul::opengl::Texture::FilterMode::AnisotropicMipMap;
+        opengl::Texture::FilterMode::Linear :
+        opengl::Texture::FilterMode::AnisotropicMipMap;
 
     for (size_t i = 0; i < _numTextures; i++) {
         ZoneScopedN("Texture");
 
         GLenum internalFormat =
-            toGlTextureFormat(_initData.glType, _initData.ghoulTextureFormat);
-        auto tex = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
+            toGlTextureFormat(_initData.glType, _initData.textureFormat);
+        auto tex = std::make_unique<opengl::Texture>(
+            opengl::Texture::FormatInit {
                 .dimensions = _initData.dimensions,
                 .type = GL_TEXTURE_2D,
-                .format = _initData.ghoulTextureFormat,
+                .format = _initData.textureFormat,
                 .dataType = _initData.glType,
                 .internalFormat = internalFormat
             },
-            ghoul::opengl::Texture::SamplerInit {
+            opengl::Texture::SamplerInit {
                 .filter = mode,
-                .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                .wrapping = opengl::Texture::WrappingMode::ClampToEdge
             }
         );
         _textures.push_back(std::move(tex));
@@ -205,9 +205,9 @@ void MemoryAwareTileCache::TextureContainer::reset(size_t numTextures) {
     reset();
 }
 
-ghoul::opengl::Texture* MemoryAwareTileCache::TextureContainer::getTextureIfFree() {
+opengl::Texture* MemoryAwareTileCache::TextureContainer::getTextureIfFree() {
     if (_freeTexture < _textures.size()) {
-        ghoul::opengl::Texture* texture = _textures[_freeTexture].get();
+        opengl::Texture* texture = _textures[_freeTexture].get();
         _freeTexture++;
         return texture;
     }
@@ -307,7 +307,7 @@ void MemoryAwareTileCache::assureTextureContainerExists(
 
 void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
     ZoneScoped;
-    ghoul_assert(!_textureContainerMap.empty(), "Texture containers must exist");
+    assert_msg(!_textureContainerMap.empty(), "Texture containers must exist");
 
     LDEBUG("Resetting tile cache size");
 
@@ -377,13 +377,12 @@ Tile MemoryAwareTileCache::get(const ProviderTileKey& key) {
     }
 }
 
-ghoul::opengl::Texture* MemoryAwareTileCache::texture(const TileTextureInitData& initData)
-{
+opengl::Texture* MemoryAwareTileCache::texture(const TileTextureInitData& initData) {
     // If the texture type doesn't exist among the texture containers we need to create it
     const TileTextureInitData::HashKey initDataKey = initData.hashKey;
     assureTextureContainerExists(initData);
     // Now that the texture container exists, check if there are any unused textures
-    ghoul::opengl::Texture* texture =
+    opengl::Texture* texture =
         _textureContainerMap[initDataKey].first->getTextureIfFree();
     // Second option. No more textures available. Pop from the LRU cache
     if (!texture) {
@@ -400,20 +399,20 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile rawTile
     }
 
     const TileTextureInitData& initData = *rawTile.textureInitData;
-    ghoul::opengl::Texture* tex = texture(initData);
+    opengl::Texture* tex = texture(initData);
 
     const size_t previousExpectedDataSize = tex->expectedPixelDataSize();
     tex->setPixelData(
         rawTile.imageData.get(),
         1,
         initData.shouldAllocateDataOnCPU ?
-            ghoul::opengl::Texture::KeepMemory::Yes :
-            ghoul::opengl::Texture::KeepMemory::No
+            opengl::Texture::KeepMemory::Yes :
+            opengl::Texture::KeepMemory::No
     );
     rawTile.imageData = nullptr;
     [[maybe_unused]] const size_t expectedSize = tex->expectedPixelDataSize();
     const size_t numBytes = rawTile.textureInitData->totalNumBytes;
-    ghoul_assert(expectedSize == numBytes, "Pixel data size is incorrect");
+    assert_msg(expectedSize == numBytes, "Pixel data size is incorrect");
     _numTextureBytesAllocatedOnCPU += numBytes - previousExpectedDataSize;
     Tile tile{ tex, std::move(rawTile.tileMetaData), Tile::Status::OK };
     const TileTextureInitData::HashKey initDataKey = initData.hashKey;

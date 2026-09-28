@@ -69,7 +69,7 @@ Documentation DashboardTextItem::Documentation() {
     );
 }
 
-DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary)
+DashboardTextItem::DashboardTextItem(const Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, "Mono")
     , _fontSize(FontSizeInfo, 10.f, 6.f, 144.f, 1.f)

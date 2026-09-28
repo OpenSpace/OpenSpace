@@ -88,7 +88,7 @@ Documentation RenderablePlaneImageLocal::Documentation() {
     );
 }
 
-RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
+RenderablePlaneImageLocal::RenderablePlaneImageLocal(const Dictionary& dictionary)
     : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
     , _texturePath(TextureInfo)
     , _rightTexturePath(RightTextureInfo)
@@ -97,7 +97,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath = p.texture.string();
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+    _textureFile = std::make_unique<filesystem::File>(_texturePath.value());
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
     _texturePath.onChange([this]() { loadTexture(); });
@@ -107,7 +107,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
         _isStereo = true;
         _rightTexturePath = (*p.rightTexture).string();
         _rightTextureFile =
-            std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
+            std::make_unique<filesystem::File>(_rightTexturePath.value());
         _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });
 
         _rightTexturePath.onChange([this]() { loadTexture(); });
@@ -154,7 +154,7 @@ void RenderablePlaneImageLocal::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderablePlaneImageLocal::bindTexture(opengl::TextureUnit& unit) {
     switch (global::windowDelegate->frustumMode()) {
         case WindowDelegate::Frustum::Mono:
         case WindowDelegate::Frustum::LeftEye:
@@ -209,19 +209,18 @@ void RenderablePlaneImageLocal::loadTexture() {
         _isStereo = true;
     }
 
-    ghoul::opengl::Texture* t = _texture;
+    opengl::Texture* t = _texture;
 
-    const unsigned int hash = ghoul::hashCRC32File(_texturePath);
+    const unsigned int hash = hashCRC32File(_texturePath);
 
     _texture = BaseModule::TextureManager.request(
         std::to_string(hash),
-        [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::texture::loadTexture(
+        [path = _texturePath.value()]() -> std::unique_ptr<opengl::Texture> {
+            std::unique_ptr<opengl::Texture> texture = io::texture::loadTexture(
                     absPath(path),
                     2,
-                    ghoul::opengl::Texture::SamplerInit{
-                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                    opengl::Texture::SamplerInit{
+                        .filter = opengl::Texture::FilterMode::LinearMipMap
                     }
                 );
 
@@ -235,25 +234,24 @@ void RenderablePlaneImageLocal::loadTexture() {
 
     BaseModule::TextureManager.release(t);
 
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+    _textureFile = std::make_unique<filesystem::File>(_texturePath.value());
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
     if (_isStereo) {
-        ghoul::opengl::Texture* t = _rightTexture;
+        opengl::Texture* t = _rightTexture;
 
-        const unsigned int hash = ghoul::hashCRC32File(_rightTexturePath);
+        const unsigned int hash = hashCRC32File(_rightTexturePath);
 
         _rightTexture = BaseModule::TextureManager.request(
             std::to_string(hash),
             [path = _rightTexturePath.value()]() ->
-                std::unique_ptr<ghoul::opengl::Texture>
+                std::unique_ptr<opengl::Texture>
             {
-                std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::texture::loadTexture(
+                std::unique_ptr<opengl::Texture> texture = io::texture::loadTexture(
                         path,
                         2,
-                        ghoul::opengl::Texture::SamplerInit{
-                            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                        opengl::Texture::SamplerInit{
+                            .filter = opengl::Texture::FilterMode::LinearMipMap
                         }
                     );
 
@@ -267,8 +265,7 @@ void RenderablePlaneImageLocal::loadTexture() {
 
         BaseModule::TextureManager.release(t);
 
-        _rightTextureFile =
-            std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
+        _rightTextureFile = std::make_unique<filesystem::File>(_rightTexturePath.value());
         _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 

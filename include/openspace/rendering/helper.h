@@ -26,17 +26,16 @@
 #define __OPENSPACE_CORE___HELPER___H__
 
 #include <openspace/glm.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/uniformcache.h>
 #include <memory>
 #include <vector>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
-
 namespace openspace {
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    } // namespace opengl
     class LightSource;
     struct RenderData;
 } // namespace openspace
@@ -51,7 +50,7 @@ void deinitialize();
 glm::mat4 ortho(const glm::vec2& position, const glm::vec2& size,
     Anchor anchor = Anchor::NW);
 
-void renderBox(ghoul::opengl::ProgramObject& program, GLint orthoLocation,
+void renderBox(opengl::ProgramObject& program, GLint orthoLocation,
     GLint colorLocation, const glm::vec2& position, const glm::vec2& size,
     const glm::vec4& color, Anchor anchor = Anchor::NW);
 
@@ -59,19 +58,19 @@ void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4
     Anchor anchor = Anchor::NW);
 
 void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
-    const ghoul::opengl::Texture& texture, Anchor anchor = Anchor::NW);
+    const opengl::Texture& texture, Anchor anchor = Anchor::NW);
 
 void renderLine(const glm::vec2& startPosition, const glm::vec2& endPosition,
     const glm::vec2& size, const glm::vec4& startColor, const glm::vec4& endColor);
 
 struct Shaders {
     struct {
-        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        std::unique_ptr<opengl::ProgramObject> program;
         UniformCache(tex, hasTexture, shouldFlipTexture, proj, color) cache;
     } xyuvrgba;
 
     struct {
-        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        std::unique_ptr<opengl::ProgramObject> program;
         UniformCache(tex, hasTexture, shouldFlipTexture, proj, color) cache;
     } screenfilling;
 };

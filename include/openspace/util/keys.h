@@ -398,17 +398,15 @@ constexpr inline bool isKeypadKey(Key key) noexcept {
 KeyWithModifier stringToKey(const std::string& str);
 std::string keyToString(KeyWithModifier keyWithModifier);
 
+template <>
+std::string to_string(const openspace::Key& key);
+
+template <>
+std::string to_string(const openspace::KeyModifier& mod);
+
+template <>
+std::string to_string(const openspace::KeyWithModifier& keyMod);
+
 } // namespace openspace
-
-namespace ghoul {
-    template <>
-    std::string to_string(const openspace::Key& key);
-
-    template <>
-    std::string to_string(const openspace::KeyModifier& mod);
-
-    template <>
-    std::string to_string(const openspace::KeyWithModifier& keyMod);
-} // namespace ghoul
 
 #endif // __OPENSPACE_CORE___KEYS___H__

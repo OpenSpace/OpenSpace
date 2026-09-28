@@ -43,21 +43,21 @@ VideoModule::VideoModule()
     : OpenSpaceModule(VideoModule::Name)
 {}
 
-void VideoModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<TileProvider>* fTileProvider =
+void VideoModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<TileProvider>* fTileProvider =
         FactoryManager::ref().factory<TileProvider>();
-    ghoul_assert(fTileProvider, "TileProvider factory was not created");
+    assert_msg(fTileProvider, "TileProvider factory was not created");
     fTileProvider->registerClass<VideoTileProvider>("VideoTileProvider");
 
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
+    TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
+    assert_msg(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
     fSsRenderable->registerClass<ScreenSpaceVideo>("ScreenSpaceVideo");
 
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    assert_msg(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderableVideoSphere>("RenderableVideoSphere");
     fRenderable->registerClass<RenderableVideoPlane>("RenderableVideoPlane");
 }

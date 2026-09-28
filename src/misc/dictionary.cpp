@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +31,7 @@
 #include <utility>
 
 namespace {
-    using namespace ghoul;
+    using namespace openspace;
 
     // Boolean constant used to check whether a value T is part of a parameter pack Ts
     template <typename T, typename U> struct is_one_of;
@@ -77,7 +76,7 @@ namespace {
     };
 } // namespace
 
-namespace ghoul {
+namespace openspace {
 
 bool Dictionary::operator==(const Dictionary& rhs) const noexcept {
     return _storage == rhs._storage;
@@ -89,7 +88,7 @@ bool Dictionary::operator!=(const Dictionary& rhs) const noexcept {
 
 template <SupportedByDictionary T>
 void Dictionary::setValue(std::string key, T value) {
-    ghoul_assert(!key.empty(), "Key must not be empty");
+    assert_msg(!key.empty(), "Key must not be empty");
     if constexpr (isDirectType<T>::value) {
         _storage.insert_or_assign(std::move(key), std::move(value));
     }
@@ -120,7 +119,7 @@ void Dictionary::setValue(std::string key, T value) {
 
 template <SupportedByDictionary T>
 T Dictionary::value(std::string_view key) const {
-    ghoul_assert(!key.empty(), "Key must not be empty");
+    assert_msg(!key.empty(), "Key must not be empty");
 
     auto it = _storage.find(key);
     if (it == _storage.end()) {
@@ -211,7 +210,7 @@ T Dictionary::value(std::string_view key) const {
 
 template <SupportedByDictionary T>
 bool Dictionary::hasValue(std::string_view key) const {
-    ghoul_assert(!key.empty(), "Key must not be empty");
+    assert_msg(!key.empty(), "Key must not be empty");
 
     auto it = _storage.find(key);
     if (it == _storage.end()) {
@@ -259,7 +258,7 @@ bool Dictionary::hasValue(std::string_view key) const {
 }
 
 bool Dictionary::hasKey(std::string_view key) const {
-    ghoul_assert(!key.empty(), "Key must not be empty");
+    assert_msg(!key.empty(), "Key must not be empty");
 
     auto it = _storage.find(key);
     return it != _storage.end();
@@ -384,4 +383,4 @@ template bool Dictionary::hasValue<glm::dmat4x2>(std::string_view) const;
 template bool Dictionary::hasValue<glm::dmat4x3>(std::string_view) const;
 template bool Dictionary::hasValue<glm::dmat4x4>(std::string_view) const;
 
-} // namespace ghoul
+} // namespace openspace

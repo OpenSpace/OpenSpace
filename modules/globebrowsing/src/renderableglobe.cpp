@@ -571,12 +571,12 @@ namespace {
         };
 
         // A list of layers that should be added to the globe.
-        std::optional<std::map<Group, std::vector<ghoul::Dictionary>>> layers
+        std::optional<std::map<Group, std::vector<Dictionary>>> layers
             [[codegen::reference("globebrowsing_layer")]];
 
         // Specifies information about planetary labels that can be rendered on the
         // object's surface.
-        std::optional<ghoul::Dictionary> labels
+        std::optional<Dictionary> labels
             [[codegen::reference("globebrowsing_globelabelscomponent")]];
 
         struct ShadowGroup {
@@ -599,10 +599,10 @@ namespace {
         std::optional<ShadowGroup> shadowGroup;
 
         // Details about the rings of the globe, if it has any.
-        std::optional<ghoul::Dictionary> rings
+        std::optional<Dictionary> rings
             [[codegen::reference("globebrowsing_ringscomponent")]];
 
-        std::optional<ghoul::Dictionary> shadows
+        std::optional<Dictionary> shadows
             [[codegen::reference("globebrowsing_shadowscomponent")]];
     };
 } // namespace
@@ -623,7 +623,7 @@ Documentation RenderableGlobe::Documentation() {
     );
 }
 
-RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
+RenderableGlobe::RenderableGlobe(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _performShading(PerformShadingInfo, true)
     , _useAccurateNormals(AccurateNormalsInfo, false)
@@ -675,7 +675,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     setInteractionSphere(boundingSphere());
 
     // Init layer manager
-    std::map<layers::Group::ID, std::vector<ghoul::Dictionary>> layers;
+    std::map<layers::Group::ID, std::vector<Dictionary>> layers;
     if (p.layers.has_value()) {
         for (const auto& [key, value] : *p.layers) {
             layers[codegen::map<layers::Group::ID>(key)] = value;
@@ -933,7 +933,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks&) {
                 }
             }
         }
-        catch (const ghoul::opengl::TextureUnit::TextureUnitError&) {
+        catch (const opengl::TextureUnit::TextureUnitError&) {
             const std::string& layer =
                 _lastChangedLayer ? _lastChangedLayer->guiName() : "";
 
@@ -970,7 +970,7 @@ void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {
     try {
         _globeLabelsComponent.draw(data);
     }
-    catch (const ghoul::opengl::TextureUnit::TextureUnitError& e) {
+    catch (const opengl::TextureUnit::TextureUnitError& e) {
         LERROR(std::format("Error on drawing globe labels '{}'", e.message));
     }
 
@@ -987,7 +987,7 @@ void RenderableGlobe::update(const UpdateData& data) {
 
         _localRenderer.program->setUniform("xSegments", _grid.xSegments);
 
-        ghoul::opengl::updateUniformLocations(
+        opengl::updateUniformLocations(
             *_localRenderer.program,
             _localRenderer.uniformCache
         );
@@ -1003,7 +1003,7 @@ void RenderableGlobe::update(const UpdateData& data) {
             glm::vec3(_ellipsoid.radii() * _ellipsoid.radii())
         );
 
-        ghoul::opengl::updateUniformLocations(
+        opengl::updateUniformLocations(
             *_globalRenderer.program,
             _globalRenderer.uniformCache
         );
@@ -1155,7 +1155,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
             // accurate shading)  [maybe]
             // It's easier to just try to set it and ignore the error, since this is only
             // happening on a few frames
-            using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+            using IgnoreError = opengl::ProgramObject::IgnoreError;
             _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
             _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
             _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
@@ -1195,7 +1195,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         const float dsf = static_cast<float>(
             _currentLodScaleFactor * _ellipsoid.minimumRadius()
         );
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        using IgnoreError = opengl::ProgramObject::IgnoreError;
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
         _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
@@ -1217,7 +1217,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         const float dsf = static_cast<float>(
             _currentLodScaleFactor * _ellipsoid.minimumRadius()
         );
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        using IgnoreError = opengl::ProgramObject::IgnoreError;
         _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
         _localRenderer.program->setUniform("distanceScaleFactor", dsf);
         _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
@@ -1252,7 +1252,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
             _cachedInverseModelTransform * glm::dvec4(data.camera.position(), 1.0)
         );
 
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        using IgnoreError = opengl::ProgramObject::IgnoreError;
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
         // The cameraPosition is not used if a globe only has a solid color, but it would
         // be costlier to figure that out and will only trigger rarely, so instead we just
@@ -1316,7 +1316,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         const glm::vec3 directionToSunObjSpace(_cachedInverseModelTransform *
             glm::dvec4(directionToSunWorldSpace, 0.0));
 
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        using IgnoreError = opengl::ProgramObject::IgnoreError;
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
         _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
@@ -1461,7 +1461,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     TracyGpuZone("renderChunkGlobally");
 
     const TileIndex& tileIndex = chunk.tileIndex;
-    ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
+    opengl::ProgramObject& program = *_globalRenderer.program;
 
     std::array<LayerGroup*, LayerManager::NumLayerGroups> layerGroups =
         _layerManager.layerGroups();
@@ -1471,13 +1471,10 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     // Setup shadow mapping uniforms
     std::vector<glm::dmat4> lightViewProjections;
-    std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
+    std::vector<std::pair<opengl::TextureUnit, GLuint>> depthmapTextureUnits;
     for (const DepthMapData& depthData : depthMapData) {
         lightViewProjections.push_back(depthData.viewProjection);
-        depthmapTextureUnits.emplace_back(
-            ghoul::opengl::TextureUnit(),
-            depthData.depthMap
-        );
+        depthmapTextureUnits.emplace_back(opengl::TextureUnit(), depthData.depthMap);
     }
 
     std::vector<GLint> boundUnits;
@@ -1515,7 +1512,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         // needed if a globe only has `SolidColor` layers, which is pretty rare, but a
         // check to see if we need it would need to iterate over all layers, which would
         // be relatively expensive
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        using IgnoreError = opengl::ProgramObject::IgnoreError;
         program.setIgnoreUniformLocationError(IgnoreError::Yes);
         program.setUniform("chunkLevel", chunk.tileIndex.level);
         program.setIgnoreUniformLocationError(IgnoreError::No);
@@ -1541,8 +1538,8 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     }
 
     // Shadow Mapping
-    ghoul::opengl::TextureUnit ringTextureColorUnit;
-    ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
+    opengl::TextureUnit ringTextureColorUnit;
+    opengl::TextureUnit ringTextureTransparencyUnit;
     if (_shadowMappingProperties.shadowMapping && _performShading) {
         // Bind ring textures for direct projection when rings component is available
         if (_ringsComponent && _ringsComponent->isEnabled()) {
@@ -1587,7 +1584,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     TracyGpuZone("renderChunkLocally");
 
     const TileIndex& tileIndex = chunk.tileIndex;
-    ghoul::opengl::ProgramObject& program = *_localRenderer.program;
+    opengl::ProgramObject& program = *_localRenderer.program;
 
     const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
         _layerManager.layerGroups();
@@ -1675,8 +1672,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
 
     // Shadow Mapping
-    ghoul::opengl::TextureUnit ringTextureColorUnit;
-    ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
+    opengl::TextureUnit ringTextureColorUnit;
+    opengl::TextureUnit ringTextureTransparencyUnit;
     if (_shadowMappingProperties.shadowMapping) {
         // Bind ring textures for direct projection when rings component is available
         if (_ringsComponent && _ringsComponent->isEnabled()) {
@@ -1699,10 +1696,10 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
 
     std::vector<glm::dmat4> lightViewProjections;
-    std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTexUnits;
+    std::vector<std::pair<opengl::TextureUnit, GLuint>> depthmapTexUnits;
     for (const DepthMapData& depthData : depthMapData) {
         lightViewProjections.push_back(depthData.viewProjection);
-        depthmapTexUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
+        depthmapTexUnits.emplace_back(opengl::TextureUnit(), depthData.depthMap);
     }
 
     std::vector<GLint> boundUnits;
@@ -1765,7 +1762,7 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
     }
 }
 
-void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
+void RenderableGlobe::setCommonUniforms(opengl::ProgramObject& programObject,
                                         const Chunk& chunk, const RenderData& data)
 {
     ZoneScoped;
@@ -1815,7 +1812,7 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
     }
 
     // Used by local and global renderer, as well as GeoJSON
-    using ghoul::opengl::ProgramObject;
+    using opengl::ProgramObject;
     programObject.setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
     programObject.setUniform("modelTransform", _cachedModelTransform);
     programObject.setIgnoreUniformLocationError(ProgramObject::IgnoreError::No);
@@ -1898,7 +1895,7 @@ void RenderableGlobe::recompileShaders() {
     // Create dictionary from layerpreprocessing data
     //
 
-    ghoul::Dictionary shaderDictionary;
+    Dictionary shaderDictionary;
 
     // Different layer types can be height layers or color layers for example.
     // These are used differently within the shaders
@@ -1966,7 +1963,7 @@ void RenderableGlobe::recompileShaders() {
         }
     }
 
-    ghoul::Dictionary layerGroupNames;
+    Dictionary layerGroupNames;
     for (size_t i = 0; i < layers::Groups.size(); i++) {
         layerGroupNames.setValue(
             std::to_string(i),
@@ -2009,15 +2006,12 @@ void RenderableGlobe::recompileShaders() {
         absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
         shaderDictionary
     );
-    ghoul_assert(_localRenderer.program, "Failed to initialize programObject");
+    assert_msg(_localRenderer.program, "Failed to initialize programObject");
     _localRenderer.updatedSinceLastCall = true;
 
     _localRenderer.program->setUniform("xSegments", _grid.xSegments);
 
-    ghoul::opengl::updateUniformLocations(
-        *_localRenderer.program,
-        _localRenderer.uniformCache
-    );
+    opengl::updateUniformLocations(*_localRenderer.program, _localRenderer.uniformCache);
 
 
     //
@@ -2030,7 +2024,7 @@ void RenderableGlobe::recompileShaders() {
         absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
         shaderDictionary
     );
-    ghoul_assert(_globalRenderer.program, "Failed to initialize programObject");
+    assert_msg(_globalRenderer.program, "Failed to initialize programObject");
 
     _globalRenderer.program->setUniform("xSegments", _grid.xSegments);
 
@@ -2040,7 +2034,7 @@ void RenderableGlobe::recompileShaders() {
         glm::vec3(_ellipsoid.radii() * _ellipsoid.radii())
     );
 
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *_globalRenderer.program,
         _globalRenderer.uniformCache
     );
@@ -2135,7 +2129,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const int x = static_cast<int>(floor(xIndexSpace));
     const int y = static_cast<int>(floor(yIndexSpace));
 
-    ghoul_assert(chunkLevel < std::numeric_limits<uint8_t>::max(), "Too high level");
+    assert_msg(chunkLevel < std::numeric_limits<uint8_t>::max(), "Too high level");
     const TileIndex tileIndex(x, y, static_cast<uint8_t>(chunkLevel));
     const GeodeticPatch patch = GeodeticPatch(tileIndex);
 
@@ -2174,7 +2168,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
             return 0;
         }
 
-        ghoul::opengl::Texture* tileTexture = tile.texture;
+        opengl::Texture* tileTexture = tile.texture;
         if (!tileTexture) {
             return 0;
         }
@@ -2185,8 +2179,8 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
         );
 
         // Sample and do linear interpolation (could possibly be moved as a function in
-        // ghoul texture). Suggestion: a function in ghoul::opengl::Texture that takes uv
-        // coordinates in range [0,1] and uses the set interpolation method and clamping
+        // texture). Suggestion: a function in opengl::Texture that takes uv coordinates
+        // in range [0,1] and uses the set interpolation method and clamping
 
         const glm::uvec3 dimensions = tileTexture->dimensions();
 
@@ -2260,7 +2254,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     return height;
 }
 
-void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
+void RenderableGlobe::calculateEclipseShadows(opengl::ProgramObject& programObject,
                                               const RenderData& data,
                                               ShadowCompType stype)
 {
@@ -2268,7 +2262,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
 
     constexpr double KmToM = 1000.0;
 
-    ghoul_assert(
+    assert_msg(
         !_ellipsoid.shadowConfigurationArray().empty(),
         "Eclipse shadows must be enabled"
     );

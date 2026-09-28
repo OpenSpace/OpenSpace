@@ -39,10 +39,10 @@ namespace openspace {
 
 GUIRenderHandler::GUIRenderHandler() {
     LDEBUG("Initializing CEF GL environment...");
-    ghoul::Dictionary define;
+    Dictionary define;
     define.setValue("useAcceleratedRendering", _acceleratedRendering);
 
-    _programObject = ghoul::opengl::ProgramObject::Build(
+    _programObject = opengl::ProgramObject::Build(
         "WebGUICEFProgram",
         absPath("${MODULE_CEFWEBGUI}/shaders/gui_vs.glsl"),
         absPath("${MODULE_CEFWEBGUI}/shaders/gui_fs.glsl"),
@@ -98,7 +98,7 @@ void GUIRenderHandler::draw() {
 
     _programObject->activate();
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(_texture);
     _programObject->setUniform("tex", unit);
 

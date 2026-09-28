@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,10 +28,10 @@
 #include <openspace/opengl/texture.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "ghoul.opengl.FramebufferObject";
+    constexpr std::string_view _loggerCat = "FramebufferObject";
 } // namespace
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 std::string_view FramebufferObject::errorChecking(GLenum status) {
     switch (status) {
@@ -143,4 +142,4 @@ GLuint FramebufferObject::generateId() {
     return _id;
 }
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl

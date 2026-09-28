@@ -35,9 +35,9 @@
 #include "missionmanager_lua.inl"
 
 namespace {
-    struct MissionManagerException final : public ghoul::RuntimeError {
+    struct MissionManagerException final : public RuntimeError {
         explicit MissionManagerException(std::string msg)
-            : ghoul::RuntimeError(std::move(msg), "MissionManager")
+            : RuntimeError(std::move(msg), "MissionManager")
         {}
     };
 } // namespace
@@ -49,7 +49,7 @@ MissionManager::MissionManager()
 {}
 
 void MissionManager::setCurrentMission(const std::string& identifier) {
-    ghoul_assert(!identifier.empty(), "missionName must not be empty");
+    assert_msg(!identifier.empty(), "missionName must not be empty");
 
     auto it = _missionMap.find(identifier);
     if (it == _missionMap.end()) {
@@ -81,9 +81,9 @@ std::string MissionManager::loadMission(Mission mission) {
 }
 
 void MissionManager::unloadMission(const std::string& identifier) {
-    ghoul_assert(!identifier.empty(), "missionName must not be empty");
+    assert_msg(!identifier.empty(), "missionName must not be empty");
     auto it = _missionMap.find(identifier);
-    ghoul_assert(it != _missionMap.end(), "missionName must be a loaded mission");
+    assert_msg(it != _missionMap.end(), "missionName must be a loaded mission");
 
     if (it == _currentMission) {
         _currentMission = _missionMap.end();

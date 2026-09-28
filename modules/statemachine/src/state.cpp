@@ -53,7 +53,7 @@ Documentation State::Documentation() {
     return codegen::doc<Parameters>("statemachine_state");
 }
 
-State::State(const ghoul::Dictionary& dictionary) {
+State::State(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _name = p.identifier;

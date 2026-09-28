@@ -84,8 +84,7 @@ namespace {
         std::optional<std::vector<std::string>> selection;
 
         // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderableconstellationsbase_codegen.cpp"
@@ -99,8 +98,7 @@ Documentation RenderableConstellationsBase::Documentation() {
     );
 }
 
-RenderableConstellationsBase::RenderableConstellationsBase(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableConstellationsBase::RenderableConstellationsBase(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
     , _selection(SelectionInfo)
@@ -146,7 +144,7 @@ std::string RenderableConstellationsBase::constellationFullName(
         return _namesTranslation.at(identifier);
     }
 
-    throw ghoul::RuntimeError(std::format(
+    throw RuntimeError(std::format(
         "Identifier '{}' could not be found in list of constellations", identifier
     ));
 }
@@ -167,7 +165,7 @@ void RenderableConstellationsBase::loadConstellationFile() {
 
     std::string line;
     while (file.good()) {
-        ghoul::getline(file, line);
+        openspace::getline(file, line);
         if (line.empty()) {
             continue;
         }
@@ -177,8 +175,8 @@ void RenderableConstellationsBase::loadConstellationFile() {
         s >> abbreviation;
 
         std::string fullName;
-        ghoul::getline(s, fullName);
-        ghoul::trimWhitespace(fullName);
+        openspace::getline(s, fullName);
+        trimWhitespace(fullName);
         _namesTranslation[abbreviation] = fullName;
     }
 

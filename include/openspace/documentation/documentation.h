@@ -32,10 +32,9 @@
 #include <string>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 class Verifier;
 
 BooleanType(Optional);
@@ -115,7 +114,7 @@ struct TestResult {
  * a specification violation. This class contains the TestResult that would have otherwise
  * be returned in a call to #testSpecification.
  */
-struct SpecificationError final : public ghoul::RuntimeError {
+struct SpecificationError final : public RuntimeError {
     /**
      * Creates the SpecificationError exception instance.
      *
@@ -224,12 +223,12 @@ struct DocumentationEntry {
 };
 
 /**
- * This struct contains the documentation and specification for a ghoul::Dictionary. It is
- * used to impose restrictions on keys and values and determine whether a given
- * ghoul::Dictionary adheres to these specifications (see #testSpecification and
- * #testSpecificationAndThrow methods). Each Documentation consists of a human-readable
- * `name`, and a list of DocumentationEntry%s that each describe a single key value. The
- * most convenient way of creating a Documentation is by using nested initializer lists:
+ * This struct contains the documentation and specification for a Dictionary. It is used
+ * to impose restrictions on keys and values and determine whether a given Dictionary
+ * adheres to these specifications (see #testSpecification and #testSpecificationAndThrow
+ * methods). Each Documentation consists of a human-readable `name`, and a list of
+ * DocumentationEntry%s that each describe a single key value. The most convenient way of
+ * creating a Documentation is by using nested initializer lists:
  * ```
  * Documentation doc = {
  *     "Documentation for an arbitrary dictionary",
@@ -258,30 +257,28 @@ struct Documentation {
 };
 
 /**
- * This method tests whether a provided ghoul::Dictionary \p dictionary adheres to the
+ * This method tests whether a provided Dictionary \p dictionary adheres to the
  * specification \p documentation and returns its result as a TestResult. The TestResult
  * will contain whether the \p dictionary adheres to the \p documentation and, in
  * addition, the list of all offending keys together with the reason why they are
  * offending.
  *
  * \param documentation The Documentation that the \p dictionary is tested against
- * \param dictionary The ghoul::Dictionary that is to be tested against the
- *        \p documentation
+ * \param dictionary The Dictionary that is to be tested against the \p documentation
  * \return A TestResult that contains the results of the specification testing
  */
 TestResult testSpecification(const Documentation& documentation,
-    const ghoul::Dictionary& dictionary);
+    const Dictionary& dictionary);
 
 /**
- * This method tests whether a provided ghoul::Dictionary \p dictionary adheres to the
+ * This method tests whether a provided Dictionary \p dictionary adheres to the
  * specification \p documentation. If the \p dictionary does not adhere to the
  * specification a SpecificationError is thrown, and the exception contains the TestResult
  * that contains more information about the offending keys. If the \p dictionary adheres
  * to the \p documentation, the method returns normally.
  *
  * \param documentation The Documentation that the \p dictionary is tested against
- * \param dictionary The ghoul::Dictionary that is to be tested against the
- *        \p documentation
+ * \param dictionary The Dictionary that is to be tested against the \p documentation
  * \param component The component that is using this method; this argument is passed to
  *        the SpecificationError that is thrown in case of not adhering to the
  *        \p documentation
@@ -289,14 +286,14 @@ TestResult testSpecification(const Documentation& documentation,
  * \throw SpecificationError If the \p dictionary does not adhere to the \p documentation
  */
 void testSpecificationAndThrow(const Documentation& documentation,
-    const ghoul::Dictionary& dictionary, std::string component);
+    const Dictionary& dictionary, std::string component);
 
 } // namespace openspace
 
 // Make the overload for std::to_string available for the Offense::Reason for easier
 // error logging
 
-namespace ghoul {
+namespace openspace {
 
 template <>
 std::string to_string(const openspace::TestResult& value);
@@ -313,7 +310,7 @@ std::string to_string(const openspace::TestResult::Warning& value);
 template <>
 std::string to_string(const openspace::TestResult::Warning::Reason& value);
 
-} // namespace ghoul
+} // namespace openspace
 
 // The verifier header depends on the classes defined in here, but we want to make it
 // easier for consumers of this header to just have access to all verifiers without

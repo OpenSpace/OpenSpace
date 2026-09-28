@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +29,7 @@
 
 #include <openspace/systemcapabilities/systemcapabilities.h>
 
-namespace ghoul::systemcapabilities {
+namespace openspace::systemcapabilities {
 
 // @TODO: Implement CPU detection
 // @TODO: Implement feature detection
@@ -239,18 +238,19 @@ protected:
     std::string _extensions;
 };
 
-} // namespace ghoul::systemcapabilities
+} // namespace openspace::systemcapabilities
 
-namespace ghoul {
+namespace openspace {
 
 template <>
 std::string to_string(
     const systemcapabilities::GeneralCapabilitiesComponent::OperatingSystem& value);
-} // namespace ghoul
+
+} // namespace openspace
 
 #define CpuCap (                                                                         \
-    ghoul::systemcapabilities::SystemCapabilities::ref().component<                      \
-        ghoul::systemcapabilities::GeneralCapabilitiesComponent                          \
+    openspace::systemcapabilities::SystemCapabilities::ref().component<                  \
+        openspace::systemcapabilities::GeneralCapabilitiesComponent                      \
     >())
 
 #endif // __OPENSPACE_CORE___GENERALCAPABILITIESCOMPONENT___H__

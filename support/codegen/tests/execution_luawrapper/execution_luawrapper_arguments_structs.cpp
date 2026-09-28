@@ -32,7 +32,7 @@
 #include <openspace/scripting/lualibrary.h>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     struct [[codegen::Dictionary(P)]] Parameter {
@@ -193,7 +193,7 @@ namespace {
 
 
 TEST_CASE("Execution/LuaWrapper/Arguments-Structs:  void", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncVoid;
+    LuaLibrary::Function func = codegen::lua::FuncVoid;
     CHECK(func.name == "funcVoid");
     CHECK(func.arguments.empty());
     CHECK(func.returnType.empty());
@@ -214,7 +214,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncSingleArgument;
+    LuaLibrary::Function func = codegen::lua::FuncSingleArgument;
     CHECK(func.name == "funcSingleArgument");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "p");
@@ -225,11 +225,11 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::Dictionary p;
+    Dictionary p;
     p.setValue("A", 1);
     p.setValue("B", 2.2);
     p.setValue("C", "3.3"s);
-    ghoul::lua::push(state, p);
+    lua::push(state, p);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -242,7 +242,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncOptionalArgument;
+    LuaLibrary::Function func = codegen::lua::FuncOptionalArgument;
     CHECK(func.name == "funcOptionalArgument");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "hasValue");
@@ -255,15 +255,15 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::Dictionary p;
+    Dictionary p;
     p.setValue("A", 1);
     p.setValue("B", 2.2);
     p.setValue("C", "3.3"s);
-    ghoul::lua::push(state, true, p);
+    lua::push(state, true, p);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(state, false);
+    lua::push(state, false);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -276,7 +276,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncMultipleArguments;
+    LuaLibrary::Function func = codegen::lua::FuncMultipleArguments;
     CHECK(func.name == "funcMultipleArguments");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "p");
@@ -289,15 +289,15 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::Dictionary p;
+    Dictionary p;
     p.setValue("A", 1);
     p.setValue("B", 2.2);
     p.setValue("C", "3.3"s);
-    ghoul::Dictionary q;
+    Dictionary q;
     q.setValue("A", 4);
     q.setValue("B", 5.5);
     q.setValue("C", "6.6"s);
-    ghoul::lua::push(state, p, q);
+    lua::push(state, p, q);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -306,7 +306,7 @@ TEST_CASE(
 TEST_CASE("Execution/LuaWrapper/Arguments-Structs:  Two Parameters w/optional") {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncOptionalMultiple;
+    LuaLibrary::Function func = codegen::lua::FuncOptionalMultiple;
     CHECK(func.name == "funcOptionalMultiple");
     REQUIRE(func.arguments.size() == 3);
     CHECK(func.arguments[0].name == "hasValue");
@@ -321,19 +321,19 @@ TEST_CASE("Execution/LuaWrapper/Arguments-Structs:  Two Parameters w/optional") 
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::Dictionary p;
+    Dictionary p;
     p.setValue("A", 1);
     p.setValue("B", 2.2);
     p.setValue("C", "3.3"s);
-    ghoul::Dictionary q;
+    Dictionary q;
     q.setValue("A", 4);
     q.setValue("B", 5.5);
     q.setValue("C", "6.6"s);
-    ghoul::lua::push(state, true, p, q);
+    lua::push(state, true, p, q);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(state, false, p);
+    lua::push(state, false, p);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -346,7 +346,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncVectorArguments;
+    LuaLibrary::Function func = codegen::lua::FuncVectorArguments;
     CHECK(func.name == "funcVectorArguments");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "n");
@@ -359,36 +359,36 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    std::vector<ghoul::Dictionary> ps;
-    ghoul::Dictionary p;
+    std::vector<Dictionary> ps;
+    Dictionary p;
     p.setValue("A", 1);
     p.setValue("B", 2.2);
     p.setValue("C", "3.3"s);
     ps.push_back(p);
 
-    ghoul::Dictionary p2;
+    Dictionary p2;
     p2.setValue("A", 4);
     p2.setValue("B", 5.5);
     p2.setValue("C", "6.6"s);
     ps.push_back(p2);
 
-    ghoul::Dictionary p3;
+    Dictionary p3;
     p3.setValue("A", 7);
     p3.setValue("B", 8.8);
     p3.setValue("C", "9.9"s);
     ps.push_back(p3);
-    ghoul::lua::push(state, 3, ps);
+    lua::push(state, 3, ps);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
     ps.clear();
     ps.push_back(p);
-    ghoul::lua::push(state, 1, ps);
+    lua::push(state, 1, ps);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
     ps.clear();
-    ghoul::lua::push(state, 0, ps);
+    lua::push(state, 0, ps);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -401,7 +401,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncOptionalVectorArguments;
+    LuaLibrary::Function func = codegen::lua::FuncOptionalVectorArguments;
     CHECK(func.name == "funcOptionalVectorArguments");
     REQUIRE(func.arguments.size() == 3);
     CHECK(func.arguments[0].name == "hasValue");
@@ -416,40 +416,40 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    std::vector<ghoul::Dictionary> ps;
-    ghoul::Dictionary p;
+    std::vector<Dictionary> ps;
+    Dictionary p;
     p.setValue("A", 1);
     p.setValue("B", 2.2);
     p.setValue("C", "3.3"s);
     ps.push_back(p);
 
-    ghoul::Dictionary p2;
+    Dictionary p2;
     p2.setValue("A", 4);
     p2.setValue("B", 5.5);
     p2.setValue("C", "6.6"s);
     ps.push_back(p2);
 
-    ghoul::Dictionary p3;
+    Dictionary p3;
     p3.setValue("A", 7);
     p3.setValue("B", 8.8);
     p3.setValue("C", "9.9"s);
     ps.push_back(p3);
-    ghoul::lua::push(state, true, 3, ps);
+    lua::push(state, true, 3, ps);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
     ps.clear();
     ps.push_back(p);
-    ghoul::lua::push(state, true, 1, ps);
+    lua::push(state, true, 1, ps);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
     ps.clear();
-    ghoul::lua::push(state, true, 0, ps);
+    lua::push(state, true, 0, ps);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
 
-    ghoul::lua::push(state, false);
+    lua::push(state, false);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -462,7 +462,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncMapArguments;
+    LuaLibrary::Function func = codegen::lua::FuncMapArguments;
     CHECK(func.name == "funcMapArguments");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "ps");
@@ -473,27 +473,27 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::Dictionary ps;
+    Dictionary ps;
 
-    ghoul::Dictionary p;
+    Dictionary p;
     p.setValue("A", 1);
     p.setValue("B", 2.2);
     p.setValue("C", "3.3"s);
     ps.setValue("first", p);
 
-    ghoul::Dictionary p2;
+    Dictionary p2;
     p2.setValue("A", 4);
     p2.setValue("B", 5.5);
     p2.setValue("C", "6.6"s);
     ps.setValue("second", p2);
 
-    ghoul::Dictionary p3;
+    Dictionary p3;
     p3.setValue("A", 7);
     p3.setValue("B", 8.8);
     p3.setValue("C", "9.9"s);
     ps.setValue("third", p3);
 
-    ghoul::lua::push(state, ps);
+    lua::push(state, ps);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -506,7 +506,7 @@ TEST_CASE(
 {
     using namespace std::string_literals;
 
-    Function func = codegen::lua::FuncReturnValue;
+    LuaLibrary::Function func = codegen::lua::FuncReturnValue;
     CHECK(func.name == "funcReturnValue");
     REQUIRE(func.arguments.size() == 3);
     CHECK(func.arguments[0].name == "a");
@@ -521,11 +521,11 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, 1, 2.2, "3.3"s);
+    lua::push(state, 1, 2.2, "3.3"s);
     func.function(state);
     CHECK(lua_gettop(state) == 1);
 
-    const ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(state);
+    const Dictionary d = lua::value<Dictionary>(state);
     REQUIRE(d.hasValue<double>("a"));
     CHECK(d.value<double>("a") == 1);
     REQUIRE(d.hasValue<double>("b"));

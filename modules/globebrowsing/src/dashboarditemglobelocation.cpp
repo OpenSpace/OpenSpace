@@ -85,8 +85,7 @@ Documentation DashboardItemGlobeLocation::Documentation() {
     );
 }
 
-DashboardItemGlobeLocation::DashboardItemGlobeLocation(
-                                                      const ghoul::Dictionary& dictionary)
+DashboardItemGlobeLocation::DashboardItemGlobeLocation(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _displayFormat(DisplayFormatInfo)
     , _significantDigits(SignificantDigitsInfo, 4, 1, 12)

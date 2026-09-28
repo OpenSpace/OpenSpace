@@ -57,7 +57,7 @@ namespace {
         std::string line;
 
         // Load existing entries
-        while (ghoul::getline(inFile, line)) {
+        while (openspace::getline(inFile, line)) {
             if (!line.empty()) {
                 existingEntries.insert(std::filesystem::path(line).filename().string());
             }
@@ -99,19 +99,17 @@ std::pair<double, double> DynamicFileSequenceDownloader::parseDataInfoResponse(
                                                        const nlohmann::json& json)
 {
     if (!json.contains("datafeeds") || !json["datafeeds"].is_array()) {
-        throw ghoul::RuntimeError(
-            "ISWA metadata response missing array 'datafeeds'"
-        );
+        throw RuntimeError("ISWA metadata response missing array 'datafeeds'");
     }
 
     const nlohmann::json& datafeeds = json["datafeeds"];
     if (datafeeds.empty() || !datafeeds[0].is_object()) {
-        throw ghoul::RuntimeError("ISWA metadata response missing object 'datafeeds[0]'");
+        throw RuntimeError("ISWA metadata response missing object 'datafeeds[0]'");
     }
 
     const nlohmann::json& datafeed = datafeeds[0];
     if (!datafeed.contains("availability") || !datafeed["availability"].is_object()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "ISWA metadata response missing object 'datafeeds[0].availability'"
         );
     }
@@ -119,12 +117,12 @@ std::pair<double, double> DynamicFileSequenceDownloader::parseDataInfoResponse(
     const nlohmann::json& availability = datafeed["availability"];
 
     if (!availability.contains("startDate") || !availability["startDate"].is_string()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "ISWA metadata response missing string 'datafeeds[0].availability.startDate'"
         );
     }
     if (!availability.contains("stopDate") || !availability["stopDate"].is_string()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "ISWA metadata response missing string 'datafeeds[0].availability.stopDate'"
         );
     }
@@ -139,7 +137,7 @@ std::vector<std::pair<std::string, std::string>>
 DynamicFileSequenceDownloader::parseAvailableFilesResponse(const nlohmann::json& json)
 {
     if (!json.contains("files") || !json["files"].is_array()) {
-        throw ghoul::RuntimeError("ISWA file response missing array 'files'");
+        throw RuntimeError("ISWA file response missing array 'files'");
     }
 
     std::vector<std::pair<std::string, std::string>> files;
@@ -147,13 +145,13 @@ DynamicFileSequenceDownloader::parseAvailableFilesResponse(const nlohmann::json&
 
     for (const nlohmann::json& element : json["files"]) {
         if (!element.is_object()) {
-            throw ghoul::RuntimeError("ISWA file response contains non-object file entry");
+            throw RuntimeError("ISWA file response contains non-object file entry");
         }
         if (!element.contains("timestamp") || !element["timestamp"].is_string()) {
-            throw ghoul::RuntimeError("ISWA file entry missing string 'timestamp'");
+            throw RuntimeError("ISWA file entry missing string 'timestamp'");
         }
         if (!element.contains("url") || !element["url"].is_string()) {
-            throw ghoul::RuntimeError("ISWA file entry missing string 'url'");
+            throw RuntimeError("ISWA file entry missing string 'url'");
         }
 
         files.emplace_back(
@@ -192,7 +190,7 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
     std::unordered_set<std::string> keepFiles;
     std::ifstream listFile = std::ifstream(_trackSynced);
     std::string filename;
-    while (ghoul::getline(listFile, filename)) {
+    while (openspace::getline(listFile, filename)) {
         if (!filename.empty()) {
             keepFiles.insert(std::filesystem::path(filename).filename().string());
         }
@@ -279,7 +277,7 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
         try {
             std::vector<char> responseText = response.downloadedData();
             if (responseText.empty()) {
-                throw ghoul::RuntimeError("Empty HTTP response");
+                throw RuntimeError("Empty HTTP response");
             }
             nlohmann::json jsonResult = nlohmann::json::parse(responseText);
             const std::pair<double, double> timeRange = parseDataInfoResponse(jsonResult);
@@ -290,7 +288,7 @@ void DynamicFileSequenceDownloader::requestDataInfo(std::string httpInfoRequest)
         catch (const nlohmann::json::parse_error& e) {
             LWARNING(std::format("JSON parse error: {}", e.what()));
         }
-        catch (const ghoul::RuntimeError& e) {
+        catch (const RuntimeError& e) {
             LWARNING(std::format("ISWA metadata schema error: {}", e.what()));
         }
 
@@ -349,7 +347,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
         try {
             std::vector<char> data = response.downloadedData();
             if (data.empty()) {
-                throw ghoul::RuntimeError("Empty HTTP response");
+                throw RuntimeError("Empty HTTP response");
             }
 
             jsonResult = nlohmann::json::parse(data);
@@ -359,7 +357,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
         catch (const nlohmann::json::parse_error& ex) {
             LERROR(std::format("JSON parsing error: '{}'", ex.what()));
         }
-        catch (const ghoul::RuntimeError& ex) {
+        catch (const RuntimeError& ex) {
             LERROR(std::format("ISWA file schema error: '{}'", ex.what()));
         }
 
@@ -461,7 +459,7 @@ void DynamicFileSequenceDownloader::downloadFile() {
     {
         File* dl = _queuedFilesToDownload.front();
         if (dl->state != File::State::OnQueue) {
-            throw ghoul::RuntimeError(
+            throw RuntimeError(
                 "Trying to download file from list of queued files, but its status is "
                 "not OnQueue"
             );

@@ -31,7 +31,7 @@ namespace openspace {
 
 class DashboardItemCameraOrientation : public DashboardTextItem {
 public:
-    explicit DashboardItemCameraOrientation(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemCameraOrientation(const Dictionary& dictionary);
     ~DashboardItemCameraOrientation() override = default;
 
     void update() override;

@@ -66,13 +66,13 @@ void TransferFunction::setPath(const std::filesystem::path& filepath) {
         return;
     }
     _filepath = f;
-    _file = std::make_unique<ghoul::filesystem::File>(_filepath);
+    _file = std::make_unique<filesystem::File>(_filepath);
     _needsUpdate = true;
     _file->setCallback([this]() { _needsUpdate = true; });
 }
 
-ghoul::opengl::Texture& TransferFunction::texture() {
-    ghoul_assert(_texture, "Transfer function is null");
+opengl::Texture& TransferFunction::texture() {
+    assert_msg(_texture, "Transfer function is null");
     update();
     return *_texture;
 }
@@ -102,7 +102,7 @@ void TransferFunction::setTextureFromTxt() {
     std::ifstream in = std::ifstream(_filepath);
 
     if (!in.is_open()) {
-        throw ghoul::FileNotFoundError(_filepath);
+        throw FileNotFoundError(_filepath);
     }
 
     int width = 512;
@@ -113,7 +113,7 @@ void TransferFunction::setTextureFromTxt() {
 
     std::string line;
 
-    while (ghoul::getline(in, line)) {
+    while (openspace::getline(in, line)) {
         std::istringstream iss(line);
         std::string key;
         iss >> key;
@@ -197,15 +197,15 @@ void TransferFunction::setTextureFromTxt() {
         }
     }
 
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+    _texture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit{
             .dimensions = glm::uvec3(width, 1, 1),
             .type = GL_TEXTURE_1D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         },
         reinterpret_cast<std::byte*>(transferFunction)
     );
@@ -214,7 +214,7 @@ void TransferFunction::setTextureFromTxt() {
 void TransferFunction::setTextureFromImage() {
     _texture = dataloader::colormap::loadColorMapTexture(
         _filepath,
-        { .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge }
+        { .wrapping = opengl::Texture::WrappingMode::ClampToEdge }
     );
 }
 

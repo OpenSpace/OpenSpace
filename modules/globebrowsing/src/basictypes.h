@@ -31,9 +31,9 @@
 #include <limits>
 #include <optional>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
+
+namespace opengl { class Texture; }
 
 struct AABB3 {
     glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
@@ -122,7 +122,7 @@ public:
         OK
     };
 
-    ghoul::opengl::Texture* texture = nullptr;
+    opengl::Texture* texture = nullptr;
     std::optional<TileMetaData> metaData = std::nullopt;
     Status status = Status::Unavailable;
 };

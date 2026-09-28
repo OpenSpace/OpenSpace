@@ -31,6 +31,8 @@
 #include <optional>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(Array)]] Parameters {
         // simpleArray documentation
@@ -46,16 +48,16 @@ namespace {
         std::optional<std::vector<std::array<std::string, 5>>> optionalVectorArray;
 
         // dictArray documentation
-        std::array<ghoul::Dictionary, 3> dictArray;
+        std::array<Dictionary, 3> dictArray;
 
         // optionalDictArray documentation
-        std::optional<std::array<ghoul::Dictionary, 3>> optionalDictArray;
+        std::optional<std::array<Dictionary, 3>> optionalDictArray;
 
         // vectorDictArray documentation
-        std::vector<std::array<ghoul::Dictionary, 3>> vectorDictArray;
+        std::vector<std::array<Dictionary, 3>> vectorDictArray;
 
         // optionalVectorDictArray documentation
-        std::optional<std::vector<std::array<ghoul::Dictionary, 3>>> optionalVectorDictArray;
+        std::optional<std::vector<std::array<Dictionary, 3>>> optionalVectorDictArray;
     };
 } // namespace
 #include "execution_structs_array_codegen.cpp"
@@ -64,9 +66,9 @@ namespace {
 TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
     using namespace std::literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "abc"s);
         e.setValue("2", "def"s);
         e.setValue("3", "ghi"s);
@@ -75,7 +77,7 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
         d.setValue("SimpleArray", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "abc"s);
         e.setValue("2", "def"s);
         e.setValue("3", "ghi"s);
@@ -84,9 +86,9 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
         d.setValue("OptionalArray", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("1", "abc"s);
             f.setValue("2", "def"s);
             f.setValue("3", "ghi"s);
@@ -95,7 +97,7 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("1", "pqr"s);
             f.setValue("2", "stu"s);
             f.setValue("3", "vwx"s);
@@ -104,7 +106,7 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("1", "efg"s);
             f.setValue("2", "hij"s);
             f.setValue("3", "klm"s);
@@ -115,9 +117,9 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
         d.setValue("VectorArray", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("1", "abc"s);
             f.setValue("2", "def"s);
             f.setValue("3", "ghi"s);
@@ -126,7 +128,7 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("1", "pqr"s);
             f.setValue("2", "stu"s);
             f.setValue("3", "vwx"s);
@@ -135,7 +137,7 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("1", "efg"s);
             f.setValue("2", "hij"s);
             f.setValue("3", "klm"s);
@@ -146,23 +148,23 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
         d.setValue("OptionalVectorArray", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("A", "1"s);
             f.setValue("B", "2"s);
             f.setValue("C", "3"s);
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("D", "4"s);
             f.setValue("E", "5"s);
             f.setValue("F", "6"s);
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("G", "7"s);
             f.setValue("H", "8"s);
             f.setValue("I", "9"s);
@@ -171,23 +173,23 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
         d.setValue("DictArray", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("A", "1"s);
             f.setValue("B", "2"s);
             f.setValue("C", "3"s);
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("D", "4"s);
             f.setValue("E", "5"s);
             f.setValue("F", "6"s);
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("G", "7"s);
             f.setValue("H", "8"s);
             f.setValue("I", "9"s);
@@ -196,25 +198,25 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
         d.setValue("OptionalDictArray", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A", "1"s);
                 g.setValue("B", "2"s);
                 g.setValue("C", "3"s);
                 f.setValue("1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D", "4"s);
                 g.setValue("E", "5"s);
                 g.setValue("F", "6"s);
                 f.setValue("2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G", "7"s);
                 g.setValue("H", "8"s);
                 g.setValue("I", "9"s);
@@ -223,23 +225,23 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A", "1"s);
                 g.setValue("B", "2"s);
                 g.setValue("C", "3"s);
                 f.setValue("1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D", "4"s);
                 g.setValue("E", "5"s);
                 g.setValue("F", "6"s);
                 f.setValue("2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G", "7"s);
                 g.setValue("H", "8"s);
                 g.setValue("I", "9"s);
@@ -248,23 +250,23 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A", "1"s);
                 g.setValue("B", "2"s);
                 g.setValue("C", "3"s);
                 f.setValue("1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D", "4"s);
                 g.setValue("E", "5"s);
                 g.setValue("F", "6"s);
                 f.setValue("2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G", "7"s);
                 g.setValue("H", "8"s);
                 g.setValue("I", "9"s);
@@ -275,25 +277,25 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
         d.setValue("VectorDictArray", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A", "1"s);
                 g.setValue("B", "2"s);
                 g.setValue("C", "3"s);
                 f.setValue("1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D", "4"s);
                 g.setValue("E", "5"s);
                 g.setValue("F", "6"s);
                 f.setValue("2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G", "7"s);
                 g.setValue("H", "8"s);
                 g.setValue("I", "9"s);
@@ -302,23 +304,23 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A", "1"s);
                 g.setValue("B", "2"s);
                 g.setValue("C", "3"s);
                 f.setValue("1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D", "4"s);
                 g.setValue("E", "5"s);
                 g.setValue("F", "6"s);
                 f.setValue("2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G", "7"s);
                 g.setValue("H", "8"s);
                 g.setValue("I", "9"s);
@@ -327,23 +329,23 @@ TEST_CASE("Execution/Structs/Array:  Bake", "[Execution][Structs]") {
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("A", "1"s);
                 g.setValue("B", "2"s);
                 g.setValue("C", "3"s);
                 f.setValue("1", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("D", "4"s);
                 g.setValue("E", "5"s);
                 g.setValue("F", "6"s);
                 f.setValue("2", g);
             }
             {
-                ghoul::Dictionary g;
+                Dictionary g;
                 g.setValue("G", "7"s);
                 g.setValue("H", "8"s);
                 g.setValue("I", "9"s);

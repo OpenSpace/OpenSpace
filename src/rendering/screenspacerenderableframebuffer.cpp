@@ -56,7 +56,7 @@ Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
 }
 
 ScreenSpaceRenderableFramebuffer::ScreenSpaceRenderableFramebuffer(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _size(SizeInfo, glm::vec2(16.f), glm::vec2(16.f), glm::vec2(16384.f))
 {
@@ -88,7 +88,7 @@ void ScreenSpaceRenderableFramebuffer::initializeGL() {
 void ScreenSpaceRenderableFramebuffer::deinitializeGL() {
     _framebuffer->activate();
     _framebuffer->detachAll();
-    ghoul::opengl::FramebufferObject::deactivate();
+    opengl::FramebufferObject::deactivate();
     removeAllRenderFunctions();
 
     _texture = nullptr;
@@ -110,7 +110,7 @@ void ScreenSpaceRenderableFramebuffer::render(const RenderData& renderData) {
     glGetIntegerv(GL_VIEWPORT, viewport.data());
     glViewport(0, 0, static_cast<GLint>(size.x), static_cast<GLint>(size.y));
 
-    const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+    const GLint defaultFBO = opengl::FramebufferObject::getActiveObject();
     _framebuffer->activate();
 
     glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -118,7 +118,7 @@ void ScreenSpaceRenderableFramebuffer::render(const RenderData& renderData) {
     for (const RenderFunction& renderFunction : _renderFunctions) {
         renderFunction();
     }
-    ghoul::opengl::FramebufferObject::deactivate();
+    opengl::FramebufferObject::deactivate();
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -145,32 +145,32 @@ void ScreenSpaceRenderableFramebuffer::removeAllRenderFunctions() {
 void ScreenSpaceRenderableFramebuffer::createFramebuffer() {
     const glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
 
-    _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
+    _framebuffer = std::make_unique<opengl::FramebufferObject>();
     _framebuffer->activate();
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _texture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(resolution.x, resolution.y, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
 
-    _depthTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _depthTexture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(resolution.x, resolution.y, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::DepthComponent,
+            .format = opengl::Texture::Format::DepthComponent,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
     _framebuffer->attachTexture(_depthTexture.get(), GL_DEPTH_ATTACHMENT);
 
     _objectSize = glm::ivec2(resolution);
-    ghoul::opengl::FramebufferObject::deactivate();
+    opengl::FramebufferObject::deactivate();
 }
 
 int ScreenSpaceRenderableFramebuffer::id() {
@@ -178,7 +178,7 @@ int ScreenSpaceRenderableFramebuffer::id() {
     return id++;
 }
 
-void ScreenSpaceRenderableFramebuffer::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceRenderableFramebuffer::bindTexture(opengl::TextureUnit& unit) {
     unit.bind(*_texture);
 }
 

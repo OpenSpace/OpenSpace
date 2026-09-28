@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +24,7 @@
 
 #include <utility>
 
-namespace ghoul::cmdparser {
+namespace openspace::cmdparser {
 
 template <class T>
 MultipleCommand<T>::MultipleCommand(std::vector<T>& ptr1, std::string name,
@@ -167,4 +166,4 @@ void MultipleCommand<T,U,V,W>::checkParameters(
     }
 }
 
-} // namespace ghoul::cmdparser
+} // namespace openspace::cmdparser

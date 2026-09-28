@@ -30,14 +30,14 @@
 #include <filesystem>
 #include <regex>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
+
+class Dictionary;
 
 class InstrumentTimesParser : public SequenceParser {
 public:
     InstrumentTimesParser(std::string name, std::filesystem::path sequenceSource,
-        ghoul::Dictionary& inputDict);
+        Dictionary& inputDict);
 
     bool create() override;
 

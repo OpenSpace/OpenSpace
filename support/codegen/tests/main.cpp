@@ -28,7 +28,7 @@
 #include <openspace/logging/logmanager.h>
 
 int main(int argc, char** argv) {
-    using namespace ghoul::logging;
+    using namespace openspace::logging;
     LogManager::initialize(LogLevel::Error);
     LogMgr.addLog(std::make_unique<ConsoleLog>());
 

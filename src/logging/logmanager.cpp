@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +33,7 @@
 #include <utility>
 
 namespace {
-    using namespace ghoul::logging;
+    using namespace openspace::logging;
 
     // The always-present console log. Definining it here as we'd otherwise need to
     // include the ConsoleLog in every file that wants to use the LogManager. Its fine to
@@ -42,7 +41,7 @@ namespace {
     ConsoleLog consoleLog;
 } // namespace
 
-namespace ghoul::logging {
+namespace openspace::logging {
 
 LogManager* LogManager::_instance = nullptr;
 
@@ -60,7 +59,7 @@ void LogManager::initialize(LogLevel level, ImmediateFlush immediateFlush) {
 }
 
 void LogManager::deinitialize() {
-    ghoul_assert(isInitialized(), "LogManager is not initialized");
+    assert_msg(isInitialized(), "LogManager is not initialized");
 
     _instance->_logs.clear();
 }
@@ -70,7 +69,7 @@ bool LogManager::isInitialized() {
 }
 
 LogManager& LogManager::ref() {
-    ghoul_assert(isInitialized(), "LogManager is not initialized");
+    assert_msg(isInitialized(), "LogManager is not initialized");
     return *_instance;
 }
 
@@ -144,4 +143,4 @@ void LogManager::resetMessageCounters() {
     std::fill(_logCounters.begin(), _logCounters.end(), 0);
 }
 
-} // namespace ghoul::logging
+} // namespace openspace::logging

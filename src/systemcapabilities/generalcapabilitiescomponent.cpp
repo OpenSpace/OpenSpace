@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +47,7 @@ typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, DWORD);
 #include <cstring>
 #endif // WIN32
 
-namespace ghoul {
+namespace openspace {
 
 template <>
 std::string to_string(
@@ -87,9 +86,10 @@ std::string to_string(
             throw MissingCaseException();
     }
 }
-} // namespace ghoul
 
-namespace ghoul::systemcapabilities {
+} // namespace openspace
+
+namespace openspace::systemcapabilities {
 
 GeneralCapabilitiesComponent::GeneralCapabilitiesComponentError::
     GeneralCapabilitiesComponentError(std::string msg)
@@ -580,4 +580,4 @@ std::string_view GeneralCapabilitiesComponent::name() const {
     return "CPU";
 }
 
-} // namespace ghoul::systemcapabilities
+} // namespace openspace::systemcapabilities

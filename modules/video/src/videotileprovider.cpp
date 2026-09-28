@@ -58,7 +58,7 @@ Documentation VideoTileProvider::Documentation() {
     );
 }
 
-VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
+VideoTileProvider::VideoTileProvider(const Dictionary& dictionary)
     : _videoPlayer(dictionary)
 {
     ZoneScoped;

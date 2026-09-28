@@ -98,8 +98,7 @@ Documentation DashboardItemPropertyValue::Documentation() {
     );
 }
 
-DashboardItemPropertyValue::DashboardItemPropertyValue(
-                                                      const ghoul::Dictionary& dictionary)
+DashboardItemPropertyValue::DashboardItemPropertyValue(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _propertyUri(PropertyUriInfo)
     , _displayString(DisplayStringInfo)

@@ -36,7 +36,7 @@ namespace {
 [[codegen::luawrap]] void setRelativeMinDistance(float multiplier) {
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
-        throw ghoul::lua::LuaError("Could not determine current focus node");
+        throw lua::LuaError("Could not determine current focus node");
     }
 
     double is = node->interactionSphere();
@@ -52,7 +52,7 @@ namespace {
 [[codegen::luawrap]] void setRelativeMaxDistance(float multiplier) {
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
-        throw ghoul::lua::LuaError("Could not determine current focus node");
+        throw lua::LuaError("Could not determine current focus node");
     }
 
     double is = node->interactionSphere();

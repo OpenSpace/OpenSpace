@@ -84,11 +84,11 @@ float NumericalProperty<T>::exponent() const {
 
 template <typename T>
 void NumericalProperty<T>::setExponent(float exponent) {
-    ghoul_assert(std::abs(exponent) > 0.f, "Exponent for property input cannot be zero");
+    assert_msg(std::abs(exponent) > 0.f, "Exponent for property input cannot be zero");
 
     if (!std::is_unsigned<T>::value) {
         auto isValidRange = [](const T& minValue, const T& maxValue) {
-            if constexpr (ghoul::isGlmVector<T>() || ghoul::isGlmMatrix<T>()) {
+            if constexpr (isGlmVector<T>() || isGlmMatrix<T>()) {
                 return glm::all(glm::greaterThanEqual(minValue, T(0))) &&
                     glm::all(glm::greaterThanEqual(maxValue, T(0)));
             }
@@ -100,7 +100,7 @@ void NumericalProperty<T>::setExponent(float exponent) {
         // While the exponential slider does not support ranges with negative values,
         // prevent setting the exponent for such ranges
         // @TODO (2021-06-30, emmbr), remove this check when no longer needed
-        ghoul_assert(
+        assert_msg(
             isValidRange(_minimumValue, _maximumValue),
             "Setting exponent for properties with negative values in [min, max] "
             "range is not yet supported"
@@ -129,19 +129,19 @@ nlohmann::json NumericalProperty<T>::generateAdditionalJsonDescription() const {
     nlohmann::json result = {
         {
             MinimumValueKey,
-            nlohmann::json::parse(luaToJson(ghoul::to_string(_minimumValue)))
+            nlohmann::json::parse(luaToJson(openspace::to_string(_minimumValue)))
         },
         {
             MaximumValueKey,
-            nlohmann::json::parse(luaToJson(ghoul::to_string(_maximumValue)))
+            nlohmann::json::parse(luaToJson(openspace::to_string(_maximumValue)))
         },
         {
             SteppingValueKey,
-            nlohmann::json::parse(luaToJson(ghoul::to_string(_stepping)))
+            nlohmann::json::parse(luaToJson(openspace::to_string(_stepping)))
         },
         {
             ExponentValueKey,
-            nlohmann::json::parse(luaToJson(ghoul::to_string(_exponent)))
+            nlohmann::json::parse(luaToJson(openspace::to_string(_exponent)))
         }
     };
     return result;
@@ -155,9 +155,7 @@ void NumericalProperty<T>::setLuaInterpolationTarget(lua_State* state) {
 }
 
 template <typename T>
-void NumericalProperty<T>::interpolateValue(float t,
-                                            ghoul::EasingFunc<float> easingFunction)
-{
+void NumericalProperty<T>::interpolateValue(float t, EasingFunc<float> easingFunction) {
     t = std::clamp(t, 0.f, 1.f);
 
     if (easingFunction) {
@@ -173,7 +171,7 @@ nlohmann::json NumericalProperty<T>::MetaDataSchema() {
     nlohmann::json metaData = TemplateProperty<T>::MetaDataSchema();
 
     nlohmann::json additionalData;
-    if constexpr (ghoul::isGlmVector<T>() || ghoul::isGlmMatrix<T>()) {
+    if constexpr (isGlmVector<T>() || isGlmMatrix<T>()) {
         metaData["$defs"]["AdditionalDataVectorMatrix"] = nlohmann::json::parse(R"(
             {
               "type": "object",

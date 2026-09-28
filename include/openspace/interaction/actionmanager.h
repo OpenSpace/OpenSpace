@@ -30,10 +30,9 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct LuaLibrary;
 
 class ActionManager {
@@ -47,7 +46,7 @@ public:
     const Action& action(const std::string& identifier) const;
     std::vector<Action> actions() const;
 
-    void triggerAction(const std::string& identifier, const ghoul::Dictionary& arguments,
+    void triggerAction(const std::string& identifier, const Dictionary& arguments,
         ShouldBeSynchronized shouldBeSynchronized,
         ShouldBeLogged shouldBeLogged = ShouldBeLogged::No) const;
     static LuaLibrary luaLibrary();

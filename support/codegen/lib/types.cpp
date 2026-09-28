@@ -329,7 +329,9 @@ VariableType* parseType(std::string_view type, Struct* context) {
     else if (type == "glm::dmat4x3")          { t = newType(BasicType::Type::DMat4x3); }
     else if (type == "glm::dmat4x4")          { t = newType(BasicType::Type::DMat4x4); }
     else if (type == "glm::dmat4")            { t = newType(BasicType::Type::DMat4x4); }
-    else if (type == "ghoul::Dictionary")    { t = newType(BasicType::Type::Dictionary); }
+    else if ((type == "openspace::Dictionary") || (type == "Dictionary")) {
+        t = newType(BasicType::Type::Dictionary);
+    }
     // NOLINTEND(bugprone-branch-clone)
     else if (startsWith(type, "std::vector<")) {
         type.remove_prefix("std::vector<"sv.size());
@@ -544,7 +546,7 @@ std::string generateTypename(BasicType::Type type) {
         case BasicType::Type::DMat4x2: return "glm::dmat4x2";
         case BasicType::Type::DMat4x3: return "glm::dmat4x3";
         case BasicType::Type::DMat4x4: return "glm::dmat4x4";
-        case BasicType::Type::Dictionary: return "ghoul::Dictionary";
+        case BasicType::Type::Dictionary: return "openspace::Dictionary";
         default:                       throw std::logic_error("Missing case label");
     }
 }
@@ -773,7 +775,7 @@ namespace {
         // Yo dawg, I heard you like types
         switch (type->type->type) {
             case StackElement::Type::Enum:   return "std::string";
-            case StackElement::Type::Struct: return "ghoul::Dictionary";
+            case StackElement::Type::Struct: return "openspace::Dictionary";
             default:                         throw std::logic_error("Missing case label");
         }
     }

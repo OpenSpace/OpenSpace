@@ -59,13 +59,13 @@ Documentation ResourceSynchronization::Documentation() {
 }
 
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    ghoul::TemplateFactory<ResourceSynchronization>* factory =
+    TemplateFactory<ResourceSynchronization>* factory =
         FactoryManager::ref().factory<ResourceSynchronization>();
-    ghoul_assert(factory, "ResourceSynchronization factory did not exist");
+    assert_msg(factory, "ResourceSynchronization factory did not exist");
     ResourceSynchronization* sync = factory->create(p.type, dictionary);
     sync->_name = p.name;
     return std::unique_ptr<ResourceSynchronization>(sync);

@@ -30,15 +30,15 @@
 #include <string_view>
 
 namespace {
-    constexpr std::string_view BakeFunctionVectorDeclaration = "template <typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::vector<T>* val);\n";
-    constexpr std::string_view BakeFunctionArrayDeclaration = "template <typename T, size_t N> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::array<T, N>* val);\n";
-    constexpr std::string_view BakeFunctionMapStringKeyDeclaration = "template <typename V> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::map<std::string, V>* val);\n";
-    constexpr std::string_view BakeFunctionMapEnumKeyDeclaration = "template <typename K, typename V> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::map<K, V>* val);\n";
-    constexpr std::string_view BakeFunctionOptionalDeclaration = "template <typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val);\n";
-    constexpr std::string_view BakeFunctionTupleDeclaration = "template <typename... Ts> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::tuple<Ts...>* val);\n";
+    constexpr std::string_view BakeFunctionVectorDeclaration = "template <typename T> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::vector<T>* val);\n";
+    constexpr std::string_view BakeFunctionArrayDeclaration = "template <typename T, size_t N> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::array<T, N>* val);\n";
+    constexpr std::string_view BakeFunctionMapStringKeyDeclaration = "template <typename V> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::map<std::string, V>* val);\n";
+    constexpr std::string_view BakeFunctionMapEnumKeyDeclaration = "template <typename K, typename V> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::map<K, V>* val);\n";
+    constexpr std::string_view BakeFunctionOptionalDeclaration = "template <typename T> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::optional<T>* val);\n";
+    constexpr std::string_view BakeFunctionTupleDeclaration = "template <typename... Ts> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::tuple<Ts...>* val);\n";
 
-    constexpr std::string_view BackFunctionFallback = "template <typename T> [[maybe_unused]] T bake(const ghoul::Dictionary&) { static_assert(sizeof(T) == 0); }";
-    constexpr std::string_view BakeToFunctionFallback = "template <typename T> [[maybe_unused]] void bakeTo(const ghoul::Dictionary&, std::string_view, T*) { static_assert(sizeof(T) == 0); }";
+    constexpr std::string_view BackFunctionFallback = "template <typename T> [[maybe_unused]] T bake(const openspace::Dictionary&) { static_assert(sizeof(T) == 0); }";
+    constexpr std::string_view BakeToFunctionFallback = "template <typename T> [[maybe_unused]] void bakeTo(const openspace::Dictionary&, std::string_view, T*) { static_assert(sizeof(T) == 0); }";
     constexpr std::string_view MapFunctionFallback = "template <typename T, typename U> [[maybe_unused]] T map(U) { static_assert(sizeof(T) == 0); }";
     constexpr std::string_view DocumentationFallback = R"(template <typename T> [[maybe_unused]] openspace::Documentation doc(std::string, [[maybe_unused]] std::vector<openspace::Documentation> parentDoc = std::vector<openspace::Documentation>()) {
     static_assert(sizeof(T) == 0);
@@ -71,7 +71,7 @@ namespace {
     constexpr std::string_view ArrayifyFallback = "template <typename T> [[maybe_unused]] std::vector<T> arrayify() { return {}; }";
 
     constexpr std::string_view BakeStructPreamble = R"(
-template <> [[maybe_unused]] {0} bake<{0}>(const ghoul::Dictionary& dict) {{
+template <> [[maybe_unused]] {0} bake<{0}>(const openspace::Dictionary& dict) {{
     openspace::testSpecificationAndThrow(codegen::doc<{0}>("{0}"), dict, "{1}");
     {0} res = {{}};
 )";
@@ -156,27 +156,27 @@ template <> [[maybe_unused]] openspace::Documentation doc<{}>(std::string id, st
 
     constexpr std::string_view LuaWrapperOptionalTypeExtraction = R"(
         {0} {1};
-        if (ghoul::lua::hasValue<{2}>(L, 1)) {{
-            {1} = ghoul::lua::value<{2}>(L, 1, ghoul::lua::PopValue::No);
+        if (openspace::lua::hasValue<{2}>(L, 1)) {{
+            {1} = openspace::lua::value<{2}>(L, 1, openspace::lua::PopValue::No);
             lua_remove(L, 1);
         }}
 )";
 
     constexpr std::string_view LuaWrapperPushTupleOptional = R"(
             if (std::get<{0}>(res).has_value()) {{
-                ghoul::lua::push(L, *std::get<{0}>(res));
+                openspace::lua::push(L, *std::get<{0}>(res));
                 nArguments++;
             }}
 )";
 
     constexpr std::string_view LuaWrapperPushTupleRegular = R"(
-            ghoul::lua::push(L, std::get<{}>(res));
+            openspace::lua::push(L, std::get<{}>(res));
             nArguments++;
 )";
 
     constexpr std::string_view LuaWrapperPushOptional = R"(
             if (res.has_value()) {
-                ghoul::lua::push(L, std::move(*res));
+                openspace::lua::push(L, std::move(*res));
                 return 1;
             }
             else {
@@ -186,7 +186,7 @@ template <> [[maybe_unused]] openspace::Documentation doc<{}>(std::string id, st
 
     constexpr std::string_view LuaWrapperPushVariant = R"(
             if (std::holds_alternative<{0}>(res)) {{
-                ghoul::lua::push(L, std::move(std::get<{0}>(res)));
+                openspace::lua::push(L, std::move(std::get<{0}>(res)));
             }}
 )";
 
@@ -210,7 +210,7 @@ template <> [[maybe_unused]] openspace::Documentation doc<{}>(std::string id, st
 )";
 
     constexpr std::string_view BakeFunctionOptional = R"(
-template <typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val) {
+template <typename T> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::optional<T>* val) {
     if (d.hasKey(key)) {
         T v;
         bakeTo(d, key, &v);
@@ -225,8 +225,8 @@ template <typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view k
     // This code is also used in the BakeFunctionArray. If you change anything in this
     // function, it should also be changed there
     constexpr std::string_view BakeFunctionVector = R"(
-template <typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::vector<T>* val) {
-    ghoul::Dictionary dict = d.value<ghoul::Dictionary>(key);
+template <typename T> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::vector<T>* val) {
+    openspace::Dictionary dict = d.value<openspace::Dictionary>(key);
     // For the moment we need to make sure in here that all of the keys are sequential
     // since our TableVerifier doesn't really do that and we don't have a VectorVerifier
     // for a flat list (yet).  So you might have gotten a specification error from here
@@ -237,7 +237,7 @@ template <typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view k
     for (size_t i = 1; i <= dict.size(); i++) {
         std::string k = std::to_string(i);
         if (!dict.hasKey(k)) {
-            throw ghoul::RuntimeError("Could not find key '" + k + "' in the dictionary");
+            throw openspace::RuntimeError("Could not find key '" + k + "' in the dictionary");
         }
     }
 
@@ -252,8 +252,8 @@ template <typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view k
     // This code is also used in the BakeFunctionVector. If you change anything in this
     // function, it should also be changed there
     constexpr std::string_view BakeFunctionArray = R"(
-template <typename T, size_t N> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::array<T, N>* val) {
-    ghoul::Dictionary dict = d.value<ghoul::Dictionary>(key);
+template <typename T, size_t N> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::array<T, N>* val) {
+    openspace::Dictionary dict = d.value<openspace::Dictionary>(key);
     // For the moment we need to make sure in here that all of the keys are sequential
     // since our TableVerifier doesn't really do that and we don't have a VectorVerifier
     // for a flat list (yet).  So you might have gotten a specification error from here
@@ -264,7 +264,7 @@ template <typename T, size_t N> void bakeTo(const ghoul::Dictionary& d, std::str
     for (size_t i = 1; i <= dict.size(); i++) {
         std::string k = std::to_string(i);
         if (!dict.hasKey(k)) {
-            throw ghoul::RuntimeError("Could not find key '" + k + "' in the dictionary");
+            throw openspace::RuntimeError("Could not find key '" + k + "' in the dictionary");
         }
     }
 
@@ -278,7 +278,7 @@ template <typename T, size_t N> void bakeTo(const ghoul::Dictionary& d, std::str
 
     constexpr std::string_view BakeFunctionTuple = R"(
 namespace {
-template <size_t I = 0, typename... Ts> void innerBake(const ghoul::Dictionary& dict, std::tuple<Ts...>* val) {
+template <size_t I = 0, typename... Ts> void innerBake(const openspace::Dictionary& dict, std::tuple<Ts...>* val) {
     std::tuple_element_t<I, std::tuple<Ts...>> v;
     // +1 due to Lua 1-based counting
     bakeTo(dict, std::to_string(I + 1), &v);
@@ -291,15 +291,15 @@ template <size_t I = 0, typename... Ts> void innerBake(const ghoul::Dictionary& 
 
 } // namespace
 
-template <typename... Ts> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::tuple<Ts...>* val) {
-    ghoul::Dictionary dict = d.value<ghoul::Dictionary>(key);
+template <typename... Ts> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::tuple<Ts...>* val) {
+    openspace::Dictionary dict = d.value<openspace::Dictionary>(key);
     innerBake<0>(dict, val);
 }
 )";
 
     constexpr std::string_view BakeFunctionMapStringKey = R"(
-template <typename V> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::map<std::string, V>* val) {
-    ghoul::Dictionary dict = d.value<ghoul::Dictionary>(key);
+template <typename V> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::map<std::string, V>* val) {
+    openspace::Dictionary dict = d.value<openspace::Dictionary>(key);
 
     for (std::string_view k : dict.keys()) {
         V v;
@@ -309,8 +309,8 @@ template <typename V> void bakeTo(const ghoul::Dictionary& d, std::string_view k
 }
 )";
     constexpr std::string_view BakeFunctionMapEnumKey = R"(
-template <typename K, typename V> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::map<K, V>* val) {
-    ghoul::Dictionary dict = d.value<ghoul::Dictionary>(key);
+template <typename K, typename V> void bakeTo(const openspace::Dictionary& d, std::string_view key, std::map<K, V>* val) {
+    openspace::Dictionary dict = d.value<openspace::Dictionary>(key);
 
     for (std::string_view k : dict.keys()) {
         V v;

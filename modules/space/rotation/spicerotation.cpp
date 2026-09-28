@@ -103,7 +103,7 @@ Documentation SpiceRotation::Documentation() {
     );
 }
 
-SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
+SpiceRotation::SpiceRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
     , _sourceFrame(SourceInfo)
     , _destinationFrame(DestinationInfo)

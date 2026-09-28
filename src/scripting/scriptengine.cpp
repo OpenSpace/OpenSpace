@@ -32,7 +32,7 @@
 #include <openspace/format.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/logging/logmanager.h>
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/lua/lua_helper.h>
 #include <openspace/misc/dictionary.h>
 #include <openspace/misc/exception.h>
@@ -89,7 +89,7 @@ namespace {
 namespace openspace {
 
 ScriptEngine::ScriptEngine(bool sandboxedLua)
-    : _state(ghoul::lua::LuaState::Sandboxed(sandboxedLua))
+    : _state(lua::LuaState::Sandboxed(sandboxedLua))
 {}
 
 void ScriptEngine::initialize() {
@@ -100,10 +100,10 @@ void ScriptEngine::initialize() {
 
     LDEBUG("Add user defined scripts");
     if (FileSys.hasRegisteredToken("${USER_SCRIPTS}")) {
-        _rootLibrary.scripts = ghoul::filesystem::walkDirectory(
+        _rootLibrary.scripts = filesystem::walkDirectory(
             absPath("${USER_SCRIPTS}"),
-            ghoul::filesystem::Recursive::Yes,
-            ghoul::filesystem::Sorted::Yes,
+            filesystem::Recursive::Yes,
+            filesystem::Sorted::Yes,
             [](const std::filesystem::path& p) {
                 return p.extension() == ".lua" && !std::filesystem::is_directory(p);
             }
@@ -146,7 +146,7 @@ void ScriptEngine::initializeLuaState(lua_State* state) {
     lua_settop(state, top);
 }
 
-ghoul::lua::LuaState* ScriptEngine::luaState() {
+lua::LuaState* ScriptEngine::luaState() {
     return &_state;
 }
 
@@ -191,14 +191,14 @@ bool ScriptEngine::runScript(const Script& script) {
     ZoneScoped;
     ZoneText(script.code.c_str(), script.code.size());
 
-    ghoul_assert(!script.code.empty(), "Script must not be empty");
-    ghoul_assert(
-        !(script.addToLog && ghoul::lua::isScriptBinary(script.code)),
+    assert_msg(!script.code.empty(), "Script must not be empty");
+    assert_msg(
+        !(script.addToLog && lua::isScriptBinary(script.code)),
         "Shouldn't try to add a script to a log that is a binary blob"
     );
 
     // Binary scripts should never be logged
-    if (_logScripts && !ghoul::lua::isScriptBinary(script.code)) {
+    if (_logScripts && !lua::isScriptBinary(script.code)) {
         if (script.addToLog && !global::configuration->verboseScriptLog) {
             writeLog(script.code);
         }
@@ -217,25 +217,25 @@ bool ScriptEngine::runScript(const Script& script) {
 
     try {
         if (script.callback) {
-            ghoul::Dictionary returnValue =
-                ghoul::lua::loadArrayDictionaryFromString(script.code, _state);
+            Dictionary returnValue =
+                lua::loadArrayDictionaryFromString(script.code, _state);
             script.callback(std::move(returnValue));
         }
         else {
-            ghoul::lua::runScript(_state, script.code);
+            lua::runScript(_state, script.code);
         }
     }
-    catch (const ghoul::lua::LuaLoadingException& e) {
+    catch (const lua::LuaLoadingException& e) {
         LERRORC(e.component, e.message);
         if (script.callback) {
-            script.callback(ghoul::Dictionary());
+            script.callback(Dictionary());
         }
         return false;
     }
-    catch (const ghoul::lua::LuaExecutionException& e) {
+    catch (const lua::LuaExecutionException& e) {
         LERRORC(e.component, e.message);
         if (script.callback) {
-            script.callback(ghoul::Dictionary());
+            script.callback(Dictionary());
         }
         return false;
     }
@@ -243,14 +243,14 @@ bool ScriptEngine::runScript(const Script& script) {
         LERRORC(e.component, e.message);
         logError(e, e.component);
         if (script.callback) {
-            script.callback(ghoul::Dictionary());
+            script.callback(Dictionary());
         }
         return false;
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERRORC(e.component, e.message);
         if (script.callback) {
-            script.callback(ghoul::Dictionary());
+            script.callback(Dictionary());
         }
         return false;
     }
@@ -315,7 +315,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 {
     ZoneScoped;
 
-    ghoul_assert(state, "State must not be nullptr");
+    assert_msg(state, "State must not be nullptr");
     for (const LuaLibrary::Function& p : library.functions) {
         if (!replace) {
             lua_getfield(state, -1, p.name.c_str());
@@ -326,18 +326,18 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
             }
             lua_pop(state, 1);
         }
-        ghoul::lua::push(state, p.name);
+        lua::push(state, p.name);
         lua_pushcfunction(state, p.function);
         lua_settable(state, TableOffset);
     }
 
     for (LuaLibrary& sl : library.subLibraries) {
-        ghoul::lua::push(state, sl.name);
+        lua::push(state, sl.name);
         lua_newtable(state);
         lua_settable(state, TableOffset);
 
         // Retrieve the table
-        ghoul::lua::push(state, sl.name);
+        lua::push(state, sl.name);
         lua_gettable(state, -2);
 
         // Add the library functions into the table
@@ -353,7 +353,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
     // library's table are passed as upvalues so the closure can add the declared
     // function into that table. For the root library (empty name), use the global
     // table so that registered functions end up as global Lua functions
-    ghoul::lua::push(state, &library);
+    lua::push(state, &library);
     if (isRootLibrary) {
         lua_pushglobaltable(state);
     }
@@ -363,19 +363,15 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
     lua_pushcclosure(
         state,
         [](lua_State* L) {
-            LuaLibrary* lib = ghoul::lua::userData<LuaLibrary>(L, 1);
+            LuaLibrary* lib = lua::userData<LuaLibrary>(L, 1);
 
-            ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::registerFunction");
+            lua::checkArgumentsAndThrow(L, 1, "lua::registerFunction");
 
-            if (!ghoul::lua::hasValue<ghoul::Dictionary>(L)) {
-                ghoul::lua::luaError(L, "Invalid parameter. Needs table or function");
+            if (!lua::hasValue<Dictionary>(L)) {
+                lua::luaError(L, "Invalid parameter. Needs table or function");
             }
 
-            const ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(
-                L,
-                -1,
-                ghoul::lua::PopValue::No
-            );
+            const Dictionary d = lua::value<Dictionary>(L, -1, lua::PopValue::No);
             const Parameters p = codegen::bake<Parameters>(d);
 
             // Add definitions
@@ -397,7 +393,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
             // Lift and define the function into the library's table (second upvalue)
             lua_getfield(L, 1, "Function");
             if (lua_isfunction(L, -1) != 1) {
-                ghoul::lua::luaError(L, "Invalid parameter. Needs a function");
+                lua::luaError(L, "Invalid parameter. Needs a function");
             }
             luaL_checktype(L, -1, LUA_TFUNCTION);
 
@@ -407,7 +403,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
             const bool alreadyExists = !lua_isnil(L, -1);
             lua_pop(L, 1);
             if (alreadyExists) {
-                ghoul::lua::luaError(
+                lua::luaError(
                     L,
                     std::format("Function '{}' was already assigned", p.name)
                 );
@@ -425,7 +421,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 
     try {
         for (const std::filesystem::path& script : library.scripts) {
-            ghoul::lua::runScriptFile(state, script);
+            lua::runScriptFile(state, script);
         }
     }
     catch (...) {
@@ -445,7 +441,7 @@ void ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library,
 {
     ZoneScoped;
 
-    ghoul_assert(state, "State must not be nullptr");
+    assert_msg(state, "State must not be nullptr");
     const int top = lua_gettop(state);
 
     lua_getglobal(state, OpenSpaceLibraryName.data());
@@ -464,12 +460,12 @@ void ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library,
         // probably be used by scripts already
 
         // Add the table
-        ghoul::lua::push(state, library.name);
+        lua::push(state, library.name);
         lua_newtable(state);
         lua_settable(state, TableOffset);
 
         // Retrieve the table
-        ghoul::lua::push(state, library.name);
+        lua::push(state, library.name);
         lua_gettable(state, -2);
 
         // Add the library functions into the table
@@ -608,7 +604,7 @@ void ScriptEngine::postSync(bool isMaster) {
             try {
                 runScript(script);
             }
-            catch (const ghoul::RuntimeError& e) {
+            catch (const RuntimeError& e) {
                 LERRORC(e.component, e.message);
                 continue;
             }
@@ -621,7 +617,7 @@ void ScriptEngine::postSync(bool isMaster) {
                 runScript({ _clientScriptQueue.front() });
                 _clientScriptQueue.pop();
             }
-            catch (const ghoul::RuntimeError& e) {
+            catch (const RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -673,7 +669,7 @@ void ScriptEngine::registerRepeatedScript(std::string identifier, std::string sc
         }
     );
     if (it != _repeatedScripts.end()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             std::format("Script with identifier '{}' already registered", identifier),
             "ScriptEngine"
         );

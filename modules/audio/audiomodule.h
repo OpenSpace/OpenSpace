@@ -298,7 +298,7 @@ private:
         unsigned int handle = 0;
     };
 
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
     void internalDeinitializeGL() override;
 
     /**
@@ -316,7 +316,7 @@ private:
      * \param path The path to the audio file on disk that should be loaded
      * \return The SoLoud::Wav object of the loaded file
      *
-     * \throw ghoul::RuntimeError If the \p path is not a loadable audio file
+     * \throw RuntimeError If the \p path is not a loadable audio file
      */
     std::unique_ptr<SoLoud::Wav> loadSound(const std::filesystem::path& path);
 

@@ -24,44 +24,86 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/filesystem/filesystem.h>
 #include <openspace/lua/lua_helper.h>
-#include <openspace/misc/dictionaryluaformatter.h>
-#include <openspace/scene/assetmanager.h>
-#include <openspace/scene/asset.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/sceneinitializer.h>
-#include <openspace/scripting/scriptengine.h>
-#include <exception>
-#include <memory>
+#include <openspace/lua/luastate.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/glm.h>
+#include <fstream>
+#include <sstream>
+#include <iostream>
 
 using namespace openspace;
 
-TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
-    const Scene scene = Scene(std::make_unique<SceneInitializer>());
-    ghoul::lua::LuaState* state = global::scriptEngine->luaState();
-    AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
+TEST_CASE("LuaToDictionary: Nested Tables", "[luatodictionary]") {
+    constexpr std::string_view TestString = R"(
+        glob = {
+            A = {
+                B = {
+                    C = {
+                        D = {
+                            E = { 
+                                F = { "127.0.0.1", "localhost" },
+                                G = {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+)";
 
-    CHECK_NOTHROW(assetLoader.add("passassertion"));
-    CHECK_NOTHROW(assetLoader.add("failassertion"));
+    const lua::LuaState state;
+    lua::runScript(state, TestString);
+    //lua::runScriptFile(state, "C:/Users/alebo68/Desktop/test.lua");
+
+    lua_getglobal(state, "glob");
+
+    Dictionary dict;
+    lua::luaDictionaryFromState(state, dict);
+
+    REQUIRE(dict.hasValue<Dictionary>("A"));
+    const Dictionary a = dict.value<Dictionary>("A");
+
+    REQUIRE(a.hasValue<Dictionary>("B"));
+    const Dictionary b = a.value<Dictionary>("B");
+
+    REQUIRE(b.hasValue<Dictionary>("C"));
+    const Dictionary c = b.value<Dictionary>("C");
+
+    REQUIRE(c.hasValue<Dictionary>("D"));
+    const Dictionary d = c.value<Dictionary>("D");
+
+    REQUIRE(d.hasValue<Dictionary>("E"));
+    const Dictionary e = d.value<Dictionary>("E");
+
+    REQUIRE(e.hasValue<Dictionary>("F"));
+    const Dictionary f = e.value<Dictionary>("F");
+
+    CHECK(f.hasValue<std::string>("1"));
+    CHECK(f.hasValue<std::string>("2"));
 }
 
-TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
-    Scene scene = Scene(std::make_unique<SceneInitializer>());
-    ghoul::lua::LuaState* state = global::scriptEngine->luaState();
-    AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
+TEST_CASE("LuaToDictionary: Nested Tables 2", "[luatodictionary]") {
+    constexpr std::string_view TestString = R"(
+        ModuleConfigurations = {
+            Server = {
+                Interfaces = {
+                    {
+                        RequirePasswordAddresses = {}
+                    },
+                    {
+                        RequirePasswordAddresses = {}
+                    }
+                }
+            }
+        }
+)";
 
-    CHECK_NOTHROW(assetLoader.add("require"));
-}
+    const lua::LuaState state;
+    lua::runScript(state, TestString);
 
-TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
-    const Scene scene = Scene(std::make_unique<SceneInitializer>(1u));
-    ghoul::lua::LuaState* state = global::scriptEngine->luaState();
-    AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
-
-    CHECK_NOTHROW(assetLoader.add("assetfunctionsexist"));
+    lua_getglobal(state, "ModuleConfigurations");
+    const Dictionary d = lua::value<Dictionary>(state);
+    CHECK(d.hasValue<Dictionary>("Server"));
 }

@@ -30,6 +30,8 @@
 #include <optional>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(D)]] P {
         struct A {
@@ -77,22 +79,22 @@ namespace {
 TEST_CASE("Execution/Structs/Shadowing:  Bake", "[Execution][Structs]") {
     using namespace std::string_literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("T", "Type1"s);
         d.setValue("A", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("T", "Type4"s);
         d.setValue("B", e);
     }
     d.setValue("T", "Type5"s);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
+            Dictionary f;
             f.setValue("Ca", 2.0);
             e.setValue("A", f);
         }

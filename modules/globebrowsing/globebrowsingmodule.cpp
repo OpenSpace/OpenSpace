@@ -216,7 +216,7 @@ GlobeBrowsingModule::GlobeBrowsingModule()
     addProperty(_mrfCacheLocation);
 }
 
-void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
+void GlobeBrowsingModule::internalInitialize(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
     _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
 
@@ -287,16 +287,16 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         GdalWrapper::destroy();
     });
 
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    assert_msg(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
 
     FactoryManager::ref().addFactory<TileProvider>("TileProvider");
 
-    ghoul::TemplateFactory<TileProvider>* fTileProvider =
+    TemplateFactory<TileProvider>* fTileProvider =
         FactoryManager::ref().factory<TileProvider>();
-    ghoul_assert(fTileProvider, "TileProvider factory was not created");
+    assert_msg(fTileProvider, "TileProvider factory was not created");
 
 
     fTileProvider->registerClass<DefaultTileProvider>("DefaultTileProvider");
@@ -310,9 +310,9 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     fTileProvider->registerClass<TileProviderByLevel>("TileProviderByLevel");
     fTileProvider->registerClass<TileProviderByIndex>("TileProviderByIndex");
 
-    ghoul::TemplateFactory<DashboardItem>* fDashboard =
+    TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
-    ghoul_assert(fDashboard, "Dashboard factory was not created");
+    assert_msg(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemGlobeLocation>("DashboardItemGlobeLocation");
 }
@@ -347,7 +347,7 @@ std::vector<Documentation> GlobeBrowsingModule::documentations() const {
 void GlobeBrowsingModule::goToChunk(const SceneGraphNode& node,
                                     int x, int y, int level)
 {
-    ghoul_assert(level < std::numeric_limits<uint8_t>::max(), "Level way too big");
+    assert_msg(level < std::numeric_limits<uint8_t>::max(), "Level way too big");
 
     const GeodeticPatch patch = GeodeticPatch(
         TileIndex(x, y, static_cast<uint8_t>(level))

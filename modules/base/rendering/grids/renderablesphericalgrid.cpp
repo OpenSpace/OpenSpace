@@ -110,8 +110,7 @@ namespace {
         std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
         // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderablesphericalgrid_codegen.cpp"
@@ -125,7 +124,7 @@ Documentation RenderableSphericalGrid::Documentation() {
     );
 }
 
-RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
+RenderableSphericalGrid::RenderableSphericalGrid(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridProgram(nullptr)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
@@ -182,7 +181,7 @@ void RenderableSphericalGrid::initialize() {
 void RenderableSphericalGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
         "GridProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "GridProgram",
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
@@ -203,7 +202,7 @@ void RenderableSphericalGrid::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

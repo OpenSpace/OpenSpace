@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,9 +37,11 @@
 #include <unistd.h>
 #endif // WIN32
 
+using namespace openspace;
+
 TEST_CASE("FileSystem: OnChangeCallback", "[filesystem]") {
-    using ghoul::filesystem::File;
-    using ghoul::filesystem::FileSystem;
+    using filesystem::File;
+    using filesystem::FileSystem;
 
     const char* cpath = "${TEMPORARY}/tmpfil.txt";
     const std::filesystem::path path = absPath(cpath);
@@ -107,10 +108,9 @@ TEST_CASE("FileSystem: OnChangeCallback", "[filesystem]") {
 }
 
 TEST_CASE("FileSystem: TokenDefaultState", "[filesystem]") {
-    REQUIRE(FileSys.tokens().size() == 3);
+    REQUIRE(FileSys.tokens().size() == 2);
     CHECK(FileSys.tokens()[0] == "${TEMPORARY}");
-    CHECK(FileSys.tokens()[1] == "${UNIT_SCRIPT}");
-    CHECK(FileSys.tokens()[2] == "${UNIT_TEST}");
+    CHECK(FileSys.tokens()[1] == "${TESTDIR}");
 }
 
 TEST_CASE("FileSystem: Override Non Existing Path Token", "[filesystem]") {
@@ -122,12 +122,12 @@ TEST_CASE("FileSystem: Override Non Existing Path Token", "[filesystem]") {
         FileSys.registerPathToken(
             "${AddExistingPathToken}",
             absPath("${TEMPORARY}"),
-            ghoul::filesystem::FileSystem::Override::Yes
+            filesystem::FileSystem::Override::Yes
         )
     );
 }
 
 TEST_CASE("FileSystem: ExpandingTokensNonExistingToken", "[filesystem]") {
     const std::string p = "${NOTFOUND}";
-    REQUIRE_THROWS_AS(FileSys.expandPathTokens(p), ghoul::RuntimeError);
+    REQUIRE_THROWS_AS(FileSys.expandPathTokens(p), RuntimeError);
 }

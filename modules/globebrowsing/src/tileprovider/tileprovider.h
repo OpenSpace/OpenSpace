@@ -33,11 +33,11 @@
 #include <memory>
 #include <string>
 
-namespace ghoul { class Dictionary; }
 struct CPLXMLNode;
 
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 struct TileIndex;
 
@@ -59,7 +59,7 @@ struct TileProvider : public PropertyOwner {
     static unsigned int NumTileProviders;
 
     static std::unique_ptr<TileProvider> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+        const Dictionary& dictionary);
 
     static void initializeDefaultTile();
     static void deinitializeDefaultTile();

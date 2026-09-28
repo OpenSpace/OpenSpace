@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +35,7 @@
 #include <typeinfo>
 #include <vector>
 
-namespace ghoul {
+namespace openspace {
 
 class Dictionary;
 
@@ -82,8 +81,8 @@ public:
  * registered classes can then be created using the #create method, providing the same
  * `className` with which the class was registered. If the subclass that was registered
  * provides both an empty default constructor as well as a constructor taking a single
- * `const ghoul::Dictionary&` parameter, the second #create method can be used which takes
- * the `className` as well as the Dictionary with which to instantiate the class. If this
+ * `const Dictionary&` parameter, the second #create method can be used which takes the
+ * `className` as well as the Dictionary with which to instantiate the class. If this
  * method is used and the class does not provide a Dictionary constructor, an exception is
  * thrown. Likewise, if the registered class does not provide a default constructor and is
  * called with the first #create method, a similar exception is thrown. #hasClass tests if
@@ -94,7 +93,7 @@ public:
  * class C {};
  * class D : public A {
  * public:
- *     D(const ghoul::Dictionary&);
+ *     D(const Dictionary&);
  * };
  *
  * TemplateFactory<A> factory;
@@ -253,7 +252,7 @@ private:
     std::map<std::string, FactoryFunction, std::less<>> _map;
 };
 
-} // namespace ghoul
+} // namespace openspace
 
 #include <openspace/misc/templatefactory.inl>
 

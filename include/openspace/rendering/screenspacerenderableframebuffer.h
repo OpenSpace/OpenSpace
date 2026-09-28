@@ -44,7 +44,7 @@ class ScreenSpaceRenderableFramebuffer : public ScreenSpaceRenderable {
 public:
     using RenderFunction = std::function<void()>;
 
-    explicit ScreenSpaceRenderableFramebuffer(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceRenderableFramebuffer(const Dictionary& dictionary);
     ~ScreenSpaceRenderableFramebuffer() override;
 
     void initializeGL() override;
@@ -61,15 +61,15 @@ protected:
     Vec2Property _size;
 
 private:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
     static int id();
 
-    std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
+    std::unique_ptr<opengl::FramebufferObject> _framebuffer;
     std::vector<std::function<void()>> _renderFunctions;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::opengl::Texture> _depthTexture;
+    std::unique_ptr<opengl::Texture> _texture;
+    std::unique_ptr<opengl::Texture> _depthTexture;
 };
 
 } // namespace openspace

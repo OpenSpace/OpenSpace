@@ -36,17 +36,14 @@
 #include <optional>
 #include <tuple>
 
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    } // namespace opengl
-    class Dictionary;
-} // namespace ghoul
-
 namespace openspace {
 
+namespace opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace opengl
 class Camera;
+class Dictionary;
 struct Documentation;
 class Ellipsoid;
 struct RenderData;
@@ -72,10 +69,9 @@ public:
         Sticker = 32
     };
 
-    static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+    static mm_unique_ptr<Renderable> createFromDictionary(const Dictionary& dictionary);
 
-    explicit Renderable(const ghoul::Dictionary& dictionary,
+    explicit Renderable(const Dictionary& dictionary,
         RenderableSettings settings = RenderableSettings());
     ~Renderable() override = default;
 
@@ -225,8 +221,8 @@ private:
      * to provide a set method for this. Otherwise, anyone might mess around with our
      * parentage and that's no bueno.
      */
-    friend ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
-        const ghoul::Dictionary&);
+    friend mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
+        const Dictionary&);
 };
 
 } // namespace openspace

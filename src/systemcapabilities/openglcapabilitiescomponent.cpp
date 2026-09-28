@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +27,7 @@
 #include <openspace/format.h>
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/stringconversion.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <algorithm>
 #include <sstream>
 #include <utility>
@@ -47,7 +46,7 @@ namespace {
     constexpr std::string_view _loggerCat = "OpenGLCapabilities";
 } // namespace
 
-namespace ghoul::systemcapabilities {
+namespace openspace::systemcapabilities {
 
 OpenGLCapabilitiesComponent::OpenGLCapabilitiesComponentError::
 OpenGLCapabilitiesComponentError(std::string msg)
@@ -264,4 +263,4 @@ std::string_view OpenGLCapabilitiesComponent::name() const {
     return "OpenGL";
 }
 
-} // namespace ghoul::systemcapabilities
+} // namespace openspace::systemcapabilities

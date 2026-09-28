@@ -37,7 +37,7 @@ class SceneGraphNode;
 
 class GlobeTranslation : public Translation {
 public:
-    explicit GlobeTranslation(const ghoul::Dictionary& dictionary);
+    explicit GlobeTranslation(const Dictionary& dictionary);
 
     void initialize() override;
 

@@ -32,19 +32,17 @@
 #include <openspace/scene/timeframe.h>
 #include <limits>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 struct UpdateData;
 
 class Scale : public PropertyOwner {
 public:
-    static ghoul::mm_unique_ptr<Scale> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+    static mm_unique_ptr<Scale> createFromDictionary(const Dictionary& dictionary);
 
-    explicit Scale(const ghoul::Dictionary& dictionary);
+    explicit Scale(const Dictionary& dictionary);
     ~Scale() override = default;
 
     virtual void initialize();
@@ -60,7 +58,7 @@ protected:
 
 private:
     bool _needsUpdate = true;
-    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
+    mm_unique_ptr<TimeFrame> _timeFrame;
     double _cachedTime = -std::numeric_limits<double>::max();
     glm::dvec3 _cachedScale = glm::dvec3(1.0);
 };

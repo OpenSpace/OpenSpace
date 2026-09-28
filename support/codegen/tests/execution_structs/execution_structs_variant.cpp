@@ -33,6 +33,8 @@
 #include <variant>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(Variant)]] Parameters {
         // boolDouble value documentation
@@ -142,7 +144,7 @@ TEST_CASE("Execution/Structs/Variant:  Bake", "[Execution][Structs]") {
     }
 
     {
-        ghoul::Dictionary d1;
+        Dictionary d1;
         d1.setValue("BoolDoubleValue", false);
         d1.setValue("FloatStringValue", 2.0);
         d1.setValue("IvecsValue", glm::dvec2(1.0, 2.0));
@@ -162,19 +164,19 @@ TEST_CASE("Execution/Structs/Variant:  Bake", "[Execution][Structs]") {
         d1.setValue("OptionalVariantEnumFloat", "Value2"s);
         d1.setValue("VariantPath", tmpFile);
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("1", tmpFile);
             e.setValue("2", tmpFile2);
             d1.setValue("VariantPath2", e);
         }
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("Var", "Value"s);
             d1.setValue("VariantStringVectorC", e);
         }
         {
-            ghoul::Dictionary e;
-            ghoul::Dictionary f;
+            Dictionary e;
+            Dictionary f;
             f.setValue("1", "Abc"s);
             f.setValue("2", "Def"s);
             e.setValue("Var", f);
@@ -248,7 +250,7 @@ TEST_CASE("Execution/Structs/Variant:  Bake", "[Execution][Structs]") {
     }
 
     {
-        ghoul::Dictionary d2;
+        Dictionary d2;
         d2.setValue("BoolDoubleValue", 6.0);
         d2.setValue("FloatStringValue", "abc"s);
         d2.setValue("IvecsValue", glm::dvec3(7.0, 8.0, 9.0));
@@ -265,7 +267,7 @@ TEST_CASE("Execution/Structs/Variant:  Bake", "[Execution][Structs]") {
             )
         );
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("1", "abc"s);
             e.setValue("2", "def"s);
             e.setValue("3", "ghi"s);
@@ -273,7 +275,7 @@ TEST_CASE("Execution/Structs/Variant:  Bake", "[Execution][Structs]") {
             d2.setValue("VariantVector", e);
         }
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("1", "mno"s);
             e.setValue("2", "pqr"s);
             e.setValue("3", "stu"s);
@@ -286,20 +288,20 @@ TEST_CASE("Execution/Structs/Variant:  Bake", "[Execution][Structs]") {
         d2.setValue("VariantEnumFloat", 2.0);
         d2.setValue("OptionalVariantEnumFloat", 2.0);
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("1", tmpFile);
             e.setValue("2", tmpFile2);
             d2.setValue("VariantPath", e);
         }
         d2.setValue("VariantPath2", tmpFile);
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("Var", "Value"s);
             d2.setValue("VariantStringVectorC", e);
         }
         {
-            ghoul::Dictionary e;
-            ghoul::Dictionary f;
+            Dictionary e;
+            Dictionary f;
             f.setValue("1", "Abc"s);
             f.setValue("2", "Def"s);
             e.setValue("Var", f);
@@ -362,7 +364,7 @@ TEST_CASE("Execution/Structs/Variant:  Bake", "[Execution][Structs]") {
     }
 
     {
-        ghoul::Dictionary d3;
+        Dictionary d3;
         d3.setValue("BoolDoubleValue", 13.1);
         d3.setValue("FloatStringValue", "abc"s);
         d3.setValue("IvecsValue", glm::dvec4(14.0, 15.0, 16.0, 17.0));
@@ -382,19 +384,19 @@ TEST_CASE("Execution/Structs/Variant:  Bake", "[Execution][Structs]") {
         d3.setValue("OptionalVariantEnumFloat", "Value1"s);
         d3.setValue("VariantPath", tmpFile);
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("1", tmpFile);
             e.setValue("2", tmpFile2);
             d3.setValue("VariantPath2", e);
         }
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("Var", "Value"s);
             d3.setValue("VariantStringVectorC", e);
         }
         {
-            ghoul::Dictionary e;
-            ghoul::Dictionary f;
+            Dictionary e;
+            Dictionary f;
             f.setValue("1", "Abc"s);
             f.setValue("2", "Def"s);
             e.setValue("Var", f);
@@ -438,7 +440,7 @@ TEST_CASE("Execution/Structs/Variant:  Bake", "[Execution][Structs]") {
     }
 
     {
-        ghoul::Dictionary d4;
+        Dictionary d4;
         d4.setValue("BoolDoubleValue", 20.0);
         d4.setValue("FloatStringValue", "abc"s);
         d4.setValue("IvecsValue", glm::dvec2(21.0, 22.0));
@@ -465,19 +467,19 @@ TEST_CASE("Execution/Structs/Variant:  Bake", "[Execution][Structs]") {
         d4.setValue("OptionalVariantEnumFloat", 5.0);
         d4.setValue("VariantPath", tmpFile);
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("1", tmpFile);
             e.setValue("2", tmpFile2);
             d4.setValue("VariantPath2", e);
         }
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("Var", "Value"s);
             d4.setValue("VariantStringVectorC", e);
         }
         {
-            ghoul::Dictionary e;
-            ghoul::Dictionary f;
+            Dictionary e;
+            Dictionary f;
             f.setValue("1", "Abc"s);
             f.setValue("2", "Def"s);
             e.setValue("Var", f);

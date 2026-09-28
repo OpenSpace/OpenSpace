@@ -138,9 +138,9 @@ MoleculeModule::MoleculeModule()
     addProperty(_exposure);
 }
 
-void MoleculeModule::internalInitialize(const ghoul::Dictionary&) {
+void MoleculeModule::internalInitialize(const Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    assert_msg(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableMolecule>("RenderableMolecule");
     fRenderable->registerClass<RenderableSimulationBox>("RenderableSimulationBox");
 
@@ -155,7 +155,7 @@ void MoleculeModule::internalInitialize(const ghoul::Dictionary&) {
 }
 
 void MoleculeModule::internalDeinitializeGL() {
-    ghoul_assert(_initializeCounter == 0, "Renderable type did not deinitialize shaders");
+    assert_msg(_initializeCounter == 0, "Renderable type did not deinitialize shaders");
 
     _depthTex = nullptr;
     _normalTex = nullptr;
@@ -181,15 +181,15 @@ void MoleculeModule::initializeShaders() {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
     const glm::ivec2 size = global::windowDelegate->currentWindowSize();
 
-    _colorTex = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _colorTex = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size.x, size.y, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
     glFramebufferTexture2D(
@@ -200,16 +200,16 @@ void MoleculeModule::initializeShaders() {
         0
     );
 
-    _normalTex = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _normalTex = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size.x, size.y, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RG,
+            .format = opengl::Texture::Format::RG,
             .dataType = GL_UNSIGNED_SHORT
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .filter = ghoul::opengl::Texture::FilterMode::Nearest,
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .filter = opengl::Texture::FilterMode::Nearest,
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
     glFramebufferTexture2D(
@@ -220,15 +220,15 @@ void MoleculeModule::initializeShaders() {
         0
     );
 
-    _depthTex = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _depthTex = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size.x, size.y, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::DepthComponent,
+            .format = opengl::Texture::Format::DepthComponent,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
     glFramebufferTexture2D(

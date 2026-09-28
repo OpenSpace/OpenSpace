@@ -123,7 +123,7 @@ Documentation RenderableRings::Documentation() {
     );
 }
 
-RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
+RenderableRings::RenderableRings(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
@@ -131,7 +131,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
     , _colorFilter(ColorFilterInfo, 0.15f, 0.f, 1.f)
 {
-    using ghoul::filesystem::File;
+    using filesystem::File;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -166,7 +166,7 @@ void RenderableRings::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/rings_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 
     glCreateBuffers(1, &_vbo);
     glCreateVertexArrays(1, &_vao);
@@ -208,7 +208,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
     _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_texture);
     _shader->setUniform(_uniformCache.texture, unit);
 
@@ -224,7 +224,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
 void RenderableRings::update(const UpdateData& data) {
     if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+        opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     if (_planeIsDirty) [[unlikely]] {
@@ -248,12 +248,10 @@ void RenderableRings::update(const UpdateData& data) {
 }
 
 void RenderableRings::loadTexture() {
-    using namespace ghoul::io;
-    using namespace ghoul::opengl;
-    _texture = texture::loadTexture(
+    _texture = io::texture::loadTexture(
         _texturePath.value(),
         1,
-        { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
+        { .filter = opengl::Texture::FilterMode::AnisotropicMipMap }
     );
 
     LDEBUGC(
@@ -261,7 +259,7 @@ void RenderableRings::loadTexture() {
         std::format("Loaded texture from '{}'", _texturePath.value())
     );
 
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+    _textureFile = std::make_unique<filesystem::File>(_texturePath.value());
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 }
 

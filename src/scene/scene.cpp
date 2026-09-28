@@ -88,7 +88,7 @@ namespace {
             return "Sticker";
         }
         else {
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
         }
     }
 #endif // TRACY_ENABLE
@@ -102,9 +102,9 @@ namespace {
         }
     }
 
-    using ProfilePropertyLua = std::variant<bool, float, std::string, ghoul::lua::nil_t>;
+    using ProfilePropertyLua = std::variant<bool, float, std::string, lua::nil_t>;
     template <typename T>
-    void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
+    void processPropertyValueTableEntries(lua::LuaState& L,
         const std::string& value, std::vector<T>& table, bool& valueIsTable,
         std::string_view propertyName);
 
@@ -151,7 +151,7 @@ namespace {
      * \param L The Lua state to (eventually) push to
      * \param value String representation of the value with which to set property
      */
-    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value,
+    void handlePropertyLuaTableEntry(lua::LuaState& L, const std::string& value,
                                      bool& isTableValue, std::string_view propertyName)
     {
         PropertyValueType enclosedType = PropertyValueType::Nil;
@@ -180,7 +180,7 @@ namespace {
                     isTableValue,
                     propertyName
                 );
-                ghoul::lua::push(L, vals);
+                lua::push(L, vals);
             }
             break;
             case PropertyValueType::String:
@@ -193,7 +193,7 @@ namespace {
                     isTableValue,
                     propertyName
                 );
-                ghoul::lua::push(L, vals);
+                lua::push(L, vals);
             }
             break;
             case PropertyValueType::Table:
@@ -214,8 +214,8 @@ namespace {
      * \param value String representation of the value with which to set property
      * \return The ProfilePropertyLua variant type translated from string representation
      */
-    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
-                                            const std::string& value, bool& valueIsTable,
+    ProfilePropertyLua propertyProcessValue(lua::LuaState& L, const std::string& value,
+                                            bool& valueIsTable,
                                             std::string_view propertyName)
     {
         ProfilePropertyLua result;
@@ -229,12 +229,12 @@ namespace {
                 result = std::stof(value);
                 break;
             case PropertyValueType::Nil:
-                result = ghoul::lua::nil_t();
+                result = lua::nil_t();
                 break;
             case PropertyValueType::Table: {
                 std::string val = value;
-                ghoul::trimSurroundingCharacters(val, '{');
-                ghoul::trimSurroundingCharacters(val, '}');
+                trimSurroundingCharacters(val, '{');
+                trimSurroundingCharacters(val, '}');
                 handlePropertyLuaTableEntry(L, val, valueIsTable, propertyName);
                 valueIsTable = true;
                 break;
@@ -242,9 +242,9 @@ namespace {
             case PropertyValueType::String:
             default: {
                 std::string val = value;
-                ghoul::trimSurroundingCharacters(val, '\"');
-                ghoul::trimSurroundingCharacters(val, '[');
-                ghoul::trimSurroundingCharacters(val, ']');
+                trimSurroundingCharacters(val, '\"');
+                trimSurroundingCharacters(val, '[');
+                trimSurroundingCharacters(val, ']');
                 result = val;
                 break;
             }
@@ -261,9 +261,8 @@ namespace {
      * \param table The std::vector container which has elements of type T for a Lua table
      */
     template <typename T>
-    void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
-                                          const std::string& value, std::vector<T>& table,
-                                          bool& valueIsTable,
+    void processPropertyValueTableEntries(lua::LuaState& L, const std::string& value,
+                                          std::vector<T>& table, bool& valueIsTable,
                                           std::string_view propertyName)
     {
         size_t commaPos = 0;
@@ -278,7 +277,7 @@ namespace {
             else {
                 nextValue = value.substr(prevPos);
             }
-            ghoul::trimSurroundingCharacters(nextValue, ' ');
+            trimSurroundingCharacters(nextValue, ' ');
             ProfilePropertyLua t = propertyProcessValue(
                 L,
                 nextValue,
@@ -338,11 +337,11 @@ Scene::~Scene() {
     _rootNode.setScene(nullptr);
 }
 
-void Scene::attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node) {
+void Scene::attachNode(mm_unique_ptr<SceneGraphNode> node) {
     _rootNode.attachChild(std::move(node));
 }
 
-ghoul::mm_unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
+mm_unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
     return _rootNode.detachChild(node);
 }
 
@@ -352,7 +351,7 @@ Camera* Scene::camera() const {
 
 void Scene::registerNode(SceneGraphNode* node) {
     if (_nodesByIdentifier.contains(node->identifier())) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Node with identifier '{}' already exists", node->identifier()
         ));
     }
@@ -403,7 +402,7 @@ void Scene::sortTopologically() {
     );
     _circularNodes.clear();
 
-    ghoul_assert(
+    assert_msg(
         _topologicallySortedNodes.size() == _nodesByIdentifier.size(),
         "Number of scene graph nodes is inconsistent"
     );
@@ -415,7 +414,7 @@ void Scene::sortTopologically() {
     // Only the Root node can have an in-degree of 0
     SceneGraphNode* root = _nodesByIdentifier[RootNodeIdentifier];
     if (!root) {
-        throw ghoul::RuntimeError("No root node found");
+        throw RuntimeError("No root node found");
     }
 
     std::unordered_map<SceneGraphNode*, size_t> inDegrees;
@@ -468,7 +467,7 @@ void Scene::sortTopologically() {
 }
 
 void Scene::initializeNode(SceneGraphNode* node) {
-    ghoul_assert(node, "Node must not be nullptr");
+    assert_msg(node, "Node must not be nullptr");
 
     _initializer->initializeNode(node);
 }
@@ -485,7 +484,7 @@ void Scene::update(const UpdateData& data) {
         try {
             node->initializeGL();
         }
-        catch (const ghoul::RuntimeError& e) {
+        catch (const RuntimeError& e) {
             LERRORC(e.component, e.message);
         }
     }
@@ -497,7 +496,7 @@ void Scene::update(const UpdateData& data) {
         try {
             node->update(data);
         }
-        catch (const ghoul::RuntimeError& e) {
+        catch (const RuntimeError& e) {
             LERRORC(e.component, e.what());
         }
     }
@@ -514,7 +513,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         try {
             node->render(data, tasks);
         }
-        catch (const ghoul::RuntimeError& e) {
+        catch (const RuntimeError& e) {
             LERRORC(e.component, e.what());
         }
         if (global::callback::webBrowserPerformanceHotfix) {
@@ -556,7 +555,7 @@ const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
     return _topologicallySortedNodes;
 }
 
-SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
+SceneGraphNode* Scene::loadNode(const Dictionary& nodeDictionary) {
     ZoneScoped;
 
     // First interpret the dictionary
@@ -586,18 +585,18 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
         }
     }
 
-    ghoul::mm_unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
+    mm_unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
         nodeDictionary
     );
 
     if (nodeDictionary.hasKey(SceneGraphNode::KeyDependencies)) {
-        if (!nodeDictionary.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies))
+        if (!nodeDictionary.hasValue<Dictionary>(SceneGraphNode::KeyDependencies))
         {
             // TODO: Throw exception
             LERROR("Dependencies did not have the corrent type");
         }
-        const ghoul::Dictionary nodeDependencies =
-            nodeDictionary.value<ghoul::Dictionary>(SceneGraphNode::KeyDependencies);
+        const Dictionary nodeDependencies =
+            nodeDictionary.value<Dictionary>(SceneGraphNode::KeyDependencies);
 
         for (const std::string_view key : nodeDependencies.keys()) {
             std::string value = nodeDependencies.value<std::string>(key);
@@ -641,12 +640,11 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
 
 void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
                                      std::string postScript,
-                                     ghoul::EasingFunction easingFunction,
-                                     bool shouldBounce)
+                                     EasingFunction easingFunction, bool shouldBounce)
 {
-    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
-    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
-    ghoul_postcondition(
+    precondition(prop != nullptr, "prop must not be nullptr");
+    precondition(durationSeconds > 0.f, "durationSeconds must be positive");
+    postcondition(
         std::find_if(
             _propertyInterpolationInfos.begin(),
             _propertyInterpolationInfos.end(),
@@ -657,10 +655,10 @@ void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
         "A new interpolation record exists for p that is not expired"
     );
 
-    ghoul::EasingFunc<float> func =
-        (easingFunction == ghoul::EasingFunction::Linear) ?
+    EasingFunc<float> func =
+        (easingFunction == EasingFunction::Linear) ?
         nullptr :
-        ghoul::easingFunction<float>(easingFunction);
+        openspace::easingFunction<float>(easingFunction);
 
     // First check if the current property already has an interpolation information
     const std::chrono::steady_clock::time_point now = currentTimeForInterpolation();
@@ -692,8 +690,8 @@ void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
 }
 
 void Scene::removePropertyInterpolation(Property* prop) {
-    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
-    ghoul_postcondition(
+    precondition(prop != nullptr, "prop must not be nullptr");
+    postcondition(
         std::find_if(
             _propertyInterpolationInfos.begin(),
             _propertyInterpolationInfos.end(),
@@ -801,7 +799,7 @@ void Scene::updateInterpolations() {
 }
 
 void Scene::stopBouncing(Property* prop) {
-    ghoul_assert(prop, "No property provided");
+    assert_msg(prop, "No property provided");
 
     auto it = std::find_if(
         _propertyInterpolationInfos.begin(),
@@ -810,7 +808,7 @@ void Scene::stopBouncing(Property* prop) {
     );
 
     if (it == _propertyInterpolationInfos.end()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "The provided property '{}' is not interpolating", prop->uri()
         ));
     }
@@ -819,7 +817,7 @@ void Scene::stopBouncing(Property* prop) {
 }
 
 void Scene::setPropertiesFromProfile(const Profile& p) {
-    ghoul::lua::LuaState L;
+    lua::LuaState L;
 
     for (const Profile::Property& prop : p.properties) {
         if (prop.name.empty()) {
@@ -833,11 +831,11 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             uriOrRegex = removeGroupTagFromUri(uriOrRegex);
         }
         _profilePropertyName = uriOrRegex;
-        ghoul::lua::push(L, uriOrRegex);
-        ghoul::lua::push(L, 0.0);
+        lua::push(L, uriOrRegex);
+        lua::push(L, 0.0);
 
         std::string workingValue = prop.value;
-        ghoul::trimSurroundingCharacters(workingValue, ' ');
+        trimSurroundingCharacters(workingValue, ' ');
         // Later functions expect the value to be at the last position on the stack
         propertyPushProfileValueToLua(L, workingValue);
 
@@ -846,7 +844,7 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             uriOrRegex,
             0.0,
             groupName,
-            ghoul::EasingFunction::Linear,
+            EasingFunction::Linear,
             "",
             false
         );
@@ -855,9 +853,7 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
     }
 }
 
-void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
-                                          const std::string& value)
-{
+void Scene::propertyPushProfileValueToLua(lua::LuaState& L, const std::string& value) {
     _valueIsTable = false;
     ProfilePropertyLua elem = propertyProcessValue(
         L,
@@ -867,7 +863,7 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
     );
     if (!_valueIsTable) {
         std::visit(
-            overloaded { [&L](auto v) { ghoul::lua::push(L, v); } },
+            overloaded { [&L](auto v) { lua::push(L, v); } },
             elem
         );
     }
@@ -894,8 +890,8 @@ void Scene::setGuiTreeOrder(const std::string& guiPath,
     global::eventEngine->publishEvent<EventGuiTreeUpdated>();
 }
 
-ghoul::Dictionary Scene::guiTreeOrder() const {
-    ghoul::Dictionary dict;
+Dictionary Scene::guiTreeOrder() const {
+    Dictionary dict;
     for (const auto& [key, list] : _guiTreeOrderMap) {
         dict.setValue(key, list);
     }

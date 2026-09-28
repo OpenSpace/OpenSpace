@@ -120,7 +120,7 @@ Documentation SpiceTranslation::Documentation() {
     );
 }
 
-SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
+SpiceTranslation::SpiceTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
     , _target(TargetInfo)
     , _observer(ObserverInfo)

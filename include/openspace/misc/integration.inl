@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,11 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace ghoul {
+namespace openspace {
 
 template <typename T>
 double integrateSimpsonsRule(double t0, double t1, int n, Integrand<T> f) {
-    ghoul_assert(n >= 2, "Number of partitions, n, must be at least 2");
+    assert_msg(n >= 2, "Number of partitions, n, must be at least 2");
 
     // `n` must be an even number
     if (n % 2 != 0) {
@@ -80,4 +79,4 @@ T integrateGaussianQuadrature(double t0, double t1, Integrand<T> f) {
     return 0.5 * (b - a) * sum;
 }
 
-} // namespace ghoul
+} // namespace openspace

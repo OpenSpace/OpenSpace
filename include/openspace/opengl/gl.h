@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,24 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___GHOUL_LUA___H__
-#define __OPENSPACE_CORE___GHOUL_LUA___H__
+#ifndef __OPENSPACE_CORE___GL___H__
+#define __OPENSPACE_CORE___GL___H__
 
 #ifdef __clang__
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wdeprecated-copy"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#pragma GCC diagnostic ignored "-Wuseless-cast"
 #endif // __clang__
 
-extern "C" {
-    #include <lua.h>
-    #include <lualib.h>
-    #include <lauxlib.h>
-} // extern
+#include <glbinding/gl46core/gl.h>
+#include <glbinding/Binding.h>
+#define __GL_H__
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif // __clang__
+
+// Evil 'using namespace' in the header to make the usage of OpenGL less painful
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wheader-hygiene"
+#endif // __clang__
+
+using namespace gl;
 
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif // __clang__
 
-#include <openspace/lua/lua_helper.h>
+namespace openspace {
 
-#endif // __OPENSPACE_CORE___GHOUL_LUA___H__
+template <int ID = 0>
+struct GLDebugGroup {
+    explicit GLDebugGroup(std::string_view name) {
+        glPushDebugGroup(
+            GL_DEBUG_SOURCE_APPLICATION,
+            ID,
+            static_cast<GLsizei>(name.length()),
+            name.data()
+        );
+    }
+
+    ~GLDebugGroup() {
+        glPopDebugGroup();
+    }
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___GL___H__

@@ -279,7 +279,7 @@ ImGUIModule::ImGUIModule()
     );
 }
 
-void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
+void ImGUIModule::internalInitialize(const Dictionary&) {
     LDEBUGC("ImGUIModule", "Initializing GUI");
 
     _sceneProperty.setPropertyOwnerFunction([]() {
@@ -406,13 +406,13 @@ void ImGUIModule::internalInitializeGL() {
         comp->initialize();
     }
 
-    _program = ghoul::opengl::ProgramObject::Build(
+    _program = opengl::ProgramObject::Build(
         "GUI",
         absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
         absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     {
         unsigned char* texData = nullptr;
@@ -423,14 +423,14 @@ void ImGUIModule::internalInitializeGL() {
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
         }
 
-        _fontTexture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
+        _fontTexture = std::make_unique<opengl::Texture>(
+            opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(texSize.x, texSize.y, 1),
                 .type = GL_TEXTURE_2D,
-                .format = ghoul::opengl::Texture::Format::RGBA,
+                .format = opengl::Texture::Format::RGBA,
                 .dataType = GL_UNSIGNED_BYTE
             },
-            ghoul::opengl::Texture::SamplerInit {},
+            opengl::Texture::SamplerInit {},
             reinterpret_cast<std::byte*>(texData)
         );
         _fontTexture->setName("GUI Text");
@@ -518,7 +518,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
     //
@@ -588,7 +588,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_fontTexture);
 
     // Setup orthographic projection matrix

@@ -160,7 +160,7 @@ Documentation RenderableShadowCylinder::Documentation() {
     );
 }
 
-RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)
+RenderableShadowCylinder::RenderableShadowCylinder(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _numberOfPoints(NumberPointsInfo, 190, 1, 300)
     , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 0.5f)
@@ -235,7 +235,7 @@ void RenderableShadowCylinder::initializeGL() {
 
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "ShadowCylinderProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "ShadowCylinderProgram",
                 absPath(
@@ -248,13 +248,13 @@ void RenderableShadowCylinder::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderableShadowCylinder::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         "ShadowCylinderProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -298,7 +298,7 @@ void RenderableShadowCylinder::update(const UpdateData& data) {
 
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+        opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     createCylinder(data.time.j2000Seconds());

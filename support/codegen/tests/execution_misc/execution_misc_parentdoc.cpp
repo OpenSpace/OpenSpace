@@ -28,6 +28,8 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/misc/dictionary.h>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(ABC)]] Parameters {
         float test;

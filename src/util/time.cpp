@@ -45,7 +45,7 @@
 namespace openspace {
 
 double Time::convertTime(const std::string& time) {
-    ghoul_assert(!time.empty(), "timeString must not be empty");
+    assert_msg(!time.empty(), "timeString must not be empty");
     return SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
@@ -148,9 +148,9 @@ std::string Time::advancedTime(const std::string& base, std::string change) {
 
     double dt = 0.0;
     if (change.empty()) {
-        throw ghoul::RuntimeError("Modifier string must not be empty");
+        throw RuntimeError("Modifier string must not be empty");
     }
-    ghoul::trimWhitespace(change);
+    trimWhitespace(change);
     bool isNegative = false;
     if (change[0] == '-') {
         isNegative = true;
@@ -177,7 +177,7 @@ std::string Time::advancedTime(const std::string& base, std::string change) {
         else if (uName == "d") { unit = TimeUnit::Day; }
         else if (uName == "M") { unit = TimeUnit::Month; }
         else if (uName == "y") { unit = TimeUnit::Year; }
-        else {       throw ghoul::RuntimeError(std::format("Unknown unit '{}'", uName)); }
+        else {              throw RuntimeError(std::format("Unknown unit '{}'", uName)); }
 
         dt = openspace::convertTime(value, unit, TimeUnit::Second);
         if (isNegative) {
@@ -185,7 +185,7 @@ std::string Time::advancedTime(const std::string& base, std::string change) {
         }
     }
     catch (...) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error parsing relative time offset '{}'", change
         ));
     }

@@ -27,7 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -35,9 +35,9 @@
 #include <openspace/util/touch.h>
 #include <memory>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
+
+namespace opengl { class ProgramObject; }
 
 class TouchMarker : public PropertyOwner {
 public:
@@ -57,7 +57,7 @@ private:
     FloatProperty _opacity;
     Vec3Property _color;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<opengl::ProgramObject> _shader;
     UniformCache(radius, opacity, color) _uniformCache;
 
     GLsizei _count = 0;

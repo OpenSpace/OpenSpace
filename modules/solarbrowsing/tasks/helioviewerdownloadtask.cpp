@@ -97,7 +97,7 @@ openspace::Documentation HelioviewerDownloadTask::Documentation() {
     );
 }
 
-HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictionary) {
+HelioviewerDownloadTask::HelioviewerDownloadTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _startTime = p.startTime;
@@ -229,7 +229,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
                 std::string(formattedDate),
                 "{}-{}-{}T{}:{}:{}.{}"
             );
-            ghoul_assert(r, "Invalid date");
+            assert_msg(r, "Invalid date");
             auto& [year, month, day, hour, minute, second, millisecond] = r->values();
 
             const std::string outFilename = std::format(

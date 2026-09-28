@@ -123,7 +123,7 @@ Documentation DashboardItemSimulationIncrement::Documentation() {
 }
 
 DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo)

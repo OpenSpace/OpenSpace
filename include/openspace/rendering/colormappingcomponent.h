@@ -39,10 +39,9 @@
 #include <memory>
 #include <optional>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 /**
@@ -58,10 +57,10 @@ struct Documentation;
 class ColorMappingComponent : public PropertyOwner {
 public:
     ColorMappingComponent();
-    explicit ColorMappingComponent(const ghoul::Dictionary& dictionary);
+    explicit ColorMappingComponent(const Dictionary& dictionary);
     ~ColorMappingComponent() override = default;
 
-    ghoul::opengl::Texture* texture() const;
+    opengl::Texture* texture() const;
 
     /**
      * Initialize the color map information (ranges, etc.) based on the input dataset.
@@ -109,7 +108,7 @@ private:
     /// One item per color parameter option
     std::vector<glm::vec2> _colorRangeData;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<opengl::Texture> _texture;
 
     dataloader::ColorMap _colorMap;
 

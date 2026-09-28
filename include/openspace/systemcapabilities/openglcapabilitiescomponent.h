@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +30,7 @@
 #include <openspace/systemcapabilities/systemcapabilities.h>
 #include <openspace/systemcapabilities/version.h>
 
-namespace ghoul::systemcapabilities {
+namespace openspace::systemcapabilities {
 
 /**
  * This subclass of SystemCapabilitiesComponent detects graphics and OpenGL-related
@@ -242,11 +241,11 @@ protected:
     std::string _adapterName;
 };
 
-} // namespace ghoul::systemcapabilities
+} // namespace openspace::systemcapabilities
 
 #define OpenGLCap (                                                                      \
-    ghoul::systemcapabilities::SystemCapabilities::ref().component<                      \
-        ghoul::systemcapabilities::OpenGLCapabilitiesComponent                           \
+    openspace::systemcapabilities::SystemCapabilities::ref().component<                  \
+        openspace::systemcapabilities::OpenGLCapabilitiesComponent                       \
     >())
 
 #endif // __OPENSPACE_CORE___OPENGLCAPABILITIESCOMPONENT___H__

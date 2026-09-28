@@ -70,7 +70,7 @@ Documentation DashboardItemMission::Documentation() {
     );
 }
 
-DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
+DashboardItemMission::DashboardItemMission(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
 {}
 

@@ -287,7 +287,7 @@ Documentation RenderableFluxNodes::Documentation() {
     );
 }
 
-RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
+RenderableFluxNodes::RenderableFluxNodes(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _earthdistGroup({ "Earthfocus" })
     , _goesEnergyBins(GoesEnergyBinsInfo)
@@ -410,7 +410,7 @@ void RenderableFluxNodes::initializeGL() {
     _uniformCache.nodeSize = _shaderProgram->uniformLocation("nodeSize");
     _uniformCache.thresholdFlux = _shaderProgram->uniformLocation("thresholdFlux");
 
-    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
+    opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
 
     glCreateBuffers(1, &_vboPosition);
     glCreateBuffers(1, &_vboColor);
@@ -616,12 +616,12 @@ void RenderableFluxNodes::populateStartTimes() {
     // Time filestream
     std::ifstream tfs = std::ifstream(timeFile);
     if (!tfs.is_open()) {
-        throw ghoul::RuntimeError("Could not open file");
+        throw RuntimeError("Could not open file");
     }
 
     std::string line;
     // Gets only first line to "remove" header
-    ghoul::getline(tfs, line);
+    openspace::getline(tfs, line);
     std::stringstream s;
     s << line;
 
@@ -631,7 +631,7 @@ void RenderableFluxNodes::populateStartTimes() {
     while (s >> columnName) {
         nColumns++;
     }
-    while (ghoul::getline(tfs, line)) {
+    while (openspace::getline(tfs, line)) {
         std::istringstream iss(line);
         for (int i = 0; i < nColumns; i++) {
             std::string columnValue;
@@ -755,7 +755,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
 
     if (_colorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
         _transferFunction->update();
-        ghoul::opengl::TextureUnit textureUnit;
+        opengl::TextureUnit textureUnit;
         textureUnit.bind(_transferFunction->texture());
         _shaderProgram->setUniform("colorTable", textureUnit);
     }
@@ -826,7 +826,7 @@ void RenderableFluxNodes::update(const UpdateData& data) {
 
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
+        opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
     }
 }
 

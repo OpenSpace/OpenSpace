@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +25,12 @@
 #ifndef __OPENSPACE_CORE___OPENGLSTATECACHE___H__
 #define __OPENSPACE_CORE___OPENGLSTATECACHE___H__
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <array>
 #include <limits>
 #include <vector>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 /**
  * This class works as cache for the OpenGL most common properties defining the current
@@ -126,6 +125,6 @@ private:
     } _line;
 };
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl
 
 #endif // __OPENSPACE_CORE___OPENGLSTATECACHE___H__

@@ -51,7 +51,7 @@ Documentation RenderableSphereSpout::Documentation() {
     );
 }
 
-RenderableSphereSpout::RenderableSphereSpout(const ghoul::Dictionary& dictionary)
+RenderableSphereSpout::RenderableSphereSpout(const Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _spoutReceiver(*this, dictionary)
 {
@@ -87,7 +87,7 @@ void RenderableSphereSpout::update(const UpdateData& data) {
     _spoutReceiver.updateReceiver();
 }
 
-void RenderableSphereSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderableSphereSpout::bindTexture(opengl::TextureUnit& unit) {
     if (_spoutReceiver.isReceiving()) {
         unit.bind(_spoutReceiver.spoutTexture());
     }

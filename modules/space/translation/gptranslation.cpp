@@ -68,10 +68,10 @@ namespace {
 namespace {
     using namespace openspace;
 
-    ghoul::Dictionary gpDictionaryToKepler(const ghoul::Dictionary& dictionary) {
+    Dictionary gpDictionaryToKepler(const Dictionary& dictionary) {
         const Parameters p = codegen::bake<Parameters>(dictionary);
         if (!std::filesystem::is_regular_file(p.file)) {
-            throw ghoul::RuntimeError("The provided GP file must exist");
+            throw RuntimeError("The provided GP file must exist");
         }
 
         int element = p.element.value_or(1);
@@ -82,7 +82,7 @@ namespace {
         );
 
         if (element > static_cast<int>(parameters.size())) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Requested element {} but only {} are available",
                 element, parameters.size()
             ));
@@ -92,7 +92,7 @@ namespace {
 
         // We copy the old dictionary to make sure we keep values intact that we don't
         // want to touch here (for example the 'Type')
-        ghoul::Dictionary res = dictionary;
+        Dictionary res = dictionary;
         res.setValue("Eccentricity", param.eccentricity);
         res.setValue("SemiMajorAxis", param.semiMajorAxis);
         res.setValue("Inclination", param.inclination);
@@ -111,7 +111,7 @@ Documentation GPTranslation::Documentation() {
     return codegen::doc<Parameters>("space_translation_gp");
 }
 
-GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary)
+GPTranslation::GPTranslation(const Dictionary& dictionary)
     : KeplerTranslation(gpDictionaryToKepler(dictionary))
 {}
 

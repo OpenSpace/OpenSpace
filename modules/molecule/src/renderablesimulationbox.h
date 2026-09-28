@@ -41,7 +41,7 @@ namespace openspace {
 
 class RenderableSimulationBox : public Renderable {
 public:
-    explicit RenderableSimulationBox(const ghoul::Dictionary& dictionary);
+    explicit RenderableSimulationBox(const Dictionary& dictionary);
     ~RenderableSimulationBox() override;
 
     void initializeGL() override;
@@ -85,7 +85,7 @@ private:
     bool _renderableInView = true;
 
     struct {
-        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        std::unique_ptr<opengl::ProgramObject> program;
         UniformCache(transform, strokeWidth, strokeFalloffExp, fragDepth,
             strokeColor, opacity) uniforms;
         GLuint vao = 0;

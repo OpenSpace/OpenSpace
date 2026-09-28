@@ -142,7 +142,7 @@ Documentation RenderableFieldlines::Documentation() {
     );
 }
 
-RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
+RenderableFieldlines::RenderableFieldlines(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _stepSize(StepSizeInfo, DefaultFieldlineStepSize, 0.f, 10.f)
     , _classification(Classification, true)
@@ -177,7 +177,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
             case Parameters::SeedPoints::SourceType::File:
                 _seedPointSource = static_cast<int>(SeedPointSource::File);
                 if (!p.seedPoints.file.has_value()) {
-                    throw ghoul::RuntimeError("Missing key 'File'");
+                    throw RuntimeError("Missing key 'File'");
                 }
                 _seedPointSourceFile = p.seedPoints.file->string();
                 break;
@@ -342,7 +342,7 @@ void RenderableFieldlines::loadSeedPointsFromFile() {
     }
 
     std::string line;
-    while (ghoul::getline(seedFile, line)) {
+    while (openspace::getline(seedFile, line)) {
         std::stringstream s = std::stringstream(line);
 
         glm::vec3 point;
@@ -361,7 +361,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         _variables.size() == 1 && _variables[0] == VectorFieldKameleonVariableLorentz;
 
     if (!threeVariables && !lorentzForce) {
-        LERROR(std::format("Illformed variables: '{}'", ghoul::join(_variables, ",")));
+        LERROR(std::format("Illformed variables: '{}'", join(_variables, ",")));
         return {};
     }
 
@@ -381,7 +381,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         return kw.lorentzTrajectories(_seedPoints, _fieldlineColor, _stepSize);
     }
 
-    ghoul_assert(false, "Should not reach this");
+    assert_msg(false, "Should not reach this");
     return {};
 }
 

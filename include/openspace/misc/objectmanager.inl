@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +27,7 @@
 #include <openspace/logging/logmanager.h>
 #include <utility>
 
-namespace ghoul {
+namespace openspace {
 
 template <typename T>
 ObjectManager<T>::ObjectManager(std::string name)
@@ -37,12 +36,12 @@ ObjectManager<T>::ObjectManager(std::string name)
 
 template <typename T>
 ObjectManager<T>::~ObjectManager() {
-    ghoul_assert(_objects.empty(), "Objects were left at the end of the program");
+    assert_msg(_objects.empty(), "Objects were left at the end of the program");
 
     // This loop is just to check *which* programs were left. If everything goes fine, the
     // next loop should iterate 0 times
     for (const std::pair<const std::string, Info>& p [[maybe_unused]] : _objects) {
-        ghoul_assert(
+        assert_msg(
             p.second.refCount == 0,
             "Ref count for Object '" + p.first + "' was not 0"
         );
@@ -105,8 +104,8 @@ void ObjectManager<T>::release(const std::string& name,
                                const DestructionCallback& destructionFunction)
 {
     auto it = _objects.find(name);
-    ghoul_assert(it != _objects.end(), "Could not find object '" + name + "'");
-    ghoul_assert(it->second.refCount >= 0, "Ref count cannot be negative");
+    assert_msg(it != _objects.end(), "Could not find object '" + name + "'");
+    assert_msg(it->second.refCount >= 0, "Ref count cannot be negative");
 
     --(it->second.refCount);
     if (it->second.refCount == 0) {
@@ -132,4 +131,4 @@ void ObjectManager<T>::release(T* object, const DestructionCallback& destruction
     }
 }
 
-} // namespace ghoul
+} // namespace openspace

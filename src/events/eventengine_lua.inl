@@ -38,7 +38,7 @@ namespace {
  * against and only if it passes the filter, the action is triggered.
  */
 [[codegen::luawrap]] void registerEventAction(std::string event, std::string action,
-                                              std::optional<ghoul::Dictionary> filter)
+                                              std::optional<Dictionary> filter)
 {
     Event::Type type = fromString(event);
     global::eventEngine->registerEventAction(type, std::move(action), std::move(filter));
@@ -48,7 +48,7 @@ namespace {
  * Unregisters a specific combination of event, action, and potentially a filter.
  */
 [[codegen::luawrap]] void unregisterEventAction(std::string event, std::string action,
-                                                std::optional<ghoul::Dictionary> filter)
+                                                std::optional<Dictionary> filter)
 {
     Event::Type type = fromString(event);
     global::eventEngine->unregisterEventAction(type, action, filter);
@@ -57,14 +57,14 @@ namespace {
 /**
  * Returns the list of registered events.
  */
-[[codegen::luawrap]] std::vector<ghoul::Dictionary> registeredEvents() {
+[[codegen::luawrap]] std::vector<Dictionary> registeredEvents() {
     std::vector<EventEngine::ActionInfo> actions =
         global::eventEngine->registeredActions();
 
-    std::vector<ghoul::Dictionary> result;
+    std::vector<Dictionary> result;
     result.reserve(actions.size());
     for (const EventEngine::ActionInfo& ai : actions) {
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("Identifier", static_cast<int>(ai.id));
         d.setValue("Type", std::string(toString(ai.type)));
         d.setValue("Enabled", ai.isEnabled);

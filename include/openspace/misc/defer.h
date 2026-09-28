@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___DEFER___H__
 #define __OPENSPACE_CORE___DEFER___H__
 
-namespace ghoul::internal {
+namespace openspace::internal {
 
 /**
  * This internal struct is used to host the lambda expression that gets executed when the
@@ -55,7 +54,7 @@ public:
     }
 };
 
-} // namespace ghoul::internal
+} // namespace openspace::internal
 
 #define __MERGE_Defer(a,b)  a##b
 #define __LABEL_Defer(a) __MERGE_Defer(scopeExit_, a)
@@ -71,6 +70,7 @@ public:
  * *i = 0;
  * ```
  */
-#define defer auto __LABEL_Defer(__LINE__) = ghoul::internal::ScopeExitHelper() << [&]()
+#define defer \
+    auto __LABEL_Defer(__LINE__) = openspace::internal::ScopeExitHelper() << [&]()
 
 #endif // __OPENSPACE_CORE___DEFER___H__

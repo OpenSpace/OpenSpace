@@ -305,9 +305,9 @@ void FramebufferRenderer::initialize() {
     // Sets back to default FBO
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
 
-    ghoul::opengl::updateUniformLocations(*_hdrFilteringProgram, _hdrUniformCache);
-    ghoul::opengl::updateUniformLocations(*_fxaaProgram, _fxaaUniformCache);
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(*_hdrFilteringProgram, _hdrUniformCache);
+    opengl::updateUniformLocations(*_fxaaProgram, _fxaaUniformCache);
+    opengl::updateUniformLocations(
         *_downscaledVolumeProgram,
         _writeDownscaledVolumeUniformCache
     );
@@ -442,7 +442,7 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
     shadowMap.targets.push_back(target);
 
     if (shadowMap.lightSource != lightSource) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Registering shadow group with different light source. Originally registered "
             "with light source '{}', now with '{}'. The light source for each shadow "
             "group has to be unique",
@@ -455,15 +455,13 @@ void FramebufferRenderer::removeShadowCaster(const std::string& shadowGroup,
                                              const SceneGraphNode* target)
 {
     if (!_shadowMaps.contains(shadowGroup)) {
-        throw ghoul::RuntimeError(std::format(
-            "Could not find shadow group '{}'", shadowGroup
-        ));
+        throw RuntimeError(std::format("Could not find shadow group '{}'", shadowGroup));
     }
     ShadowInfo& shadowMap = _shadowMaps[shadowGroup];
 
     auto it = std::find(shadowMap.targets.begin(), shadowMap.targets.end(), target);
     if (it == shadowMap.targets.end()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Could not find shadowing target '{}'", target->identifier()
         ));
     }
@@ -479,7 +477,7 @@ void FramebufferRenderer::removeShadowCaster(const std::string& shadowGroup,
 }
 
 ShadowInfo FramebufferRenderer::shadowInformation(const std::string& shadowGroup) const {
-    ghoul_assert(_shadowMaps.contains(shadowGroup), "Shadow group not registered");
+    assert_msg(_shadowMaps.contains(shadowGroup), "Shadow group not registered");
     return _shadowMaps.at(shadowGroup);
 }
 
@@ -494,7 +492,7 @@ std::vector<std::string> FramebufferRenderer::shadowGroups() const {
 
 void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::vec4& blackoutColor,
                                    float blackoutTextureFactor,
-                                   ghoul::opengl::Texture* blackoutTexture,
+                                   opengl::Texture* blackoutTexture,
                                    const glm::ivec4& viewport)
 {
     ZoneScoped;
@@ -502,13 +500,13 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::vec4& blacko
 
     _hdrFilteringProgram->activate();
 
-    ghoul::opengl::TextureUnit hdrFeedingUnit;
+    opengl::TextureUnit hdrFeedingUnit;
     hdrFeedingUnit.bind(_pingPongBuffers.colorTexture[_pingPongIndex]);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrFeedingTexture, hdrFeedingUnit);
 
     _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutColor, blackoutColor);
-    ghoul::opengl::TextureUnit blackoutTextureUnit;
+    opengl::TextureUnit blackoutTextureUnit;
     if (blackoutTexture) {
         blackoutTextureUnit.bind(*blackoutTexture);
     }
@@ -548,7 +546,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::vec4& blacko
 void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
     _fxaaProgram->activate();
 
-    ghoul::opengl::TextureUnit renderedTextureUnit;
+    opengl::TextureUnit renderedTextureUnit;
     renderedTextureUnit.bind(_fxaaBuffers.fxaaTexture);
     _fxaaProgram->setUniform(_fxaaUniformCache.renderedTexture, renderedTextureUnit);
 
@@ -629,14 +627,14 @@ void FramebufferRenderer::updateDownscaleTextures() const {
 void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
     _downscaledVolumeProgram->activate();
 
-    ghoul::opengl::TextureUnit downscaledTextureUnit;
+    opengl::TextureUnit downscaledTextureUnit;
     downscaledTextureUnit.bind(_downscaleVolumeRendering.colorTexture);
     _downscaledVolumeProgram->setUniform(
         _writeDownscaledVolumeUniformCache.downscaledRenderedVolume,
         downscaledTextureUnit
     );
 
-    ghoul::opengl::TextureUnit downscaledDepthUnit;
+    opengl::TextureUnit downscaledDepthUnit;
     downscaledDepthUnit.bind(_downscaleVolumeRendering.depthbuffer);
     _downscaledVolumeProgram->setUniform(
         _writeDownscaledVolumeUniformCache.downscaledRenderedVolumeDepth,
@@ -694,32 +692,32 @@ void FramebufferRenderer::update() {
     if (_hdrFilteringProgram->isDirty()) {
         _hdrFilteringProgram->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(*_hdrFilteringProgram, _hdrUniformCache);
+        opengl::updateUniformLocations(*_hdrFilteringProgram, _hdrUniformCache);
     }
 
     if (_fxaaProgram->isDirty()) {
         _fxaaProgram->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(*_fxaaProgram, _fxaaUniformCache);
+        opengl::updateUniformLocations(*_fxaaProgram, _fxaaUniformCache);
     }
 
     if (_downscaledVolumeProgram->isDirty()) {
         _downscaledVolumeProgram->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(
+        opengl::updateUniformLocations(
             *_downscaledVolumeProgram,
             _writeDownscaledVolumeUniformCache
         );
     }
 
     using K = VolumeRaycaster*;
-    using V = std::unique_ptr<ghoul::opengl::ProgramObject>;
+    using V = std::unique_ptr<opengl::ProgramObject>;
     for (const std::pair<const K, V>& program : _exitPrograms) {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
             }
-            catch (const ghoul::RuntimeError& e) {
+            catch (const RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -730,7 +728,7 @@ void FramebufferRenderer::update() {
             try {
                 program.second->rebuildFromFile();
             }
-            catch (const ghoul::RuntimeError& e) {
+            catch (const RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -741,7 +739,7 @@ void FramebufferRenderer::update() {
             try {
                 program.second->rebuildFromFile();
             }
-            catch (const ghoul::RuntimeError& e) {
+            catch (const RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -749,14 +747,14 @@ void FramebufferRenderer::update() {
 
     for (const std::pair<
             Deferredcaster* const,
-            std::unique_ptr<ghoul::opengl::ProgramObject>
+            std::unique_ptr<opengl::ProgramObject>
         >& program : _deferredcastPrograms)
     {
         if (program.second && program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
             }
-            catch (const ghoul::RuntimeError& e) {
+            catch (const RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -1047,13 +1045,13 @@ void FramebufferRenderer::updateRaycastData() {
         const std::filesystem::path& vsPath = raycaster->boundsVertexShaderPath();
         std::filesystem::path fsPath = raycaster->boundsFragmentShaderPath();
 
-        ghoul::Dictionary dict;
+        Dictionary dict;
         dict.setValue("rendererData", _rendererData);
         dict.setValue("fragmentPath", fsPath);
         dict.setValue("id", data.id);
 
         std::filesystem::path helperPath = raycaster->helperPath();
-        ghoul::Dictionary helpersDict;
+        Dictionary helpersDict;
         if (!helperPath.empty()) {
             helpersDict.setValue("0", helperPath);
         }
@@ -1063,42 +1061,42 @@ void FramebufferRenderer::updateRaycastData() {
         _raycastData[raycaster] = data;
 
         try {
-            _exitPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
+            _exitPrograms[raycaster] = opengl::ProgramObject::Build(
                 std::format("Volume {} exit", data.id),
                 absPath(vsPath),
                 absPath(ExitFragmentShaderPath),
                 dict
             );
         }
-        catch (const ghoul::RuntimeError& e) {
+        catch (const RuntimeError& e) {
             LERROR(e.message);
         }
 
         try {
-            ghoul::Dictionary outsideDict = dict;
+            Dictionary outsideDict = dict;
             outsideDict.setValue("getEntryPath", std::string(GetEntryOutsidePath));
-            _raycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
+            _raycastPrograms[raycaster] = opengl::ProgramObject::Build(
                 std::format("Volume {} raycast", data.id),
                 absPath(vsPath),
                 absPath(RaycastFragmentShaderPath),
                 outsideDict
             );
         }
-        catch (const ghoul::RuntimeError& e) {
+        catch (const RuntimeError& e) {
             LERROR(e.message);
         }
 
         try {
-            ghoul::Dictionary insideDict = dict;
+            Dictionary insideDict = dict;
             insideDict.setValue("getEntryPath", std::string(GetEntryInsidePath));
-            _insideRaycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
+            _insideRaycastPrograms[raycaster] = opengl::ProgramObject::Build(
                 std::format("Volume {} inside raycast", data.id),
                 absPath("${SHADERS}/framebuffer/resolveframebuffer_vs.glsl"),
                 absPath(RaycastFragmentShaderPath),
                 insideDict
             );
         }
-        catch (const ghoul::RuntimeError& e) {
+        catch (const RuntimeError& e) {
             LERRORC(e.component, e.message);
         }
     }
@@ -1118,12 +1116,12 @@ void FramebufferRenderer::updateDeferredcastData() {
         const std::filesystem::path vsPath = caster->deferredcastVSPath();
         const std::filesystem::path fsPath = caster->deferredcastFSPath();
 
-        ghoul::Dictionary dict;
+        Dictionary dict;
         dict.setValue("rendererData", _rendererData);
         //dict.setValue("fragmentPath", fsPath);
         dict.setValue("id", data.id);
         const std::filesystem::path helperPath = caster->helperPath();
-        ghoul::Dictionary helpersDict;
+        Dictionary helpersDict;
         if (!helperPath.empty()) {
             helpersDict.setValue("0", helperPath);
         }
@@ -1132,7 +1130,7 @@ void FramebufferRenderer::updateDeferredcastData() {
         _deferredcastData[caster] = data;
 
         try {
-            _deferredcastPrograms[caster] = ghoul::opengl::ProgramObject::Build(
+            _deferredcastPrograms[caster] = opengl::ProgramObject::Build(
                 std::format("Deferred {} raycast", data.id),
                 vsPath,
                 fsPath,
@@ -1141,7 +1139,7 @@ void FramebufferRenderer::updateDeferredcastData() {
 
             caster->initializeCachedVariables(*_deferredcastPrograms[caster]);
         }
-        catch (const ghoul::RuntimeError& e) {
+        catch (const RuntimeError& e) {
             LERRORC(e.component, e.message);
         }
     }
@@ -1151,7 +1149,7 @@ void FramebufferRenderer::updateDeferredcastData() {
 void FramebufferRenderer::updateHDRAndFiltering() {
     ZoneScoped;
 
-    _hdrFilteringProgram = ghoul::opengl::ProgramObject::Build(
+    _hdrFilteringProgram = opengl::ProgramObject::Build(
         "HDR and Filtering Program",
         absPath("${SHADERS}/framebuffer/hdr_and_filtering_vs.glsl"),
         absPath("${SHADERS}/framebuffer/hdr_and_filtering_fs.glsl")
@@ -1161,7 +1159,7 @@ void FramebufferRenderer::updateHDRAndFiltering() {
 void FramebufferRenderer::updateFXAA() {
     ZoneScoped;
 
-    _fxaaProgram = ghoul::opengl::ProgramObject::Build(
+    _fxaaProgram = opengl::ProgramObject::Build(
         "FXAA Program",
         absPath("${SHADERS}/framebuffer/fxaa_vs.glsl"),
         absPath("${SHADERS}/framebuffer/fxaa_fs.glsl")
@@ -1171,7 +1169,7 @@ void FramebufferRenderer::updateFXAA() {
 void FramebufferRenderer::updateDownscaledVolume() {
     ZoneScoped;
 
-    _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
+    _downscaledVolumeProgram = opengl::ProgramObject::Build(
         "Write Downscaled Volume Program",
         absPath("${SHADERS}/framebuffer/mergedownscaledvolume_vs.glsl"),
         absPath("${SHADERS}/framebuffer/mergedownscaledvolume_fs.glsl")
@@ -1181,7 +1179,7 @@ void FramebufferRenderer::updateDownscaledVolume() {
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
                                  const glm::vec4& blackoutColor,
                                  float blackoutTextureFactor,
-                                 ghoul::opengl::Texture* blackoutTexture)
+                                 opengl::Texture* blackoutTexture)
 {
     ZoneScoped;
     TracyGpuZone("FramebufferRenderer");
@@ -1225,21 +1223,21 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         TracyGpuZone("Background")
-        const ghoul::GLDebugGroup group("Background");
+        const GLDebugGroup group("Background");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Background);
         scene->render(data, tasks);
     }
 
     {
         TracyGpuZone("Opaque")
-        const ghoul::GLDebugGroup group("Opaque");
+        const GLDebugGroup group("Opaque");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
         scene->render(data, tasks);
     }
 
     {
         TracyGpuZone("PreDeferredTransparent")
-        const ghoul::GLDebugGroup group("PreDeferredTransparent");
+        const GLDebugGroup group("PreDeferredTransparent");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::PreDeferredTransparent
         );
@@ -1248,14 +1246,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         TracyGpuZone("Raycaster Tasks")
-        const ghoul::GLDebugGroup group("Raycaster Tasks");
+        const GLDebugGroup group("Raycaster Tasks");
         // Run Volume Tasks
         performRaycasterTasks(tasks.raycasterTasks, viewport);
     }
 
     if (!tasks.deferredcasterTasks.empty()) {
         TracyGpuZone("Deferred Caster Tasks")
-        const ghoul::GLDebugGroup group("Deferred Caster Tasks");
+        const GLDebugGroup group("Deferred Caster Tasks");
 
         // We use ping pong rendering in order to be able to render multiple deferred
         // tasks at same time (e.g. more than 1 ATM being seen at once) to the same final
@@ -1275,14 +1273,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         TracyGpuZone("Overlay")
-        const ghoul::GLDebugGroup group("Overlay");
+        const GLDebugGroup group("Overlay");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
         scene->render(data, tasks);
     }
 
     {
         TracyGpuZone("PostDeferredTransparent")
-        const ghoul::GLDebugGroup group("PostDeferredTransparent");
+        const GLDebugGroup group("PostDeferredTransparent");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::PostDeferredTransparent
         );
@@ -1291,7 +1289,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     {
         TracyGpuZone("Sticker")
-        const ghoul::GLDebugGroup group("Sticker");
+        const GLDebugGroup group("Sticker");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::Sticker
         );
@@ -1318,7 +1316,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     {
         // Apply the selected TMO on the results and resolve the result to the default FBO
         TracyGpuZone("Apply TMO");
-        const ghoul::GLDebugGroup group("Apply TMO");
+        const GLDebugGroup group("Apply TMO");
 
         applyTMO(
             blackoutFactor,
@@ -1331,7 +1329,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     if (_enableFXAA) {
         TracyGpuZone("Apply FXAA")
-        const ghoul::GLDebugGroup group("Apply FXAA");
+        const GLDebugGroup group("Apply FXAA");
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
         applyFXAA(viewport);
     }
@@ -1339,7 +1337,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
 void FramebufferRenderer::renderDepthMaps() {
     TracyGpuZone("Shadow Maps");
-    const ghoul::GLDebugGroup group("Shadow Maps");
+    const GLDebugGroup group("Shadow Maps");
 
     // Save previous FBO and viewport
     GLint prevFbo;
@@ -1354,8 +1352,8 @@ void FramebufferRenderer::renderDepthMaps() {
         std::vector<const Shadower*> toRender;
         toRender.reserve(shadowMap.second.targets.size());
         for (const SceneGraphNode* node : shadowMap.second.targets) {
-            ghoul_assert(node, "No SceneGraphNode");
-            ghoul_assert(node->renderable(), "No Renderable");
+            assert_msg(node, "No SceneGraphNode");
+            assert_msg(node->renderable(), "No Renderable");
 
             const Shadower* shadower = dynamic_cast<const Shadower*>(node->renderable());
             if (shadower && node->renderable()->isEnabled() &&
@@ -1421,7 +1419,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
+        opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
             exitProgram->activate();
             raycaster->renderExitPoints(raycasterTask.renderData, *exitProgram);
@@ -1454,7 +1452,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             raycasterTask.renderData,
             cameraPosition
         );
-        ghoul::opengl::ProgramObject* raycastProgram = nullptr;
+        opengl::ProgramObject* raycastProgram = nullptr;
 
         if (isCameraInside) {
             raycastProgram = _insideRaycastPrograms[raycaster].get();
@@ -1484,15 +1482,15 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
             raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 
-            ghoul::opengl::TextureUnit exitColorTextureUnit;
+            opengl::TextureUnit exitColorTextureUnit;
             exitColorTextureUnit.bind(_exitColorTexture);
             raycastProgram->setUniform("exitColorTexture", exitColorTextureUnit);
 
-            ghoul::opengl::TextureUnit exitDepthTextureUnit;
+            opengl::TextureUnit exitDepthTextureUnit;
             exitDepthTextureUnit.bind(_exitDepthTexture);
             raycastProgram->setUniform("exitDepthTexture", exitDepthTextureUnit);
 
-            ghoul::opengl::TextureUnit mainDepthTextureUnit;
+            opengl::TextureUnit mainDepthTextureUnit;
             mainDepthTextureUnit.bind(_gBuffers.depthTexture);
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
@@ -1551,7 +1549,7 @@ void FramebufferRenderer::performDeferredTasks(
 
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
-        ghoul::opengl::ProgramObject* deferredcastProgram =
+        opengl::ProgramObject* deferredcastProgram =
             _deferredcastPrograms[deferredcaster].get();
 
         if (!deferredcastProgram) {
@@ -1570,7 +1568,7 @@ void FramebufferRenderer::performDeferredTasks(
         deferredcastProgram->activate();
 
         // Adding G-Buffer
-        ghoul::opengl::TextureUnit mainDColorTextureUnit;
+        opengl::TextureUnit mainDColorTextureUnit;
         mainDColorTextureUnit.bind(_pingPongBuffers.colorTexture[fromIndex]);
         deferredcastProgram->setUniform("mainColorTexture", mainDColorTextureUnit);
 
@@ -1583,11 +1581,11 @@ void FramebufferRenderer::performDeferredTasks(
         );
         deferredcastProgram->setUniform("resolution", glm::vec2(_resolution));
 
-        ghoul::opengl::TextureUnit mainPositionTextureUnit;
+        opengl::TextureUnit mainPositionTextureUnit;
         mainPositionTextureUnit.bind(_gBuffers.positionTexture);
         deferredcastProgram->setUniform("mainPositionTexture", mainPositionTextureUnit);
 
-        ghoul::opengl::TextureUnit mainNormalTextureUnit;
+        opengl::TextureUnit mainNormalTextureUnit;
         mainNormalTextureUnit.bind(_gBuffers.normalTexture);
         deferredcastProgram->setUniform("mainNormalTexture", mainNormalTextureUnit);
 
@@ -1627,13 +1625,13 @@ void FramebufferRenderer::setDisableHDR(bool disable) {
 }
 
 void FramebufferRenderer::setHDRExposure(float hdrExposure) {
-    ghoul_assert(hdrExposure > 0.f, "HDR exposure must be greater than zero");
+    assert_msg(hdrExposure > 0.f, "HDR exposure must be greater than zero");
     _hdrExposure = hdrExposure;
     updateRendererData();
 }
 
 void FramebufferRenderer::setGamma(float gamma) {
-    ghoul_assert(gamma > 0.f, "Gamma value must be greater than zero");
+    assert_msg(gamma > 0.f, "Gamma value must be greater than zero");
     _gamma = gamma;
 }
 
@@ -1651,7 +1649,7 @@ void FramebufferRenderer::enableFXAA(bool enable) {
 void FramebufferRenderer::updateRendererData() {
     ZoneScoped;
 
-    ghoul::Dictionary dict;
+    Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
     dict.setValue("hdrExposure", std::to_string(_hdrExposure));
     dict.setValue("disableHDR", std::to_string(_disableHDR));

@@ -216,7 +216,7 @@ Documentation ConstructOctreeTask::Documentation() {
     return codegen::doc<Parameters>("gaia_task_constructoctree", Task::Documentation());
 }
 
-ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
+ConstructOctreeTask::ConstructOctreeTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _inFileOrFolderPath = absPath(p.inFileOrFolderPath);

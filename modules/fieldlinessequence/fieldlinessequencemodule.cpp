@@ -64,16 +64,16 @@ FieldlinesSequenceModule::FieldlinesSequenceModule()
     file << DefaultTransferfunctionSource;
 }
 
-void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+void FieldlinesSequenceModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    assert_msg(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableFieldlinesSequence>(
         "RenderableFieldlinesSequence"
     );
 
-    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
+    TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    assert_msg(fTask, "No task factory existed");
     fTask->registerClass<KameleonVolumeToFieldlinesTask>(
         "KameleonVolumeToFieldlinesTask"
     );

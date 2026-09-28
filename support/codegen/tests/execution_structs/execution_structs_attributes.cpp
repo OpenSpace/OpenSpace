@@ -717,52 +717,52 @@ namespace {
 
 
         // referenceValueOptional documentation
-        std::optional<ghoul::Dictionary> referenceValueOptional
+        std::optional<Dictionary> referenceValueOptional
             [[codegen::reference("abc")]];
 
         // referenceValueVector documentation
-        std::optional<std::vector<ghoul::Dictionary>> referenceValueVector
+        std::optional<std::vector<Dictionary>> referenceValueVector
             [[codegen::reference("abc")]];
 
         // dictValue documentation
-        ghoul::Dictionary dictValue [[codegen::reference("abc")]];
+        Dictionary dictValue [[codegen::reference("abc")]];
 
         // dictValueVector documentation
-        std::vector<ghoul::Dictionary> dictValueVector [[codegen::reference("abc")]];
+        std::vector<Dictionary> dictValueVector [[codegen::reference("abc")]];
 
         // dictValueOptional documentation
-        std::optional<ghoul::Dictionary> dictValueOptional [[codegen::reference("abc")]];
+        std::optional<Dictionary> dictValueOptional [[codegen::reference("abc")]];
 
         // dictValueMap documentation
-        std::map<std::string, ghoul::Dictionary> dictValueMap
+        std::map<std::string, Dictionary> dictValueMap
             [[codegen::reference("abc")]];
 
         // vectorDictValueMap documentation
-        std::vector<std::map<std::string, ghoul::Dictionary>> vectorDictValueMap
+        std::vector<std::map<std::string, Dictionary>> vectorDictValueMap
             [[codegen::reference("abc")]];
 
         // optionalDictValueMap documentation
-        std::optional<std::map<std::string, ghoul::Dictionary>> optionalDictValueMap
+        std::optional<std::map<std::string, Dictionary>> optionalDictValueMap
             [[codegen::reference("abc")]];
 
         // optionalVectorDictValueMap documentation
-        std::optional<std::vector<std::map<std::string, ghoul::Dictionary>>>
+        std::optional<std::vector<std::map<std::string, Dictionary>>>
             optionalVectorDictValueMap [[codegen::reference("abc")]];
 
         // dictValueVectorMap documentation
-        std::map<std::string, std::vector<ghoul::Dictionary>> dictValueVectorMap
+        std::map<std::string, std::vector<Dictionary>> dictValueVectorMap
             [[codegen::reference("abc")]];
 
         // vectorDictValueVectorMap documentation
-        std::vector<std::map<std::string, std::vector<ghoul::Dictionary>>> vectorDictValueVectorMap
+        std::vector<std::map<std::string, std::vector<Dictionary>>> vectorDictValueVectorMap
             [[codegen::reference("abc")]];
 
         // optionalDictValueVectorMap documentation
-        std::optional<std::map<std::string, std::vector<ghoul::Dictionary>>> optionalDictValueVectorMap
+        std::optional<std::map<std::string, std::vector<Dictionary>>> optionalDictValueVectorMap
             [[codegen::reference("abc")]];
 
         // optionalVectorDictValueVectorMap documentation
-        std::optional<std::vector<std::map<std::string, std::vector<ghoul::Dictionary>>>>
+        std::optional<std::vector<std::map<std::string, std::vector<Dictionary>>>>
             optionalVectorDictValueVectorMap [[codegen::reference("abc")]];
 
         // annotation documentation
@@ -940,11 +940,11 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     doc.id = "abc";
     DocEng.addDocumentation(doc);
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("KeyKey", 2.1);
     d.setValue("KeyKeyOptional", 2.2);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 2.3);
         e.setValue("2", 2.4);
         e.setValue("3", 2.5);
@@ -953,7 +953,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("InRangeValueInt", 3.0);
     d.setValue("InRangeValueIntOptional", 4.0);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 5.0);
         e.setValue("2", 6.0);
         e.setValue("3", 7.0);
@@ -962,7 +962,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("InRangeValueFloat", 8.1);
     d.setValue("InRangeValueFloatOptional", 8.2);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 8.3);
         e.setValue("2", 8.4);
         e.setValue("3", 8.5);
@@ -971,7 +971,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("InRangeValueVec2", glm::dvec2(1.5));
     d.setValue("InRangeValueVec2Optional", glm::dvec2(1.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(1.25));
         e.setValue("2", glm::dvec2(1.5));
         e.setValue("3", glm::dvec2(1.75));
@@ -980,7 +980,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("InRangeValueVec3", glm::dvec3(1.5));
     d.setValue("InRangeValueVec3Optional", glm::dvec3(1.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(1.25));
         e.setValue("2", glm::dvec3(1.5));
         e.setValue("3", glm::dvec3(1.75));
@@ -989,7 +989,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("InRangeValueVec4", glm::dvec4(1.5));
     d.setValue("InRangeValueVec4Optional", glm::dvec4(1.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(1.25));
         e.setValue("2", glm::dvec4(1.5));
         e.setValue("3", glm::dvec4(1.75));
@@ -998,7 +998,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("InRangeValueIVec2", glm::dvec2(2));
     d.setValue("InRangeValueIVec2Optional", glm::dvec2(2));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(2.0));
         e.setValue("2", glm::dvec2(2.0));
         e.setValue("3", glm::dvec2(2.0));
@@ -1007,7 +1007,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("InRangeValueIVec3", glm::dvec3(2.0));
     d.setValue("InRangeValueIVec3Optional", glm::dvec3(2.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(2.0));
         e.setValue("2", glm::dvec3(2.0));
         e.setValue("3", glm::dvec3(2.0));
@@ -1016,7 +1016,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("InRangeValueIVec4", glm::dvec4(2.0));
     d.setValue("InRangeValueIVec4Optional", glm::dvec4(2.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(2.0));
         e.setValue("2", glm::dvec4(2.0));
         e.setValue("3", glm::dvec4(2.0));
@@ -1026,7 +1026,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NotInRangeValueInt", 9.0);
     d.setValue("NotInRangeValueIntOptional", 10.0);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 11.0);
         e.setValue("2", 12.0);
         e.setValue("3", 13.0);
@@ -1035,7 +1035,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NotInRangeValueFloat", 14.1);
     d.setValue("NotInRangeValueFloatOptional", 14.2);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 14.3);
         e.setValue("2", 14.4);
         e.setValue("3", 14.5);
@@ -1044,7 +1044,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NotInRangeValueVec2", glm::dvec2(0.5));
     d.setValue("NotInRangeValueVec2Optional", glm::dvec2(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(0.25));
         e.setValue("2", glm::dvec2(0.5));
         e.setValue("3", glm::dvec2(0.75));
@@ -1053,7 +1053,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NotInRangeValueVec3", glm::dvec3(0.5));
     d.setValue("NotInRangeValueVec3Optional", glm::dvec3(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(0.25));
         e.setValue("2", glm::dvec3(0.5));
         e.setValue("3", glm::dvec3(0.75));
@@ -1062,7 +1062,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NotInRangeValueVec4", glm::dvec4(0.5));
     d.setValue("NotInRangeValueVec4Optional", glm::dvec4(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(0.25));
         e.setValue("2", glm::dvec4(0.5));
         e.setValue("3", glm::dvec4(0.75));
@@ -1071,7 +1071,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NotInRangeValueIVec2", glm::dvec2(4.0));
     d.setValue("NotInRangeValueIVec2Optional", glm::dvec2(4.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(4.0));
         e.setValue("2", glm::dvec2(5.0));
         e.setValue("3", glm::dvec2(6.0));
@@ -1080,7 +1080,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NotInRangeValueIVec3", glm::dvec3(4.0));
     d.setValue("NotInRangeValueIVec3Optional", glm::dvec3(4.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(4.0));
         e.setValue("2", glm::dvec3(5.0));
         e.setValue("3", glm::dvec3(6.0));
@@ -1089,7 +1089,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NotInRangeValueIVec4", glm::dvec4(4.0));
     d.setValue("NotInRangeValueIVec4Optional", glm::dvec4(4.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(4.0));
         e.setValue("2", glm::dvec4(5.0));
         e.setValue("3", glm::dvec4(6.0));
@@ -1100,7 +1100,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessValueInt", 15.0);
     d.setValue("LessValueIntOptional", 16.0);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 17.0);
         e.setValue("2", 18.0);
         e.setValue("3", 19.0);
@@ -1109,7 +1109,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessValueFloat", 20.1);
     d.setValue("LessValueFloatOptional", 20.2);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 20.3);
         e.setValue("2", 20.4);
         e.setValue("3", 20.5);
@@ -1118,7 +1118,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessValueVec2", glm::dvec2(0.5));
     d.setValue("LessValueVec2Optional", glm::dvec2(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(0.25));
         e.setValue("2", glm::dvec2(0.5));
         e.setValue("3", glm::dvec2(0.75));
@@ -1127,7 +1127,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessValueVec3", glm::dvec3(0.5));
     d.setValue("LessValueVec3Optional", glm::dvec3(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(0.25));
         e.setValue("2", glm::dvec3(0.5));
         e.setValue("3", glm::dvec3(0.75));
@@ -1136,7 +1136,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessValueVec4", glm::dvec4(0.5));
     d.setValue("LessValueVec4Optional", glm::dvec4(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(0.25));
         e.setValue("2", glm::dvec4(0.5));
         e.setValue("3", glm::dvec4(0.75));
@@ -1145,7 +1145,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessValueIVec2", glm::dvec2(0));
     d.setValue("LessValueIVec2Optional", glm::dvec2(0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(0.0));
         e.setValue("2", glm::dvec2(-1.0));
         e.setValue("3", glm::dvec2(-2.0));
@@ -1154,7 +1154,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessValueIVec3", glm::dvec3(0.0));
     d.setValue("LessValueIVec3Optional", glm::dvec3(0.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(0.0));
         e.setValue("2", glm::dvec3(-1.0));
         e.setValue("3", glm::dvec3(-2.0));
@@ -1163,7 +1163,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessValueIVec4", glm::dvec4(0.0));
     d.setValue("LessValueIVec4Optional", glm::dvec4(0.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(0.0));
         e.setValue("2", glm::dvec4(-1.0));
         e.setValue("3", glm::dvec4(-2.0));
@@ -1174,7 +1174,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessEqualValueInt", 21.0);
     d.setValue("LessEqualValueIntOptional", 22.0);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 23.0);
         e.setValue("2", 24.0);
         e.setValue("3", 25.0);
@@ -1183,7 +1183,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessEqualValueFloat", 26.1);
     d.setValue("LessEqualValueFloatOptional", 26.2);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 26.3);
         e.setValue("2", 26.4);
         e.setValue("3", 26.5);
@@ -1192,7 +1192,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessEqualValueVec2", glm::dvec2(0.5));
     d.setValue("LessEqualValueVec2Optional", glm::dvec2(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(0.25));
         e.setValue("2", glm::dvec2(0.5));
         e.setValue("3", glm::dvec2(0.75));
@@ -1201,7 +1201,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessEqualValueVec3", glm::dvec3(0.5));
     d.setValue("LessEqualValueVec3Optional", glm::dvec3(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(0.25));
         e.setValue("2", glm::dvec3(0.5));
         e.setValue("3", glm::dvec3(0.75));
@@ -1210,7 +1210,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessEqualValueVec4", glm::dvec4(0.5));
     d.setValue("LessEqualValueVec4Optional", glm::dvec4(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(0.25));
         e.setValue("2", glm::dvec4(0.5));
         e.setValue("3", glm::dvec4(0.75));
@@ -1219,7 +1219,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessEqualValueIVec2", glm::dvec2(0.0));
     d.setValue("LessEqualValueIVec2Optional", glm::dvec2(0.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(0.0));
         e.setValue("2", glm::dvec2(-1.0));
         e.setValue("3", glm::dvec2(-2.0));
@@ -1228,7 +1228,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessEqualValueIVec3", glm::dvec3(0.0));
     d.setValue("LessEqualValueIVec3Optional", glm::dvec3(0.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(0.0));
         e.setValue("2", glm::dvec3(-1.0));
         e.setValue("3", glm::dvec3(-2.0));
@@ -1237,7 +1237,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("LessEqualValueIVec4", glm::dvec4(0.0));
     d.setValue("LessEqualValueIVec4Optional", glm::dvec4(0.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(0.0));
         e.setValue("2", glm::dvec4(-1.0));
         e.setValue("3", glm::dvec4(-2.0));
@@ -1248,7 +1248,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterValueInt", 27.0);
     d.setValue("GreaterValueIntOptional", 28.0);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 29.0);
         e.setValue("2", 30.0);
         e.setValue("3", 31.0);
@@ -1257,7 +1257,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterValueFloat", 32.1);
     d.setValue("GreaterValueFloatOptional", 32.2);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 32.3);
         e.setValue("2", 32.4);
         e.setValue("3", 32.5);
@@ -1266,7 +1266,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterValueVec2", glm::dvec2(1.5));
     d.setValue("GreaterValueVec2Optional", glm::dvec2(1.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(1.25));
         e.setValue("2", glm::dvec2(1.5));
         e.setValue("3", glm::dvec2(1.75));
@@ -1275,7 +1275,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterValueVec3", glm::dvec3(1.5));
     d.setValue("GreaterValueVec3Optional", glm::dvec3(1.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(1.25));
         e.setValue("2", glm::dvec3(1.5));
         e.setValue("3", glm::dvec3(1.75));
@@ -1284,7 +1284,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterValueVec4", glm::dvec4(1.5));
     d.setValue("GreaterValueVec4Optional", glm::dvec4(1.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(1.25));
         e.setValue("2", glm::dvec4(1.5));
         e.setValue("3", glm::dvec4(1.75));
@@ -1293,7 +1293,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterValueIVec2", glm::dvec2(2.0));
     d.setValue("GreaterValueIVec2Optional", glm::dvec2(2.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(2.0));
         e.setValue("2", glm::dvec2(3.0));
         e.setValue("3", glm::dvec2(4.0));
@@ -1302,7 +1302,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterValueIVec3", glm::dvec3(2.0));
     d.setValue("GreaterValueIVec3Optional", glm::dvec3(2.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(2.0));
         e.setValue("2", glm::dvec3(3.0));
         e.setValue("3", glm::dvec3(4.0));
@@ -1311,7 +1311,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterValueIVec4", glm::dvec4(2.0));
     d.setValue("GreaterValueIVec4Optional", glm::dvec4(2.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(2.0));
         e.setValue("2", glm::dvec4(3.0));
         e.setValue("3", glm::dvec4(4.0));
@@ -1322,7 +1322,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterEqualValueInt", 33.0);
     d.setValue("GreaterEqualValueIntOptional", 34.0);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 35.0);
         e.setValue("2", 36.0);
         e.setValue("3", 37.0);
@@ -1331,7 +1331,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterEqualValueFloat", 38.1);
     d.setValue("GreaterEqualValueFloatOptional", 38.2);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 38.3);
         e.setValue("2", 38.4);
         e.setValue("3", 38.5);
@@ -1340,7 +1340,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterEqualValueVec2", glm::dvec2(1.5));
     d.setValue("GreaterEqualValueVec2Optional", glm::dvec2(1.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(1.25));
         e.setValue("2", glm::dvec2(1.5));
         e.setValue("3", glm::dvec2(1.75));
@@ -1349,7 +1349,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterEqualValueVec3", glm::dvec3(1.5));
     d.setValue("GreaterEqualValueVec3Optional", glm::dvec3(1.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(1.25));
         e.setValue("2", glm::dvec3(1.5));
         e.setValue("3", glm::dvec3(1.75));
@@ -1358,7 +1358,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterEqualValueVec4", glm::dvec4(1.5));
     d.setValue("GreaterEqualValueVec4Optional", glm::dvec4(1.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(1.25));
         e.setValue("2", glm::dvec4(1.5));
         e.setValue("3", glm::dvec4(1.75));
@@ -1367,7 +1367,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterEqualValueIVec2", glm::dvec2(2.0));
     d.setValue("GreaterEqualValueIVec2Optional", glm::dvec2(2.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(2.0));
         e.setValue("2", glm::dvec2(3.0));
         e.setValue("3", glm::dvec2(4.0));
@@ -1376,7 +1376,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterEqualValueIVec3", glm::dvec3(2.0));
     d.setValue("GreaterEqualValueIVec3Optional", glm::dvec3(2.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(2.0));
         e.setValue("2", glm::dvec3(3.0));
         e.setValue("3", glm::dvec3(4.0));
@@ -1385,7 +1385,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("GreaterEqualValueIVec4", glm::dvec4(2.0));
     d.setValue("GreaterEqualValueIVec4Optional", glm::dvec4(2.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(2.0));
         e.setValue("2", glm::dvec4(3.0));
         e.setValue("3", glm::dvec4(4.0));
@@ -1396,7 +1396,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("UnequalValueInt", 39.0);
     d.setValue("UnequalValueIntOptional", 40.0);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 41.0);
         e.setValue("2", 42.0);
         e.setValue("3", 43.0);
@@ -1405,7 +1405,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("UnequalValueFloat", 44.1);
     d.setValue("UnequalValueFloatOptional", 44.2);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", 44.3);
         e.setValue("2", 44.4);
         e.setValue("3", 44.5);
@@ -1414,7 +1414,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("UnequalValueVec2", glm::dvec2(0.5));
     d.setValue("UnequalValueVec2Optional", glm::dvec2(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(0.25));
         e.setValue("2", glm::dvec2(0.5));
         e.setValue("3", glm::dvec2(0.75));
@@ -1423,7 +1423,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("UnequalValueVec3", glm::dvec3(0.5));
     d.setValue("UnequalValueVec3Optional", glm::dvec3(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(0.25));
         e.setValue("2", glm::dvec3(0.5));
         e.setValue("3", glm::dvec3(0.75));
@@ -1432,7 +1432,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("UnequalValueVec4", glm::dvec4(0.5));
     d.setValue("UnequalValueVec4Optional", glm::dvec4(0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(0.25));
         e.setValue("2", glm::dvec4(0.5));
         e.setValue("3", glm::dvec4(0.75));
@@ -1441,7 +1441,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("UnequalValueIVec2", glm::dvec2(0.0));
     d.setValue("UnequalValueIVec2Optional", glm::dvec2(0.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec2(0.0));
         e.setValue("2", glm::dvec2(-1.0));
         e.setValue("3", glm::dvec2(-2.0));
@@ -1450,7 +1450,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("UnequalValueIVec3", glm::dvec3(0.0));
     d.setValue("UnequalValueIVec3Optional", glm::dvec3(0.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(0.0));
         e.setValue("2", glm::dvec3(-1.0));
         e.setValue("3", glm::dvec3(-2.0));
@@ -1459,7 +1459,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("UnequalValueIVec4", glm::dvec4(0.0));
     d.setValue("UnequalValueIVec4Optional", glm::dvec4(0.0));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(0.0));
         e.setValue("2", glm::dvec4(-1.0));
         e.setValue("3", glm::dvec4(-2.0));
@@ -1473,7 +1473,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("InListValue1", "A"s);
     d.setValue("InListValue1Optional", "B"s);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "C"s);
         e.setValue("2", "D"s);
         e.setValue("3", "E"s);
@@ -1482,7 +1482,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("InListValue2", "F"s);
     d.setValue("InListValue2Optional", "G"s);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "H"s);
         e.setValue("2", "I"s);
         e.setValue("3", "J"s);
@@ -1493,7 +1493,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NotInListValue1", "F"s);
     d.setValue("NotInListValue1Optional", "G"s);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "H"s);
         e.setValue("2", "I"s);
         e.setValue("3", "J"s);
@@ -1502,7 +1502,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NotInListValue2", "K"s);
     d.setValue("NotInListValue2Optional", "L"s);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "M"s);
         e.setValue("2", "N"s);
         e.setValue("3", "O"s);
@@ -1513,7 +1513,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("UnequalValueString", "zyxwv"s);
     d.setValue("UnequalValueStringOptional", "zyxwv"s);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "zyxwv1"s);
         e.setValue("2", "zyxwv2"s);
         e.setValue("3", "zyxwv3"s);
@@ -1522,152 +1522,152 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NotEmptyString", "def"s);
     d.setValue("NotEmptyStringOptional", "def"s);
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", "jkl"s);
         v.setValue("2", "mno"s);
         v.setValue("3", "pqr"s);
         d.setValue("NotEmptyStringVector", v);
     }
     {
-        ghoul::Dictionary v;
+        Dictionary v;
         v.setValue("1", "jkl"s);
         v.setValue("2", "mno"s);
         v.setValue("3", "pqr"s);
         d.setValue("NotEmptyStringOptionalVector", v);
     }
-    d.setValue("DictValue", ghoul::Dictionary());
+    d.setValue("DictValue", Dictionary());
     {
-        ghoul::Dictionary e;
-        e.setValue("1", ghoul::Dictionary());
-        e.setValue("2", ghoul::Dictionary());
-        e.setValue("3", ghoul::Dictionary());
+        Dictionary e;
+        e.setValue("1", Dictionary());
+        e.setValue("2", Dictionary());
+        e.setValue("3", Dictionary());
         d.setValue("DictValueVector", e);
     }
-    d.setValue("DictValueOptional", ghoul::Dictionary());
+    d.setValue("DictValueOptional", Dictionary());
     {
-        ghoul::Dictionary e;
-        e.setValue("a", ghoul::Dictionary());
-        e.setValue("b", ghoul::Dictionary());
-        e.setValue("c", ghoul::Dictionary());
+        Dictionary e;
+        e.setValue("a", Dictionary());
+        e.setValue("b", Dictionary());
+        e.setValue("c", Dictionary());
         d.setValue("DictValueMap", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("3", f);
         }
         d.setValue("VectorDictValueMap", e);
     }
     {
-        ghoul::Dictionary e;
-        e.setValue("a", ghoul::Dictionary());
-        e.setValue("b", ghoul::Dictionary());
-        e.setValue("c", ghoul::Dictionary());
+        Dictionary e;
+        e.setValue("a", Dictionary());
+        e.setValue("b", Dictionary());
+        e.setValue("c", Dictionary());
         d.setValue("OptionalDictValueMap", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("3", f);
         }
         d.setValue("OptionalVectorDictValueMap", e);
     }
     {
-        ghoul::Dictionary e;
-        e.setValue("a", ghoul::Dictionary());
-        e.setValue("b", ghoul::Dictionary());
-        e.setValue("c", ghoul::Dictionary());
+        Dictionary e;
+        e.setValue("a", Dictionary());
+        e.setValue("b", Dictionary());
+        e.setValue("c", Dictionary());
         d.setValue("DictValueVectorMap", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("3", f);
         }
         d.setValue("VectorDictValueVectorMap", e);
     }
     {
-        ghoul::Dictionary e;
-        e.setValue("a", ghoul::Dictionary());
-        e.setValue("b", ghoul::Dictionary());
-        e.setValue("c", ghoul::Dictionary());
+        Dictionary e;
+        e.setValue("a", Dictionary());
+        e.setValue("b", Dictionary());
+        e.setValue("c", Dictionary());
         d.setValue("OptionalDictValueVectorMap", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("1", f);
         }
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("2", f);
         }
         {
-            ghoul::Dictionary f;
-            f.setValue("a", ghoul::Dictionary());
-            f.setValue("b", ghoul::Dictionary());
-            f.setValue("c", ghoul::Dictionary());
+            Dictionary f;
+            f.setValue("a", Dictionary());
+            f.setValue("b", Dictionary());
+            f.setValue("c", Dictionary());
             e.setValue("3", f);
         }
         d.setValue("OptionalVectorDictValueVectorMap", e);
@@ -1677,7 +1677,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("Annotation", "annotation_abc"s);
     d.setValue("AnnotationOptional", "annotation_def"s);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "annotation_ghi"s);
         e.setValue("2", "annotation_jkl"s);
         e.setValue("3", "annotation_mno"s);
@@ -1686,7 +1686,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("Dcolor3Value", glm::dvec3(0.0, 0.1, 0.2));
     d.setValue("OptionalDcolor3Value", glm::dvec3(0.3, 0.4, 0.5));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(0.60, 0.61, 0.62));
         e.setValue("2", glm::dvec3(0.63, 0.64, 0.65));
         e.setValue("3", glm::dvec3(0.66, 0.67, 0.68));
@@ -1695,7 +1695,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("Color3Value", glm::dvec3(0.70, 0.71, 0.72));
     d.setValue("OptionalColor3Value", glm::dvec3(0.73, 0.74, 0.75));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec3(0.80, 0.81, 0.82));
         e.setValue("2", glm::dvec3(0.83, 0.84, 0.85));
         e.setValue("3", glm::dvec3(0.86, 0.87, 0.88));
@@ -1704,7 +1704,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("Dcolor4Value", glm::dvec4(0.0, 0.1, 0.2, 0.3));
     d.setValue("OptionalDcolor4Value", glm::dvec4(0.4, 0.5, 0.6, 0.7));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(0.60, 0.61, 0.62, 0.63));
         e.setValue("2", glm::dvec4(0.64, 0.65, 0.66, 0.67));
         e.setValue("3", glm::dvec4(0.68, 0.69, 0.70, 0.71));
@@ -1713,7 +1713,7 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("Color4Value", glm::dvec4(0.80, 0.81, 0.82, 0.83));
     d.setValue("OptionalColor4Value", glm::dvec4(0.84, 0.85, 0.86, 0.87));
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", glm::dvec4(0.90, 0.91, 0.92, 0.93));
         e.setValue("2", glm::dvec4(0.94, 0.95, 0.96, 0.97));
         e.setValue("3", glm::dvec4(0.98, 0.99, 0.991, 0.992));
@@ -1723,14 +1723,14 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("DateTimeValue", "1990 03 11 12:40:53"s);
     d.setValue("OptionalDateTimeValue", "1991 03 11 12:40:53"s);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "1992 03 11 12:40:53"s);
         e.setValue("2", "1993 03 11 12:40:53"s);
         e.setValue("3", "1994 03 11 12:40:53"s);
         d.setValue("VectorDateTimeValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "1995 03 11 12:40:53"s);
         e.setValue("2", "1996 03 11 12:40:53"s);
         e.setValue("3", "1997 03 11 12:40:53"s);
@@ -1740,14 +1740,14 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("IdentifierValue", "abcdef"s);
     d.setValue("OptionalIdentifierValue", "defghi"s);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "ghijkl"s);
         e.setValue("2", "jklomn"s);
         e.setValue("3", "omnpqr"s);
         d.setValue("VectorIdentifierValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "pqrstu"s);
         e.setValue("2", "stuvwx"s);
         e.setValue("3", "vwxyzz"s);
@@ -1757,14 +1757,14 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("PrivateValue", "abcdef"s);
     d.setValue("OptionalPrivateValue", "defghi"s);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "ghijkl"s);
         e.setValue("2", "jklomn"s);
         e.setValue("3", "omnpqr"s);
         d.setValue("VectorPrivateValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", "pqrstu"s);
         e.setValue("2", "stuvwx"s);
         e.setValue("3", "vwxyzz"s);
@@ -1784,14 +1784,14 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("DefaultMustExistValue", tmpFile);
     d.setValue("DefaultOptionalMustExistValue", tmpFile);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", tmpFile);
         e.setValue("2", tmpFile);
         e.setValue("3", tmpFile);
         d.setValue("DefaultVectorMustExistValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", tmpFile);
         e.setValue("2", tmpFile);
         e.setValue("3", tmpFile);
@@ -1801,14 +1801,14 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("YesMustExistValue", tmpFile);
     d.setValue("YesOptionalMustExistValue", tmpFile);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", tmpFile);
         e.setValue("2", tmpFile);
         e.setValue("3", tmpFile);
         d.setValue("YesVectorMustExistValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", tmpFile);
         e.setValue("2", tmpFile);
         e.setValue("3", tmpFile);
@@ -1818,14 +1818,14 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NoMustExistValue", noTmpFile);
     d.setValue("NoOptionalMustExistValue", noTmpFile);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", noTmpFile);
         e.setValue("2", noTmpFile);
         e.setValue("3", noTmpFile);
         d.setValue("NoVectorMustExistValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", noTmpFile);
         e.setValue("2", noTmpFile);
         e.setValue("3", noTmpFile);
@@ -1839,14 +1839,14 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("DefaultMustExistDirectoryValue", tmpFolder);
     d.setValue("DefaultOptionalMustExistDirectoryValue", tmpFolder);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", tmpFolder);
         e.setValue("2", tmpFolder);
         e.setValue("3", tmpFolder);
         d.setValue("DefaultVectorMustExistDirectoryValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", tmpFolder);
         e.setValue("2", tmpFolder);
         e.setValue("3", tmpFolder);
@@ -1856,14 +1856,14 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("YesMustExistDirectoryValue", tmpFolder);
     d.setValue("YesOptionalMustExistDirectoryValue", tmpFolder);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", tmpFolder);
         e.setValue("2", tmpFolder);
         e.setValue("3", tmpFolder);
         d.setValue("YesVectorMustExistDirectoryValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", tmpFolder);
         e.setValue("2", tmpFolder);
         e.setValue("3", tmpFolder);
@@ -1873,14 +1873,14 @@ TEST_CASE("Execution/Structs/Attributes:  Bake", "[Execution][Structs]") {
     d.setValue("NoMustExistDirectoryValue", noTmpFolder);
     d.setValue("NoOptionalMustExistDirectoryValue", noTmpFolder);
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", noTmpFolder);
         e.setValue("2", noTmpFolder);
         e.setValue("3", noTmpFolder);
         d.setValue("NoVectorMustExistDirectoryValue", e);
     }
     {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("1", noTmpFolder);
         e.setValue("2", noTmpFolder);
         e.setValue("3", noTmpFolder);

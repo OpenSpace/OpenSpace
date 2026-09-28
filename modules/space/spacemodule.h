@@ -40,13 +40,13 @@ public:
     ~SpaceModule() override = default;
     std::vector<openspace::Documentation> documentations() const override;
 
-    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
+    static opengl::ProgramObjectManager ProgramObjectManager;
 
     LuaLibrary luaLibrary() const override;
     static openspace::Documentation Documentation();
 
 private:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
     void internalDeinitializeGL() override;
 
     BoolProperty _showSpiceExceptions;

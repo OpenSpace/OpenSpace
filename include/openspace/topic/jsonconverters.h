@@ -49,16 +49,11 @@ class Renderable;
 void to_json(nlohmann::json& j, const Renderable& r);
 void to_json(nlohmann::json& j, const Renderable* pR);
 
-} // namespace openspace
-
-namespace ghoul {
-
 class Dictionary;
-
 void to_json(nlohmann::json& j, const Dictionary& d);
 void to_json(nlohmann::json& j, const Dictionary* d);
 
-} // namespace ghoul
+} // namespace openspace
 
 namespace glm {
 

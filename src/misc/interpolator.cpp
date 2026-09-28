@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +27,7 @@
 #include <openspace/misc/assert.h>
 #include <glm/gtx/quaternion.hpp>
 
-namespace ghoul {
+namespace openspace {
 
 template <>
 glm::quat interpolateLinear(double t, const glm::quat& p0, const glm::quat& p1) {
@@ -45,8 +44,8 @@ glm::dquat interpolateLinear(double t, const glm::dquat& p0, const glm::dquat& p
 glm::dvec3 interpolateCatmullRom(double t, const glm::dvec3& p0, const glm::dvec3& p1,
                                  const glm::dvec3& p2, const glm::dvec3& p3, double alpha)
 {
-    ghoul_assert(t >= 0.0 && t <= 1.0, "Interpolation variable must be in range [0,1]");
-    ghoul_assert(alpha >= 0.0 && alpha <= 1.0, "Alpha must be in range [0,1]");
+    assert_msg(t >= 0.0 && t <= 1.0, "Interpolation variable must be in range [0,1]");
+    assert_msg(alpha >= 0.0 && alpha <= 1.0, "Alpha must be in range [0,1]");
 
     const double t01 = std::pow(glm::distance(p0, p1), alpha);
     const double t12 = std::pow(glm::distance(p1, p2), alpha);
@@ -70,4 +69,4 @@ glm::dvec3 interpolateCatmullRom(double t, const glm::dvec3& p0, const glm::dvec
     return a * t * t * t + b * t * t + c * t + d;
 }
 
-} // namespace ghoul
+} // namespace openspace

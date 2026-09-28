@@ -113,7 +113,7 @@ namespace {
             Quality.cend(),
             [quality](const std::pair<int, std::string>& p) { return p.first == quality; }
         );
-        ghoul_assert(it != Quality.cend(), "Combobox has too many values");
+        assert_msg(it != Quality.cend(), "Combobox has too many values");
         return static_cast<int>(std::distance(Quality.cbegin(), it));
     }
 } // namespace
@@ -930,7 +930,7 @@ void WindowControl::setProjectionBlit(int windowBlitId) {
     // We add 1 here as SGCT uses a 0-indexing for the window idx, but we present it to
     // the user as a 1-indexing
     int idx = _blit.windowId->findText(QString::number(windowBlitId + 1));
-    ghoul_assert(idx != -1, "Could not find window blit id");
+    assert_msg(idx != -1, "Could not find window blit id");
     _blit.windowId->setCurrentIndex(idx);
     _projectionType->setCurrentIndex(
         static_cast<int>(ProjectionIndices::Blit)

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +32,7 @@
 #include <openspace/misc/stringconversion.h>
 #include <string_view>
 
-namespace ghoul::logging {
+namespace openspace::logging {
 
 /**
  * Enumerates all available LogLevel for the LogManager. The LogLevels are guaranteed to
@@ -60,9 +59,9 @@ enum class LogLevel {
     NoLogging = 7
 };
 
-} // namespace ghoul::logging
+} // namespace openspace::logging
 
-namespace ghoul {
+namespace openspace {
 
 /**
  * Returns the string representation of the passed LogLevel. The name of each level is
@@ -119,6 +118,6 @@ constexpr glm::vec4 toColor(logging::LogLevel level) {
     }
 }
 
-} // namespace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___LOGLEVEL___H__

@@ -30,16 +30,15 @@
 #include <optional>
 #include <string>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
 struct CameraPose;
+class Dictionary;
 struct Documentation;
 
 struct NavigationState {
     NavigationState() = default;
-    explicit NavigationState(const ghoul::Dictionary& dictionary);
+    explicit NavigationState(const Dictionary& dictionary);
     explicit NavigationState(const nlohmann::json& json);
     NavigationState(std::string anchor, std::string aim, std::string referenceFrame,
         glm::dvec3 position, std::optional<glm::dvec3> up = std::nullopt,
@@ -47,7 +46,7 @@ struct NavigationState {
         std::optional<double> timestamp = std::nullopt);
 
     CameraPose cameraPose() const;
-    ghoul::Dictionary dictionary() const;
+    Dictionary dictionary() const;
     nlohmann::json toJson() const;
     static openspace::Documentation Documentation();
 

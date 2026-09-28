@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___GHOUL_LUA_TYPES___H__
-#define __OPENSPACE_CORE___GHOUL_LUA_TYPES___H__
+#ifndef __OPENSPACE_CORE___LUA_TYPES___H__
+#define __OPENSPACE_CORE___LUA_TYPES___H__
 
 #include <cstdint>
 
-namespace ghoul::lua {
+namespace openspace::lua {
 
 /**
  * Supported Lua types.The values are powers of two in order to be able to combine them to
@@ -51,6 +50,6 @@ LuaTypes fromLuaType(int type);
 
 bool typeMatch(LuaTypes lhs, LuaTypes rhs) noexcept;
 
-} // namespace ghoul::lua
+} // namespace openspace::lua
 
-#endif // __OPENSPACE_CORE___GHOUL_LUA_TYPES___H__
+#endif // __OPENSPACE_CORE___LUA_TYPES___H__

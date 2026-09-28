@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +44,7 @@ namespace {
     };
 } // namespace
 
-namespace ghoul {
+namespace openspace {
 
 std::string_view nameForEasingFunction(EasingFunction func) {
     return EaseFuncNames[static_cast<std::underlying_type_t<EasingFunction>>(func)];
@@ -134,4 +133,4 @@ namespace {
     [[maybe_unused]] double _d30 = bounceEaseInOut(0.0);
 } // namespace
 
-} // namespace ghoul
+} // namespace openspace

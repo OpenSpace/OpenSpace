@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,58 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___GHOUL_GL___H__
-#define __OPENSPACE_CORE___GHOUL_GL___H__
+#include <catch2/catch_test_macros.hpp>
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-copy"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-copy"
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#endif // __clang__
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionaryluaformatter.h>
+#include <openspace/scene/assetmanager.h>
+#include <openspace/scene/asset.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/sceneinitializer.h>
+#include <openspace/scripting/scriptengine.h>
+#include <exception>
+#include <memory>
 
-#include <glbinding/gl46core/gl.h>
-#include <glbinding/Binding.h>
-#define __GL_H__
+using namespace openspace;
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif // __clang__
+TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
+    const Scene scene = Scene(std::make_unique<SceneInitializer>());
+    lua::LuaState* state = global::scriptEngine->luaState();
+    AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
 
-// Evil 'using namespace' in the header to make the usage of OpenGL less painful
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wheader-hygiene"
-#endif // __clang__
+    CHECK_NOTHROW(assetLoader.add("passassertion"));
+    CHECK_NOTHROW(assetLoader.add("failassertion"));
+}
 
-using namespace gl;
+TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
+    Scene scene = Scene(std::make_unique<SceneInitializer>());
+    lua::LuaState* state = global::scriptEngine->luaState();
+    AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif // __clang__
+    CHECK_NOTHROW(assetLoader.add("require"));
+}
 
-namespace ghoul {
+TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
+    const Scene scene = Scene(std::make_unique<SceneInitializer>(1u));
+    lua::LuaState* state = global::scriptEngine->luaState();
+    AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
 
-template <int ID = 0>
-struct GLDebugGroup {
-    explicit GLDebugGroup(std::string_view name) {
-        glPushDebugGroup(
-            GL_DEBUG_SOURCE_APPLICATION,
-            ID,
-            static_cast<GLsizei>(name.length()),
-            name.data()
-        );
-    }
-
-    ~GLDebugGroup() {
-        glPopDebugGroup();
-    }
-};
-
-} // namespace ghoul
-
-#endif // __OPENSPACE_CORE___GHOUL_GL___H__
+    CHECK_NOTHROW(assetLoader.add("assetfunctionsexist"));
+}

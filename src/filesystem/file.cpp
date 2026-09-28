@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,10 +28,10 @@
 #include <openspace/misc/assert.h>
 #include <utility>
 
-namespace ghoul::filesystem {
+namespace openspace::filesystem {
 
 File::File(std::filesystem::path filename) {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
+    assert_msg(!filename.empty(), "Filename must not be empty");
     _filename = std::move(filename);
 }
 
@@ -73,4 +72,4 @@ void File::removeFileChangeListener() const {
     FileSys.removeFileListener(_index);
 }
 
-} // namespace ghoul::filesystem
+} // namespace openspace::filesystem

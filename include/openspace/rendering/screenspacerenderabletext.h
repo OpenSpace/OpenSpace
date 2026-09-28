@@ -38,7 +38,7 @@ namespace openspace {
 
 class ScreenSpaceRenderableText : public ScreenSpaceRenderable {
 public:
-    explicit ScreenSpaceRenderableText(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceRenderableText(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -53,16 +53,16 @@ protected:
 
 private:
     void updateFramebuffer();
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
     StringProperty _fontName;
     FloatProperty _fontSize;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
-    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+    std::shared_ptr<fontrendering::Font> _font;
+    std::unique_ptr<fontrendering::FontRenderer> _fontRenderer;
 
-    std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<opengl::FramebufferObject> _framebuffer;
+    std::unique_ptr<opengl::Texture> _texture;
 };
 
 } // namespace openspace

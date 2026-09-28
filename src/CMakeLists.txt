@@ -80,8 +80,8 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/openspace/data/dataloader.h
     ${PROJECT_SOURCE_DIR}/include/openspace/data/datamapping.h
     ${PROJECT_SOURCE_DIR}/include/openspace/data/speckloader.h
-    ${PROJECT_SOURCE_DIR}/include/openspace/designpattern/event.h
-    ${PROJECT_SOURCE_DIR}/include/openspace/designpattern/event.inl
+    ${PROJECT_SOURCE_DIR}/include/openspace/designpattern/synchronousevent.h
+    ${PROJECT_SOURCE_DIR}/include/openspace/designpattern/synchronousevent.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/core_registration.h
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentation.h
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentationengine.h
@@ -154,7 +154,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/openspace/logging/logmanager.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/logging/textlog.h
     ${PROJECT_SOURCE_DIR}/include/openspace/logging/visualstudiooutputlog.h
-    ${PROJECT_SOURCE_DIR}/include/openspace/lua/ghoul_lua.h
+    ${PROJECT_SOURCE_DIR}/include/openspace/lua/lua.h
     ${PROJECT_SOURCE_DIR}/include/openspace/lua/lua_helper.h
     ${PROJECT_SOURCE_DIR}/include/openspace/lua/lua_helper.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/lua/lua_types.h
@@ -169,6 +169,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/openspace/misc/csvreader.h
     ${PROJECT_SOURCE_DIR}/include/openspace/misc/defer.h
     ${PROJECT_SOURCE_DIR}/include/openspace/misc/dictionary.h
+    ${PROJECT_SOURCE_DIR}/include/openspace/misc/dictionaryformatter.h
     ${PROJECT_SOURCE_DIR}/include/openspace/misc/dictionaryjsonformatter.h
     ${PROJECT_SOURCE_DIR}/include/openspace/misc/dictionaryluaformatter.h
     ${PROJECT_SOURCE_DIR}/include/openspace/misc/easing.h
@@ -228,7 +229,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/openspace/opengl/bufferbinding.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/opengl/debugcontext.h
     ${PROJECT_SOURCE_DIR}/include/openspace/opengl/framebufferobject.h
-    ${PROJECT_SOURCE_DIR}/include/openspace/opengl/ghoul_gl.h
+    ${PROJECT_SOURCE_DIR}/include/openspace/opengl/gl.h
     ${PROJECT_SOURCE_DIR}/include/openspace/opengl/openglstatecache.h
     ${PROJECT_SOURCE_DIR}/include/openspace/opengl/programobject.h
     ${PROJECT_SOURCE_DIR}/include/openspace/opengl/programobjectmanager.h
@@ -714,16 +715,16 @@ target_sources(
     ${OPENSPACE_SHADERS}
 )
 
-if (GHOUL_HIGH_DEBUG_MODE)
-  target_compile_definitions(openspace-core PUBLIC "GHL_DEBUG")
+if (OPENSPACE_HIGH_DEBUG_MODE)
+  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_DEBUG")
 endif ()
 
-if (GHOUL_LOGGING_ENABLE_TRACE)
-  target_compile_definitions(openspace-core PUBLIC "GHOUL_LOGGING_ENABLE_TRACE")
+if (OPENSPACE_LOGGING_ENABLE_TRACE)
+  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_LOGGING_ENABLE_TRACE")
 endif ()
 
-if (GHOUL_THROW_ON_ASSERT)
-  target_compile_definitions(openspace-core PUBLIC "GHL_THROW_ON_ASSERT")
+if (OPENSPACE_THROW_ON_ASSERT)
+  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_THROW_ON_ASSERT")
 endif ()
 
 target_include_directories(openspace-core
@@ -794,7 +795,7 @@ endif ()
 find_path(WEBSOCKETPP_INCLUDE_DIR "websocketpp/version.hpp" REQUIRED)
 target_include_directories(openspace-core SYSTEM PUBLIC $<BUILD_INTERFACE:${WEBSOCKETPP_INCLUDE_DIR}>)
 
-# RenderDoc is a single vendored header included by the public ghoul/opengl/renderdoc.h
+# RenderDoc is a single vendored header included by the public opengl/renderdoc.h
 target_include_directories(
   openspace-core SYSTEM PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/renderdoc>
 )
@@ -852,7 +853,7 @@ target_precompile_headers(openspace-core PRIVATE
   <openspace/misc/exception.h>
   <openspace/misc/invariants.h>
   <openspace/misc/profiling.h>
-  <openspace/opengl/ghoul_gl.h>
+  <openspace/opengl/gl.h>
   <algorithm>
   <any>
   <array>

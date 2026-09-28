@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -39,7 +39,7 @@ namespace openspace {
 
 class RenderableEclipseCone : public Renderable {
 public:
-    explicit RenderableEclipseCone(const ghoul::Dictionary& dictionary);
+    explicit RenderableEclipseCone(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -65,7 +65,7 @@ private:
     StringProperty _shadowerFrame;
     StringProperty _shadowee;
 
-    ghoul::opengl::ProgramObject* _shader = nullptr;
+    opengl::ProgramObject* _shader = nullptr;
     UniformCache(modelViewProjectionTransform, shadowColor, opacity) _uniformCache;
 
     GLuint _vao = 0;

@@ -36,7 +36,7 @@ namespace openspace {
 
 class ImageSequenceTileProvider : public TileProvider {
 public:
-    explicit ImageSequenceTileProvider(const ghoul::Dictionary& dictionary);
+    explicit ImageSequenceTileProvider(const Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;
@@ -57,7 +57,7 @@ private:
     StringProperty _currentImage;
     StringProperty _folderPath;
 
-    ghoul::Dictionary _initDict;
+    Dictionary _initDict;
     bool _isImageDirty = true;
     std::vector<std::filesystem::path> _imagePaths;
 };

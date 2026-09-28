@@ -44,16 +44,16 @@ std::string_view UShortProperty::className() const {
     return "UShortProperty";
 }
 
-ghoul::lua::LuaTypes UShortProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes UShortProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void UShortProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 unsigned short UShortProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<unsigned short>(state);
+    return lua::value<unsigned short>(state);
 }
 
 std::string UShortProperty::stringValue() const {

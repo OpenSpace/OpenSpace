@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,13 +27,13 @@
 
 #include <openspace/glm.h>
 #include <openspace/misc/boolean.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <array>
 #include <optional>
 #include <string>
 #include <variant>
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 /**
  * This class is a wrapper for an OpenGL texture. It wraps the OpenGL functions for
@@ -473,6 +472,6 @@ extern template const glm::tvec4<int16_t>& Texture::texel(const glm::uvec3& pos)
 extern template const glm::tvec4<int32_t>& Texture::texel(const glm::uvec3& pos) const;
 extern template const glm::tvec4<float>& Texture::texel(const glm::uvec3& pos) const;
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl
 
 #endif // __OPENSPACE_CORE___TEXTURE___H__

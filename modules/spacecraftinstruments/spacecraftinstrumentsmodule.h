@@ -40,13 +40,13 @@ public:
 
     std::vector<openspace::Documentation> documentations() const override;
 
-    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
+    static opengl::ProgramObjectManager ProgramObjectManager;
 
     bool addFrame(std::string body, std::string frame);
     std::string frameFromBody(const std::string& body);
 
 protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
     void internalDeinitialize() override;
     void internalDeinitializeGL() override;
 

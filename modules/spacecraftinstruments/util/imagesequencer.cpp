@@ -43,12 +43,12 @@ namespace openspace {
 ImageSequencer* ImageSequencer::_instance = nullptr;
 
 ImageSequencer& ImageSequencer::ref() {
-    ghoul_assert(_instance != nullptr, "Instance has not been initialized");
+    assert_msg(_instance != nullptr, "Instance has not been initialized");
     return *_instance;
 }
 
 void ImageSequencer::initialize() {
-    ghoul_assert(_instance == nullptr, "Instance already has been initialized");
+    assert_msg(_instance == nullptr, "Instance already has been initialized");
     _instance = new ImageSequencer;
     _instance->_defaultCaptureImage = absPath("${DATA}/placeholder.png");
 }

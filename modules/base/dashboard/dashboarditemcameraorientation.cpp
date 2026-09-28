@@ -51,7 +51,7 @@ Documentation DashboardItemCameraOrientation::Documentation() {
 }
 
 DashboardItemCameraOrientation::DashboardItemCameraOrientation(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
 {}
 

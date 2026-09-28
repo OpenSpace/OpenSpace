@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +36,7 @@ namespace {
     constexpr std::chrono::seconds WaitTime(1);
 } // namespace
 
-namespace ghoul {
+namespace openspace {
 
 ThreadPool::ThreadPool(int nThreads, std::function<void()> workerInit,
                        std::function<void()> workerDeinit,
@@ -55,16 +54,16 @@ ThreadPool::ThreadPool(int nThreads, std::function<void()> workerInit,
     , _threadPriorityLevel(tpl)
     , _threadBackground(bg)
 {
-    ghoul_assert(nThreads > 0, "nThreads must be bigger than 0");
-    ghoul_assert(_workerInitialization, "workerInit must not be empty");
-    ghoul_assert(_workerDeinitialization, "workerDeinit must not be empty");
+    assert_msg(nThreads > 0, "nThreads must be bigger than 0");
+    assert_msg(_workerInitialization, "workerInit must not be empty");
+    assert_msg(_workerDeinitialization, "workerDeinit must not be empty");
 
     // Activate the workers
     for (Worker& w : _workers) {
         activateWorker(w);
     }
 
-    ghoul_assert(isRunning(), "ThreadPool is not running");
+    assert_msg(isRunning(), "ThreadPool is not running");
 }
 
 ThreadPool::~ThreadPool() {
@@ -85,7 +84,7 @@ ThreadPool::~ThreadPool() {
 }
 
 void ThreadPool::start() {
-    ghoul_assert(!isRunning(), "ThreadPool must not be running");
+    assert_msg(!isRunning(), "ThreadPool must not be running");
 
     *_isRunning = true;
 
@@ -93,12 +92,12 @@ void ThreadPool::start() {
         activateWorker(w);
     }
 
-    ghoul_assert(isRunning(), "ThreadPool is not running");
+    assert_msg(isRunning(), "ThreadPool is not running");
 }
 
 void ThreadPool::stop(RunRemainingTasks runTasks, DetachThreads detachThreads) {
-    ghoul_assert(isRunning(), "ThreadPool must be running");
-    ghoul_assert(
+    assert_msg(isRunning(), "ThreadPool must be running");
+    assert_msg(
         !(runTasks && detachThreads),
         "Cannot run remaining tasks and detach threads"
     );
@@ -132,7 +131,7 @@ void ThreadPool::stop(RunRemainingTasks runTasks, DetachThreads detachThreads) {
         w = { .thread = nullptr, .shouldTerminate = nullptr };
     }
 
-    ghoul_assert(!isRunning(), "The ThreadPool is still running");
+    assert_msg(!isRunning(), "The ThreadPool is still running");
 }
 
 bool ThreadPool::isRunning() const {
@@ -140,7 +139,7 @@ bool ThreadPool::isRunning() const {
 }
 
 void ThreadPool::resize(int nThreads) {
-    ghoul_assert(nThreads > 0, "nThreads must be bigger than 0");
+    assert_msg(nThreads > 0, "nThreads must be bigger than 0");
 
     const int oldNThreads = size();
     if (oldNThreads <= nThreads) {
@@ -170,7 +169,7 @@ void ThreadPool::resize(int nThreads) {
         // Safe to delete because the threads are detached
         _workers.resize(nThreads);
     }
-    ghoul_assert(size() == nThreads, "The ThreadPool contains wrong number of workers");
+    assert_msg(size() == nThreads, "The ThreadPool contains wrong number of workers");
 }
 
 int ThreadPool::size() const {
@@ -190,7 +189,7 @@ void ThreadPool::clearRemainingTasks() {
         _taskQueue->pop();
     }
 
-    ghoul_assert(_taskQueue->isEmpty(), "Task queue is not empty");
+    assert_msg(_taskQueue->isEmpty(), "Task queue is not empty");
 }
 
 void ThreadPool::activateWorker(Worker& worker) {
@@ -341,4 +340,4 @@ int ThreadPool::TaskQueue::size() const {
     return static_cast<int>(_queue.size());
 }
 
-} // namespace ghoul
+} // namespace openspace

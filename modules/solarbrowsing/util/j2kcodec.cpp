@@ -33,6 +33,8 @@
 #include <vector>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "J2kCodec";
 
     using namespace std::string_view_literals;
@@ -68,7 +70,7 @@ namespace {
             case FileFormat::RAW: return ".raw";
             case FileFormat::TGA: return ".tga";
             case FileFormat::PNG: return ".png";
-            default: throw ghoul::MissingCaseException();
+            default: throw MissingCaseException();
         }
     }
 

@@ -41,11 +41,11 @@ namespace {
 namespace openspace {
 
 PathCurve::InsufficientPrecisionError::InsufficientPrecisionError(std::string error)
-    : ghoul::RuntimeError(std::move(error), "PathCurve")
+    : RuntimeError(std::move(error), "PathCurve")
 {}
 
 PathCurve::TooShortPathError::TooShortPathError(std::string error)
-    : ghoul::RuntimeError(std::move(error), "PathCurve")
+    : RuntimeError(std::move(error), "PathCurve")
 {}
 
 PathCurve::~PathCurve() {}
@@ -65,7 +65,7 @@ std::vector<glm::dvec3> PathCurve::points() const {
 
 void PathCurve::initializeParameterData() {
     _nSegments = static_cast<int>(_points.size() - 3);
-    ghoul_assert(_nSegments > 0, "Cannot have a curve with zero segments");
+    assert_msg(_nSegments > 0, "Cannot have a curve with zero segments");
 
     _curveParameterSteps.clear();
     _lengthSums.clear();
@@ -236,7 +236,7 @@ double PathCurve::arcLength(double limit) const {
 }
 
 double PathCurve::arcLength(double lowerLimit, double upperLimit) const {
-    return ghoul::integrateGaussianQuadrature<double>(
+    return integrateGaussianQuadrature<double>(
         lowerLimit,
         upperLimit,
         [this](double u) { return approximatedDerivative(u); }
@@ -245,7 +245,7 @@ double PathCurve::arcLength(double lowerLimit, double upperLimit) const {
 
 glm::dvec3 PathCurve::interpolate(double u) const {
     const double max = _curveParameterSteps.back();
-    ghoul_assert(u >= 0 && u <= max, "Interpolation variable must be in [0, _nSegments]");
+    assert_msg(u >= 0 && u <= max, "Interpolation variable must be in [0, _nSegments]");
 
     if (u <= 0.0) {
         return _points[1];
@@ -264,7 +264,7 @@ glm::dvec3 PathCurve::interpolate(double u) const {
     const double segmentDuration = (_curveParameterSteps[index + 1] - segmentStart);
     const double uSegment = (u - segmentStart) / segmentDuration;
 
-    return ghoul::interpolateCatmullRom(
+    return interpolateCatmullRom(
         uSegment,
         _points[index],
         _points[index + 1],
@@ -294,7 +294,7 @@ glm::dvec3 LinearCurve::interpolate(double u) const {
         return _points.back();
     }
 
-    return ghoul::interpolateLinear(u, _points.front(), _points.back());
+    return interpolateLinear(u, _points.front(), _points.back());
 }
 
 } // namespace openspace

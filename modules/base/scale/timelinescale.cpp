@@ -50,8 +50,7 @@ namespace {
     struct [[codegen::Dictionary(TimelineScale)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Scale objects.
-        std::map<std::string, ghoul::Dictionary> keyframes
-            [[codegen::reference("core_scale")]];
+        std::map<std::string, Dictionary> keyframes [[codegen::reference("core_scale")]];
 
         // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
         std::optional<bool> shouldInterpolate;
@@ -68,16 +67,16 @@ Documentation TimelineScale::Documentation() {
     );
 }
 
-TimelineScale::TimelineScale(const ghoul::Dictionary& dictionary)
+TimelineScale::TimelineScale(const Dictionary& dictionary)
     : Scale(dictionary)
     , _shouldInterpolate(ShouldInterpolateInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    for (const std::pair<const std::string, ghoul::Dictionary>& kf : p.keyframes) {
+    for (const std::pair<const std::string, Dictionary>& kf : p.keyframes) {
         const double t = Time::convertTime(kf.first);
 
-        ghoul::mm_unique_ptr<Scale> scale = Scale::createFromDictionary(kf.second);
+        mm_unique_ptr<Scale> scale = Scale::createFromDictionary(kf.second);
         scale->setIdentifier(makeIdentifier(kf.first));
         addPropertySubOwner(scale.get());
         _timeline.addKeyframe(t, std::move(scale));
@@ -89,14 +88,14 @@ TimelineScale::TimelineScale(const ghoul::Dictionary& dictionary)
 
 void TimelineScale::initialize() {
     Scale::initialize();
-    for (const Keyframe<ghoul::mm_unique_ptr<Scale>>& kf : _timeline.keyframes()) {
+    for (const Keyframe<mm_unique_ptr<Scale>>& kf : _timeline.keyframes()) {
         kf.data->initialize();
     }
 }
 
 void TimelineScale::update(const UpdateData& data) {
     const double now = data.time.j2000Seconds();
-    using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Scale>>*;
+    using KeyframePointer = const Keyframe<mm_unique_ptr<Scale>>*;
 
     if (KeyframePointer prev = _timeline.lastKeyframeBefore(now, true);  prev) {
         prev->data->update(data);
@@ -110,7 +109,7 @@ void TimelineScale::update(const UpdateData& data) {
 
 glm::dvec3 TimelineScale::scaleValue(const UpdateData& data) const {
     const double now = data.time.j2000Seconds();
-    using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Scale>>*;
+    using KeyframePointer = const Keyframe<mm_unique_ptr<Scale>>*;
 
     KeyframePointer prev = _timeline.lastKeyframeBefore(now, true);
     KeyframePointer next = _timeline.firstKeyframeAfter(now, true);

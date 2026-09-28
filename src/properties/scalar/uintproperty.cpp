@@ -44,23 +44,23 @@ std::string_view UIntProperty::className() const {
     return "UIntProperty";
 }
 
-ghoul::lua::LuaTypes UIntProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes UIntProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void UIntProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 unsigned int UIntProperty::toValue(lua_State* state) const {
-    if (ghoul::lua::hasValue<double>(state)) {
-        return static_cast<unsigned int>(ghoul::lua::value<double>(state));
+    if (lua::hasValue<double>(state)) {
+        return static_cast<unsigned int>(lua::value<double>(state));
     }
-    else if (ghoul::lua::hasValue<unsigned int>(state)) {
-        return ghoul::lua::value<unsigned int>(state);
+    else if (lua::hasValue<unsigned int>(state)) {
+        return lua::value<unsigned int>(state);
     }
     else {
-        throw ghoul::RuntimeError("Error extracting value in UIntProperty");
+        throw RuntimeError("Error extracting value in UIntProperty");
     }
 }
 

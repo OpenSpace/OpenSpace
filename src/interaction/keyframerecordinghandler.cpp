@@ -101,7 +101,7 @@ void KeyframeRecordingHandler::addScriptKeyframe(double sequenceTime, std::strin
 
 void KeyframeRecordingHandler::removeKeyframe(int index) {
     if (index < 0 || static_cast<size_t>(index) >(_timeline.entries.size() - 1)) {
-        throw ghoul::RuntimeError(std::format("Index {} out of range", index));
+        throw RuntimeError(std::format("Index {} out of range", index));
     }
     _timeline.entries.erase(_timeline.entries.begin() + index);
 }
@@ -109,12 +109,12 @@ void KeyframeRecordingHandler::removeKeyframe(int index) {
 void KeyframeRecordingHandler::updateKeyframe(int index) {
     using namespace datamessagestructures;
     if (index < 0 || static_cast<size_t>(index) > (_timeline.entries.size() - 1)) {
-        throw ghoul::RuntimeError(std::format("Index {} out of range", index));
+        throw RuntimeError(std::format("Index {} out of range", index));
     }
 
     SessionRecording::Entry& entry = _timeline.entries[index];
     if (!std::holds_alternative<SessionRecording::Entry::Camera>(entry.value)) {
-        throw ghoul::RuntimeError(std::format("Index {} is not a camera frame", index));
+        throw RuntimeError(std::format("Index {} is not a camera frame", index));
     }
     auto& camera = std::get<SessionRecording::Entry::Camera>(entry.value);
     CameraKeyframe kf = datamessagestructures::generateCameraKeyframe();
@@ -129,7 +129,7 @@ void KeyframeRecordingHandler::updateKeyframe(int index) {
 
 void KeyframeRecordingHandler::moveKeyframe(int index, double sequenceTime) {
     if (index < 0 || static_cast<size_t>(index) > (_timeline.entries.size() - 1)) {
-        throw ghoul::RuntimeError(std::format("Index {} out of range", index));
+        throw RuntimeError(std::format("Index {} out of range", index));
     }
 
     _timeline.entries[index].timestamp = sequenceTime;
@@ -144,7 +144,7 @@ void KeyframeRecordingHandler::moveKeyframe(int index, double sequenceTime) {
 
 void KeyframeRecordingHandler::saveSequence(std::filesystem::path filename) const {
     if (filename.empty()) {
-        throw ghoul::RuntimeError("Failed to save file, reason: Invalid empty file name");
+        throw RuntimeError("Failed to save file, reason: Invalid empty file name");
     }
 
     saveSessionRecording(filename, _timeline, DataMode::Ascii);
@@ -162,7 +162,7 @@ bool KeyframeRecordingHandler::hasKeyframeRecording() const {
     return !_timeline.entries.empty();
 }
 
-std::vector<ghoul::Dictionary> KeyframeRecordingHandler::keyframes() const {
+std::vector<Dictionary> KeyframeRecordingHandler::keyframes() const {
     return sessionRecordingToDictionary(_timeline);
 }
 

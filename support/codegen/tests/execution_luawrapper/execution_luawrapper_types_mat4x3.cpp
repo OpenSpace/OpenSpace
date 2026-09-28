@@ -32,7 +32,7 @@
 #include <array>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     [[codegen::luawrap]] void funcMat4x3(glm::mat4x3 arg) {
@@ -277,7 +277,7 @@ namespace {
 
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncMat4x3;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3;
     CHECK(func.name == "funcMat4x3");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -288,7 +288,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3", "[Execution][LuaWrapper]") 
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(
+    lua::push(
         state,
         glm::mat4x3(
             1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f,
@@ -305,7 +305,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncMat4x3Defaulted;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3Defaulted;
     CHECK(func.name == "funcMat4x3Defaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -321,7 +321,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(
+    lua::push(
         state,
         glm::mat4x3(
             1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f,
@@ -338,7 +338,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncMat4x3Defaulted;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3Defaulted;
     CHECK(func.name == "funcMat4x3Defaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -364,7 +364,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncMat4x3DefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3DefaultedCheck;
     CHECK(func.name == "funcMat4x3DefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -382,7 +382,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(
+    lua::push(
         state,
         false,
         glm::mat4x3(
@@ -400,7 +400,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncMat4x3DefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3DefaultedCheck;
     CHECK(func.name == "funcMat4x3DefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -418,14 +418,14 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, true);
+    lua::push(state, true);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Map", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncMat4x3Map;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3Map;
     CHECK(func.name == "funcMat4x3Map");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -437,7 +437,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Map", "[Execution][LuaWrapper]
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(
+    lua::push(
         state,
         "key1",
         glm::mat4x3(
@@ -446,7 +446,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Map", "[Execution][LuaWrapper]
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         "key2",
         glm::mat4x3(
@@ -455,7 +455,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Map", "[Execution][LuaWrapper]
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         "key3",
         glm::mat4x3(
@@ -470,7 +470,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Map", "[Execution][LuaWrapper]
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Optional", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncMat4x3Optional;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3Optional;
     CHECK(func.name == "funcMat4x3Optional");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -481,7 +481,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Optional", "[Execution][LuaWra
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(
+    lua::push(
         state,
         glm::mat4x3(
             1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f,
@@ -498,7 +498,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncMat4x3OptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3OptionalNullopt;
     CHECK(func.name == "funcMat4x3OptionalNullopt");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -515,7 +515,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Vector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncMat4x3Vector;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3Vector;
     CHECK(func.name == "funcMat4x3Vector");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -527,7 +527,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Vector", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(
+    lua::push(
         state,
         1,
         glm::mat4x3(
@@ -536,7 +536,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Vector", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         2,
         glm::mat4x3(
@@ -545,7 +545,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Vector", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         3,
         glm::mat4x3(
@@ -560,7 +560,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Vector", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array1", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncMat4x3Array1;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3Array1;
     CHECK(func.name == "funcMat4x3Array1");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -572,7 +572,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array1", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(
+    lua::push(
         state,
         1,
         glm::mat4x3(
@@ -586,7 +586,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array1", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array2", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncMat4x3Array2;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3Array2;
     CHECK(func.name == "funcMat4x3Array2");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -598,7 +598,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array2", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(
+    lua::push(
         state,
         1,
         glm::mat4x3(
@@ -606,7 +606,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array2", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         2,
         glm::mat4x3(
@@ -615,7 +615,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array2", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         3,
         glm::mat4x3(
@@ -624,7 +624,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array2", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         4,
         glm::mat4x3(
@@ -633,7 +633,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array2", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         5,
         glm::mat4x3(
@@ -648,7 +648,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array2", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncMat4x3Array3;
+    LuaLibrary::Function func = codegen::lua::FuncMat4x3Array3;
     CHECK(func.name == "funcMat4x3Array3");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -660,7 +660,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapp
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(
+    lua::push(
         state,
         1,
         glm::mat4x3(
@@ -668,7 +668,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         2,
         glm::mat4x3(
@@ -677,7 +677,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         3,
         glm::mat4x3(
@@ -686,7 +686,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         4,
         glm::mat4x3(
@@ -695,7 +695,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         5,
         glm::mat4x3(
@@ -704,7 +704,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         6,
         glm::mat4x3(
@@ -713,7 +713,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         7,
         glm::mat4x3(
@@ -722,7 +722,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         8,
         glm::mat4x3(
@@ -731,7 +731,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         9,
         glm::mat4x3(
@@ -740,7 +740,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapp
         )
     );
     lua_rawset(state, -3);
-    ghoul::lua::push(
+    lua::push(
         state,
         10,
         glm::mat4x3(
@@ -755,7 +755,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  mat4x3Array3", "[Execution][LuaWrapp
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  mat4x3", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnMat4x3;
+    LuaLibrary::Function func = codegen::lua::ReturnMat4x3;
     CHECK(func.name == "returnMat4x3");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "mat4x3");
@@ -766,7 +766,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  mat4x3", "[Execution][LuaWrapper]") {
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    glm::mat4x3 val = ghoul::lua::value<glm::mat4x3>(state);
+    glm::mat4x3 val = lua::value<glm::mat4x3>(state);
     CHECK(
         val ==
         glm::mat4x3(
@@ -778,7 +778,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  mat4x3", "[Execution][LuaWrapper]") {
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  mat4x3Map", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnMat4x3Map;
+    LuaLibrary::Function func = codegen::lua::ReturnMat4x3Map;
     CHECK(func.name == "returnMat4x3Map");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String -> mat4x3");
@@ -790,7 +790,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  mat4x3Map", "[Execution][LuaWrapper]") 
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     std::map<std::string, glm::mat4x3> val =
-        ghoul::lua::value<std::map<std::string, glm::mat4x3>>(state);
+        lua::value<std::map<std::string, glm::mat4x3>>(state);
     CHECK(val.size() == 3);
     REQUIRE(val.find("key1") != val.end());
     CHECK(
@@ -824,7 +824,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnMat4x3Optional;
+    LuaLibrary::Function func = codegen::lua::ReturnMat4x3Optional;
     CHECK(func.name == "returnMat4x3Optional");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "mat4x3?");
@@ -835,7 +835,7 @@ TEST_CASE(
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    glm::mat4x3 val = ghoul::lua::value<glm::mat4x3>(state);
+    glm::mat4x3 val = lua::value<glm::mat4x3>(state);
     CHECK(
         val ==
         glm::mat4x3(
@@ -851,7 +851,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnMat4x3OptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::ReturnMat4x3OptionalNullopt;
     CHECK(func.name == "returnMat4x3OptionalNullopt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "mat4x3?");
@@ -866,7 +866,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  mat4x3Vector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnMat4x3Vector;
+    LuaLibrary::Function func = codegen::lua::ReturnMat4x3Vector;
     CHECK(func.name == "returnMat4x3Vector");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "mat4x3[]");
@@ -877,7 +877,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  mat4x3Vector", "[Execution][LuaWrapper]
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::vector<glm::mat4x3> val = ghoul::lua::value<std::vector<glm::mat4x3>>(state);
+    std::vector<glm::mat4x3> val = lua::value<std::vector<glm::mat4x3>>(state);
     REQUIRE(val.size() == 3);
     CHECK(
         val[0] ==

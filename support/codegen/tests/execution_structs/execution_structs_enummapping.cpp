@@ -28,6 +28,8 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/misc/dictionary.h>
 
+using namespace openspace;
+
 namespace {
     enum class MappedEnumA {
         Value1,
@@ -52,7 +54,7 @@ namespace {
 TEST_CASE("Execution/Structs/EnumMapping:  1", "[Execution][Structs]") {
     using namespace std::string_literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("EnumAValue", "Value1"s);
 
     const Parameters p = codegen::bake<Parameters>(d);
@@ -65,7 +67,7 @@ TEST_CASE("Execution/Structs/EnumMapping:  1", "[Execution][Structs]") {
 TEST_CASE("Execution/Structs/EnumMapping:  2", "[Execution][Structs]") {
     using namespace std::string_literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("EnumAValue", "value2"s);
 
     const Parameters p = codegen::bake<Parameters>(d);
@@ -78,7 +80,7 @@ TEST_CASE("Execution/Structs/EnumMapping:  2", "[Execution][Structs]") {
 TEST_CASE("Execution/Structs/EnumMapping:  3", "[Execution][Structs]") {
     using namespace std::string_literals;
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("EnumAValue", "Value3"s);
 
     const Parameters p = codegen::bake<Parameters>(d);

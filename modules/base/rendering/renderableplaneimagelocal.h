@@ -34,7 +34,7 @@ namespace openspace {
 
 class RenderablePlaneImageLocal : public RenderablePlane {
 public:
-    explicit RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneImageLocal(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -44,7 +44,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
 private:
     void loadTexture();
@@ -54,11 +54,11 @@ private:
     StringProperty _texturePath;
     StringProperty _rightTexturePath;
 
-    ghoul::opengl::Texture* _texture = nullptr;
-    ghoul::opengl::Texture* _rightTexture = nullptr;
+    opengl::Texture* _texture = nullptr;
+    opengl::Texture* _rightTexture = nullptr;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
-    std::unique_ptr<ghoul::filesystem::File> _rightTextureFile;
+    std::unique_ptr<filesystem::File> _textureFile;
+    std::unique_ptr<filesystem::File> _rightTextureFile;
 
     bool _isLoadingLazily = false;
     bool _shouldUnloadTexture = false;

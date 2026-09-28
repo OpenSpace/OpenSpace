@@ -33,18 +33,16 @@ namespace {
  * Adds a new dashboard item to an existing SceenSpaceDashboard.
  */
 [[codegen::luawrap]] void addDashboardItemToScreenSpace(std::string identifier,
-                                                        ghoul::Dictionary dashboard)
+                                                        Dictionary dashboard)
 {
     ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(identifier);
     if (!ssr) {
-        throw ghoul::lua::LuaError("Provided name is not a ScreenSpace item");
+        throw lua::LuaError("Provided name is not a ScreenSpace item");
     }
 
     ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
     if (!dash) {
-        throw ghoul::lua::LuaError(
-            "Provided name is a ScreenSpace item but not a dashboard"
-        );
+        throw lua::LuaError("Provided name is a ScreenSpace item but not a dashboard");
     }
 
     dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(dashboard));
@@ -56,12 +54,12 @@ namespace {
 [[codegen::luawrap]] void removeDashboardItemsFromScreenSpace(std::string identifier) {
     ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(identifier);
     if (!ssr) {
-        throw ghoul::lua::LuaError("Provided identifier is not a ScreenSpace item");
+        throw lua::LuaError("Provided identifier is not a ScreenSpace item");
     }
 
     ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
     if (!dash) {
-        throw ghoul::lua::LuaError(
+        throw lua::LuaError(
             "Provided identifier is a ScreenSpace item but not a dashboard"
         );
     }

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,11 +29,13 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     // The working principle is as follows: There are two methods which can create
     // subclasses, 'create' and 'createWithDictionary'. The first one will create the
     // subclass using the default constructor while the second can use the default
-    // constructor or a constructor using a ghoul::Dictionary as an input. Since both
-    // methods adhere to the same function prototype 'BaseClass* (*FactoryFuncPtr)(bool,
+    // constructor or a constructor using a Dictionary as an input. Since both methods
+    // adhere to the same function prototype 'BaseClass* (*FactoryFuncPtr)(bool,
     // const Dictionary&)', they can be stored in the same TemplateFactory's '_map'
     // without the TemplateFactory knowing which of the two functions it is. If C++ would
     // support partial template specialization, two separate methods wouldn't be necessary
@@ -53,14 +54,14 @@ namespace {
      * Create Class using only the default constructor.
      */
     template <typename BaseClass, typename Class>
-    BaseClass* createDefault(bool useDictionary, const ghoul::Dictionary& dict,
+    BaseClass* createDefault(bool useDictionary, const openspace::Dictionary& dict,
                              pmr::memory_resource* pool)
     {
         // We don't have a dictionary constructor, but the user tried to create it with a
         // Dictionary
         if (useDictionary || dict.size() != 0) {
             std::string className = typeid(Class).name();
-            throw ghoul::TemplateConstructionError(std::format(
+            throw TemplateConstructionError(std::format(
                 "Class '{}' does not provide a constructor receiving a Dictionary",
                 className
             ));
@@ -80,7 +81,7 @@ namespace {
      */
     template <typename BaseClass, typename Class>
     BaseClass* createDefaultAndDictionary(bool useDictionary,
-                                          const ghoul::Dictionary& dict,
+                                          const openspace::Dictionary& dict,
                                           pmr::memory_resource* pool)
     {
         if (useDictionary) {
@@ -107,12 +108,12 @@ namespace {
      * Create Class using only the Dictionary constructor.
      */
     template <typename BaseClass, typename Class>
-    BaseClass* createDictionary(bool useDictionary, const ghoul::Dictionary& dict,
+    BaseClass* createDictionary(bool useDictionary, const openspace::Dictionary& dict,
                                 pmr::memory_resource* pool)
     {
         if (!useDictionary) {
             std::string className = typeid(Class).name();
-            throw ghoul::TemplateConstructionError(std::format(
+            throw TemplateConstructionError(std::format(
                 "Class '{}' does only provide a Dictionary constructor but was called "
                 "using the default constructor", className
             ));
@@ -129,7 +130,9 @@ namespace {
     template <typename BaseClass, typename Class, int Constructor>
     struct CreateHelper {
         using FactoryFuncPtr = BaseClass* (*)(
-            bool useDictionary, const ghoul::Dictionary& dict, pmr::memory_resource* pool
+            bool useDictionary,
+            const openspace::Dictionary& dict,
+            pmr::memory_resource* pool
         );
         FactoryFuncPtr createFunction();
     };
@@ -137,7 +140,9 @@ namespace {
     template <typename BaseClass, typename Class>
     struct CreateHelper<BaseClass, Class, DefaultConstructor | DictionaryConstructor> {
         using FactoryFuncPtr = BaseClass* (*)(
-            bool useDictionary, const ghoul::Dictionary& dict, pmr::memory_resource* pool
+            bool useDictionary,
+            const openspace::Dictionary& dict,
+            pmr::memory_resource* pool
         );
         FactoryFuncPtr createFunction() {
             return &createDefaultAndDictionary<BaseClass, Class>;
@@ -147,7 +152,9 @@ namespace {
     template <typename BaseClass, typename Class>
     struct CreateHelper<BaseClass, Class, DefaultConstructor> {
         using FactoryFuncPtr = BaseClass* (*)(
-            bool useDictionary, const ghoul::Dictionary& dict, pmr::memory_resource* pool
+            bool useDictionary,
+            const openspace::Dictionary& dict,
+            pmr::memory_resource* pool
         );
         FactoryFuncPtr createFunction() {
             return &createDefault<BaseClass, Class>;
@@ -157,7 +164,9 @@ namespace {
     template <typename BaseClass, typename Class>
     struct CreateHelper<BaseClass, Class, DictionaryConstructor> {
         using FactoryFuncPtr = BaseClass* (*)(
-            bool useDictionary, const ghoul::Dictionary& dict, pmr::memory_resource* pool
+            bool useDictionary,
+            const openspace::Dictionary& dict,
+            pmr::memory_resource* pool
         );
         FactoryFuncPtr createFunction() {
             return &createDictionary<BaseClass, Class>;
@@ -165,13 +174,13 @@ namespace {
     };
 } // namespace
 
-namespace ghoul {
+namespace openspace {
 
 template <typename BaseClass>
 BaseClass* TemplateFactory<BaseClass>::create(std::string_view className,
                                               pmr::memory_resource* pool) const
 {
-    ghoul_assert(!className.empty(), "Classname must not be empty");
+    assert_msg(!className.empty(), "Classname must not be empty");
 
     const auto it = _map.find(className);
     if (it == _map.cend()) {
@@ -189,7 +198,7 @@ BaseClass* TemplateFactory<BaseClass>::create(std::string_view className,
                                               const Dictionary& dictionary,
                                               pmr::memory_resource* pool) const
 {
-    ghoul_assert(!className.empty(), "Classname must not be empty");
+    assert_msg(!className.empty(), "Classname must not be empty");
 
     const auto it = _map.find(className);
     if (it == _map.end()) {
@@ -212,11 +221,11 @@ void TemplateFactory<BaseClass>::registerClass(std::string className) {
     );
     static_assert(
         std::is_default_constructible<Class>::value |
-        std::is_constructible<Class, const Dictionary&>::value,
+        std::is_constructible<Class, const openspace::Dictionary&>::value,
         "Class needs a public default or Dictionary constructor"
     );
 
-    ghoul_assert(!className.empty(), "Classname must not be empty");
+    assert_msg(!className.empty(), "Classname must not be empty");
 
     // Use the correct CreateHelper struct to create a function pointer that we can store
     // for later usage. std::is_constructible<>::value returns a boolean that checks at
@@ -235,8 +244,8 @@ template <typename BaseClass>
 void TemplateFactory<BaseClass>::registerClass(std::string className,
                                                FactoryFunction factoryFunction)
 {
-    ghoul_assert(!className.empty(), "Classname must not be empty");
-    ghoul_assert(factoryFunction, "Factory function must not be nullptr");
+    assert_msg(!className.empty(), "Classname must not be empty");
+    assert_msg(factoryFunction, "Factory function must not be nullptr");
 
     if (_map.find(className) != _map.end()) {
         throw TemplateFactoryError(std::format(
@@ -249,7 +258,7 @@ void TemplateFactory<BaseClass>::registerClass(std::string className,
 
 template <typename BaseClass>
 bool TemplateFactory<BaseClass>::hasClass(const std::string& className) const {
-    ghoul_assert(!className.empty(), "Classname must not be empty");
+    assert_msg(!className.empty(), "Classname must not be empty");
     return _map.find(className) != _map.end();
 }
 
@@ -268,4 +277,4 @@ const std::type_info& TemplateFactory<BaseClass>::baseClassType() const {
     return typeid(BaseClass);
 }
 
-} // namespace ghoul
+} // namespace openspace

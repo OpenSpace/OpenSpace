@@ -43,16 +43,16 @@ std::string_view Mat4Property::className() const {
     return "Mat4Property";
 }
 
-ghoul::lua::LuaTypes Mat4Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes Mat4Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void Mat4Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::mat4 Mat4Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::mat4>(state);
+    return lua::value<glm::mat4>(state);
 }
 
 std::string Mat4Property::stringValue() const {

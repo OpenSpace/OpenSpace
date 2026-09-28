@@ -45,8 +45,7 @@ class RenderableGlobe;
 struct GeoJsonProperties : public PropertyOwner {
     GeoJsonProperties();
 
-    void createFromDictionary(const ghoul::Dictionary& dictionary,
-        const RenderableGlobe& globe);
+    void createFromDictionary(const Dictionary& dictionary, const RenderableGlobe& globe);
 
     static openspace::Documentation Documentation();
 

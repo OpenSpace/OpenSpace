@@ -107,7 +107,7 @@ Documentation RenderableDistanceLabel::Documentation() {
     );
 }
 
-RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
+RenderableDistanceLabel::RenderableDistanceLabel(const Dictionary& dictionary)
     : RenderableLabel(dictionary)
     , _nodelineId(NodeLineInfo)
     , _distanceUnit(DistanceUnitInfo)

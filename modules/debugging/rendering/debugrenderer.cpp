@@ -52,7 +52,7 @@ DebugRenderer::DebugRenderer()  {
     );
 }
 
-DebugRenderer::DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject)
+DebugRenderer::DebugRenderer(std::unique_ptr<opengl::ProgramObject> programObject)
     : _programObject(std::move(programObject))
 {}
 
@@ -61,7 +61,7 @@ const DebugRenderer& DebugRenderer::ref() {
         try {
             _reference = new DebugRenderer();
         }
-        catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
+        catch (const opengl::ShaderObject::ShaderCompileError& e) {
             LERROR(e.what());
         }
     }
@@ -108,7 +108,7 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
 void DebugRenderer::renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
                                    const glm::vec4& rgba) const
 {
-    ghoul_assert(clippingSpaceBoxCorners.size() == 8, "Box must have 8 vertices");
+    assert_msg(clippingSpaceBoxCorners.size() == 8, "Box must have 8 vertices");
 
     const Vertices& V = clippingSpaceBoxCorners;
 
@@ -142,7 +142,7 @@ void DebugRenderer::renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
 void DebugRenderer::renderBoxEdges(const Vertices& clippingSpaceBoxCorners,
                                    const glm::vec4& rgba) const
 {
-    ghoul_assert(clippingSpaceBoxCorners.size() == 8, "Box must have 8 vertices");
+    assert_msg(clippingSpaceBoxCorners.size() == 8, "Box must have 8 vertices");
 
     const Vertices& v = clippingSpaceBoxCorners;
 

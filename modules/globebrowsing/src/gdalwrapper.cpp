@@ -87,7 +87,7 @@ void GdalWrapper::destroy() {
 }
 
 GdalWrapper& GdalWrapper::ref() {
-    ghoul_assert(_singleton, "GdalWrapper not created");
+    assert_msg(_singleton, "GdalWrapper not created");
     return *_singleton;
 }
 
@@ -139,7 +139,7 @@ void GdalWrapper::setGdalProxyConfiguration() {
         const std::string user = global::configuration->httpProxy.user;
         const std::string password = global::configuration->httpProxy.password;
         std::string auth = global::configuration->httpProxy.authentication;
-        auth = ghoul::toUpperCase(auth);
+        auth = toUpperCase(auth);
 
         const std::string proxy = address + ":" + std::to_string(port);
         CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +26,7 @@
 
 #include <openspace/format.h>
 #include <openspace/logging/logmanager.h>
-#include <openspace/lua/ghoul_lua.h>
+#include <openspace/lua/lua.h>
 #include <openspace/misc/dictionary.h>
 #include <openspace/misc/stringhelper.h>
 #include <cstring>
@@ -35,7 +34,7 @@
 #include <vector>
 
 namespace {
-    using namespace ghoul::lua;
+    using namespace openspace::lua;
 
     lua_State* _state = nullptr;
     constexpr int KeyTableIndex = -2;
@@ -122,7 +121,7 @@ namespace {
     )";
 } // namespace
 
-namespace ghoul::lua {
+namespace openspace::lua {
 
 LuaError::LuaError(std::string msg)
     : RuntimeError(std::move(msg))
@@ -151,7 +150,7 @@ LuaExecutionException::LuaExecutionException(std::string error,
 {}
 
 const char* errorLocation(lua_State* state) {
-    ghoul_assert(state, "State must not be empty");
+    assert_msg(state, "State must not be empty");
 
     luaL_where(state, 1);
     const char* result = lua_tostring(state, -1);
@@ -160,12 +159,12 @@ const char* errorLocation(lua_State* state) {
 }
 
 int luaError(lua_State* state, const std::string& message) {
-    ghoul_assert(state, "State must not be empty");
+    assert_msg(state, "State must not be empty");
     return luaL_error(state, message.c_str());
 }
 
 std::string luaValueToString(lua_State* state, int location) {
-    ghoul_assert(state, "State must not be nullptr");
+    assert_msg(state, "State must not be nullptr");
 
     const int type = lua_type(state, location);
     switch (type) {
@@ -178,8 +177,8 @@ std::string luaValueToString(lua_State* state, int location) {
 }
 
 std::string luaTableToString(lua_State* state, int tableLocation) {
-    ghoul_assert(state, "State must not be nullptr");
-    ghoul_assert(lua_istable(state, tableLocation), "Lua object is not a table");
+    assert_msg(state, "State must not be nullptr");
+    assert_msg(lua_istable(state, tableLocation), "Lua object is not a table");
 
     lua_pushvalue(state, tableLocation);
     lua_pushnil(state);
@@ -210,7 +209,7 @@ std::string luaTableToString(lua_State* state, int tableLocation) {
 }
 
 std::string stackInformation(lua_State* state) {
-    ghoul_assert(state, "State must not be nullptr");
+    assert_msg(state, "State must not be nullptr");
 
     const int top = lua_gettop(state);
     if (top == 0) {
@@ -252,8 +251,8 @@ std::string stackInformation(lua_State* state) {
 void loadDictionaryFromFile(const std::filesystem::path& filename, Dictionary& dictionary,
                             lua_State* state)
 {
-    ghoul_assert(!filename.empty(), "filename must not be empty");
-    ghoul_assert(
+    assert_msg(!filename.empty(), "filename must not be empty");
+    assert_msg(
         std::filesystem::is_regular_file(filename),
         "filename must be an existing file"
     );
@@ -297,7 +296,7 @@ Dictionary loadDictionaryFromFile(const std::filesystem::path& filename, lua_Sta
 void loadDictionaryFromString(const std::string& script, Dictionary& dictionary,
                               lua_State* state)
 {
-    ghoul_assert(!script.empty(), "Script must not be empty");
+    assert_msg(!script.empty(), "Script must not be empty");
 
     if (!state) {
         state = staticLuaState();
@@ -330,7 +329,7 @@ void loadDictionaryFromString(const std::string& script, Dictionary& dictionary,
 void loadArrayDictionaryFromString(const std::string& script, Dictionary& dictionary,
                                    lua_State* state)
 {
-    ghoul_assert(!script.empty(), "Script must not be empty");
+    assert_msg(!script.empty(), "Script must not be empty");
 
     if (!state) {
         state = staticLuaState();
@@ -377,7 +376,7 @@ void luaDictionaryFromState(lua_State* state, Dictionary& dictionary,
         Array = 5       // 101
     };
 
-    ghoul_assert(state, "State must not be nullptr");
+    assert_msg(state, "State must not be nullptr");
 
     TableType type = TableType::Undefined;
 
@@ -488,7 +487,7 @@ void luaDictionaryFromState(lua_State* state, Dictionary& dictionary,
     // @CLEANUP:  This function seems to leak stack space and a lua_settop(state,0)
     //            crashes --- abock(2018-02-15)
     //            Affected: navigationhandler_lua.inl::setCameraState
-    //ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");
+    //assert_msg(lua_gettop(state) == 0, "Incorrect number of items left on stack");
 }
 
 Dictionary luaDictionaryFromState(lua_State* state, int location) {
@@ -560,7 +559,7 @@ lua_State* createNewLuaState(bool sandboxed, bool loadStandardLibraries, bool st
     }
 
     if (strictState) {
-        ghoul_assert(
+        assert_msg(
             loadStandardLibraries,
             "If requesting strict state, the standard libraries must be loaded"
         );
@@ -587,14 +586,14 @@ lua_State* createNewLuaState(bool sandboxed, bool loadStandardLibraries, bool st
 }
 
 void destroyLuaState(lua_State* state) {
-    ghoul_assert(state, "State must not be nullptr");
+    assert_msg(state, "State must not be nullptr");
     lua_close(state);
 }
 
 void runScriptFile(lua_State* state, const std::filesystem::path& filename) {
-    ghoul_assert(state, "State must not be nullptr");
-    ghoul_assert(!filename.empty(), "filename must not be empty");
-    ghoul_assert(
+    assert_msg(state, "State must not be nullptr");
+    assert_msg(!filename.empty(), "filename must not be empty");
+    assert_msg(
         std::filesystem::is_regular_file(filename),
         "Filename must be a file that exists"
     );
@@ -614,8 +613,8 @@ void runScriptFile(lua_State* state, const std::filesystem::path& filename) {
 }
 
 void runScript(lua_State* state, std::string_view script) {
-    ghoul_assert(state, "State must not be nullptr");
-    ghoul_assert(!script.empty(), "Script must not be empty");
+    assert_msg(state, "State must not be nullptr");
+    assert_msg(!script.empty(), "Script must not be empty");
 
     const int load = luaL_loadbuffer(state, script.data(), script.size(), script.data());
     if (load != LUA_OK) {
@@ -630,7 +629,7 @@ void runScript(lua_State* state, std::string_view script) {
             throw LuaExecutionException(std::move(error));
         }
         else {
-            std::string stack = ghoul::lua::stackInformation(state);
+            std::string stack = lua::stackInformation(state);
             throw LuaExecutionException(std::format(
                 "Fatal error in Lua execution. Return value not an error message.\n{}",
                 stack
@@ -704,7 +703,7 @@ void verifyStackSize(lua_State* L, int expected) {
         LINFOC("Stack", stackInformation(L));
     }
 
-    ghoul_assert(
+    assert_msg(
         size == expected,
         std::format(
             "Incorrect number of items left on stack. Expected {} got {}", expected, size
@@ -726,4 +725,4 @@ namespace internal {
     }
 } // namespace internal
 
-} // namespace ghoul::lua
+} // namespace openspace::lua

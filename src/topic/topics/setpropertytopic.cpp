@@ -123,7 +123,7 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
         LERROR("Could not set property -- key or value is missing in payload");
         LERROR(e.what());
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERROR("Could not set property -- runtime error:");
         LERROR(e.what());
     }

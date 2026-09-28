@@ -34,7 +34,7 @@
 namespace openspace {
 
 KeyWithModifier stringToKey(const std::string& str) {
-    std::vector<std::string> tokens = ghoul::tokenizeString(str, '+');
+    std::vector<std::string> tokens = tokenizeString(str, '+');
     // "Keypad +" will tokenize into "Keypad " + ""
     if (tokens.size() == 2 && tokens[0] == "Keypad " && tokens[1].empty()) {
         tokens = { std::string("Keypad +") };
@@ -42,7 +42,7 @@ KeyWithModifier stringToKey(const std::string& str) {
 
     std::vector<std::string> originalTokens = tokens;
     for (std::string& t : tokens) {
-        t = ghoul::toUpperCase(t);
+        t = toUpperCase(t);
     }
 
     // Default is unknown
@@ -58,7 +58,7 @@ KeyWithModifier stringToKey(const std::string& str) {
         }
     }
     if (key == Key::Unknown) {
-        throw ghoul::RuntimeError(std::format("Could not find key for '{}'", keyName));
+        throw RuntimeError(std::format("Could not find key for '{}'", keyName));
     }
 
     KeyModifier m = KeyModifier::None;
@@ -76,7 +76,7 @@ KeyWithModifier stringToKey(const std::string& str) {
                 }
             }
             if (!found) {
-                throw ghoul::RuntimeError(std::format("Unknown modifier key '{}'", s));
+                throw RuntimeError(std::format("Unknown modifier key '{}'", s));
             }
         }
     );
@@ -84,8 +84,8 @@ KeyWithModifier stringToKey(const std::string& str) {
     return { key, m };
 }
 
-// Returns the 'identifier' of the key (compared to the ghoul::to_string which returns the
-// 'name' of the key
+// Returns the 'identifier' of the key (compared to the to_string which returns the 'name'
+// of the key
 std::string keyToString(KeyWithModifier keyWithModifier) {
     std::string modifier;
     if (keyWithModifier.modifier != KeyModifier::None) {
@@ -111,49 +111,48 @@ std::string keyToString(KeyWithModifier keyWithModifier) {
     // The modifier has a residual + at the end that we use here
     return modifier + key;
 }
+
+template <>
+std::string to_string(const openspace::Key& value) {
+    for (const openspace::KeyInfo& ki : openspace::KeyInfos) {
+        if (ki.key == value) {
+            return std::string(ki.name);
+        }
+    }
+
+    throw MissingCaseException();
+}
+
+template <>
+std::string to_string(const openspace::KeyModifier& value) {
+    if (value == openspace::KeyModifier::None) {
+        return "";
+    }
+
+    std::string result;
+    for (const openspace::KeyModifierInfo& kmi : openspace::KeyModifierInfos) {
+        // No need for an extra check for the empty modifier since that is mapped to
+        // 0, meaning that the `hasKeyModifier` will always fail for it since it
+        // checks internally against != 0
+
+        if (hasKeyModifier(value, kmi.modifier)) {
+            result += std::format("{}+", kmi.name);
+        }
+
+    }
+    // The last addition has added an additional '+' that we should remove
+    result.pop_back();
+    return result;
+}
+
+template <>
+std::string to_string(const openspace::KeyWithModifier& value) {
+    if (value.modifier == openspace::KeyModifier::None) {
+        return to_string(value.key);
+    }
+    else {
+        return std::format("{}+{}", to_string(value.modifier), to_string(value.key));
+    }
+}
+
 } // namespace openspace
-
-namespace ghoul {
-    template <>
-    std::string to_string(const openspace::Key& value) {
-        for (const openspace::KeyInfo& ki : openspace::KeyInfos) {
-            if (ki.key == value) {
-                return std::string(ki.name);
-            }
-        }
-
-        throw ghoul::MissingCaseException();
-    }
-
-    template <>
-    std::string to_string(const openspace::KeyModifier& value) {
-        if (value == openspace::KeyModifier::None) {
-            return "";
-        }
-
-        std::string result;
-        for (const openspace::KeyModifierInfo& kmi : openspace::KeyModifierInfos) {
-            // No need for an extra check for the empty modifier since that is mapped to
-            // 0, meaning that the `hasKeyModifier` will always fail for it since it
-            // checks internally against != 0
-
-            if (hasKeyModifier(value, kmi.modifier)) {
-                result += std::format("{}+", kmi.name);
-            }
-
-        }
-        // The last addition has added an additional '+' that we should remove
-        result.pop_back();
-        return result;
-    }
-
-    template <>
-    std::string to_string(const openspace::KeyWithModifier& value) {
-        if (value.modifier == openspace::KeyModifier::None) {
-            return to_string(value.key);
-        }
-        else {
-            return std::format("{}+{}", to_string(value.modifier), to_string(value.key));
-        }
-    }
-} // namespace ghoul

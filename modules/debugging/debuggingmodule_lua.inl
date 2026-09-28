@@ -92,7 +92,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
             "Transform = { "
                 "Translation = {"
                     "Type = 'StaticTranslation',"
-                    "Position = " + ghoul::to_string(p) + ""
+                    "Position = " + openspace::to_string(p) + ""
                 "},"
             "}"
         "}";
@@ -114,7 +114,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
                 "StartNode = '" + id1 + "',"
                 "EndNode = '" + id2 + "',"
                 "LineWidth = " + std::to_string(lineWidth) + ","
-                "Color = " + ghoul::to_string(color) + ""
+                "Color = " + openspace::to_string(color) + ""
             "}"
         "}";
 
@@ -202,7 +202,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
             "Transform = { "
                 "Translation = {"
                     "Type = 'StaticTranslation',"
-                    "Position = " + ghoul::to_string(points[i]) + ""
+                    "Position = " + openspace::to_string(points[i]) + ""
                 "},"
             "},"
             "Renderable = {"

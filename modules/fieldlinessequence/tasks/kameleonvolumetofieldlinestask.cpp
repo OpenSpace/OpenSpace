@@ -83,7 +83,7 @@ Documentation KameleonVolumeToFieldlinesTask::Documentation() {
 }
 
 KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -104,7 +104,7 @@ KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
     _extraVars = p.extraVars.value_or(std::vector<std::string>());
 
     if (!std::filesystem::is_directory(_inputPath)) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "KameleonVolumeToFieldlineTask: {} is not a valid directory", _inputPath
         ));
     }

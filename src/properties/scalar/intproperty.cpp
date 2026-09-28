@@ -37,23 +37,23 @@ std::string_view IntProperty::className() const {
     return "IntProperty";
 }
 
-ghoul::lua::LuaTypes IntProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes IntProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void IntProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 int IntProperty::toValue(lua_State* state) const {
-    if (ghoul::lua::hasValue<double>(state)) {
-        return static_cast<int>(ghoul::lua::value<double>(state));
+    if (lua::hasValue<double>(state)) {
+        return static_cast<int>(lua::value<double>(state));
     }
-    else if (ghoul::lua::hasValue<int>(state)) {
-        return ghoul::lua::value<int>(state);
+    else if (lua::hasValue<int>(state)) {
+        return lua::value<int>(state);
     }
     else {
-        throw ghoul::RuntimeError("Error extracting value in IntProperty");
+        throw RuntimeError("Error extracting value in IntProperty");
     }
 }
 

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,14 +28,14 @@
 #include <openspace/misc/assert.h>
 #include <utility>
 
-namespace ghoul {
+namespace openspace {
 
 RuntimeError::RuntimeError(std::string msg, std::string comp)
     : std::runtime_error(comp.empty() ? msg : std::format("({}) {}", comp, msg))
     , message(std::move(msg))
     , component(std::move(comp))
 {
-    ghoul_assert(!message.empty(), "Message must not be empty");
+    assert_msg(!message.empty(), "Message must not be empty");
 }
 
 FileNotFoundError::FileNotFoundError(std::filesystem::path f, std::string comp)
@@ -44,4 +43,4 @@ FileNotFoundError::FileNotFoundError(std::filesystem::path f, std::string comp)
     , file(std::move(f))
 {}
 
-} // namespace ghoul
+} // namespace openspace

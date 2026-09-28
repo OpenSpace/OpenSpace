@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +34,7 @@
 #include <stb_image_write.h>
 #include <utility>
 
-namespace ghoul::io::texture {
+namespace openspace::io::texture {
 
 MissingWriterException::MissingWriterException(std::string extension)
     : RuntimeError(std::format("No writer was found for extension '{}'", extension), "IO")
@@ -49,14 +48,14 @@ TextureWriteException::TextureWriteException(std::string name, std::string msg)
 {}
 
 void saveTexture(const opengl::Texture& texture, const std::string& filename) {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
+    assert_msg(!filename.empty(), "Filename must not be empty");
 
     std::string extension = std::filesystem::path(filename).extension().string();
     if (!extension.empty()) {
         // Remove the leading . of the extension
         extension = extension.substr(1);
     }
-    ghoul_assert(!extension.empty(), "Filename must have an extension");
+    assert_msg(!extension.empty(), "Filename must have an extension");
 
     if (!isSupportedWriteExtension(extension)) {
         throw MissingWriterException(extension);
@@ -134,4 +133,4 @@ std::vector<std::string> supportedWriteExtensions() {
     };
 }
 
-} // namespace ghoul::io::texture
+} // namespace openspace::io::texture

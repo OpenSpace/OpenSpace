@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +27,7 @@
 
 #include <openspace/logging/log.h>
 
-namespace ghoul::logging {
+namespace openspace::logging {
 
 /**
  * A concrete subclass of Log that logs the messages to the console to the `std::cout`
@@ -102,6 +101,6 @@ protected:
     const bool _colorOutput;
 };
 
-} // namespace ghoul::logging
+} // namespace openspace::logging
 
 #endif // __OPENSPACE_CORE___CONSOLELOG___H__

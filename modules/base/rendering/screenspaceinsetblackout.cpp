@@ -66,7 +66,7 @@ namespace {
     }
 
     std::pair<glm::vec2, glm::vec2> calculatePadding(const std::vector<glm::vec2>& v) {
-        ghoul_assert(v.size() >= 2, "Too few points in the list");
+        assert_msg(v.size() >= 2, "Too few points in the list");
 
         const glm::vec2& pf0 = v[1];
         const glm::vec2& pf1 = v[2];
@@ -78,7 +78,7 @@ namespace {
     }
 
     std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2>& controlPoints) {
-        ghoul_assert(controlPoints.size() >= 3, "Too few control points");
+        assert_msg(controlPoints.size() >= 3, "Too few control points");
 
         constexpr int Subdivisions = 100;
         std::vector<glm::vec2> splineData;
@@ -87,7 +87,7 @@ namespace {
         for (int i = 0; i < numberOfSegments; i++) {
             for (int s = 0; s < Subdivisions; s++) {
                 float tValue = stepSize * s;
-                glm::vec2 value = ghoul::interpolateCatmullRom(
+                glm::vec2 value = interpolateCatmullRom(
                     tValue,
                     *(controlPoints.begin() + i + 0),
                     *(controlPoints.begin() + i + 1),
@@ -139,7 +139,7 @@ namespace {
         std::string strBottom = formatLine("Bottom", bottomSplineData);
         std::string strLeft = formatLine("Left", leftSplineData);
 
-        ghoul::setClipboardText(strCorners + strTop + strRight + strBottom + strLeft);
+        setClipboardText(strCorners + strTop + strRight + strBottom + strLeft);
     }
 
     constexpr Property::PropertyInfo CopyToClipboardInfo = {
@@ -386,8 +386,7 @@ ScreenSpaceInsetBlackout::BlackoutShape::Corners::Corners(std::vector<glm::vec2>
     }
 }
 
-ScreenSpaceInsetBlackout::BlackoutShape::BlackoutShape(
-                                                      const ghoul::Dictionary& dictionary)
+ScreenSpaceInsetBlackout::BlackoutShape::BlackoutShape(const Dictionary& dictionary)
     : PropertyOwner({ "BlackoutShape", "Blackout Shape", "" })
     , enableCalibrationColor(CalibrationColorInfo, false)
     , enableCalibrationPattern(CalibrationPatternInfo, false)
@@ -499,7 +498,7 @@ void ScreenSpaceInsetBlackout::BlackoutShape::checkAndUpdateGUI() {
     }
 }
 
-ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dictionary)
+ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _blackoutShape(dictionary)
 {
@@ -515,12 +514,12 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
         p.blackoutshape.calibrationTexturePath;
     if (optTexturePath.has_value()) {
         if (std::filesystem::is_regular_file(*optTexturePath)) {
-            ghoul::opengl::Texture::SamplerInit samplerInit = {
+            opengl::Texture::SamplerInit samplerInit = {
                 // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-                //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
+                //.filter = opengl::Texture::FilterMode::AnisotropicMipMap,
+                .filter = opengl::Texture::FilterMode::LinearMipMap,
             };
-            _calibrationTexture = ghoul::io::texture::loadTexture(
+            _calibrationTexture = io::texture::loadTexture(
                 *optTexturePath,
                 2,
                 samplerInit
@@ -543,7 +542,7 @@ void ScreenSpaceInsetBlackout::initializeGL() {
     // Setup program object and shaders
     _fboProgram = BaseModule::ProgramObjectManager.request(
         "ScreenSpaceInsetBlackout",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "ScreenSpaceInsetBlackout",
                 absPath("${MODULE_BASE}/shaders/screenspaceinsetblackout_vs.glsl"),
@@ -552,14 +551,14 @@ void ScreenSpaceInsetBlackout::initializeGL() {
         }
     );
 
-    _blackoutTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _blackoutTexture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(BlackoutTextureSize, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
 
     _uniformCache.color = _fboProgram->uniformLocation("color");
@@ -575,7 +574,7 @@ void ScreenSpaceInsetBlackout::deinitializeGL() {
     if (_fboProgram) {
         BaseModule::ProgramObjectManager.release(
             _fboProgram,
-            [](ghoul::opengl::ProgramObject* p) {
+            [](opengl::ProgramObject* p) {
                 global::renderEngine->removeRenderProgram(p);
             }
         );
@@ -747,7 +746,7 @@ void ScreenSpaceInsetBlackout::generateTexture() {
     _fboProgram->deactivate();
 }
 
-void ScreenSpaceInsetBlackout::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceInsetBlackout::bindTexture(opengl::TextureUnit& unit) {
     if (_blackoutShape.enableCalibrationPattern && _calibrationTexture.get()) {
         unit.bind(*_calibrationTexture);
         _objectSize = _calibrationTexture->dimensions();

@@ -45,7 +45,7 @@ Documentation MilkywayPointsConversionTask::Documentation() {
     );
 }
 
-MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary&) {}
+MilkywayPointsConversionTask::MilkywayPointsConversionTask(const Dictionary&) {}
 
 std::string MilkywayPointsConversionTask::description() {
     return std::string();
@@ -75,7 +75,7 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
     for (int64_t i = 0; i < nPoints; i++) {
         in >> x >> y >> z >> r >> g >> b >> a;
         if (!in.good()) {
-            throw ghoul::RuntimeError("Failed to convert point data");
+            throw RuntimeError("Failed to convert point data");
         }
 
         pointData[i * 7 + 0] = x;

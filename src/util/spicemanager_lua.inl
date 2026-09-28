@@ -48,7 +48,7 @@ namespace {
     if (std::holds_alternative<std::string>(kernel)) {
         std::string k = std::get<std::string>(kernel);
         if (!std::filesystem::is_regular_file(k)) {
-            throw ghoul::lua::LuaError(std::format("Kernel file '{}' did not exist", k));
+            throw lua::LuaError(std::format("Kernel file '{}' did not exist", k));
         }
         SpiceManager::ref().loadKernel(k);
     }
@@ -56,9 +56,7 @@ namespace {
         std::vector<std::string> ks = std::get<std::vector<std::string>>(kernel);
         for (const std::string& k : ks) {
             if (!std::filesystem::is_regular_file(k)) {
-                throw ghoul::lua::LuaError(std::format(
-                    "Kernel file '{}' did not exist", k
-                ));
+                throw lua::LuaError(std::format("Kernel file '{}' did not exist", k));
             }
             SpiceManager::ref().loadKernel(k);
         }
@@ -155,7 +153,7 @@ namespace {
                                          int elementToExtract = 0)
 {
     if (!std::filesystem::exists(tle)) {
-        throw ghoul::RuntimeError(std::format("Could not find TLE file '{}'", tle));
+        throw RuntimeError(std::format("Could not find TLE file '{}'", tle));
     }
 
     // Code adopted from
@@ -204,7 +202,7 @@ namespace {
     // contains a human-readable name for the spacecraft files are encoded with Windows
     // line endings (CRLF)
 
-    std::vector<std::string> lines = ghoul::tokenizeString(contents, '\n');
+    std::vector<std::string> lines = tokenizeString(contents, '\n');
 
     // Erase carriage return characters
     for (std::string& line : lines) {
@@ -213,7 +211,7 @@ namespace {
 
     const size_t nElements = lines.size() / 3;
     if (elementToExtract > static_cast<int>(nElements)) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error loading {}. Element number {} requested, but only {} found",
             tle, nElements, elementToExtract
         ));
@@ -223,14 +221,14 @@ namespace {
 
     std::string line1 = lines[3 * elementToExtract + 1];
     if (line1.size() != TLEColumnWidth) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Illformed TLE file {}, expected {} characters per line, got {}",
             tle, TLEColumnWidth, line1.size()
         ));
     }
     std::string line2 = lines[3 * elementToExtract + 2];
     if (line2.size() != TLEColumnWidth) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Illformed TLE file {}, expected {} characters per line, got {}",
             tle, TLEColumnWidth, line2.size()
         ));
@@ -253,9 +251,9 @@ namespace {
     constexpr SpiceDouble last = std::numeric_limits<double>::max();
 
     // Extract the body id
-    std::vector<std::string> tokens = ghoul::tokenizeString(line2, ' ');
+    std::vector<std::string> tokens = tokenizeString(line2, ' ');
     if (tokens.size() < 2) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error parsing TLE file {}. Expected 8-9 elements in the second row, got {}",
             tle, tokens.size()
         ));
@@ -310,7 +308,7 @@ namespace {
                                          int elementToExtract = 0)
 {
     if (!std::filesystem::exists(csv)) {
-        throw ghoul::RuntimeError(std::format("Could not find CSV file '{}'", csv));
+        throw RuntimeError(std::format("Could not find CSV file '{}'", csv));
     }
 
 
@@ -331,9 +329,9 @@ namespace {
         "EPOCH",
         "NORAD_CAT_ID"
     };
-    std::vector<std::vector<std::string>> parameters = ghoul::loadCSVFile(csv, columns);
+    std::vector<std::vector<std::string>> parameters = loadCSVFile(csv, columns);
     if (elementToExtract >= static_cast<int>(parameters.size())) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Requested element {} but only {} elements were found",
             elementToExtract, parameters.size()
         ));
@@ -348,7 +346,7 @@ namespace {
         double value = 0.0;
         auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
         if (ptr != str.data() + str.size() || ec != std::errc()) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Error parsing '{}' of CSV file with error '{}'",
                 columns[i], std::make_error_code(ec).message()
             ));

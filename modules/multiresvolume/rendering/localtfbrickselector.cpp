@@ -377,8 +377,8 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
             for (size_t i = 0; i < gradients.size(); i++) {
                 float x = (i + 0.5f) / tfWidth;
                 float sample = histogram->interpolate(x);
-                ghoul_assert(sample >= 0, "@MISSING");
-                ghoul_assert(gradients[i] >= 0, "@MISSING");
+                assert_msg(sample >= 0, "@MISSING");
+                assert_msg(gradients[i] >= 0, "@MISSING");
                 error += sample * gradients[i];
             }
             _brickErrors[brickIndex].spatial = error;
@@ -395,8 +395,8 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
             for (size_t i = 0; i < gradients.size(); i++) {
                 float x = (i + 0.5f) / tfWidth;
                 float sample = histogram->interpolate(x);
-                ghoul_assert(sample >= 0, "@MISSING");
-                ghoul_assert(gradients[i] >= 0, "@MISSING");
+                assert_msg(sample >= 0, "@MISSING");
+                assert_msg(gradients[i] >= 0, "@MISSING");
                 error += sample * gradients[i];
             }
             _brickErrors[brickIndex].temporal = error;

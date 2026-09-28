@@ -108,8 +108,7 @@ namespace {
         std::optional<glm::vec2> radii [[codegen::greaterequal(glm::vec2(0.f))]];
 
         // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderableradialgrid_codegen.cpp"
@@ -123,7 +122,7 @@ Documentation RenderableRadialGrid::Documentation() {
     );
 }
 
-RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
+RenderableRadialGrid::RenderableRadialGrid(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _gridSegments(GridSegmentsInfo, glm::ivec2(10), glm::ivec2(1), glm::ivec2(200))
@@ -179,7 +178,7 @@ void RenderableRadialGrid::initialize() {
 void RenderableRadialGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
         "GridProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "GridProgram",
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
@@ -192,7 +191,7 @@ void RenderableRadialGrid::initializeGL() {
 void RenderableRadialGrid::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

@@ -32,7 +32,7 @@
 #include <array>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     [[codegen::luawrap]] void funcVec2(glm::vec2 arg) {
@@ -135,7 +135,7 @@ namespace {
 
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  vec2", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncVec2;
+    LuaLibrary::Function func = codegen::lua::FuncVec2;
     CHECK(func.name == "funcVec2");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -146,7 +146,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2", "[Execution][LuaWrapper]") {
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, glm::vec2(1.1f, 2.2f));
+    lua::push(state, glm::vec2(1.1f, 2.2f));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -157,7 +157,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncVec2Defaulted;
+    LuaLibrary::Function func = codegen::lua::FuncVec2Defaulted;
     CHECK(func.name == "funcVec2Defaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -169,7 +169,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, glm::vec2(1.1f, 2.2f));
+    lua::push(state, glm::vec2(1.1f, 2.2f));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -180,7 +180,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncVec2Defaulted;
+    LuaLibrary::Function func = codegen::lua::FuncVec2Defaulted;
     CHECK(func.name == "funcVec2Defaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -202,7 +202,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncVec2DefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncVec2DefaultedCheck;
     CHECK(func.name == "funcVec2DefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -216,7 +216,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, false, glm::vec2(3.3f, 4.4f));
+    lua::push(state, false, glm::vec2(3.3f, 4.4f));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -227,7 +227,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncVec2DefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncVec2DefaultedCheck;
     CHECK(func.name == "funcVec2DefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -241,14 +241,14 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, true);
+    lua::push(state, true);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Map", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncVec2Map;
+    LuaLibrary::Function func = codegen::lua::FuncVec2Map;
     CHECK(func.name == "funcVec2Map");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -260,11 +260,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Map", "[Execution][LuaWrapper]")
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, "key1", glm::vec2(1.1f, 2.2f));
+    lua::push(state, "key1", glm::vec2(1.1f, 2.2f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key2", glm::vec2(3.3f, 4.4f));
+    lua::push(state, "key2", glm::vec2(3.3f, 4.4f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key3", glm::vec2(5.5f, 6.6f));
+    lua::push(state, "key3", glm::vec2(5.5f, 6.6f));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -272,7 +272,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Map", "[Execution][LuaWrapper]")
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Optional", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncVec2Optional;
+    LuaLibrary::Function func = codegen::lua::FuncVec2Optional;
     CHECK(func.name == "funcVec2Optional");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -283,7 +283,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Optional", "[Execution][LuaWrapp
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, glm::vec2(1.1f, 2.2f));
+    lua::push(state, glm::vec2(1.1f, 2.2f));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -294,7 +294,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncVec2OptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::FuncVec2OptionalNullopt;
     CHECK(func.name == "funcVec2OptionalNullopt");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -311,7 +311,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Vector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncVec2Vector;
+    LuaLibrary::Function func = codegen::lua::FuncVec2Vector;
     CHECK(func.name == "funcVec2Vector");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -323,11 +323,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Vector", "[Execution][LuaWrapper
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::vec2(1.1f, 2.2f));
+    lua::push(state, 1, glm::vec2(1.1f, 2.2f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, glm::vec2(3.3f, 4.4f));
+    lua::push(state, 2, glm::vec2(3.3f, 4.4f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, glm::vec2(5.5f, 6.6f));
+    lua::push(state, 3, glm::vec2(5.5f, 6.6f));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -335,7 +335,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Vector", "[Execution][LuaWrapper
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Array1", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncVec2Array1;
+    LuaLibrary::Function func = codegen::lua::FuncVec2Array1;
     CHECK(func.name == "funcVec2Array1");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -347,7 +347,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Array1", "[Execution][LuaWrapper
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::vec2(1.1f, 2.2f));
+    lua::push(state, 1, glm::vec2(1.1f, 2.2f));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -355,7 +355,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Array1", "[Execution][LuaWrapper
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Array2", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncVec2Array2;
+    LuaLibrary::Function func = codegen::lua::FuncVec2Array2;
     CHECK(func.name == "funcVec2Array2");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -367,15 +367,15 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Array2", "[Execution][LuaWrapper
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::vec2(1.1f, 2.2f));
+    lua::push(state, 1, glm::vec2(1.1f, 2.2f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, glm::vec2(3.3f, 4.4f));
+    lua::push(state, 2, glm::vec2(3.3f, 4.4f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, glm::vec2(5.5f, 6.6f));
+    lua::push(state, 3, glm::vec2(5.5f, 6.6f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, glm::vec2(7.7f, 8.8f));
+    lua::push(state, 4, glm::vec2(7.7f, 8.8f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, glm::vec2(9.9f, 10.10f));
+    lua::push(state, 5, glm::vec2(9.9f, 10.10f));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -383,7 +383,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Array2", "[Execution][LuaWrapper
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Array3", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncVec2Array3;
+    LuaLibrary::Function func = codegen::lua::FuncVec2Array3;
     CHECK(func.name == "funcVec2Array3");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -395,25 +395,25 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Array3", "[Execution][LuaWrapper
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, glm::vec2(1.1f, 2.2f));
+    lua::push(state, 1, glm::vec2(1.1f, 2.2f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, glm::vec2(3.3f, 4.4f));
+    lua::push(state, 2, glm::vec2(3.3f, 4.4f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, glm::vec2(5.5f, 6.6f));
+    lua::push(state, 3, glm::vec2(5.5f, 6.6f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, glm::vec2(7.7f, 8.8f));
+    lua::push(state, 4, glm::vec2(7.7f, 8.8f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, glm::vec2(9.9f, 10.10f));
+    lua::push(state, 5, glm::vec2(9.9f, 10.10f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 6, glm::vec2(11.11f, 12.12f));
+    lua::push(state, 6, glm::vec2(11.11f, 12.12f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 7, glm::vec2(13.13f, 14.14f));
+    lua::push(state, 7, glm::vec2(13.13f, 14.14f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 8, glm::vec2(15.15f, 16.16f));
+    lua::push(state, 8, glm::vec2(15.15f, 16.16f));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 9, glm::vec2(17.17, 18.18));
+    lua::push(state, 9, glm::vec2(17.17, 18.18));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 10, glm::vec2(19.19, 20.20));
+    lua::push(state, 10, glm::vec2(19.19, 20.20));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -421,7 +421,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  vec2Array3", "[Execution][LuaWrapper
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  vec2", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnVec2;
+    LuaLibrary::Function func = codegen::lua::ReturnVec2;
     CHECK(func.name == "returnVec2");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "vec2");
@@ -432,13 +432,13 @@ TEST_CASE("Execution/LuaWrapper/Return:  vec2", "[Execution][LuaWrapper]") {
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    glm::vec2 val = ghoul::lua::value<glm::vec2>(state);
+    glm::vec2 val = lua::value<glm::vec2>(state);
     CHECK(val == glm::vec2(1.1f, 2.2f));
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  vec2Map", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnVec2Map;
+    LuaLibrary::Function func = codegen::lua::ReturnVec2Map;
     CHECK(func.name == "returnVec2Map");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String -> vec2");
@@ -450,7 +450,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  vec2Map", "[Execution][LuaWrapper]") {
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     std::map<std::string, glm::vec2> val =
-        ghoul::lua::value<std::map<std::string, glm::vec2>>(state);
+        lua::value<std::map<std::string, glm::vec2>>(state);
     CHECK(val.size() == 3);
     REQUIRE(val.find("key1") != val.end());
     CHECK(val.find("key1")->second == glm::vec2(1.1f, 2.2f));
@@ -466,7 +466,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnVec2Optional;
+    LuaLibrary::Function func = codegen::lua::ReturnVec2Optional;
     CHECK(func.name == "returnVec2Optional");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "vec2?");
@@ -477,7 +477,7 @@ TEST_CASE(
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    glm::vec2 val = ghoul::lua::value<glm::vec2>(state);
+    glm::vec2 val = lua::value<glm::vec2>(state);
     CHECK(val == glm::vec2(1.1f, 2.2));
     lua_close(state);
 }
@@ -487,7 +487,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnVec2OptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::ReturnVec2OptionalNullopt;
     CHECK(func.name == "returnVec2OptionalNullopt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "vec2?");
@@ -502,7 +502,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  vec2Vector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnVec2Vector;
+    LuaLibrary::Function func = codegen::lua::ReturnVec2Vector;
     CHECK(func.name == "returnVec2Vector");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "vec2[]");
@@ -513,7 +513,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  vec2Vector", "[Execution][LuaWrapper]")
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::vector<glm::vec2> val = ghoul::lua::value<std::vector<glm::vec2>>(state);
+    std::vector<glm::vec2> val = lua::value<std::vector<glm::vec2>>(state);
     REQUIRE(val.size() == 3);
     CHECK(val[0] == glm::vec2(1.1f, 2.2f));
     CHECK(val[1] == glm::vec2(3.3f, 4.4f));

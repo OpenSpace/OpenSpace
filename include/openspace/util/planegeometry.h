@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___PLANEGEOMETRY___H__
 
 #include <openspace/glm.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 
 namespace openspace {
 

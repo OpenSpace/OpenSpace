@@ -29,26 +29,23 @@
 #include <openspace/rendering/deferredcasterlistener.h>
 
 #include <openspace/glm.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/rendering/shadowmapping.h>
 #include <map>
 #include <vector>
 
-namespace ghoul {
-    namespace filesystem { class File; }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    } // namespace ghoul::opengl
-    class Dictionary;
-} // namespace ghoul
-
 namespace openspace {
 
+namespace filesystem { class File; }
+namespace opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace opengl
 class Camera;
 struct DeferredcastData;
 struct DeferredcasterTask;
+class Dictionary;
 struct RaycastData;
 struct RaycasterTask;
 class Scene;
@@ -162,7 +159,7 @@ public:
         const glm::ivec4& viewport);
     void render(Scene* scene, Camera* camera, float blackoutFactor,
         const glm::vec4& blackoutColor, float blackoutTextureFactor,
-        ghoul::opengl::Texture* blackoutTexture);
+        opengl::Texture* blackoutTexture);
 
     /**
      * Update render data. Responsible for calling RenderEngine::setRenderData.
@@ -184,15 +181,15 @@ public:
 private:
     using RaycasterProgObjMap = std::map<
         VolumeRaycaster*,
-        std::unique_ptr<ghoul::opengl::ProgramObject>
+        std::unique_ptr<opengl::ProgramObject>
     >;
     using DeferredcasterProgObjMap = std::map<
         Deferredcaster*,
-        std::unique_ptr<ghoul::opengl::ProgramObject>
+        std::unique_ptr<opengl::ProgramObject>
     >;
 
     void applyTMO(float blackoutFactor, const glm::vec4& blackoutColor,
-        float blackoutTextureFactor, ghoul::opengl::Texture* blackoutTexture,
+        float blackoutTextureFactor, opengl::Texture* blackoutTexture,
         const glm::ivec4& viewport);
     void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures() const;
@@ -207,10 +204,10 @@ private:
     std::map<Deferredcaster*, DeferredcastData> _deferredcastData;
     DeferredcasterProgObjMap _deferredcastPrograms;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _hdrFilteringProgram;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _tmoProgram;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _fxaaProgram;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
+    std::unique_ptr<opengl::ProgramObject> _hdrFilteringProgram;
+    std::unique_ptr<opengl::ProgramObject> _tmoProgram;
+    std::unique_ptr<opengl::ProgramObject> _fxaaProgram;
+    std::unique_ptr<opengl::ProgramObject> _downscaledVolumeProgram;
 
     UniformCache(hdrFeedingTexture, blackoutFactor, blackoutColor, hasBlackoutTexture,
         blackoutTexture, blackoutTextureFactor, hdrExposure, gamma, hue, saturation,
@@ -273,7 +270,7 @@ private:
 
     bool _renderedDepthMapsThisFrame = false;
 
-    ghoul::Dictionary _rendererData;
+    Dictionary _rendererData;
 };
 
 } // namespace openspace

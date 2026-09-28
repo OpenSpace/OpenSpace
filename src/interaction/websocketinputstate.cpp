@@ -31,7 +31,7 @@
 namespace openspace {
 
 float WebsocketInputStates::axis(int axis) const {
-    ghoul_precondition(axis >= 0, "axis must be 0 or positive");
+    precondition(axis >= 0, "axis must be 0 or positive");
 
     const float res = std::accumulate(
         begin(),
@@ -53,7 +53,7 @@ float WebsocketInputStates::axis(int axis) const {
 }
 
 bool WebsocketInputStates::button(int button, WebsocketAction action) const {
-    ghoul_precondition(button >= 0, "button must be 0 or positive");
+    precondition(button >= 0, "button must be 0 or positive");
 
     const bool res = std::any_of(
         begin(),

@@ -371,7 +371,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
             float x = static_cast<float>(i) / static_cast<float>(tfWidth);
             float sample = histogram->interpolate(x);
 
-            ghoul_assert(sample >= 0, "@MISSING");
+            assert_msg(sample >= 0, "@MISSING");
             dotProduct += sample * _transferFunction->sample(i).w;
         }
         _transferFunction->texture().clearDownloadedTexture();

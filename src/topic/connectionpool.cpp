@@ -39,16 +39,16 @@ ConnectionPool::~ConnectionPool() {
     disconnectAllConnections();
 }
 
-void ConnectionPool::addServer(std::shared_ptr<ghoul::io::SocketServer> server) {
+void ConnectionPool::addServer(std::shared_ptr<io::SocketServer> server) {
     _socketServers.push_back(std::move(server));
 }
 
-void ConnectionPool::removeServer(ghoul::io::SocketServer* server) {
+void ConnectionPool::removeServer(io::SocketServer* server) {
     _socketServers.erase(
         std::remove_if(
             _socketServers.begin(),
             _socketServers.end(),
-            [server](const std::shared_ptr<ghoul::io::SocketServer>& s) {
+            [server](const std::shared_ptr<io::SocketServer>& s) {
                 return s.get() == server;
             }
         ),
@@ -66,8 +66,8 @@ void ConnectionPool::updateConnections() {
 }
 
 void ConnectionPool::acceptNewSockets() {
-    for (const std::shared_ptr<ghoul::io::SocketServer>& server : _socketServers) {
-        std::unique_ptr<ghoul::io::Socket> socket;
+    for (const std::shared_ptr<io::SocketServer>& server : _socketServers) {
+        std::unique_ptr<io::Socket> socket;
         while ((socket = server->nextPendingSocket())) {
             _handleSocket(*socket);
             _sockets.push_back(std::move(socket));
@@ -80,7 +80,7 @@ void ConnectionPool::removeDisconnectedSockets() {
         std::remove_if(
             _sockets.begin(),
             _sockets.end(),
-            [](const std::unique_ptr<ghoul::io::Socket>& socket) {
+            [](const std::unique_ptr<io::Socket>& socket) {
                 return !socket || !socket->isConnected();
             }
         ),
@@ -89,7 +89,7 @@ void ConnectionPool::removeDisconnectedSockets() {
 }
 
 void ConnectionPool::disconnectAllConnections() {
-    for (const std::unique_ptr<ghoul::io::Socket>& socket : _sockets) {
+    for (const std::unique_ptr<io::Socket>& socket : _sockets) {
         if (socket && socket->isConnected()) {
             socket->disconnect();
         }

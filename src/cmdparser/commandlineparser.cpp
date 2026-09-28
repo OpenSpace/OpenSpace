@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +36,7 @@
 #include <utility>
 
 namespace {
-    using namespace ghoul;
+    using namespace openspace;
 
     constexpr std::string_view _loggerCat = "CommandlineParser";
 
@@ -88,7 +87,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul::cmdparser {
+namespace openspace::cmdparser {
 
 CommandlineParser::CommandlineParser(std::string programName,
                                      AllowUnknownCommands allowUnknownCommands,
@@ -118,7 +117,7 @@ const std::vector<std::string>& CommandlineParser::setCommandLine(
 {
     // arguments[0] = program name
     // arguments[i] = i-th argument
-    ghoul_assert(!arguments.empty(), "Arguments must not be empty");
+    assert_msg(!arguments.empty(), "Arguments must not be empty");
     _programPath = arguments.front();
 
     // Might be possible that someone calls us multiple times
@@ -292,11 +291,11 @@ CommandlineParser::DisplayHelpText CommandlineParser::execute() {
 }
 
 void CommandlineParser::addCommand(std::unique_ptr<CommandlineCommand> cmd) {
-    ghoul_assert(cmd, "Command must not be nullptr");
-    ghoul_assert(!getCommand(cmd->name()), "Name was previously registered");
+    assert_msg(cmd, "Command must not be nullptr");
+    assert_msg(!getCommand(cmd->name()), "Name was previously registered");
 
     if (!cmd->shortName().empty()) {
-        ghoul_assert(!getCommand(cmd->shortName()), "Shortname registered previously");
+        assert_msg(!getCommand(cmd->shortName()), "Shortname registered previously");
     }
 
     _commands.push_back(std::move(cmd));
@@ -305,7 +304,7 @@ void CommandlineParser::addCommand(std::unique_ptr<CommandlineCommand> cmd) {
 void CommandlineParser::addCommandForNamelessArguments(
                                                   std::unique_ptr<CommandlineCommand> cmd)
 {
-    ghoul_assert(cmd, "Command must not be empty");
+    assert_msg(cmd, "Command must not be empty");
     _commandForNamelessArguments = std::move(cmd);
 }
 
@@ -355,7 +354,7 @@ std::string CommandlineParser::usageInformation() const {
 std::string CommandlineParser::usageInformationForCommand(
                                                          const std::string& command) const
 {
-    ghoul_assert(!command.empty(), "Command must not be empty");
+    assert_msg(!command.empty(), "Command must not be empty");
 
     const auto it = std::find_if(
         _commands.cbegin(),
@@ -364,13 +363,13 @@ std::string CommandlineParser::usageInformationForCommand(
             return i->name() == command || i->shortName() == command;
         }
     );
-    ghoul_assert(it != _commands.cend(), "Command must name a valid name or shortname");
+    assert_msg(it != _commands.cend(), "Command must name a valid name or shortname");
 
     return std::format("Usage: \n{}", (*it)->usage());
 }
 
 std::string CommandlineParser::usageInformationForNamelessCommand() const {
-    ghoul_assert(
+    assert_msg(
         _commandForNamelessArguments,
         "A nameless commandline argument must be registered"
     );
@@ -406,4 +405,4 @@ bool CommandlineParser::hasOnlyHelpCommand() const {
     );
 }
 
-} // namespace ghoul::cmdparser
+} // namespace openspace::cmdparser

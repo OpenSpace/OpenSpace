@@ -112,7 +112,7 @@ function (handle_module_dependencies target_name module_name)
     <openspace/misc/exception.h>
     <openspace/misc/invariants.h>
     <openspace/misc/profiling.h>
-    <openspace/opengl/ghoul_gl.h>
+    <openspace/opengl/gl.h>
     <array>
     <filesystem>
     <memory>

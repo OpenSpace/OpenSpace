@@ -339,7 +339,7 @@ namespace {
 
         // A dictionary specifying details on how to load the dataset. Updating the data
         // mapping will lead to a new cached version of the dataset.
-        std::optional<ghoul::Dictionary> dataMapping
+        std::optional<Dictionary> dataMapping
             [[codegen::reference("core_dataloader_datamapping")]];
 
         struct Texture {
@@ -413,12 +413,11 @@ namespace {
         std::optional<Unit> unit;
 
         // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
 
         struct SizeSettings {
             // Settings related to scaling the points based on data.
-            std::optional<ghoul::Dictionary> sizeMapping
+            std::optional<Dictionary> sizeMapping
                 [[codegen::reference("base_sizemappingcomponent")]];
 
             // [[codegen::verbatim(ScaleExponentInfo.description)]]
@@ -442,7 +441,7 @@ namespace {
             std::optional<glm::vec3> fixedColor [[codegen::color()]];
 
             // Settings related to the choice of color map, parameters, etc.
-            std::optional<ghoul::Dictionary> colorMapping
+            std::optional<Dictionary> colorMapping
                 [[codegen::reference("core_colormappingcomponent")]];
 
             // [[codegen::verbatim(EnableOutlineInfo.description)]]
@@ -499,7 +498,7 @@ Documentation RenderablePointCloud::Documentation() {
     );
 }
 
-RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
+RenderablePointCloud::SizeSettings::SizeSettings(const Dictionary& dictionary)
     : PropertyOwner({ "Sizing", "Sizing", ""})
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 25.f)
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 100.f)
@@ -530,7 +529,7 @@ RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictio
     addProperty(maxAngularSize);
 }
 
-RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)
+RenderablePointCloud::ColorSettings::ColorSettings(const Dictionary& dictionary)
     : PropertyOwner({ "Coloring", "Coloring", "" })
     , pointColor(PointColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , enableOutline(EnableOutlineInfo, false)
@@ -602,7 +601,7 @@ RenderablePointCloud::TextureOwner::TextureOwner()
     addProperty(inputMode);
 }
 
-RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
+RenderablePointCloud::Fading::Fading(const Dictionary& dictionary)
     : PropertyOwner({ "Fading", "Fading", "" })
     , fadeInDistances(
         FadeInDistancesInfo,
@@ -635,7 +634,7 @@ RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
     addProperty(invert);
 }
 
-RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
+RenderablePointCloud::RenderablePointCloud(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _sizeSettings(dictionary)
     , _colorSettings(dictionary)
@@ -670,7 +669,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     _renderOption.addOption(RenderOption::FixedRotation, "Fixed Rotation");
 
     if (p.billboard.has_value()) {
-        ghoul_assert(
+        assert_msg(
             std::holds_alternative<bool>(*p.billboard) ||
             std::holds_alternative<Parameters::RenderOption>(*p.billboard),
             "Wrong type"
@@ -877,7 +876,7 @@ void RenderablePointCloud::initializeGL() {
 
     initializeShadersAndGlExtras();
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     if (_hasSpriteTexture) {
         switch (_textureMode) {
@@ -925,7 +924,7 @@ void RenderablePointCloud::initializeShadersAndGlExtras() {
 void RenderablePointCloud::deinitializeShaders() {
     BaseModule::ProgramObjectManager.release(
         "RenderablePointCloud",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -942,7 +941,7 @@ void RenderablePointCloud::initializeSingleTexture() {
     std::filesystem::path p = absPath(_texture.spriteTexturePath);
 
     if (!std::filesystem::is_regular_file(p)) {
-        throw ghoul::RuntimeError(std::format("Could not find image file '{}'", p));
+        throw RuntimeError(std::format("Could not find image file '{}'", p));
     }
 
     loadTexture(p, 0);
@@ -954,9 +953,7 @@ void RenderablePointCloud::initializeMultiTextures() {
         std::filesystem::path path = _texturesDirectory / tex.file;
 
         if (!std::filesystem::is_regular_file(path)) {
-            throw ghoul::RuntimeError(std::format(
-                "Could not find image file '{}'", path
-            ));
+            throw RuntimeError(std::format("Could not find image file '{}'", path));
         }
         loadTexture(path, tex.index);
     }
@@ -991,25 +988,20 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     }
 
     // Just load the image data so we have full control of the texture formatting
-    ghoul::io::texture::ImageInfo imageInfo = ghoul::io::texture::loadImage(path);
+    io::texture::ImageInfo imageInfo = io::texture::loadImage(path);
 
     if (imageInfo.data.empty()) {
-        throw ghoul::RuntimeError(std::format(
-            "Failed to load image data from '{}'", path
-        ));
+        throw RuntimeError(std::format("Failed to load image data from '{}'", path));
     }
 
     if (imageInfo.dimensions.x == 0 || imageInfo.dimensions.y == 0) {
-        throw ghoul::RuntimeError(std::format(
-            "Invalid image dimensions from '{}'", path
-        ));
+        throw RuntimeError(std::format("Invalid image dimensions from '{}'", path));
     }
 
-    using Texture = ghoul::opengl::Texture;
-    Texture::FormatInit formatInit = Texture::FormatInit{
+    opengl::Texture::FormatInit formatInit = opengl::Texture::FormatInit{
         .dimensions = glm::uvec3(imageInfo.dimensions, 1),
         .type = GL_TEXTURE_2D,
-        .format = Texture::formatFromNumChannels(imageInfo.nChannels),
+        .format = opengl::Texture::formatFromNumChannels(imageInfo.nChannels),
         .dataType = GL_UNSIGNED_BYTE,
     };
 
@@ -1021,16 +1013,16 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
                 case 3: return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
                 case 4: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
                 default:
-                    throw ghoul::RuntimeError(std::format(
+                    throw RuntimeError(std::format(
                         "Unsupported channel count: {}", nDim
                     ));
             }
         }(imageInfo.nChannels);
     }
 
-    std::unique_ptr<Texture> t = std::make_unique<Texture>(
+    std::unique_ptr<opengl::Texture> t = std::make_unique<opengl::Texture>(
         formatInit,
-        Texture::SamplerInit{},
+        opengl::Texture::SamplerInit{},
         reinterpret_cast<const std::byte*>(imageInfo.data.data())
     );
 
@@ -1075,7 +1067,7 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
         static_cast<GLsizei>(nLayers)
     );
 
-    if (format.format == ghoul::opengl::Texture::Format::Red) {
+    if (format.format == opengl::Texture::Format::Red) {
         // Swizzle for grayscale images so that the red channel is used for all RGB
         std::array<GLenum, 4> swizzleMask = { GL_RED, GL_RED, GL_RED, GL_ONE};
         glTextureParameteriv(textureId, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask.data());
@@ -1133,8 +1125,8 @@ void RenderablePointCloud::generateArrayTextures() {
         // Fill that storage with the data from the individual textures
         unsigned int layer = 0;
         for (const size_t& i : textureListIndices) {
-            ghoul::opengl::Texture* texture = _textures[i].get();
-            ghoul_assert(texture != nullptr, "Texture pointer was null");
+            opengl::Texture* texture = _textures[i].get();
+            assert_msg(texture != nullptr, "Texture pointer was null");
 
             fillAndUploadTextureLayer(
                 id,
@@ -1275,7 +1267,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
 
     _program->setUniform(_uniformCache.useColorMap, useColorMap);
 
-    ghoul::opengl::TextureUnit colorMapTextureUnit;
+    opengl::TextureUnit colorMapTextureUnit;
     _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
 
     if (useColorMap) {
@@ -1322,7 +1314,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     bool useTexture = _hasSpriteTexture && _texture.enabled;
     _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
 
-    ghoul::opengl::TextureUnit spriteTextureUnit;
+    opengl::TextureUnit spriteTextureUnit;
     _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
 
     _program->setUniform(_uniformCache.useTextureAlpha, _texture.useAlphaChannel);

@@ -68,8 +68,7 @@ Documentation FindLastClosedFieldlinesTask::Documentation() {
     );
 }
 
-FindLastClosedFieldlinesTask::FindLastClosedFieldlinesTask(
-                                                      const ghoul::Dictionary& dictionary)
+FindLastClosedFieldlinesTask::FindLastClosedFieldlinesTask(const Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _outputFolder = p.output;
@@ -83,7 +82,7 @@ FindLastClosedFieldlinesTask::FindLastClosedFieldlinesTask(
     _threshold = p.threshold.value_or(_threshold);
     _inputPath = p.input;
     if (!std::filesystem::is_directory(_inputPath)) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "FindLastClosedFieldlinesTask: {} is not a valid directory", _inputPath
         ));
     }

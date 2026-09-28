@@ -79,7 +79,7 @@ namespace {
     if (!receivedSaveFileName) {
         std::time_t t = std::time(nullptr);
         std::tm* utcTime = std::gmtime(&t);
-        ghoul_assert(utcTime, "Conversion to UTC failed");
+        assert_msg(utcTime, "Conversion to UTC failed");
 
         std::string time = std::format(
             "{:04d}-{:02d}-{:02d}T{:02d}_{:02d}_{:02d}",
@@ -103,7 +103,7 @@ namespace {
         saveFileName = path.stem().string();
     }
     if (saveFileName->empty()) {
-        throw ghoul::lua::LuaError("Save filepath string is empty");
+        throw lua::LuaError("Save filepath string is empty");
     }
 
     const PropertyOwner& root = *global::rootPropertyOwner;
@@ -112,15 +112,13 @@ namespace {
     global::profile->saveCurrentSettingsToProfile(root, currentTime, navState);
 
     if (saveFileName->contains('/')) {
-        throw ghoul::lua::LuaError("Profile filename must not contain (/) elements");
+        throw lua::LuaError("Profile filename must not contain (/) elements");
     }
     else if (saveFileName->contains(':')) {
-        throw ghoul::lua::LuaError("Profile filename must not contain (:) elements");
+        throw lua::LuaError("Profile filename must not contain (:) elements");
     }
     else if (saveFileName->contains('.')) {
-        throw ghoul::lua::LuaError(
-            "Only provide the filename to save without file extension"
-        );
+        throw lua::LuaError("Only provide the filename to save without file extension");
     }
 
     std::string absFilename = std::format(
@@ -135,7 +133,7 @@ namespace {
     if (std::filesystem::is_regular_file(absFilename) && !shouldOverwrite &&
         receivedSaveFileName)
     {
-        throw ghoul::lua::LuaError(
+        throw lua::LuaError(
             std::format(
                 "Unable to save profile '{}'. File of same name already exists",
                 absFilename
@@ -147,7 +145,7 @@ namespace {
 
     std::ofstream outFile = std::ofstream(absFilename, std::ofstream::out);
     if (!outFile.good()) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Exception opening profile file for write '{}'", absFilename
         ));
     }
@@ -156,9 +154,7 @@ namespace {
         outFile << global::profile->serialize();
     }
     catch (const std::ofstream::failure&) {
-        throw ghoul::lua::LuaError(std::format(
-            "Data write error to file '{}'", absFilename
-        ));
+        throw lua::LuaError(std::format("Data write error to file '{}'", absFilename));
     }
 }
 

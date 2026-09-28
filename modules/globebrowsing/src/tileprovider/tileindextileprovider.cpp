@@ -55,7 +55,7 @@ Documentation TileIndexTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_tileindex");
 }
 
-TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dictionary)
+TileIndexTileProvider::TileIndexTileProvider(const Dictionary& dictionary)
     : TextTileProvider(tileTextureInitData(layers::Group::ID::ColorLayers, false))
     , _uniqueBackgroundColors(UniqueBackgroundColors, false)
 {

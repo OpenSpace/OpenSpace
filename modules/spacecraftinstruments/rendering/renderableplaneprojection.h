@@ -27,19 +27,18 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <filesystem>
 #include <memory>
 
-namespace ghoul::filesystem { class File; }
-
 namespace openspace {
 
+namespace filesystem { class File; }
 struct Image;
 
 class RenderablePlaneProjection : public Renderable {
 public:
-    explicit RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneProjection(const Dictionary& dictionary);
     ~RenderablePlaneProjection() override = default;
 
     void initializeGL() override;
@@ -62,10 +61,10 @@ private:
     glm::dmat3 _stateMatrix = glm::dmat3(1.0);
     std::string _frame;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<opengl::ProgramObject> _shader;
     bool _textureIsDirty = false;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    std::unique_ptr<opengl::Texture> _texture;
+    std::unique_ptr<filesystem::File> _textureFile;
     GLuint _vao = 0;
     GLuint _vbo = 0;
     std::string _spacecraft;

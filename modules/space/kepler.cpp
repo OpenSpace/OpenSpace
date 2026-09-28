@@ -36,6 +36,8 @@
 #include <sstream>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "Kepler";
     constexpr int8_t CurrentCacheVersion = 1;
 
@@ -211,7 +213,7 @@ namespace {
             e += ".0";
         }
         if (e.size() <= 2) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Error parsing epoch '{}'. Invalid date string", epoch
             ));
         }
@@ -220,13 +222,13 @@ namespace {
         std::string_view daysInYearStr = std::string_view(e).substr(2);
         auto resYear = scn::scan<int>(yearStr, "{}");
         if (!resYear) {
-            throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
+            throw RuntimeError(std::format("Error parsing epoch '{}'", epoch));
         }
         int year = resYear->value();
 
         auto resDaysInYear = scn::scan<double>(daysInYearStr, "{}");
         if (!resDaysInYear) {
-            throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
+            throw RuntimeError(std::format("Error parsing epoch '{}'", epoch));
         }
         double daysInYear = resDaysInYear->value();
         year += year > 57 ? 1900 : 2000;
@@ -288,7 +290,7 @@ namespace {
 
         auto res = scn::scan<int, int, int, double>(e, "{:4d}-{:2d}-{:2d}.{}");
         if (!res) {
-            throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
+            throw RuntimeError(std::format("Error parsing epoch '{}'", epoch));
         }
         auto [year, monthNum, day, fraction] = res->values();
         const int daysSince2000 = countDays(year);
@@ -355,7 +357,7 @@ namespace {
                 epoch, "{:4}-{:2}-{:2}T{:2}:{:2}:{}"
             );
             if (!res) {
-                throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
+                throw RuntimeError(std::format("Error parsing epoch '{}'", epoch));
             }
             std::tie(date.year, month, days, date.hours, date.minutes, date.seconds) =
                 res->values();
@@ -368,13 +370,13 @@ namespace {
                 epoch, "{:4}-{:3}T{:2}:{:2}:{}"
             );
             if (!res) {
-                throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
+                throw RuntimeError(std::format("Error parsing epoch '{}'", epoch));
             }
             std::tie(date.year, date.nDays, date.hours, date.minutes, date.seconds) =
                 res->values();
         }
         else {
-            throw ghoul::RuntimeError(std::format("Malformed epoch string '{}'", epoch));
+            throw RuntimeError(std::format("Malformed epoch string '{}'", epoch));
         }
 
         const int daysSince2000 = countDays(date.year);
@@ -411,7 +413,7 @@ namespace {
         // http://www.minorplanetcenter.org/iau/info/PackedDates.html
 
         if (packedDate.size() < 5) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Illformed packed date. Size must be 5 characters. {}", packedDate
             ));
         }
@@ -422,7 +424,7 @@ namespace {
                 case 'J': return 1900;
                 case 'K': return 2000;
                 default:
-                    throw ghoul::RuntimeError(std::format(
+                    throw RuntimeError(std::format(
                         "Illformed packed date. Illegal year marker. {}", packedDate
                     ));
             }
@@ -430,7 +432,7 @@ namespace {
 
         auto yearRes = scn::scan<int>(packedDate.substr(1, 2), "{}");
         if (!yearRes) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Illformed packed date. Second and third characters must be numbers. {}",
                 packedDate
             ));
@@ -456,7 +458,7 @@ namespace {
         }(packedDate[3]);
 
         if (month == -1) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Illformed packed date. Wrong month marker. {}", packedDate
             ));
         }
@@ -499,7 +501,7 @@ namespace {
         }(packedDate[4]);
 
         if (day == -1) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Illformed packed date. Wrong day marker. {}", packedDate
             ));
         }
@@ -511,7 +513,7 @@ namespace {
 namespace openspace::kepler {
 
 std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
-    ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+    assert_msg(std::filesystem::is_regular_file(file), "File must exist");
 
     std::vector<Parameters> result;
 
@@ -520,7 +522,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
     int lineNum = 1;
 
     std::string header;
-    while (ghoul::getline(f, header)) {
+    while (openspace::getline(f, header)) {
         if (header.starts_with("No GP data found")) {
             LWARNING(std::format("TLE file '{}' did not contain any data", file));
             return std::vector<Parameters>();
@@ -530,7 +532,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
 
         // Header
         std::string name = header;
-        ghoul::trimWhitespace(name);
+        trimWhitespace(name);
         p.name = std::move(name);
 
         // First line
@@ -550,9 +552,9 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         //    13   65-68   Element set  number.Incremented when a new TLE is generated
         //    14   69-69   Checksum (modulo 10)
         std::string firstLine;
-        ghoul::getline(f, firstLine);
+        openspace::getline(f, firstLine);
         if (f.bad() || firstLine[0] != '1') {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Malformed TLE file '{}' at line {}", file, lineNum + 1
             ));
         }
@@ -582,9 +584,9 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         //     9      64-68   Revolution number at epoch (revolutions)
         //    10      69-69   Checksum (modulo 10)
         std::string secondLine;
-        ghoul::getline(f, secondLine);
+        openspace::getline(f, secondLine);
         if (f.bad() || secondLine[0] != '2') {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Malformed TLE file '{}' at line {}", file, lineNum + 1
             ));
         }
@@ -634,7 +636,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
 }
 
 std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
-    ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+    assert_msg(std::filesystem::is_regular_file(file), "File must exist");
 
     std::vector<Parameters> result;
 
@@ -643,7 +645,7 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
     int lineNum = 1;
     std::optional<Parameters> current = std::nullopt;
     std::string line;
-    while (ghoul::getline(f, line)) {
+    while (openspace::getline(f, line)) {
         if (line.starts_with("No GP data found")) {
             LWARNING(std::format("OMM file '{}' did not contain any data", file));
             return std::vector<Parameters>();
@@ -654,15 +656,13 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
         }
 
         // Tokenize the line
-        std::vector<std::string> parts = ghoul::tokenizeString(line, '=');
+        std::vector<std::string> parts = tokenizeString(line, '=');
         for (std::string& p : parts) {
-            ghoul::trimWhitespace(p);
+            trimWhitespace(p);
         }
 
         if (parts.size() != 2) {
-            throw ghoul::RuntimeError(std::format(
-                "Malformed line '{}' at {}", line, lineNum
-            ));
+            throw RuntimeError(std::format("Malformed line '{}' at {}", line, lineNum));
         }
 
         if (parts[0] == "CCSDS_OMM_VERS") {
@@ -686,7 +686,7 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
             current = Parameters();
         }
 
-        ghoul_assert(current.has_value(), "No current element");
+        assert_msg(current.has_value(), "No current element");
 
         if (parts[0] == "OBJECT_NAME") {
             current->name = parts[1];
@@ -730,13 +730,13 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
 }
 
 std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
-    ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+    assert_msg(std::filesystem::is_regular_file(file), "File must exist");
 
     {
         // Tentatively load the CSV file to better detect if we got some other response
         std::ifstream f = std::ifstream(file);
         std::string line;
-        ghoul::getline(f, line);
+        openspace::getline(f, line);
 
         if (line.starts_with("No GP data found")) {
             LWARNING(std::format("OMM file '{}' did not contain any data", file));
@@ -755,12 +755,12 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
         "ARG_OF_PERICENTER",
         "MEAN_ANOMALY"
     };
-    std::vector<std::vector<std::string>> entries = ghoul::loadCSVFile(file, columns);
+    std::vector<std::vector<std::string>> entries = loadCSVFile(file, columns);
 
     std::vector<Parameters> result;
     result.reserve(entries.size());
     for (const std::vector<std::string>& entry : entries) {
-        ghoul_assert(entry.size() == columns.size(), "Mismatched number of columns");
+        assert_msg(entry.size() == columns.size(), "Mismatched number of columns");
 
         Parameters current = {
             .name = entry[0],
@@ -776,13 +776,13 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
                 mm
             );
             if (ptr != meanMotion.data() + meanMotion.size() || ec != std::errc()) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error parsing 'MeanMotion' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
                 ));
             }
             if (mm == 0.0) {
-                throw ghoul::RuntimeError(
+                throw RuntimeError(
                     "Error parsing 'MeanMotion' of CSV file. Mean motion of 0 not valid"
                 );
             }
@@ -798,7 +798,7 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
                 current.eccentricity
             );
             if (ptr != eccentricity.data() + eccentricity.size() || ec != std::errc()) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error parsing 'Eccentricity' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
                 ));
@@ -812,7 +812,7 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
                 current.inclination
             );
             if (ptr != inclination.data() + inclination.size() || ec != std::errc()) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error parsing 'Inclination' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
                 ));
@@ -826,7 +826,7 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
                 current.ascendingNode
             );
             if (ptr != ascendingNode.data() + ascendingNode.size() || ec != std::errc()) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error parsing 'AscendingNode' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
                 ));
@@ -842,7 +842,7 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
             if (ptr != argumentOfPeriapsis.data() + argumentOfPeriapsis.size() ||
                 ec != std::errc())
             {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error parsing 'ArgumentOfPeriapsis' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
                 ));
@@ -856,7 +856,7 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file) {
                 current.meanAnomaly
             );
             if (ptr != meanAnomaly.data() + meanAnomaly.size() || ec != std::errc()) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error parsing 'MeanAnomaly' of CSV file with error '{}'",
                     std::make_error_code(ec).message()
                 ));
@@ -873,31 +873,31 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
     constexpr int NDataFields = 9;
     constexpr std::string_view ExpectedHeader = "full_name,epoch_cal,e,a,i,om,w,ma,per";
 
-    ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+    assert_msg(std::filesystem::is_regular_file(file), "File must exist");
 
     std::ifstream f = std::ifstream(file);
 
     std::string line;
-    ghoul::getline(f, line);
+    openspace::getline(f, line);
     // Newer versions downloaded from the JPL SBDB website have " around variables
     line.erase(remove(line.begin(), line.end(), '\"'), line.end());
     if (line != ExpectedHeader) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Expected JPL SBDB file to start with '{}' but found '{}' instead",
             ExpectedHeader, line.substr(0, 100)
         ));
     }
 
     std::vector<Parameters> result;
-    while (ghoul::getline(f, line)) {
-        std::vector<std::string> parts = ghoul::tokenizeString(line, ',');
+    while (openspace::getline(f, line)) {
+        std::vector<std::string> parts = tokenizeString(line, ',');
         if (parts.size() != NDataFields) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Malformed line {}, expected 8 data fields, got {}", line, parts.size()
             ));
         }
 
-        ghoul::trimWhitespace(parts[0]);
+        trimWhitespace(parts[0]);
         auto importAngleValue = [](const std::string& angle) {
             if (angle.empty()) {
                 return 0.0;
@@ -930,7 +930,7 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
 }
 
 std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
-    ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+    assert_msg(std::filesystem::is_regular_file(file), "File must exist");
 
     std::ifstream f = std::ifstream(file);
 
@@ -945,7 +945,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
     std::vector<Parameters> result;
     std::string line;
     int i = 0;
-    while (ghoul::getline(f, line)) {
+    while (openspace::getline(f, line)) {
         i++;
 
         if (line.size() < 160) {
@@ -970,7 +970,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
                 line, "{} {} {} {} {} {} {} {}"
             );
         if (!initial) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Unable to parse initial block of line {} in data file '{}'. {}",
                 i, file, line
             ));
@@ -982,7 +982,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
         std::string name = designation;
         if (line.size() >= 194) {
             name = line.substr(166, 28);
-            ghoul::trimWhitespace(name);
+            trimWhitespace(name);
         }
 
         std::string epochDate = unpackDate(epoch);

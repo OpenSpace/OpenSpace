@@ -55,7 +55,7 @@ Documentation ConvertRecFormatTask::Documentation() {
     );
 }
 
-ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) {
+ConvertRecFormatTask::ConvertRecFormatTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _inFilePath = p.inputFilePath;

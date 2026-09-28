@@ -152,7 +152,7 @@ namespace {
     // correctly projected onto the surface.
     struct [[codegen::Dictionary(RenderablePlanetProjection)]] Parameters {
         // Contains information about projecting onto this planet.
-        ghoul::Dictionary projection
+        Dictionary projection
             [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 
         // [[codegen::verbatim(ColorTexturePathsInfo.description)]]
@@ -191,7 +191,7 @@ Documentation RenderablePlanetProjection::Documentation() {
     );
 }
 
-RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dict)
+RenderablePlanetProjection::RenderablePlanetProjection(const Dictionary& dict)
     : Renderable(dict)
     , _colorTexturePaths(ColorTexturePathsInfo)
     , _addColorTexturePath(AddColorTextureInfo)
@@ -308,7 +308,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 void RenderablePlanetProjection::initializeGL() {
     _programObject = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "ProjectiveProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "ProjectiveProgram",
                 absPath(
@@ -321,12 +321,12 @@ void RenderablePlanetProjection::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
+    opengl::updateUniformLocations(*_programObject, _mainUniformCache);
 
     _fboProgramObject = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "FBOPassProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return ghoul::opengl::ProgramObject::Build(
+        []() -> std::unique_ptr<opengl::ProgramObject> {
+            return opengl::ProgramObject::Build(
                 "FBOPassProgram",
                     absPath(
                         "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
@@ -340,7 +340,7 @@ void RenderablePlanetProjection::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
+    opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
 
     loadColorTexture();
     loadHeightTexture();
@@ -384,7 +384,7 @@ void RenderablePlanetProjection::deinitializeGL() {
 
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         "ProjectiveProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -394,15 +394,14 @@ void RenderablePlanetProjection::deinitializeGL() {
     _fboProgramObject = nullptr;
 }
 
-void RenderablePlanetProjection::imageProjectGPU(
-                                          const ghoul::opengl::Texture& projectionTexture,
-                                                         const glm::mat4& projectorMatrix)
+void RenderablePlanetProjection::imageProjectGPU(const opengl::Texture& projectionTexture,
+                                                 const glm::mat4& projectorMatrix)
 {
     _projectionComponent.imageProjectBegin();
 
     _fboProgramObject->activate();
 
-    ghoul::opengl::TextureUnit unitFbo;
+    opengl::TextureUnit unitFbo;
     unitFbo.bind(projectionTexture);
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
@@ -457,7 +456,7 @@ glm::mat4 RenderablePlanetProjection::attitudeParameters(double time, const glm:
     );
 }
 
-ghoul::opengl::Texture& RenderablePlanetProjection::baseTexture() const {
+opengl::Texture& RenderablePlanetProjection::baseTexture() const {
     return _projectionComponent.projectionTexture();
 }
 
@@ -481,7 +480,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
             }
             try {
                 const glm::mat4 projMatrix = attitudeParameters(img.timeRange.start, up);
-                const std::shared_ptr<ghoul::opengl::Texture> t =
+                const std::shared_ptr<opengl::Texture> t =
                     _projectionComponent.loadProjectionTexture(img.path);
                 imageProjectGPU(*t, projMatrix);
                 nProjections++;
@@ -539,17 +538,17 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         _projectionComponent.projectionFading()
     );
 
-    ghoul::opengl::TextureUnit baseUnit;
+    opengl::TextureUnit baseUnit;
     if (_baseTexture) {
         baseUnit.bind(*_baseTexture);
         _programObject->setUniform(_mainUniformCache.baseTexture, baseUnit);
     }
 
-    ghoul::opengl::TextureUnit projectionUnit;
+    opengl::TextureUnit projectionUnit;
     projectionUnit.bind(_projectionComponent.projectionTexture());
     _programObject->setUniform(_mainUniformCache.projectionTexture, projectionUnit);
 
-    ghoul::opengl::TextureUnit heightUnit;
+    opengl::TextureUnit heightUnit;
     if (_heightMapTexture) {
         heightUnit.bind(*_heightMapTexture);
         _programObject->setUniform(_mainUniformCache.heightTexture, heightUnit);
@@ -563,13 +562,13 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
+        opengl::updateUniformLocations(*_programObject, _mainUniformCache);
     }
 
     if (_fboProgramObject->isDirty()) {
         _fboProgramObject->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
+        opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
     }
 
     if (_colorTextureDirty) {
@@ -627,22 +626,22 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
 }
 
 void RenderablePlanetProjection::loadColorTexture() {
-    using ghoul::opengl::Texture;
+    using opengl::Texture;
     const std::string selectedPath = _colorTexturePaths.option().description;
 
     // We delete the texture first in order to free up the memory, which could otherwise
     // run out in the case of two large textures
     _baseTexture = nullptr;
     if (selectedPath != NoImageText) {
-        ghoul::opengl::Texture::WrappingModes wrapping = {
+        opengl::Texture::WrappingModes wrapping = {
             Texture::WrappingMode::Repeat,
             Texture::WrappingMode::MirroredRepeat
         };
 
-        _baseTexture = ghoul::io::texture::loadTexture(
+        _baseTexture = io::texture::loadTexture(
             absPath(selectedPath),
             2,
-            ghoul::opengl::Texture::SamplerInit {
+            opengl::Texture::SamplerInit {
                 .filter = Texture::FilterMode::LinearMipMap,
                 .wrapping = wrapping,
                 .swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
@@ -652,14 +651,14 @@ void RenderablePlanetProjection::loadColorTexture() {
 }
 
 void RenderablePlanetProjection::loadHeightTexture() {
-    using ghoul::opengl::Texture;
+    using opengl::Texture;
     const std::string selectedPath = _heightMapTexturePaths.option().description;
 
     // We delete the texture first in order to free up the memory, which could otherwise
     // run out in the case of two large textures
     _heightMapTexture = nullptr;
     if (selectedPath != NoImageText) {
-        _heightMapTexture = ghoul::io::texture::loadTexture(
+        _heightMapTexture = io::texture::loadTexture(
             absPath(selectedPath),
             2,
             {

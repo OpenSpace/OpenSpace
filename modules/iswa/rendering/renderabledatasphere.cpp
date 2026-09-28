@@ -52,7 +52,7 @@ Documentation RenderableDataSphere::Documentation() {
     );
 }
 
-RenderableDataSphere::RenderableDataSphere(const ghoul::Dictionary& dictionary)
+RenderableDataSphere::RenderableDataSphere(const Dictionary& dictionary)
     : RenderableDataCygnet(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

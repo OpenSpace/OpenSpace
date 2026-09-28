@@ -111,7 +111,7 @@ Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
 }
 
 ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _jsonFilePath(FileInfo, "")
     , _showBefore(ShowBeforeInfo, false)
@@ -156,14 +156,14 @@ void ScreenSpaceTimeVaryingImageOnline::deinitializeGL() {
 void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::filesystem::path& path) {
     std::ifstream file = std::ifstream(path);
     if (!file.is_open()) {
-        throw ghoul::RuntimeError(std::format("Could not open JSON file at '{}'", path));
+        throw RuntimeError(std::format("Could not open JSON file at '{}'", path));
     }
 
     nlohmann::json json;
     file >> json;
 
     if (json.find("files") == json.end()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error loading JSON file. No 'files' was found in '{}'", path
         ));
     }
@@ -236,21 +236,21 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
         }
 
         try {
-            _texture = ghoul::io::texture::loadTexture(
+            _texture = io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
-                ghoul::opengl::Texture::SamplerInit{
+                opengl::Texture::SamplerInit{
                     // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-                    //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                    //.filter = opengl::Texture::FilterMode::AnisotropicMipMap,
+                    .filter = opengl::Texture::FilterMode::LinearMipMap
                 },
                 imageFile.format
             );
 
             _objectSize = _texture->dimensions();
         }
-        catch (const ghoul::io::texture::InvalidLoadException& e) {
+        catch (const io::texture::InvalidLoadException& e) {
             LERRORC(e.component, e.message);
         }
     }
@@ -287,7 +287,7 @@ void ScreenSpaceTimeVaryingImageOnline::loadImage(const std::string& imageUrl) {
     );
 }
 
-void ScreenSpaceTimeVaryingImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceTimeVaryingImageOnline::bindTexture(opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
         unit.bind(*_texture);
     }

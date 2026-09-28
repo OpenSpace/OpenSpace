@@ -649,7 +649,7 @@ namespace {
 
     // Ensures the item at the given index is a map, replacing it if needed
     PropertyMap& ensureListItemMap(PropertyList& items, size_t index) {
-        ghoul_assert(index < items.size(), "Index out of range");
+        assert_msg(index < items.size(), "Index out of range");
         if (!items[index].isMap()) {
             items[index] = PropertyMap();
         }
@@ -661,7 +661,7 @@ namespace {
         if (properties.count(key) == 0 || properties.at(key).isNull()) {
             properties[key] = PropertyMap();
         }
-        ghoul_assert(properties[key].isMap(), "Key is not a map");
+        assert_msg(properties[key].isMap(), "Key is not a map");
         return properties[key].toMap();
     }
 
@@ -681,7 +681,7 @@ namespace {
         }
         else {
             // Should already be a list if it exists and isn't null or a map
-            ghoul_assert(properties.at(key).isList(), "Key is not a list");
+            assert_msg(properties.at(key).isList(), "Key is not a list");
         }
     }
 
@@ -1510,7 +1510,7 @@ void SchemaFormWidget::buildRefContent(CollapsibleSection* section,
         AssetSchema::instance().findType(reference.identifier);
 
     // Both lookups should succeed if the schema is well-formed
-    ghoul_assert(targetType && category, "buildRefContent: schema lookup failed");
+    assert_msg(targetType && category, "buildRefContent: schema lookup failed");
 
     // Polymorphic when the target is the base type of its category (e.g. "Renderable"),
     // or as a fallback when lookup fails

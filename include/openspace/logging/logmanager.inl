@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,32 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-inline void log(ghoul::logging::LogLevel level, std::string_view category,
+inline void log(openspace::logging::LogLevel level, std::string_view category,
                 std::string_view message)
 {
     LogMgr.logMessage(level, category, message);
 }
 
 inline void LTRACEC(std::string_view category, std::string_view message) {
-    log(ghoul::logging::LogLevel::Trace, category, message);
+    log(openspace::logging::LogLevel::Trace, category, message);
 }
 
 inline void LDEBUGC(std::string_view category, std::string_view message) {
-    log(ghoul::logging::LogLevel::Debug, category, message);
+    log(openspace::logging::LogLevel::Debug, category, message);
 }
 
 inline void LINFOC(std::string_view category, std::string_view message) {
-    log(ghoul::logging::LogLevel::Info, category, message);
+    log(openspace::logging::LogLevel::Info, category, message);
 }
 
 inline void LWARNINGC(std::string_view category, std::string_view message) {
-    log(ghoul::logging::LogLevel::Warning, category, message);
+    log(openspace::logging::LogLevel::Warning, category, message);
 }
 
 inline void LERRORC(std::string_view category, std::string_view message) {
-    log(ghoul::logging::LogLevel::Error, category, message);
+    log(openspace::logging::LogLevel::Error, category, message);
 }
 
 inline void LFATALC(std::string_view category, std::string_view message) {
-    log(ghoul::logging::LogLevel::Fatal, category, message);
+    log(openspace::logging::LogLevel::Fatal, category, message);
 }

@@ -243,7 +243,7 @@ openspace::Documentation RenderableSolarImagery::Documentation() {
     );
 }
 
-RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
+RenderableSolarImagery::RenderableSolarImagery(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _jumpToStart(JumpToStartInfo)
     , _activeInstruments(ActiveInstrumentInfo)
@@ -404,7 +404,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 void RenderableSolarImagery::initializeGL() {
     _planeShader = BaseModule::ProgramObjectManager.request(
         "SpacecraftImagePlaneProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "SpacecraftImagePlaneProgram",
                 absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl"),
@@ -415,7 +415,7 @@ void RenderableSolarImagery::initializeGL() {
 
     _frustumShader = BaseModule::ProgramObjectManager.request(
         "SpacecraftFrustumProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "SpacecraftFrustumProgram",
                 absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl"),
@@ -460,19 +460,19 @@ void RenderableSolarImagery::initializeGL() {
     glVertexArrayAttribFormat(_frustumVao, 0, 4, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_frustumVao, 0, 0);
 
-    ghoul::opengl::updateUniformLocations(*_planeShader, _uniformCachePlane);
-    ghoul::opengl::updateUniformLocations(*_frustumShader, _uniformCacheFrustum);
+    opengl::updateUniformLocations(*_planeShader, _uniformCachePlane);
+    opengl::updateUniformLocations(*_frustumShader, _uniformCacheFrustum);
     createPlaneAndFrustum(_moveFactor);
 
-    _imageryTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _imageryTexture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::Red,
+            .format = opengl::Texture::Format::Red,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
@@ -486,7 +486,7 @@ void RenderableSolarImagery::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "SpacecraftImagePlaneProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -494,7 +494,7 @@ void RenderableSolarImagery::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "SpacecraftFrustumProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -515,7 +515,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
             glDisable(GL_CULL_FACE);
             break;
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 
     // Perform necessary transforms
@@ -571,7 +571,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelViewTransform = viewMatrix * planeModelTransform;
 
     _planeShader->activate();
-    ghoul::opengl::TextureUnit imageUnit;
+    opengl::TextureUnit imageUnit;
     imageUnit.bind(*_imageryTexture);
 
     _planeShader->setUniform(_uniformCachePlane.isCoronaGraph, _isCoronaGraph);
@@ -586,7 +586,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
         projectionMatrix * glm::mat4(modelViewTransform)
     );
 
-    ghoul::opengl::TextureUnit tfUnit;
+    opengl::TextureUnit tfUnit;
     TransferFunction* lut = transferFunction();
     _planeShader->setUniform(_uniformCachePlane.hasLut, lut != nullptr);
     if (lut) {
@@ -680,7 +680,7 @@ TransferFunction* RenderableSolarImagery::transferFunction() {
     return _tfMap[_currentActiveInstrument].get();
 }
 
-const ghoul::opengl::Texture& RenderableSolarImagery::imageryTexture() const {
+const opengl::Texture& RenderableSolarImagery::imageryTexture() const {
     return *_imageryTexture;
 }
 

@@ -28,7 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/misc/managedmemoryuniqueptr.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -102,7 +102,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
 protected:
-    explicit RenderableTrail(const ghoul::Dictionary& dictionary);
+    explicit RenderableTrail(const Dictionary& dictionary);
 
     /**
      * Get the trail position for a given time from the Translation object. The position
@@ -132,7 +132,7 @@ protected:
     std::vector<unsigned int> _indexArray;
 
     /// The Translation object that provides the position of the individual trail points
-    ghoul::mm_unique_ptr<Translation> _translation;
+    mm_unique_ptr<Translation> _translation;
 
     /**
      * The RenderInformation contains information filled in by the concrete subclasses to
@@ -192,7 +192,7 @@ private:
    Appearance _appearance;
 
     /// Program object used to render the data stored in RenderInformation
-    ghoul::opengl::ProgramObject* _programObject = nullptr;
+    opengl::ProgramObject* _programObject = nullptr;
     UniformCache(opacity, modelViewTransform, projectionTransform, color, useLineFade,
         lineLength, lineFadeAmount, vertexSortingMethod, idOffset, nVertices, stride,
         pointSize, renderPhase, viewport, lineWidth, floatingOffset, useSplitRenderMode,

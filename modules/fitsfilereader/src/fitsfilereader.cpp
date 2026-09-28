@@ -250,7 +250,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     );
 
     if (!table) {
-        throw ghoul::RuntimeError(std::format("Failed to open Fits file '{}'", filePath));
+        throw RuntimeError(std::format("Failed to open Fits file '{}'", filePath));
     }
 
     int nStars = table->readRows - firstRow + 1;
@@ -386,7 +386,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
     std::string line;
     while (true) {
         const std::streampos position = fileStream.tellg();
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
 
         if (line.empty() || line[0] == '#') {
             continue;
@@ -442,7 +442,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
         std::vector<float> readValues(nValuesPerStar);
         nStars++;
 
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
         std::stringstream str = std::stringstream(line);
 
         // Read values

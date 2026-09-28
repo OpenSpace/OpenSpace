@@ -47,7 +47,7 @@ using namespace openspace;
 
 namespace {
     void updateListItem(QListWidgetItem* item, const Profile::Action& action) {
-        ghoul_assert(item, "Item must exist at this point");
+        assert_msg(item, "Item must exist at this point");
         item->setText(
             action.name.empty() ?
             QString::fromStdString(action.identifier) :
@@ -56,8 +56,10 @@ namespace {
     }
 
     void updateListItem(QListWidgetItem* item, const Profile::Keybinding& kb) {
-        ghoul_assert(item, "Item must exist at this point");
-        const std::string n = std::format("{}\t{}", ghoul::to_string(kb.key), kb.action);
+        assert_msg(item, "Item must exist at this point");
+        const std::string n = std::format(
+            "{}\t{}", openspace::to_string(kb.key), kb.action
+        );
         item->setText(QString::fromStdString(n));
     }
 } // namespace
@@ -460,9 +462,9 @@ void ActionDialog::actionAdd() {
 
 void ActionDialog::actionRemove() {
     const Profile::Action* action = selectedAction();
-    ghoul_assert(action, "An action must exist at this point");
+    assert_msg(action, "An action must exist at this point");
 
-    ghoul_assert(
+    assert_msg(
         _actionWidgets.list->count() == static_cast<int>(_actionData.size()),
         "Action list and data has desynced"
     );
@@ -480,7 +482,7 @@ void ActionDialog::actionRemove() {
                 "Action '{}' is used in the keybind '{}' and cannot be removed unless "
                 "the keybind is removed as well. Do you want to remove the keybind as "
                 "well?",
-                action->identifier, ghoul::to_string(kb.key)
+                action->identifier, openspace::to_string(kb.key)
             )),
             QMessageBox::StandardButton::Yes,
             QMessageBox::StandardButton::No
@@ -519,14 +521,14 @@ void ActionDialog::actionRemove() {
         }
     }
 
-    ghoul_assert(false, "We shouldn't be able to get here");
+    assert_msg(false, "We shouldn't be able to get here");
 }
 
 void ActionDialog::actionDuplicate() {
     const Profile::Action* action = selectedAction();
-    ghoul_assert(action, "An action must exist at this point");
+    assert_msg(action, "An action must exist at this point");
 
-    ghoul_assert(
+    assert_msg(
         _actionWidgets.list->count() == static_cast<int>(_actionData.size()),
         "Action list and data has desynced"
     );
@@ -612,7 +614,7 @@ void ActionDialog::actionSaved() {
 
         // If we got this far, we have a new identifier and it is a new one, so we need to
         // update other keybinds now
-        ghoul_assert(
+        assert_msg(
             _keybindingWidgets.list->count() == static_cast<int>(_keybindingsData.size()),
             "The list and data got out of sync"
         );
@@ -717,7 +719,7 @@ void ActionDialog::keybindingAdd() {
 
 void ActionDialog::keybindingRemove() {
     const Profile::Keybinding* keybinding = selectedKeybinding();
-    ghoul_assert(keybinding, "A keybinding must be selected at this point");
+    assert_msg(keybinding, "A keybinding must be selected at this point");
 
     for (size_t i = 0; i < _keybindingsData.size(); i++) {
         if (_keybindingsData[i].key == keybinding->key &&
@@ -751,7 +753,7 @@ void ActionDialog::keybindingSelected() {
             hasKeyModifier(keybinding->key.modifier, KeyModifier::Alt)
         );
 
-        const std::string key = ghoul::to_string(keybinding->key.key);
+        const std::string key = openspace::to_string(keybinding->key.key);
         _keybindingWidgets.key->setCurrentText(QString::fromStdString(key));
         _keybindingWidgets.key->setEnabled(true);
         _keybindingWidgets.action->setCurrentText(
@@ -805,7 +807,7 @@ void ActionDialog::keybindingSaved() {
         return;
     }
     Profile::Keybinding* keybinding = selectedKeybinding();
-    ghoul_assert(keybinding, "There must be a selected keybinding at this point");
+    assert_msg(keybinding, "There must be a selected keybinding at this point");
 
     KeyModifier km = KeyModifier::None;
     if (_keybindingWidgets.shiftModifier->isChecked()) {

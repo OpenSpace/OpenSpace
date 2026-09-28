@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +30,7 @@
 #include <string_view>
 #include <type_traits>
 
-namespace ghoul {
+namespace openspace {
 
 /**
  * Converts the passed \p string into a `T` value and returns it. For each valid
@@ -39,8 +38,8 @@ namespace ghoul {
  * analogous to the `std::to_string` function and should behave as such:
  *
  * ```
- * ghoul::to_string(ghoul::from_string(s)) == s
- * ghoul::from_string(ghoul::to_string(v)) == v
+ * openspace::to_string(openspace::from_string(s)) == s
+ * openspace::from_string(openspace::to_string(v)) == v
  * ```
  */
 template <typename T>
@@ -69,6 +68,6 @@ std::string to_string(const T& value) {
     }
 }
 
-} // namespace ghoul
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___STRINGCONVERSION___H__

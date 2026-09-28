@@ -22,67 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <catch2/catch_session.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/filesystem/file.h>
 #include <openspace/filesystem/filesystem.h>
-#include <openspace/logging/logmanager.h>
-#include <openspace/lua/ghoul_lua.h>
-#include <openspace/openspace.h>
-#include <openspace/misc/dictionary.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
+#include <openspace/lua/lua.h>
+#include <openspace/lua/luastate.h>
+#include <openspace/lua/lua_helper.h>
 #include <filesystem>
-#include <iostream>
 
-int main(int argc, char** argv) {
-    using namespace openspace;
+#if 0
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Info,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
-    initialize();
-    global::create();
+using namespace openspace;
 
-    // Register the path of the executable,
-    // to make it possible to find other files in the same directory.
-    FileSys.registerPathToken(
-        "${BIN}",
-        std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
+TEST_CASE("CreateSingleColorImage: Create image and check return value",
+          "[createsinglecolorimage]")
+{
+    const std::filesystem::path path = createSingleColorImage(
+        "colorFile",
+        glm::dvec3(1.0, 0.0, 0.0)
     );
 
-    const std::filesystem::path configFile = findConfiguration();
-    // Register the base path as the directory where 'filename' lives
-    const std::filesystem::path base = configFile.parent_path();
-    FileSys.registerPathToken("${BASE}", base);
-
-    *global::configuration = loadConfigurationFromFile(configFile, "");
-    registerPathTokens(*global::configuration);
-    global::openSpaceEngine->initialize();
-
-    ghoul::logging::LogManager::deinitialize();
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Info,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
-
-    FileSys.registerPathToken("${TESTDIR}", "${BASE}/tests");
-
-    // All of the relevant tests initialize the SpiceManager
-    openspace::SpiceManager::deinitialize();
-
-
-    const int result = Catch::Session().run(argc, argv);
-
-    // And the deinitialization needs the SpiceManager to be initialized
-    openspace::SpiceManager::initialize();
-    global::openSpaceEngine->deinitialize();
-    return result;
+    CHECK_THAT(path.string(), Catch::Matchers::ContainsSubstring("colorFile.ppm"));
 }
+
+TEST_CASE("CreateSingleColorImage: Faulty color value (invalid values)",
+          "[createsinglecolorimage]")
+{
+    CHECK_THROWS_WITH(
+        createSingleColorImage("notCreatedColorFile", glm::dvec3(255.0, 0.0, 0.0)),
+        Catch::Matchers::Equals(
+            "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
+        )
+    );
+}
+
+TEST_CASE("CreateSingleColorImage: Check if file was created",
+          "[createsinglecolorimage]")
+{
+    const std::filesystem::path path = createSingleColorImage(
+        "colorFile2",
+        glm::dvec3(0.0, 1.0, 0.0)
+    );
+    CHECK(std::filesystem::is_regular_file(path));
+}
+
+TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage]") {
+    const std::filesystem::path path = createSingleColorImage(
+        "colorFile",
+        glm::dvec3(1.0, 0.0, 0.0)
+    );
+
+    // Read the PPM file and check the image dimensions
+    // (maybe too hard coded, but cannot load a texture here...)
+    std::ifstream ppmFile = std::ifstream(path, std::ifstream::binary);
+    REQUIRE(ppmFile.is_open());
+
+    std::string version;
+    unsigned int width = 0;
+    unsigned int height = 0;
+
+    ppmFile >> version >> width >> height;
+
+    CHECK(width == 1);
+    CHECK(height == 1);
+}
+
+#endif

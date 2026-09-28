@@ -55,7 +55,7 @@ Documentation ScreenSpaceText::Documentation() {
     );
 }
 
-ScreenSpaceText::ScreenSpaceText(const ghoul::Dictionary& dictionary)
+ScreenSpaceText::ScreenSpaceText(const Dictionary& dictionary)
     : ScreenSpaceRenderableText(dictionary)
     , _text(TextInfo, "")
 {

@@ -173,7 +173,7 @@ SizeMappingComponent::SizeMappingComponent()
     addProperty(invertScale);
 }
 
-SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
+SizeMappingComponent::SizeMappingComponent(const Dictionary& dictionary)
     : SizeMappingComponent()
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

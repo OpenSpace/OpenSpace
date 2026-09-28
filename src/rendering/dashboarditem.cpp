@@ -74,11 +74,11 @@ Documentation DashboardItem::Documentation() {
 }
 
 std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
-    ghoul::TemplateFactory<DashboardItem>* factory =
+    TemplateFactory<DashboardItem>* factory =
         FactoryManager::ref().factory<DashboardItem>();
-    ghoul_assert(factory, "DashboardItem factory did not exist");
+    assert_msg(factory, "DashboardItem factory did not exist");
 
     const std::string& dashboardType = dictionary.value<std::string>(KeyType);
 
@@ -88,7 +88,7 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
     return std::unique_ptr<DashboardItem>(item);
 }
 
-DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
+DashboardItem::DashboardItem(const Dictionary& dictionary)
     : PropertyOwner({ "", "" })
     , _enabled(EnabledInfo, true)
 {

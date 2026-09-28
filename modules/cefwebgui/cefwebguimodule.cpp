@@ -151,7 +151,7 @@ void CefWebGuiModule::startOrStopGui() {
     }
 }
 
-void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
+void CefWebGuiModule::internalInitialize(const Dictionary& configuration) {
     ZoneScoped;
 
     WebBrowserModule* webBrowserModule =

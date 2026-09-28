@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,7 +55,7 @@
 #include <tuple>
 #include <vector>
 
-namespace ghoul {
+namespace openspace {
 
 /**
  * The ThreadPool is a class that manages a list of threads (= ThreadPool::Worker%s) that
@@ -68,13 +67,13 @@ namespace ghoul {
  *
  * Example use-case:
  * ```
- *  ghoul::ThreadPool pool(2);
+ *  ThreadPool pool(2);
  *
  * {
  *     std::future<int> ret = pool.queue([](){ return 1337; });
  *     auto urn = pool.queue([](){ return "foobar"; });
- *     ghoul_assert(ret.get() == 1337);
- *     ghoul_assert(urn.get() == "foobar");
+ *     assert_msg(ret.get() == 1337);
+ *     assert_msg(urn.get() == "foobar");
  *  }
  *
  *  {
@@ -84,9 +83,9 @@ namespace ghoul {
  *
  *     std::future<std::tuple<std::string, float, int>> r = pool.queue(f, 1, 2.f, "3");
  *     std::tuple<std::string, float, int> val = r.get();
- *     ghoul_assert("3" == std::get<0>(val));
- *     ghoul_assert(2.f == std::get<1>(val));
- *     ghoul_assert(1 == std::get<2>(val));
+ *     assert_msg("3" == std::get<0>(val));
+ *     assert_msg(2.f == std::get<1>(val));
+ *     assert_msg(1 == std::get<2>(val));
  *  }
  * ```
  *
@@ -115,10 +114,10 @@ public:
      *        called once for each Worker when it is created
      * \param workerDeinit The additional deinitialize function for each Worker that gets
      *        called once for each Worken when it is destroyed
-     * \param tpc The ghoul::thread::ThreadPriorityClass of the worker threads managed by
-     *        the ThreadPool
-     * \param tpl The ghoul::thread::ThreadPriorityLevel of the worker threads managed by
-     *        the ThreadPool
+     * \param tpc The thread::ThreadPriorityClass of the worker threads managed by the
+     *        ThreadPool
+     * \param tpl The thread::ThreadPriorityLevel of the worker threads managed by the
+     *        ThreadPool
      * \param bg Whether the worker threads managed by this thread pool are run in a
      *        background mode (depending on the support of the operating system)
      *
@@ -228,13 +227,13 @@ public:
      * worker in the constructor or a subsequent call to #resize. The template parameters
      * of this function are best to be automatically determined. Example use-case:
      * ```
-     * ghoul::ThreadPool pool(2);
+     * ThreadPool pool(2);
      *
      * {
      *     std::future<int> ret = pool.queue([](){ return 1337; });
      *     auto urn = pool.queue([](){ return "foobar"; });
-     *     ghoul_assert(ret.get() == 1337);
-     *     ghoul_assert(urn.get() == "foobar");
+     *     assert_msg(ret.get() == 1337);
+     *     assert_msg(urn.get() == "foobar");
      * }
      *
      * {
@@ -245,9 +244,9 @@ public:
      *     std::future<std::tuple<std::string, float, int>> ret =
      *         pool.queue(func, 1, 2.f, "3");
      *     std::tuple<std::string, float, int> val = ret.get();
-     *     ghoul_assert("3" == std::get<0>(val));
-     *     ghoul_assert(2.f == std::get<1>(val));
-     *     ghoul_assert(1 == std::get<2>(val));
+     *     assert_msg("3" == std::get<0>(val));
+     *     assert_msg(2.f == std::get<1>(val));
+     *     assert_msg(1 == std::get<2>(val));
      * }
      * ```
      *
@@ -398,16 +397,16 @@ private:
     /// Worker%s lifetime
     std::function<void ()> _workerDeinitialization;
 
-    /// The ghoul::thread::ThreadPriorityClass of all the Worker%s of this ThreadPool
+    /// The thread::ThreadPriorityClass of all the Worker%s of this ThreadPool
     thread::ThreadPriorityClass _threadPriorityClass;
-    /// The ghoul::thread::ThreadPriorityLevel of all the Worker%s of this ThreadPool
+    /// The thread::ThreadPriorityLevel of all the Worker%s of this ThreadPool
     thread::ThreadPriorityLevel _threadPriorityLevel;
     /// Whether all Worker%s of this ThreadPool are started in the background mode (if
     /// supported by the operating system)
     thread::Background _threadBackground;
 };
 
-} // namespace ghoul
+} // namespace openspace
 
 #include "threadpool.inl"
 

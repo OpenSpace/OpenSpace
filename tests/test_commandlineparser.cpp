@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +30,9 @@
 
 #include <memory>
 
+using namespace openspace;
+using namespace openspace::cmdparser;
+
  /*
   * Test checklist:
   * +++ SingleCommand, MultipleCommand
@@ -48,7 +50,7 @@
   */
 
 TEST_CASE("CommandlineParser: Unknown Commands Unhandled", "[commandlineparser]") {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     const std::vector<std::string> argv = {
         "tests",
@@ -59,12 +61,12 @@ TEST_CASE("CommandlineParser: Unknown Commands Unhandled", "[commandlineparser]"
     };
 
     p.setCommandLine(argv);
-    REQUIRE_THROWS_AS(p.execute(), ghoul::RuntimeError);
+    REQUIRE_THROWS_AS(p.execute(), RuntimeError);
 }
 
 TEST_CASE("CommandlineParser: Unknown Commands Handled Correctly", "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     const std::vector<std::string> argv = {
         "tests",
@@ -74,15 +76,13 @@ TEST_CASE("CommandlineParser: Unknown Commands Handled Correctly", "[commandline
         "arg2"
     };
 
-    p.setAllowUnknownCommands(
-        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
-    );
+    p.setAllowUnknownCommands(CommandlineParser::AllowUnknownCommands::Yes);
     p.setCommandLine(argv);
     REQUIRE_NOTHROW(p.execute());
 }
 
 TEST_CASE("CommandlineParser: Unknown Commands Interspersed", "[commandlineparser]") {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     const std::vector<std::string> argv = {
         "tests",
@@ -96,10 +96,9 @@ TEST_CASE("CommandlineParser: Unknown Commands Interspersed", "[commandlineparse
     };
     std::optional<std::string> v1;
     std::optional<std::string> v2;
-    using T = ghoul::cmdparser::SingleCommand<std::string, std::string>;
+    using T = SingleCommand<std::string, std::string>;
     p.addCommand(std::make_unique<T>(v1, v2, "-cmd2"));
 
-    using ghoul::cmdparser::CommandlineParser;
     p.setAllowUnknownCommands(CommandlineParser::AllowUnknownCommands::Yes);
     const std::vector<std::string>& arguments = p.setCommandLine(argv);
 
@@ -117,10 +116,10 @@ TEST_CASE("CommandlineParser: Unknown Commands Interspersed", "[commandlineparse
 }
 
 TEST_CASE("CommandlineParser: Single Zero Command Arguments", "[commandlineparser]") {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::optional<bool> v;
-    using T = ghoul::cmdparser::SingleCommandZeroArguments;
+    using T = SingleCommandZeroArguments;
     p.addCommand(std::make_unique<T>(v, "-zero"));
 
     const std::vector<std::string> argv = {
@@ -135,11 +134,11 @@ TEST_CASE("CommandlineParser: Single Zero Command Arguments", "[commandlineparse
 }
 
 TEST_CASE("CommandlineParser: Single Command One Argument Bool", "[commandlineparser]") {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     // boolean
     std::optional<bool> v;
-    using T = ghoul::cmdparser::SingleCommand<bool>;
+    using T = SingleCommand<bool>;
     p.addCommand(std::make_unique<T>(v, "-single"));
 
     SECTION("false") {
@@ -172,11 +171,11 @@ TEST_CASE(
     "CommandlineParser: Single Command Called Multiple Times",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     // boolean
     std::optional<bool> v = false;
-    using T = ghoul::cmdparser::SingleCommand<bool>;
+    using T = SingleCommand<bool>;
     p.addCommand(std::make_unique<T>(v, "-single"));
 
     const std::vector<std::string> argv = {
@@ -188,17 +187,17 @@ TEST_CASE(
     };
 
     p.setCommandLine(argv);
-    REQUIRE_THROWS_AS(p.execute(), ghoul::RuntimeError);
+    REQUIRE_THROWS_AS(p.execute(), RuntimeError);
 }
 
 TEST_CASE("CommandlineParser: Multiple Commands Permutation", "[commandlineparser]") {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::optional<int> v1;
     std::optional<int> v2;
     std::optional<int> v3;
 
-    using T = ghoul::cmdparser::SingleCommand<int>;
+    using T = SingleCommand<int>;
 
     p.addCommand(std::make_unique<T>(v1, "-cmd1"));
     p.addCommand(std::make_unique<T>(v2, "-cmd2"));
@@ -290,10 +289,10 @@ TEST_CASE("CommandlineParser: Multiple Commands Permutation", "[commandlineparse
 }
 
 TEST_CASE("CommandlineParser: Single Command One Argument Int", "[commandlineparser]") {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::optional<int> v;
-    using T = ghoul::cmdparser::SingleCommand<int>;
+    using T = SingleCommand<int>;
     p.addCommand(std::make_unique<T>(v, "-single"));
 
     SECTION("1") {
@@ -324,10 +323,10 @@ TEST_CASE("CommandlineParser: Single Command One Argument Int", "[commandlinepar
 
 TEST_CASE("CommandlineParser: Single Command One Argument String", "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::optional<std::string> v;
-    using T = ghoul::cmdparser::SingleCommand<std::string>;
+    using T = SingleCommand<std::string>;
     p.addCommand(std::make_unique<T>(v, "-single"));
 
     SECTION("foo") {
@@ -361,11 +360,11 @@ TEST_CASE(
     "CommandlineParser: Single Command Two Arguments Bool Bool",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::optional<bool> v1;
     std::optional<bool> v2;
-    using T = ghoul::cmdparser::SingleCommand<bool, bool>;
+    using T = SingleCommand<bool, bool>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -434,10 +433,10 @@ TEST_CASE(
     "CommandlineParser: Single Command Two Arguments Int Int",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
     std::optional<int> v1;
     std::optional<int> v2;
-    using T = ghoul::cmdparser::SingleCommand<int, int>;
+    using T = SingleCommand<int, int>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -506,11 +505,11 @@ TEST_CASE(
     "CommandlineParser: Single Command Two Arguments String String",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::optional<std::string> v1;
     std::optional<std::string> v2;
-    using T = ghoul::cmdparser::SingleCommand<std::string, std::string>;
+    using T = SingleCommand<std::string, std::string>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -580,11 +579,11 @@ TEST_CASE(
     "CommandlineParser: Single Command Two Arguments Bool Int",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::optional<bool> v1;
     std::optional<int> v2;
-    using T = ghoul::cmdparser::SingleCommand<bool, int>;
+    using T = SingleCommand<bool, int>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -653,10 +652,10 @@ TEST_CASE(
     "CommandlineParser: Single Command Two Arguments Int Bool",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
     std::optional<int> v1;
     std::optional<bool> v2;
-    using T = ghoul::cmdparser::SingleCommand<int, bool>;
+    using T = SingleCommand<int, bool>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -725,11 +724,11 @@ TEST_CASE(
     "CommandlineParser: Single Command Two Arguments Int String",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::optional<int> v1;
     std::optional<std::string> v2;
-    using T = ghoul::cmdparser::SingleCommand<int, std::string>;
+    using T = SingleCommand<int, std::string>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -798,11 +797,11 @@ TEST_CASE(
     "CommandlineParser: Single Command Two Arguments String Int",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::optional<std::string> v1;
     std::optional<int> v2;
-    using T = ghoul::cmdparser::SingleCommand<std::string, int>;
+    using T = SingleCommand<std::string, int>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -871,12 +870,12 @@ TEST_CASE(
     "CommandlineParser: Single Command Three Arguments Bool Int String",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::optional<bool> v1;
     std::optional<int> v2;
     std::optional<std::string> v3;
-    using T = ghoul::cmdparser::SingleCommand<bool, int, std::string>;
+    using T = SingleCommand<bool, int, std::string>;
     p.addCommand(std::make_unique<T>(v1, v2, v3, "-single"));
 
     SECTION("000") {
@@ -1030,14 +1029,14 @@ TEST_CASE(
     "CommandlineParser: Single Command Four Arguments Bool Int String Float",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::optional<bool> v1;
     std::optional<int> v2;
     std::optional<std::string> v3;
     std::optional<float> v4;
 
-    using T = ghoul::cmdparser::SingleCommand<bool, int, std::string, float>;
+    using T = SingleCommand<bool, int, std::string, float>;
     p.addCommand(std::make_unique<T>(v1, v2, v3, v4, "-single"));
 
     SECTION("0000") {
@@ -1385,10 +1384,10 @@ TEST_CASE(
     "CommandlineParser: Multiple Zero Command Arguments",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     int v = 0;
-    using T = ghoul::cmdparser::MultipleCommandZeroArguments;
+    using T = MultipleCommandZeroArguments;
     p.addCommand(std::make_unique<T>(v, "-zero"));
 
     SECTION("zero zero") {
@@ -1422,10 +1421,10 @@ TEST_CASE(
 
 TEST_CASE("CommandlineParser: Multiple Command One Argument Bool", "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<bool> v;
-    using T = ghoul::cmdparser::MultipleCommand<bool>;
+    using T = MultipleCommand<bool>;
     p.addCommand(std::make_unique<T>(v, "-single"));
 
     SECTION("0") {
@@ -1520,10 +1519,10 @@ TEST_CASE("CommandlineParser: Multiple Command One Argument Bool", "[commandline
 }
 
 TEST_CASE("CommandlineParser: Multiple Command One Argument Int", "[commandlineparser]") {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<int> v;
-    using T = ghoul::cmdparser::MultipleCommand<int>;
+    using T = MultipleCommand<int>;
     p.addCommand(std::make_unique<T>(v, "-single"));
 
     SECTION("1") {
@@ -1621,10 +1620,10 @@ TEST_CASE(
     "CommandlineParser: Multiple Command One Argument String",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<std::string> v;
-    using T = ghoul::cmdparser::MultipleCommand<std::string>;
+    using T = MultipleCommand<std::string>;
     p.addCommand(std::make_unique<T>(v, "-single"));
 
     SECTION("foo") {
@@ -1722,11 +1721,11 @@ TEST_CASE(
     "CommandlineParser: Multiple Command Two Arguments Bool Bool",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<bool> v1;
     std::vector<bool> v2;
-    using T = ghoul::cmdparser::MultipleCommand<bool, bool>;
+    using T = MultipleCommand<bool, bool>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -1966,12 +1965,12 @@ TEST_CASE(
     "CommandlineParser: Multiple Command Two Arguments Int Int",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<int> v1;
     std::vector<int> v2;
 
-    using T = ghoul::cmdparser::MultipleCommand<int, int>;
+    using T = MultipleCommand<int, int>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -2211,12 +2210,12 @@ TEST_CASE(
     "CommandlineParser: Multiple Command Two Arguments String String",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<std::string> v1;
     std::vector<std::string> v2;
 
-    using T = ghoul::cmdparser::MultipleCommand<std::string, std::string>;
+    using T = MultipleCommand<std::string, std::string>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -2456,12 +2455,12 @@ TEST_CASE(
     "CommandlineParser: Multiple Command Two Arguments Bool Int",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<bool> v1;
     std::vector<int> v2;
 
-    using T = ghoul::cmdparser::MultipleCommand<bool, int>;
+    using T = MultipleCommand<bool, int>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -2701,12 +2700,12 @@ TEST_CASE(
     "CommandlineParser: Multiple Command Two Arguments Int Bool",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<int> v1;
     std::vector<bool> v2;
 
-    using T = ghoul::cmdparser::MultipleCommand<int, bool>;
+    using T = MultipleCommand<int, bool>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -2946,12 +2945,12 @@ TEST_CASE(
     "CommandlineParser: Multiple Command Two Arguments Int String",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<int> v1;
     std::vector<std::string> v2;
 
-    using T = ghoul::cmdparser::MultipleCommand<int, std::string>;
+    using T = MultipleCommand<int, std::string>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -3191,12 +3190,12 @@ TEST_CASE(
     "CommandlineParser: Multiple Command Two Arguments String Int",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<std::string> v1;
     std::vector<int> v2;
 
-    using T = ghoul::cmdparser::MultipleCommand<std::string, int>;
+    using T = MultipleCommand<std::string, int>;
     p.addCommand(std::make_unique<T>(v1, v2, "-single"));
 
     SECTION("00") {
@@ -3436,13 +3435,13 @@ TEST_CASE(
     "CommandlineParser: Multiple Command Three Arguments Bool Int String",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<bool> v1;
     std::vector<int> v2;
     std::vector<std::string> v3;
 
-    using T = ghoul::cmdparser::MultipleCommand<bool, int, std::string>;
+    using T = MultipleCommand<bool, int, std::string>;
     p.addCommand(std::make_unique<T>(v1, v2, v3, "-single"));
 
     SECTION("000") {
@@ -4018,14 +4017,14 @@ TEST_CASE(
     "CommandlineParser: Multiple Command Four Arguments Bool Int String Float",
     "[commandlineparser]")
 {
-    ghoul::cmdparser::CommandlineParser p;
+    CommandlineParser p;
 
     std::vector<bool> v1;
     std::vector<int> v2;
     std::vector<std::string> v3;
     std::vector<float> v4;
 
-    using T = ghoul::cmdparser::MultipleCommand<bool, int, std::string, float>;
+    using T = MultipleCommand<bool, int, std::string, float>;
     p.addCommand(std::make_unique<T>(v1, v2, v3, v4, "-single"));
 
     SECTION("0000") {

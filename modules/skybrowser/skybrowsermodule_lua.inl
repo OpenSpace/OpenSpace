@@ -45,12 +45,12 @@ bool browserBelongsToCurrentNode(std::string identifier) {
     std::string errorMessage = "The Sky Browser encountered a problem when it tried to "
         "initialize the browser";
     if (found == std::string::npos) {
-        throw ghoul::RuntimeError(errorMessage);
+        throw RuntimeError(errorMessage);
     }
     else {
         std::string res = identifier.substr(found + 1, identifier.size());
         if (res.empty()) {
-            throw ghoul::RuntimeError(errorMessage);
+            throw RuntimeError(errorMessage);
         }
         // Convert the last char to an int
         int nodeId = std::stoi(res);
@@ -158,7 +158,7 @@ std::string prunedIdentifier(std::string identifier) {
 [[codegen::luawrap]] void setHoverIndicator(std::string identifier) {
     SceneGraphNode* sgn = global::renderEngine->scene()->sceneGraphNode(identifier);
     if (!sgn) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Could not find node to set as hover indicator: {}", identifier
         ));
     }
@@ -307,9 +307,9 @@ std::string prunedIdentifier(std::string identifier) {
 /**
  * Returns the AAS WorldWide Telescope image collection URL.
  */
-[[codegen::luawrap]] ghoul::Dictionary wwtImageCollectionUrl() {
+[[codegen::luawrap]] Dictionary wwtImageCollectionUrl() {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    ghoul::Dictionary url;
+    Dictionary url;
     url.setValue("url", module->wwtImageCollectionUrl());
     return url;
 }
@@ -320,7 +320,7 @@ std::string prunedIdentifier(std::string identifier) {
  * equatorial Cartesian coordinates, if the image has celestial coordinates, credits text,
  * credits URL and the identifier of the image which is a unique number.
  */
-[[codegen::luawrap]] ghoul::Dictionary listOfImages() {
+[[codegen::luawrap]] Dictionary listOfImages() {
     // Send image list to GUI
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     std::string url = module->wwtImageCollectionUrl();
@@ -331,9 +331,9 @@ std::string prunedIdentifier(std::string identifier) {
     }
 
     // Create Lua table to send to the GUI
-    ghoul::Dictionary list;
+    Dictionary list;
     for (auto const& [id, img] : module->wwtDataHandler().images()) {
-        ghoul::Dictionary image;
+        Dictionary image;
         image.setValue("name", img.name);
         image.setValue("thumbnail", img.thumbnailUrl);
         image.setValue("url", img.imageUrl);
@@ -359,17 +359,17 @@ std::string prunedIdentifier(std::string identifier) {
  *
  * \return A table of data regarding the current targets
  */
-[[codegen::luawrap]] ghoul::Dictionary targetData() {
+[[codegen::luawrap]] Dictionary targetData() {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     const std::string& browserId = module->selectedBrowserId();
     if (browserId.empty()) {
-        return ghoul::Dictionary();
+        return Dictionary();
     }
 
-    ghoul::Dictionary data;
+    Dictionary data;
 
     // The current viewport data for OpenSpace
-    ghoul::Dictionary openSpace;
+    Dictionary openSpace;
 
     // Camera directions
     glm::dvec3 cartesianCam = cameraDirectionEquatorial();
@@ -402,7 +402,7 @@ std::string prunedIdentifier(std::string identifier) {
             glm::dvec2 spherical = pair->targetDirectionEquatorial();
             glm::dvec3 cartesian = sphericalToCartesian(spherical);
 
-            ghoul::Dictionary target;
+            Dictionary target;
             target.setValue("id", id);
             target.setValue("name", pair->browserGuiName());
             target.setValue("FOV", static_cast<double>(pair->verticalFov()));
@@ -414,7 +414,7 @@ std::string prunedIdentifier(std::string identifier) {
             target.setValue("color", pair->borderColor());
             std::vector<std::pair<std::string, glm::dvec3>> copies =
                 pair->displayCopies();
-            ghoul::Dictionary copiesData;
+            Dictionary copiesData;
             for (size_t i = 0; i < copies.size(); i++) {
                 copiesData.setValue(copies[i].first, copies[i].second);
             }
@@ -505,7 +505,7 @@ std::string prunedIdentifier(std::string identifier) {
         "Name = '" + nameBrowser + "',"
         "Url = '" + url + "',"
         "FaceCamera = false,"
-        "CartesianPosition = " + ghoul::to_string(positionBrowser) +
+        "CartesianPosition = " + to_string(positionBrowser) +
      "}";
 
     const std::string target = "{"
@@ -775,7 +775,7 @@ std::string prunedIdentifier(std::string identifier) {
             images.rbegin(), images.rend(),
             [module, pair](std::string imageUrl) {
                 std::optional<ImageData> img = module->wwtDataHandler().image(imageUrl);
-                ghoul_assert(img.has_value(), "No image found");
+                assert_msg(img.has_value(), "No image found");
                 // Index of image is used as layer ID as it's unique in the image data set
                 pair->addImageLayerToWwt(img->imageUrl);
             }

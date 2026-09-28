@@ -32,6 +32,8 @@
 #include <variant>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     struct [[codegen::Dictionary(VariantFilesystem)]] Parameters {
         // variant path vector path documentation
@@ -65,10 +67,10 @@ TEST_CASE("Execution/Structs/Variant-Filesystem:  Bake", "[Execution][Structs]")
     }
 
     {
-        ghoul::Dictionary d1;
+        Dictionary d1;
         d1.setValue("VariantPath", tmpFile);
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("1", tmpFile);
             e.setValue("2", tmpFile2);
             d1.setValue("VariantPath2", e);
@@ -92,9 +94,9 @@ TEST_CASE("Execution/Structs/Variant-Filesystem:  Bake", "[Execution][Structs]")
     }
 
     {
-        ghoul::Dictionary d2;
+        Dictionary d2;
         {
-            ghoul::Dictionary e;
+            Dictionary e;
             e.setValue("1", tmpFile);
             e.setValue("2", tmpFile2);
             d2.setValue("VariantPath", e);

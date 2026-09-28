@@ -35,7 +35,7 @@ QColor colorForWindow(int idx) {
         QColor(248, 51, 60)
     };
 
-    ghoul_assert(idx >= 0, "idx must be non-negative");
+    assert_msg(idx >= 0, "idx must be non-negative");
 
     if (idx < 4) {
         return Hardcoded[idx];

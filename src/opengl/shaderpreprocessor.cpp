@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,8 +48,8 @@
 // #for <key>, <value> in <dictionary>
 
 namespace {
-    using namespace ghoul;
-    using namespace ghoul::opengl;
+    using namespace openspace;
+    using namespace openspace::opengl;
 
     constexpr std::string_view Ws = " \n\r\t";
 
@@ -162,8 +161,8 @@ namespace {
     void Env::processFile(const std::filesystem::path& path) {
         ZoneScoped;
 
-        ghoul_assert(!path.empty(), "Path must not be empty");
-        ghoul_assert(std::filesystem::is_regular_file(path), "Path must exist");
+        assert_msg(!path.empty(), "Path must not be empty");
+        assert_msg(std::filesystem::is_regular_file(path), "Path must exist");
 
         auto it = std::find(_includedFiles.begin(), _includedFiles.end(), path);
         if (it == _includedFiles.end()) {
@@ -185,7 +184,7 @@ namespace {
         while (true) {
             Env::InputFile& input = _inputFiles.back();
             std::string line;
-            if (!ghoul::getline(input.stream, line)) {
+            if (!openspace::getline(input.stream, line)) {
                 break;
             }
             input.lineNumber++;
@@ -503,7 +502,7 @@ namespace {
         const bool isCompatibility =
             cpm == ContextProfileMask::GL_CONTEXT_COMPATIBILITY_PROFILE_BIT;
 
-        ghoul_assert(
+        assert_msg(
             isCore || isCompatibility,
             "OpenGL context is neither core nor compatibility"
         );
@@ -625,7 +624,7 @@ namespace {
     void Env::addLineNumber() {
         const std::filesystem::path filename = _inputFiles.back().file;
         auto it = std::find(_includedFiles.begin(), _includedFiles.end(), filename);
-        ghoul_assert(it != _includedFiles.end(), "File not in included files");
+        assert_msg(it != _includedFiles.end(), "File not in included files");
 
         std::string_view includeSep;
 
@@ -648,7 +647,7 @@ namespace {
     }
 } // namespace
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 std::vector<std::filesystem::path> ShaderPreprocessor::_includePaths =
     std::vector<std::filesystem::path>();
@@ -705,8 +704,8 @@ std::string ShaderPreprocessor::includedFiles() const {
 }
 
 void ShaderPreprocessor::addIncludePath(const std::filesystem::path& folderPath) {
-    ghoul_assert(!folderPath.empty(), "Folder path must not be empty");
-    ghoul_assert(
+    assert_msg(!folderPath.empty(), "Folder path must not be empty");
+    assert_msg(
         std::filesystem::is_directory(folderPath),
         "Folder path must be an existing directory"
     );
@@ -721,4 +720,4 @@ const std::vector<std::filesystem::path> ShaderPreprocessor::includePaths() {
     return _includePaths;
 }
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl

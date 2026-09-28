@@ -258,7 +258,7 @@ namespace {
         // Remove all double whitespaces from the helptext (these may be generated when
         // using multi-line strings in Lua)
         std::string cleanedHelpText = f.helpText;
-        ghoul::trimWhitespace(cleanedHelpText);
+        trimWhitespace(cleanedHelpText);
         std::size_t doubleSpace = cleanedHelpText.find("  ");
         while (doubleSpace != std::string::npos) {
             cleanedHelpText.erase(doubleSpace, 1);
@@ -285,12 +285,12 @@ DocumentationEngine* DocumentationEngine::_instance = nullptr;
 DocumentationEngine::DocumentationEngine() {}
 
 void DocumentationEngine::initialize() {
-    ghoul_assert(!isInitialized(), "DocumentationEngine is already initialized");
+    assert_msg(!isInitialized(), "DocumentationEngine is already initialized");
     _instance = new DocumentationEngine;
 }
 
 void DocumentationEngine::deinitialize() {
-    ghoul_assert(isInitialized(), "DocumentationEngine is not initialized");
+    assert_msg(isInitialized(), "DocumentationEngine is not initialized");
     delete _instance;
     _instance = nullptr;
 }
@@ -468,7 +468,7 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
 
             // Output filters as a string
             if (action.filter.has_value()) {
-                ghoul::Dictionary filters = action.filter.value();
+                Dictionary filters = action.filter.value();
                 std::vector<std::string_view> keys = filters.keys();
                 nlohmann::json filtersJson = nlohmann::json::array();
 
@@ -501,7 +501,7 @@ void DocumentationEngine::writeJsonSchema() {
     auto mergeDefs = [](nlohmann::json& target, const nlohmann::json& source) {
         for (const auto& [key, value] : source.items()) {
             if (target.contains(key)) {
-                ghoul_assert(
+                assert_msg(
                     target[key] == value,
                     std::format(
                         "Conflicting $def '{}': existing definition '{}' differs from "
@@ -618,7 +618,7 @@ void DocumentationEngine::writeJsonSchema() {
     std::ofstream propertiesFile = std::ofstream(propertiesPath);
 
     if (!propertiesFile.good()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Could not open properties file: '{}'", propertiesPath
         ));
     }
@@ -656,7 +656,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         factory[NameKey] = factoryInfo.name;
         factory[IdentifierKey] = std::format("{}{}", CategoryName, factoryInfo.name);
 
-        ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
+        TemplateFactoryBase* f = factoryInfo.factory.get();
         // Add documentation about base class
         auto factoryDoc = std::find_if(
             docs.begin(),
@@ -733,7 +733,7 @@ nlohmann::json DocumentationEngine::generateKeybindingsJson() const {
 
     for (const std::pair<const KeyWithModifier, std::string>& p : luaKeys) {
         nlohmann::json keybind;
-        keybind[NameKey] = ghoul::to_string(p.first);
+        keybind[NameKey] = to_string(p.first);
         keybind[ActionKey] = p.second;
         json.push_back(std::move(keybind));
     }
@@ -749,7 +749,7 @@ nlohmann::json DocumentationEngine::generatePropertyOwnerJson(PropertyOwner* own
 {
     ZoneScoped;
 
-    ghoul_assert(owner, "Owner must not be nullptr");
+    assert_msg(owner, "Owner must not be nullptr");
 
     nlohmann::json json;
     std::vector<PropertyOwner*> subOwners = owner->propertySubOwners();
@@ -866,7 +866,7 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
         );
 
         if (it != _documentations.end()) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Duplicate Documentation with name '{}' and id '{}'",
                 documentation.name, documentation.id
             ));
@@ -889,9 +889,7 @@ void DocumentationEngine::addSchema(Schema schema) {
         );
 
         if (it != _schemas.end()) {
-            throw ghoul::RuntimeError(std::format(
-                "Duplicate Schema with id '{}'", schema.id
-            ));
+            throw RuntimeError(std::format("Duplicate Schema with id '{}'", schema.id));
         }
         else {
             _schemas.push_back(std::move(schema));

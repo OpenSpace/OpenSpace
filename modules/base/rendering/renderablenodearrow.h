@@ -41,7 +41,7 @@ namespace openspace {
  */
 class RenderableNodeArrow : public Renderable {
 public:
-    explicit RenderableNodeArrow(const ghoul::Dictionary& dictionary);
+    explicit RenderableNodeArrow(const Dictionary& dictionary);
     ~RenderableNodeArrow() override = default;
 
     void initializeGL() override;
@@ -65,7 +65,7 @@ private:
 
     Shading _shading;
 
-    ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
+    opengl::ProgramObject* _shaderProgram = nullptr;
 
     StringProperty _start;
     StringProperty _end;

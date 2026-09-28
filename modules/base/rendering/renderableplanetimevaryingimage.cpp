@@ -72,7 +72,7 @@ Documentation RenderablePlaneTimeVaryingImage::Documentation() {
 }
 
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
     : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
     , _sourceFolder(SourceFolderInfo)
 {
@@ -111,10 +111,7 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
 
     _textureFiles.resize(_sourceFiles.size());
     for (size_t i = 0; i < _sourceFiles.size(); i++) {
-        _textureFiles[i] = ghoul::io::texture::loadTexture(
-            absPath(_sourceFiles[i]),
-            2
-        );
+        _textureFiles[i] = io::texture::loadTexture(absPath(_sourceFiles[i]), 2);
     }
     if (!_isLoadingLazily) {
         _texture = loadTexture();
@@ -154,7 +151,7 @@ void RenderablePlaneTimeVaryingImage::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneTimeVaryingImage::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderablePlaneTimeVaryingImage::bindTexture(opengl::TextureUnit& unit) {
     if (_texture && !_textureIsDirty) {
         unit.bind(*_texture);
     }
@@ -254,8 +251,8 @@ void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
     }
 }
 
-ghoul::opengl::Texture* RenderablePlaneTimeVaryingImage::loadTexture() const {
-    ghoul::opengl::Texture* texture = nullptr;
+opengl::Texture* RenderablePlaneTimeVaryingImage::loadTexture() const {
+    opengl::Texture* texture = nullptr;
     if (_activeTriggerTimeIndex != -1) {
         texture = _textureFiles[_activeTriggerTimeIndex].get();
     }

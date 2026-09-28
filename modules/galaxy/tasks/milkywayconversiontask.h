@@ -37,7 +37,7 @@ namespace openspace {
  */
 class MilkywayConversionTask : public Task {
 public:
-    explicit MilkywayConversionTask(const ghoul::Dictionary& dictionary);
+    explicit MilkywayConversionTask(const Dictionary& dictionary);
     ~MilkywayConversionTask() override = default;
 
     std::string description() override;

@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +27,7 @@
 
 #include <openspace/misc/dictionary.h>
 #include <openspace/misc/exception.h>
-#include <openspace/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/opengl/shaderpreprocessor.h>
 #include <filesystem>
 #include <functional>
@@ -36,9 +35,9 @@
 #include <string_view>
 #include <type_traits>
 
-namespace ghoul::filesystem { class File; }
+namespace openspace::filesystem { class File; }
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
 
 /**
  * This class is a wrapper for an OpenGL shader object. It represents a single shader
@@ -230,6 +229,6 @@ private:
     ShaderPreprocessor _preprocessor;
 };
 
-} // namespace ghoul::opengl
+} // namespace openspace::opengl
 
 #endif // __OPENSPACE_CORE___SHADEROBJECT___H__

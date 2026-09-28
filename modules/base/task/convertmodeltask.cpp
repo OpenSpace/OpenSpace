@@ -56,7 +56,7 @@ Documentation ConvertModelTask::Documentation() {
     return codegen::doc<Parameters>("base_task_convertmodel", Task::Documentation());
 }
 
-ConvertModelTask::ConvertModelTask(const ghoul::Dictionary& dictionary) {
+ConvertModelTask::ConvertModelTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _inFilePath = p.inputFilePath;
@@ -72,9 +72,9 @@ std::string ConvertModelTask::description() {
 }
 
 void ConvertModelTask::perform(const Task::ProgressCallback&) {
-    ghoul::io::ModelReaderAssimp reader;
+    io::ModelReaderAssimp reader;
 
-    std::unique_ptr<ghoul::modelgeometry::ModelGeometry> geometry =
+    std::unique_ptr<modelgeometry::ModelGeometry> geometry =
         reader.loadModel(_inFilePath, false, true);
     geometry->saveToCacheFile(_outFilePath);
 }

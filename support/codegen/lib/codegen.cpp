@@ -531,7 +531,7 @@ namespace {
 
         std::string res = std::format(
             "[[maybe_unused]] "
-            "void bakeTo(const ghoul::Dictionary& d, std::string_view key, {}* val) {{\n",
+            "void bakeTo(const openspace::Dictionary& d, std::string_view key, {}* val) {{\n",
             typeString
         );
 
@@ -569,7 +569,7 @@ namespace {
         std::string type = fqn(e, "::");
         std::string result = std::format(
             "[[maybe_unused]] "
-            "void bakeTo(const ghoul::Dictionary& d, std::string_view key, {}* val) {{\n"
+            "void bakeTo(const openspace::Dictionary& d, std::string_view key, {}* val) {{\n"
             "    std::string v = d.value<std::string>(key);\n",
             type
         );
@@ -658,9 +658,9 @@ namespace {
         }
 
         std::string name = fqn(s, "::");
-        result += std::format(R"(template <> [[maybe_unused]] void bakeTo<{0}>(const ghoul::Dictionary& d, std::string_view key, {0}* val) {{
+        result += std::format(R"(template <> [[maybe_unused]] void bakeTo<{0}>(const openspace::Dictionary& d, std::string_view key, {0}* val) {{
         {0}& res = *val;
-        ghoul::Dictionary dict = d.value<ghoul::Dictionary>(key);
+        openspace::Dictionary dict = d.value<openspace::Dictionary>(key);
     )",
             name
         );
@@ -937,13 +937,13 @@ namespace {
         int nTotalArguments = static_cast<int>(f->arguments.size());
         if (nRequiredArguments == nTotalArguments) {
             result += std::format(
-                "        ghoul::lua::checkArgumentsAndThrow(L, {}, \"{}\");\n",
+                "        openspace::lua::checkArgumentsAndThrow(L, {}, \"{}\");\n",
                 nTotalArguments, f->luaName
             );
         }
         else {
             result += std::format(
-                "        ghoul::lua::checkArgumentsAndThrow(L, {{ {}, {} }}, \"{}\");\n",
+                "        openspace::lua::checkArgumentsAndThrow(L, {{ {}, {} }}, \"{}\");\n",
                 nRequiredArguments, nTotalArguments, f->luaName
             );
         }
@@ -987,7 +987,7 @@ namespace {
             types = types.substr(0, types.size() - 2);
 
             result += std::format(
-                "        auto [{}] = ghoul::lua::values<{}>(L);\n", names, types
+                "        auto [{}] = openspace::lua::values<{}>(L);\n", names, types
             );
         }
 
@@ -1032,8 +1032,8 @@ namespace {
                     );
                 }
                 else if (var->type->containsCustomType()) {
-                    // We have extracted this type as a ghoul::Dictionary previously, and
-                    // need to bake it into the correct type here instead
+                    // We have extracted this type as a Dictionary previously, and need to
+                    // bake it into the correct type here instead
                     result += std::format(
                         "codegen::bake<{0}>({1})",
                         generateTypename(var->type), var->name
@@ -1072,7 +1072,7 @@ namespace {
                         result += "            lua_newtable(L);\n";
                         for (Variable* var : s->variables) {
                             result += std::format(
-                                "            ghoul::lua::push(L, \"{0}\", std::move(res.{0}));\n",
+                                "            openspace::lua::push(L, \"{0}\", std::move(res.{0}));\n",
                                 var->name
                             );
                             result += "            lua_settable(L, -3);\n";
@@ -1082,14 +1082,14 @@ namespace {
                         break;
                     }
                     case StackElement::Type::Enum: {
-                        result += "            ghoul::lua::push(L, codegen::toString(res));\n";
+                        result += "            openspace::lua::push(L, codegen::toString(res));\n";
                         result += "            return 1;\n";
                         break;
                     }
                 }
             }
             else {
-                result += "            ghoul::lua::push(L, std::move(res));\n";
+                result += "            openspace::lua::push(L, std::move(res));\n";
                 result += "            return 1;\n";
             }
         }
@@ -1098,8 +1098,8 @@ namespace {
         }
 
         result += "        }\n";
-        result += "        catch (const ghoul::lua::LuaError& error) {\n";
-        result += "            return ghoul::lua::luaError(L, error.message);\n";
+        result += "        catch (const openspace::lua::LuaError& error) {\n";
+        result += "            return openspace::lua::luaError(L, error.message);\n";
         result += "        }\n";
 
         result += "    },\n";
@@ -1272,7 +1272,7 @@ std::string generateResult(const Code& code) {
     }
 
     // GCC has an overeager need to report an uninitialized variable when returning
-    // a std::variant<std::string, ghoul::Dictionary> in a Lua function
+    // a std::variant<std::string, openspace::Dictionary> in a Lua function
     constexpr std::string_view GCCWarningStart =
 #if defined(__GNUC__) && !defined(__clang__)
         "#pragma GCC diagnostic push\n"

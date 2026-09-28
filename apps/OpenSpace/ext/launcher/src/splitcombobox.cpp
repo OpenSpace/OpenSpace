@@ -122,10 +122,10 @@ void SplitComboBox::populateList(const std::string& preset) {
     addItem(QString::fromStdString(_userHeader));
     qobject_cast<QStandardItemModel*>(model())->item(count() - 1)->setEnabled(false);
 
-    std::vector<std::filesystem::path> userFiles = ghoul::filesystem::walkDirectory(
+    std::vector<std::filesystem::path> userFiles = openspace::filesystem::walkDirectory(
         _userPath,
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::Yes,
+        openspace::filesystem::Recursive::Yes,
+        openspace::filesystem::Sorted::Yes,
         _fileFilter
     );
     for (const std::filesystem::path& p : userFiles) {
@@ -153,10 +153,10 @@ void SplitComboBox::populateList(const std::string& preset) {
     addItem(QString::fromStdString(_hardCodedHeader));
     qobject_cast<QStandardItemModel*>(model())->item(count() - 1)->setEnabled(false);
 
-    std::vector<std::filesystem::path> hcFiles = ghoul::filesystem::walkDirectory(
+    std::vector<std::filesystem::path> hcFiles = openspace::filesystem::walkDirectory(
         _hardCodedPath,
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::Yes,
+        openspace::filesystem::Recursive::Yes,
+        openspace::filesystem::Sorted::Yes,
         _fileFilter
     );
     for (const std::filesystem::path& p : hcFiles) {

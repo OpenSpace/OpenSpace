@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +43,7 @@
 #endif // WIN32
 
 namespace {
-    using namespace ghoul;
+    using namespace openspace;
 
     constexpr std::string_view _loggerCat = "CacheManager";
     const std::filesystem::path CacheFile = "cache";
@@ -167,12 +166,12 @@ namespace {
     }
 } // namespace
 
-namespace ghoul::filesystem {
+namespace openspace::filesystem {
 
 CacheManager::CacheManager(std::filesystem::path directory)
     : _directory(std::move(directory))
 {
-    ghoul_assert(std::filesystem::is_directory(_directory), "Directory must exit");
+    assert_msg(std::filesystem::is_directory(_directory), "Directory must exit");
 
     const std::filesystem::path cacheFile = _directory / CacheFile;
     std::ifstream file = std::ifstream(cacheFile);
@@ -329,4 +328,4 @@ void CacheManager::removeCacheFile(const std::filesystem::path& file,
     }
 }
 
-} // namespace ghoul::filesystem
+} // namespace openspace::filesystem

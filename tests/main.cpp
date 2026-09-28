@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,33 +24,65 @@
 
 #include <catch2/catch_session.hpp>
 
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/file.h>
 #include <openspace/filesystem/filesystem.h>
-#include <openspace/logging/consolelog.h>
 #include <openspace/logging/logmanager.h>
-#include <openspace/misc/supportmacros.h>
+#include <openspace/lua/lua.h>
+#include <openspace/openspace.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 #include <filesystem>
+#include <iostream>
 
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
+using namespace openspace;
 
 int main(int argc, char** argv) {
-    LogManager::initialize(LogLevel::Fatal);
-    LogMgr.addLog(std::make_unique<ConsoleLog>());
+    logging::LogManager::initialize(
+        logging::LogLevel::Info,
+        logging::LogManager::ImmediateFlush::Yes
+    );
+    initialize();
+    global::create();
 
-    FileSystem::initialize();
+    // Register the path of the executable,
+    // to make it possible to find other files in the same directory.
+    FileSys.registerPathToken(
+        "${BIN}",
+        std::filesystem::path(argv[0]).parent_path(),
+        filesystem::FileSystem::Override::Yes
+    );
 
-    const std::filesystem::path root = absPath(TEST_ROOT_DIR);
-    const std::filesystem::path testDirectory = root / "tests";
-    const std::filesystem::path scriptDirectory = root / "scripts";
+    const std::filesystem::path configFile = findConfiguration();
+    // Register the base path as the directory where 'filename' lives
+    const std::filesystem::path base = configFile.parent_path();
+    FileSys.registerPathToken("${BASE}", base);
 
-    FileSys.registerPathToken("${UNIT_TEST}", testDirectory);
-    FileSys.registerPathToken("${UNIT_SCRIPT}", scriptDirectory);
+    *global::configuration = loadConfigurationFromFile(configFile, "");
+    registerPathTokens(*global::configuration);
+    global::openSpaceEngine->initialize();
 
-    if (!std::filesystem::is_directory(testDirectory)) {
-        LFATALC("main", "Fix me");
-        return 0;
-    }
+    logging::LogManager::deinitialize();
+    logging::LogManager::initialize(
+        logging::LogLevel::Info,
+        logging::LogManager::ImmediateFlush::Yes
+    );
+
+    FileSys.registerPathToken("${TESTDIR}", "${BASE}/tests");
+
+    // All of the relevant tests initialize the SpiceManager
+    openspace::SpiceManager::deinitialize();
+
 
     const int result = Catch::Session().run(argc, argv);
+
+    // And the deinitialization needs the SpiceManager to be initialized
+    openspace::SpiceManager::initialize();
+    global::openSpaceEngine->deinitialize();
     return result;
 }

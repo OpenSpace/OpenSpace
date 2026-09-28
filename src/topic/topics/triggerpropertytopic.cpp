@@ -50,7 +50,7 @@ void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
         LERROR("Could not trigger property -- key or value is missing in payload");
         LERROR(e.what());
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERROR("Could not trigger property -- runtime error:");
         LERROR(e.what());
     }

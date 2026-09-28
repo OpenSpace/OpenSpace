@@ -1,9 +1,8 @@
 /*****************************************************************************************
  *                                                                                       *
- * GHOUL                                                                                 *
- * General Helpful Open Utility Library                                                  *
+ * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2012-2026                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +26,10 @@
 
 #include <openspace/misc/memorypool.h>
 
+using namespace openspace;
+
 TEST_CASE("MemoryPool: MemoryPool Default", "[memorypool]") {
-    ghoul::MemoryPool<> pool;
+    MemoryPool<> pool;
     void* p1 = pool.allocate(1024);
     std::memset(p1, 0xB0, 1024);
     CHECK(p1);
@@ -69,7 +70,7 @@ TEST_CASE("MemoryPool: MemoryPool Default", "[memorypool]") {
 }
 
 TEST_CASE("MemoryPool: MemoryPool 2048 Bucket", "[memorypool]") {
-    ghoul::MemoryPool<2048> pool;
+    MemoryPool<2048> pool;
     void* p1 = pool.allocate(1024);
     std::memset(p1, 0xB0, 1024);
     CHECK(p1);
@@ -112,7 +113,7 @@ TEST_CASE("MemoryPool: MemoryPool 2048 Bucket", "[memorypool]") {
 }
 
 TEST_CASE("MemoryPool: MemoryPool 2048 Bucket Pre-Alloc", "[memorypool]") {
-    ghoul::MemoryPool<2048> pool(2);
+    MemoryPool<2048> pool(2);
     void* p1 = pool.allocate(1024);
     std::memset(p1, 0xB0, 1024);
     CHECK(p1);
@@ -157,7 +158,7 @@ TEST_CASE("MemoryPool: MemoryPool 2048 Bucket Pre-Alloc", "[memorypool]") {
 }
 
 TEST_CASE("MemoryPool: MemoryPool 2048 Reusing pointers", "[memorypool]") {
-    ghoul::MemoryPool<2048> pool;
+    MemoryPool<2048> pool;
 
     const unsigned long long alignment = alignof(max_align_t);
     // For the rest:  X used memory; O memory allocated due to alignment; F free memory
@@ -202,7 +203,7 @@ TEST_CASE("MemoryPool: MemoryPool 2048 Reusing pointers", "[memorypool]") {
 TEST_CASE("MemoryPool: MemoryPool Reusing pointers w/o fragmentation", "[memorypool]") {
     constexpr unsigned long long alignment = alignof(max_align_t);
     if constexpr (alignment == 8) {
-        ghoul::MemoryPool<32> pool;
+        MemoryPool<32> pool;
         REQUIRE(pool.occupancies().size() == 1);
         CHECK(pool.occupancies()[0] == 0);
         void* p1 = pool.allocate(8);
@@ -226,7 +227,7 @@ TEST_CASE("MemoryPool: MemoryPool Reusing pointers w/o fragmentation", "[memoryp
     else if constexpr (alignment == 16) {
         // Exactly the same test setup as the alignment == 8 part, but with doubled sizes
 
-        ghoul::MemoryPool<64> pool;
+        MemoryPool<64> pool;
         REQUIRE(pool.occupancies().size() == 1);
         CHECK(pool.occupancies()[0] == 0);
         void* p1 = pool.allocate(16);
@@ -253,7 +254,7 @@ TEST_CASE("MemoryPool: MemoryPool Reusing pointers w/o fragmentation", "[memoryp
 }
 
 TEST_CASE("MemoryPool: Reusable Typed MemoryPool", "[memorypool]") {
-    ghoul::ReusableTypedMemoryPool<int> pool;
+    ReusableTypedMemoryPool<int> pool;
     std::vector<void*> p1 = pool.allocate(2);
     REQUIRE(p1.size() == 2);
     CHECK(p1[0] != p1[1]);
@@ -274,7 +275,7 @@ TEST_CASE("MemoryPool: Reusable Typed MemoryPool", "[memorypool]") {
 }
 
 TEST_CASE("MemoryPool: Reusable Typed MemoryPool Reuse", "[memorypool]") {
-    ghoul::ReusableTypedMemoryPool<int> pool;
+    ReusableTypedMemoryPool<int> pool;
     std::vector<void*> p1 = pool.allocate(2);
     REQUIRE(p1.size() == 2);
     CHECK(p1[0] != p1[1]);

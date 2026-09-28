@@ -98,7 +98,7 @@ void IswaKameleonGroup::setFieldlineInfo(std::filesystem::path fieldlineIndexFil
 void IswaKameleonGroup::registerProperties() {
     _resolution.onChange([this]() {
         LDEBUG(std::format("Group {} published resolutionChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("resolution", static_cast<double>(_resolution));
         _groupEvent.publish("resolutionChanged", d);
     });
@@ -118,7 +118,7 @@ void IswaKameleonGroup::readFieldlinePaths(const std::filesystem::path& indexFil
 
     std::string line;
     std::string fileContent;
-    while (ghoul::getline(seedFile, line)) {
+    while (openspace::getline(seedFile, line)) {
         fileContent += line;
     }
 
@@ -200,7 +200,7 @@ void IswaKameleonGroup::changeCdf(std::string path) {
     clearFieldlines();
     updateFieldlineSeeds();
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("path", std::move(path));
     _groupEvent.publish("cdfChanged", d);
 }

@@ -58,7 +58,7 @@ public:
     std::vector<openspace::Documentation> documentations() const override;
 
 private:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
     void preDraw();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix) const;
@@ -66,9 +66,9 @@ private:
     inline static int _initializeCounter = 0;
 
     GLuint _fbo = 0;
-    std::unique_ptr<ghoul::opengl::Texture> _colorTex;
-    std::unique_ptr<ghoul::opengl::Texture> _normalTex;
-    std::unique_ptr<ghoul::opengl::Texture> _depthTex;
+    std::unique_ptr<opengl::Texture> _colorTex;
+    std::unique_ptr<opengl::Texture> _normalTex;
+    std::unique_ptr<opengl::Texture> _depthTex;
     int _width = 0;
     int _height = 0;
 

@@ -159,7 +159,7 @@ namespace {
         std::optional<std::string> gridType [[codegen::inlist("Spherical", "Cartesian")]];
 
         // @TODO Missing documentation
-        std::optional<ghoul::Dictionary> clipPlanes;
+        std::optional<Dictionary> clipPlanes;
     };
 } // namespace
 #include "renderabletimevaryingvolume_codegen.cpp"
@@ -173,8 +173,7 @@ Documentation RenderableTimeVaryingVolume::Documentation() {
     );
 }
 
-RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridType(GridTypeInfo)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
@@ -212,7 +211,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
     _secondsAfter = p.secondsAfter;
 
-    const ghoul::Dictionary clipPlanesDict = p.clipPlanes.value_or(ghoul::Dictionary());
+    const Dictionary clipPlanesDict = p.clipPlanes.value_or(Dictionary());
     _clipPlanes = std::make_shared<VolumeClipPlanes>(clipPlanesDict);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
@@ -265,15 +264,15 @@ void RenderableTimeVaryingVolume::initializeGL() {
         }
         // TODO: handle normalization properly for different timesteps + transfer function
 
-        t.texture = std::make_shared<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
+        t.texture = std::make_shared<opengl::Texture>(
+            opengl::Texture::FormatInit {
                 .dimensions = t.metadata.dimensions,
                 .type = GL_TEXTURE_3D,
-                .format = ghoul::opengl::Texture::Format::Red,
+                .format = opengl::Texture::Format::Red,
                 .dataType = GL_FLOAT
             },
-            ghoul::opengl::Texture::SamplerInit {
-                .wrapping = ghoul::opengl::Texture::WrappingMode::Clamp
+            opengl::Texture::SamplerInit {
+                .wrapping = opengl::Texture::WrappingMode::Clamp
             },
             reinterpret_cast<std::byte*>(data)
         );
@@ -336,10 +335,10 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::pa
     RawVolumeMetadata metadata;
 
     try {
-        const ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
+        const Dictionary dictionary = lua::loadDictionaryFromFile(path);
         metadata = RawVolumeMetadata::createFromDictionary(dictionary);
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERRORC(e.component, e.message);
         return;
     }

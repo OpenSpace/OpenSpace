@@ -39,40 +39,40 @@ namespace {
     // All of these snippets can probably replaced by a std::format expression that takes
     // two parameters;  one for the "internal" type and one for the baked-to type
 
-    constexpr std::string_view BakeFunctionBool = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, bool* val) { *val = d.value<bool>(key); }\n";
-    constexpr std::string_view BakeFunctionInt = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, int* val) { if (d.hasValue<double>(key)) { *val = static_cast<int>(d.value<double>(key)); } else if (d.hasValue<int>(key)) { *val = d.value<int>(key); } else { throw std::logic_error(\"Unexpected type\"); } }\n";
-    constexpr std::string_view BakeFunctionDouble = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, double* val) { *val = d.value<double>(key); }\n";
-    constexpr std::string_view BakeFunctionFloat = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, float* val) { *val = static_cast<float>(d.value<double>(key)); }\n";
-    constexpr std::string_view BakeFunctionString = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::string* val) { *val = d.value<std::string>(key); }\n";
-    constexpr std::string_view BakeFunctionPath = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::filesystem::path* val) { *val = d.value<std::string>(key); }\n";
-    constexpr std::string_view BakeFunctionIVec2 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::ivec2* val) { *val = d.value<glm::dvec2>(key); }\n";
-    constexpr std::string_view BakeFunctionIVec3 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::ivec3* val) { *val = d.value<glm::dvec3>(key); }\n";
-    constexpr std::string_view BakeFunctionIVec4 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::ivec4* val) { *val = d.value<glm::dvec4>(key); }\n";
-    constexpr std::string_view BakeFunctionDVec2 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dvec2* val) { *val = d.value<glm::dvec2>(key); }\n";
-    constexpr std::string_view BakeFunctionDVec3 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dvec3* val) { *val = d.value<glm::dvec3>(key); }\n";
-    constexpr std::string_view BakeFunctionDVec4 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dvec4* val) { *val = d.value<glm::dvec4>(key); }\n";
-    constexpr std::string_view BakeFunctionVec2 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::vec2* val) { *val = d.value<glm::dvec2>(key); }\n";
-    constexpr std::string_view BakeFunctionVec3 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::vec3* val) { *val = d.value<glm::dvec3>(key); }\n";
-    constexpr std::string_view BakeFunctionVec4 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::vec4* val) { *val = d.value<glm::dvec4>(key); }\n";
-    constexpr std::string_view BakeFunctionMat2x2 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::mat2x2* val) { *val = d.value<glm::dmat2x2>(key); }\n";
-    constexpr std::string_view BakeFunctionMat2x3 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::mat2x3* val) { *val = d.value<glm::dmat2x3>(key); }\n";
-    constexpr std::string_view BakeFunctionMat2x4 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::mat2x4* val) { *val = d.value<glm::dmat2x4>(key); }\n";
-    constexpr std::string_view BakeFunctionMat3x2 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::mat3x2* val) { *val = d.value<glm::dmat3x2>(key); }\n";
-    constexpr std::string_view BakeFunctionMat3x3 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::mat3x3* val) { *val = d.value<glm::dmat3x3>(key); }\n";
-    constexpr std::string_view BakeFunctionMat3x4 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::mat3x4* val) { *val = d.value<glm::dmat3x4>(key); }\n";
-    constexpr std::string_view BakeFunctionMat4x2 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::mat4x2* val) { *val = d.value<glm::dmat4x2>(key); }\n";
-    constexpr std::string_view BakeFunctionMat4x3 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::mat4x3* val) { *val = d.value<glm::dmat4x3>(key); }\n";
-    constexpr std::string_view BakeFunctionMat4x4 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::mat4x4* val) { *val = d.value<glm::dmat4x4>(key); }\n";
-    constexpr std::string_view BakeFunctionDMat2x2 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dmat2x2* val) { *val = d.value<glm::dmat2x2>(key); }\n";
-    constexpr std::string_view BakeFunctionDMat2x3 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dmat2x3* val) { *val = d.value<glm::dmat2x3>(key); }\n";
-    constexpr std::string_view BakeFunctionDMat2x4 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dmat2x4* val) { *val = d.value<glm::dmat2x4>(key); }\n";
-    constexpr std::string_view BakeFunctionDMat3x2 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dmat3x2* val) { *val = d.value<glm::dmat3x2>(key); }\n";
-    constexpr std::string_view BakeFunctionDMat3x3 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dmat3x3* val) { *val = d.value<glm::dmat3x3>(key); }\n";
-    constexpr std::string_view BakeFunctionDMat3x4 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dmat3x4* val) { *val = d.value<glm::dmat3x4>(key); }\n";
-    constexpr std::string_view BakeFunctionDMat4x2 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dmat4x2* val) { *val = d.value<glm::dmat4x2>(key); }\n";
-    constexpr std::string_view BakeFunctionDMat4x3 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dmat4x3* val) { *val = d.value<glm::dmat4x3>(key); }\n";
-    constexpr std::string_view BakeFunctionDMat4x4 = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dmat4x4* val) { *val = d.value<glm::dmat4x4>(key); }\n";
-    constexpr std::string_view BakeFunctionDictionary = "[[maybe_unused]] void bakeTo(const ghoul::Dictionary& d, std::string_view key, ghoul::Dictionary* val) { *val = d.value<ghoul::Dictionary>(key); }\n";
+    constexpr std::string_view BakeFunctionBool = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, bool* val) { *val = d.value<bool>(key); }\n";
+    constexpr std::string_view BakeFunctionInt = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, int* val) { if (d.hasValue<double>(key)) { *val = static_cast<int>(d.value<double>(key)); } else if (d.hasValue<int>(key)) { *val = d.value<int>(key); } else { throw std::logic_error(\"Unexpected type\"); } }\n";
+    constexpr std::string_view BakeFunctionDouble = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, double* val) { *val = d.value<double>(key); }\n";
+    constexpr std::string_view BakeFunctionFloat = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, float* val) { *val = static_cast<float>(d.value<double>(key)); }\n";
+    constexpr std::string_view BakeFunctionString = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, std::string* val) { *val = d.value<std::string>(key); }\n";
+    constexpr std::string_view BakeFunctionPath = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, std::filesystem::path* val) { *val = d.value<std::string>(key); }\n";
+    constexpr std::string_view BakeFunctionIVec2 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::ivec2* val) { *val = d.value<glm::dvec2>(key); }\n";
+    constexpr std::string_view BakeFunctionIVec3 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::ivec3* val) { *val = d.value<glm::dvec3>(key); }\n";
+    constexpr std::string_view BakeFunctionIVec4 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::ivec4* val) { *val = d.value<glm::dvec4>(key); }\n";
+    constexpr std::string_view BakeFunctionDVec2 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dvec2* val) { *val = d.value<glm::dvec2>(key); }\n";
+    constexpr std::string_view BakeFunctionDVec3 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dvec3* val) { *val = d.value<glm::dvec3>(key); }\n";
+    constexpr std::string_view BakeFunctionDVec4 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dvec4* val) { *val = d.value<glm::dvec4>(key); }\n";
+    constexpr std::string_view BakeFunctionVec2 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::vec2* val) { *val = d.value<glm::dvec2>(key); }\n";
+    constexpr std::string_view BakeFunctionVec3 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::vec3* val) { *val = d.value<glm::dvec3>(key); }\n";
+    constexpr std::string_view BakeFunctionVec4 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::vec4* val) { *val = d.value<glm::dvec4>(key); }\n";
+    constexpr std::string_view BakeFunctionMat2x2 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::mat2x2* val) { *val = d.value<glm::dmat2x2>(key); }\n";
+    constexpr std::string_view BakeFunctionMat2x3 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::mat2x3* val) { *val = d.value<glm::dmat2x3>(key); }\n";
+    constexpr std::string_view BakeFunctionMat2x4 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::mat2x4* val) { *val = d.value<glm::dmat2x4>(key); }\n";
+    constexpr std::string_view BakeFunctionMat3x2 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::mat3x2* val) { *val = d.value<glm::dmat3x2>(key); }\n";
+    constexpr std::string_view BakeFunctionMat3x3 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::mat3x3* val) { *val = d.value<glm::dmat3x3>(key); }\n";
+    constexpr std::string_view BakeFunctionMat3x4 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::mat3x4* val) { *val = d.value<glm::dmat3x4>(key); }\n";
+    constexpr std::string_view BakeFunctionMat4x2 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::mat4x2* val) { *val = d.value<glm::dmat4x2>(key); }\n";
+    constexpr std::string_view BakeFunctionMat4x3 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::mat4x3* val) { *val = d.value<glm::dmat4x3>(key); }\n";
+    constexpr std::string_view BakeFunctionMat4x4 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::mat4x4* val) { *val = d.value<glm::dmat4x4>(key); }\n";
+    constexpr std::string_view BakeFunctionDMat2x2 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dmat2x2* val) { *val = d.value<glm::dmat2x2>(key); }\n";
+    constexpr std::string_view BakeFunctionDMat2x3 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dmat2x3* val) { *val = d.value<glm::dmat2x3>(key); }\n";
+    constexpr std::string_view BakeFunctionDMat2x4 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dmat2x4* val) { *val = d.value<glm::dmat2x4>(key); }\n";
+    constexpr std::string_view BakeFunctionDMat3x2 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dmat3x2* val) { *val = d.value<glm::dmat3x2>(key); }\n";
+    constexpr std::string_view BakeFunctionDMat3x3 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dmat3x3* val) { *val = d.value<glm::dmat3x3>(key); }\n";
+    constexpr std::string_view BakeFunctionDMat3x4 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dmat3x4* val) { *val = d.value<glm::dmat3x4>(key); }\n";
+    constexpr std::string_view BakeFunctionDMat4x2 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dmat4x2* val) { *val = d.value<glm::dmat4x2>(key); }\n";
+    constexpr std::string_view BakeFunctionDMat4x3 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dmat4x3* val) { *val = d.value<glm::dmat4x3>(key); }\n";
+    constexpr std::string_view BakeFunctionDMat4x4 = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, glm::dmat4x4* val) { *val = d.value<glm::dmat4x4>(key); }\n";
+    constexpr std::string_view BakeFunctionDictionary = "[[maybe_unused]] void bakeTo(const openspace::Dictionary& d, std::string_view key, openspace::Dictionary* val) { *val = d.value<openspace::Dictionary>(key); }\n";
 
     constexpr std::string_view VariantConverterBool = "   if (d.hasValue<bool>(key)) { bool v; bakeTo(d, key, &v); *val = std::move(v); return; }\n";
     constexpr std::string_view VariantConverterInt = "   if (d.hasValue<double>(key)) { int v; bakeTo(d, key, &v); *val = std::move(v); return; }\n";
@@ -107,7 +107,7 @@ namespace {
     constexpr std::string_view VariantConverterDMat4x2 = "   if (d.hasValue<glm::dmat4x2>(key)) { glm::dmat4x2 v; bakeTo(d, key, &v); *val = std::move(v); return; }\n";
     constexpr std::string_view VariantConverterDMat4x3 = "   if (d.hasValue<glm::dmat4x3>(key)) { glm::dmat4x3 v; bakeTo(d, key, &v); *val = std::move(v); return; }\n";
     constexpr std::string_view VariantConverterDMat4x4 = "   if (d.hasValue<glm::dmat4x4>(key)) { glm::dmat4x4 v; bakeTo(d, key, &v); *val = std::move(v); return; }\n";
-    constexpr std::string_view VariantConverterDictionary = "   if (d.hasValue<ghoul::Dictionary>(key)) { ghoul::Dictionary v; bakeTo(d, key, &v); *val = std::move(v); return; }\n";
+    constexpr std::string_view VariantConverterDictionary = "   if (d.hasValue<openspace::Dictionary>(key)) { openspace::Dictionary v; bakeTo(d, key, &v); *val = std::move(v); return; }\n";
 } // namespace
 
 std::string_view bakeFunctionForType(BasicType::Type type) {
@@ -152,7 +152,7 @@ std::string_view bakeFunctionForType(BasicType::Type type) {
 
 std::string vectorBakeFunctionForType(std::string_view type) {
     return std::format(
-        "   if (d.hasValue<ghoul::Dictionary>(key)) {{ {} v; bakeTo(d, key, &v); *val = std::move(v); return; }}\n",
+        "   if (d.hasValue<openspace::Dictionary>(key)) {{ {} v; bakeTo(d, key, &v); *val = std::move(v); return; }}\n",
         type
     );
 }
@@ -200,7 +200,7 @@ std::string_view variantConversionFunctionForType(std::string_view type) {
         { "glm::dmat4x2",          VariantConverterDMat4x2 },
         { "glm::dmat4x3",          VariantConverterDMat4x3 },
         { "glm::dmat4x4",          VariantConverterDMat4x4 },
-        { "ghoul::Dictionary",     VariantConverterDictionary }
+        { "openspace::Dictionary", VariantConverterDictionary }
     };
 
     const auto it = ConvertFunctions.find(type);

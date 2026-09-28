@@ -32,7 +32,7 @@
 #include <array>
 #include <optional>
 
-using Function = openspace::LuaLibrary::Function;
+using namespace openspace;
 
 namespace {
     [[codegen::luawrap]] void funcPath(std::filesystem::path arg) {
@@ -135,7 +135,7 @@ namespace {
 
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  path", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncPath;
+    LuaLibrary::Function func = codegen::lua::FuncPath;
     CHECK(func.name == "funcPath");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -146,7 +146,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  path", "[Execution][LuaWrapper]") {
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::filesystem::path("abc"));
+    lua::push(state, std::filesystem::path("abc"));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -157,7 +157,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncPathDefaulted;
+    LuaLibrary::Function func = codegen::lua::FuncPathDefaulted;
     CHECK(func.name == "funcPathDefaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -169,7 +169,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::filesystem::path("abc"));
+    lua::push(state, std::filesystem::path("abc"));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -180,7 +180,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncPathDefaulted;
+    LuaLibrary::Function func = codegen::lua::FuncPathDefaulted;
     CHECK(func.name == "funcPathDefaulted");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -202,7 +202,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncPathDefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncPathDefaultedCheck;
     CHECK(func.name == "funcPathDefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -216,7 +216,7 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, false, std::filesystem::path("def"));
+    lua::push(state, false, std::filesystem::path("def"));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -227,7 +227,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncPathDefaultedCheck;
+    LuaLibrary::Function func = codegen::lua::FuncPathDefaultedCheck;
     CHECK(func.name == "funcPathDefaultedCheck");
     REQUIRE(func.arguments.size() == 2);
     CHECK(func.arguments[0].name == "isDefaulted");
@@ -241,14 +241,14 @@ TEST_CASE(
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, true);
+    lua::push(state, true);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  pathMap", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncPathMap;
+    LuaLibrary::Function func = codegen::lua::FuncPathMap;
     CHECK(func.name == "funcPathMap");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -260,11 +260,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  pathMap", "[Execution][LuaWrapper]")
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, "key1", std::filesystem::path("abc"));
+    lua::push(state, "key1", std::filesystem::path("abc"));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key2", std::filesystem::path("def"));
+    lua::push(state, "key2", std::filesystem::path("def"));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, "key3", std::filesystem::path("ghi"));
+    lua::push(state, "key3", std::filesystem::path("ghi"));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -272,7 +272,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  pathMap", "[Execution][LuaWrapper]")
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  pathOptional", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncPathOptional;
+    LuaLibrary::Function func = codegen::lua::FuncPathOptional;
     CHECK(func.name == "funcPathOptional");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -283,7 +283,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  pathOptional", "[Execution][LuaWrapp
 
     lua_State* state = luaL_newstate();
     REQUIRE(state);
-    ghoul::lua::push(state, std::filesystem::path("abc"));
+    lua::push(state, std::filesystem::path("abc"));
     func.function(state);
     CHECK(lua_gettop(state) == 0);
     lua_close(state);
@@ -294,7 +294,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::FuncPathOptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::FuncPathOptionalNullopt;
     CHECK(func.name == "funcPathOptionalNullopt");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -311,7 +311,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  pathVector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncPathVector;
+    LuaLibrary::Function func = codegen::lua::FuncPathVector;
     CHECK(func.name == "funcPathVector");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -323,11 +323,11 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  pathVector", "[Execution][LuaWrapper
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, std::filesystem::path("abc"));
+    lua::push(state, 1, std::filesystem::path("abc"));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, std::filesystem::path("def"));
+    lua::push(state, 2, std::filesystem::path("def"));
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, std::filesystem::path("ghi"));
+    lua::push(state, 3, std::filesystem::path("ghi"));
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -335,7 +335,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  pathVector", "[Execution][LuaWrapper
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  pathArray1", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncPathArray1;
+    LuaLibrary::Function func = codegen::lua::FuncPathArray1;
     CHECK(func.name == "funcPathArray1");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -347,7 +347,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  pathArray1", "[Execution][LuaWrapper
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, "abc");
+    lua::push(state, 1, "abc");
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -355,7 +355,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  pathArray1", "[Execution][LuaWrapper
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  pathArray2", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncPathArray2;
+    LuaLibrary::Function func = codegen::lua::FuncPathArray2;
     CHECK(func.name == "funcPathArray2");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -367,15 +367,15 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  pathArray2", "[Execution][LuaWrapper
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, "abc");
+    lua::push(state, 1, "abc");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, "def");
+    lua::push(state, 2, "def");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, "ghi");
+    lua::push(state, 3, "ghi");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, "jkl");
+    lua::push(state, 4, "jkl");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, "mno");
+    lua::push(state, 5, "mno");
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -383,7 +383,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  pathArray2", "[Execution][LuaWrapper
 }
 
 TEST_CASE("Execution/LuaWrapper/Arguments:  pathArray3", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::FuncPathArray3;
+    LuaLibrary::Function func = codegen::lua::FuncPathArray3;
     CHECK(func.name == "funcPathArray3");
     REQUIRE(func.arguments.size() == 1);
     CHECK(func.arguments[0].name == "arg");
@@ -395,25 +395,25 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  pathArray3", "[Execution][LuaWrapper
     lua_State* state = luaL_newstate();
     REQUIRE(state);
     lua_newtable(state);
-    ghoul::lua::push(state, 1, "abc");
+    lua::push(state, 1, "abc");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 2, "def");
+    lua::push(state, 2, "def");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 3, "ghi");
+    lua::push(state, 3, "ghi");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 4, "jkl");
+    lua::push(state, 4, "jkl");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 5, "mno");
+    lua::push(state, 5, "mno");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 6, "pqr");
+    lua::push(state, 6, "pqr");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 7, "stu");
+    lua::push(state, 7, "stu");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 8, "vwx");
+    lua::push(state, 8, "vwx");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 9, "yzz");
+    lua::push(state, 9, "yzz");
     lua_rawset(state, -3);
-    ghoul::lua::push(state, 10, "ABC");
+    lua::push(state, 10, "ABC");
     lua_rawset(state, -3);
     func.function(state);
     CHECK(lua_gettop(state) == 0);
@@ -421,7 +421,7 @@ TEST_CASE("Execution/LuaWrapper/Arguments:  pathArray3", "[Execution][LuaWrapper
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  path", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnPath;
+    LuaLibrary::Function func = codegen::lua::ReturnPath;
     CHECK(func.name == "returnPath");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Path");
@@ -432,13 +432,13 @@ TEST_CASE("Execution/LuaWrapper/Return:  path", "[Execution][LuaWrapper]") {
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::filesystem::path val = ghoul::lua::value<std::filesystem::path>(state);
+    std::filesystem::path val = lua::value<std::filesystem::path>(state);
     CHECK(val == std::filesystem::path("abc"));
     lua_close(state);
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  pathMap", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnPathMap;
+    LuaLibrary::Function func = codegen::lua::ReturnPathMap;
     CHECK(func.name == "returnPathMap");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "String -> Path");
@@ -450,7 +450,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  pathMap", "[Execution][LuaWrapper]") {
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     std::map<std::string, std::filesystem::path> val =
-        ghoul::lua::value<std::map<std::string, std::filesystem::path>>(state);
+        lua::value<std::map<std::string, std::filesystem::path>>(state);
     CHECK(val.size() == 3);
     REQUIRE(val.find("key1") != val.end());
     CHECK(val.find("key1")->second == std::filesystem::path("abc"));
@@ -466,7 +466,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnPathOptional;
+    LuaLibrary::Function func = codegen::lua::ReturnPathOptional;
     CHECK(func.name == "returnPathOptional");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Path?");
@@ -477,7 +477,7 @@ TEST_CASE(
     REQUIRE(state);
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
-    std::filesystem::path val = ghoul::lua::value<std::filesystem::path>(state);
+    std::filesystem::path val = lua::value<std::filesystem::path>(state);
     CHECK(val == std::filesystem::path("abc"));
     lua_close(state);
 }
@@ -487,7 +487,7 @@ TEST_CASE(
     "[Execution][LuaWrapper]"
 )
 {
-    Function func = codegen::lua::ReturnPathOptionalNullopt;
+    LuaLibrary::Function func = codegen::lua::ReturnPathOptionalNullopt;
     CHECK(func.name == "returnPathOptionalNullopt");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Path?");
@@ -502,7 +502,7 @@ TEST_CASE(
 }
 
 TEST_CASE("Execution/LuaWrapper/Return:  pathVector", "[Execution][LuaWrapper]") {
-    Function func = codegen::lua::ReturnPathVector;
+    LuaLibrary::Function func = codegen::lua::ReturnPathVector;
     CHECK(func.name == "returnPathVector");
     CHECK(func.arguments.empty());
     CHECK(func.returnType == "Path[]");
@@ -514,7 +514,7 @@ TEST_CASE("Execution/LuaWrapper/Return:  pathVector", "[Execution][LuaWrapper]")
     func.function(state);
     REQUIRE(lua_gettop(state) == 1);
     std::vector<std::filesystem::path> val =
-        ghoul::lua::value<std::vector<std::filesystem::path>>(state);
+        lua::value<std::vector<std::filesystem::path>>(state);
     REQUIRE(val.size() == 3);
     CHECK(val[0] == std::filesystem::path("abc"));
     CHECK(val[1] == std::filesystem::path("def"));

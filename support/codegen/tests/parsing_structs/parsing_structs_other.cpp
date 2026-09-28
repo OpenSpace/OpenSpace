@@ -1314,7 +1314,7 @@ struct [[codegen::Dictionary(P3)]] Param3 {
     double ghi;
 };
 struct [[codegen::Dictionary(P4)]] Param4 {
-    ghoul::Dictionary jkl;
+    Dictionary jkl;
 };
 )";
 
