@@ -215,7 +215,7 @@ target_link_libraries(codegentest PRIVATE Catch2::Catch2 codegen-lib openspace-c
 find_package(stbimage CONFIG REQUIRED)
 target_link_libraries(codegentest PRIVATE unofficial::stbimage::stbimage-write-impl)
 
-set_compile_settings(codegentest)
+set_openspace_compile_settings(codegentest)
 
 if (MSVC)
   # The unit tests frequently creates stacksizes that are a few hundred kb which can

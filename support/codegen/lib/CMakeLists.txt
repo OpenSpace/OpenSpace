@@ -54,5 +54,5 @@ target_include_directories(
     $<INSTALL_INTERFACE:include>
 )
 
-set_compile_settings(codegen-lib)
+set_openspace_compile_settings(codegen-lib)
 target_compile_features(codegen-lib PUBLIC cxx_std_23)
