@@ -135,6 +135,11 @@ private:
 
     void renderColormapOverviewWindow(bool* open);
 
+    // Show a tooltip with the asymmetrical uncertainty for the given column, if the
+    // hovered item has "<key>err1"/"<key>err2" columns
+    void renderUncertaintyTooltip(const ColumnKey& key, const ExoplanetItem& item,
+        float value) const;
+
     void renderPlanetTooltip(int index) const;
     void handleDoubleClickHoveredPlanet(int index);
 

@@ -960,10 +960,71 @@ void DataViewer::renderColumnValue(const ColumnKey& key, const ExoplanetItem& it
         }
         else {
             ImGui::Text(format.value_or("%.2f"), v);
+            renderUncertaintyTooltip(key, item, v);
         }
     }
     else if (std::holds_alternative<const char*>(value)) {
         ImGui::Text("%s", std::get<const char*>(value));
+    }
+}
+
+void DataViewer::renderUncertaintyTooltip(const ColumnKey& key,
+                                          const ExoplanetItem& item,
+                                          float value) const
+{
+    // The asymmetrical uncertainty values are stored in columns with the same name,
+    // ending with "err1" (upper) and "err2" (lower)
+    auto upperIt = item.dataColumns.find(key + "err1");
+    auto lowerIt = item.dataColumns.find(key + "err2");
+    if (upperIt == item.dataColumns.end() || lowerIt == item.dataColumns.end()) {
+        return;
+    }
+    if (!std::holds_alternative<float>(upperIt->second) ||
+        !std::holds_alternative<float>(lowerIt->second))
+    {
+        return;
+    }
+
+    float errorUpper = std::get<float>(upperIt->second);
+    float errorLower = std::get<float>(lowerIt->second);
+    if (std::isnan(errorUpper) && std::isnan(errorLower)) {
+        return;
+    }
+
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        // Treat as symmetrical if the difference is not visible at 2 decimals
+        if (std::abs(errorUpper - std::abs(errorLower)) < 0.005f) {
+            ImGui::Text("+/- %.2f", errorUpper);
+        }
+        else {
+            ImGui::Text(
+                "+%s",
+                std::isnan(errorUpper) ? "N/A" : std::format("{:.2f}", errorUpper).c_str()
+            );
+            ImGui::Text(
+                "%s",
+                std::isnan(errorLower) ? "N/A" : std::format("{:.2f}", errorLower).c_str()
+            );
+        }
+
+        if (value != 0.f && !std::isnan(errorUpper) && !std::isnan(errorLower)) {
+            float percentUncertainty =
+                std::abs((errorUpper - errorLower) / value) * 100.f;
+
+            glm::vec4 color = view::colors::Good;
+            if (percentUncertainty > 30.f) {
+                color = view::colors::Error;
+            }
+            else if (percentUncertainty > 10.f) {
+                color = view::colors::Warning;
+            }
+
+            ImGui::TextColored(
+                view::helper::toImVec4(color), "(%.1f%%)", percentUncertainty
+            );
+        }
+        ImGui::EndTooltip();
     }
 }
 
