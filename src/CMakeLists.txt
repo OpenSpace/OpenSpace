@@ -196,8 +196,6 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/openspace/misc/templatefactory.h
     ${PROJECT_SOURCE_DIR}/include/openspace/misc/templatefactory.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/misc/thread.h
-    ${PROJECT_SOURCE_DIR}/include/openspace/misc/threadpool.h
-    ${PROJECT_SOURCE_DIR}/include/openspace/misc/threadpool.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/misc/process.h
     ${PROJECT_SOURCE_DIR}/include/openspace/mission/mission.h
     ${PROJECT_SOURCE_DIR}/include/openspace/mission/missionmanager.h
@@ -514,7 +512,6 @@ target_sources(
     misc/stringhelper.cpp
     misc/templatefactory.cpp
     misc/thread.cpp
-    misc/threadpool.cpp
     misc/process.cpp
     mission/mission.cpp
     mission/missionmanager.cpp
