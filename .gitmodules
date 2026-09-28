@@ -10,6 +10,3 @@
 [submodule "support/doxygen/css"]
 	path = support/doxygen/css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
-[submodule "support/cmake/common-compile-settings"]
-	path = support/cmake/common-compile-settings
-	url = https://github.com/OpenSpace/common-compile-settings

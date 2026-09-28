@@ -1,8 +1,8 @@
 ##########################################################################################
 #                                                                                        #
-# OpenSpace                                                                              #
+# Common Compile Settings                                                                #
 #                                                                                        #
-# Copyright (c) 2014-2026                                                                #
+# Copyright (c) 2025-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,25 +22,43 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-if (MSVC)
-  option(OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS "Enable other optimizations, like LTCG, intrinsics, etc")
+# Last pass through the MSVC warning list:
+# https://gcc.gnu.org/onlinedocs/gcc-13.4.0/gcc/Warning-Options.html
 
-  include(${CMAKE_CURRENT_LIST_DIR}/platforms/msvc.cmake)
-elseif (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-  include(${CMAKE_CURRENT_LIST_DIR}/platforms/clang.cmake)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  include(${CMAKE_CURRENT_LIST_DIR}/platforms/gcc.cmake)
-else ()
-  message(FATAL_ERROR "Unknown compiler ${CMAKE_CXX_COMPILER_ID}")
-endif ()
 
-function (set_openspace_compile_settings target)
-  target_compile_features(${target} PRIVATE cxx_std_23)
-  internal__set_compile_options(${target})
+function (internal__set_compile_options target)
+  target_compile_options(${target} INTERFACE
+    "-ggdb"
+    "-march=x86-64-v3"
+  )
 
-  if (OPENSPACE_ENABLE_EDIT_CONTINUE)
-    target_compile_options(${target} PRIVATE
-      "/ZI"       # Edit and continue support
+  target_compile_options(${target} INTERFACE
+    "-Wall"
+    "-Wextra"
+    "-Wpedantic"
+    "-Walloc-zero"
+    "-Wcast-qual"
+    "-Wdate-time"
+    "-Wduplicated-branches"
+    "-Wduplicated-cond"
+    "-Wenum-conversion"
+    "-Wformat=2"
+    "-Wformat-signedness"
+    "-Wimplicit-fallthrough"
+    "-Winvalid-utf8"
+    "-Wlogical-op"
+    "-Wmain"
+    "-Wno-changes-meaning"
+    "-Wshadow"
+    "-Wundef"
+    "-Wunused"
+    "-Wuninitialized"
+    "-Wvla"
+    "-Wzero-as-null-pointer-constant"
     )
-  endif ()
-endfunction ()
+
+  target_compile_options(${target} INTERFACE
+    "-Wno-attributes"
+    "-Wno-missing-field-initializers"
+  )
+endfunction()
