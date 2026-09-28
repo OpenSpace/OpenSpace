@@ -47,11 +47,34 @@ uniform float colorFilterValue;
 uniform vec3 sunPosition;
 uniform vec3 sunPositionObj;
 uniform vec3 camPositionObj;
+uniform vec3 camPositionObjRaw; // Used for phase functions.
 uniform float nightFactor;
 uniform float zFightingPercentage;
 uniform float opacity;
 uniform vec3 ellipsoidRadii;
 
+vec3 ToneMap(vec3 color) {
+    mat3 inputMatrix = mat3(
+        0.84247906224151, 0.04232824226101, 0.04237565490570,
+        0.07781254037158, 0.87843363533593, 0.07843363533593,
+        0.07970839738700, 0.07923812240305, 0.87919070975837
+    );
+    color = inputMatrix * color;
+    color = clamp(log2(color + 0.0001) / 16.0 + 0.5, 0.0, 1.0);
+
+    vec3 c2 = color * color;
+    vec3 c3 = c2 * color;
+    vec3 c4 = c3 * color;
+    vec3 c5 = c4 * color;
+    color = 15.53 * c5 - 40.07 * c4 + 31.96 * c3 - 6.87 * c2 + 0.45 * color;
+
+    mat3 outputMatrix = mat3(
+        1.1961604724, -0.0528489811, -0.0528489811,
+        -0.0984852928, 1.1528414546, -0.0984852928,
+        -0.0976751805, -0.0999924735, 1.1513342746
+    );
+    return clamp(outputMatrix * color, 0.0, 1.0);
+}
 
 Fragment getFragment() {
   // Moving the origin to the center
@@ -87,7 +110,6 @@ Fragment getFragment() {
   //   colorBckwrd * vec4(1, 0.88, 0.82, 1.0),
   //   lerpFactor
   // );
-  vec4 diffuse = mix(colorFwrd, colorBckwrd, lerpFactor) * colorMult;
   diffuse.a = colorFilterValue * transparency;
   float colorValue = length(diffuse.rgb) / 0.57735026919;
   if (colorValue < 0.001) {
@@ -112,12 +134,30 @@ Fragment getFragment() {
   // WARNING: This might not be the case for Uranus
   vec3 normal = gl_FrontFacing ? vec3(-1.0, 0.0, 0.0) : vec3(1.0, 0.0, 0.0);
 
+  // Code below by Joshua Carter © 2026 under MIT license - - - - - - - - - - - - // START
+  float costheta = dot(normalize(camPositionObjRaw - in_data.posObj), sunPositionObj);
+  float alpha = acos(clamp(costheta, -1.0, 1.0)); // Alpha is the phase angle.
+  
+  // Separate phase functions combined together: Porco, C., et al. (2008) is used for the power law function.
+  float gen_phase_func = 0.153 * pow(3.092, (3.1415926 - alpha)); 
+  float fwsc_phase_func = HG(costheta, -0.95);
+  float opposition_surge = (1.5 * exp(-alpha / 0.009)) + 1;
+
+  diffuse.rgb *= (gen_phase_func + fwsc_phase_func) * opposition_surge;
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - // END
+
+  float optical_depth = -log(transparency);
+
   // Reduce the color of the fragment by the user factor
   // if we are facing away from the Sun
   if (dot(sunPosition, normal) < 0.0) {
     diffuse.rgb =
-      vec3(1.0, 0.97075, 0.952) *  texture(textureUnlit, texCoords).rgb * nightFactor;
+      vec3(1.0, 0.97075, 0.952) * texture(textureUnlit, texCoords).rgb * nightFactor;
+      diffuse.rgb *= optical_depth; // Phase function varies by optical depth.
   }
+
+  vec4 diffuse = mix(colorFwrd, colorBckwrd, lerpFactor) * colorMult;
+  diffuse.rgb = ToneMap(diffuse.rgb);
 
   Fragment frag;
   frag.color = diffuse * shadow;
