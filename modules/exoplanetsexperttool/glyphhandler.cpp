@@ -220,6 +220,7 @@ void GlyphHandler::setGlyphMode(GlyphMode mode) {
             setStarGlyphsEnabled(true);
             setBoolProperty(HostCloudIdentifier, "UseSecondMappedColor", true);
             setPlanetGlyphsEnabled(true);
+            setPlanetMode("Inclination");
 
             // TODO: Warn about having to add an extra color mapping for the star,
             // or provide a reasonable default color
