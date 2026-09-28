@@ -177,15 +177,23 @@ void SystemViewer::renderSystemViewQuickControls(const std::string& host) {
         ImGui::TextDisabled("A system view is already opened for this system");
     }
 
-    bool systemIsAdded = !systemCanBeAdded(host);
-    if (systemIsAdded) {
-        if (ImGui::Button("Zoom to star")) {
-            flyToStar(makeIdentifier(host));
-        }
+    const bool systemMissing = hasSystemBeenAdded(host) && systemCanBeAdded(host);
+    if (systemMissing) {
+        view::helper::renderHelpMarker(
+            "There is not enough data to visualize this system"
+        );
     }
     else {
-        if (ImGui::Button("+ Add system")) {
-            addExoplanetSystem(host);
+        bool systemIsAdded = !systemCanBeAdded(host);
+        if (systemIsAdded) {
+            if (ImGui::Button("Zoom to star")) {
+                flyToStar(makeIdentifier(host));
+            }
+        }
+        else {
+            if (ImGui::Button("+ Add system")) {
+                addExoplanetSystem(host);
+            }
         }
     }
 }
@@ -218,6 +226,10 @@ bool SystemViewer::systemCanBeAdded(const std::string& host) const {
     return sceneGraphNode(identifier) == nullptr;
 
     // TODO: also check against exoplanet list
+}
+
+bool SystemViewer::hasSystemBeenAdded(const std::string& host) const {
+    return std::find(_addedHostStars.begin(), _addedHostStars.end(), host) != _addedHostStars.end();
 }
 
 void SystemViewer::addExoplanetSystem(const std::string& host) {
@@ -284,6 +296,10 @@ void SystemViewer::addOrTargetPlanet(const ExoplanetItem& item) {
 }
 
 void SystemViewer::flyToStar(std::string_view hostIdentifier) const {
+    if (sceneGraphNode(hostIdentifier) == nullptr) {
+        return;
+    }
+
     // Ugly: Always set reach factors when targetting object;
     // we can't do it until the system is added to the scene
     setIncreasedReachfactors();
@@ -298,6 +314,7 @@ void SystemViewer::flyToStar(std::string_view hostIdentifier) const {
 void SystemViewer::renderSystemViewContent(const std::string& host) {
     const std::string hostIdentifier = makeIdentifier(host);
     bool systemIsAdded = !systemCanBeAdded(host);
+    const bool systemMissing = hasSystemBeenAdded(host) && systemCanBeAdded(host);
 
     std::vector<size_t> planetIndices =
         _dataViewer.planetsForHost(makeIdentifier(host));
@@ -305,7 +322,12 @@ void SystemViewer::renderSystemViewContent(const std::string& host) {
     ImGui::Text(std::format("{} system, {} planets", host, planetIndices.size()).c_str());
     ImGui::SameLine();
 
-    if (!systemIsAdded) {
+    if (systemMissing) {
+        view::helper::renderHelpMarker(
+            "There is not enough data to visualize this system"
+        );
+    }
+    else if (!systemIsAdded) {
         if (ImGui::Button("Add system")) {
             addExoplanetSystem(host);
         }
@@ -591,29 +613,32 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
         }
     }
 
-    ImGui::Separator();
+    const bool systemMissing = hasSystemBeenAdded(host) && systemCanBeAdded(host);
+    if (!systemMissing) {
+        ImGui::Separator();
 
-    for (size_t i = 0; i < nPlanets; ++i) {
-        size_t index = planetIndices[i];
-        const ExoplanetItem& p = _dataViewer.data()[index];
+        for (size_t i = 0; i < nPlanets; ++i) {
+            size_t index = planetIndices[i];
+            const ExoplanetItem& p = _dataViewer.data()[index];
 
-        const SceneGraphNode* node = global::navigationHandler->anchorNode();
-        bool isCurrentAnchor = node && node->guiName() == p.name;
-        if (isCurrentAnchor) {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImColor(0, 153, 112).Value);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(0, 204, 150).Value);
-        }
+            const SceneGraphNode* node = global::navigationHandler->anchorNode();
+            bool isCurrentAnchor = node && node->guiName() == p.name;
+            if (isCurrentAnchor) {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImColor(0, 153, 112).Value);
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(0, 204, 150).Value);
+            }
 
-        ImGui::SameLine(columnIndent(i));
+            ImGui::SameLine(columnIndent(i));
 
-        ImGui::PushID(std::format("target_button{} ", index).c_str());
-        if (ImGui::Button("Target")) {
-            addOrTargetPlanet(p);
-        }
-        ImGui::PopID();
+            ImGui::PushID(std::format("target_button{} ", index).c_str());
+            if (ImGui::Button("Target")) {
+                addOrTargetPlanet(p);
+            }
+            ImGui::PopID();
 
-        if (isCurrentAnchor) {
-            ImGui::PopStyleColor(2);
+            if (isCurrentAnchor) {
+                ImGui::PopStyleColor(2);
+            }
         }
     }
 }

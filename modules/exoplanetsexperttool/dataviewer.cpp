@@ -643,6 +643,65 @@ void DataViewer::render() {
                 "You can also rotate the view using the middle mouse button. Give it a try!"
             );
 
+            ImGui::Separator();
+
+            if (ImGui::BeginMenu("Added systems")) {
+                const std::vector<std::string>& addedSystems = _systemViewer->addedHostStars();
+                if (addedSystems.empty()) {
+                    ImGui::TextDisabled("No systems added");
+                }
+                else {
+                    std::string systemToRemove;
+                    for (const std::string& host : addedSystems) {
+                        const std::string hostIdentifier = makeIdentifier(host);
+                        const bool nodeExists = sceneGraphNode(hostIdentifier) != nullptr;
+
+                        if (!nodeExists) {
+                            ImGui::PushStyleColor(
+                                ImGuiCol_Text,
+                                view::helper::toImVec4(view::colors::Error)
+                            );
+                        }
+
+                        const bool menuOpen = ImGui::BeginMenu(host.c_str());
+
+                        if (!nodeExists) {
+                            ImGui::PopStyleColor();
+                            if (ImGui::IsItemHovered()) {
+                                ImGui::SetTooltip("Scene graph node does not exist in the scene");
+                            }
+                        }
+
+                        if (menuOpen) {
+                            if (ImGui::MenuItem("Zoom to star", nullptr, false, nodeExists)) {
+                                _systemViewer->flyToStar(hostIdentifier);
+                            }
+                            if (!nodeExists && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                                ImGui::SetTooltip("Cannot zoom to star: Scene graph node does not exist in the scene");
+                            }
+
+                            if (ImGui::MenuItem("Show system view")) {
+                                _systemViewer->showSystemView(host);
+                            }
+                            if (ImGui::MenuItem("Remove system")) {
+                                systemToRemove = host;
+                            }
+                            ImGui::EndMenu();
+                        }
+                    }
+
+                    if (!systemToRemove.empty()) {
+                        _systemViewer->removeExoplanetSystem(systemToRemove);
+                    }
+
+                    ImGui::Separator();
+                    if (ImGui::MenuItem("Remove all added systems")) {
+                        _systemViewer->removeAllExoplanetSystems();
+                    }
+                }
+                ImGui::EndMenu();
+            }
+
             ImGui::EndMenu();
         }
 

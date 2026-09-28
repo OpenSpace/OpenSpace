@@ -92,7 +92,15 @@ void TableView::render(bool* open, std::vector<size_t>& filteredDataRows) {
 void TableView::renderFirstTableColumn(const ExoplanetItem& item, size_t row) {
     const float RowHeight = ImGui::GetTextLineHeightWithSpacing(); // Inner height
 
-    if (_dataViewer.systemViewer()->systemCanBeAdded(item.hostName)) {
+    if (_dataViewer.systemViewer()->hasSystemBeenAdded(item.hostName) &&
+        _dataViewer.systemViewer()->systemCanBeAdded(item.hostName))
+    {
+        // System was added, but scene graph node does not exist (not enough data to visualize)
+        view::helper::renderHelpMarker(
+            "There is not enough data to visualize this system"
+        );
+    }
+    else if (_dataViewer.systemViewer()->systemCanBeAdded(item.hostName)) {
         ImGui::PushID(std::format("addbutton{}", row).c_str());
         if (ImGui::Button("+", ImVec2(20, RowHeight))) {
             _dataViewer.systemViewer()->addExoplanetSystem(item.hostName);

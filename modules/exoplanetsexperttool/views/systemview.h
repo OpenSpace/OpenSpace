@@ -42,6 +42,7 @@ public:
     void showSystemView(const std::string& host);
 
     bool systemCanBeAdded(const std::string& host) const;
+    bool hasSystemBeenAdded(const std::string& host) const;
 
     void addExoplanetSystem(const std::string& host);
     void removeExoplanetSystem(const std::string& host);
