@@ -700,6 +700,15 @@ void SystemViewer::renderVisualsTabContent(const std::string& host,
             }
         }
 
+        const std::string rotationAxisId = hostIdentifier + "_RotationAxis";
+        const Renderable* rotationAxis = renderable(rotationAxisId);
+        if (rotationAxis) {
+            bool enabled = rotationAxis->isEnabled();
+            if (ImGui::Checkbox("Show star rotation axis", &enabled)) {
+                setRenderableEnabled(rotationAxisId, enabled);
+            }
+        }
+
         if (!planetIndices.empty()) {
             // Assume that if first one we find is enabled/disabled, all are
             std::string planetDiscId;
