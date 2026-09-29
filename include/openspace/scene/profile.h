@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___PROFILE___H__
 #define __OPENSPACE_CORE___PROFILE___H__
 
+#include <openspace/glm.h>
+#include <openspace/misc/exception.h>
 #include <openspace/util/keys.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/exception.h>
 #include <map>
 #include <optional>
 #include <string>
@@ -67,7 +67,7 @@ Addon loadAddonFromFile(const std::filesystem::path& path);
 
 class Profile {
 public:
-    struct ParsingError final : public ghoul::RuntimeError {
+    struct ParsingError final : public RuntimeError {
         enum class Severity { Info, Warning, Error };
 
         ParsingError(Severity severity_, std::string msg);

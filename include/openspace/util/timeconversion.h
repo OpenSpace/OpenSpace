@@ -27,7 +27,7 @@
 
 #include <openspace/util/timeconstants.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <algorithm>
 #include <array>
 #include <string>
@@ -110,7 +110,7 @@ constexpr TimeUnit timeUnitFromString(std::string_view unitName) {
         i++;
     }
 
-    throw ghoul::MissingCaseException();
+    throw MissingCaseException();
 }
 
 constexpr std::vector<std::string> timeUnitList() {
@@ -153,7 +153,7 @@ constexpr double convertSeconds(double seconds, TimeUnit requestedUnit) {
         case TimeUnit::Year:
             return seconds / timeconstants::SecondsPerYear;
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 
@@ -178,7 +178,7 @@ constexpr double toSecond(TimeUnit unit) {
         case TimeUnit::Year:
             return timeconstants::SecondsPerYear;
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 

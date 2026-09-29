@@ -27,11 +27,11 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/rendering/dashboarditem.h>
-#include <ghoul/glm.h>
 #include <chrono>
 #include <memory>
 

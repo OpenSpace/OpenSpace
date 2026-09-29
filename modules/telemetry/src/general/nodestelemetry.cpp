@@ -27,13 +27,13 @@
 #include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <modules/telemetry/include/util.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <cstdlib>
 #include <limits>
 #include <utility>

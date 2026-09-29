@@ -27,19 +27,19 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/glm.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
 
 class ScreenSpaceInsetBlackout : public ScreenSpaceRenderable {
 public:
-    explicit ScreenSpaceInsetBlackout(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceInsetBlackout(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -103,7 +103,7 @@ private:
             std::vector<std::unique_ptr<Point>> points;
         };
 
-        explicit BlackoutShape(const ghoul::Dictionary& dictionary);
+        explicit BlackoutShape(const Dictionary& dictionary);
 
         bool checkHasChanged();
         void resetHasChanged();
@@ -134,14 +134,14 @@ private:
         TriggerProperty copyToClipboardTrigger;
     };
 
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
     void generateTexture();
 
     BlackoutShape _blackoutShape;
-    std::unique_ptr<ghoul::opengl::Texture> _blackoutTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _calibrationTexture;
-    ghoul::opengl::ProgramObject* _fboProgram = nullptr;
+    std::unique_ptr<opengl::Texture> _blackoutTexture;
+    std::unique_ptr<opengl::Texture> _calibrationTexture;
+    opengl::ProgramObject* _fboProgram = nullptr;
     UniformCache(color) _uniformCache;
 };
 

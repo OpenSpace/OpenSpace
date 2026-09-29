@@ -26,15 +26,15 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/glm.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
 #include <limits>
 #include <optional>
 
@@ -129,7 +129,7 @@ Documentation RenderablePrism::Documentation() {
     );
 }
 
-RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
+RenderablePrism::RenderablePrism(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _nShapeSegments(SegmentsInfo, 6, 3, 32)
     , _nLines(LinesInfo, 6, 0, 32)
@@ -181,7 +181,7 @@ void RenderablePrism::initializeGL() {
         absPath("${MODULE_BASE}/shaders/prism_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/prism_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 
     glCreateVertexArrays(1, &_vao);
     glEnableVertexArrayAttrib(_vao, 0);
@@ -260,7 +260,7 @@ void RenderablePrism::updateVertexData() {
     }
 
     // Indices for Base shape
-    ghoul_assert(
+    assert_msg(
         _nShapeSegments.value() <= std::numeric_limits<uint8_t>::max(),
         "Too many shape segments"
     );
@@ -340,7 +340,7 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
 void RenderablePrism::update(const UpdateData& data) {
     if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+        opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     if (_prismIsDirty) [[unlikely]] {

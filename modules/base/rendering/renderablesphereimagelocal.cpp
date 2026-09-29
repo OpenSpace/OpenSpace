@@ -25,9 +25,9 @@
 #include <modules/base/rendering/renderablesphereimagelocal.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <filesystem>
 
 namespace {
@@ -69,8 +69,7 @@ Documentation RenderableSphereImageLocal::Documentation() {
     );
 }
 
-RenderableSphereImageLocal::RenderableSphereImageLocal(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableSphereImageLocal::RenderableSphereImageLocal(const Dictionary& dictionary)
     : RenderableSphere(dictionary, { .shouldUpdateIfDisabled = true })
     , _texturePath(TextureInfo)
     , _textureIsDirty(_enabled)
@@ -96,8 +95,8 @@ RenderableSphereImageLocal::RenderableSphereImageLocal(
 
 void RenderableSphereImageLocal::initialize() {
     _texture = std::make_unique<TextureComponent>(2);
-    _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+    _texture->setFilterMode(opengl::Texture::FilterMode::LinearMipMap);
+    _texture->setWrapping(opengl::Texture::WrappingMode::ClampToEdge);
 }
 
 void RenderableSphereImageLocal::initializeGL() {
@@ -131,7 +130,7 @@ void RenderableSphereImageLocal::update(const UpdateData& data) {
     _texture->update();
 }
 
-void RenderableSphereImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderableSphereImageLocal::bindTexture(opengl::TextureUnit& unit) {
     unit.bind(*_texture->texture());
 }
 

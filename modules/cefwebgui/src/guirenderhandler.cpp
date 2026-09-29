@@ -24,11 +24,11 @@
 
 #include <modules/cefwebgui/include/guirenderhandler.h>
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/textureunit.h>
 #include <array>
 
 namespace {
@@ -39,10 +39,10 @@ namespace openspace {
 
 GUIRenderHandler::GUIRenderHandler() {
     LDEBUG("Initializing CEF GL environment...");
-    ghoul::Dictionary define;
+    Dictionary define;
     define.setValue("useAcceleratedRendering", _acceleratedRendering);
 
-    _programObject = ghoul::opengl::ProgramObject::Build(
+    _programObject = opengl::ProgramObject::Build(
         "WebGUICEFProgram",
         absPath("${MODULE_CEFWEBGUI}/shaders/gui_vs.glsl"),
         absPath("${MODULE_CEFWEBGUI}/shaders/gui_fs.glsl"),
@@ -98,7 +98,7 @@ void GUIRenderHandler::draw() {
 
     _programObject->activate();
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(_texture);
     _programObject->setUniform("tex", unit);
 

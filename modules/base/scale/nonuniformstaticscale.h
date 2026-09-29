@@ -33,7 +33,7 @@ namespace openspace {
 
 class NonUniformStaticScale : public Scale {
 public:
-    explicit NonUniformStaticScale(const ghoul::Dictionary& dictionary);
+    explicit NonUniformStaticScale(const Dictionary& dictionary);
 
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 

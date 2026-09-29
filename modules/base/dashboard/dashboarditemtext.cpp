@@ -25,7 +25,7 @@
 #include <modules/base/dashboard/dashboarditemtext.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionary.h>
 #include <optional>
 
 namespace {
@@ -54,7 +54,7 @@ Documentation DashboardItemText::Documentation() {
     );
 }
 
-DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
+DashboardItemText::DashboardItemText(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _text(TextInfo, "")
 {

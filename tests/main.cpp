@@ -28,26 +28,26 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua.h>
+#include <openspace/openspace.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/ghoul.h>
 #include <filesystem>
 #include <iostream>
 
-int main(int argc, char** argv) {
-    using namespace openspace;
+using namespace openspace;
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Info,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
+int main(int argc, char** argv) {
+    logging::LogManager::initialize(
+        logging::LogLevel::Info,
+        logging::LogManager::ImmediateFlush::Yes
     );
-    ghoul::initialize();
+    initialize();
     global::create();
 
     // Register the path of the executable,
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
+        filesystem::FileSystem::Override::Yes
     );
 
     const std::filesystem::path configFile = findConfiguration();
@@ -67,10 +67,10 @@ int main(int argc, char** argv) {
     registerPathTokens(*global::configuration);
     global::openSpaceEngine->initialize();
 
-    ghoul::logging::LogManager::deinitialize();
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Info,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
+    logging::LogManager::deinitialize();
+    logging::LogManager::initialize(
+        logging::LogLevel::Info,
+        logging::LogManager::ImmediateFlush::Yes
     );
 
     FileSys.registerPathToken("${TESTDIR}", "${BASE}/tests");

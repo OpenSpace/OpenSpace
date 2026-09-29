@@ -26,9 +26,9 @@
 
 #include "profile/line.h"
 #include <modules/space/horizonsfile.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>

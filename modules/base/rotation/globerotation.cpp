@@ -25,15 +25,15 @@
 #include <modules/base/rotation/globerotation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
 #include <glm/gtx/quaternion.hpp>
 #include <optional>
 
@@ -131,7 +131,7 @@ Documentation GlobeRotation::Documentation() {
     );
 }
 
-GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
+GlobeRotation::GlobeRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
     , _sceneGraphNode(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
@@ -185,7 +185,7 @@ void GlobeRotation::setUpdateVariables() {
 }
 
 glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const {
-    ghoul_assert(_attachedNode, "Attached node cannot be nullptr");
+    assert_msg(_attachedNode, "Attached node cannot be nullptr");
 
     const glm::vec3 groundPos = cartesianCoordinatesFromGeo(
         *_attachedNode,

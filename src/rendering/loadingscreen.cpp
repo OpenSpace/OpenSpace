@@ -26,22 +26,22 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/font/font.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/loglevel.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/resourcesynchronization.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/loglevel.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -112,23 +112,23 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         ScreenLog::LogLevel::Warning
     );
     _log = log.get();
-    ghoul::logging::LogManager::ref().addLog(std::move(log));
+    logging::LogManager::ref().addLog(std::move(log));
 
     const float fontScaling = global::windowDelegate->osDpiScaling();
 
     _loadingFont = global::fontManager->font(
         "Loading",
         LoadingFontSize * fontScaling,
-        ghoul::fontrendering::FontManager::Outline::No,
-        ghoul::fontrendering::FontManager::LoadGlyphs::No
+        fontrendering::FontManager::Outline::No,
+        fontrendering::FontManager::LoadGlyphs::No
     );
 
     if (_showMessage) {
         _messageFont = global::fontManager->font(
             "Loading",
             MessageFontSize * fontScaling,
-            ghoul::fontrendering::FontManager::Outline::No,
-            ghoul::fontrendering::FontManager::LoadGlyphs::No
+            fontrendering::FontManager::Outline::No,
+            fontrendering::FontManager::LoadGlyphs::No
         );
     }
 
@@ -136,8 +136,8 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         _itemFont = global::fontManager->font(
             "Loading",
             ItemFontSize * fontScaling,
-            ghoul::fontrendering::FontManager::Outline::No,
-            ghoul::fontrendering::FontManager::LoadGlyphs::No
+            fontrendering::FontManager::Outline::No,
+            fontrendering::FontManager::LoadGlyphs::No
         );
     }
 
@@ -145,17 +145,14 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         _logFont = global::fontManager->font(
             "Loading",
             LogFontSize * fontScaling,
-            ghoul::fontrendering::FontManager::Outline::No,
-            ghoul::fontrendering::FontManager::LoadGlyphs::No
+            fontrendering::FontManager::Outline::No,
+            fontrendering::FontManager::LoadGlyphs::No
         );
     }
 
     {
         // Logo stuff
-        _logoTexture = ghoul::io::texture::loadTexture(
-            absPath("${DATA}/openspace-logo.png"),
-            2
-        );
+        _logoTexture = io::texture::loadTexture(absPath("${DATA}/openspace-logo.png"), 2);
     }
 }
 
@@ -165,7 +162,7 @@ LoadingScreen::~LoadingScreen() {
     _loadingFont = nullptr;
     _messageFont = nullptr;
     _itemFont = nullptr;
-    ghoul::logging::LogManager::ref().removeLog(_log);
+    logging::LogManager::ref().removeLog(_log);
     _log = nullptr;
 }
 
@@ -306,7 +303,7 @@ void LoadingScreen::render() {
     const float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
         static_cast<float>(_logoTexture->dimensions().y);
 
-    ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(res);
+    fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(res);
 
     const glm::vec2 size = glm::vec2(
         LogoSize.x * sizeAdjustment,
@@ -338,7 +335,7 @@ void LoadingScreen::render() {
     //
     // "Loading" text
     //
-    using FR = ghoul::fontrendering::FontRenderer;
+    using FR = fontrendering::FontRenderer;
     const FR& renderer = FR::defaultRenderer();
 
     const std::string headline =
@@ -583,7 +580,7 @@ void LoadingScreen::renderLogMessages() const {
     constexpr size_t MaxNumberMessages = 6;
     constexpr int MessageLength = 209;
 
-    using FR = ghoul::fontrendering::FontRenderer;
+    using FR = fontrendering::FontRenderer;
     const FR& renderer = FR::defaultRenderer();
 
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
@@ -623,7 +620,7 @@ void LoadingScreen::renderLogMessages() const {
                 10 + _logFont->pointSize() * nRows * 2
             ),
             it.message.size() < MessageLength ? it.message : result.str(),
-            ghoul::toColor(it.level)
+            toColor(it.level)
         );
         nRows++;
     }
@@ -633,13 +630,13 @@ void LoadingScreen::renderLogMessages() const {
         glm::vec2(global::windowDelegate->firstWindowResolution()) * dpiScaling;
 
     // Render # of warnings and error messages
-    std::map<ghoul::logging::LogLevel, size_t> numberOfErrorsPerLevel;
+    std::map<logging::LogLevel, size_t> numberOfErrorsPerLevel;
     for (const auto& entry : _log->entries()) {
         numberOfErrorsPerLevel[entry.level]++;
     }
     size_t row = 0;
     for (auto& [level, amount] : numberOfErrorsPerLevel) {
-        const std::string text = std::format("{}: {}", ghoul::to_string(level), amount);
+        const std::string text = std::format("{}: {}", to_string(level), amount);
         const glm::vec2 bbox = _logFont->boundingBox(text);
         renderer.render(
             *_logFont,
@@ -648,7 +645,7 @@ void LoadingScreen::renderLogMessages() const {
                 10 + _logFont->pointSize() * row * 2
             ),
             text,
-            ghoul::toColor(level)
+            toColor(level)
         );
         row++;
     }

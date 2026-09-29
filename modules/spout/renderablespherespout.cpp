@@ -27,10 +27,10 @@
 #include <modules/spout/renderablespherespout.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/textureunit.h>
 
 namespace {
     // Renders a sphere with a texture that is provided by another application on the
@@ -51,7 +51,7 @@ Documentation RenderableSphereSpout::Documentation() {
     );
 }
 
-RenderableSphereSpout::RenderableSphereSpout(const ghoul::Dictionary& dictionary)
+RenderableSphereSpout::RenderableSphereSpout(const Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _spoutReceiver(*this, dictionary)
 {
@@ -87,7 +87,7 @@ void RenderableSphereSpout::update(const UpdateData& data) {
     _spoutReceiver.updateReceiver();
 }
 
-void RenderableSphereSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderableSphereSpout::bindTexture(opengl::TextureUnit& unit) {
     if (_spoutReceiver.isReceiving()) {
         unit.bind(_spoutReceiver.spoutTexture());
     }

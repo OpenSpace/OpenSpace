@@ -27,14 +27,14 @@
 
 #include <openspace/scene/timeframe.h>
 
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/timerange.h>
-#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
 class TimeFrameKernel : public TimeFrame {
 public:
-    explicit TimeFrameKernel(const ghoul::Dictionary& dictionary);
+    explicit TimeFrameKernel(const Dictionary& dictionary);
 
     bool initialize() override;
     void update(const Time& time) override;
@@ -42,7 +42,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    ghoul::Dictionary _initialization;
+    Dictionary _initialization;
 
     std::vector<TimeRange> _timeRangesSPK;
     std::vector<TimeRange> _timeRangesCK;

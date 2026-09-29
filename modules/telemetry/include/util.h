@@ -26,8 +26,8 @@
 #define __OPENSPACE_MODULE_TELEMETRY___UTIL___H__
 
 #include <modules/telemetry/telemetrymodule.h>
+#include <openspace/glm.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/glm.h>
 #include <string>
 
 namespace openspace {

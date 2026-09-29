@@ -27,14 +27,14 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/topic/server.h>
 #include <openspace/util/json_helper.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <filesystem>
 #include <optional>
@@ -169,11 +169,11 @@ void WebGuiModule::removeEndpointChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(it != _endpointChangeCallbacks.cend(), "Must be valid callback handle");
+    assert_msg(it != _endpointChangeCallbacks.cend(), "Must be valid callback handle");
     _endpointChangeCallbacks.erase(it);
 }
 
-void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
+void WebGuiModule::internalInitialize(const Dictionary& configuration) {
     const Parameters p = codegen::bake<Parameters>(configuration);
 
     _port = p.port.value_or(_port);
@@ -283,7 +283,7 @@ void WebGuiModule::startProcess() {
         defaultEndpoint, _port.value(), _address.value(), webSocketPort
     );
 
-    _process = std::make_unique<ghoul::Process>(
+    _process = std::make_unique<Process>(
         command,
         absPath("${BIN}"),
         [](const char* data, size_t n) {

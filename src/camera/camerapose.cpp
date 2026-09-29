@@ -34,10 +34,10 @@ CameraRotationDecomposition decomposeCameraRotation(const CameraPose& cameraPose
                                                     const glm::dvec3& reference)
 {
     const glm::dvec3 cameraUp = cameraPose.rotation * glm::dvec3(0.0, 1.0, 0.0);
-    const glm::dvec3 cameraViewDirection = ghoul::viewDirection(cameraPose.rotation);
+    const glm::dvec3 cameraViewDirection = viewDirection(cameraPose.rotation);
 
     // To avoid problem with lookup in up direction we adjust it with the view direction
-    const glm::dquat globalCameraRotation = ghoul::lookAtQuaternion(
+    const glm::dquat globalCameraRotation = lookAtQuaternion(
         glm::dvec3(0.0),
         reference - cameraPose.position,
         normalize(cameraViewDirection + cameraUp)
@@ -57,7 +57,7 @@ decomposeCameraRotationSurface(const CameraPose& cameraPose,
                                const SceneGraphNode& reference)
 {
     const glm::dvec3 cameraUp = cameraPose.rotation * Camera::UpDirectionCameraSpace;
-    const glm::dvec3 cameraViewDirection = ghoul::viewDirection(cameraPose.rotation);
+    const glm::dvec3 cameraViewDirection = viewDirection(cameraPose.rotation);
 
     glm::dmat4 modelTransform = reference.modelTransform();
     if (modelTransform[0][0] == 0.0) {
@@ -83,7 +83,7 @@ decomposeCameraRotationSurface(const CameraPose& cameraPose,
     );
 
     // To avoid problem with lookup in up direction we adjust it with the view direction
-    const glm::dquat globalCameraRotation = ghoul::lookAtQuaternion(
+    const glm::dquat globalCameraRotation = lookAtQuaternion(
         glm::dvec3(0.0),
         -directionFromSurfaceToCamera,
         normalize(cameraViewDirection + cameraUp)

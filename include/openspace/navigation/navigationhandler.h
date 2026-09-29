@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
@@ -35,7 +36,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 #include <functional>
 #include <optional>

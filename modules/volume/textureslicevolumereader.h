@@ -26,14 +26,14 @@
 #define __OPENSPACE_MODULE_VOLUME___TEXTURESLICEVOLUMEREADER___H__
 
 #include <modules/volume/linearlrucache.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
+
+namespace opengl { class Texture; }
 
 template <typename Type>
 class TextureSliceVolumeReader {
@@ -51,9 +51,9 @@ public:
     void setPaths(std::vector<std::string> paths);
 
 private:
-    ghoul::opengl::Texture& getSlice(int sliceIndex) const;
+    opengl::Texture& getSlice(int sliceIndex) const;
     std::vector<std::string> _paths;
-    mutable LinearLruCache<std::shared_ptr<ghoul::opengl::Texture>> _cache;
+    mutable LinearLruCache<std::shared_ptr<opengl::Texture>> _cache;
     glm::ivec2 _sliceDimensions = glm::ivec2(0);
     bool _isInitialized = false;
 };

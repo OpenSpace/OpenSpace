@@ -35,19 +35,19 @@
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
@@ -176,7 +176,7 @@ Documentation RenderableMultiresVolume::Documentation() {
     );
 }
 
-RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dictionary)
+RenderableMultiresVolume::RenderableMultiresVolume(const Dictionary& dictionary)
     :  Renderable(dictionary)
     , _useGlobalTime(UseGlobalTimeInfo, false)
     , _loop(LoopInfo, false)
@@ -388,7 +388,7 @@ void RenderableMultiresVolume::initializeGL() {
     onEnabledChange(onChange);
 
     if (!success) {
-        throw ghoul::RuntimeError("Error during initialization");
+        throw RuntimeError("Error during initialization");
     }
 }
 
@@ -510,7 +510,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         std::chrono::duration<double> frameDuration = frameEnd - _frameStart;
 
         // Make sure that the directory exists
-        ghoul::filesystem::File file(_statsFileName);
+        filesystem::File file(_statsFileName);
         std::filesystem::path directory =
             std::filesystem::path(_statsFileName).parent_path();
         std::filesystem::create_directories(directory);

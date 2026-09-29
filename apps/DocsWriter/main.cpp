@@ -27,19 +27,19 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/openspace.h>
 
 int main(int, char** argv) {
     using namespace openspace;
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
+    logging::LogManager::initialize(
+        logging::LogLevel::Debug,
+        logging::LogManager::ImmediateFlush::Yes
     );
 
-    ghoul::initialize();
+    initialize();
     global::create();
 
     // In order to initialize the engine, we need to specify the tokens
@@ -48,7 +48,7 @@ int main(int, char** argv) {
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
+        filesystem::FileSystem::Override::Yes
     );
 
     std::filesystem::path configFile = findConfiguration();

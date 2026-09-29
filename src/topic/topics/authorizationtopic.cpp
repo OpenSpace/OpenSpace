@@ -25,12 +25,14 @@
 #include <openspace/topic/topics/authorizationtopic.h>
 
 #include <openspace/documentation/schema.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/topic/connection.h>
-#include <ghoul/logging/logmanager.h>
 #include <stdexcept>
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "AuthorizationTopic";
 
     enum class Status {
@@ -44,7 +46,7 @@ namespace {
             case Status::Authorized: return "authorized";
             case Status::IncorrectKey: return "incorrectKey";
             case Status::BadRequest: return "badRequest";
-            default: throw ghoul::MissingCaseException();
+            default: throw MissingCaseException();
         }
     }
 

@@ -31,15 +31,14 @@
 #include <string>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 class StateMachine {
 public:
-    explicit StateMachine(const ghoul::Dictionary& dictionary);
+    explicit StateMachine(const Dictionary& dictionary);
     ~StateMachine() = default;
 
     void setInitialState(const std::string& initialState);

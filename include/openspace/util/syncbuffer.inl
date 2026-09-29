@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <cstring>
 
 namespace openspace {
@@ -43,7 +43,7 @@ void SyncBuffer::encode(const T& v) {
 template <typename T>
 T SyncBuffer::decode() {
     const size_t size = sizeof(T);
-    ghoul_assert(_decodeOffset + size < _n, "");
+    assert_msg(_decodeOffset + size < _n, "");
     T value;
     std::memcpy(&value, _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
@@ -53,7 +53,7 @@ T SyncBuffer::decode() {
 template <typename T>
 void SyncBuffer::decode(T& value) {
     const size_t size = sizeof(T);
-    ghoul_assert(_decodeOffset + size < _n, "");
+    assert_msg(_decodeOffset + size < _n, "");
     std::memcpy(&value, _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
 }

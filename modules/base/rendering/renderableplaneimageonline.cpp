@@ -27,12 +27,12 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <cstdlib>
 #include <limits>
 #include <utility>
@@ -83,8 +83,7 @@ Documentation RenderablePlaneImageOnline::Documentation() {
     );
 }
 
-RenderablePlaneImageOnline::RenderablePlaneImageOnline(
-                                                      const ghoul::Dictionary& dictionary)
+RenderablePlaneImageOnline::RenderablePlaneImageOnline(const Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
     , _rightTexturePath(RightTextureInfo)
@@ -117,7 +116,7 @@ void RenderablePlaneImageOnline::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderablePlaneImageOnline::bindTexture(opengl::TextureUnit& unit) {
     switch (global::windowDelegate->frustumMode()) {
         case WindowDelegate::Frustum::Mono:
         case WindowDelegate::Frustum::LeftEye:
@@ -173,17 +172,17 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            _texture = ghoul::io::texture::loadTexture(
+            _texture = io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
-                ghoul::opengl::Texture::SamplerInit{
-                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                opengl::Texture::SamplerInit{
+                    .filter = opengl::Texture::FilterMode::LinearMipMap
                 },
                 imageFile.format
             );
         }
-        catch (const ghoul::io::texture::InvalidLoadException& e) {
+        catch (const io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }
@@ -214,17 +213,17 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
             }
 
             try {
-                _rightTexture = ghoul::io::texture::loadTexture(
+                _rightTexture = io::texture::loadTexture(
                     reinterpret_cast<void*>(imageFile.buffer),
                     imageFile.size,
                     2,
-                    ghoul::opengl::Texture::SamplerInit{
-                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                    opengl::Texture::SamplerInit{
+                        .filter = opengl::Texture::FilterMode::LinearMipMap
                     },
                     imageFile.format
                 );
             }
-            catch (const ghoul::io::texture::InvalidLoadException& e) {
+            catch (const io::texture::InvalidLoadException& e) {
                 _textureIsDirty = false;
                 LERRORC(e.component, e.message);
             }

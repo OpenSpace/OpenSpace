@@ -33,7 +33,7 @@ namespace openspace {
 
 class DashboardItemDate : public DashboardTextItem {
 public:
-    explicit DashboardItemDate(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemDate(const Dictionary& dictionary);
     ~DashboardItemDate() override = default;
 
     void update() override;

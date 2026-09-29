@@ -27,16 +27,16 @@
 
 #include <modules/base/rendering/renderabledisc.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <ghoul/glm.h>
 
 namespace openspace {
 
 class RenderableHabitableZone : public RenderableDisc {
 public:
-    explicit RenderableHabitableZone(const ghoul::Dictionary& dictionary);
+    explicit RenderableHabitableZone(const Dictionary& dictionary);
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 

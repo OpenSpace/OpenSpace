@@ -35,7 +35,7 @@ namespace openspace {
 
 class DashboardItemTimeVaryingText : public DashboardTextItem {
 public:
-    explicit DashboardItemTimeVaryingText(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemTimeVaryingText(const Dictionary& dictionary);
     ~DashboardItemTimeVaryingText() override = default;
 
     void update() override;

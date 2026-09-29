@@ -31,8 +31,6 @@
 
 using namespace openspace;
 
-// Note: Dictionary formatting is tested in Ghoul
-
 TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
     glm::vec4, glm::dvec2, glm::dvec3, glm::dvec4, glm::ivec2, glm::ivec3, glm::ivec4,
     glm::uvec2, glm::uvec3, glm::uvec4, glm::mat2x2, glm::mat2x3, glm::mat2x4,
@@ -46,9 +44,9 @@ TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
 
     std::string json = formatJson(val);
 
-    // Compare with Ghoul's Lua conversions. Note that Lua uses '{' for arrays,
-    // while we here expect '[' for all glm types
-    std::string luaValue = ghoul::to_string(val);
+    // Compare with the Lua conversions. Note that Lua uses '{' for arrays, while we here
+    // expect '[' for all glm types
+    std::string luaValue = to_string(val);
     luaValue.front() = '[';
     luaValue.back() = ']';
     CHECK(json == luaValue);

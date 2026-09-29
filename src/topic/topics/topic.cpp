@@ -25,8 +25,8 @@
 #include <openspace/topic/topics/topic.h>
 
 #include <openspace/json.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/topic/connection.h>
-#include <ghoul/misc/profiling.h>
 #include <utility>
 
 namespace openspace {

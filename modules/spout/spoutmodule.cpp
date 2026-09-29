@@ -28,12 +28,12 @@
 #include <modules/spout/renderablespherespout.h>
 #include <modules/spout/screenspacespout.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <vector>
 
 namespace openspace {
@@ -42,16 +42,16 @@ SpoutModule::SpoutModule()
     : OpenSpaceModule(Name)
 {}
 
-void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
+void SpoutModule::internalInitialize(const Dictionary&) {
 #ifdef WIN32
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
+    TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
+    assert_msg(fSsRenderable, "ScreenSpaceRenderable factory was not created");
     fSsRenderable->registerClass<ScreenSpaceSpout>("ScreenSpaceSpout");
 
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    assert_msg(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
     fRenderable->registerClass<RenderableSphereSpout>("RenderableSphereSpout");
 #endif // WIN32

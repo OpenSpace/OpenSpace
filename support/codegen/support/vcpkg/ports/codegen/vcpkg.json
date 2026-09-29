@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "codegen",
+  "version": "1.0.0",
+  "description": [
+    "OpenSpace code generator.",
+    "This port lives inside the codegen repository and builds the enclosing checkout. It ships the codegen::codegen-lib library and the codegen-tool executable that a consumer runs as a build step."
+  ],
+  "homepage": "https://github.com/OpenSpace/codegen",
+  "license": "MIT",
+  "supports": "!(osx | uwp | android)",
+  "dependencies": [
+    "common-compile-settings",
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}

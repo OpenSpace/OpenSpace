@@ -27,20 +27,20 @@
 #include <openspace/data/colormaploader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -451,7 +451,7 @@ Documentation RenderableStars::Documentation() {
     );
 }
 
-RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
+RenderableStars::RenderableStars(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _speckFile(SpeckFileInfo)
     , _colorTexturePath(ColorTextureInfo)
@@ -517,7 +517,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_speckFile);
 
 
-    _colorTextureFile = std::make_unique<ghoul::filesystem::File>(p.colorMap);
+    _colorTextureFile = std::make_unique<filesystem::File>(p.colorMap);
     _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
     _colorTexturePath = p.colorMap.string();
     _colorTexturePath.onChange([&] {
@@ -628,7 +628,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     if (p.core.has_value()) {
         _core.texturePath = absPath(p.core->texture).string();
-        _core.file = std::make_unique<ghoul::filesystem::File>(_core.texturePath.value());
+        _core.file = std::make_unique<filesystem::File>(_core.texturePath.value());
         _core.file->setCallback(markTextureAsDirty);
         _core.multiplier = p.core->multiplier.value_or(_core.multiplier);
         _core.gamma = p.core->gamma.value_or(_core.gamma);
@@ -643,7 +643,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     _glare.texturePath = absPath(p.glare.texture).string();
     _glare.texturePath.onChange(markTextureAsDirty);
-    _glare.file = std::make_unique<ghoul::filesystem::File>(_glare.texturePath.value());
+    _glare.file = std::make_unique<filesystem::File>(_glare.texturePath.value());
     _glare.file->setCallback(markTextureAsDirty);
     _glare.container.addProperty(_glare.texturePath);
     _glare.multiplier = p.glare.multiplier.value_or(_glare.multiplier);
@@ -741,7 +741,7 @@ void RenderableStars::initializeGL() {
     glVertexArrayAttribFormat(_vao, otherDataAttrib, 1, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, otherDataAttrib, 3);
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     loadData();
 
@@ -781,7 +781,7 @@ void RenderableStars::deinitializeGL() {
 void RenderableStars::loadPSFTexture() {
     auto markPsfTextureAsDirty = [this]() { _pointSpreadFunctionTextureIsDirty = true; };
     auto loadTexture = [markPsfTextureAsDirty](TextureComponent& component) {
-        using Texture = ghoul::opengl::Texture;
+        using Texture = opengl::Texture;
 
         component.texture = nullptr;
         const std::string path = component.texturePath;
@@ -789,7 +789,7 @@ void RenderableStars::loadPSFTexture() {
             return;
         }
 
-        component.texture = ghoul::io::texture::loadTexture(
+        component.texture = io::texture::loadTexture(
             absPath(path),
             2,
             {
@@ -800,7 +800,7 @@ void RenderableStars::loadPSFTexture() {
         );
 
         LDEBUG(std::format("Loaded texture from '{}'", absPath(component.texturePath)));
-        component.file = std::make_unique<ghoul::filesystem::File>(path);
+        component.file = std::make_unique<filesystem::File>(path);
         component.file->setCallback(markPsfTextureAsDirty);
     };
 
@@ -871,14 +871,14 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.opacity, opacity());
     }
 
-    ghoul::opengl::TextureUnit glareUnit;
+    opengl::TextureUnit glareUnit;
     glareUnit.bind(*_glare.texture);
     _program->setUniform(_uniformCache.glareTexture, glareUnit);
     _program->setUniform(_uniformCache.glareMultiplier, _glare.multiplier);
     _program->setUniform(_uniformCache.glareGamma, _glare.gamma);
     _program->setUniform(_uniformCache.glareScale, _glare.scale);
 
-    ghoul::opengl::TextureUnit coreUnit;
+    opengl::TextureUnit coreUnit;
     if (_core.texture) {
         coreUnit.bind(*_core.texture);
         _program->setUniform(_uniformCache.coreTexture, coreUnit);
@@ -888,13 +888,13 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     }
     _program->setUniform(_uniformCache.hasCore, _core.texture != nullptr);
 
-    ghoul::opengl::TextureUnit colorUnit;
+    opengl::TextureUnit colorUnit;
     if (_colorTexture) {
         colorUnit.bind(*_colorTexture);
         _program->setUniform(_uniformCache.colorTexture, colorUnit);
     }
 
-    ghoul::opengl::TextureUnit otherDataUnit;
+    opengl::TextureUnit otherDataUnit;
     if (_colorOption == ColorOption::OtherData && _otherDataColorMapTexture) {
         otherDataUnit.bind(*_otherDataColorMapTexture);
         _program->setUniform(_uniformCache.otherDataTexture, otherDataUnit);
@@ -951,7 +951,7 @@ void RenderableStars::update(const UpdateData&) {
             );
 
             LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
-            _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
+            _colorTextureFile = std::make_unique<filesystem::File>(
                 _colorTexturePath.value()
             );
             _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
@@ -975,7 +975,7 @@ void RenderableStars::update(const UpdateData&) {
 
     if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 
@@ -999,9 +999,8 @@ void RenderableStars::loadData() {
 
     const bool success = _dataset.normalizeVariable(_dataMapping.luminance);
     if (!success) {
-        throw ghoul::RuntimeError(std::format(
-            "Could not find required variable '{}'",
-            _dataMapping.luminance.value()
+        throw RuntimeError(std::format(
+            "Could not find required variable '{}'", _dataMapping.luminance.value()
         ));
     }
 }

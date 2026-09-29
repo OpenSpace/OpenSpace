@@ -34,7 +34,7 @@ namespace openspace {
 
 class DashboardItemGlobeLocation : public DashboardTextItem {
 public:
-    explicit DashboardItemGlobeLocation(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemGlobeLocation(const Dictionary& dictionary);
     ~DashboardItemGlobeLocation() override = default;
 
     void update() override;

@@ -27,18 +27,17 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/io/socket/socketserver.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <ghoul/io/socket/socketserver.h>
 #include <memory>
-
-namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 class ServerInterface : public PropertyOwner {
@@ -46,9 +45,9 @@ public:
     static Documentation Documentation();
 
     static std::unique_ptr<ServerInterface> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+        const Dictionary& dictionary);
 
-    explicit ServerInterface(const ghoul::Dictionary& dictionary);
+    explicit ServerInterface(const Dictionary& dictionary);
     ~ServerInterface() override = default;
 
     void initialize();
@@ -60,7 +59,7 @@ public:
     bool clientHasAccessWithoutPassword(const std::string& address) const;
     bool clientIsBlocked(const std::string& address) const;
 
-    ghoul::io::SocketServer* server();
+    io::SocketServer* server();
 
 private:
     enum class InterfaceType : int {
@@ -83,7 +82,7 @@ private:
     OptionProperty _defaultAccess;
     StringProperty _password;
 
-    std::unique_ptr<ghoul::io::SocketServer> _socketServer;
+    std::unique_ptr<io::SocketServer> _socketServer;
 };
 
 } // namespace openspace

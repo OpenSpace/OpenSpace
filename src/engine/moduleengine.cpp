@@ -25,16 +25,16 @@
 #include <openspace/engine/moduleengine.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/systemcapabilities/version.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/openspacemodule.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/systemcapabilities/version.h>
 #include <algorithm>
 #include <string_view>
 #include <utility>
@@ -66,7 +66,7 @@ ModuleEngine::ModuleEngine()
 }
 
 void ModuleEngine::initialize(
-                     const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
+                            const std::map<std::string, Dictionary>& moduleConfigurations)
 {
     ZoneScoped;
 
@@ -83,7 +83,7 @@ void ModuleEngine::initialize(
     for (OpenSpaceModule* m : modules) {
         const std::string& identifier = m->identifier();
         auto it = moduleConfigurations.find(identifier);
-        ghoul::Dictionary configuration;
+        Dictionary configuration;
         if (it != moduleConfigurations.end()) {
             configuration = it->second;
         }
@@ -145,7 +145,7 @@ void ModuleEngine::deinitializeGL() {
 void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
     ZoneScoped;
 
-    ghoul_assert(module, "Module must not be nullptr");
+    assert_msg(module, "Module must not be nullptr");
 
     auto it = std::find_if(
         _modules.begin(),
@@ -155,7 +155,7 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
         }
     );
     if (it != _modules.end()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             std::format("Module name '{}' was registered before", module->identifier()),
             "ModuleEngine"
         );

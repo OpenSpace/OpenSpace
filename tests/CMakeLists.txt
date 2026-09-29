@@ -22,42 +22,55 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-add_executable(
-  OpenSpaceTest
-  main.cpp
-  test_assetloader.cpp
-  test_concurrentqueue.cpp
-  test_distanceconversion.cpp
-  test_documentation.cpp
-  test_horizons.cpp
-  test_iswamanager.cpp
-  test_jsonformatting.cpp
-  test_kepler.cpp
-  test_latlonpatch.cpp
-  test_lrucache.cpp
-  test_lua_createsinglecolorimage.cpp
-  test_lua_property.cpp
-  test_lua_propertyvalue.cpp
-  test_lua_setpropertyvalue.cpp
-  test_profile.cpp
-  test_rawvolumeio.cpp
-  test_scriptscheduler.cpp
-  test_sessionrecording.cpp
-  test_settings.cpp
-  test_sgctedit.cpp
-  test_spicemanager.cpp
-  test_timeconversion.cpp
-  test_timeline.cpp
-  test_timequantizer.cpp
-
-  property/test_property_optionproperty.cpp
-  property/test_property_listproperties.cpp
-  property/test_property_selectionproperty.cpp
-
-  regression/517.cpp
-)
-
+add_executable(OpenSpaceTest)
 set_openspace_compile_settings(OpenSpaceTest)
+
+target_sources(
+  OpenSpaceTest
+  PRIVATE
+    main.cpp
+    test_assetloader.cpp
+    test_commandlineparser.cpp
+    test_concurrentqueue.cpp
+    test_crc32.cpp
+    test_csvreader.cpp
+    test_dictionary.cpp
+    test_dictionaryjsonformatter.cpp
+    test_dictionaryluaformatter.cpp
+    test_distanceconversion.cpp
+    test_documentation.cpp
+    test_filesystem.cpp
+    test_horizons.cpp
+    test_iswamanager.cpp
+    test_jsonformatting.cpp
+    test_kepler.cpp
+    test_latlonpatch.cpp
+    test_lrucache.cpp
+    test_luaconversions.cpp
+    test_luatodictionary.cpp
+    test_lua_createsinglecolorimage.cpp
+    test_lua_property.cpp
+    test_lua_propertyvalue.cpp
+    test_lua_setpropertyvalue.cpp
+    test_memorypool.cpp
+    test_profile.cpp
+    test_rawvolumeio.cpp
+    test_scriptscheduler.cpp
+    test_sessionrecording.cpp
+    test_settings.cpp
+    test_sgctedit.cpp
+    test_spicemanager.cpp
+    test_templatefactory.cpp
+    test_timeconversion.cpp
+    test_timeline.cpp
+    test_timequantizer.cpp
+
+    property/test_property_optionproperty.cpp
+    property/test_property_listproperties.cpp
+    property/test_property_selectionproperty.cpp
+
+    regression/517.cpp
+)
 
 find_package(Catch2 CONFIG REQUIRED)
 find_package(sgct CONFIG REQUIRED)
@@ -65,19 +78,25 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(nlohmann_json_schema_validator CONFIG REQUIRED)
 find_package(stbimage CONFIG REQUIRED)
 
-target_compile_definitions(OpenSpaceTest PRIVATE "GHL_THROW_ON_ASSERT")
-target_link_libraries(OpenSpaceTest PRIVATE
-  Catch2::Catch2
-  openspace-core
-  sgct::sgct
-  unofficial::stbimage::stbimage-write-impl
-  nlohmann_json::nlohmann_json
-  nlohmann_json_schema_validator::validator
+target_compile_definitions(
+  OpenSpaceTest
+  PRIVATE
+  "OPENSPACE_THROW_ON_ASSERT"
+  "TEST_ROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\""
 )
 
-target_precompile_headers(OpenSpaceTest PRIVATE
-  <catch2/catch_test_macros.hpp>
+target_link_libraries(
+  OpenSpaceTest
+  PRIVATE
+    Catch2::Catch2
+    openspace-core
+    sgct::sgct
+    unofficial::stbimage::stbimage-write-impl
+    nlohmann_json::nlohmann_json
+    nlohmann_json_schema_validator::validator
 )
+
+target_precompile_headers(OpenSpaceTest PRIVATE <catch2/catch_test_macros.hpp>)
 
 foreach (library_name ${all_enabled_modules})
   get_target_property(library_type ${library_name} TYPE)

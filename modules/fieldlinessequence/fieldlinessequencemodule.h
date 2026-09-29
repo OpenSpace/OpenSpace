@@ -42,7 +42,7 @@ public:
     static std::filesystem::path DefaultTransferFunctionFile;
 
 private:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
 };
 
 } // namespace openspace

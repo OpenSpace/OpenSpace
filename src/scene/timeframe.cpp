@@ -25,10 +25,10 @@
 #include <openspace/scene/timeframe.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 #include <string>
 
 namespace {
@@ -66,9 +66,7 @@ Documentation TimeFrame::Documentation() {
     return codegen::doc<Parameters>("core_timeframe");
 }
 
-ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
-                                                            const ghoul::Dictionary& dict)
-{
+mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(const Dictionary& dict) {
     ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dict);
@@ -77,7 +75,7 @@ ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
     result->setIdentifier("TimeFrame");
     result->_type = p.type;
 
-    return ghoul::mm_unique_ptr<TimeFrame>(result);
+    return mm_unique_ptr<TimeFrame>(result);
 }
 
 TimeFrame::TimeFrame()

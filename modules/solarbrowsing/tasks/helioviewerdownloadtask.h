@@ -34,7 +34,7 @@ namespace openspace {
 
 class HelioviewerDownloadTask : public Task {
 public:
-    explicit HelioviewerDownloadTask(const ghoul::Dictionary& dictionary);
+    explicit HelioviewerDownloadTask(const Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;

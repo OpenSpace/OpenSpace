@@ -30,16 +30,16 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/touchinputstate.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <algorithm>
 #include <functional>
 #include <optional>
@@ -89,7 +89,7 @@ TouchModule::~TouchModule() {
     // intentionally left empty
 }
 
-void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
+void TouchModule::internalInitialize(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     _tuioPort = p.tuioPort.value_or(_tuioPort);

@@ -25,7 +25,7 @@
 #include "dependencieswidget.h"
 
 #include <jasset.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/filesystem/filesystem.h>
 #include <QDir>
 #include <QFileDialog>
 #include <QHBoxLayout>

@@ -29,24 +29,24 @@
 #include <modules/volume/rawvolumereader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/component_wise.hpp>
 #include <algorithm>
@@ -249,7 +249,7 @@ Documentation RenderableGalaxy::Documentation() {
     );
 }
 
-RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
+RenderableGalaxy::RenderableGalaxy(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
     , _starRenderingEnabled(StarRenderingEnabledInfo, true)
@@ -296,7 +296,7 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     _pointsFilename = p.points.filename;
     _enabledPointsRatio = p.points.enabledPointsRatio.value_or(_enabledPointsRatio);
     _pointSpreadFunctionTexturePath = p.points.texture;
-    _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+    _pointSpreadFunctionFile = std::make_unique<filesystem::File>(
         _pointSpreadFunctionTexturePath
     );
 
@@ -369,7 +369,7 @@ void RenderableGalaxy::initialize() {
     }
     else {
         Result res = loadPointFile();
-        ghoul_assert(res.success, "Point file loading failed");
+        assert_msg(res.success, "Point file loading failed");
         _pointPositionsCache = std::move(res.positions);
         _pointColorsCache = std::move(res.color);
         saveCachedFile(
@@ -385,15 +385,15 @@ void RenderableGalaxy::initialize() {
 void RenderableGalaxy::initializeGL() {
     ZoneScoped;
 
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _texture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = _volumeDimensions,
             .type = GL_TEXTURE_3D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         },
         reinterpret_cast<std::byte*>(_volume->data())
     );
@@ -429,23 +429,23 @@ void RenderableGalaxy::initializeGL() {
     );
 
     if (!_pointSpreadFunctionTexturePath.empty()) {
-        _pointSpreadFunctionTexture = ghoul::io::texture::loadTexture(
+        _pointSpreadFunctionTexture = io::texture::loadTexture(
             absPath(_pointSpreadFunctionTexturePath),
             2,
-            { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
+            { .filter = opengl::Texture::FilterMode::AnisotropicMipMap }
         );
 
         LDEBUG(std::format(
             "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
         ));
 
-        _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+        _pointSpreadFunctionFile = std::make_unique<filesystem::File>(
             _pointSpreadFunctionTexturePath
         );
     }
 
-    ghoul::opengl::updateUniformLocations(*_pointsProgram, _uniformCachePoints);
-    ghoul::opengl::updateUniformLocations(*_billboardsProgram, _uniformCacheBillboards);
+    opengl::updateUniformLocations(*_pointsProgram, _uniformCachePoints);
+    opengl::updateUniformLocations(*_billboardsProgram, _uniformCacheBillboards);
 
     glCreateBuffers(1, &_positionVbo);
     glNamedBufferStorage(
@@ -559,7 +559,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         }
 
         _opacityCoefficient = opacityCoefficient * opacity();
-        ghoul_assert(
+        assert_msg(
             _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
             "Opacity coefficient was not between 0 and 1"
         );
@@ -672,7 +672,7 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
     const glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
     _billboardsProgram->setUniform(_uniformCacheBillboards.cameraUp, cameraUp);
 
-    ghoul::opengl::TextureUnit psfUnit;
+    opengl::TextureUnit psfUnit;
     psfUnit.bind(*_pointSpreadFunctionTexture);
     _billboardsProgram->setUniform(_uniformCacheBillboards.psfTexture, psfUnit);
 
@@ -691,10 +691,10 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
 
     // Read header for OFF (Object File Format)
     std::string line;
-    ghoul::getline(pointFile, line);
+    openspace::getline(pointFile, line);
 
     // Read point count
-    ghoul::getline(pointFile, line);
+    openspace::getline(pointFile, line);
     std::istringstream iss = std::istringstream(line);
     int64_t nPoints = 0;
     iss >> nPoints;
@@ -716,7 +716,7 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
         float g = 0.f;
         float b = 0.f;
         float a = 0.f;
-        ghoul::getline(pointFile, line);
+        openspace::getline(pointFile, line);
         std::istringstream issp = std::istringstream(line);
         issp >> x >> y >> z >> r >> g >> b >> a;
 

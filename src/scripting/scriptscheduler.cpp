@@ -26,10 +26,10 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
-#include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <iterator>
 #include <utility>
@@ -100,7 +100,7 @@ ScriptScheduler::ScriptScheduler()
     addProperty(_shouldRunAllTimeJump);
 }
 
-ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict) {
+ScriptScheduler::ScheduledScript::ScheduledScript(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     time = Time::convertTime(p.time);

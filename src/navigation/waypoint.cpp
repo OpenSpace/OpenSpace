@@ -26,13 +26,13 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <cmath>
 #include <string_view>
 #include <utility>
@@ -243,7 +243,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
         lookAtPos = cameraPos - stepDir * 0.1 * startToEndDist;
     }
 
-    const glm::dquat targetRot = ghoul::lookAtQuaternion(cameraPos, lookAtPos, up);
+    const glm::dquat targetRot = lookAtQuaternion(cameraPos, lookAtPos, up);
 
     return Waypoint(cameraPos, targetRot, spec.identifier);
 }

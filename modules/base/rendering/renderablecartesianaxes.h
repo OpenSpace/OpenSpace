@@ -28,13 +28,13 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 
 namespace openspace {
 
 class RenderableCartesianAxes : public Renderable {
 public:
-    explicit RenderableCartesianAxes(const ghoul::Dictionary& dictionary);
+    explicit RenderableCartesianAxes(const Dictionary& dictionary);
     ~RenderableCartesianAxes() override = default;
 
     void initializeGL() override;
@@ -49,7 +49,7 @@ protected:
         float location[3];
     };
 
-    ghoul::opengl::ProgramObject* _program;
+    opengl::ProgramObject* _program;
 
     Vec3Property _xColor;
     Vec3Property _yColor;

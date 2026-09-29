@@ -24,7 +24,7 @@
 
 #include <openspace/properties/scalar/shortproperty.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
@@ -37,16 +37,16 @@ std::string_view ShortProperty::className() const {
     return "ShortProperty";
 }
 
-ghoul::lua::LuaTypes ShortProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes ShortProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void ShortProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 short ShortProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<short>(state);
+    return lua::value<short>(state);
 }
 
 std::string ShortProperty::stringValue() const {

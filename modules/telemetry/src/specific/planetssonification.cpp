@@ -29,16 +29,16 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/memorymanager.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
 #include <osc/OscTypes.h>
 #include <cstdint>
 #include <cstdlib>
@@ -468,7 +468,7 @@ void PlanetsSonification::stop() {
     _toggleAll = false;
 }
 
-void PlanetsSonification::addPlanet(const ghoul::Dictionary& dict) {
+void PlanetsSonification::addPlanet(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
     DataBody planet = DataBody(p.name);
 
@@ -547,7 +547,7 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
             settings[MoonsIndex] = _neptuneProperty.moonsEnabled;
             break;
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
             break;
     }
 

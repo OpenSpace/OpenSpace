@@ -27,7 +27,7 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <limits>
 
 namespace openspace {
@@ -40,7 +40,7 @@ public:
         glm::ivec3 stepValue = glm::ivec3(1));
 
     std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+    lua::LuaTypes typeLua() const override final;
 
     void getLuaValue(lua_State* state) const override final;
 

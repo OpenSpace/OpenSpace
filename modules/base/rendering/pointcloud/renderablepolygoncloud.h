@@ -35,7 +35,7 @@ namespace openspace {
  */
 class RenderablePolygonCloud : public RenderablePointCloud {
 public:
-    explicit RenderablePolygonCloud(const ghoul::Dictionary& dictionary);
+    explicit RenderablePolygonCloud(const Dictionary& dictionary);
     ~RenderablePolygonCloud() override = default;
 
     void deinitializeGL() override;

@@ -24,16 +24,16 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/downloadmanager.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/io/texture/texturewriter.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/base64.h>
+#include <openspace/misc/csvreader.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/openspace.h>
 #include <openspace/util/json_helper.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturewriter.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/base64.h>
-#include <ghoul/misc/csvreader.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
 #include <array>
 #include <iterator>
 
@@ -72,7 +72,7 @@ namespace {
     FileSys.registerPathToken(
         "${SCREENSHOTS}",
         folder,
-        ghoul::filesystem::FileSystem::Override::Yes
+        filesystem::FileSystem::Override::Yes
     );
 
     global::windowDelegate->setScreenshotFolder(std::move(folder));
@@ -84,7 +84,7 @@ namespace {
 [[codegen::luawrap]] void addTag(std::string uri, std::string tag) {
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
-        throw ghoul::lua::LuaError(std::format("Unknown scene graph node '{}'", uri));
+        throw lua::LuaError(std::format("Unknown scene graph node '{}'", uri));
     }
 
     node->addTag(std::move(tag));
@@ -96,7 +96,7 @@ namespace {
 [[codegen::luawrap]] void removeTag(std::string uri, std::string tag) {
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
-        throw ghoul::lua::LuaError(std::format("Unknown scene graph node '{}'", uri));
+        throw lua::LuaError(std::format("Unknown scene graph node '{}'", uri));
     }
 
     node->removeTag(tag);
@@ -165,12 +165,12 @@ namespace {
     // @TODO (emmbr 2020-12-18) Verify that the input dictionary is a vec3
     // Would like to clean this up with a more direct use of the Verifier in the future
     const std::string& key = "color";
-    ghoul::Dictionary colorDict;
+    Dictionary colorDict;
     colorDict.setValue(key, color);
     TestResult res = Color3Verifier()(colorDict, key);
 
     if (!res.success) {
-        throw ghoul::lua::LuaError(
+        throw lua::LuaError(
             "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
         );
     }
@@ -194,13 +194,13 @@ namespace {
             static_cast<std::byte>(255 * color.b)
         };
 
-        using Texture = ghoul::opengl::Texture;
+        using Texture = opengl::Texture;
 
         Texture texture = Texture(
-            ghoul::opengl::Texture::FormatInit{
+            opengl::Texture::FormatInit{
                 .dimensions = glm::uvec3(Width, Height, 1),
                 .type = GL_TEXTURE_2D,
-                .format = ghoul::opengl::Texture::Format::RGB,
+                .format = opengl::Texture::Format::RGB,
                 .dataType = GL_UNSIGNED_BYTE
             },
             {},
@@ -208,7 +208,7 @@ namespace {
         );
 
         try {
-            ghoul::io::texture::saveTexture(texture, fileName.string());
+            io::texture::saveTexture(texture, fileName.string());
         }
         catch (const std::filesystem::filesystem_error& e) {
             LERRORC("Exception: {}", e.what());
@@ -225,7 +225,7 @@ namespace {
  * \return The size of the image in pixels
  */
 [[codegen::luawrap]] glm::ivec2 imageSize(std::filesystem::path path) {
-    return ghoul::io::texture::imageInfo(path).dimensions;
+    return io::texture::imageInfo(path).dimensions;
 }
 
 /**
@@ -239,7 +239,7 @@ namespace {
 [[codegen::luawrap]] void saveBase64File(std::filesystem::path filePath,
                                          std::string base64Data)
 {
-    std::vector<uint8_t> data = ghoul::decodeBase64(base64Data);
+    std::vector<uint8_t> data = decodeBase64(base64Data);
 
     std::ofstream file = std::ofstream(filePath, std::ofstream::binary);
     file.write(reinterpret_cast<char*>(data.data()), data.size());
@@ -267,10 +267,10 @@ namespace {
  * Branch = <string>
  * \endcode
  */
-[[codegen::luawrap]] ghoul::Dictionary version() {
-    ghoul::Dictionary res;
+[[codegen::luawrap]] Dictionary version() {
+    Dictionary res;
 
-    ghoul::Dictionary version;
+    Dictionary version;
     version.setValue("Major", static_cast<int>(OPENSPACE_VERSION_MAJOR));
     version.setValue("Minor", static_cast<int>(OPENSPACE_VERSION_MINOR));
     version.setValue("Patch", static_cast<int>(OPENSPACE_VERSION_PATCH));
@@ -293,10 +293,10 @@ namespace {
                                                             bool includeFirstLine = false)
 {
     if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
-        throw ghoul::lua::LuaError(std::format("Could not find file '{}'", file));
+        throw lua::LuaError(std::format("Could not find file '{}'", file));
     }
 
-    std::vector<std::vector<std::string>> r = ghoul::loadCSVFile(file, includeFirstLine);
+    std::vector<std::vector<std::string>> r = loadCSVFile(file, includeFirstLine);
     return r;
 }
 
@@ -310,7 +310,7 @@ namespace {
 /**
  * Returns the whole configuration object as a Dictionary.
  */
-[[codegen::luawrap]] ghoul::Dictionary configuration() {
+[[codegen::luawrap]] Dictionary configuration() {
     return global::configuration->createDictionary();
 }
 
@@ -326,9 +326,9 @@ namespace {
  * JSON contains keys that array of an array type, they are converted into a Dictionary
  * with numerical keys and the numerical keys start with 1.
  */
-[[codegen::luawrap]] ghoul::Dictionary loadJson(std::filesystem::path path) {
+[[codegen::luawrap]] Dictionary loadJson(std::filesystem::path path) {
     if (!std::filesystem::exists(path)) {
-        throw ghoul::RuntimeError(std::format("File '{}' did not exist", path));
+        throw RuntimeError(std::format("File '{}' did not exist", path));
     }
 
     std::ifstream f(path);
@@ -349,7 +349,7 @@ namespace {
 #ifdef WIN32
     return FileSys.resolveShellLink(std::move(path));
 #else // ^^^^ WIN32 // !WIN32 vvvv
-    throw ghoul::lua::LuaError(std::format(
+    throw lua::LuaError(std::format(
         "Tried to resolve shortcut file '{}' on unsupported non-Windows platform", path
     ));
 #endif // WIN32

@@ -28,10 +28,9 @@
 #include <memory>
 #include <vector>
 
-namespace ghoul::fontrendering { class FontManager; }
-
 namespace openspace {
 
+namespace fontrendering { class FontManager; }
 class ActionManager;
 class Astrocast;
 struct Configuration;
@@ -66,7 +65,7 @@ struct WindowDelegate;
 
 namespace global {
 
-inline ghoul::fontrendering::FontManager* fontManager;
+inline fontrendering::FontManager* fontManager;
 inline Dashboard* dashboard;
 inline DeferredcasterManager* deferredcasterManager;
 inline DownloadEventEngine* downloadEventEngine;

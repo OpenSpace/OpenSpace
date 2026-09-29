@@ -32,21 +32,21 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -82,7 +82,7 @@ namespace {
         ZoneScoped;
 
         constexpr int BufferSize = 64;
-        ghoul_assert(format.size() < BufferSize, "Format string too long");
+        assert_msg(format.size() < BufferSize, "Format string too long");
 
         char FormatBuf[BufferSize];
         std::memset(FormatBuf, '\0', BufferSize);
@@ -175,7 +175,7 @@ Documentation TemporalTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_temporal");
 }
 
-TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
+TemporalTileProvider::TemporalTileProvider(const Dictionary& dictionary)
     : _initDict(dictionary)
     , _useFixedTime(UseFixedTimeInfo, false)
     , _fixedTime(FixedTimeInfo)
@@ -187,12 +187,12 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     // Make sure that the user provided the data that they requested. The mode parameter
     // is a required one and these two if statements tie the table requirement to the mode
     if (p.mode == Parameters::Mode::Folder && !p.folder.has_value()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "When selecting the `Folder` mode, a `Folder` table must be specified"
         );
     }
     if (p.mode == Parameters::Mode::Prototyped && !p.prototyped.has_value()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "When selecting the `Prototyped` mode, a `Prototyped` table must be specified"
         );
     }
@@ -230,14 +230,14 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
             _prototyped.timeQuantizer.setResolution(p.prototyped->temporalResolution);
             _prototyped.temporalResolution = p.prototyped->temporalResolution;
         }
-        catch (const ghoul::RuntimeError& e) {
-            throw ghoul::RuntimeError(std::format(
+        catch (const RuntimeError& e) {
+            throw RuntimeError(std::format(
                 "Could not create time quantizer for Temporal GDAL dataset: {}", e.message
             ));
         }
 
         if (p.prototyped->timeFormat.size() >= 64) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Time format string '{}' too large. Maximum length of 64 is allowed",
                 p.prototyped->timeFormat
             ));
@@ -308,7 +308,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         );
 
         if (_folder.files.empty()) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Error loading layer '{}'. Folder '{}' does not contain any files that "
                 "matched the time format", _identifier, _folder.folder
             ));
@@ -321,7 +321,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         _interpolateTileProvider->initialize();
         _interpolateTileProvider->colormap = dataloader::colormap::loadColorMapTexture(
             _colormap,
-            { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
+            { .filter = opengl::Texture::FilterMode::AnisotropicMipMap }
         );
     }
 }
@@ -366,7 +366,7 @@ void TemporalTileProvider::update() {
             newCurr = tileProvider(global::timeManager->time());
         }
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERRORC("TemporalTileProvider", e.message);
     }
 
@@ -432,7 +432,7 @@ DefaultTileProvider TemporalTileProvider::createTileProvider(
             break;
     }
 
-    ghoul::Dictionary dict = _initDict;
+    Dictionary dict = _initDict;
     dict.setValue("FilePath", value);
     return DefaultTileProvider(dict);
 }
@@ -464,7 +464,7 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
                 return std::string_view(it->second);
             }
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }();
 
@@ -657,7 +657,7 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
             case Mode::Prototype:
                 return tileProvider<Mode::Prototype, true>(time);
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }
     else {
@@ -667,13 +667,12 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
             case Mode::Prototype:
                 return tileProvider<Mode::Prototype, false>(time);
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }
 }
 
-TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
-                                                                 const ghoul::Dictionary&)
+TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(const Dictionary&)
 {
     ZoneScoped;
 
@@ -763,7 +762,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     // Initializing the tile that will contian the interpolated texture
     Tile ourTile;
     // The texture that will contain the interpolated image
-    ghoul::opengl::Texture* writeTexture = nullptr;
+    opengl::Texture* writeTexture = nullptr;
     MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     if (tileCache->exist(key)) {
@@ -803,15 +802,15 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     shaderProgram->setUniform("blendFactor", factor);
 
     // The texture that will give the color for the interpolated texture
-    ghoul::opengl::TextureUnit colormapUnit;
+    opengl::TextureUnit colormapUnit;
     colormapUnit.bind(*colormap);
     shaderProgram->setUniform("colormapTexture", colormapUnit);
 
-    ghoul::opengl::TextureUnit prevUnit;
+    opengl::TextureUnit prevUnit;
     prevUnit.bind(*prev.texture);
     shaderProgram->setUniform("prevTexture", prevUnit);
 
-    ghoul::opengl::TextureUnit nextUnit;
+    opengl::TextureUnit nextUnit;
     nextUnit.bind(*next.texture);
     shaderProgram->setUniform("nextTexture", nextUnit);
 

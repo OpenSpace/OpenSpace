@@ -34,7 +34,7 @@ namespace openspace {
 
 class DashboardItemVelocity : public DashboardTextItem {
 public:
-    explicit DashboardItemVelocity(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemVelocity(const Dictionary& dictionary);
     ~DashboardItemVelocity() override = default;
 
     void update() override;

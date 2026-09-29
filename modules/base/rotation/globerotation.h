@@ -37,7 +37,7 @@ class SceneGraphNode;
 
 class GlobeRotation : public Rotation {
 public:
-    explicit GlobeRotation(const ghoul::Dictionary& dictionary);
+    explicit GlobeRotation(const Dictionary& dictionary);
 
     void initialize() override;
 

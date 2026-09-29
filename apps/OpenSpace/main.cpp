@@ -22,30 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/cmdparser/commandlineparser.h>
+#include <openspace/cmdparser/multiplecommand.h>
+#include <openspace/cmdparser/singlecommand.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/glm.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/logging/visualstudiooutputlog.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stacktrace.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/openspace.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/task.h>
 #include <openspace/util/taskloader.h>
-#include <openspace/openspace.h>
-#include <ghoul/format.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/glm.h>
-#include <ghoul/cmdparser/commandlineparser.h>
-#include <ghoul/cmdparser/multiplecommand.h>
-#include <ghoul/cmdparser/singlecommand.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/stacktrace.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif // WIN32
@@ -59,7 +59,6 @@
 #include <sgct/projection/nonlinearprojection.h>
 #include <sgct/user.h>
 #include <sgct/window.h>
-#include <ghoul/misc/profiling.h>
 #include <stb_image.h>
 #include <iostream>
 #include <string_view>
@@ -161,8 +160,8 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
     GetLocalTime(&stLocalTime);
 
     LFATAL("Printing Stack Trace that lead to the crash:");
-    std::vector<std::string> stackTrace = ghoul::stackTrace();
-    for (const std::string& s : stackTrace) {
+    std::vector<std::string> trace = stackTrace();
+    for (const std::string& s : trace) {
         LINFO(s);
     }
 
@@ -454,7 +453,7 @@ void mainPreSyncFunc() {
     try {
         global::openSpaceEngine->preSynchronization();
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LFATALC(e.component, e.message);
         Engine::instance().terminate();
     }
@@ -555,7 +554,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
         }
 #endif // OPENSPACE_HAS_SPOUT
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERRORC(e.component, e.message);
     }
 
@@ -576,7 +575,7 @@ void mainDraw2DFunc(const sgct::RenderData& data) {
     try {
         global::openSpaceEngine->drawOverlays();
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERRORC(e.component, e.message);
     }
 
@@ -976,7 +975,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.nameForWindow = [](size_t windowIdx) {
         ZoneScoped;
 
-        ghoul_assert(
+        assert_msg(
             windowIdx < Engine::instance().windows().size(),
             "Invalid window index"
         );
@@ -990,7 +989,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.horizFieldOfView = [](size_t windowIdx) {
         ZoneScoped;
 
-        ghoul_assert(
+        assert_msg(
             windowIdx < Engine::instance().windows().size(),
             "Invalid window index"
         );
@@ -999,7 +998,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setHorizFieldOfView = [](size_t windowIdx, float hFovDeg) {
         ZoneScoped;
 
-        ghoul_assert(
+        assert_msg(
             windowIdx < Engine::instance().windows().size(),
             "Invalid window index"
         );
@@ -1138,7 +1137,7 @@ void setSgctDelegateFunctions() {
                 createGLFWCursor(GLFW_NOT_ALLOWED_CURSOR)
             },
         };
-        ghoul_assert(
+        assert_msg(
             Cursors.find(mouse) != Cursors.end(), "Tried to create non-existent cursor"
         );
         glfwSetCursor(glfwGetCurrentContext(), Cursors[mouse]);
@@ -1186,16 +1185,16 @@ int main(int argc, char* argv[]) {
     // configuration file, we will deinitialize this LogManager and reinitialize it later
     // with the correct LogLevel
     {
-        using namespace ghoul::logging;
+        using namespace openspace::logging;
         LogManager::initialize(LogLevel::Debug, LogManager::ImmediateFlush::Yes);
 #ifdef WIN32
         if (IsDebuggerPresent()) {
-            LogMgr.addLog(std::make_unique<ghoul::logging::VisualStudioOutputLog>());
+            LogMgr.addLog(std::make_unique<logging::VisualStudioOutputLog>());
         }
 #endif // WIN32
     }
 
-    ghoul::initialize();
+    initialize();
     global::create();
 
     // Register the path of the executable, to make it possible to find other files in the
@@ -1203,7 +1202,7 @@ int main(int argc, char* argv[]) {
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
+        filesystem::FileSystem::Override::Yes
     );
     LDEBUG(std::format("Registering ${{BIN}} to '{}'", absPath("${BIN}")));
 
@@ -1211,13 +1210,13 @@ int main(int argc, char* argv[]) {
     // Parse commandline arguments
     //
     char* prgName = argv[0];
-    ghoul::cmdparser::CommandlineParser parser(
+    cmdparser::CommandlineParser parser(
         std::string(prgName),
-        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+        cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
     CommandlineArguments commandlineArguments;
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.configuration,
         "--file",
         "-f",
@@ -1225,7 +1224,7 @@ int main(int argc, char* argv[]) {
         "path token is available and any other path has to be specified relative to the "
         "current working directory."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.windowConfig,
         "--config",
         "-c",
@@ -1234,14 +1233,14 @@ int main(int argc, char* argv[]) {
         "settings. This value can include path tokens, so for example "
         "`${CONFIG}/single.json` is a valid value."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.profile,
         "--profile",
         "-p",
         "Specifies the profile that should be used to start OpenSpace and that overrides "
         "the profile specified in the `openspace.cfg` and the settings."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.profileAddons,
         "--addons",
         "-a",
@@ -1250,7 +1249,7 @@ int main(int argc, char* argv[]) {
         "with a \";\", for example \"--addons abc;def\" specifies the addons \"abc\" and "
         "\"def\"."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.propertyVisibility,
         "--propertyVisibility",
         "",
@@ -1260,7 +1259,7 @@ int main(int argc, char* argv[]) {
         "values for this parameter are: `Developer`, `AdvancedUser`, `User`, and "
         "`NoviceUser`."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.task,
         "--task",
         "-t",
@@ -1268,7 +1267,7 @@ int main(int argc, char* argv[]) {
         "the task finishes, the application will automatically close again. All other "
         "commandline arguments are ignored, if a task is specified."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommandZeroArguments>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommandZeroArguments>(
         commandlineArguments.bypassLauncher,
         "--bypassLauncher",
         "-b",
@@ -1285,7 +1284,7 @@ int main(int argc, char* argv[]) {
             exit(EXIT_SUCCESS);
         }
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LFATALC(e.component, e.message);
         exit(EXIT_FAILURE);
     }
@@ -1349,7 +1348,7 @@ int main(int argc, char* argv[]) {
         }
         if (commandlineArguments.profileAddons.has_value()) {
             global::configuration->profile.addons =
-                ghoul::tokenizeString(*commandlineArguments.profileAddons, ';');
+                tokenizeString(*commandlineArguments.profileAddons, ';');
         }
         if (commandlineArguments.propertyVisibility.has_value()) {
             if (commandlineArguments.propertyVisibility == "NoviceUser") {
@@ -1369,7 +1368,7 @@ int main(int argc, char* argv[]) {
                     Property::Visibility::Developer;
             }
             else {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Unknown property visibility value '{}'",
                     *commandlineArguments.propertyVisibility
                 ));
@@ -1384,16 +1383,16 @@ int main(int argc, char* argv[]) {
     catch (const SpecificationError& e) {
         LFATALC("main", "Loading of configuration file failed");
         logError(e);
-        ghoul::deinitialize();
+        deinitialize();
         exit(EXIT_FAILURE);
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         // Write out all of the information about the exception and flush the logs
         LFATALC(e.component, e.message);
-        if (ghoul::logging::LogManager::isInitialized()) {
+        if (logging::LogManager::isInitialized()) {
             LogMgr.flushLogs();
         }
-        ghoul::deinitialize();
+        deinitialize();
         return EXIT_FAILURE;
     }
 
@@ -1493,11 +1492,11 @@ int main(int argc, char* argv[]) {
 
         const std::filesystem::path profile = global::configuration->profile.profile;
 
-        const bool isDefaultProfile = ghoul::filesystem::isSubdirectory(
+        const bool isDefaultProfile = filesystem::isSubdirectory(
             profile,
             absPath("${PROFILES}")
         );
-        const bool isUserProfile = ghoul::filesystem::isSubdirectory(
+        const bool isUserProfile = filesystem::isSubdirectory(
             profile,
             absPath("${USER_PROFILES}")
         );
@@ -1595,12 +1594,12 @@ int main(int argc, char* argv[]) {
         LFATALC("main", e.what());
         Engine::destroy();
         global::openSpaceEngine->deinitialize();
-        ghoul::deinitialize();
+        deinitialize();
         exit(EXIT_FAILURE);
     }
     catch (...) {
         global::openSpaceEngine->deinitialize();
-        ghoul::deinitialize();
+        deinitialize();
         Engine::destroy();
         exit(EXIT_FAILURE);
     }
@@ -1631,6 +1630,6 @@ int main(int argc, char* argv[]) {
     }
 #endif // OPENSPACE_HAS_SPOUT
 
-    ghoul::deinitialize();
+    deinitialize();
     exit(EXIT_SUCCESS);
 }

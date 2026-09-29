@@ -26,10 +26,10 @@
 
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <geos/io/GeoJSON.h>
 #include <scn/scan.h>
 #include <algorithm>
@@ -435,7 +435,7 @@ GeoJsonProperties::GeoJsonProperties()
     addPropertySubOwner(tessellation);
 }
 
-void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary,
+void GeoJsonProperties::createFromDictionary(const Dictionary& dictionary,
                                              const RenderableGlobe& globe)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

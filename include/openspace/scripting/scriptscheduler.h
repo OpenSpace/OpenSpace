@@ -33,10 +33,9 @@
 #include <string>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 struct LuaLibrary;
 
@@ -50,7 +49,7 @@ public:
 
     struct ScheduledScript {
         ScheduledScript() = default;
-        explicit ScheduledScript(const ghoul::Dictionary& dict);
+        explicit ScheduledScript(const Dictionary& dict);
 
         double time = -std::numeric_limits<double>::max();
         std::string forwardScript;
@@ -61,7 +60,7 @@ public:
     };
 
     /**
-     * Load a schedule from a ghoul::Dictionary \p scheduledScripts and adds the
+     * Load a schedule from a Dictionary \p scheduledScripts and adds the
      * ScheduledScript%s to the list of stored scripts.
      *
      * \param scheduledScripts The scripts that should be loaded

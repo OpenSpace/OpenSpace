@@ -28,16 +28,16 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/glm.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -222,7 +222,7 @@ Documentation RenderablePlane::Documentation() {
 }
 
 RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
     : PropertyOwner({ "DistanceScaling", "Distance Scaling", "" })
     , scaleByDistance(ScaleByDistanceInfo, false)
     , apparentSizeMultiplier(ApparentSizeMultiplierInfo, 1.f)
@@ -254,7 +254,7 @@ static constexpr RenderableSettings defaultSettings(RenderableSettings settings)
     return settings;
 }
 
-RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary,
+RenderablePlane::RenderablePlane(const Dictionary& dictionary,
                                  RenderableSettings settings)
     : Renderable(dictionary, defaultSettings(settings))
     , _blendMode(BlendModeInfo)
@@ -312,7 +312,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary,
     _renderOption.addOption(RenderOption::FixedRotation, "Fixed Rotation");
 
     if (p.billboard.has_value()) {
-        ghoul_assert(
+        assert_msg(
             std::holds_alternative<bool>(*p.billboard) ||
             std::holds_alternative<Parameters::RenderOption>(*p.billboard),
             "Wrong type"
@@ -375,7 +375,7 @@ void RenderablePlane::initializeGL() {
 
     _shader = BaseModule::ProgramObjectManager.request(
         "Plane",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "Plane",
                 absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
@@ -384,7 +384,7 @@ void RenderablePlane::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderablePlane::deinitializeGL() {
@@ -395,7 +395,7 @@ void RenderablePlane::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "Plane",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -456,7 +456,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     );
     _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     bindTexture(unit);
     defer { unbindTexture(); };
 
@@ -482,7 +482,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 }
 
-void RenderablePlane::bindTexture(ghoul::opengl::TextureUnit&) {}
+void RenderablePlane::bindTexture(opengl::TextureUnit&) {}
 
 void RenderablePlane::unbindTexture() {}
 
@@ -491,7 +491,7 @@ void RenderablePlane::update(const UpdateData&) {
 
     if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+        opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     if (_planeIsDirty) [[unlikely]] {

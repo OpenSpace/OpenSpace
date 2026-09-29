@@ -28,14 +28,14 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/invariants.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <memory>
 #include <utility>
@@ -71,11 +71,11 @@ PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
     , _guiName(std::move(info.guiName))
     , _description(std::move(info.description))
 {
-    ghoul_precondition(
+    precondition(
         _identifier.find_first_of("\t\n ") == std::string::npos,
         "Identifier must contain any whitespaces"
     );
-    ghoul_precondition(
+    precondition(
         _identifier.find_first_of('.') == std::string::npos,
         "Identifier must contain any dots"
     );
@@ -185,7 +185,7 @@ PropertyOwner* PropertyOwner::owner() const {
 }
 
 bool PropertyOwner::hasProperty(const Property* prop) const {
-    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+    precondition(prop != nullptr, "prop must not be nullptr");
 
     std::vector<Property*>::const_iterator it = std::find(
         _properties.begin(),
@@ -226,7 +226,7 @@ std::string PropertyOwner::propertyGroupName(const std::string& groupID) const {
 void PropertyOwner::addProperty(Property* prop) {
     ZoneScoped;
 
-    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+    precondition(prop != nullptr, "prop must not be nullptr");
 
     if (prop->identifier().empty()) {
         LERROR("No property identifier specified");
@@ -277,8 +277,8 @@ void PropertyOwner::addProperty(Property& prop) {
 void PropertyOwner::addPropertySubOwner(PropertyOwner* owner) {
     ZoneScoped;
 
-    ghoul_precondition(owner != nullptr, "owner must not be nullptr");
-    ghoul_precondition(
+    precondition(owner != nullptr, "owner must not be nullptr");
+    precondition(
         !owner->identifier().empty(),
         "PropertyOwner must have an identifier"
     );
@@ -330,7 +330,7 @@ void PropertyOwner::addPropertySubOwner(PropertyOwner& owner) {
 }
 
 void PropertyOwner::removeProperty(Property* prop) {
-    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+    precondition(prop != nullptr, "prop must not be nullptr");
 
     // See if we can find the identifier of the property to add in the properties list
     std::vector<Property*>::const_iterator it = std::find_if(
@@ -362,7 +362,7 @@ void PropertyOwner::removeProperty(Property& prop) {
 }
 
 void PropertyOwner::removePropertySubOwner(PropertyOwner* owner) {
-    ghoul_precondition(owner != nullptr, "owner must not be nullptr");
+    precondition(owner != nullptr, "owner must not be nullptr");
 
     // See if we can find the name of the PropertyOwner to add
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
@@ -408,7 +408,7 @@ void PropertyOwner::removePropertySubOwner(PropertyOwner& owner) {
 
 void PropertyOwner::setIdentifier(std::string identifier) {
     if (identifier.find_first_of(". \t\n") != std::string::npos) {
-        throw ghoul::RuntimeError("Identifier must not contain any dots or whitespaces");
+        throw RuntimeError("Identifier must not contain any dots or whitespaces");
     }
     _identifier = std::move(identifier);
 }

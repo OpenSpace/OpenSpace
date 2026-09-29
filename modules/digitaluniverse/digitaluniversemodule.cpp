@@ -26,31 +26,31 @@
 
 #include <modules/digitaluniverse/rendering/renderabledumeshes.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/objectmanager.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/objectmanager.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
-ghoul::opengl::ProgramObjectManager DigitalUniverseModule::ProgramObjectManager;
+opengl::ProgramObjectManager DigitalUniverseModule::ProgramObjectManager;
 
 DigitalUniverseModule::DigitalUniverseModule()
     : OpenSpaceModule(DigitalUniverseModule::Name)
 {}
 
-void DigitalUniverseModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+void DigitalUniverseModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    assert_msg(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
 }
 
 void DigitalUniverseModule::internalDeinitializeGL() {
-    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
+    ProgramObjectManager.releaseAll(opengl::ProgramObjectManager::Warnings::Yes);
 }
 
 std::vector<Documentation> DigitalUniverseModule::documentations() const {

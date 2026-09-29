@@ -24,9 +24,9 @@
 
 #include <openspace/engine/syncengine.h>
 
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/syncable.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <memory>
 
@@ -35,7 +35,7 @@ namespace openspace {
 SyncEngine::SyncEngine(unsigned int syncBufferSize)
     : _syncBuffer(syncBufferSize)
 {
-    ghoul_assert(syncBufferSize > 0, "syncBufferSize must be bigger than 0");
+    assert_msg(syncBufferSize > 0, "syncBufferSize must be bigger than 0");
 }
 
 // Will be called on SGCT master
@@ -80,14 +80,14 @@ void SyncEngine::postSynchronization(IsMaster isMaster) {
 }
 
 void SyncEngine::addSyncable(Syncable* syncable) {
-    ghoul_assert(syncable, "Syncable must not be nullptr");
+    assert_msg(syncable, "Syncable must not be nullptr");
 
     _syncables.push_back(syncable);
 }
 
 void SyncEngine::addSyncables(const std::vector<Syncable*>& syncables) {
     for (Syncable* syncable : syncables) {
-        ghoul_assert(syncable, "Syncables must not contain any nullptr");
+        assert_msg(syncable, "Syncables must not contain any nullptr");
         addSyncable(syncable);
     }
 }

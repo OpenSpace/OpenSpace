@@ -24,11 +24,11 @@
 
 #include <modules/kameleon/include/kameleonwrapper.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <algorithm>
 #include <cctype>
 #include <cmath>
@@ -72,11 +72,11 @@ std::array<std::string, 3> gridVariables(ccmc::Model* model) {
     grid.erase(remove_if(grid.begin(), grid.end(), isspace), grid.end());
 
     // Tokenize
-    std::vector<std::string> tokens = ghoul::tokenizeString(grid, ',');
+    std::vector<std::string> tokens = tokenizeString(grid, ',');
 
     // Validate
     if (tokens.size() != 3) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Expected three dimensional grid system. Got {} dimensions", tokens.size()
         ));
     }
@@ -84,7 +84,7 @@ std::array<std::string, 3> gridVariables(ccmc::Model* model) {
     const std::string x = std::move(tokens[0]);
     const std::string y = std::move(tokens[1]);
     const std::string z = std::move(tokens[2]);
-    return { ghoul::toLowerCase(x), ghoul::toLowerCase(y), ghoul::toLowerCase(z) };
+    return { toLowerCase(x), toLowerCase(y), toLowerCase(z) };
 }
 
 KameleonWrapper::KameleonWrapper(const std::filesystem::path& filename) {
@@ -167,7 +167,7 @@ void KameleonWrapper::close() {
 std::vector<float> KameleonWrapper::uniformSampledValues(const std::string& var,
                                                   const glm::size3_t& outDimensions) const
 {
-    ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
+    assert_msg(_model && _interpolator, "Model and interpolator must exist");
 
     LINFO(std::format(
         "Loading variable '{}' from CDF data with a uniform sampling", var
@@ -315,7 +315,7 @@ std::vector<float> KameleonWrapper::uniformSliceValues(const std::string& var,
                                                        const glm::size3_t& outDimensions,
                                                        float slice) const
 {
-    ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
+    assert_msg(_model && _interpolator, "Model and interpolator must exist");
     LINFO(std::format(
         "Loading variable '{}' from CDF data with a uniform sampling", var
     ));
@@ -434,7 +434,7 @@ std::vector<float> KameleonWrapper::uniformSampledVectorValues(const std::string
                                                                const std::string& zVar,
                                                   const glm::size3_t& outDimensions) const
 {
-    ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
+    assert_msg(_model && _interpolator, "Model and interpolator must exist");
 
     LINFO(std::format(
         "Loading variables {} {} {} from CDF data with a uniform sampling",
@@ -497,7 +497,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::classifiedFieldLines(const std::str
                                                  const std::vector<glm::vec3>& seedPoints,
                                                                      float stepSize) const
 {
-    ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
+    assert_msg(_model && _interpolator, "Model and interpolator must exist");
     LINFO(std::format(
         "Creating {} fieldlines from variables {} {} {}",
         seedPoints.size(), xVar, yVar, zVar
@@ -558,7 +558,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::fieldLines(const std::string& xVar,
                                                                            float stepSize,
                                                              const glm::vec4& color) const
 {
-    ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
+    assert_msg(_model && _interpolator, "Model and interpolator must exist");
 
     LINFO(std::format(
         "Creating {} fieldlines from variables {} {} {}",

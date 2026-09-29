@@ -27,19 +27,19 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/programobject.h>
 #include <memory>
 
 namespace {
@@ -144,7 +144,7 @@ Documentation RenderableTravelSpeed::Documentation() {
     return codegen::doc<Parameters>("space_renderable_travelspeed");
 }
 
-RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary)
+RenderableTravelSpeed::RenderableTravelSpeed(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _targetIdentifier(TargetInfo)
     , _travelSpeed(
@@ -200,14 +200,14 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
 void RenderableTravelSpeed::initialize() {
     _targetNode = sceneGraphNode(_targetIdentifier);
     if (!_targetNode) {
-        throw ghoul::RuntimeError("Could not find Target Node");
+        throw RuntimeError("Could not find Target Node");
     }
 }
 
 void RenderableTravelSpeed::initializeGL() {
     _shaderProgram = BaseModule::ProgramObjectManager.request(
         "Travelspeed",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "Travelspeed",
                 absPath("${MODULE_SPACE}/shaders/travelspeed_vs.glsl"),
@@ -226,13 +226,13 @@ void RenderableTravelSpeed::initializeGL() {
     glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, 0, 0);
 
-    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
+    opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
 }
 
 void RenderableTravelSpeed::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         "Travelspeed",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -278,7 +278,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     }
 
     SceneGraphNode* sourceNode = parent();
-    ghoul_assert(sourceNode, "Renderable have to be owned by scene graph node");
+    assert_msg(sourceNode, "Renderable have to be owned by scene graph node");
 
     // Target position, in the reference frame of the source node (to correctly inherit
     // parent transform)

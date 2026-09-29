@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___MOUSEINPUTSTATE___H__
 #define __OPENSPACE_CORE___MOUSEINPUTSTATE___H__
 
+#include <openspace/glm.h>
 #include <openspace/util/mouse.h>
-#include <ghoul/glm.h>
 #include <vector>
 
 namespace openspace {

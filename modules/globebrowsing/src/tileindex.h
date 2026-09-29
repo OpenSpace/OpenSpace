@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_INDEX___H__
 
 #include <modules/globebrowsing/src/basictypes.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <cstdint>
 
 namespace openspace {

@@ -25,10 +25,10 @@
 #include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/format.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/format.h>
 #include <optional>
 #include <variant>
 
@@ -173,7 +173,7 @@ SizeMappingComponent::SizeMappingComponent()
     addProperty(invertScale);
 }
 
-SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
+SizeMappingComponent::SizeMappingComponent(const Dictionary& dictionary)
     : SizeMappingComponent()
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

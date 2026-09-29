@@ -26,11 +26,11 @@
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryjsonformatter.h>
 #include <openspace/util/task.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <fstream>
 #include <utility>
 
@@ -51,9 +51,7 @@ Documentation KameleonMetadataToJsonTask::Documentation() {
     return codegen::doc<Parameters>("kameleon_task_metadatatojson");
 }
 
-KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
-                                                      const ghoul::Dictionary& dictionary)
-{
+KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _inputPath = p.input;
     _outputPath = p.output;
@@ -68,10 +66,10 @@ std::string KameleonMetadataToJsonTask::description() {
 
 void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressCallback) {
     KameleonVolumeReader reader = KameleonVolumeReader(_inputPath);
-    ghoul::Dictionary dictionary = reader.readMetaData();
+    Dictionary dictionary = reader.readMetaData();
     progressCallback(0.5f);
 
-    std::string json = ghoul::formatJson(dictionary);
+    std::string json = formatJson(dictionary);
     std::ofstream output = std::ofstream(_outputPath);
     output << std::move(json);
     progressCallback(1.f);

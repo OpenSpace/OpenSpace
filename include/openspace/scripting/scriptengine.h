@@ -27,9 +27,9 @@
 
 #include <openspace/util/syncable.h>
 
+#include <openspace/lua/luastate.h>
+#include <openspace/misc/boolean.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/misc/boolean.h>
 #include <filesystem>
 #include <functional>
 #include <mutex>
@@ -38,11 +38,11 @@
 #include <string_view>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
 struct lua_State;
 
 namespace openspace {
 
+class Dictionary;
 class SyncBuffer;
 
 /**
@@ -59,7 +59,7 @@ public:
         BooleanType(ShouldBeSynchronized);
         BooleanType(ShouldSendToRemote);
         BooleanType(ShouldBeLogged);
-        using Callback = std::function<void(ghoul::Dictionary)>;
+        using Callback = std::function<void(Dictionary)>;
 
         /// The Lua script that should be executed
         std::string code;
@@ -103,7 +103,7 @@ public:
     void deinitialize();
 
     void initializeLuaState(lua_State* state);
-    ghoul::lua::LuaState* luaState();
+    lua::LuaState* luaState();
 
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
@@ -150,7 +150,7 @@ private:
     void addBaseLibrary();
 
 
-    ghoul::lua::LuaState _state;
+    lua::LuaState _state;
     /// The library that has functions that are not placed in the `openspace.` namespace
     LuaLibrary _rootLibrary;
     std::vector<LuaLibrary> _registeredLibraries;

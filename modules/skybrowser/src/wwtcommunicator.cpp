@@ -25,20 +25,21 @@
 #include <modules/skybrowser/include/wwtcommunicator.h>
 
 #include <modules/webbrowser/include/browserinstance.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryjsonformatter.h>
 #include <algorithm>
 #include <iterator>
 
 namespace {
+    using namespace openspace;
+
     // WWT messages
-    ghoul::Dictionary moveCameraMessage(const glm::dvec2& celestCoords, double fov,
-                                        double roll)
+    Dictionary moveCameraMessage(const glm::dvec2& celestCoords, double fov, double roll)
     {
         using namespace std::string_literals;
 
-        ghoul::Dictionary msg;
+        Dictionary msg;
         msg.setValue("event", "center_on_coordinates"s);
         msg.setValue("ra", celestCoords.x);
         msg.setValue("dec", celestCoords.y);
@@ -48,20 +49,20 @@ namespace {
         return msg;
     }
 
-    ghoul::Dictionary loadCollectionMessage(const std::string& url) {
+    Dictionary loadCollectionMessage(const std::string& url) {
         using namespace std::string_literals;
 
-        ghoul::Dictionary msg;
+        Dictionary msg;
         msg.setValue("event", "load_image_collection"s);
         msg.setValue("url", url);
         msg.setValue("loadChildFolders", true);
         return msg;
     }
 
-    ghoul::Dictionary addImageMessage(const std::string& url) {
+    Dictionary addImageMessage(const std::string& url) {
         using namespace std::string_literals;
 
-        ghoul::Dictionary msg;
+        Dictionary msg;
         msg.setValue("event", "image_layer_create"s);
         msg.setValue("id", url);
         msg.setValue("url", url);
@@ -70,19 +71,19 @@ namespace {
         return msg;
     }
 
-    ghoul::Dictionary removeImageMessage(const std::string& imageId) {
+    Dictionary removeImageMessage(const std::string& imageId) {
         using namespace std::string_literals;
 
-        ghoul::Dictionary msg;
+        Dictionary msg;
         msg.setValue("event", "image_layer_remove"s);
         msg.setValue("id", imageId);
         return msg;
     }
 
-    ghoul::Dictionary setImageOpacityMessage(const std::string& imageId, double opacity) {
+    Dictionary setImageOpacityMessage(const std::string& imageId, double opacity) {
         using namespace std::string_literals;
 
-        ghoul::Dictionary msg;
+        Dictionary msg;
         msg.setValue("event", "image_layer_set"s);
         msg.setValue("id", imageId);
         msg.setValue("setting", "opacity"s);
@@ -90,14 +91,14 @@ namespace {
         return msg;
     }
 
-    ghoul::Dictionary setLayerOrderMessage(const std::string& imageUrl, int order) {
+    Dictionary setLayerOrderMessage(const std::string& imageUrl, int order) {
         static int MessageCounter = 0;
 
         // The lower the layer order, the more towards the back the image is placed 0 is
         // the background
         using namespace std::string_literals;
 
-        ghoul::Dictionary msg;
+        Dictionary msg;
         msg.setValue("event", "image_layer_order"s);
         msg.setValue("id", imageUrl);
         msg.setValue("order", order);
@@ -144,8 +145,8 @@ void WwtCommunicator::removeSelectedImage(const std::string& imageUrl) {
     }
 }
 
-void WwtCommunicator::sendMessageToWwt(const ghoul::Dictionary& msg) const {
-    std::string m = ghoul::formatJson(msg);
+void WwtCommunicator::sendMessageToWwt(const Dictionary& msg) const {
+    std::string m = formatJson(msg);
     executeJavascript(std::format("sendMessageToWWT({});", m));
 }
 
@@ -188,7 +189,7 @@ void WwtCommunicator::setBorderColor(glm::ivec3 color) {
 
 void WwtCommunicator::setAim(glm::dvec2 equatorialAim, double vFov, double roll) {
     // Message WorldWide Telescope current view
-    const ghoul::Dictionary msg = moveCameraMessage(equatorialAim, vFov, roll);
+    const Dictionary msg = moveCameraMessage(equatorialAim, vFov, roll);
     sendMessageToWwt(msg);
 }
 
@@ -239,7 +240,7 @@ void WwtCommunicator::setImageOrder(const std::string& imageUrl, int order) {
 
     _selectedImages = newDeque;
     const int reverseOrder = static_cast<int>(_selectedImages.size()) - order - 1;
-    const ghoul::Dictionary message = setLayerOrderMessage(imageUrl, reverseOrder);
+    const Dictionary message = setLayerOrderMessage(imageUrl, reverseOrder);
     sendMessageToWwt(message);
 }
 
@@ -253,7 +254,7 @@ void WwtCommunicator::setImageOpacity(const std::string& imageUrl, float opacity
     auto it = findSelectedImage(imageUrl);
     it->second = opacity;
 
-    const ghoul::Dictionary msg = setImageOpacityMessage(imageUrl, opacity);
+    const Dictionary msg = setImageOpacityMessage(imageUrl, opacity);
     sendMessageToWwt(msg);
 }
 

@@ -29,9 +29,9 @@
 #include <string>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
+
+class Dictionary;
 
 /**
  * This function takes a \p text and escapes all necessary characters that JSON does not
@@ -83,7 +83,7 @@ void sortJson(nlohmann::json& json, std::string_view key);
  * that if the JSON contains keys that array of an array type, they are converted into a
  * Dictionary with numerical keys and the numerical keys start with 1.
  */
-ghoul::Dictionary jsonToDictionary(const nlohmann::json& json);
+Dictionary jsonToDictionary(const nlohmann::json& json);
 
 } // namespace openspace
 

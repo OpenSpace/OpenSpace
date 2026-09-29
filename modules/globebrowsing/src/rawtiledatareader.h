@@ -30,8 +30,8 @@
 #include <modules/globebrowsing/src/tilecacheproperties.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
 #include <gdal.h>
 #include <array>
 #include <mutex>

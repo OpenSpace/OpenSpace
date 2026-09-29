@@ -30,13 +30,13 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-namespace ghoul::fontrendering { class Font; }
-
 namespace openspace {
+
+namespace fontrendering { class Font; }
 
 class DashboardTextItem : public DashboardItem {
 public:
-    explicit DashboardTextItem(const ghoul::Dictionary& dictionary);
+    explicit DashboardTextItem(const Dictionary& dictionary);
 
     void render(glm::vec2& penPosition) override;
 
@@ -46,7 +46,7 @@ protected:
     StringProperty _fontName;
     FloatProperty _fontSize;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::shared_ptr<fontrendering::Font> _font;
     std::string _buffer;
 };
 

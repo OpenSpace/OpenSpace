@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/misc/assert.h>
 #include <openspace/util/job.h>
-#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
@@ -48,7 +48,7 @@ void ConcurrentJobManager<P>::clearEnqueuedJobs() {
 
 template <typename P>
 std::shared_ptr<Job<P>> ConcurrentJobManager<P>::popFinishedJob() {
-    ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop");
+    assert_msg(!_finishedJobs.empty(), "There is no finished job to pop");
 
     const std::unique_lock lock(_finishedJobsMutex);
     return _finishedJobs.pop();

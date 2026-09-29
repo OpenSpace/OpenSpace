@@ -44,7 +44,7 @@ public:
 
     CefWebGuiModule();
 
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
+    void internalInitialize(const Dictionary& configuration) override;
 
     static openspace::Documentation Documentation();
 

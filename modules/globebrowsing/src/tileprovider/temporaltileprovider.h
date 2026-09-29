@@ -29,36 +29,34 @@
 
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
 #include <modules/globebrowsing/src/timequantizer.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <filesystem>
 #include <unordered_map>
 #include <utility>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
-
 namespace openspace {
 
+namespace opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace opengl
 class Time;
 
 /**
  * Provide `Tile`s from web map services that have temporal resolution.
  *
- * TemporalTileProviders are instantiated using a ghoul::Dictionary, and must define a
- * filepath to a Openspace Temporal dataset description file. This is an XML-file that
- * defines the same meta data as the GDAL WMS description
- * (http://www.gdal.org/frmt_wms.html), but augmented with some extra tags describing the
- * temporal properties of the dataset.
+ * TemporalTileProviders are instantiated using a Dictionary, and must define a filepath
+ * to a Openspace Temporal dataset description file. This is an XML-file that defines the
+ * same meta data as the GDAL WMS description (http://www.gdal.org/frmt_wms.html), but
+ * augmented with some extra tags describing the temporal properties of the dataset.
  *
  * \sa TemporalTileProvider::TemporalXMLTags
  */
 class TemporalTileProvider : public TileProvider {
 public:
-    explicit TemporalTileProvider(const ghoul::Dictionary& dictionary);
+    explicit TemporalTileProvider(const Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;
@@ -78,7 +76,7 @@ private:
     };
 
     struct InterpolateTileProvider : public TileProvider {
-        explicit InterpolateTileProvider(const ghoul::Dictionary&);
+        explicit InterpolateTileProvider(const Dictionary&);
         ~InterpolateTileProvider() override;
 
         Tile tile(const TileIndex& tileIndex) override final;
@@ -98,8 +96,8 @@ private:
         GLuint vaoQuad = 0;
         GLuint vboQuad = 0;
         GLuint fbo = 0;
-        std::unique_ptr<ghoul::opengl::ProgramObject> shaderProgram;
-        std::unique_ptr<ghoul::opengl::Texture> colormap;
+        std::unique_ptr<opengl::ProgramObject> shaderProgram;
+        std::unique_ptr<opengl::Texture> colormap;
     };
 
     DefaultTileProvider createTileProvider(std::string_view timekey) const;
@@ -129,7 +127,7 @@ private:
         std::vector<std::pair<double, std::string>> files;
     } _folder;
 
-    ghoul::Dictionary _initDict;
+    Dictionary _initDict;
     BoolProperty _useFixedTime;
     StringProperty _fixedTime;
     bool _fixedTimeDirty = true;

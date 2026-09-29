@@ -26,14 +26,14 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 
 namespace {
@@ -111,7 +111,7 @@ Documentation RenderableOrbitDisc::Documentation() {
     );
 }
 
-RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
+RenderableOrbitDisc::RenderableOrbitDisc(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
     , _size(SizeInfo, 1.f, 0.f, 3.0e12f)
@@ -148,8 +148,8 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
 
 void RenderableOrbitDisc::initialize() {
     _texture = std::make_unique<TextureComponent>(1);
-    _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+    _texture->setFilterMode(opengl::Texture::FilterMode::AnisotropicMipMap);
+    _texture->setWrapping(opengl::Texture::WrappingMode::ClampToEdge);
     _plane = std::make_unique<PlaneGeometry>(glm::vec2(planeSize()));
 }
 
@@ -160,7 +160,7 @@ void RenderableOrbitDisc::initializeGL() {
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 
     _texture->loadFromFile(_texturePath.value());
 
@@ -189,7 +189,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.semiMajorAxis, _size);
     _shader->setUniform(_uniformCache.multiplyColor, _multiplyColor);
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_texture->texture());
     _shader->setUniform(_uniformCache.discTexture, unit);
 
@@ -210,7 +210,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
 void RenderableOrbitDisc::update(const UpdateData&) {
     if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+        opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     if (_planeIsDirty) [[unlikely]] {

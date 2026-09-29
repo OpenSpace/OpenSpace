@@ -26,11 +26,11 @@
 
 #include <modules/multiresvolume/rendering/atlasmanager.h>
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <glm/gtx/std_based_type.hpp>
 #include <cstdlib>
 
@@ -64,7 +64,7 @@ void MultiresVolumeRaycaster::initialize() {
 void MultiresVolumeRaycaster::deinitialize() {}
 
 void MultiresVolumeRaycaster::renderEntryPoints(const RenderData& data,
-                                                ghoul::opengl::ProgramObject& program)
+                                                opengl::ProgramObject& program)
 {
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
@@ -80,7 +80,7 @@ void MultiresVolumeRaycaster::renderEntryPoints(const RenderData& data,
 }
 
 void MultiresVolumeRaycaster::renderExitPoints(const RenderData& data,
-                                               ghoul::opengl::ProgramObject& program)
+                                               opengl::ProgramObject& program)
 {
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
@@ -98,21 +98,21 @@ void MultiresVolumeRaycaster::renderExitPoints(const RenderData& data,
 }
 
 void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
-                                         ghoul::opengl::ProgramObject& program)
+                                         opengl::ProgramObject& program)
 {
     std::string id = std::to_string(data.id);
     program.setUniform("stepSizeCoefficient_" + id, _stepSizeCoefficient);
 
-    _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+    _tfUnit = std::make_unique<opengl::TextureUnit>();
     _tfUnit->bind(_transferFunction->texture());
     program.setUniform("transferFunction_" + id, *_tfUnit);
 
-    _atlasUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+    _atlasUnit = std::make_unique<opengl::TextureUnit>();
     _atlasUnit->bind(_atlasManager->textureAtlas());
     program.setUniform("textureAtlas_" + id, *_atlasUnit);
 
-    _atlasMapBinding = std::make_unique<ghoul::opengl::BufferBinding<
-        ghoul::opengl::bufferbinding::Buffer::ShaderStorage
+    _atlasMapBinding = std::make_unique<opengl::BufferBinding<
+        opengl::bufferbinding::Buffer::ShaderStorage
     >>();
     glBindBufferBase(
         GL_SHADER_STORAGE_BUFFER,
@@ -159,9 +159,7 @@ bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
             localPosition.x < 1.f && localPosition.y < 1.f && localPosition.z < 1.f);
 }
 
-void MultiresVolumeRaycaster::postRaycast(const RaycastData&,
-                                          ghoul::opengl::ProgramObject&)
-{
+void MultiresVolumeRaycaster::postRaycast(const RaycastData&, opengl::ProgramObject&) {
     _atlasUnit = nullptr;
     _tfUnit = nullptr;
 }

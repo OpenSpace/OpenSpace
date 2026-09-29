@@ -27,14 +27,14 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumewriter.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/dictionaryluaformatter.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/util/spicemanager.h>
 #include <fstream>
 #include <queue>
 
@@ -249,7 +249,7 @@ double epochFromSubstring(const std::string& epochString) {
 }
 
 std::vector<KeplerParameters> readTLEFile(const std::string& filename){
-    ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
+    assert_msg(FileSys.fileExists(filename), "The filename must exist");
 
     std::vector<KeplerParameters> data;
 
@@ -266,12 +266,11 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
 
     std::string line = "-";
     for (int i = 0; i < numberOfObjects; i++) {
-
-        ghoul::getline(file, line); // get rid of title
+        openspace::getline(file, line); // get rid of title
 
         KeplerParameters keplerElements;
 
-        ghoul::getline(file, line);
+        openspace::getline(file, line);
         if (line[0] == '1') {
             // First line
             // Field Columns   Content
@@ -292,12 +291,12 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
             keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
         }
         else {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "File {} @ line {} does not have '1' header", filename // linNum + 1
             ));
         }
 
-        ghoul::getline(file, line);
+        openspace::getline(file, line);
         if (line[0] == '2') {
             // Second line
             // Field    Columns   Content
@@ -345,7 +344,7 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
             stream >> keplerElements.meanMotion;
         }
         else {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "File {} @ line {} does not have '2' header", filename  // , lineNum + 2
             ));
         }
@@ -554,8 +553,7 @@ double* mapDensityToVoxels(double* densityArray, std::vector<glm::dvec3> positio
     return densityArray;
 }
 
-GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dictionary)
-{
+GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const Dictionary& dictionary) {
     openspace::testSpecificationAndThrow(
         documentation(),
         dictionary,
@@ -746,13 +744,10 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         std::string dictionaryOutputName = _dictionaryOutputPath.substr(0, lastIndex);
         dictionaryOutputName += std::to_string(i) + ".dictionary";
 
-        ghoul::filesystem::File file(rawOutputName);
+        filesystem::File file(rawOutputName);
         const std::string directory = file.directoryName();
         if (!FileSys.directoryExists(directory)) {
-            FileSys.createDirectory(
-                directory,
-                ghoul::filesystem::FileSystem::Recursive::Yes
-            );
+            FileSys.createDirectory(directory, filesystem::FileSystem::Recursive::Yes);
         }
 
         volume::RawVolumeWriter<float> writer(rawOutputName);
@@ -776,8 +771,8 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         /*LINFO(std::format("min2: {} ", minVal));
         LINFO(std::format("max2: {} ", maxVal));*/
 
-        ghoul::Dictionary outputDictionary = metadata.dictionary();
-        ghoul::DictionaryLuaFormatter formatter;
+        Dictionary outputDictionary = metadata.dictionary();
+        DictionaryLuaFormatter formatter;
         std::string metadataString = formatter.format(outputDictionary);
 
         std::fstream f(dictionaryOutputName, std::ios::out);

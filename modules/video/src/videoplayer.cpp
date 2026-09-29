@@ -28,19 +28,19 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/framebufferobject.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <render_gl.h>
-#include <ghoul/opengl/texture.h>
 #include <cstdlib>
 #include <optional>
 
@@ -249,7 +249,7 @@ Documentation VideoPlayer::Documentation() {
     return codegen::doc<Parameters>("video_videoplayer");
 }
 
-VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
+VideoPlayer::VideoPlayer(const Dictionary& dictionary)
     : PropertyOwner({ "VideoPlayer", "Video Player"})
     , _play(PlayInfo)
     , _pause(PauseInfo)
@@ -308,7 +308,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         }
         _startJ200Time = Time::convertTime(*p.startTime);
         _endJ200Time = Time::convertTime(*p.endTime);
-        ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
+        assert_msg(_endJ200Time > _startJ200Time, "Invalid times for video");
 
         // @TODO (2026-05-05, emmbr) Adding these properties as read-only so we can show
         // them in the UI. In the future, we should also allow editing them, but that
@@ -592,7 +592,7 @@ void VideoPlayer::renderMpv() {
 
 void VideoPlayer::renderFrame() {
     // Save the currently bound FBO
-    const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+    const GLint defaultFBO = opengl::FramebufferObject::getActiveObject();
 
     // See render_gl.h on what OpenGL environment mpv expects, and other API details. This
     // function fills the fbo and texture with data, after it we can get the data on the
@@ -844,7 +844,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 
@@ -950,7 +950,7 @@ void VideoPlayer::postSync(bool isMaster) {
     }
 }
 
-const std::unique_ptr<ghoul::opengl::Texture>& VideoPlayer::frameTexture() const {
+const std::unique_ptr<opengl::Texture>& VideoPlayer::frameTexture() const {
     return _frameTexture;
 }
 
@@ -1014,14 +1014,14 @@ void VideoPlayer::createTexture(glm::ivec2 size) {
     // Update resolution of video
     _videoResolution = size;
 
-    _frameTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _frameTexture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
 
     // Bind texture to framebuffer

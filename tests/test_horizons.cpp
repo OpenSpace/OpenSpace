@@ -25,10 +25,10 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
 
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
 #include <modules/space/horizonsfile.h>

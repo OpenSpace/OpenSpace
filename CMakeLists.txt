@@ -37,19 +37,17 @@ set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 # directory. Changing any of the options below afterwards will not add or remove the
 # corresponding dependency: delete build/<preset>/vcpkg_installed (or the whole build
 # directory) and configure again
-option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
+option(OPENSPACE_HAVE_TESTS "Activate the unit tests" ON)
 option(OPENSPACE_ENABLE_TRACY "Enable profiling with Tracy" OFF)
-option(OPENSPACE_OPENVR_SUPPORT "Build the OpenSpace application with OpenVR support" OFF)
 option(OPENSPACE_USE_SYSTEM_QT "Use a Qt installation provided by the system instead of building Qt through vcpkg" OFF)
+option(OPENSPACE_HIGH_DEBUG_MODE "Add additional debugging code" ON)
+option(OPENSPACE_LOGGING_ENABLE_TRACE "Enables the LTRACE macro" ON)
 
 if (OPENSPACE_HAVE_TESTS)
   list(APPEND VCPKG_MANIFEST_FEATURES "tests")
 endif ()
 if (OPENSPACE_ENABLE_TRACY)
   list(APPEND VCPKG_MANIFEST_FEATURES "profiling")
-endif ()
-if (OPENSPACE_OPENVR_SUPPORT)
-  list(APPEND VCPKG_MANIFEST_FEATURES "openvr")
 endif ()
 if (NOT OPENSPACE_USE_SYSTEM_QT)
   list(APPEND VCPKG_MANIFEST_FEATURES "qt")
@@ -62,27 +60,16 @@ set(OPENSPACE_VERSION_MAJOR)
 set(OPENSPACE_VERSION_MINOR)
 set(OPENSPACE_VERSION_PATCH)
 
-# The dependencies resolved through vcpkg are located with find_package() from the
-# subdirectory that consumes them (ext/, apps/, individual modules). Their IMPORTED targets
-# have to be visible across sibling directories (for example Ghoul::Ghoul is found in ext/
-# but linked from src/, modules/ and tests/), so promote every find_package target to
-# global scope
 set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON)
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
-include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/message_macros.cmake)
 
 begin_header("Configuring OpenSpace project")
 
 ##########################################################################################
 # Cleanup project                                                                        #
 ##########################################################################################
-if (NOT EXISTS "${PROJECT_SOURCE_DIR}/ext/ghoul/CMakeLists.txt")
-  message(FATAL_ERROR "Git submodules are missing. Please run "
-    "git submodule update --init --recursive to download the missing dependencies."
-  )
-endif ()
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 
@@ -158,8 +145,8 @@ endif ()
 
 add_subdirectory(ext)
 add_subdirectory(src)
+add_subdirectory(support/codegen)
 
-find_package(codegen CONFIG REQUIRED)
 # It is important that the __codegen.h do not actually exist so
 # that this target is never considered as finished
 add_custom_target(
@@ -181,6 +168,17 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules")
 end_header("End: Configuring Modules")
 
 
+# SGCT installs the calibrator as a plain executable rather than exporting it as a target,
+# and the sgct port moves it on into the vcpkg tools folder. It is picked up here, at the
+# top level, because both apps/OpenSpace (which copies it next to the OpenSpace binary)
+# and support/cmake/packaging.cmake (which puts it into the packages) need these paths.
+# Every use is guarded on the executable existing so that an sgct built without the
+# "calibrator" feature still configures
+set(OPENSPACE_SGCT_CALIBRATOR_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/sgct")
+set(OPENSPACE_SGCT_CALIBRATOR "${OPENSPACE_SGCT_CALIBRATOR_DIR}/calibrator${CMAKE_EXECUTABLE_SUFFIX}")
+file(GLOB OPENSPACE_SGCT_CALIBRATOR_PATTERNS "${OPENSPACE_SGCT_CALIBRATOR_DIR}/test-pattern-*.png")
+
+
 begin_header("Configuring Applications")
 add_subdirectory(apps)
 end_header("End: Configuring Applications")
@@ -194,7 +192,7 @@ endif ()
 if (OPENSPACE_HAVE_TESTS)
   enable_testing()
 
-  add_subdirectory(support/coding/codegen/tests)
+  add_subdirectory(support/codegen/tests)
   set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
   set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
   if (NOT TEST codegentest)
