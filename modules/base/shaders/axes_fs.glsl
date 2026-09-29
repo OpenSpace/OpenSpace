@@ -30,9 +30,9 @@ in Data {
   float screenSpaceDepth;
 } in_data;
 
-uniform vec3 xColor;
-uniform vec3 yColor;
-uniform vec3 zColor;
+uniform vec4 xColor;
+uniform vec4 yColor;
+uniform vec4 zColor;
 uniform float opacity;
 
 
@@ -43,8 +43,8 @@ Fragment getFragment() {
   vec3 colorComp = step(2e-32, in_data.positionModelSpace);
 
   Fragment frag;
-  frag.color.rgb = colorComp.x * xColor + colorComp.y * yColor + colorComp.z * zColor;
-  frag.color.a = opacity;
+  frag.color = colorComp.x * xColor + colorComp.y * yColor + colorComp.z * zColor;
+  frag.color.a *= opacity;
   frag.depth = in_data.screenSpaceDepth;
   frag.gPosition = in_data.positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);

@@ -13,9 +13,9 @@ local Node = {
   },
   Renderable = {
     Type = "RenderableCartesianAxes",
-    XColor = { 0.0, 1.0, 1.0 }, -- Cyan
-    YColor = { 1.0, 0.0, 1.0 }, -- Magenta
-    ZColor = { 1.0, 1.0, 0.0 }  -- Yellow
+    XColor = { 0.0, 1.0, 1.0, 1.0 }, -- Cyan
+    YColor = { 1.0, 0.0, 1.0, 1.0 }, -- Magenta
+    ZColor = { 1.0, 1.0, 0.0, 1.0 }  -- Yellow
   },
   GUI = {
     Name = "RenderableCartesianAxes - Custom Colors",

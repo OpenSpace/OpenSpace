@@ -72,13 +72,13 @@ namespace {
     // example using a [StaticScale](#base_scale_static).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
-        std::optional<glm::vec3> xColor [[codegen::color()]];
+        std::optional<glm::vec4> xColor [[codegen::color()]];
 
         // [[codegen::verbatim(YColorInfo.description)]]
-        std::optional<glm::vec3> yColor [[codegen::color()]];
+        std::optional<glm::vec4> yColor [[codegen::color()]];
 
         // [[codegen::verbatim(ZColorInfo.description)]]
-        std::optional<glm::vec3> zColor [[codegen::color()]];
+        std::optional<glm::vec4> zColor [[codegen::color()]];
     };
 } // namespace
 #include "renderablecartesianaxes_codegen.cpp"
@@ -95,9 +95,9 @@ Documentation RenderableCartesianAxes::Documentation() {
 RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _program(nullptr)
-    , _xColor(XColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _yColor(YColorInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _zColor(ZColorInfo, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _xColor(XColorInfo, glm::vec4(1.f, 0.f, 0.f, 1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _yColor(YColorInfo, glm::vec4(0.f, 1.f, 0.f, 1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _zColor(ZColorInfo, glm::vec4(0.f, 0.f, 1.f, 1.f), glm::vec4(0.f), glm::vec4(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -114,6 +114,8 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     _zColor = p.zColor.value_or(_zColor);
     _zColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_zColor);
+
+    setRenderBin(RenderBin::PostDeferredTransparent);
 }
 
 void RenderableCartesianAxes::initializeGL() {

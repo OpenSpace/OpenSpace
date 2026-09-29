@@ -286,8 +286,8 @@ function addExoplanetSystem(data)
       math.deg(data.StarInclination)
     )
 
-    local StarAxes = {
-      Identifier = starIdentifier .. "_RotationAxes",
+    local StarAxis = {
+      Identifier = starIdentifier .. "_RotationAxis",
       Parent = starIdentifier,
       Transform = {
         Rotation = {
@@ -296,24 +296,26 @@ function addExoplanetSystem(data)
         },
         Scale = {
           Type = "StaticScale",
-          Scale = 1.5 * starRadii
+          Scale = 2 * starRadii
         }
       },
       Renderable = {
         Type = "RenderableCartesianAxes",
-        Enabled = false
+        Enabled = false,
+        XColor = { 0.0, 0.0, 0.0, 0.0 },
+        YColor = { 0.0, 0.0, 0.0, 0.0 },
+        ZColor = { 0.8, 0.8, 0.8, 1.0 }
       },
-      Tag = { "exoplanet_star_axes" },
+      Tag = { "exoplanet_star_rotationaxis" },
       GUI = {
-        Name = data.StarName .. " Rotation Axes",
+        Name = data.StarName .. " Rotation Axis",
         Path = guiPath,
-        Description = string.format(
-          "Cartesian coordinate axes for the star %s. The blue Z-axis indicates the star's rotation axis.",
-          data.StarName
-        )
+        Description = [[
+          A visualization of the star's rotation axis. Only added if the star has a defined inclination.
+        ]]
       }
     }
-    openspace.addSceneGraphNode(StarAxes)
+    openspace.addSceneGraphNode(StarAxis)
   end
 
   --------------------------------------------------------------------

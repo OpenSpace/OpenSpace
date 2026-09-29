@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
@@ -51,9 +51,9 @@ protected:
 
     ghoul::opengl::ProgramObject* _program;
 
-    Vec3Property _xColor;
-    Vec3Property _yColor;
-    Vec3Property _zColor;
+    Vec4Property _xColor;
+    Vec4Property _yColor;
+    Vec4Property _zColor;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
