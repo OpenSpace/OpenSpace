@@ -881,36 +881,43 @@ void ComputeColumnsView::render(bool* open) {
         _errorMessage.clear();
     }
 
-    if (_computeMode == ComputeMode::PerPlanet) {
-        ImGui::Text("Expression");
-        ImGui::SameLine();
-        if (ImGui::Button("Browse columns")) {
-            _showColumnBrowser = true;
-            _focusColumnBrowser = true;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Browse constants")) {
-            _showConstantBrowser = true;
-            _focusConstantBrowser = true;
-        }
-        ImGui::SameLine();
-        view::helper::renderHelpMarker(
-            "Enter an arithmetic expression using existing column names as variables, e.g. "
-            "'mass / radius^2' (use pow(mass, 2) instead of '^'). Supported functions: "
-            "sqrt, log, log10, abs, pow, min, max."
-        );
+    if (ImGui::BeginChild(
+        "ComputeControls",
+        ImVec2(0.f, 0.f),
+        ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY
+    )) {
+        if (_computeMode == ComputeMode::PerPlanet) {
+            ImGui::Text("Expression");
+            ImGui::SameLine();
+            if (ImGui::Button("Browse columns")) {
+                _showColumnBrowser = true;
+                _focusColumnBrowser = true;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Browse constants")) {
+                _showConstantBrowser = true;
+                _focusConstantBrowser = true;
+            }
+            ImGui::SameLine();
+            view::helper::renderHelpMarker(
+                "Enter an arithmetic expression using existing column names as variables, e.g. "
+                "'mass / radius^2' (use pow(mass, 2) instead of '^'). Supported functions: "
+                "sqrt, log, log10, abs, pow, min, max."
+            );
 
-        ImGui::InputTextMultiline(
-            "##Expression",
-            _expressionBuffer,
-            IM_ARRAYSIZE(_expressionBuffer),
-            ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 4),
-            ImGuiInputTextFlags_AllowTabInput
-        );
+            ImGui::InputTextMultiline(
+                "##Expression",
+                _expressionBuffer,
+                IM_ARRAYSIZE(_expressionBuffer),
+                ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 4),
+                ImGuiInputTextFlags_AllowTabInput
+            );
+        }
+        else {
+            renderSystemAggregateControls();
+        }
     }
-    else {
-        renderSystemAggregateControls();
-    }
+    ImGui::EndChild();
 
     if (ImGui::Button("Compute")) {
         if (computeColumn(_nameBuffer, _expressionBuffer, _descriptionBuffer)) {
@@ -922,6 +929,9 @@ void ComputeColumnsView::render(bool* open) {
         }
     }
 
+    ImGui::SameLine(0.f, ImGui::GetStyle().ItemSpacing.x * 3.f);
+    renderHistory();
+
     if (!_errorMessage.empty()) {
         ImGui::TextColored(
             view::helper::toImVec4(view::colors::Error),
@@ -930,7 +940,6 @@ void ComputeColumnsView::render(bool* open) {
         );
     }
 
-    renderHistory();
 
     ImGui::Separator();
     ImGui::Text("Computed columns");
