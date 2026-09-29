@@ -91,6 +91,11 @@
             "name": "Star radius",
             "desc": "(Solar)"
         },
+        "st_incl": {
+            "name": "Star inclination",
+            "format": "%.1f",
+            "desc": "Stellar inclination (deg)"
+        },
         "st_age": {
             "name": "Star age",
             "desc": "(Gyr)"

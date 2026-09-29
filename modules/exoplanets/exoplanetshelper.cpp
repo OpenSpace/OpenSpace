@@ -28,12 +28,15 @@
 #include <modules/exoplanets/exoplanetsmodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/timeconstants.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
 #include <glm/gtx/transform.hpp>
+#include <algorithm>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
@@ -116,6 +119,97 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega) {
     return orbitPlaneRotation;
 }
 
+std::pair<float, glm::vec2> computeStellarInclination(float vsini, float vsiniLower,
+                                                      float vsiniUpper, float radius,
+                                                      float radiusLower,
+                                                      float radiusUpper,
+                                                      float rotationPeriod,
+                                                      float rotLower,
+                                                      float rotUpper)
+{
+    if (std::isnan(vsini) || std::isnan(radius) || std::isnan(rotationPeriod) ||
+        vsini <= 0.f || radius <= 0.f || rotationPeriod <= 0.f)
+    {
+        return {
+            std::numeric_limits<float>::quiet_NaN(),
+            glm::vec2(std::numeric_limits<float>::quiet_NaN())
+        };
+    }
+
+    // Radius in km: (radius * SolarRadius) / 1000.0
+    // Period in seconds: rotationPeriod * SecondsPerDay
+    // Equatorial velocity veq in km/s = 2 * pi * radius_km / period_s
+    const double radiusKm =
+        (static_cast<double>(radius) * distanceconstants::SolarRadius) / 1000.0;
+    const double periodSeconds =
+        static_cast<double>(rotationPeriod) * timeconstants::SecondsPerDay;
+    const double veq = (2.0 * glm::pi<double>() * radiusKm) / periodSeconds;
+
+    if (veq <= 0.0) {
+        return {
+            std::numeric_limits<float>::quiet_NaN(),
+            glm::vec2(std::numeric_limits<float>::quiet_NaN())
+        };
+    }
+
+    const double sinI = static_cast<double>(vsini) / veq;
+    const double clampedSinI = std::clamp(sinI, 0.0, 1.0);
+    const float inclination = static_cast<float>(std::asin(clampedSinI));
+
+    // Uncertainty propagation on sin(i) = (vsini * P_rot) / (2 * pi * R_*):
+    // Fractional uncertainties add in quadrature for each asymmetric bound:
+    // - Upper bound combines vsiniUpper, rotUpper, and radiusLower (increases sin(i))
+    // - Lower bound combines vsiniLower, rotLower, and radiusUpper (decreases sin(i))
+    auto squaredError = [](float value, float error) -> double {
+        return std::pow(static_cast<double>(error) / static_cast<double>(value), 2.0);
+    };
+
+    double fUpperSq = 0.0;
+    bool hasUpperError = false;
+    if (!std::isnan(vsiniUpper) && vsiniUpper > 0.f) {
+        fUpperSq += squaredError(vsini, vsiniUpper);
+        hasUpperError = true;
+    }
+    if (!std::isnan(rotUpper) && rotUpper > 0.f) {
+        fUpperSq += squaredError(rotationPeriod, rotUpper);
+        hasUpperError = true;
+    }
+    if (!std::isnan(radiusLower) && radiusLower > 0.f) {
+        fUpperSq += squaredError(radius, radiusLower);
+        hasUpperError = true;
+    }
+
+    double fLowerSq = 0.0;
+    bool hasLowerError = false;
+    if (!std::isnan(vsiniLower) && vsiniLower > 0.f) {
+        fLowerSq +=
+            squaredError(vsini, vsiniLower);
+        hasLowerError = true;
+    }
+    if (!std::isnan(rotLower) && rotLower > 0.f) {
+        fLowerSq += squaredError(rotationPeriod, rotLower);
+        hasLowerError = true;
+    }
+    if (!std::isnan(radiusUpper) && radiusUpper > 0.f) {
+        fLowerSq += squaredError(radius, radiusUpper);
+        hasLowerError = true;
+    }
+
+    glm::vec2 incError = glm::vec2(std::numeric_limits<float>::quiet_NaN());
+    if (hasLowerError) {
+        const double sigmaSinLower = sinI * std::sqrt(fLowerSq);
+        const double sinILower = std::clamp(sinI - sigmaSinLower, 0.0, 1.0);
+        incError.x = static_cast<float>(inclination - std::asin(sinILower));
+    }
+    if (hasUpperError) {
+        const double sigmaSinUpper = sinI * std::sqrt(fUpperSq);
+        const double sinIUpper = std::clamp(sinI + sigmaSinUpper, 0.0, 1.0);
+        incError.y = static_cast<float>(std::asin(sinIUpper) - inclination);
+    }
+
+    return { inclination, incError };
+}
+
 glm::dmat3 computeSystemRotation(const glm::dvec3& starPosition) {
     const glm::dvec3 sunPosition = glm::dvec3(0.0);
     const glm::dvec3 starToSunVec = glm::normalize(sunPosition - starPosition);
@@ -176,6 +270,37 @@ void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p
     }
     if (starData.luminosity != p.luminosity && !std::isnan(p.luminosity)) {
         starData.luminosity = p.luminosity;
+    }
+    if (starData.rotationPeriod != p.starRotationPeriod && !std::isnan(p.starRotationPeriod)) {
+        starData.rotationPeriod = p.starRotationPeriod;
+    }
+    if (starData.vsini != p.starVsini && !std::isnan(p.starVsini)) {
+        starData.vsini = p.starVsini;
+    }
+
+    if (!std::isnan(starData.vsini) && !std::isnan(starData.radius) &&
+        !std::isnan(starData.rotationPeriod))
+    {
+        const float vLower = !std::isnan(p.starVsiniLower) ? p.starVsiniLower :
+            std::numeric_limits<float>::quiet_NaN();
+        const float vUpper = !std::isnan(p.starVsiniUpper) ? p.starVsiniUpper :
+            std::numeric_limits<float>::quiet_NaN();
+        const float rLower = !std::isnan(p.rStarLower) ? p.rStarLower :
+            std::numeric_limits<float>::quiet_NaN();
+        const float rUpper = !std::isnan(p.rStarUpper) ? p.rStarUpper :
+            std::numeric_limits<float>::quiet_NaN();
+        const float pLower = !std::isnan(p.starRotationPeriodLower) ? p.starRotationPeriodLower :
+            std::numeric_limits<float>::quiet_NaN();
+        const float pUpper = !std::isnan(p.starRotationPeriodUpper) ? p.starRotationPeriodUpper :
+            std::numeric_limits<float>::quiet_NaN();
+
+        auto [inc, incErr] = computeStellarInclination(
+            starData.vsini, vLower, vUpper,
+            starData.radius, rLower, rUpper,
+            starData.rotationPeriod, pLower, pUpper
+        );
+        starData.inclination = inc;
+        starData.inclinationError = incErr;
     }
 }
 

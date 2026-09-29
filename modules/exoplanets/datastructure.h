@@ -125,6 +125,20 @@ struct ExoplanetDataEntry {
     /// Lower uncertainty of epoch of transit center
     float ttLower = std::numeric_limits<float>::quiet_NaN();
 
+    // Star's estimate vsini (projected rotational velocity on view direction)
+    float starVsini = std::numeric_limits<float>::quiet_NaN();
+    /// Upper uncertainty of estimated vsini
+    float starVsiniUpper = std::numeric_limits<float>::quiet_NaN();
+    /// Lower uncertainty of estimated vsini
+    float starVsiniLower = std::numeric_limits<float>::quiet_NaN();
+
+    // Star's rotation period, in days
+    float starRotationPeriod = std::numeric_limits<float>::quiet_NaN();
+    /// Upper uncertainty of star rotation period
+    float starRotationPeriodUpper = std::numeric_limits<float>::quiet_NaN();
+    /// Lower uncertainty of star rotation period
+    float starRotationPeriodLower = std::numeric_limits<float>::quiet_NaN();
+
     /// Star position's X-coordinate in parsec
     float positionX = std::numeric_limits<float>::quiet_NaN();
     /// Star position's Y-coordinate in parsec
@@ -135,10 +149,19 @@ struct ExoplanetDataEntry {
 
 struct StarData {
     glm::vec3 position = glm::vec3(std::numeric_limits<float>::quiet_NaN()); // In parsec
+
     float radius = std::numeric_limits<float>::quiet_NaN(); // In solar radii
+
     float bv = std::numeric_limits<float>::quiet_NaN();
     float teff = std::numeric_limits<float>::quiet_NaN(); // In Kelvin
     float luminosity = std::numeric_limits<float>::quiet_NaN(); // In solar luminosities
+
+    float rotationPeriod = std::numeric_limits<float>::quiet_NaN(); // In days
+    float vsini = std::numeric_limits<float>::quiet_NaN();
+
+    // Computed inclination from radius, vsini, and rotationPeriod. In radians
+    float inclination = std::numeric_limits<float>::quiet_NaN();
+    glm::vec2 inclinationError = glm::vec2(std::numeric_limits<float>::quiet_NaN());
 };
 
 struct ExoplanetSystem {

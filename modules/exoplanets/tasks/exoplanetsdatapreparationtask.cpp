@@ -431,6 +431,26 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
             const float dataInLogSolar = readFloatData(data);
             p.luminosityLower = static_cast<float>(-std::pow(10, dataInLogSolar));
         }
+        // Star vsini
+        else if (column == "st_vsin" || column == "st_vsini") {
+            p.starVsini = readFloatData(data);
+        }
+        else if (column == "st_vsinerr1" || column == "st_vsinierr1") {
+            p.starVsiniUpper = readFloatData(data);
+        }
+        else if (column == "st_vsinerr2" || column == "st_vsinierr2") {
+            p.starVsiniLower = -readFloatData(data);
+        }
+        // Star rotation period
+        else if (column == "st_rotp" || column == "st_rotper") {
+            p.starRotationPeriod = readFloatData(data);
+        }
+        else if (column == "st_rotperr1" || column == "st_rotpererr1") {
+            p.starRotationPeriodUpper = readFloatData(data);
+        }
+        else if (column == "st_rotperr2" || column == "st_rotpererr2") {
+            p.starRotationPeriodLower = -readFloatData(data);
+        }
         // Is the planet orbiting a binary system?
         else if (column == "cb_flag") {
             p.binary = readIntegerData(data) != 0;

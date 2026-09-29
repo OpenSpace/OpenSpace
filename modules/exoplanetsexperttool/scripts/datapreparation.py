@@ -268,6 +268,58 @@ df.fillna({'ra': temp_df.ra}, inplace=True)
 df.fillna({'dec': temp_df.dec}, inplace=True)
 
 ##################################################################
+# Stellar inclination
+##################################################################
+
+print("Computing stellar inclination...")
+
+R_SUN_KM = const.R_sun.value / 1000.0  # solar radius in km (~695700 km)
+SECONDS_PER_DAY = 86400.0
+
+# Valid rows have positive values for radius, rotation period, and vsini
+has_stellar_inc_data = (
+    (df['st_rad'] > 0) &
+    (df['st_rotp'] > 0) &
+    (df['st_vsin'] > 0) &
+    df['st_rad'].notna() &
+    df['st_rotp'].notna() &
+    df['st_vsin'].notna()
+)
+
+# Initialize columns
+df['st_incl'] = np.nan
+df['st_inclerr1'] = np.nan
+df['st_inclerr2'] = np.nan
+
+if has_stellar_inc_data.any():
+    rad = df.loc[has_stellar_inc_data, 'st_rad']
+    rotp = df.loc[has_stellar_inc_data, 'st_rotp']
+    vsin = df.loc[has_stellar_inc_data, 'st_vsin']
+
+    # Equatorial rotational velocity veq in km/s = 2 * pi * R_star / P_rot
+    veq = (2.0 * np.pi * rad * R_SUN_KM) / (rotp * SECONDS_PER_DAY)
+    sin_i = vsin / veq
+    incl_rad = np.arcsin(np.clip(sin_i, 0.0, 1.0))
+    df.loc[has_stellar_inc_data, 'st_incl'] = np.degrees(incl_rad)
+
+    # Fractional error squared helper (err / val)^2
+    squareError = lambda col, val: (df.loc[has_stellar_inc_data, col].abs() / val).pow(2).fillna(0.0)
+
+    # Upper bound error terms: vsin(+), rotp(+), radius(-)
+    f_upper_sq = squareError('st_vsinerr1', vsin) + squareError('st_rotperr1', rotp) + squareError('st_raderr2', rad)
+    has_u = f_upper_sq > 0
+    if has_u.any():
+        sin_i_upper = np.clip(sin_i[has_u] + sin_i[has_u] * np.sqrt(f_upper_sq[has_u]), 0.0, 1.0)
+        df.loc[rad.index[has_u], 'st_inclerr1'] = np.degrees(np.arcsin(sin_i_upper) - incl_rad[has_u])
+
+    # Lower bound error terms: vsin(-), rotp(-), radius(+)
+    f_lower_sq = squareError('st_vsinerr2', vsin) + squareError('st_rotperr2', rotp) + squareError('st_raderr1', rad)
+    has_l = f_lower_sq > 0
+    if has_l.any():
+        sin_i_lower = np.clip(sin_i[has_l] - sin_i[has_l] * np.sqrt(f_lower_sq[has_l]), 0.0, 1.0)
+        df.loc[rad.index[has_l], 'st_inclerr2'] = -np.degrees(incl_rad[has_l] - np.arcsin(sin_i_lower))
+
+##################################################################
 # Chemical Abundances
 ##################################################################
 

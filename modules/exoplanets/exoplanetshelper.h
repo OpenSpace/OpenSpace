@@ -49,6 +49,19 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom = 180.f,
     float omega = 90.f);
 
 /**
+ * Compute the stellar inclination angle (in radians) and its asymmetric uncertainty
+ * from vsini (in km/s), stellar radius (in solar radii), and stellar rotation period (in days).
+ *
+ * \return A pair containing the inclination angle in radians and a vec2 representing
+ *         the (lower, upper) uncertainty in radians.
+ */
+std::pair<float, glm::vec2> computeStellarInclination(
+    float vsini, float vsiniLower, float vsiniUpper,
+    float radius, float radiusLower, float radiusUpper,
+    float rotationPeriod, float rotLower, float rotUpper
+);
+
+/**
  * Rotate the original coordinate system (where x is pointing to First Point of Aries) so
  * that x is pointing from star to the Sun.
  */

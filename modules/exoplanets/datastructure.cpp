@@ -74,6 +74,18 @@ namespace {
         // data exists.
         std::optional<double> starLuminosity;
 
+        // The rotation period of the star, in days, if data exists.
+        std::optional<double> starRotationPeriod;
+
+        // The projected rotational velocity (vsini) of the star, in km/s, if data exists.
+        std::optional<double> starVsini;
+
+        // The computed inclination of the star, in radians, if data exists.
+        std::optional<double> starInclination;
+
+        // The uncertainty of the star's inclination, in radians, if data exists.
+        std::optional<glm::dvec2> starInclinationUncertainty;
+
         struct Planet {
             // An identifier to use for the planet, created based on the planet name.
             std::string id;
@@ -209,6 +221,25 @@ ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
 
     if (!std::isnan(starData.luminosity)) {
         res.setValue("StarLuminosity", static_cast<double>(starData.luminosity));
+    }
+
+    if (!std::isnan(starData.rotationPeriod)) {
+        res.setValue("StarRotationPeriod", static_cast<double>(starData.rotationPeriod));
+    }
+
+    if (!std::isnan(starData.vsini)) {
+        res.setValue("StarVsini", static_cast<double>(starData.vsini));
+    }
+
+    if (!std::isnan(starData.inclination)) {
+        res.setValue("StarInclination", static_cast<double>(starData.inclination));
+    }
+
+    if (!glm::any(glm::isnan(starData.inclinationError))) {
+        res.setValue(
+            "StarInclinationUncertainty",
+            glm::dvec2(starData.inclinationError)
+        );
     }
 
     ghoul::Dictionary planets;

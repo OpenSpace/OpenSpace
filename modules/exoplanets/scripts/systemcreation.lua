@@ -141,24 +141,33 @@ function addExoplanetSystem(data)
   end
 
   local starSizeAndTempInfo = function (data)
+    local info = ""
     if hasValue(data.StarRadius) and hasValue(data.StarTeff) then
-      return string.format(
+      info = string.format(
         "It has a size of %.2f solar radii and an effective temperature of %.0f Kelvin",
         data.StarRadius / SolarRadius, data.StarTeff
       )
     elseif hasValue(data.StarTeff) then
-      return string.format(
+      info = string.format(
         "Its size is uknown, but it has an effective temperature of %.0f Kelvin",
         data.StarTeff
       )
     elseif hasValue(data.StarRadius) then
-      return string.format(
+      info = string.format(
         "It has a size of %.2f solar radii, but its temperature is unknown",
         data.StarRadius
       )
     else
-      return "Both its size and temperature is unknown"
+      info = "Both its size and temperature is unknown"
     end
+
+    if hasValue(data.StarRotationPeriod) then
+      info = info .. string.format(". Rotation period: %.2f days", data.StarRotationPeriod)
+    end
+    if hasValue(data.StarInclination) then
+      info = info .. string.format(". Stellar inclination: %.1f deg", math.deg(data.StarInclination))
+    end
+    return info
   end
 
   -- Use SolarSystemBarycenter as parent if available; otherwise fall back to Root (these
@@ -173,6 +182,12 @@ function addExoplanetSystem(data)
     parentNodeIdentifier = "Root"
   end
 
+  local starRadii = openspace.ternary(
+    hasValue(data.StarRadius),
+    data.StarRadius,
+    0.1 * SolarRadius
+  )
+
   local Star = {
     Identifier = starIdentifier,
     Parent = parentNodeIdentifier,
@@ -186,21 +201,7 @@ function addExoplanetSystem(data)
         Position = data.Position
       }
     },
-    Renderable = {
-      Type = "RenderableGlobe",
-      -- If there is not a value for the radius, render a globe with a default radius,
-      -- to allow us to navigate to something. Note that it can't be too small, due to
-      -- precision issues at this distance
-      Radii = openspace.ternary(
-        hasValue(data.StarRadius),
-        data.StarRadius,
-        0.1 * SolarRadius
-      ),
-      PerformShading = false,
-      Layers = {
-        ColorLayers = colorLayers
-      }
-    },
+    BoundingSphere = starRadii,
     Tag = { "exoplanet_system" },
     GUI = {
       Name = data.StarName .. " (Star)",
@@ -219,6 +220,101 @@ function addExoplanetSystem(data)
     }
   }
   openspace.addSceneGraphNode(Star)
+
+  local starGlobeRotations = {}
+  if hasValue(data.StarInclination) then
+    local inclinationMatrix = openspace.exoplanets.computeOrbitPlaneRotationMatrix(
+      math.deg(data.StarInclination)
+    )
+    table.insert(starGlobeRotations, {
+      Type = "StaticRotation",
+      Rotation = inclinationMatrix
+    })
+  end
+
+  if hasValue(data.StarRotationPeriod) and data.StarRotationPeriod > 0 then
+    local rotationRate = 1.0 / (data.StarRotationPeriod * openspace.time.secondsPerDay())
+    table.insert(starGlobeRotations, {
+      Type = "ConstantRotation",
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = rotationRate
+    })
+  end
+
+  local starGlobeRotationTransform = nil
+  if #starGlobeRotations > 1 then
+    starGlobeRotationTransform = {
+      Type = "MultiRotation",
+      Rotations = starGlobeRotations
+    }
+  elseif #starGlobeRotations == 1 then
+    starGlobeRotationTransform = starGlobeRotations[1]
+  end
+
+  local StarGlobe = {
+    Identifier = starIdentifier .. "_Globe",
+    Parent = starIdentifier,
+    Renderable = {
+      Type = "RenderableGlobe",
+      -- If there is not a value for the radius, render a globe with a default radius,
+      -- to allow us to navigate to something. Note that it can't be too small, due to
+      -- precision issues at this distance
+      Radii = starRadii,
+      PerformShading = false,
+      Layers = {
+        ColorLayers = colorLayers
+      }
+    },
+    GUI = {
+      Name = data.StarName .. " Surface",
+      Path = guiPath,
+      Description = string.format("The surface globe for %s.", data.StarName)
+    }
+  }
+  if starGlobeRotationTransform ~= nil then
+    StarGlobe.Transform = {
+      Rotation = starGlobeRotationTransform
+    }
+  end
+  openspace.addSceneGraphNode(StarGlobe)
+
+  --------------------------------------------------------------------
+  -- Star Rotation Axes
+  --------------------------------------------------------------------
+  if hasValue(data.StarInclination) then
+    local inclinationMatrix = openspace.exoplanets.computeOrbitPlaneRotationMatrix(
+      math.deg(data.StarInclination)
+    )
+
+    local StarAxes = {
+      Identifier = starIdentifier .. "_RotationAxes",
+      Parent = starIdentifier,
+      Transform = {
+        Rotation = {
+          Type = "StaticRotation",
+          Rotation = inclinationMatrix
+        },
+        Scale = {
+          Type = "StaticScale",
+          Scale = 1.5 * starRadii
+        }
+      },
+      Renderable = {
+        Type = "RenderableCartesianAxes",
+        Enabled = false
+      },
+      Tag = { "exoplanet_star_axes" },
+      GUI = {
+        Name = data.StarName .. " Rotation Axes",
+        Path = guiPath,
+        Description = string.format(
+          "Cartesian coordinate axes for the star %s. The blue Z-axis indicates the star's rotation axis.",
+          data.StarName
+        )
+      }
+    }
+    openspace.addSceneGraphNode(StarAxes)
+  end
 
   --------------------------------------------------------------------
   -- Star Label
