@@ -94,6 +94,18 @@ add_custom_command(TARGET OpenSpace POST_BUILD
   COMMAND_EXPAND_LISTS
 )
 
+# The calibrator is a standalone SGCT tool that is not linked against, so it only has to
+# end up next to the OpenSpace binary. The paths come from the top-level CMakeLists
+if (EXISTS "${OPENSPACE_SGCT_CALIBRATOR}")
+  add_custom_command(TARGET OpenSpace POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${OPENSPACE_SGCT_CALIBRATOR}"
+    ${OPENSPACE_SGCT_CALIBRATOR_PATTERNS}
+    $<TARGET_FILE_DIR:OpenSpace>
+    COMMAND_EXPAND_LISTS
+  )
+endif ()
+
 end_header("Dependency: SGCT")
 
 # Profile Editor / Launcher GUI

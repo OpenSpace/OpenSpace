@@ -9,16 +9,17 @@
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO sgct/sgct
-  REF 12d9c38941f69191eead3782747be936c8c2e6c3
-  SHA512 801d4644db419118cd71788cd278e350e4ecd43322ab17e2860feb6692380b4e046f4ccde14450bcf1914fcd596cfa84bcbb63ae86db27885263b09fed43282d
+  REF 487fac461b1d66b4d79c427d527d98303136ace0
+  SHA512 ad60757440d476f41a8295e3ff834cc5d471fe28fb845f41e2197daddbea80a3ed74dd826d599dd8497419bfb0665e749a21e80bcfd730e26fb9ef8bb135b27b
   HEAD_REF master
 )
 
 vcpkg_check_features(
   OUT_FEATURE_OPTIONS FEATURE_OPTIONS
   FEATURES
-    ndi      SGCT_NDI_SUPPORT
-    scalable SGCT_SCALABLE_SUPPORT
+    calibrator SGCT_BUILD_CALIBRATOR
+    ndi        SGCT_NDI_SUPPORT
+    scalable   SGCT_SCALABLE_SUPPORT
 )
 
 vcpkg_cmake_configure(
@@ -26,8 +27,12 @@ vcpkg_cmake_configure(
   OPTIONS
     ${FEATURE_OPTIONS}
     -DSGCT_BUILD_TESTS=OFF
-    -DSGCT_BUILD_CALIBRATOR=OFF
     -DSGCT_ENABLE_EDIT_CONTINUE=OFF
+  # Only the release calibrator is shipped, so building it a second time is wasted work.
+  # vcpkg_cmake_configure passes OPTIONS before OPTIONS_DEBUG and CMake keeps the last -D
+  # it sees for a cache variable, so this overrides what the feature check emitted above
+  OPTIONS_DEBUG
+    -DSGCT_BUILD_CALIBRATOR=OFF
 )
 
 vcpkg_cmake_install()
@@ -41,6 +46,19 @@ file(
   INSTALL "${SOURCE_PATH}/sgct.schema.json"
   DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}"
 )
+
+if ("calibrator" IN_LIST FEATURES)
+  # SGCT installs the calibrator into bin/, together with the test patterns it resolves
+  # against its working directory. Everything moves into the tools folder from there: that
+  # is where a consumer looks for an executable, and a static triplet is not allowed to
+  # leave anything behind in bin/. The patterns have to go first, because AUTO_CLEAN only
+  # removes bin/ once nothing but the tool itself is left in it
+  file(GLOB calibrator_patterns "${CURRENT_PACKAGES_DIR}/bin/test-pattern-*.png")
+  file(COPY ${calibrator_patterns} DESTINATION "${CURRENT_PACKAGES_DIR}/tools/${PORT}")
+  file(REMOVE ${calibrator_patterns})
+
+  vcpkg_copy_tools(TOOL_NAMES calibrator AUTO_CLEAN)
+endif ()
 
 file(
   REMOVE_RECURSE

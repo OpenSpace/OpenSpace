@@ -54,6 +54,9 @@
     }
   ],
   "features": {
+    "calibrator": {
+      "description": "Build the SGCT calibrator application, a standalone tool that renders a test pattern for aligning and calibrating a display cluster"
+    },
     "ndi": {
       "description": "Build SGCT with NDI support. Proprietary SDK, the resulting package cannot be redistributed",
       "supports": "windows"

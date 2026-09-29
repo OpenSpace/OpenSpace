@@ -62,7 +62,12 @@
     "openjpeg",
     "oscpack",
     "scnlib",
-    "sgct",
+    {
+      "name": "sgct",
+      "features": [
+        "calibrator"
+      ]
+    },
     "soloud",
     "spice",
     {

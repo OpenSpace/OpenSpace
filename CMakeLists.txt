@@ -168,6 +168,17 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules")
 end_header("End: Configuring Modules")
 
 
+# SGCT installs the calibrator as a plain executable rather than exporting it as a target,
+# and the sgct port moves it on into the vcpkg tools folder. It is picked up here, at the
+# top level, because both apps/OpenSpace (which copies it next to the OpenSpace binary)
+# and support/cmake/packaging.cmake (which puts it into the packages) need these paths.
+# Every use is guarded on the executable existing so that an sgct built without the
+# "calibrator" feature still configures
+set(OPENSPACE_SGCT_CALIBRATOR_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/sgct")
+set(OPENSPACE_SGCT_CALIBRATOR "${OPENSPACE_SGCT_CALIBRATOR_DIR}/calibrator${CMAKE_EXECUTABLE_SUFFIX}")
+file(GLOB OPENSPACE_SGCT_CALIBRATOR_PATTERNS "${OPENSPACE_SGCT_CALIBRATOR_DIR}/test-pattern-*.png")
+
+
 begin_header("Configuring Applications")
 add_subdirectory(apps)
 end_header("End: Configuring Applications")

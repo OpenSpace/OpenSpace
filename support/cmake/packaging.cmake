@@ -484,6 +484,13 @@ set(CPACK_PACKAGE_CONTACT "support@openspaceproject.com")
 
 install(TARGETS OpenSpace RUNTIME DESTINATION bin COMPONENT Runtime)
 
+# The SGCT calibrator and the test patterns it loads from its working directory. They come
+# out of the vcpkg tools folder rather than a target, see the top-level CMakeLists
+if (EXISTS "${OPENSPACE_SGCT_CALIBRATOR}")
+  install(PROGRAMS "${OPENSPACE_SGCT_CALIBRATOR}" DESTINATION bin COMPONENT Runtime)
+  install(FILES ${OPENSPACE_SGCT_CALIBRATOR_PATTERNS} DESTINATION bin COMPONENT Runtime)
+endif ()
+
 if (WIN32)
   install(DIRECTORY "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/" DESTINATION bin COMPONENT Runtime FILES_MATCHING PATTERN "*.dll")
   if (OPENSPACE_USE_SYSTEM_QT)
@@ -567,6 +574,7 @@ if (UNIX AND NOT APPLE)
       )
       list(APPEND OPENSPACE_INSTALLED_LIBRARIES
         "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/OpenSpace_Helper"
+        "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/calibrator"
       )
       foreach (library ${OPENSPACE_INSTALLED_LIBRARIES})
         if (EXISTS "${library}")
