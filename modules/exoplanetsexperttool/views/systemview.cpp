@@ -120,6 +120,18 @@ namespace {
     void resetTrailWidth(const openspace::exoplanets::ExoplanetItem& p) {
         setTrailThicknessAndFade(p, 10.f, 1.f);
     };
+
+    // Render the initials of each word of the text, with the full text as a tooltip
+    void renderAbbreviated(const std::string& text) {
+        std::string abbreviation;
+        for (const std::string& word : ghoul::tokenizeString(text, ' ')) {
+            if (!word.empty()) {
+                abbreviation += word[0];
+            }
+        }
+        ImGui::Text("%s", abbreviation.c_str());
+        ImGui::SetItemTooltip("%s", text.c_str());
+    }
 }
 
 namespace openspace::exoplanets {
@@ -415,9 +427,6 @@ void SystemViewer::renderSystemViewContent(const std::string& host) {
 void SystemViewer::renderOverviewTabContent(const std::string& host,
                                             const std::vector<size_t>& planetIndices)
 {
-    // TODO: For now, assume that the table columns come from the Exoplanet archive.
-    // Later, the names for the columns should not be hardcoded.
-
     if (planetIndices.empty()) {
         ImGui::Text("No information.");
         return;
@@ -426,11 +435,79 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
     const ExoplanetItem& first = _dataViewer.data()[planetIndices.front()];
     size_t nPlanets = planetIndices.size();
 
-    ImGuiIO& io = ImGui::GetIO();
-    float wScale = io.FontGlobalScale;
-    float hScale = wScale * (wScale < 1.f ? 1.f : 0.9f);
+    const DataSettings::SystemViewColumns& viewColumns =
+        _dataViewer.dataSettings().systemView;
+    const ColumnKey& ratioKey = _dataViewer.dataMapping().metallicityRatio;
+    const ColumnKey& methodKey = _dataViewer.dataMapping().discoveryMethod;
 
-    float boxHeight = 150.f * hScale;
+    const ImGuiStyle& style = ImGui::GetStyle();
+    const float padding = 2.f * style.ItemSpacing.x;
+
+    auto columnLabel = [this](const ColumnKey& key) {
+        return std::format("{}: ", _dataViewer.columnName(key));
+    };
+
+    // The width required to fit the widest of the given column labels
+    auto labelWidth = [&](const std::vector<ColumnKey>& keys) {
+        float width = 0.f;
+        for (const ColumnKey& key : keys) {
+            if (_dataViewer.hasColumn(key)) {
+                width = std::max(width, ImGui::CalcTextSize(columnLabel(key).c_str()).x);
+            }
+        }
+        return width + padding;
+    };
+
+    // Render a "Name: value" row for one column of the given item. An optional second
+    // column may be rendered on the same line, directly after the value
+    auto renderColumnRow = [&](const ColumnKey& key, const ExoplanetItem& item,
+                               float indent, const ColumnKey& inlineKey = ColumnKey())
+    {
+        view::helper::renderDescriptiveText(columnLabel(key).c_str());
+        ImGui::SameLine(indent);
+        _dataViewer.renderColumnValue(key, item);
+
+        if (!inlineKey.empty()) {
+            ImGui::SameLine();
+            _dataViewer.renderColumnValue(inlineKey, item);
+        }
+
+        if (_dataViewer.hasColumnDescription(key)) {
+            ImGui::SameLine();
+            view::helper::renderHelpMarker(_dataViewer.columnDescription(key));
+        }
+    };
+
+    std::vector<ColumnKey> systemRows;
+    systemRows.reserve(viewColumns.systemColumns.size() + 1);
+    if (_dataViewer.hasColumn(_dataViewer.dataMapping().positionDistance)) {
+        systemRows.push_back(_dataViewer.dataMapping().positionDistance);
+    }
+    for (const ColumnKey& key : viewColumns.systemColumns) {
+        if (_dataViewer.hasColumn(key)) {
+            systemRows.push_back(key);
+        }
+    }
+
+    // The column of each row, and the column to render on the same line, if any
+    std::vector<std::pair<ColumnKey, ColumnKey>> starRows;
+    starRows.reserve(viewColumns.starColumns.size());
+    for (const ColumnKey& key : viewColumns.starColumns) {
+        if (!_dataViewer.hasColumn(key)) {
+            continue;
+        }
+        // The metallicity ratio is shown on the same line as the column before it
+        if (key == ratioKey && !starRows.empty()) {
+            starRows.back().second = ratioKey;
+            continue;
+        }
+        starRows.emplace_back(key, ColumnKey());
+    }
+
+    // + 1 for the "Main star" title
+    const size_t nRows = std::max(systemRows.size(), starRows.size() + 1);
+    const float boxHeight = static_cast<float>(nRows) * ImGui::GetTextLineHeightWithSpacing()
+        + 2.f * style.WindowPadding.y;
 
     // General information about the system
     ImGui::BeginChild(
@@ -439,20 +516,10 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
         true
     );
     {
-        const float indent = 150.f * wScale;
-        view::helper::renderDescriptiveText("Distance to Earth: ");
-        ImGui::SameLine(indent);
-        _dataViewer.renderColumnValue(_dataViewer.dataMapping().positionDistance, first);
-        ImGui::SameLine();
-        view::helper::renderDescriptiveText("(Parsec)");
-
-        view::helper::renderDescriptiveText("Stars: ");
-        ImGui::SameLine(indent);
-        _dataViewer.renderColumnValue("sy_snum", first);
-
-        view::helper::renderDescriptiveText("In habitable zone: ");
-        ImGui::SameLine(indent);
-        ImGui::Text("TODO"); // TODO: add detals of how many
+        const float indent = labelWidth(systemRows);
+        for (const ColumnKey& key : systemRows) {
+            renderColumnRow(key, first, indent);
+        }
     }
     ImGui::EndChild();
     ImGui::SameLine();
@@ -464,75 +531,73 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
     {
         ImGui::Text("Main star");
 
-        const float indent = 100.f * wScale;
-        // Star information
-        view::helper::renderDescriptiveText("Teff: ");
-        ImGui::SameLine(indent);
-        _dataViewer.renderColumnValue("st_teff", first);
-        ImGui::SameLine();
-        view::helper::renderDescriptiveText("(K)");
-
-        view::helper::renderDescriptiveText("Metallicity: ");
-        ImGui::SameLine(indent);
-        _dataViewer.renderColumnValue("st_met", first);
-        ImGui::SameLine();
-        _dataViewer.renderColumnValue("st_metratio", first);
-
-        view::helper::renderDescriptiveText("Radius: ");
-        ImGui::SameLine(indent);
-        _dataViewer.renderColumnValue("st_rad", first);
-        ImGui::SameLine();
-        view::helper::renderDescriptiveText("(Solar)");
-
-        view::helper::renderDescriptiveText("Age: ");
-        ImGui::SameLine(indent);
-        _dataViewer.renderColumnValue("st_age", first);
-        ImGui::SameLine();
-        view::helper::renderDescriptiveText("(Gyr)");
-
-        view::helper::renderDescriptiveText("Type: ");
-        ImGui::SameLine(indent);
-        _dataViewer.renderColumnValue("st_spectype", first);
+        const float indent = labelWidth(viewColumns.starColumns);
+        for (const std::pair<ColumnKey, ColumnKey>& row : starRows) {
+            renderColumnRow(row.first, first, indent, row.second);
+        }
     }
     ImGui::EndChild();
 
     // Frames showing information about each planet
-    ImGui::Text("Planets: ");
+    std::vector<ColumnKey> planetRows;
+    planetRows.reserve(viewColumns.planetColumns.size() + 1);
+    for (const ColumnKey& key : viewColumns.planetColumns) {
+        if (_dataViewer.hasColumn(key)) {
+            planetRows.push_back(key);
+        }
+    }
+    const bool hasMethodColumn = _dataViewer.hasColumn(methodKey);
+    if (hasMethodColumn) {
+        planetRows.push_back(methodKey);
+    }
 
-    const float indent = 80.f * wScale;
-    const float avgExtraIndent = 20.f * wScale;
-
-    auto columnIndent = [&](size_t columnIndex) {
-        return static_cast<float>((columnIndex + 1)) * indent;
-    };
-
-    const float avgColumnIndent = columnIndent(nPlanets) + avgExtraIndent;
-
-    for (size_t i = 0; i < nPlanets; ++i) {
-        size_t index = planetIndices[i];
+    // The planet names, with the host star name removed from the beginning
+    std::vector<std::string> planetNames;
+    planetNames.reserve(nPlanets);
+    for (size_t index : planetIndices) {
         const ExoplanetItem& p = _dataViewer.data()[index];
-
-        ImGui::SameLine(columnIndent(i));
-
-        // Get the name, but remove the star name from the beginning
         const std::variant<std::string, float>& value =
             p.dataColumns.at(_dataViewer.dataMapping().name);
 
         if (std::holds_alternative<float>(value)) {
             // This should not happen
-            ImGui::Text(std::format("{}", i).c_str());
+            planetNames.push_back(std::format("{}", planetNames.size()));
+            continue;
         }
-        else {
-            std::string fullName = std::get<std::string>(value);
 
-            std::string::size_type it = fullName.find(host);
-
-            if (it != std::string::npos) {
-                fullName.erase(it, host.length());
-            }
-
-            ImGui::Text(std::format("{}", fullName).c_str());
+        std::string name = std::get<std::string>(value);
+        std::string::size_type it = name.find(host);
+        if (it != std::string::npos) {
+            name.erase(it, host.length());
         }
+        planetNames.push_back(name);
+    }
+
+    const float labelIndent = std::max(
+        labelWidth(planetRows),
+        ImGui::CalcTextSize("Planets: ").x + padding
+    );
+
+    // Wide enough to fit the planet names, the "Target" buttons and typical values
+    float columnWidth = std::max(
+        ImGui::CalcTextSize("-1000.00").x,
+        ImGui::CalcTextSize("Target").x + 2.f * style.FramePadding.x
+    );
+    for (const std::string& name : planetNames) {
+        columnWidth = std::max(columnWidth, ImGui::CalcTextSize(name.c_str()).x);
+    }
+    columnWidth += padding;
+
+    auto columnIndent = [&](size_t columnIndex) {
+        return labelIndent + static_cast<float>(columnIndex) * columnWidth;
+    };
+
+    const float avgColumnIndent = columnIndent(nPlanets) + padding;
+
+    ImGui::Text("Planets: ");
+    for (size_t i = 0; i < nPlanets; ++i) {
+        ImGui::SameLine(columnIndent(i));
+        ImGui::Text("%s", planetNames[i].c_str());
     }
 
     ImGui::SameLine(avgColumnIndent);
@@ -543,29 +608,41 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
 
     ImGui::Separator();
 
-    // TODO: Avoid hardcoded column names
-    std::vector<std::pair<std::string, ColumnKey>> columns = {
-        {"Radius", "pl_rade"},
-        {"Mass", "pl_bmasse"},
-        {"Incl.", "pl_orbincl"},
-        {"Orbit", "pl_orbsmax"},
-        {"Period", "pl_orbper"},
-        {"Ecc", "pl_orbeccen"},
-    };
+    for (const ColumnKey& colKey : planetRows) {
+        const bool isMethodColumn = hasMethodColumn && (colKey == methodKey);
 
-    for (const std::pair<std::string, ColumnKey>& pair : columns) {
-        view::helper::renderDescriptiveText(std::format("{}: ", pair.first).c_str());
-        const ColumnKey& colKey = pair.second;
+        if (isMethodColumn) {
+            ImGui::Separator();
+        }
+
+        view::helper::renderDescriptiveText(columnLabel(colKey).c_str());
+        if (_dataViewer.hasColumnDescription(colKey)) {
+            ImGui::SetItemTooltip("%s", _dataViewer.columnDescription(colKey));
+        }
+
         for (size_t i = 0; i < nPlanets; ++i) {
             size_t index = planetIndices[i];
             const ExoplanetItem& p = _dataViewer.data()[index];
 
             ImGui::SameLine(columnIndent(i));
-            ImGui::PushItemWidth(static_cast<float>(indent));
-            _dataViewer.renderColumnValue(colKey, p);
+
+            if (isMethodColumn) {
+                auto it = p.dataColumns.find(colKey);
+                if (it != p.dataColumns.end() &&
+                    std::holds_alternative<std::string>(it->second))
+                {
+                    renderAbbreviated(std::get<std::string>(it->second));
+                }
+                else {
+                    ImGui::Text("N/A");
+                }
+            }
+            else {
+                _dataViewer.renderColumnValue(colKey, p);
+            }
         }
 
-        if (_dataViewer.meanValue(colKey).has_value()) {
+        if (!isMethodColumn && _dataViewer.meanValue(colKey).has_value()) {
             ImGui::SameLine(avgColumnIndent);
             view::helper::renderDescriptiveText(
                 std::format("{:.2f}", *_dataViewer.meanValue(colKey)).c_str()
@@ -573,45 +650,6 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
         }
     }
     // TODO: Highlight values that are very different from average
-
-    ImGui::Separator();
-
-    // Render the method column separately, to process the text a bit
-    const ColumnKey MethodKey = "discoverymethod";
-    view::helper::renderDescriptiveText("Method: ");
-    for (size_t i = 0; i < nPlanets; ++i) {
-        size_t index = planetIndices[i];
-        const ExoplanetItem& p = _dataViewer.data()[index];
-
-        ImGui::SameLine(columnIndent(i));
-        ImGui::PushItemWidth(static_cast<float>(indent));
-
-        // Check if the column exists
-        if (p.dataColumns.find(MethodKey) == p.dataColumns.end()) {
-            ImGui::Text("N/A");
-            continue;
-        }
-
-        const std::variant<std::string, float>& value = p.dataColumns.at(MethodKey);
-
-        if (std::holds_alternative<float>(value)) {
-            throw ghoul::RuntimeError(std::format("Wrong column type for {}!", MethodKey));
-        }
-
-        const std::string method = std::get<std::string>(value);
-        std::vector<std::string> words = ghoul::tokenizeString(method, ' ');
-        std::string methodAbbrev;
-        for (const std::string& w : words) {
-            if (!w.empty()) {
-                methodAbbrev += w[0];
-            }
-        }
-
-        ImGui::Text("%s", methodAbbrev.c_str());
-        if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("%s", method.c_str());
-        }
-    }
 
     const bool systemMissing = hasSystemBeenAdded(host) && systemCanBeAdded(host);
     if (!systemMissing) {

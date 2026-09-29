@@ -122,7 +122,19 @@ struct DataSettings {
         ColumnKey ringSize = "";
         ColumnKey referenceName = "";
         ColumnKey referenceLink = "";
+
+        // Rendered on the same line as the metallicity value, in the system view
+        ColumnKey metallicityRatio = "";
+        // Rendered as an abbreviation, in the system view
+        ColumnKey discoveryMethod = "";
     } dataMapping;
+
+    // The columns to show in the overview tab of the system view
+    struct SystemViewColumns {
+        std::vector<ColumnKey> systemColumns;
+        std::vector<ColumnKey> starColumns;
+        std::vector<ColumnKey> planetColumns;
+    } systemView;
 
     struct CmapInfo {
         ColumnKey column;

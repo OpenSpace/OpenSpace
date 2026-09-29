@@ -88,6 +88,25 @@ namespace {
             if (dataMapping.contains("reference_link")) {
                 dataMapping.at("reference_link").get_to(s.dataMapping.referenceLink);
             }
+            if (dataMapping.contains("metallicity_ratio")) {
+                dataMapping.at("metallicity_ratio").get_to(s.dataMapping.metallicityRatio);
+            }
+            if (dataMapping.contains("discovery_method")) {
+                dataMapping.at("discovery_method").get_to(s.dataMapping.discoveryMethod);
+            }
+
+            if (j.contains("system_view")) {
+                const nlohmann::json systemView = j.at("system_view");
+                if (systemView.contains("system_columns")) {
+                    systemView.at("system_columns").get_to(s.systemView.systemColumns);
+                }
+                if (systemView.contains("star_columns")) {
+                    systemView.at("star_columns").get_to(s.systemView.starColumns);
+                }
+                if (systemView.contains("planet_columns")) {
+                    systemView.at("planet_columns").get_to(s.systemView.planetColumns);
+                }
+            }
 
             if (j.contains("default_colormapping")) {
                 const nlohmann::json cmapping = j.at("default_colormapping");

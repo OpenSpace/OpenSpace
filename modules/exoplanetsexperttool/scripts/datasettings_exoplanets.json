@@ -8,7 +8,29 @@
         "hostName": "hostname",
         "ring_size": "pl_orbsmax",
         "reference_name": "pl_refname_name",
-        "reference_link": "pl_refname_url"
+        "reference_link": "pl_refname_url",
+        "metallicity_ratio": "st_metratio",
+        "discovery_method": "discoverymethod"
+    },
+    "system_view": {
+        "system_columns": ["sy_snum"],
+        "star_columns": [
+            "st_teff",
+            "st_met",
+            "st_metratio",
+            "st_rad",
+            "st_age",
+            "st_incl",
+            "st_spectype"
+        ],
+        "planet_columns": [
+            "pl_rade",
+            "pl_bmasse",
+            "pl_orbincl",
+            "pl_orbsmax",
+            "pl_orbper",
+            "pl_orbeccen"
+        ]
     },
     "default_colormapping": {
         "column": "ESM",
@@ -90,6 +112,11 @@
         "st_rad": {
             "name": "Star radius",
             "desc": "(Solar)"
+        },
+        "st_spectype": {
+            "name": "Type",
+            "desc": "Stellar spectral type",
+            "isText": true
         },
         "st_incl": {
             "name": "Star inclination",
