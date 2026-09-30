@@ -753,9 +753,6 @@ target_link_libraries(
   openspace-core
   PUBLIC
     nlohmann_json::nlohmann_json
-    "shlwapi"
-    "WbemUuid.lib"
-    "Ws2_32.lib"
     zip::zip
     glm::glm
     scn::scn
@@ -779,6 +776,16 @@ if (TARGET unofficial::lua::lua)
 else ()
   # Lua 5.4.7 exports an unnamespaced target, later versions do not
   target_link_libraries(openspace-core PUBLIC lua)
+endif ()
+
+if (WIN32)
+  target_link_libraries(
+    openspace-core
+    PUBLIC
+      "WbemUuid.lib"
+      "Ws2_32.lib"
+      "shlwapi"
+  )
 endif ()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
