@@ -127,6 +127,11 @@ struct DataSettings {
         ColumnKey metallicityRatio = "";
         // Rendered as an abbreviation, in the system view
         ColumnKey discoveryMethod = "";
+
+        // Planet orbital inclination, in degrees
+        ColumnKey inclination = "";
+        // Stellar inclination (rotation axis to line of sight), in degrees
+        ColumnKey stellarInclination = "";
     } dataMapping;
 
     // The columns to show in the overview tab of the system view

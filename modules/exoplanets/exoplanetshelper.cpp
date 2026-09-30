@@ -278,8 +278,21 @@ void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p
         starData.vsini = p.starVsini;
     }
 
-    if (!std::isnan(starData.vsini) && !std::isnan(starData.radius) &&
-        !std::isnan(starData.rotationPeriod))
+    // Update the stellar inclination. Prefer a value from the dataset, if any. Otherwise,
+    // compute it from vsini, radius, and rotation period
+    if (starData.hasInclinationFromDataset) {
+        return;
+    }
+
+    if (!std::isnan(p.starInclination)) {
+        starData.inclination = glm::radians(p.starInclination);
+        starData.inclinationError = glm::radians(
+            glm::vec2(p.starInclinationLower, p.starInclinationUpper)
+        );
+        starData.hasInclinationFromDataset = true;
+    }
+    else if (std::isnan(starData.inclination) && !std::isnan(starData.vsini) &&
+             !std::isnan(starData.radius) && !std::isnan(starData.rotationPeriod))
     {
         const float vLower = !std::isnan(p.starVsiniLower) ? p.starVsiniLower :
             std::numeric_limits<float>::quiet_NaN();

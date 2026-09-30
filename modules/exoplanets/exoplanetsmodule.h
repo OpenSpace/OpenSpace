@@ -62,6 +62,7 @@ public:
     bool showHabitableZone() const;
     bool useOptimisticZone() const;
     float habitableZoneOpacity() const;
+    std::string stellarInclinationColumn() const;
 
     LuaLibrary luaLibrary() const override;
     std::vector<openspace::Documentation> documentations() const override;
@@ -86,6 +87,8 @@ protected:
     BoolProperty _useOptimisticZone;
 
     FloatProperty _habitableZoneOpacity;
+
+    StringProperty _stellarInclinationColumn;
 };
 
 } // namespace openspace

@@ -192,6 +192,14 @@ bool DataViewer::initializeData(DataSettings settings) {
     }
 
     _dataSettings = std::move(settings);
+
+    // Set the inclination column to use in the regular exoplanet module to be the same
+    // as the one specified in the data settings
+    global::scriptEngine->queueScript(std::format(
+        "openspace.setPropertyValueSingle('Modules.Exoplanets.StellarInclinationColumn', '{}')",
+        _dataSettings.dataMapping.stellarInclination
+    ));
+
     _data = std::move(data);
     _computedColumns.clear();
     _hostIdToPlanetsMap.clear();
@@ -1520,25 +1528,19 @@ void DataViewer::updateGlyphRenderData() {
             );
         }
 
-        const std::variant<std::string, float>& inclination =
-            item.dataColumns.at("pl_orbincl"); // TODO: Do not hardcode
+        auto floatValue = [&item](const ColumnKey& key) {
+            const auto it = item.dataColumns.find(key);
+            if (it != item.dataColumns.end() &&
+                std::holds_alternative<float>(it->second))
+            {
+                return std::get<float>(it->second);
+            }
+            return std::numeric_limits<float>::quiet_NaN();
+        };
 
-        if (std::holds_alternative<float>(inclination)) {
-            renderItem.inclination = std::get<float>(inclination);
-        }
-        else {
-            renderItem.inclination = std::numeric_limits<float>::quiet_NaN();
-        }
-
-        const auto stellarInclinationIt = item.dataColumns.find("st_incl");
-        if (stellarInclinationIt != item.dataColumns.end() &&
-            std::holds_alternative<float>(stellarInclinationIt->second))
-        {
-            renderItem.stellarInclination = std::get<float>(stellarInclinationIt->second);
-        }
-        else {
-            renderItem.stellarInclination = std::numeric_limits<float>::quiet_NaN();
-        }
+        const DataSettings::DataMapping& mapping = _dataSettings.dataMapping;
+        renderItem.inclination = floatValue(mapping.inclination);
+        renderItem.stellarInclination = floatValue(mapping.stellarInclination);
 
         data.push_back(renderItem);
     }

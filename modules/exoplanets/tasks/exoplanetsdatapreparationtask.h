@@ -72,6 +72,8 @@ public:
      *        temperature (teff) values and B-V color index values. Each line should
      *        include two values separated by a comma: first the teff value and then the
      *        B-V value
+     * \param stellarInclinationColumn The name of the column containing the stellar
+     *        inclination in degrees, if any. May be empty
      * \return An object containing the parsed information
      *
      * /sa https://exoplanetarchive.ipac.caltech.edu/
@@ -79,7 +81,8 @@ public:
     static PlanetData parseDataRow(const std::string& row,
         const std::vector<std::string>& columnNames,
         const std::filesystem::path& positionSourceFile,
-        const std::filesystem::path& bvFromTeffConversionFile);
+        const std::filesystem::path& bvFromTeffConversionFile,
+        const std::string& stellarInclinationColumn);
 
 private:
     std::filesystem::path _inputDataPath;

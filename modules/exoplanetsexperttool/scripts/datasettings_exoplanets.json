@@ -10,7 +10,9 @@
         "reference_name": "pl_refname_name",
         "reference_link": "pl_refname_url",
         "metallicity_ratio": "st_metratio",
-        "discovery_method": "discoverymethod"
+        "discovery_method": "discoverymethod",
+        "inclination": "pl_orbincl",
+        "stellar_inclination": "st_incl"
     },
     "system_view": {
         "system_columns": ["sy_snum"],

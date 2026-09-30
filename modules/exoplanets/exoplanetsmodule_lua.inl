@@ -305,7 +305,8 @@ std::vector<std::string> hostStarsWithSufficientData() {
             row,
             columnNames,
             "",
-            module->teffToBvConversionFilePath()
+            module->teffToBvConversionFilePath(),
+            module->stellarInclinationColumn()
         );
 
         if (!hasSufficientData(planetData.dataEntry)) {

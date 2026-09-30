@@ -154,6 +154,18 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
+    constexpr Property::PropertyInfo StellarInclinationColumnInfo = {
+        "StellarInclinationColumn",
+        "Stellar inclination column",
+        "The name of a column in the exoplanet CSV dataset that contains the stellar "
+        "inclination, in degrees. Uncertainties are read from the columns with the same "
+        "name followed by 'err1' (upper) and 'err2' (lower). If a value exists, it is "
+        "used instead of computing the inclination from the vsini, rotation period and "
+        "radius of the star. If empty, the inclination is always computed. Used both "
+        "when loading data from a CSV at runtime and in the data preparation task.",
+        Property::Visibility::AdvancedUser
+    };
+
     constexpr std::string_view ExoplanetsDataFileName = "exoplanets_data.bin";
     constexpr std::string_view LookupTableFileName = "lookup.txt";
     constexpr std::string_view TeffToBvConversionFileName = "teff_bv.txt";
@@ -200,6 +212,9 @@ namespace {
 
         // [[codegen::verbatim(HabitableZoneOpacityInfo.description)]]
         std::optional<float> habitableZoneOpacity [[codegen::inrange(0, 1)]];
+
+        // [[codegen::verbatim(StellarInclinationColumnInfo.description)]]
+        std::optional<std::string> stellarInclinationColumn;
     };
 } // namespace
 #include "exoplanetsmodule_codegen.cpp"
@@ -231,6 +246,7 @@ ExoplanetsModule::ExoplanetsModule()
     , _showHabitableZone(ShowHabitableZoneInfo, true)
     , _useOptimisticZone(UseOptimisticZoneInfo, true)
     , _habitableZoneOpacity(HabitableZoneOpacityInfo, 0.1f, 0.f, 1.f)
+    , _stellarInclinationColumn(StellarInclinationColumnInfo)
 {
     _exoplanetsDataFolder.setReadOnly(true);
 
@@ -283,6 +299,7 @@ ExoplanetsModule::ExoplanetsModule()
     addProperty(_showHabitableZone);
     addProperty(_useOptimisticZone);
     addProperty(_habitableZoneOpacity);
+    addProperty(_stellarInclinationColumn);
 }
 
 bool ExoplanetsModule::hasDataFiles() const {
@@ -365,6 +382,10 @@ float ExoplanetsModule::habitableZoneOpacity() const {
     return _habitableZoneOpacity;
 }
 
+std::string ExoplanetsModule::stellarInclinationColumn() const {
+    return _stellarInclinationColumn;
+}
+
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
@@ -406,6 +427,8 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     _showHabitableZone = p.showHabitableZone.value_or(_showHabitableZone);
     _useOptimisticZone = p.useOptimisticZone.value_or(_useOptimisticZone);
     _habitableZoneOpacity = p.habitableZoneOpacity.value_or(_habitableZoneOpacity);
+    _stellarInclinationColumn =
+        p.stellarInclinationColumn.value_or(_stellarInclinationColumn);
 
     ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
     ghoul::TemplateFactory<Renderable>* fRenderable =

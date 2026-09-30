@@ -139,6 +139,13 @@ struct ExoplanetDataEntry {
     /// Lower uncertainty of star rotation period
     float starRotationPeriodLower = std::numeric_limits<float>::quiet_NaN();
 
+    /// Star's inclination in degrees, read directly from the dataset
+    float starInclination = std::numeric_limits<float>::quiet_NaN();
+    /// Upper uncertainty of star inclination
+    float starInclinationUpper = std::numeric_limits<float>::quiet_NaN();
+    /// Lower uncertainty of star inclination
+    float starInclinationLower = std::numeric_limits<float>::quiet_NaN();
+
     /// Star position's X-coordinate in parsec
     float positionX = std::numeric_limits<float>::quiet_NaN();
     /// Star position's Y-coordinate in parsec
@@ -159,9 +166,12 @@ struct StarData {
     float rotationPeriod = std::numeric_limits<float>::quiet_NaN(); // In days
     float vsini = std::numeric_limits<float>::quiet_NaN();
 
-    // Computed inclination from radius, vsini, and rotationPeriod. In radians
+    // Inclination read from the dataset, or computed from radius, vsini, and
+    // rotationPeriod. In radians
     float inclination = std::numeric_limits<float>::quiet_NaN();
     glm::vec2 inclinationError = glm::vec2(std::numeric_limits<float>::quiet_NaN());
+    // True if the inclination was read from a dataset column rather than computed here
+    bool hasInclinationFromDataset = false;
 };
 
 struct ExoplanetSystem {

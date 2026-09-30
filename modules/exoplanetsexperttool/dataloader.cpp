@@ -94,6 +94,14 @@ namespace {
             if (dataMapping.contains("discovery_method")) {
                 dataMapping.at("discovery_method").get_to(s.dataMapping.discoveryMethod);
             }
+            if (dataMapping.contains("inclination")) {
+                dataMapping.at("inclination").get_to(s.dataMapping.inclination);
+            }
+            if (dataMapping.contains("stellar_inclination")) {
+                dataMapping.at("stellar_inclination").get_to(
+                    s.dataMapping.stellarInclination
+                );
+            }
 
             if (j.contains("system_view")) {
                 const nlohmann::json systemView = j.at("system_view");

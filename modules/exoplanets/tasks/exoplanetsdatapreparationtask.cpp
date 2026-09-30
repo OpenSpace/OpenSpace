@@ -24,7 +24,10 @@
 
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 
+#include <modules/exoplanets/exoplanetsmodule.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/util/coordinateconversion.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -187,6 +190,9 @@ void ExoplanetsDataPreparationTask::perform(
 
     LINFO(std::format("Loading {} exoplanets", total));
 
+    const std::string stellarInclinationColumn =
+        global::moduleEngine->module<ExoplanetsModule>()->stellarInclinationColumn();
+
     int exoplanetCount = 0;
     while (ghoul::getline(inputDataFile, row)) {
         exoplanetCount++;
@@ -196,7 +202,8 @@ void ExoplanetsDataPreparationTask::perform(
             row,
             columnNames,
             _inputSpeckPath,
-            _teffToBvFilePath
+            _teffToBvFilePath,
+            stellarInclinationColumn
         );
 
         // Create look-up table
@@ -241,7 +248,8 @@ ExoplanetsDataPreparationTask::PlanetData
 ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
                                             const std::vector<std::string>& columnNames,
                                           const std::filesystem::path& positionSourceFile,
-                                    const std::filesystem::path& bvFromTeffConversionFile)
+                                    const std::filesystem::path& bvFromTeffConversionFile,
+                                              const std::string& stellarInclinationColumn)
 {
     auto readFloatData = [](const std::string& str) -> float {
 #ifdef WIN32
@@ -302,6 +310,28 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
     while (ghoul::getline(lineStream, data, ',')) {
         const std::string& column = columnNames[columnIndex];
         columnIndex++;
+
+        // Stellar inclination does not exist in the exoplanet archive by default, so we
+        // check if a custom column is specified. If it is not, it will later be computed
+        // from vsini, rotation period, and radius
+        if (!stellarInclinationColumn.empty() &&
+            column.starts_with(stellarInclinationColumn))
+        {
+            const std::string_view suffix =
+                std::string_view(column).substr(stellarInclinationColumn.size());
+            if (suffix.empty()) {
+                p.starInclination = readFloatData(data);
+                continue;
+            }
+            else if (suffix == "err1") {
+                p.starInclinationUpper = readFloatData(data);
+                continue;
+            }
+            else if (suffix == "err2") {
+                p.starInclinationLower = -readFloatData(data);
+                continue;
+            }
+        }
 
         if (column == "pl_letter") {
             component = readStringData(data);
