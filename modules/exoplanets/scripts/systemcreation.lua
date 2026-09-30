@@ -296,7 +296,7 @@ function addExoplanetSystem(data)
         },
         Scale = {
           Type = "StaticScale",
-          Scale = 2 * starRadii
+          Scale = 3 * starRadii
         }
       },
       Renderable = {
