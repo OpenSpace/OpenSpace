@@ -62,6 +62,9 @@ set(OPENSPACE_VERSION_PATCH)
 
 set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON)
 
+# No target in this project uses C++20 modules, so skip the per-source module dependency
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/support/cmake/message_macros.cmake)
 
