@@ -50,6 +50,7 @@ public:
             glm::dvec3 position;
             std::vector<glm::vec4> colors;
             float inclination;
+            float stellarInclination;
         };
         std::vector<Item> items;
 

@@ -1530,6 +1530,16 @@ void DataViewer::updateGlyphRenderData() {
             renderItem.inclination = std::numeric_limits<float>::quiet_NaN();
         }
 
+        const auto stellarInclinationIt = item.dataColumns.find("st_incl");
+        if (stellarInclinationIt != item.dataColumns.end() &&
+            std::holds_alternative<float>(stellarInclinationIt->second))
+        {
+            renderItem.stellarInclination = std::get<float>(stellarInclinationIt->second);
+        }
+        else {
+            renderItem.stellarInclination = std::numeric_limits<float>::quiet_NaN();
+        }
+
         data.push_back(renderItem);
     }
     data.shrink_to_fit();

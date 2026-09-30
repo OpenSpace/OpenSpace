@@ -122,10 +122,18 @@ private:
     struct {
         PropertyOwner owner;
         BoolProperty enabled;
-        Vec4Property lineColor;
+        Vec4Property color;
         FloatProperty lineWidth;
         FloatProperty lineLength;
-    } _starGlyph;
+    } _starObservationLine;
+
+    struct {
+        PropertyOwner owner;
+        BoolProperty enabled;
+        Vec4Property color;
+        FloatProperty lineWidth;
+        FloatProperty lineLength;
+    } _starRotationAxis;
 
     // Unified glyph data structure
     struct GlyphData {
@@ -171,7 +179,8 @@ private:
     // Star glyphs
     struct StarGlyphData {
         glm::vec3 position;
-        glm::vec3 up; // Up vector of the star, in world space
+        glm::vec3 rotationAxis;
+        int hasRotationAxis = 0;
     };
     std::vector<StarGlyphData> _starData;
 
@@ -182,7 +191,9 @@ private:
 
     UniformCache(
         modelMatrix, cameraViewProjectionMatrix, opacity, scale, cameraPosition,
-        originLineColor, lineLengthFactor
+        originLineColor, rotationAxisColor, observationLineLengthFactor,
+        rotationAxisLineLengthFactor, observationLineWidth, rotationAxisLineWidth,
+        viewportSize, drawOriginLine, drawRotationAxis
     ) _uniformCacheStars;
 };
 

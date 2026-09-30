@@ -285,6 +285,7 @@ void ExoplanetsExpertToolModule::encode(SyncBuffer* syncBuffer) {
         }
 
         syncBuffer->encode(item.inclination);
+        syncBuffer->encode(item.stellarInclination);
     }
 
     // Sync timestamp
@@ -338,6 +339,7 @@ void ExoplanetsExpertToolModule::decode(SyncBuffer* syncBuffer) {
             item.colors.push_back(color);
         }
         syncBuffer->decode(item.inclination);
+        syncBuffer->decode(item.stellarInclination);
 
         _glyphRenderData.items.push_back(std::move(item));
     }

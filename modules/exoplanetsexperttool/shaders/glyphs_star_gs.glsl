@@ -27,11 +27,12 @@
 #include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
-layout(line_strip, max_vertices = 4) out;
+layout(triangle_strip, max_vertices = 8) out;
 
 in Data {
   flat dvec4 dposWorld;
-  flat vec3 upWorld;
+  flat vec3 rotationAxisWorld;
+  flat int hasRotationAxis;
 } in_data[];
 
 out Data {
@@ -44,14 +45,55 @@ uniform dmat4 cameraViewProjectionMatrix;
 uniform float scale;
 uniform dvec3 cameraPosition;
 uniform vec4 originLineColor;
-uniform float lineLengthFactor;
+uniform vec4 rotationAxisColor;
+uniform float observationLineLengthFactor;
+uniform float rotationAxisLineLengthFactor;
+uniform float observationLineWidth;
+uniform float rotationAxisLineWidth;
+uniform vec2 viewportSize;
+uniform bool drawOriginLine;
+uniform bool drawRotationAxis;
 
-const float M_PI = 3.14159265359;
+void emitThickLine(vec4 startClip, vec4 endClip, float width, vec4 color,
+                   float depthClipSpace)
+{
+  vec4 start = z_normalization(startClip);
+  vec4 end = z_normalization(endClip);
+  vec2 direction = end.xy / end.w - start.xy / start.w;
+  vec2 pixelDirection = direction * viewportSize;
+  float projectedLength = length(pixelDirection);
+  if (projectedLength <= 1e-7 || any(lessThanEqual(viewportSize, vec2(0.0)))) {
+    return;
+  }
+
+  vec2 normal = normalize(vec2(-pixelDirection.y, pixelDirection.x));
+  vec2 offset = normal * width / viewportSize;
+  vec4 startPositive = vec4(start.xy + offset * start.w, start.zw);
+  vec4 startNegative = vec4(start.xy - offset * start.w, start.zw);
+  vec4 endPositive = vec4(end.xy + offset * end.w, end.zw);
+  vec4 endNegative = vec4(end.xy - offset * end.w, end.zw);
+
+  out_data.color = color;
+  out_data.depthClipSpace = depthClipSpace;
+  gl_Position = startPositive;
+  EmitVertex();
+  out_data.color = color;
+  out_data.depthClipSpace = depthClipSpace;
+  gl_Position = startNegative;
+  EmitVertex();
+  out_data.color = color;
+  out_data.depthClipSpace = depthClipSpace;
+  gl_Position = endPositive;
+  EmitVertex();
+  out_data.color = color;
+  out_data.depthClipSpace = depthClipSpace;
+  gl_Position = endNegative;
+  EmitVertex();
+  EndPrimitive();
+}
 
 void main() {
   dvec4 dposWorld = in_data[0].dposWorld;
-  vec3 upWorld = normalize(in_data[0].upWorld);
-
   // Limit the max size of the points, as the angle in "FOV" that the point is allowed
   // to take up. Note that the max size is for the diameter, and we need the radius
   const float DesiredAngleRadians = radians(1.0);
@@ -62,48 +104,22 @@ void main() {
   // Calculate correction scale to achieve desired angle
   float correctionScale = DesiredAngleRadians / currentAngle;
 
-  float lineLength = correctionScale * scale * lineLengthFactor;
-
-  dvec4 originDir = - lineLength * dvec4(normalize(dvec3(dposWorld)), 0.0);
-  dvec4 upDir = lineLength * dvec4(upWorld, 0.0);
-
-  // Line 1: From current position to origin
-  // Start at current position
   vec4 startClip = vec4(cameraViewProjectionMatrix * dposWorld);
-  out_data.color = originLineColor;
-  out_data.depthClipSpace = startClip.w;
-  gl_Position = z_normalization(startClip);
-  EmitVertex();
+  if (drawOriginLine) {
+    float lineLength = correctionScale * scale * observationLineLengthFactor;
+    dvec4 originDir = -lineLength * dvec4(normalize(dvec3(dposWorld)), 0.0);
+    vec4 originClip = vec4(cameraViewProjectionMatrix * (dposWorld + originDir));
+    emitThickLine(startClip, originClip, observationLineWidth, originLineColor,
+      startClip.w);
+  }
 
-  // End at origin
-  dvec4 endPos = dposWorld + originDir;
-  vec4 originClip = vec4(cameraViewProjectionMatrix * endPos);
-  out_data.color = originLineColor;
-  out_data.depthClipSpace = startClip.w;
-  gl_Position = z_normalization(vec4(originClip));
-  EmitVertex();
-
-  EndPrimitive();
-
-  // @TODO: Leaving the up-direction for now. There is no data for this, so all the
-  // stars will have the same up as of now
-
-//  // Line 2: From current position in up direction
-//  vec4 upLineColor = vec4(1.0, 1.0, 1.0, 1.0);
-//
-//  // Start at current position
-//  out_data.color = upLineColor;
-//  out_data.depthClipSpace = startClip.w;
-//  gl_Position = z_normalization(vec4(startClip));
-//  EmitVertex();
-//
-//  // End at current position + upWorld * scale
-//  dvec4 upPos = dposWorld + upDir;
-//  vec4 upClip = vec4(cameraViewProjectionMatrix * upPos);
-//  out_data.color = upLineColor;
-//  out_data.depthClipSpace = upClip.w;
-//  gl_Position = z_normalization(upClip);
-//  EmitVertex();
-
-  EndPrimitive();
+  if (drawRotationAxis && in_data[0].hasRotationAxis != 0) {
+    float lineLength = correctionScale * scale * rotationAxisLineLengthFactor;
+    vec3 axis = normalize(in_data[0].rotationAxisWorld);
+    dvec4 axisOffset = 0.5 * lineLength * dvec4(axis, 0.0);
+    vec4 axisStartClip = vec4(cameraViewProjectionMatrix * (dposWorld - axisOffset));
+    vec4 axisEndClip = vec4(cameraViewProjectionMatrix * (dposWorld + axisOffset));
+    emitThickLine(axisStartClip, axisEndClip, rotationAxisLineWidth,
+      rotationAxisColor, startClip.w);
+  }
 }

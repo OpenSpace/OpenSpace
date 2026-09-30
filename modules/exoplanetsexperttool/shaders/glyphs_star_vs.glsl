@@ -29,17 +29,20 @@
 const int MaxColors = 4;
 
 layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_up;
+layout(location = 1) in vec3 in_rotationAxis;
+layout(location = 2) in int in_hasRotationAxis;
 
 
 out Data {
   flat dvec4 dposWorld;
-  flat vec3 upWorld;
+  flat vec3 rotationAxisWorld;
+  flat int hasRotationAxis;
 } out_data;
 
 uniform dmat4 modelMatrix;
 
 void main() {
   out_data.dposWorld = modelMatrix * dvec4(in_position, 1.0);
-  out_data.upWorld = in_up;
+  out_data.rotationAxisWorld = mat3(modelMatrix) * in_rotationAxis;
+  out_data.hasRotationAxis = in_hasRotationAxis;
 }

@@ -237,7 +237,8 @@ void GlyphHandler::renderModeSpecificSettings() {
 
     // RenderableExoplanetGlyphCloud
     static bool useFixedWidth = false;
-    static bool starEnabled = false;
+    static bool showStarObservationLine = false;
+    static bool showStarRotationAxis = false;
 
     // RenderableHostCloud
     static bool useAdditiveBlending = true;
@@ -249,8 +250,19 @@ void GlyphHandler::renderModeSpecificSettings() {
         }
     }
     else if (_mode == GlyphMode::Inclination) {
-        if (ImGui::Checkbox("Show lines from star", &starEnabled)) {
-            setBoolProperty(GlyphCloudIdentifier, "StarGlyph.Enabled", starEnabled);
+        if (ImGui::Checkbox("Show observation lines from star", &showStarObservationLine)) {
+            setBoolProperty(
+                GlyphCloudIdentifier,
+                "StarObservationLine.Enabled",
+                showStarObservationLine
+            );
+        }
+        if (ImGui::Checkbox("Show star rotation axis", &showStarRotationAxis)) {
+            setBoolProperty(
+                GlyphCloudIdentifier,
+                "StarRotationAxis.Enabled",
+                showStarRotationAxis
+            );
         }
     }
     else if (_mode == GlyphMode::Star) {
@@ -262,11 +274,26 @@ void GlyphHandler::renderModeSpecificSettings() {
         }
     }
     else if (_mode == GlyphMode::InclinationAndStar) {
-        if (ImGui::Checkbox("Show lines from star", &starEnabled)) {
-            setBoolProperty(GlyphCloudIdentifier, "StarGlyph.Enabled", starEnabled);
+        if (ImGui::Checkbox("Show observation lines from star", &showStarObservationLine)) {
+            setBoolProperty(
+                GlyphCloudIdentifier,
+                "StarObservationLine.Enabled",
+                showStarObservationLine
+            );
+        }
+        if (ImGui::Checkbox("Show star rotation axis", &showStarRotationAxis)) {
+            setBoolProperty(
+                GlyphCloudIdentifier,
+                "StarRotationAxis.Enabled",
+                showStarRotationAxis
+            );
         }
         if (ImGui::Checkbox("Use additive blending (star)", &useAdditiveBlending)) {
-            setBoolProperty(HostCloudIdentifier, "UseAdditiveBlending", useAdditiveBlending);
+            setBoolProperty(
+                HostCloudIdentifier,
+                "UseAdditiveBlending",
+                useAdditiveBlending
+            );
         }
         if (ImGui::Checkbox("Should blur points (star)", &shouldBlurPoints)) {
             setBoolProperty(HostCloudIdentifier, "ShouldBlurPoints", shouldBlurPoints);

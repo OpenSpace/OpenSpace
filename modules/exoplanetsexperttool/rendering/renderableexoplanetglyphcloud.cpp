@@ -122,25 +122,45 @@ namespace {
     constexpr Property::PropertyInfo ShowStarLineInfo = {
         "Enabled",
         "Enabled",
-        "If true, the inclination glyphs include a line in the direction of Earth."
+        ""
+    };
+
+    const PropertyOwner::PropertyOwnerInfo StarOvservationLineInfo = {
+        "StarObservationLine",
+        "Star observation line",
+        "If enabled, show a line from the star pointing in the direction towards Earth. "
+        "This is only shown in inclination mode, and is useful for visualizing the "
+        "inclination of the planetary system."
+    };
+
+    const PropertyOwner::PropertyOwnerInfo StarRotationAxisInfo = {
+        "StarRotationAxis",
+        "Star rotation axis",
+        "If enabled, show a line for the stellar rotation axis based on the inclination "
+        "data. The catalog provides only the inclination to the line of sight, so "
+        "projected celestial north is assumed for the otherwise unknown sky-plane "
+        "position angle. An inclination of 0 degrees points along the line of sight; 90 "
+        "degrees is orthogonal to it."
     };
 
     constexpr Property::PropertyInfo StarLineColorInfo = {
         "LineColor",
         "Line color",
-        "The color of the lines from the stars towards the center in inclination mode."
+        "The color of the lines from the stars towards the target direction in "
+        "inclination mode."
     };
 
     constexpr Property::PropertyInfo StarLineWidthInfo = {
         "LineWidth",
         "Line width",
-        "The width of the lines from the stars towards the center in inclination mode."
+        "The width of the lines from the stars towards the target direction in "
+        "inclination mode."
     };
 
     constexpr Property::PropertyInfo StarLineLengthInfo = {
         "LineLength",
         "Line length",
-        "A factor controlling the length of the lines from the stars towards the center "
+        "A factor controlling the length of the lines from the stars towards the target direction "
         "in inclination mode."
     };
 
@@ -177,12 +197,12 @@ namespace {
         // [[codegen::verbatim(ShowMissingInclinationInfo.description)]]
         std::optional<bool> showMissingInclination;
 
-        struct StarGlyph {
+        struct StarLine {
             // [[codegen::verbatim(ShowStarLineInfo.description)]]
             std::optional<bool> enabled;
 
             // [[codegen::verbatim(StarLineColorInfo.description)]]
-            std::optional<glm::vec4> lineColor [[codegen::color()]];
+            std::optional<glm::vec4> color [[codegen::color()]];
 
             // [[codegen::verbatim(StarLineWidthInfo.description)]]
             std::optional<float> lineWidth [[codegen::greater(0.f)]];
@@ -191,8 +211,13 @@ namespace {
             std::optional<float> lineLength [[codegen::greater(0.f)]];
         };
 
-        // [[codegen::verbatim(StarGlyphInfo.description)]]
-        std::optional<StarGlyph> _starGlyph;
+        // Settings for the star rotation axis line, that may be shown in inclination
+        // mode.
+        std::optional<StarLine> starRotationAxis;
+
+        // Settings for the line from the star in the direction of the observation
+        // (towards Earth), that may be shown in inclination mode.
+        std::optional<StarLine> starObservationLine;
     };
 #include "renderableexoplanetglyphcloud_codegen.cpp"
 } // namespace
@@ -215,12 +240,24 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     , _glyphMode(GlyphModeInfo)
     , _darkenFactor(DarkenFactorInfo, 0.3f, 0.f, 1.f)
     , _showMissingInclination(ShowMissingInclinationInfo, false)
-    , _starGlyph{
-        .owner = PropertyOwner(StarGlyphInfo),
+    , _starObservationLine{
+        .owner = PropertyOwner(StarOvservationLineInfo),
         .enabled = BoolProperty(ShowStarLineInfo, false),
-        .lineColor = Vec4Property(
+        .color = Vec4Property(
             StarLineColorInfo,
             glm::vec4(0.8f, 0.8f, 0.8f, 0.2f),
+            glm::vec4(0.f),
+            glm::vec4(1.f)
+        ),
+        .lineWidth = FloatProperty(StarLineWidthInfo, 2.f, 0.01f, 3.f),
+        .lineLength = FloatProperty(StarLineLengthInfo, 1.f, 0.01f, 3.f)
+    }
+    , _starRotationAxis{
+        .owner = PropertyOwner(StarRotationAxisInfo),
+        .enabled = BoolProperty(ShowStarLineInfo, false),
+        .color = Vec4Property(
+            StarLineColorInfo,
+            glm::vec4(0.8f, 0.8f, 0.8f, 1.f),
             glm::vec4(0.f),
             glm::vec4(1.f)
         ),
@@ -276,20 +313,31 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     });
     addProperty(_showMissingInclination);
 
-    if (p._starGlyph.has_value()) {
-        const Parameters::StarGlyph& params = *p._starGlyph;
-        _starGlyph.enabled = params.enabled.value_or(_starGlyph.enabled);
-        _starGlyph.lineColor = params.lineColor.value_or(_starGlyph.lineColor);
-        _starGlyph.lineWidth = params.lineWidth.value_or(_starGlyph.lineWidth);
-        _starGlyph.lineLength = params.lineLength.value_or(_starGlyph.lineLength);
+    const auto applyStarLineParameters = [](const Parameters::StarLine& params,
+                                            auto& properties)
+    {
+        properties.enabled = params.enabled.value_or(properties.enabled);
+        properties.color = params.color.value_or(properties.color);
+        properties.lineWidth = params.lineWidth.value_or(properties.lineWidth);
+        properties.lineLength = params.lineLength.value_or(properties.lineLength);
+    };
+    if (p.starObservationLine.has_value()) {
+        applyStarLineParameters(*p.starObservationLine, _starObservationLine);
+    }
+    if (p.starRotationAxis.has_value()) {
+        applyStarLineParameters(*p.starRotationAxis, _starRotationAxis);
     }
 
-    _starGlyph.owner.addProperty(_starGlyph.enabled);
-    _starGlyph.lineColor.setViewOption(Property::ViewOptions::Color);
-    _starGlyph.owner.addProperty(_starGlyph.lineColor);
-    _starGlyph.owner.addProperty(_starGlyph.lineWidth);
-    _starGlyph.owner.addProperty(_starGlyph.lineLength);
-    addPropertySubOwner(_starGlyph.owner);
+    const auto registerStarLineProperties = [this](auto& properties) {
+        properties.owner.addProperty(properties.enabled);
+        properties.color.setViewOption(Property::ViewOptions::Color);
+        properties.owner.addProperty(properties.color);
+        properties.owner.addProperty(properties.lineWidth);
+        properties.owner.addProperty(properties.lineLength);
+        addPropertySubOwner(properties.owner);
+    };
+    registerStarLineProperties(_starObservationLine);
+    registerStarLineProperties(_starRotationAxis);
 
     updateDataIfChanged();
 
@@ -657,7 +705,9 @@ void RenderableExoplanetGlyphCloud::renderSelectedPoints(
 }
 
 void RenderableExoplanetGlyphCloud::renderStars(const RenderData& data) {
-    if (_starData.empty() || !_programStars || !_starGlyph.enabled) {
+    if (_starData.empty() || !_programStars ||
+        (!_starObservationLine.enabled && !_starRotationAxis.enabled))
+    {
         return;
     }
     _programStars->activate();
@@ -670,15 +720,50 @@ void RenderableExoplanetGlyphCloud::renderStars(const RenderData& data) {
     const glm::dmat4 viewProjectionMatrix =
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
 
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
     _programStars->setUniform(_uniformCacheStars.modelMatrix, modelTransform);
     _programStars->setUniform(_uniformCacheStars.cameraViewProjectionMatrix, viewProjectionMatrix);
     _programStars->setUniform(_uniformCacheStars.opacity, opacity());
     _programStars->setUniform(_uniformCacheStars.scale, _scale);
     _programStars->setUniform(_uniformCacheStars.cameraPosition, data.camera.position());
-    _programStars->setUniform(_uniformCacheStars.originLineColor, _starGlyph.lineColor);
-    _programStars->setUniform(_uniformCacheStars.lineLengthFactor, _starGlyph.lineLength);
-
-    glLineWidth(_starGlyph.lineWidth);
+    _programStars->setUniform(
+        _uniformCacheStars.originLineColor,
+        _starObservationLine.color
+    );
+    _programStars->setUniform(
+        _uniformCacheStars.rotationAxisColor,
+        _starRotationAxis.color
+    );
+    _programStars->setUniform(
+        _uniformCacheStars.observationLineLengthFactor,
+        _starObservationLine.lineLength
+    );
+    _programStars->setUniform(
+        _uniformCacheStars.rotationAxisLineLengthFactor,
+        _starRotationAxis.lineLength
+    );
+    _programStars->setUniform(
+        _uniformCacheStars.observationLineWidth,
+        _starObservationLine.lineWidth
+    );
+    _programStars->setUniform(
+        _uniformCacheStars.rotationAxisLineWidth,
+        _starRotationAxis.lineWidth
+    );
+    _programStars->setUniform(
+        _uniformCacheStars.viewportSize,
+        glm::vec2(viewport[2], viewport[3])
+    );
+    _programStars->setUniform(
+        _uniformCacheStars.drawOriginLine,
+        _starObservationLine.enabled
+    );
+    _programStars->setUniform(
+        _uniformCacheStars.drawRotationAxis,
+        _starRotationAxis.enabled
+    );
 
     glEnablei(GL_BLEND, 0);
     glDepthMask(true);
@@ -731,12 +816,20 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
             offsetof(StarGlyphData, position)
         );
 
-        // Location 1: in_up
+        // Location 1: in_rotationAxis
         glEnableVertexArrayAttrib(_starsVao, 1);
         glVertexArrayAttribBinding(_starsVao, 1, 0);
         glVertexArrayAttribFormat(
             _starsVao, 1, 3, GL_FLOAT, GL_FALSE,
-            offsetof(StarGlyphData, up)
+            offsetof(StarGlyphData, rotationAxis)
+        );
+
+        // Location 2: in_hasRotationAxis
+        glEnableVertexArrayAttrib(_starsVao, 2);
+        glVertexArrayAttribBinding(_starsVao, 2, 0);
+        glVertexArrayAttribIFormat(
+            _starsVao, 2, 1, GL_INT,
+            offsetof(StarGlyphData, hasRotationAxis)
         );
 
         glVertexArrayVertexBuffer(_starsVao, 0, _starsVbo, 0, sizeof(StarGlyphData));
@@ -986,8 +1079,30 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
                 uniquePositions.push_back(d.position);
                 _starData.push_back({
                     .position = d.position,
-                    .up = systemRotation * glm::vec3(0.f, 1.f, 0.f)
+                    .rotationAxis = glm::vec3(0.f),
+                    .hasRotationAxis = 0
                 });
+            }
+
+            // Add data for star rotation axis if stellar inclination is available.
+            // It might be available for some planets but not others
+            if (std::isfinite(item.stellarInclination) &&
+                item.stellarInclination >= 0.f && item.stellarInclination <= 180.f)
+            {
+                const size_t starIndex = static_cast<size_t>(
+                    std::find(uniquePositions.begin(), uniquePositions.end(), d.position) -
+                    uniquePositions.begin()
+                );
+                StarGlyphData& star = _starData.at(starIndex);
+                if (!star.hasRotationAxis) {
+                    const glm::dmat3 stellarRotation =
+                        computeOrbitPlaneRotationMatrix(item.stellarInclination);
+                    const glm::dvec3 axis = glm::normalize(
+                        systemRotation * stellarRotation * glm::dvec3(0.0, 0.0, 1.0)
+                    );
+                    star.rotationAxis = glm::vec3(axis);
+                    star.hasRotationAxis = 1;
+                }
             }
         }
 
