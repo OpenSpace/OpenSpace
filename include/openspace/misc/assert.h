@@ -110,7 +110,7 @@ void internalAssert(std::string expression, std::string message, std::string fil
 #endif // OPENSPACE_THROW_ON_ASSERT
 #else // ^^^^ NDEBUG || DEBUG || OPENSPACE_ASSERT
       // !(NDEBUG || DEBUG || OPENSPACE_ASSERT) vvvv
-#define assert_msg(__condition__, __message__) {}
+#define assert_msg(__condition__, __message__) do {} while (false)
 #endif // NDEBUG || DEBUG || OPENSPACE_ASSERT
 
 /** @}  */
