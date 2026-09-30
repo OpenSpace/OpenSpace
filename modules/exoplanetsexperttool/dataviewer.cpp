@@ -229,6 +229,7 @@ bool DataViewer::initializeData(DataSettings settings) {
         _columnSelectionView.orderedSelectedColumns()
     );
     _computeColumnsView = std::make_unique<ComputeColumnsView>(*this, _dataSettings);
+    _spatialSelectionView = std::make_unique<SpatialSelectionView>(*this, _dataSettings);
 
     _currentlyTargettedSystem = std::nullopt;
 
@@ -437,6 +438,10 @@ TableView* DataViewer::tableView() {
     return _tableView.get();
 }
 
+SpatialSelectionView* DataViewer::spatialSelectionView() {
+    return _spatialSelectionView.get();
+}
+
 std::vector<size_t> DataViewer::planetsForHost(const std::string& hostIdentifier) const {
     if (!_hostIdToPlanetsMap.contains(hostIdentifier)) {
         return {};
@@ -463,6 +468,10 @@ void DataViewer::clearExternalSelection() {
     _externalSelection = {};
     LINFO("Cleared external selection");
 };
+
+const std::vector<size_t>& DataViewer::selection() const {
+    return _selection;
+}
 
 void DataViewer::setSelection(const std::vector<size_t>& indices) {
     _selection = indices;
@@ -603,6 +612,7 @@ void DataViewer::render() {
             ImGui::MenuItem("Filters", NULL, &_showFilterSettingsWindow);
             ImGui::MenuItem("Color mapping", NULL, &_showColormapWindow);
             ImGui::MenuItem("Compute data columns", NULL, &_showComputeColumnsWindow);
+            ImGui::MenuItem("Spatial selection", NULL, &_showSpatialSelectionWindow);
             if (mod->showInfoWindowAtStartup()) {
                 ImGui::Separator();
                 ImGui::MenuItem("Start-up info", NULL, &_shouldOpenInfoWindow);
@@ -617,6 +627,25 @@ void DataViewer::render() {
         renderSettingsMenu();
 
         if (ImGui::BeginMenu("Navigation")) {
+            if (_spatialSelectionView) {
+                const bool isSelection = _spatialSelectionView->isSelectionMode();
+                if (isSelection) {
+                    if (ImGui::MenuItem("Switch to Navigation Mode")) {
+                        _spatialSelectionView->setInteractionMode(
+                            InteractionMode::Navigation
+                        );
+                    }
+                }
+                else {
+                    if (ImGui::MenuItem("Switch to Selection Mode")) {
+                        _spatialSelectionView->setInteractionMode(
+                            InteractionMode::Selection
+                        );
+                    }
+                }
+                ImGui::Separator();
+            }
+
             if (ImGui::Button("Refocus on Earth")) {
                 refocusView();
             }
@@ -953,6 +982,10 @@ void DataViewer::render() {
 
     if (_showComputeColumnsWindow) {
         _computeColumnsView->render(&_showComputeColumnsWindow);
+    }
+
+    if (_showSpatialSelectionWindow && _spatialSelectionView) {
+        _spatialSelectionView->render(&_showSpatialSelectionWindow);
     }
 
     _systemViewer->renderAllSystemViews();

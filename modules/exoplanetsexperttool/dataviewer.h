@@ -33,6 +33,7 @@
 #include <modules/exoplanetsexperttool/views/columnselectionview.h>
 #include <modules/exoplanetsexperttool/views/computecolumnsview.h>
 #include <modules/exoplanetsexperttool/views/filteringview.h>
+#include <modules/exoplanetsexperttool/views/spatialselectionview.h>
 #include <modules/exoplanetsexperttool/views/systemview.h>
 #include <modules/exoplanetsexperttool/views/tableview.h>
 #include <openspace/properties/list/intlistproperty.h>
@@ -92,6 +93,7 @@ public:
     ColorMappingView* colorMappingView();
     SystemViewer* systemViewer();
     TableView* tableView();
+    SpatialSelectionView* spatialSelectionView();
 
     std::vector<size_t> planetsForHost(const std::string& hostStar) const;
     const std::unordered_map<std::string, std::vector<size_t>>& hostPlanetGroups() const;
@@ -99,6 +101,8 @@ public:
     size_t externalSelectionSize() const;
     const std::string& lastExternalSelectionTimestamp() const;
     void clearExternalSelection();
+
+    const std::vector<size_t>& selection() const;
 
     // Set the selected planets to be highlighted in the rendering
     void setSelection(const std::vector<size_t>& indices);
@@ -159,6 +163,7 @@ private:
     std::unique_ptr<SystemViewer> _systemViewer;
     std::unique_ptr<TableView> _tableView;
     std::unique_ptr<ComputeColumnsView> _computeColumnsView;
+    std::unique_ptr<SpatialSelectionView> _spatialSelectionView;
 
     GlyphHandler _glyphHandler;
 
@@ -167,6 +172,7 @@ private:
     bool _showFilterSettingsWindow = false;
     bool _showColormapWindow = false;
     bool _showComputeColumnsWindow = false;
+    bool _showSpatialSelectionWindow = false;
 
     bool _showColormapOverviewWindow = false;
 

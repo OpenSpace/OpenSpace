@@ -36,10 +36,12 @@ set(HEADER_FILES
     gui.h
     rendering/renderableexoplanetglyphcloud.h
     rendering/renderablehostcloud.h
+    spatialselectionhandler.h
     views/colormappingview.h
     views/columnselectionview.h
     views/computecolumnsview.h
     views/filteringview.h
+    views/spatialselectionview.h
     views/systemview.h
     views/tableview.h
     views/viewhelper.h
@@ -57,10 +59,12 @@ set(SOURCE_FILES
     gui.cpp
     rendering/renderableexoplanetglyphcloud.cpp
     rendering/renderablehostcloud.cpp
+    spatialselectionhandler.cpp
     views/colormappingview.cpp
     views/columnselectionview.cpp
     views/computecolumnsview.cpp
     views/filteringview.cpp
+    views/spatialselectionview.cpp
     views/systemview.cpp
     views/tableview.cpp
     views/viewhelper.cpp
