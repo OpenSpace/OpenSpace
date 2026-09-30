@@ -382,7 +382,11 @@ void PropertyOwner::removePropertySubOwner(PropertyOwner* owner) {
     }
 
     for (Property* prop : (*it)->propertiesRecursive()) {
-        global::renderEngine->scene()->removePropertyInterpolation(prop);
+        // The scene might be a nullptr if we are in the middle of switching the global
+        // scene that we are representing
+        if (global::renderEngine->scene()) {
+            global::renderEngine->scene()->removePropertyInterpolation(prop);
+        }
     }
 
     // Notify the change so the UI can update

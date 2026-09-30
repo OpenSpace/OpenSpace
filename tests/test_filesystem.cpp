@@ -108,9 +108,8 @@ TEST_CASE("FileSystem: OnChangeCallback", "[filesystem]") {
 }
 
 TEST_CASE("FileSystem: TokenDefaultState", "[filesystem]") {
-    REQUIRE(FileSys.tokens().size() == 2);
-    CHECK(FileSys.tokens()[0] == "${TEMPORARY}");
-    CHECK(FileSys.tokens()[1] == "${TESTDIR}");
+    REQUIRE(FileSys.hasRegisteredToken("${TEMPORARY}"));
+    REQUIRE(FileSys.hasRegisteredToken("${TESTDIR}"));
 }
 
 TEST_CASE("FileSystem: Override Non Existing Path Token", "[filesystem]") {

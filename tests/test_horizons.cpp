@@ -115,8 +115,8 @@ namespace {
         // Get files and make sure they exist
         const std::filesystem::path kernel =
             absPath("${TESTDIR}/horizonsTest/naif0012.tls");
-        CHECK(std::filesystem::is_regular_file(kernel));
-        CHECK(std::filesystem::is_regular_file(filePath));
+        REQUIRE(std::filesystem::is_regular_file(kernel));
+        REQUIRE(std::filesystem::is_regular_file(filePath));
 
         // Initialize SpiceManager and load leap second kernel
         SpiceManager::initialize();

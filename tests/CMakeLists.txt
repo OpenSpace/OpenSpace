@@ -30,6 +30,7 @@ target_sources(
   OpenSpaceTest
   PRIVATE
     main.cpp
+    testhelper.h
 
     test_assetloader.cpp
     test_commandlineparser.cpp
@@ -261,6 +262,7 @@ target_compile_definitions(
   PRIVATE
   "OPENSPACE_THROW_ON_ASSERT"
   "TEST_ROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\""
+  "CATCH_CONFIG_ENABLE_ALL_STRINGMAKERS"
 )
 
 target_link_libraries(

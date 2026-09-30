@@ -64,3 +64,4 @@ support/codegen/tests/execution_enums/*_codegen.cpp
 support/codegen/tests/execution_luawrapper/*_codegen.cpp
 support/codegen/tests/execution_misc/*_codegen.cpp
 support/codegen/tests/execution_structs/*_codegen.cpp
+tests/horizonsTest/*.hrz
