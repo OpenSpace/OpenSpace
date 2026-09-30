@@ -192,13 +192,6 @@ endif ()
 if (OPENSPACE_HAVE_TESTS)
   enable_testing()
 
-  add_subdirectory(support/codegen/tests)
-  set_target_properties(run_test_codegen PROPERTIES FOLDER "Unit Tests/support")
-  set_target_properties(codegentest PROPERTIES FOLDER "Unit Tests")
-  if (NOT TEST codegentest)
-    add_test(NAME codegentest COMMAND codegentest)
-  endif ()
-
   begin_header("Generating OpenSpace unit test")
   add_subdirectory(tests)
   end_header()

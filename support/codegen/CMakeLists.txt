@@ -24,9 +24,47 @@
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
 
-add_subdirectory(lib)
+# First, define the library
+add_library(codegen-lib STATIC)
+add_library(codegen::codegen-lib ALIAS codegen-lib)
+target_sources(
+  codegen-lib
+  PRIVATE
+    codegen.cpp
+    parsing.cpp
+    snippets.cpp
+    types.cpp
+    util.cpp
+    verifier.cpp
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}"
+    FILES
+      codegen.h
+      keywords.h
+      parsing.h
+      settings.h
+      snippets.h
+      types.h
+      util.h
+      verifier.h
+)
+
+target_include_directories(
+  codegen-lib
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
+
+set_openspace_compile_settings(codegen-lib)
+target_compile_features(codegen-lib PUBLIC cxx_std_23)
+set_target_properties(codegen-lib PROPERTIES FOLDER "support")
+
+# Then, the application
 
 add_executable(codegen-tool main.cpp)
 add_executable(codegen::codegen-tool ALIAS codegen-tool)
 target_link_libraries(codegen-tool PRIVATE codegen-lib)
 set_openspace_compile_settings(codegen-tool)
+set_target_properties(codegen-tool PROPERTIES FOLDER "support")

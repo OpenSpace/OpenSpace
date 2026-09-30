@@ -1,4 +1,0 @@
-common-compile-settings provides CMake functions:
-
-  find_package(common-compile-settings CONFIG REQUIRED)
-  set_compile_settings(main)

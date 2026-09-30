@@ -235,8 +235,8 @@ if (OS_MACOSX)
     endif ()
   endforeach()
 
-  set_target_properties(${CEF_HELPER_TARGET_GPU} PROPERTIES FOLDER "Helper")
-  set_target_properties(${CEF_HELPER_TARGET_RENDERER} PROPERTIES FOLDER "Helper")
+  set_target_properties(${CEF_HELPER_TARGET_GPU} PROPERTIES FOLDER "support")
+  set_target_properties(${CEF_HELPER_TARGET_RENDERER} PROPERTIES FOLDER "support")
 else ()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
   set_openspace_cef_target_out_dir()
@@ -259,7 +259,7 @@ else ()
   endif (OS_WINDOWS)
 endif ()
 
-set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "Helper")
+set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "support")
 set_openspace_compile_settings(${CEF_HELPER_TARGET})
 
 ##########################################################################################
@@ -306,7 +306,7 @@ target_precompile_headers(${webbrowser_module} PRIVATE
   <include/wrapper/cef_helpers.h>
 )
 
-set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "Helper")
+set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "support")
 set_openspace_compile_settings(libcef_dll_wrapper)
 
 # Display CEF configuration settings.
