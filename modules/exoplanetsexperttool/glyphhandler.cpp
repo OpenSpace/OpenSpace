@@ -27,6 +27,7 @@
 #include <modules/exoplanetsexperttool/dataviewer.h>
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
 #include <modules/exoplanetsexperttool/rendering/renderablehostcloud.h>
+#include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/query/query.h>
@@ -239,65 +240,97 @@ void GlyphHandler::renderModeSpecificSettings() {
     static bool useFixedWidth = false;
     static bool showStarObservationLine = false;
     static bool showStarRotationAxis = false;
+    static bool showMissingInclination = false;
 
     // RenderableHostCloud
     static bool useAdditiveBlending = true;
     static bool shouldBlurPoints = true;
 
+    auto renderInclinationSettings = [&]() {
+        if (ImGui::Checkbox("Show observation lines from star", &showStarObservationLine)) {
+            setBoolProperty(
+                GlyphCloudIdentifier,
+                "StarObservationLine.Enabled",
+                showStarObservationLine
+            );
+        }
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(
+            "Show a line from each star in the direction towards Earth, i.e. the line "
+            "of sight. Useful as a reference when interpreting the inclination of the "
+            "planetary orbits."
+        );
+
+        if (ImGui::Checkbox("Show star rotation axis", &showStarRotationAxis)) {
+            setBoolProperty(
+                GlyphCloudIdentifier,
+                "StarRotationAxis.Enabled",
+                showStarRotationAxis
+            );
+        }
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(
+            "Show a line for the rotation axis of each star, based on the stellar "
+            "inclination data. Only the inclination relative to the line of sight is "
+            "known, so the axis is assumed to lie towards projected celestial north. "
+            "An inclination of 0 degrees points along the line of sight, and 90 "
+            "degrees is orthogonal to it."
+        );
+
+        if (ImGui::Checkbox("Show missing inclination", &showMissingInclination)) {
+            setBoolProperty(
+                GlyphCloudIdentifier,
+                "ShowMissingInclination",
+                showMissingInclination
+            );
+        }
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(
+            "If checked, planets without inclination data are shown with a dashed "
+            "pattern. Otherwise, they are hidden."
+        );
+    };
+
+    auto renderStarSettings = [&]() {
+        if (ImGui::Checkbox("Use additive blending", &useAdditiveBlending)) {
+            setBoolProperty(HostCloudIdentifier, "UseAdditiveBlending", useAdditiveBlending);
+        }
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(
+            "If checked, the colors of overlapping star glyphs are added together, "
+            "making dense regions appear brighter. Otherwise, overlapping glyphs are "
+            "drawn on top of each other without changing their colors."
+        );
+
+        if (ImGui::Checkbox("Should blur points", &shouldBlurPoints)) {
+            setBoolProperty(HostCloudIdentifier, "ShouldBlurPoints", shouldBlurPoints);
+        }
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(
+            "If checked, the star glyphs are blurred towards the edges, making them "
+            "look more like stars."
+        );
+    };
+
     if (_mode == GlyphMode::Rings) {
         if (ImGui::Checkbox("Use fixed ring width", &useFixedWidth)) {
             setBoolProperty(GlyphCloudIdentifier, "UseFixedWidth", useFixedWidth);
         }
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(
+            "If checked, all rings representing the planets have the same width. "
+            "Otherwise, the width of each ring decreases slightly as its radius grows."
+        );
     }
     else if (_mode == GlyphMode::Inclination) {
-        if (ImGui::Checkbox("Show observation lines from star", &showStarObservationLine)) {
-            setBoolProperty(
-                GlyphCloudIdentifier,
-                "StarObservationLine.Enabled",
-                showStarObservationLine
-            );
-        }
-        if (ImGui::Checkbox("Show star rotation axis", &showStarRotationAxis)) {
-            setBoolProperty(
-                GlyphCloudIdentifier,
-                "StarRotationAxis.Enabled",
-                showStarRotationAxis
-            );
-        }
+        renderInclinationSettings();
     }
     else if (_mode == GlyphMode::Star) {
-        if (ImGui::Checkbox("Use additive blending", &useAdditiveBlending)) {
-            setBoolProperty(HostCloudIdentifier, "UseAdditiveBlending", useAdditiveBlending);
-        }
-        if (ImGui::Checkbox("Should blur points", &shouldBlurPoints)) {
-            setBoolProperty(HostCloudIdentifier, "ShouldBlurPoints", shouldBlurPoints);
-        }
+        renderStarSettings();
     }
     else if (_mode == GlyphMode::InclinationAndStar) {
-        if (ImGui::Checkbox("Show observation lines from star", &showStarObservationLine)) {
-            setBoolProperty(
-                GlyphCloudIdentifier,
-                "StarObservationLine.Enabled",
-                showStarObservationLine
-            );
-        }
-        if (ImGui::Checkbox("Show star rotation axis", &showStarRotationAxis)) {
-            setBoolProperty(
-                GlyphCloudIdentifier,
-                "StarRotationAxis.Enabled",
-                showStarRotationAxis
-            );
-        }
-        if (ImGui::Checkbox("Use additive blending (star)", &useAdditiveBlending)) {
-            setBoolProperty(
-                HostCloudIdentifier,
-                "UseAdditiveBlending",
-                useAdditiveBlending
-            );
-        }
-        if (ImGui::Checkbox("Should blur points (star)", &shouldBlurPoints)) {
-            setBoolProperty(HostCloudIdentifier, "ShouldBlurPoints", shouldBlurPoints);
-        }
+        renderInclinationSettings();
+        renderStarSettings();
     }
     else {
         throw ghoul::MissingCaseException();
