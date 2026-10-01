@@ -228,7 +228,7 @@ bool DataViewer::initializeData(DataSettings settings) {
         *this,
         _columnSelectionView.orderedSelectedColumns()
     );
-    _computeColumnsView = std::make_unique<ComputeColumnsView>(*this, _dataSettings);
+    _computeColumnsView = std::make_unique<ComputeColumnsView>(*this);
     _spatialSelectionView = std::make_unique<SpatialSelectionView>(*this, _dataSettings);
 
     _currentlyTargettedSystem = std::nullopt;

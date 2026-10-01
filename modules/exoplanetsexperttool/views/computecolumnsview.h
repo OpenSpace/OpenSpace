@@ -39,8 +39,7 @@ class Expression;
 
 class ComputeColumnsView {
 public:
-    ComputeColumnsView(DataViewer& dataViewer,
-        const DataSettings& dataSettings);
+    ComputeColumnsView(DataViewer& dataViewer);
 
     void render(bool* open);
 

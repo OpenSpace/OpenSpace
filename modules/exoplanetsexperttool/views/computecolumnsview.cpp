@@ -83,8 +83,7 @@ std::string formatNumericConstant(double value) {
 
 } // namespace
 
-ComputeColumnsView::ComputeColumnsView(DataViewer& dataViewer,
-                                       const DataSettings& dataSettings)
+ComputeColumnsView::ComputeColumnsView(DataViewer& dataViewer)
     : _dataViewer(dataViewer)
     , _historyFile(dataViewer.computedColumnHistoryFile())
 {
