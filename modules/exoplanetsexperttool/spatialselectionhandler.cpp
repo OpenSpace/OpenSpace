@@ -190,16 +190,39 @@ std::vector<size_t> SpatialSelectionHandler::selectDensity(
     return {};
 }
 
+std::vector<size_t> SpatialSelectionHandler::select(
+                                      const std::vector<ExoplanetItem>& data,
+                                      const std::vector<size_t>& candidates,
+                                      const SpatialSelectionQuery& query,
+                                      const DataSettings::DataMapping& mapping) const
+{
+    if (const SphereVolume* sphere = std::get_if<SphereVolume>(&query)) {
+        return selectSphere(data, candidates, *sphere);
+    }
+    if (const BoxVolume* box = std::get_if<BoxVolume>(&query)) {
+        return selectBox(data, candidates, *box);
+    }
+    if (const SkyMapRect* rect = std::get_if<SkyMapRect>(&query)) {
+        return selectSkyRect(data, candidates, *rect, mapping);
+    }
+    return selectDensity(
+        data,
+        candidates,
+        std::get<DensitySelectionSettings>(query)
+    );
+}
+
 void SpatialSelectionHandler::addSavedSelection(std::string name, std::string summary,
-                                                std::vector<size_t> indices)
+                                                SpatialSelectionQuery query)
 {
     if (name.empty()) {
         name = std::format("Selection {}", _savedSelections.size() + 1);
     }
     _savedSelections.push_back(SavedSelection{
+        .id = _nextSavedSelectionId++,
         .name = std::move(name),
         .summary = std::move(summary),
-        .indices = std::move(indices),
+        .query = std::move(query),
         .isEnabled = true
     });
 }
@@ -222,11 +245,21 @@ const std::vector<SavedSelection>& SpatialSelectionHandler::savedSelections() co
     return _savedSelections;
 }
 
-std::vector<size_t> SpatialSelectionHandler::combinedSavedSelections() const {
+std::vector<size_t> SpatialSelectionHandler::combinedSavedSelections(
+                                      const std::vector<ExoplanetItem>& data,
+                                      const std::vector<size_t>& candidates,
+                                      const DataSettings::DataMapping& mapping) const
+{
     std::unordered_set<size_t> combinedSet;
     for (const SavedSelection& sel : _savedSelections) {
         if (sel.isEnabled) {
-            for (size_t idx : sel.indices) {
+            const std::vector<size_t> indices = select(
+                data,
+                candidates,
+                sel.query,
+                mapping
+            );
+            for (size_t idx : indices) {
                 combinedSet.insert(idx);
             }
         }

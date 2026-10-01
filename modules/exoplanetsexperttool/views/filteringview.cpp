@@ -26,6 +26,7 @@
 
 #include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/dataviewer.h>
+#include <modules/exoplanetsexperttool/views/spatialselectionview.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <implot.h>
@@ -70,6 +71,10 @@ bool FilteringView::isUsingExternalFiltering() const {
     return _useExternalSelection;
 }
 
+bool FilteringView::isUsingSpatialFiltering() const {
+    return _useSpatialSelection;
+}
+
 int FilteringView::activeFilters() const {
     return _nActiveFilters;
 }
@@ -93,6 +98,26 @@ const ColumnKey& FilteringView::rowLimitColumn() const {
         }
     }
     return _dataViewer.columns().front();
+}
+
+std::string FilteringView::spatialFilterDescription(
+                                      const SpatialSelectionView& spatialSelectionView) const
+{
+    if (_savedSpatialSelectionId.has_value()) {
+        const std::vector<SavedSelection>& saved =
+            spatialSelectionView.handler().savedSelections();
+        const auto it = std::find_if(
+            saved.begin(),
+            saved.end(),
+            [this](const SavedSelection& selection) {
+                return selection.id == *_savedSpatialSelectionId;
+            }
+        );
+        if (it != saved.end()) {
+            return it->name;
+        }
+    }
+    return "Current spatial query";
 }
 
 void FilteringView::renderAppliedColumnFilters() const {
@@ -132,7 +157,9 @@ void FilteringView::renderAppliedColumnFilters() const {
     }
 }
 
-bool FilteringView::render(bool* open) {
+bool FilteringView::render(bool* open,
+                           const SpatialSelectionView& spatialSelectionView)
+{
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Filters", open)) {
         ImGui::End();
@@ -165,8 +192,16 @@ bool FilteringView::render(bool* open) {
         filterWasChanged = true;
     }
 
+    ImGui::SameLine();
+    if (ImGui::Button("Reset spatial")) {
+        _useSpatialSelection = false;
+        _savedSpatialSelectionId.reset();
+        filterWasChanged = true;
+    }
+
     filterWasChanged |= renderColumnFilterSettings();
     filterWasChanged |= renderRowLimitFilterSettings();
+    filterWasChanged |= renderSpatialFilterSettings(spatialSelectionView);
     filterWasChanged |= renderExternalFilterSettings();
 
     ImGui::End();
@@ -175,7 +210,8 @@ bool FilteringView::render(bool* open) {
 }
 
 std::vector<size_t> FilteringView::applyFiltering(const std::vector<ExoplanetItem>& data,
-                                               const std::vector<int>& externalSelection)
+                                               const std::vector<int>& externalSelection,
+                                               const SpatialSelectionView& spatialSelectionView)
 {
     std::vector<size_t> filteredData;
     filteredData.reserve(data.size());
@@ -265,6 +301,7 @@ std::vector<size_t> FilteringView::applyFiltering(const std::vector<ExoplanetIte
 
     applyRowLimit(data, filteredData);
     applyExternalSelection(externalSelection, filteredData);
+    applySpatialSelection(data, spatialSelectionView, filteredData);
 
     return filteredData;
 }
@@ -324,6 +361,41 @@ void FilteringView::applyExternalSelection(const std::vector<int>& externalSelec
         newFilteredData.shrink_to_fit();
         prefilteredData = std::move(newFilteredData);
     }
+}
+
+void FilteringView::applySpatialSelection(
+                                      const std::vector<ExoplanetItem>& data,
+                                      const SpatialSelectionView& spatialSelectionView,
+                                      std::vector<size_t>& prefilteredData) const
+{
+    if (!_useSpatialSelection) {
+        return;
+    }
+
+    const std::vector<SavedSelection>& saved =
+        spatialSelectionView.handler().savedSelections();
+
+    SpatialSelectionQuery query = spatialSelectionView.currentSpatialQuery();
+
+    if (_savedSpatialSelectionId.has_value()) {
+        const auto it = std::find_if(
+            saved.begin(),
+            saved.end(),
+            [this](const SavedSelection& selection) {
+                return selection.id == *_savedSpatialSelectionId;
+            }
+        );
+        if (it != saved.end()) {
+            query = it->query;
+        }
+    }
+
+    prefilteredData = spatialSelectionView.handler().select(
+        data,
+        prefilteredData,
+        query,
+        _dataViewer.dataMapping()
+    );
 }
 
 bool FilteringView::renderColumnFilterSettings() {
@@ -673,6 +745,69 @@ bool FilteringView::renderRowLimitFilterSettings() {
     }
 
     ImGui::Spacing();
+
+    return filterWasChanged;
+}
+
+bool FilteringView::renderSpatialFilterSettings(
+                                      const SpatialSelectionView& spatialSelectionView)
+{
+    bool filterWasChanged = false;
+
+    const bool headerIsOpen = ImGui::CollapsingHeader("Spatial filters");
+    ImGui::SameLine();
+    view::helper::renderHelpMarker(
+        "Filter the current results using the live spatial query or one saved spatial "
+        "query. The query is evaluated against this dataset and intersects the other "
+        "filters."
+    );
+
+    if (!headerIsOpen) {
+        return filterWasChanged;
+    }
+
+    filterWasChanged |= ImGui::Checkbox(
+        "Use spatial selection",
+        &_useSpatialSelection
+    );
+
+    if (!_useSpatialSelection) {
+        ImGui::BeginDisabled();
+    }
+
+    const std::vector<SavedSelection>& saved =
+        spatialSelectionView.handler().savedSelections();
+
+    const std::string sourceDescription = spatialFilterDescription(spatialSelectionView);
+
+    ImGui::SetNextItemWidth(-1.f);
+    if (ImGui::BeginCombo("##SpatialFilterSource", sourceDescription.c_str())) {
+        const bool currentIsSelected = !_savedSpatialSelectionId.has_value() ||
+            std::none_of(
+                saved.begin(),
+                saved.end(),
+                [this](const SavedSelection& selection) {
+                    return selection.id == *_savedSpatialSelectionId;
+                }
+            );
+        if (ImGui::Selectable("Current spatial query", currentIsSelected)) {
+            _savedSpatialSelectionId.reset();
+            filterWasChanged = true;
+        }
+
+        for (const SavedSelection& selection : saved) {
+            const bool isSelected = _savedSpatialSelectionId == selection.id;
+            if (ImGui::Selectable(selection.name.c_str(), isSelected)) {
+                _savedSpatialSelectionId = selection.id;
+                filterWasChanged = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    if (!_useSpatialSelection) {
+        ImGui::EndDisabled();
+    }
 
     return filterWasChanged;
 }

@@ -29,6 +29,7 @@
 
 #include <ghoul/glm.h>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace openspace::exoplanets {
@@ -92,18 +93,28 @@ struct DensitySelectionSettings {
     int minNeighbors = 5;
 };
 
+using SpatialSelectionQuery = std::variant<
+    SphereVolume,
+    BoxVolume,
+    SkyMapRect,
+    DensitySelectionSettings
+>;
+
 /**
- * Represents a saved spatial selection with user metadata and selected indices.
+ * Represents a saved spatial query with user metadata.
  */
 struct SavedSelection {
+    /// Stable session-local identity
+    size_t id = 0;
+
     /// User-defined display name
     std::string name;
 
     /// Human-readable summary of the selection parameters
     std::string summary;
 
-    /// Indices of selected data rows
-    std::vector<size_t> indices;
+    /// Reusable spatial query definition
+    SpatialSelectionQuery query;
 
     /// Flag indicating if this selection is active when applying combined selections
     bool isEnabled = true;
@@ -165,14 +176,21 @@ public:
         const DensitySelectionSettings& settings) const;
 
     /**
+     * Evaluates a spatial query against the provided candidate rows.
+     */
+    std::vector<size_t> select(const std::vector<ExoplanetItem>& data,
+        const std::vector<size_t>& candidates, const SpatialSelectionQuery& query,
+        const DataSettings::DataMapping& mapping) const;
+
+    /**
      * Adds a new saved selection to the list.
      *
      * \param name Display name for the selection
      * \param summary Text summary of selection parameters
-     * \param indices Row indices included in the selection
+      * \param query Reusable spatial query definition
      */
     void addSavedSelection(std::string name, std::string summary,
-        std::vector<size_t> indices);
+          SpatialSelectionQuery query);
 
     /**
      * Removes a saved selection by index.
@@ -205,10 +223,14 @@ public:
      *
      * \return Sorted vector of unique indices from all enabled saved selections
      */
-    std::vector<size_t> combinedSavedSelections() const;
+    std::vector<size_t> combinedSavedSelections(
+        const std::vector<ExoplanetItem>& data,
+        const std::vector<size_t>& candidates,
+        const DataSettings::DataMapping& mapping) const;
 
 private:
     std::vector<SavedSelection> _savedSelections;
+    size_t _nextSavedSelectionId = 0;
 };
 
 } // namespace openspace::exoplanets

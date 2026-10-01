@@ -801,6 +801,18 @@ void DataViewer::render() {
                 }
             }
 
+            if (_filteringView->isUsingSpatialFiltering()) {
+                ImGui::SameLine();
+                ImGui::TextColored(ImVec4(1.f, 0.75f, 0.f, 1.f), "+ spatial");
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip(
+                        _filteringView->spatialFilterDescription(
+                            *_spatialSelectionView
+                        ).c_str()
+                    );
+                }
+            }
+
             if (_externalSelection.value().size() > 0 && _filteringView->isUsingExternalFiltering()) {
                 ImGui::SameLine();
                 ImGui::TextColored(ImVec4(1.f, 0.3f, 1.f, 1.f), "+ external"); // TODO: add timestamp here?
@@ -942,18 +954,30 @@ void DataViewer::render() {
 
     // Windows
 
+    bool spatialSelectionChanged = false;
+    if (_showSpatialSelectionWindow && _spatialSelectionView) {
+        spatialSelectionChanged = _spatialSelectionView->render(
+            &_showSpatialSelectionWindow
+        );
+    }
 
     if (_showFilterSettingsWindow) {
-        _filterChanged = _filteringView->render(&_showFilterSettingsWindow);
+        _filterChanged = _filteringView->render(
+            &_showFilterSettingsWindow,
+            *_spatialSelectionView
+        );
     }
 
     _filterChanged = _filterChanged || _externalSelectionChanged;
+    _filterChanged = _filterChanged ||
+        (_filteringView->isUsingSpatialFiltering() && spatialSelectionChanged);
 
     // Update the filtered data right away
     if (_filterChanged) {
         _filteredData = _filteringView->applyFiltering(
             _data,
-            _externalSelection.value()
+            _externalSelection.value(),
+            *_spatialSelectionView
         );
 
         updateFilteredRowsProperty();
@@ -979,10 +1003,6 @@ void DataViewer::render() {
 
     if (_showComputeColumnsWindow) {
         _computeColumnsView->render(&_showComputeColumnsWindow);
-    }
-
-    if (_showSpatialSelectionWindow && _spatialSelectionView) {
-        _spatialSelectionView->render(&_showSpatialSelectionWindow);
     }
 
     _systemViewer->renderAllSystemViews();

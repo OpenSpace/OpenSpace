@@ -107,7 +107,18 @@ public:
      *
      * \param open Pointer to the boolean controlling window visibility
      */
-    void render(bool* open);
+    bool render(bool* open);
+
+    /**
+     * Evaluates the current spatial query against the provided candidate rows.
+     *
+     * \param candidates Candidate item indices to test
+     * \return Candidate indices matching the current spatial query
+     */
+    std::vector<size_t> currentSpatialSelection(
+        const std::vector<size_t>& candidates) const;
+
+    SpatialSelectionQuery currentSpatialQuery() const;
 
     /**
      * Returns a mutable reference to the spatial selection handler.
@@ -125,12 +136,12 @@ public:
 
 private:
     void renderModeSelector();
-    void renderMethodTabs();
-    void renderShape3DTab();
-    void renderSkyMapTab();
+    bool renderMethodTabs();
+    bool renderShape3DTab();
+    bool renderSkyMapTab();
     void renderDensityTab();
-    void renderCurrentSelectionActions();
-    void renderSavedSelectionsManager();
+    bool renderCurrentSelectionActions();
+    bool renderSavedSelectionsManager();
 
     struct ConstellationLineSegment {
         std::vector<float> ra;
@@ -139,7 +150,6 @@ private:
 
     void initConstellationLines() const;
 
-    std::vector<size_t> computeCurrentSpatialSelection() const;
     void applyCurrentSelection();
     void applyCombinedSavedSelections();
     void updateSkyMapCache() const;

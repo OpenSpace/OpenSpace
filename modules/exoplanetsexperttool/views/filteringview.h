@@ -27,11 +27,13 @@
 
 #include <modules/exoplanetsexperttool/columnfilter.h>
 #include <modules/exoplanetsexperttool/datastructures.h>
+#include <optional>
 #include <string>
 
 namespace openspace::exoplanets {
 
 class DataViewer;
+class SpatialSelectionView;
 
 class FilteringView {
 public:
@@ -39,30 +41,39 @@ public:
 
     bool isUsingRowFiltering() const;
     bool isUsingExternalFiltering() const;
+    bool isUsingSpatialFiltering() const;
 
     int activeFilters() const;
     std::string rowLimitDescription() const;
+    std::string spatialFilterDescription(
+        const SpatialSelectionView& spatialSelectionView) const;
 
     void renderAppliedColumnFilters() const;
 
     // Return true if filtering was changed
-    bool render(bool* open);
+    bool render(bool* open, const SpatialSelectionView& spatialSelectionView);
 
     // Return the rows matching the current filtering
     std::vector<size_t> applyFiltering(const std::vector<ExoplanetItem>& data,
-        const std::vector<int>& externalSelection);
+        const std::vector<int>& externalSelection,
+        const SpatialSelectionView& spatialSelectionView);
 
 private:
     const ColumnKey& rowLimitColumn() const;
 
     bool renderColumnFilterSettings();
     bool renderRowLimitFilterSettings();
+    bool renderSpatialFilterSettings(
+        const SpatialSelectionView& spatialSelectionView);
     bool renderExternalFilterSettings();
 
     void applyRowLimit(const std::vector<ExoplanetItem>& data,
         std::vector<size_t>& prefilteredData);
     void applyExternalSelection(const std::vector<int>& externalSelection,
         std::vector<size_t>& prefilteredData);
+    void applySpatialSelection(const std::vector<ExoplanetItem>& data,
+        const SpatialSelectionView& spatialSelectionView,
+        std::vector<size_t>& prefilteredData) const;
 
     struct ColumnFilterEntry {
         ColumnKey column;
@@ -81,6 +92,9 @@ private:
     // Filter selection from webpage
     bool _useExternalSelection = false;
     bool _overrideInternalSelection = false;
+
+    bool _useSpatialSelection = false;
+    std::optional<size_t> _savedSpatialSelectionId;
 
     int _nActiveFilters = 0;
 
