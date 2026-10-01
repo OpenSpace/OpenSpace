@@ -119,21 +119,16 @@ private:
 
     BoolProperty _showMissingInclination;
 
-    struct {
+    struct StarLine {
         PropertyOwner owner;
         BoolProperty enabled;
         Vec4Property color;
         FloatProperty lineWidth;
         FloatProperty lineLength;
-    } _starObservationLine;
+    };
 
-    struct {
-        PropertyOwner owner;
-        BoolProperty enabled;
-        Vec4Property color;
-        FloatProperty lineWidth;
-        FloatProperty lineLength;
-    } _starRotationAxis;
+    StarLine _starObservationLine;
+    StarLine _starRotationAxis;
 
     // Unified glyph data structure
     struct GlyphData {

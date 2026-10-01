@@ -328,7 +328,7 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
         applyStarLineParameters(*p.starRotationAxis, _starRotationAxis);
     }
 
-    const auto registerStarLineProperties = [this](auto& properties) {
+    const auto registerStarLineProperties = [this](StarLine& properties) {
         properties.owner.addProperty(properties.enabled);
         properties.color.setViewOption(Property::ViewOptions::Color);
         properties.owner.addProperty(properties.color);
