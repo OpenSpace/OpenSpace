@@ -67,7 +67,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataViewer";
 
-    constexpr std::string_view WebpagePath = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
+    constexpr char WebpageLink[] = "https://research.openspaceproject.com/exoplanetexplorer/1/";
 
     constexpr std::string_view AboutTheTool =
         "This is a research tool under development and we are currently \n"
@@ -747,22 +747,15 @@ void DataViewer::render() {
         }
 
         if (ImGui::BeginMenu("Webpage")) {
-            const std::string path = absPath(WebpagePath).string();
+            ImGui::TextLinkOpenURL(WebpageLink);
 
             ImGui::Text(
-                "Open an interactive webpage for further interaction and \n"
+                "Opens an interactive webpage for further interaction and \n"
                 "visualization of the dataset. \n \n"
                 "The webpage can be used to control the selection, as well \n"
                 "as visualizing the current planet selection. Click a button \n"
                 "to open in your selected browser."
             );
-
-            if (ImGui::Button("Open in Chrome (Windows)")) {
-                system(std::format("start chrome.exe {}", path).c_str());
-            }
-            if (ImGui::Button("Open in Firefox (Windows)")) {
-                system(std::format("start firefox {}", path).c_str());
-            }
 
             ImGui::EndMenu();
         }
