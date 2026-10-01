@@ -19,7 +19,10 @@
  * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
  * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.        
+ *
+ * Henyey-Greenstein phase function implementation by Joshua Carter @ 2026
+ * under MIT license (same conditions as above).
  ****************************************************************************************/
 
 #include "powerscaling/powerscaling_fs.glsl"
@@ -145,17 +148,17 @@ Fragment getFragment() {
   // WARNING: This might not be the case for Uranus
   vec3 normal = gl_FrontFacing ? vec3(-1.0, 0.0, 0.0) : vec3(1.0, 0.0, 0.0);
 
-  // Code below by Joshua Carter © 2026 under MIT license - - - - - - - - - - - - // START
+  // Phase functions
   float costheta = dot(normalize(camPositionObjRaw - in_data.posObj), sunPositionObj);
   float alpha = acos(clamp(costheta, -1.0, 1.0)); // Alpha is the phase angle.
 
-  // Separate phase functions combined together: Porco, C., et al. (2008) is used for the power law function.
+  // Separate phase functions combined together: Porco, C., et al. (2008) is
+  // used for the power law function.
   float gen_phase_func = 0.153 * pow(3.092, (3.1415926 - alpha));
   float fwsc_phase_func = HG(costheta, -0.95);
   float opposition_surge = (1.5 * exp(-alpha / 0.009)) + 1;
 
   diffuse.rgb *= (gen_phase_func + fwsc_phase_func) * opposition_surge;
-  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - // END
 
   float optical_depth = -log(transparency);
 
