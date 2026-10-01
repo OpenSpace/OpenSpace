@@ -112,9 +112,9 @@ private:
         opacity, ellipsoidRadii
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, sunPositionObj, camPositionObj, textureForwards, camPositionObjRaw, textureBackwards,
-        textureUnlit, textureColor, textureTransparency,
-        opacity, ellipsoidRadii
+        sunPosition, sunPositionObj, camPositionObj, textureForwards, camPositionObjRaw,
+        textureBackwards, textureUnlit, textureColor, textureTransparency, opacity,
+        ellipsoidRadii
     ) _uniformCacheAdvancedRings;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) _geomUniformCache;
 

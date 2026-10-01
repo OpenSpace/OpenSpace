@@ -50,7 +50,7 @@ uniform float colorFilterValue;
 uniform vec3 sunPosition;
 uniform vec3 sunPositionObj;
 uniform vec3 camPositionObj;
-uniform vec3 camPositionObjRaw; // Used for phase functions.
+uniform vec3 camPositionObjRaw;
 uniform float nightFactor;
 uniform float zFightingPercentage;
 uniform float opacity;
@@ -58,7 +58,7 @@ uniform vec3 ellipsoidRadii;
 
 vec3 toneMap(vec3 color) {
     // Rec.709 -> ACEScg approximation
-    mat3 inputMatrix = mat3(
+    const mat3 InputMatrix = mat3(
         0.84247906224151, 0.04232824226101, 0.04237565490570,
         0.07781254037158, 0.87843363533593, 0.07843363533593,
         0.07970839738700, 0.07923812240305, 0.87919070975837
@@ -150,7 +150,7 @@ Fragment getFragment() {
 
   // Phase functions
   float costheta = dot(normalize(camPositionObjRaw - in_data.posObj), sunPositionObj);
-  float alpha = acos(clamp(costheta, -1.0, 1.0)); // Alpha is the phase angle.
+  float alpha = acos(clamp(costheta, -1.0, 1.0)); // Alpha is the phase angle
 
   // Separate phase functions combined together: Porco, C., et al. (2008) is
   // used for the power law function.

@@ -488,7 +488,7 @@ void RingsComponent::draw(const RenderData& data, const ShadowComponent::ShadowM
             _camPositionObjectSpace
         );
         _shader->setUniform(
-            _uniformCacheAdvancedRings.camPositionObjRaw, // Not normalized.
+            _uniformCacheAdvancedRings.camPositionObjRaw,
             _camPositionObjectSpaceRaw
         );
 
