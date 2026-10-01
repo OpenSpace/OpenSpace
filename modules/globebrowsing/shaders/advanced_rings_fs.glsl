@@ -54,6 +54,7 @@ uniform float opacity;
 uniform vec3 ellipsoidRadii;
 
 vec3 toneMap(vec3 color) {
+    // Rec.709 → ACEScg approximation
     mat3 inputMatrix = mat3(
         0.84247906224151, 0.04232824226101, 0.04237565490570,
         0.07781254037158, 0.87843363533593, 0.07843363533593,
@@ -62,18 +63,28 @@ vec3 toneMap(vec3 color) {
     color = inputMatrix * color;
     color = clamp(log2(color + 0.0001) / 16.0 + 0.5, 0.0, 1.0);
 
+    // Polynomial approximation for ACES S-curve.
     vec3 c2 = color * color;
     vec3 c3 = c2 * color;
     vec3 c4 = c3 * color;
     vec3 c5 = c4 * color;
     color = 15.53 * c5 - 40.07 * c4 + 31.96 * c3 - 6.87 * c2 + 0.45 * color;
 
+    // ACEScg → Rec.709 conversion
     mat3 outputMatrix = mat3(
         1.1961604724, -0.0528489811, -0.0528489811,
         -0.0984852928, 1.1528414546, -0.0984852928,
         -0.0976751805, -0.0999924735, 1.1513342746
     );
+
     return clamp(outputMatrix * color, 0.0, 1.0);
+}
+
+float HG(float costheta, float g)
+{
+    const float FOURPI = 12.566371;
+    float g_sq = g*g;
+    return (1.0 - g_sq) / (FOURPI * pow(((g_sq + 1.0) - g*2 * costheta), 1.5));
 }
 
 Fragment getFragment() {
