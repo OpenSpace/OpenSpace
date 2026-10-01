@@ -53,7 +53,7 @@ uniform float zFightingPercentage;
 uniform float opacity;
 uniform vec3 ellipsoidRadii;
 
-vec3 ToneMap(vec3 color) {
+vec3 toneMap(vec3 color) {
     mat3 inputMatrix = mat3(
         0.84247906224151, 0.04232824226101, 0.04237565490570,
         0.07781254037158, 0.87843363533593, 0.07843363533593,
