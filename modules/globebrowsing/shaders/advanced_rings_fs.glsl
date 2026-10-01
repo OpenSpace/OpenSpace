@@ -71,7 +71,7 @@ vec3 toneMap(vec3 color) {
     vec3 c3 = c2 * color;
     vec3 c4 = c3 * color;
     vec3 c5 = c4 * color;
-    color = 15.53 * c5 - 40.07 * c4 + 31.96 * c3 - 6.87 * c2 + 0.45 * color;
+    vec3 result = 15.53 * c5 - 40.07 * c4 + 31.96 * c3 - 6.87 * c2 + 0.45 * color;
 
     // ACEScg → Rec.709 conversion
     mat3 outputMatrix = mat3(
