@@ -708,6 +708,86 @@ int propertyGetValue(lua_State* L) {
     prop->getLuaValue(L);
     return 1;
 }
+
+int propertyGetEnabled(lua_State* L) {
+    lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetEnabled");
+    const std::string uri = lua::value<std::string>(L);
+
+    Property* prop = property(uri);
+    if (!prop) {
+        LERRORC(
+            "propertyGetEnabled",
+            std::format(
+                "{}: Property with URI '{}' was not found",
+                lua::errorLocation(L), uri
+            )
+        );
+        return 0;
+    }
+
+    bool isEnabled = prop->isEnabled();
+    lua::push(L, isEnabled);
+
+    return 1;
+}
+
+int propertyGetEnablable(lua_State* L) {
+    lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetEnablable");
+    const std::string uri = lua::value<std::string>(L);
+
+    Property* prop = property(uri);
+    if (!prop) {
+        LERRORC(
+            "propertyGetEnablable",
+            std::format(
+                "{}: Property with URI '{}' was not found",
+                lua::errorLocation(L), uri
+            )
+        );
+        return 0;
+    }
+
+    bool isEnablable = prop->isEnablable();
+    lua::push(L, isEnablable);
+
+    return 1;
+}
+
+int propertySetEnabled(lua_State* L) {
+    lua::checkArgumentsAndThrow(L, 2, "lua::propertySetEnabled");
+    auto [uri, isEnabled] = lua::values<std::string, bool>(L);
+
+    Property* prop = property(uri);
+    if (!prop) {
+        LERRORC(
+            "propertySetEnabled",
+            std::format(
+                "{}: Property with URI '{}' was not found",
+                lua::errorLocation(L), uri
+            )
+        );
+        return 0;
+    }
+
+    if (!prop->isEnablable()) {
+        LERRORC(
+            "propertySetEnabled",
+            std::format(
+                "{}: Property with URI '{}' is not enablable",
+                lua::errorLocation(L), uri
+            )
+        );
+        return 0;
+    }
+
+    if (global::sessionRecordingHandler->isRecording()) {
+        global::sessionRecordingHandler->savePropertyEnabledBaseline(*prop);
+    }
+
+    prop->setIsEnabled(isEnabled ? Property::IsEnabled::Yes : Property::IsEnabled::No);
+    return 0;
+}
+
 } // namespace openspace::luascriptfunctions
 
 namespace {
