@@ -130,7 +130,7 @@ private:
     /// The file version for the requested files
     int _version = -1;
 
-    bool _shouldUnzipFiles = false;
+    bool _unzipFiles = false;
     std::optional<std::string> _unzipFilesDestination = std::nullopt;
 
     /// The list of all repositories that we'll try to sync from

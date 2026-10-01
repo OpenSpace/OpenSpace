@@ -36,7 +36,6 @@
 #include <openspace/util/httprequest.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <zip/zip.h>
 #include <algorithm>
 #include <cstdint>
 #include <fstream>
@@ -86,16 +85,6 @@ namespace {
         // symbolic value `math.huge` is used, a file is never redownloaded after the
         // first time.
         std::optional<double> secondsUntilResync [[codegen::greaterequal(0.0)]];
-
-        // Determines whether .zip files that are downloaded should automatically be
-        // unzipped. If this value is not specified, no unzipping is performed.
-        std::optional<bool> unzipFiles;
-
-        // The destination for the unzipping. If this value is specified, all zip files
-        // contained in the synchronization will be unzipped into the same specified
-        // folder. If this value is specified, but 'unzipFiles' is false, no extaction
-        // will be performed.
-        std::optional<std::string> unzipFilesDestination;
     };
 } // namespace
 #include "urlsynchronization_codegen.cpp"
@@ -154,11 +143,6 @@ UrlSynchronization::UrlSynchronization(const Dictionary& dictionary,
             "Optionally, use SecondsUntilResync instead to specify file validity date.",
             p.identifier
         ));
-    }
-
-    _shouldUnzipFiles = p.unzipFiles.value_or(_shouldUnzipFiles);
-    if (p.unzipFilesDestination.has_value()) {
-        _unzipFilesDestination = *p.unzipFilesDestination;
     }
 }
 
@@ -460,36 +444,6 @@ bool UrlSynchronization::trySyncUrls() {
             DownloadEventEngine::DownloadEvent::Type::Finished
         );
         LDEBUG(std::format("Finished downloading '{}'", d->url()));
-
-        if (_shouldUnzipFiles && originalName.extension() == ".zip") {
-            std::string source = originalName.string();
-            const std::filesystem::path dest =
-                _unzipFilesDestination.has_value() ?
-                (originalName.parent_path() / *_unzipFilesDestination) :
-                originalName.parent_path();
-
-            std::error_code ec;
-            std::filesystem::create_directories(dest, ec);
-
-            struct zip_t* z = zip_open(source.c_str(), 0, 'r');
-            const bool is64 = zip_is64(z) == 1;
-            zip_close(z);
-
-            if (is64) {
-                LERROR(std::format("Error while unzipping '{}': Zip64 archives are not supported", source));
-                failed = true;
-                continue;
-            }
-
-            int ret = zip_extract(source.c_str(), dest.string().c_str(), nullptr, nullptr);
-            if (ret != 0) {
-                LERROR(std::format("Error '{}' while unzipping '{}'", ret, source));
-                failed = true;
-                continue;
-            }
-
-            std::filesystem::remove(source);
-        }
     }
 
     return !failed;

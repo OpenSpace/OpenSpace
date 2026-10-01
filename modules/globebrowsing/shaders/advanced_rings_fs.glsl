@@ -110,11 +110,11 @@ Fragment getFragment() {
   //   colorBckwrd * vec4(1, 0.88, 0.82, 1.0),
   //   lerpFactor
   // );
-  diffuse.a = colorFilterValue * transparency;
-  float colorValue = length(diffuse.rgb) / 0.57735026919;
-  if (colorValue < 0.001) {
-    discard;
-  }
+  // diffuse.a = colorFilterValue * transparency;
+  // float colorValue = length(diffuse.rgb) / 0.57735026919;
+  // if (colorValue < 0.001) {
+  //   discard;
+  // }
 
   // Check if ray from fragment to sun intersects the ellipsoid (globe)
   // This creates more accurate shadowing for rings
@@ -137,9 +137,9 @@ Fragment getFragment() {
   // Code below by Joshua Carter © 2026 under MIT license - - - - - - - - - - - - // START
   float costheta = dot(normalize(camPositionObjRaw - in_data.posObj), sunPositionObj);
   float alpha = acos(clamp(costheta, -1.0, 1.0)); // Alpha is the phase angle.
-  
+
   // Separate phase functions combined together: Porco, C., et al. (2008) is used for the power law function.
-  float gen_phase_func = 0.153 * pow(3.092, (3.1415926 - alpha)); 
+  float gen_phase_func = 0.153 * pow(3.092, (3.1415926 - alpha));
   float fwsc_phase_func = HG(costheta, -0.95);
   float opposition_surge = (1.5 * exp(-alpha / 0.009)) + 1;
 

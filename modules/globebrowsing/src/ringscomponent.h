@@ -83,7 +83,6 @@ public:
     glm::vec2 textureOffset() const;
     glm::vec3 sunPositionObj() const;
     glm::vec3 camPositionObj() const;
-    glm::vec3 camPositionObjRaw() const;
 
     void setEllipsoidRadii(glm::vec3 radii);
 
@@ -141,6 +140,7 @@ private:
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
     glm::vec3 _camPositionObjectSpace = glm::vec3(0.f);
+    glm::vec3 _camPositionObjectSpaceRaw = glm::vec3(0.f);
     glm::vec3 _ellipsoidRadii = glm::vec3(1.f);
 
     // Callback for readiness state changes
