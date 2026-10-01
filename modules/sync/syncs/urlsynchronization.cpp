@@ -156,7 +156,7 @@ UrlSynchronization::UrlSynchronization(const Dictionary& dictionary,
         ));
     }
 
-    _unzipFiles = p.unzipFiles.value_or(_unzipFiles);
+    _shouldUnzipFiles = p.unzipFiles.value_or(_shouldUnzipFiles);
     if (p.unzipFilesDestination.has_value()) {
         _unzipFilesDestination = *p.unzipFilesDestination;
     }
@@ -461,7 +461,7 @@ bool UrlSynchronization::trySyncUrls() {
         );
         LDEBUG(std::format("Finished downloading '{}'", d->url()));
 
-        if (_unzipFiles && originalName.extension() == ".zip") {
+        if (_shouldUnzipFiles && originalName.extension() == ".zip") {
             std::string source = originalName.string();
             const std::filesystem::path dest =
                 _unzipFilesDestination.has_value() ?
