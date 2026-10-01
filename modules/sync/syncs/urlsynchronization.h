@@ -115,6 +115,9 @@ private:
     /// Contains a flag whether the current transfer should be cancelled
     std::atomic_bool _shouldCancel = false;
 
+    bool _unzipFiles = false;
+    std::optional<std::string> _unzipFilesDestination = std::nullopt;
+
     /// The thread that will be doing the synchronization
     std::thread _syncThread;
 
