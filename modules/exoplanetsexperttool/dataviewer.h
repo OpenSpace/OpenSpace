@@ -89,6 +89,7 @@ public:
     const DataSettings::DataMapping& dataMapping() const;
     const DataSettings& dataSettings() const;
     bool filterChanged() const;
+    bool colormapChanged() const;
 
     ColorMappingView* colorMappingView();
     SystemViewer* systemViewer();

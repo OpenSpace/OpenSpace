@@ -426,6 +426,10 @@ bool DataViewer::filterChanged() const {
     return _filterChanged;
 }
 
+bool DataViewer::colormapChanged() const {
+    return _colormapWasChanged;
+}
+
 ColorMappingView* DataViewer::colorMappingView() {
     return _colorMappingView.get();
 }

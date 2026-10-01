@@ -132,6 +132,14 @@ private:
     void renderCurrentSelectionActions();
     void renderSavedSelectionsManager();
 
+    struct ConstellationLineSegment {
+        std::vector<float> ra;
+        std::vector<float> dec;
+    };
+
+    void initConstellationLines() const;
+    void renderConstellationLines(const glm::vec4& color, float lineWeight = 1.0f) const;
+
     std::vector<size_t> computeCurrentSpatialSelection() const;
     void applyCurrentSelection();
     void applyCombinedSavedSelections();
@@ -170,6 +178,12 @@ private:
     /// Whether changing parameters immediately updates the active selection in DataViewer
     bool _liveUpdate = true;
 
+    /// Whether constellation lines are rendered on the sky map
+    bool _showConstellations = true;
+
+    /// Whether constellation lines are rendered on top of planet points
+    bool _showConstellationsOnTop = false;
+
     /// Text buffer for naming new saved selections
     char _saveNameBuffer[128] = "";
 
@@ -178,6 +192,15 @@ private:
 
     /// Cached Declination values for the 2D sky map plot
     mutable std::vector<float> _cachedDec;
+
+    /// Cached point colors (as packed ImU32 RGBA) for the 2D sky map scatter plot
+    mutable std::vector<unsigned int> _cachedColors;
+
+    /// Cached 2D constellation line segments (in degrees RA/Dec)
+    mutable std::vector<ConstellationLineSegment> _cachedConstellationLines;
+
+    /// Flag indicating whether constellation lines have been loaded
+    mutable bool _constellationLinesLoaded = false;
 
     /// Dirty flag indicating if the 2D sky map cache needs updating
     mutable bool _skyMapCacheDirty = true;
