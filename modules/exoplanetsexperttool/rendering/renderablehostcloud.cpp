@@ -156,8 +156,8 @@ RenderableHostCloud::RenderableHostCloud(const ghoul::Dictionary& dictionary)
     , _orientationRenderOption(OrientationRenderOptionInfo)
     , _darkenFactor(DarkenFactorInfo, 0.3f, 0.f, 1.f)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
-    , _useSecondColor(UseSecondMappedColorInfo, false)
     , _shouldBlurPoints(ShouldBlurPointsInfo, true)
+    , _useSecondColor(UseSecondMappedColorInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
