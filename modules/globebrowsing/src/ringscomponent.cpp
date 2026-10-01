@@ -479,7 +479,7 @@ void RingsComponent::draw(const RenderData& data, const ShadowComponent::ShadowM
         _camPositionObjectSpace = glm::normalize(
             glm::vec3(camToObjectTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0))
         );
-        _camPositionObjectSpaceRaw = glm::vec3(  // Not normalized.
+        _camPositionObjectSpaceRaw = glm::vec3(
             camToObjectTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0)
         );
 
