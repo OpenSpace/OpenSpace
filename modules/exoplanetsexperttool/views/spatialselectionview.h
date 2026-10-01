@@ -138,7 +138,6 @@ private:
     };
 
     void initConstellationLines() const;
-    void renderConstellationLines(const glm::vec4& color, float lineWeight = 1.0f) const;
 
     std::vector<size_t> computeCurrentSpatialSelection() const;
     void applyCurrentSelection();
@@ -198,6 +197,9 @@ private:
 
     /// Cached 2D constellation line segments (in degrees RA/Dec)
     mutable std::vector<ConstellationLineSegment> _cachedConstellationLines;
+
+    /// Cached zodiac constellation line segments (in degrees RA/Dec)
+    mutable std::vector<ConstellationLineSegment> _cachedZodiacLines;
 
     /// Flag indicating whether constellation lines have been loaded
     mutable bool _constellationLinesLoaded = false;

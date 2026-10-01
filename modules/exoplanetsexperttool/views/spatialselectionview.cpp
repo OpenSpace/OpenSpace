@@ -47,7 +47,7 @@ struct SkyPoint {
 
 // Constellation stick-figure polylines in ICRS (RA, Dec in degrees, J2000)
 // Converted from Digital Universe Atlas v3 (AMNH/Hayden) Galactic XYZ coordinates
-const std::vector<std::vector<SkyPoint>> ConstellationLines = {
+const std::vector<std::vector<SkyPoint>> OtherConstellationLines = {
     // And: North Arm
     {
         { 2.1f, 29.09f }, { 9.09f, 33.64f }, { 14.19f, 38.5f },
@@ -68,20 +68,6 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
         { 221.96f, -79.04f }, { 245.11f, -78.67f }, { 248.36f, -78.9f },
         { 250.77f, -77.52f }
     },
-    // Aqr: Main Branch
-    {
-        { 311.92f, -9.5f }, { 322.89f, -5.57f }, { 331.45f, -0.32f },
-        { 335.41f, -1.39f }, { 337.21f, -0.02f }, { 338.84f, -0.12f },
-        { 348.58f, -6.05f }, { 343.15f, -7.58f }, { 342.4f, -13.59f },
-        { 343.66f, -15.82f }, { 347.36f, -21.17f }
-    },
-    // Aqr: Top of the Jug
-    { { 336.32f, 1.38f }, { 337.21f, -0.02f } },
-    // Aqr: Alpha branch
-    {
-        { 331.45f, -0.32f }, { 334.21f, -7.78f }, { 332.66f, -11.56f },
-        { 331.61f, -13.87f }
-    },
     // Aql: Wings
     {
         { 284.91f, 15.07f }, { 286.35f, 13.86f }, { 296.56f, 10.61f },
@@ -100,11 +86,6 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
     { { 261.35f, -56.38f }, { 262.77f, -60.68f } },
     // Ara: Eta leg
     { { 254.65f, -55.99f }, { 252.45f, -59.04f } },
-    // Ari: Aries
-    {
-        { 28.38f, 19.29f }, { 28.66f, 20.81f }, { 31.79f, 23.46f },
-        { 42.5f, 27.26f }
-    },
     // Aur: Auriga
     {
         { 81.57f, 28.61f }, { 89.93f, 37.21f }, { 89.88f, 44.95f },
@@ -129,10 +110,6 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
         { 52.48f, 58.88f }, { 57.38f, 65.53f }, { 57.59f, 71.33f },
         { 75.85f, 60.44f }, { 74.32f, 53.75f }
     },
-    // Cnc: Lower part
-    { { 134.62f, 11.86f }, { 131.17f, 18.16f }, { 124.13f, 9.19f } },
-    // Cnc: Upper part
-    { { 131.17f, 18.16f }, { 130.82f, 21.47f }, { 131.67f, 28.76f } },
     // CVn: Canes Venatici
     { { 194.01f, 38.32f }, { 188.44f, 41.36f } },
     // CMa: Upper part
@@ -151,17 +128,6 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
     { { 108.7f, -26.77f }, { 109.68f, -24.95f } },
     // CMi: Canis Minor
     { { 114.83f, 5.23f }, { 111.79f, 8.29f } },
-    // Cap: Upper part
-    {
-        { 304.51f, -12.54f }, { 305.25f, -14.78f }, { 316.49f, -17.23f },
-        { 320.56f, -16.83f }, { 325.02f, -16.66f }, { 326.76f, -16.13f }
-    },
-    // Cap: Lower part
-    {
-        { 326.76f, -16.13f }, { 324.27f, -19.47f }, { 321.67f, -22.41f },
-        { 316.78f, -25.01f }, { 312.96f, -26.92f }, { 311.52f, -25.27f },
-        { 305.25f, -14.78f }
-    },
     // Car: Carina
     {
         { 146.78f, -65.07f }, { 138.3f, -69.72f }, { 153.43f, -70.04f },
@@ -307,17 +273,6 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
     },
     // For: furnace
     { { 48.02f, -28.99f }, { 42.27f, -32.41f }, { 31.12f, -29.3f } },
-    // Gem: Bodies
-    {
-        { 95.74f, 22.51f }, { 100.98f, 25.13f }, { 107.79f, 30.25f },
-        { 113.65f, 31.89f }, { 116.33f, 28.03f }, { 110.03f, 21.98f },
-        { 106.03f, 20.57f }, { 99.43f, 16.4f }
-    },
-    // Gem: Feet
-    {
-        { 101.32f, 12.9f }, { 99.43f, 16.4f }, { 97.24f, 20.21f },
-        { 95.74f, 22.51f }, { 93.72f, 22.51f }
-    },
     // Gru: Body
     {
         { 328.48f, -37.36f }, { 331.53f, -39.54f }, { 333.9f, -41.35f },
@@ -376,17 +331,6 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
         { 335.26f, 46.54f }, { 337.38f, 47.71f }, { 336.13f, 49.48f },
         { 337.82f, 50.28f }, { 335.89f, 52.23f }
     },
-    // Leo: body
-    {
-        { 152.09f, 11.97f }, { 168.56f, 15.43f }, { 177.27f, 14.57f },
-        { 168.53f, 20.52f }, { 154.99f, 19.84f }, { 151.83f, 16.76f },
-        { 152.09f, 11.97f }
-    },
-    // Leo: Head
-    {
-        { 154.99f, 19.84f }, { 154.17f, 23.42f }, { 148.19f, 26.01f },
-        { 146.46f, 23.77f }
-    },
     // LMi: Leo Minor
     { { 163.33f, 34.22f }, { 156.97f, 36.71f }, { 151.86f, 35.24f } },
     // Lep: Upper part
@@ -401,14 +345,6 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
     },
     // Lep: connecting part
     { { 83.18f, -17.82f }, { 82.06f, -20.76f } },
-    // Lib: main part
-    {
-        { 239.55f, -14.28f }, { 238.46f, -16.73f }, { 236.02f, -15.67f },
-        { 233.88f, -14.79f }, { 229.25f, -9.38f }, { 222.72f, -16.04f },
-        { 226.02f, -25.28f }, { 234.26f, -28.14f }, { 234.66f, -29.78f }
-    },
-    // Lib: connecting part
-    { { 229.25f, -9.38f }, { 226.02f, -25.28f } },
     // Lup: main part
     {
         { 241.82f, -36.76f }, { 240.03f, -38.4f }, { 233.78f, -41.17f },
@@ -535,15 +471,6 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
     },
     // Pic: easel
     { { 86.82f, -51.07f }, { 87.46f, -56.17f }, { 102.05f, -61.94f } },
-    // Psc: fishes
-    {
-        { 354.99f, 5.63f }, { 355.51f, 1.78f }, { 351.73f, 1.26f },
-        { 349.29f, 3.28f }, { 351.99f, 6.38f }, { 354.99f, 5.63f },
-        { 359.83f, 6.86f }, { 12.17f, 7.59f }, { 15.74f, 7.89f },
-        { 25.36f, 5.49f }, { 30.51f, 2.76f }, { 26.35f, 9.16f },
-        { 22.87f, 15.35f }, { 18.44f, 24.58f }, { 19.87f, 27.26f },
-        { 17.91f, 30.09f }
-    },
     // PsA: south fish
     {
         { 344.41f, -29.62f }, { 343.99f, -32.54f }, { 343.13f, -32.88f },
@@ -569,43 +496,6 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
     { { 295.02f, 18.01f }, { 296.85f, 18.53f }, { 295.26f, 17.48f } },
     // Sge: front
     { { 296.85f, 18.53f }, { 299.69f, 19.49f } },
-    // Sgr: teapot
-    {
-        { 274.41f, -36.76f }, { 276.04f, -34.38f }, { 275.25f, -29.83f },
-        { 276.99f, -25.42f }, { 281.41f, -26.99f }, { 285.65f, -29.88f },
-        { 286.73f, -27.67f }, { 283.82f, -26.3f }, { 281.41f, -26.99f }
-    },
-    // Sgr: spout
-    { { 275.25f, -29.83f }, { 271.45f, -30.42f }, { 266.89f, -27.83f } },
-    // Sgr: lid
-    { { 276.99f, -25.42f }, { 273.57f, -21.71f } },
-    // Sgr: top handle
-    {
-        { 283.82f, -26.3f }, { 286.17f, -21.74f }, { 287.44f, -21.02f },
-        { 290.42f, -17.85f }
-    },
-    // Sgr: top handle 2
-    { { 286.17f, -21.74f }, { 284.43f, -21.11f } },
-    // Sgr: lower handle
-    {
-        { 286.73f, -27.67f }, { 294.18f, -24.88f }, { 300.66f, -27.71f },
-        { 299.93f, -35.28f }, { 298.82f, -41.87f }, { 290.8f, -44.8f }
-    },
-    // Sgr: lower handle 2
-    { { 298.82f, -41.87f }, { 290.97f, -40.62f } },
-    // Sco: Head
-    {
-        { 243.f, -19.46f }, { 241.36f, -19.81f }, { 240.08f, -22.62f },
-        { 239.71f, -26.11f }, { 239.22f, -29.21f }
-    },
-    // Sco: body
-    {
-        { 240.08f, -22.62f }, { 245.3f, -25.59f }, { 247.35f, -26.43f },
-        { 248.97f, -28.22f }, { 252.54f, -34.29f }, { 252.97f, -38.05f },
-        { 253.65f, -42.36f }, { 258.04f, -43.24f }, { 264.33f, -43.f },
-        { 266.9f, -40.13f }, { 265.62f, -39.03f }, { 263.4f, -37.1f },
-        { 262.69f, -37.3f }
-    },
     // Scl: sculptor
     {
         { 353.24f, -37.82f }, { 349.71f, -32.53f }, { 357.23f, -28.13f },
@@ -628,17 +518,6 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
     },
     // Sex: sextant
     { { 157.57f, -0.64f }, { 151.98f, -0.37f }, { 148.13f, -8.1f } },
-    // Tau: the horns
-    {
-        { 81.57f, 28.61f }, { 67.15f, 19.18f }, { 65.73f, 17.54f },
-        { 64.95f, 15.63f }, { 67.17f, 15.87f }, { 68.98f, 16.51f },
-        { 84.41f, 21.14f }
-    },
-    // Tau: the front
-    {
-        { 64.95f, 15.63f }, { 60.17f, 12.49f }, { 51.79f, 9.73f },
-        { 51.2f, 9.03f }
-    },
     // Tel: scope
     { { 277.21f, -49.07f }, { 276.74f, -45.97f }, { 272.81f, -45.95f } },
     // Tri: Triangulum
@@ -693,6 +572,138 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
         { 131.1f, -42.65f }, { 137.f, -43.43f }, { 142.68f, -40.47f },
         { 153.68f, -42.12f }, { 159.33f, -48.23f }, { 161.69f, -49.42f }
     },
+    // Vol: fish
+    {
+        { 135.61f, -66.4f }, { 126.43f, -66.14f }, { 121.98f, -68.62f },
+        { 115.45f, -72.61f }, { 107.19f, -70.5f }, { 109.21f, -67.96f },
+        { 121.98f, -68.62f }
+    },
+    // Vul: fox
+    { { 289.43f, 23.03f }, { 292.18f, 24.67f }, { 298.37f, 24.08f } }
+};
+
+const std::vector<std::vector<SkyPoint>> ZodiacConstellationLines = {
+    // Aqr: Main Branch
+    {
+        { 311.92f, -9.5f }, { 322.89f, -5.57f }, { 331.45f, -0.32f },
+        { 335.41f, -1.39f }, { 337.21f, -0.02f }, { 338.84f, -0.12f },
+        { 348.58f, -6.05f }, { 343.15f, -7.58f }, { 342.4f, -13.59f },
+        { 343.66f, -15.82f }, { 347.36f, -21.17f }
+    },
+    // Aqr: Top of the Jug
+    { { 336.32f, 1.38f }, { 337.21f, -0.02f } },
+    // Aqr: Alpha branch
+    {
+        { 331.45f, -0.32f }, { 334.21f, -7.78f }, { 332.66f, -11.56f },
+        { 331.61f, -13.87f }
+    },
+    // Ari: Aries
+    {
+        { 28.38f, 19.29f }, { 28.66f, 20.81f }, { 31.79f, 23.46f },
+        { 42.5f, 27.26f }
+    },
+    // Cnc: Lower part
+    { { 134.62f, 11.86f }, { 131.17f, 18.16f }, { 124.13f, 9.19f } },
+    // Cnc: Upper part
+    { { 131.17f, 18.16f }, { 130.82f, 21.47f }, { 131.67f, 28.76f } },
+    // Cap: Upper part
+    {
+        { 304.51f, -12.54f }, { 305.25f, -14.78f }, { 316.49f, -17.23f },
+        { 320.56f, -16.83f }, { 325.02f, -16.66f }, { 326.76f, -16.13f }
+    },
+    // Cap: Lower part
+    {
+        { 326.76f, -16.13f }, { 324.27f, -19.47f }, { 321.67f, -22.41f },
+        { 316.78f, -25.01f }, { 312.96f, -26.92f }, { 311.52f, -25.27f },
+        { 305.25f, -14.78f }
+    },
+    // Gem: Bodies
+    {
+        { 95.74f, 22.51f }, { 100.98f, 25.13f }, { 107.79f, 30.25f },
+        { 113.65f, 31.89f }, { 116.33f, 28.03f }, { 110.03f, 21.98f },
+        { 106.03f, 20.57f }, { 99.43f, 16.4f }
+    },
+    // Gem: Feet
+    {
+        { 101.32f, 12.9f }, { 99.43f, 16.4f }, { 97.24f, 20.21f },
+        { 95.74f, 22.51f }, { 93.72f, 22.51f }
+    },
+    // Leo: body
+    {
+        { 152.09f, 11.97f }, { 168.56f, 15.43f }, { 177.27f, 14.57f },
+        { 168.53f, 20.52f }, { 154.99f, 19.84f }, { 151.83f, 16.76f },
+        { 152.09f, 11.97f }
+    },
+    // Leo: Head
+    {
+        { 154.99f, 19.84f }, { 154.17f, 23.42f }, { 148.19f, 26.01f },
+        { 146.46f, 23.77f }
+    },
+    // Lib: main part
+    {
+        { 239.55f, -14.28f }, { 238.46f, -16.73f }, { 236.02f, -15.67f },
+        { 233.88f, -14.79f }, { 229.25f, -9.38f }, { 222.72f, -16.04f },
+        { 226.02f, -25.28f }, { 234.26f, -28.14f }, { 234.66f, -29.78f }
+    },
+    // Lib: connecting part
+    { { 229.25f, -9.38f }, { 226.02f, -25.28f } },
+    // Psc: fishes
+    {
+        { 354.99f, 5.63f }, { 355.51f, 1.78f }, { 351.73f, 1.26f },
+        { 349.29f, 3.28f }, { 351.99f, 6.38f }, { 354.99f, 5.63f },
+        { 359.83f, 6.86f }, { 12.17f, 7.59f }, { 15.74f, 7.89f },
+        { 25.36f, 5.49f }, { 30.51f, 2.76f }, { 26.35f, 9.16f },
+        { 22.87f, 15.35f }, { 18.44f, 24.58f }, { 19.87f, 27.26f },
+        { 17.91f, 30.09f }
+    },
+    // Sgr: teapot
+    {
+        { 274.41f, -36.76f }, { 276.04f, -34.38f }, { 275.25f, -29.83f },
+        { 276.99f, -25.42f }, { 281.41f, -26.99f }, { 285.65f, -29.88f },
+        { 286.73f, -27.67f }, { 283.82f, -26.3f }, { 281.41f, -26.99f }
+    },
+    // Sgr: spout
+    { { 275.25f, -29.83f }, { 271.45f, -30.42f }, { 266.89f, -27.83f } },
+    // Sgr: lid
+    { { 276.99f, -25.42f }, { 273.57f, -21.71f } },
+    // Sgr: top handle
+    {
+        { 283.82f, -26.3f }, { 286.17f, -21.74f }, { 287.44f, -21.02f },
+        { 290.42f, -17.85f }
+    },
+    // Sgr: top handle 2
+    { { 286.17f, -21.74f }, { 284.43f, -21.11f } },
+    // Sgr: lower handle
+    {
+        { 286.73f, -27.67f }, { 294.18f, -24.88f }, { 300.66f, -27.71f },
+        { 299.93f, -35.28f }, { 298.82f, -41.87f }, { 290.8f, -44.8f }
+    },
+    // Sgr: lower handle 2
+    { { 298.82f, -41.87f }, { 290.97f, -40.62f } },
+    // Sco: Head
+    {
+        { 243.f, -19.46f }, { 241.36f, -19.81f }, { 240.08f, -22.62f },
+        { 239.71f, -26.11f }, { 239.22f, -29.21f }
+    },
+    // Sco: body
+    {
+        { 240.08f, -22.62f }, { 245.3f, -25.59f }, { 247.35f, -26.43f },
+        { 248.97f, -28.22f }, { 252.54f, -34.29f }, { 252.97f, -38.05f },
+        { 253.65f, -42.36f }, { 258.04f, -43.24f }, { 264.33f, -43.f },
+        { 266.9f, -40.13f }, { 265.62f, -39.03f }, { 263.4f, -37.1f },
+        { 262.69f, -37.3f }
+    },
+    // Tau: the horns
+    {
+        { 81.57f, 28.61f }, { 67.15f, 19.18f }, { 65.73f, 17.54f },
+        { 64.95f, 15.63f }, { 67.17f, 15.87f }, { 68.98f, 16.51f },
+        { 84.41f, 21.14f }
+    },
+    // Tau: the front
+    {
+        { 64.95f, 15.63f }, { 60.17f, 12.49f }, { 51.79f, 9.73f },
+        { 51.2f, 9.03f }
+    },
     // Vir: legs and body
     {
         { 220.76f, -5.66f }, { 214.f, -6.f }, { 213.22f, -10.27f },
@@ -703,15 +714,7 @@ const std::vector<std::vector<SkyPoint>> ConstellationLines = {
     // Vir: upper arm
     { { 195.54f, 10.96f }, { 193.9f, 3.4f } },
     // Vir: lower arm
-    { { 190.42f, -1.45f }, { 184.98f, -0.67f }, { 177.67f, 1.77f } },
-    // Vol: fish
-    {
-        { 135.61f, -66.4f }, { 126.43f, -66.14f }, { 121.98f, -68.62f },
-        { 115.45f, -72.61f }, { 107.19f, -70.5f }, { 109.21f, -67.96f },
-        { 121.98f, -68.62f }
-    },
-    // Vul: fox
-    { { 289.43f, 23.03f }, { 292.18f, 24.67f }, { 298.37f, 24.08f } }
+    { { 190.42f, -1.45f }, { 184.98f, -0.67f }, { 177.67f, 1.77f } }
 };
 
 
@@ -753,65 +756,48 @@ const SpatialSelectionHandler& SpatialSelectionView::handler() const {
 
 void SpatialSelectionView::initConstellationLines() const {
     _cachedConstellationLines.clear();
+    _cachedZodiacLines.clear();
     _constellationLinesLoaded = true;
 
-    for (const std::vector<SkyPoint>& line : ConstellationLines) {
-        if (line.size() < 2) {
-            continue;
-        }
-
-        ConstellationLineSegment currentSeg;
-        for (const SkyPoint& pt : line) {
-            float ra = std::fmod(pt.ra, 360.f);
-            if (ra < 0.f) {
-                ra += 360.f;
+    const auto cacheLines = [](
+        const std::vector<std::vector<SkyPoint>>& lines,
+        std::vector<ConstellationLineSegment>& cache
+    ) {
+        for (const std::vector<SkyPoint>& line : lines) {
+            if (line.size() < 2) {
+                continue;
             }
-            const float dec = std::clamp(pt.dec, -90.f, 90.f);
 
-            if (!currentSeg.ra.empty()) {
-                const float prevRa = currentSeg.ra.back();
-                if (std::abs(ra - prevRa) > 180.f) {
-                    if (currentSeg.ra.size() >= 2) {
-                        _cachedConstellationLines.push_back(std::move(currentSeg));
-                    }
-                    currentSeg = ConstellationLineSegment();
+            ConstellationLineSegment currentSeg;
+            for (const SkyPoint& pt : line) {
+                float ra = std::fmod(pt.ra, 360.f);
+                if (ra < 0.f) {
+                    ra += 360.f;
                 }
+                const float dec = std::clamp(pt.dec, -90.f, 90.f);
+
+                if (!currentSeg.ra.empty()) {
+                    const float prevRa = currentSeg.ra.back();
+                    if (std::abs(ra - prevRa) > 180.f) {
+                        if (currentSeg.ra.size() >= 2) {
+                            cache.push_back(std::move(currentSeg));
+                        }
+                        currentSeg = ConstellationLineSegment();
+                    }
+                }
+
+                currentSeg.ra.push_back(ra);
+                currentSeg.dec.push_back(dec);
             }
 
-            currentSeg.ra.push_back(ra);
-            currentSeg.dec.push_back(dec);
+            if (currentSeg.ra.size() >= 2) {
+                cache.push_back(std::move(currentSeg));
+            }
         }
+    };
 
-        if (currentSeg.ra.size() >= 2) {
-            _cachedConstellationLines.push_back(std::move(currentSeg));
-        }
-    }
-}
-
-void SpatialSelectionView::renderConstellationLines(const glm::vec4& color,
-                                                    float lineWeight) const
-{
-    if (_cachedConstellationLines.empty()) {
-        return;
-    }
-
-    ImPlotSpec lineSpec;
-    lineSpec.LineColor = view::helper::toImVec4(color);
-    lineSpec.LineWeight = lineWeight;
-
-    for (size_t i = 0; i < _cachedConstellationLines.size(); ++i) {
-        const ConstellationLineSegment& seg = _cachedConstellationLines[i];
-        if (seg.ra.size() >= 2) {
-            const std::string lineId = std::format("##const_{}", i);
-            ImPlot::PlotLine(
-                lineId.c_str(),
-                seg.ra.data(),
-                seg.dec.data(),
-                static_cast<int>(seg.ra.size()),
-                lineSpec
-            );
-        }
-    }
+    cacheLines(OtherConstellationLines, _cachedConstellationLines);
+    cacheLines(ZodiacConstellationLines, _cachedZodiacLines);
 }
 
 void SpatialSelectionView::updateSkyMapCache() const {
@@ -1156,6 +1142,26 @@ void SpatialSelectionView::renderSkyMapTab() {
                 const ConstellationLineSegment& seg = _cachedConstellationLines[i];
                 if (seg.ra.size() >= 2) {
                     const std::string lineId = std::format("##const_{}", i);
+                    ImPlot::PlotLine(
+                        lineId.c_str(),
+                        seg.ra.data(),
+                        seg.dec.data(),
+                        static_cast<int>(seg.ra.size()),
+                        lineSpec
+                    );
+                }
+            }
+        }
+
+        if (!_cachedZodiacLines.empty()) {
+            ImPlotSpec lineSpec;
+            lineSpec.LineColor = ImVec4(0.9f, 0.9f, 0.9f, 0.6f);
+            lineSpec.LineWeight = 1.5f;
+
+            for (size_t i = 0; i < _cachedZodiacLines.size(); ++i) {
+                const ConstellationLineSegment& seg = _cachedZodiacLines[i];
+                if (seg.ra.size() >= 2) {
+                    const std::string lineId = std::format("##zodiac_{}", i);
                     ImPlot::PlotLine(
                         lineId.c_str(),
                         seg.ra.data(),
