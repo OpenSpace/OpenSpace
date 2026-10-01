@@ -167,7 +167,7 @@ Fragment getFragment() {
   if (dot(sunPosition, normal) < 0.0) {
     diffuse.rgb =
       vec3(1.0, 0.97075, 0.952) * texture(textureUnlit, texCoords).rgb * nightFactor;
-      diffuse.rgb *= optical_depth; // Phase function varies by optical depth.
+      diffuse.rgb *= optical_depth;
   }
 
   vec4 diffuse = mix(colorFwrd, colorBckwrd, lerpFactor) * colorMult;
