@@ -64,7 +64,7 @@ vec3 toneMap(vec3 color) {
         0.07970839738700, 0.07923812240305, 0.87919070975837
     );
     color = inputMatrix * color;
-    color = clamp(log2(color + 0.0001) / 16.0 + 0.5, 0.0, 1.0);
+    color = log2(clamp(color, 1.0 / 256.0, 256.0)) / 16.0 + 0.5;
 
     // Polynomial approximation for ACES S-curve.
     vec3 c2 = color * color;
