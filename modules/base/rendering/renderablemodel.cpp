@@ -24,7 +24,7 @@
 
 #include <modules/base/rendering/renderablemodel.h>
 
-#include <modules/base/basemodule.h>
+#include <modules/base/basemodule.h>        
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -203,18 +203,13 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UseOverrideColorInfo = {
-        "UseOverrideColor",
-        "Use Override Color",
-        "Whether or not to render model with a single color.",
-        Property::Visibility::AdvancedUser
-    };
-
     constexpr Property::PropertyInfo OverrideColorInfo = {
         "OverrideColor",
         "Override Color",
         "The single color to use for entire model (RGBA).",
-        Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser,
+        Property::NeedsConfirmation::No,
+        Property::IsEnablable::Yes
     };
 
     // Renders a 3D model. The provided model may contain textures and animations and is
@@ -326,9 +321,6 @@ namespace {
         // The path to a fragment shader program to use instead of the default shader.
         std::optional<std::filesystem::path> fragmentShader;
 
-        // [[codegen::verbatim(UseOverrideColorInfo.description)]]
-        std::optional<bool> useOverrideColor;
-
         // [[codegen::verbatim(OverrideColorInfo.description)]]
         std::optional<glm::vec4> overrideColor [[codegen::color()]];
 
@@ -412,8 +404,7 @@ RenderableModel::RenderableModel(const Dictionary& dictionary)
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(BlendingOptionInfo)
     , _renderWireframe(RenderWireframeInfo, false)
-    , _useOverrideColor(UseOverrideColorInfo, false)
-    , _overrideColor(OverrideColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _overrideColor(OverrideColorInfo, Property::IsEnabled::No, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _customNodeTransformsOwner(CustomNodeTransformsInfo)
 {
@@ -536,7 +527,6 @@ RenderableModel::RenderableModel(const Dictionary& dictionary)
         }
     }
 
-    _useOverrideColor = p.useOverrideColor.value_or(_useOverrideColor);
     _overrideColor = p.overrideColor.value_or(_overrideColor);
 
     addProperty(_enableAnimation);
@@ -554,7 +544,6 @@ RenderableModel::RenderableModel(const Dictionary& dictionary)
     addProperty(_modelTransform);
     addProperty(_pivot);
     addProperty(_rotationVec);
-    addProperty(_useOverrideColor);
     _overrideColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_overrideColor);
 
@@ -1133,8 +1122,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.shadow_depth_map, shadowUnit);
     }
 
-    _program->setUniform(_uniformCache.has_override_color, _useOverrideColor);
-    if (_useOverrideColor) {
+    _program->setUniform(_uniformCache.has_override_color, _overrideColor.isEnabled());
+    if (_overrideColor.isEnabled()) {
         _program->setUniform(_uniformCache.override_color, _overrideColor);
     }
 

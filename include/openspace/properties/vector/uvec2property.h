@@ -38,6 +38,11 @@ public:
         glm::uvec2 minValue = glm::uvec2(std::numeric_limits<unsigned int>::lowest()),
         glm::uvec2 maxValue = glm::uvec2(std::numeric_limits<unsigned int>::max()),
         glm::uvec2 stepValue = glm::uvec2(1));
+    explicit UVec2Property(PropertyInfo info, IsEnabled isEnabled,
+        glm::uvec2 value = glm::uvec2(0),
+        glm::uvec2 minValue = glm::uvec2(std::numeric_limits<unsigned int>::lowest()),
+        glm::uvec2 maxValue = glm::uvec2(std::numeric_limits<unsigned int>::max()),
+        glm::uvec2 stepValue = glm::uvec2(1));
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

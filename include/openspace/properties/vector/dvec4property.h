@@ -38,6 +38,11 @@ public:
         glm::dvec4 minValue = glm::dvec4(std::numeric_limits<double>::lowest()),
         glm::dvec4 maxValue = glm::dvec4(std::numeric_limits<double>::max()),
         glm::dvec4 stepValue = glm::dvec4(0.01));
+    explicit DVec4Property(PropertyInfo info, IsEnabled isEnabled,
+        glm::dvec4 value = glm::dvec4(0.0),
+        glm::dvec4 minValue = glm::dvec4(std::numeric_limits<double>::lowest()),
+        glm::dvec4 maxValue = glm::dvec4(std::numeric_limits<double>::max()),
+        glm::dvec4 stepValue = glm::dvec4(0.01));
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

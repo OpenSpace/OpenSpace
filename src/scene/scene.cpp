@@ -1027,6 +1027,51 @@ provided new value, then back to the original value, until manually stopped.
                     std::source_location::current().line()
                 }
             },
+            {
+                "propertyEnabled",
+                &luascriptfunctions::propertyGetEnabled,
+                {
+                    { "uri", "String" }
+                },
+                "Boolean",
+                "Returns true if the property identified by the provided URI is enabled "
+                "and false otherwise. This function will provide an error message if no "
+                "property matching the URI is found, or if the property is not "
+                "enablable.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
+            {
+                "propertyEnablable",
+                &luascriptfunctions::propertyGetEnablable,
+                {
+                    { "uri", "String" }
+                },
+                "Boolean",
+                "Returns true if the property identified by the provided URI is "
+                "enablable and false otherwise. This function will provide an error "
+                "message if no property matching the URI is found.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
+            {
+                "propertySetEnabled",
+                &luascriptfunctions::propertySetEnabled,
+                {
+                    { "uri", "String" },
+                    { "value", "Boolean" }
+                },
+                "",
+                "Sets the enabled setting for the property with the provided uri",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
             codegen::lua::StopPropertyBouncing,
             codegen::lua::HasProperty,
             codegen::lua::Property,

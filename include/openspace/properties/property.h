@@ -72,6 +72,10 @@ class Property {
 public:
     BooleanType(NeedsConfirmation);
 
+    // Enabled state of the property itself    
+    BooleanType(IsEnablable);
+    BooleanType(IsEnabled);
+
     /**
      * The visibility classes for Property%s. The classes are strictly ordered as
      * Hidden > Developer > AdvancedUser > User > NoviceUser > Always
@@ -104,21 +108,25 @@ public:
          * argument for the struct initialization.
          */
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
+                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No,
+                             IsEnablable isEnablable_ = IsEnablable::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
             , needsConfirmation(needsConfirmation_)
+            , isEnablable(isEnablable_)
         {}
 
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
                                Visibility vis,
-                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
+                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No,
+                             IsEnablable isEnablable_ = IsEnablable::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
             , visibility(vis)
             , needsConfirmation(needsConfirmation_)
+            , isEnablable(isEnablable_)
         {}
 
         /// The unique identifier that is part of the fully qualified URI of this Property
@@ -131,6 +139,8 @@ public:
         Visibility visibility = Visibility::Default;
         /// Determines if the Property require confirmation upon value change
         NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
+        /// Determines if the Property is enablable (linked to a boolean)
+        IsEnablable isEnablable = IsEnablable::No;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an
@@ -467,6 +477,32 @@ public:
     bool viewOption(const std::string& option, bool defaultValue = false) const;
 
     /**
+     * Returns whether this Property can be enabled and disabled independently of its
+     * value. This is static metadata that is set through the PropertyInfo.
+     *
+     * \return `IsEnablable::Yes` if the Property is enablable, else `IsEnablable::No`
+     */
+    IsEnablable isEnablable() const;
+
+    /**
+     * Returns whether this Property is currently enabled. The result is only meaningful
+     * if the Property is enablable, see #isEnablable.
+     *
+     * \return `IsEnabled::Yes` if the Property is enabled, else `IsEnabled::No`
+     */
+    IsEnabled isEnabled() const;
+
+    /**
+     * Sets the enabled state of this Property and notifies the change listeners. This
+     * only works for Property%s that are enablable, see #isEnablable.
+     *
+     * \param isEnabled The new enabled state
+     *
+     * \throw RuntimeError If the Property is not enablable
+     */
+    void setIsEnabled(IsEnabled isEnabled);
+
+    /**
      * Get a valid JSON formatted representation of the Property's value.
      *
      * \return The value in a JSON compatible format
@@ -549,6 +585,8 @@ protected:
     /// The user-facing description of this Property
     std::string _description;
 
+    /// If this property is enablable, this will tell if it is enabled or not
+    IsEnabled _isEnabled = IsEnabled::No;
     /**
      * The meta data necessary for external applications.
      */
@@ -557,6 +595,7 @@ protected:
         Visibility visibility = Visibility::Default;
         std::optional<bool> readOnly;
         bool needsConfirmation = false;
+        bool isEnablable = false;
         std::unordered_map<std::string, bool> viewOptions;
     } _metaData;
 

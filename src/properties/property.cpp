@@ -55,6 +55,7 @@ Property::Property(PropertyInfo info)
 
     setVisibility(info.visibility);
     setNeedsConfirmation(info.needsConfirmation);
+    _metaData.isEnablable = info.isEnablable;
 }
 
 Property::~Property() {
@@ -139,6 +140,25 @@ void Property::setViewOption(std::string option, bool value) {
 bool Property::viewOption(const std::string& option, bool defaultValue) const {
     auto it = _metaData.viewOptions.find(option);
     return it != _metaData.viewOptions.end() ? it->second : defaultValue;
+}
+
+Property::IsEnablable Property::isEnablable() const {
+    return _metaData.isEnablable ? IsEnablable::Yes : IsEnablable::No;
+}
+
+Property::IsEnabled Property::isEnabled() const {
+    if (!_metaData.isEnablable) {
+        throw RuntimeError("Tried to get enabled on a property that is not enablable");
+    }
+    return _isEnabled;
+}
+
+void Property::setIsEnabled(IsEnabled isEnabled) {
+    if (!_metaData.isEnablable) {
+        throw RuntimeError("Tried to set enabled on a property that is not enablable");
+    }
+    _isEnabled = isEnabled;
+    notifyChangeListeners();
 }
 
 std::string Property::jsonValue() const {
@@ -258,6 +278,10 @@ void Property::notifyChangeListeners() {
     nlohmann::json payload;
     payload["uri"] = uri();
     payload["value"] = nlohmann::json::parse(jsonValue());
+    // If the property is enablable we send true false, otherwise it will be undefined
+    if (_metaData.isEnablable) {
+        payload["isEnabled"] = _isEnabled ? true : false;
+    }
     payload["type"] = "value";
     global::server->passDataToTopic("propertyTree", payload);
 }
@@ -313,6 +337,7 @@ nlohmann::json Property::generateJsonDescription() const {
         { "group", groupId },
         { "isReadOnly", isReadOnly },
         { "needsConfirmation", _metaData.needsConfirmation },
+        { "isEnablable", _metaData.isEnablable },
         { "type", className() },
         { "visibility", vis }
     };
@@ -359,6 +384,7 @@ nlohmann::json Property::MetaDataSchema() {
             "group": { "type": "string" },
             "isReadOnly": { "type": "boolean" },
             "needsConfirmation": { "type": "boolean" },
+            "isEnablable": { "type": "boolean" },
             "visibility": { "$ref": "#/$defs/PropertyVisibility" }
           },
           "additionalProperties": false,
@@ -369,6 +395,7 @@ nlohmann::json Property::MetaDataSchema() {
             "group",
             "isReadOnly",
             "needsConfirmation",
+            "isEnablable",
             "visibility"
           ]
         }

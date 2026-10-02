@@ -33,6 +33,13 @@ IntListProperty::IntListProperty(PropertyInfo info, std::vector<int> values)
     : ListProperty(std::move(info), std::move(values))
 {}
 
+IntListProperty::IntListProperty(PropertyInfo info, IsEnabled isEnabled,
+                                 std::vector<int> values)
+    : IntListProperty(std::move(info), std::move(values))
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view IntListProperty::className() const {
     return "IntListProperty";
 }

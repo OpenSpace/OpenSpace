@@ -35,6 +35,7 @@ class SelectionProperty : public TemplateProperty<std::set<std::string>> {
 
 public:
     SelectionProperty(Property::PropertyInfo info);
+    SelectionProperty(Property::PropertyInfo info, IsEnabled isEnabled);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

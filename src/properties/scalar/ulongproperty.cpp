@@ -40,6 +40,14 @@ ULongProperty::ULongProperty(Property::PropertyInfo info, unsigned long value,
     )
 {}
 
+ULongProperty::ULongProperty(Property::PropertyInfo info, IsEnabled isEnabled,
+                             unsigned long value, unsigned long minValue,
+                             unsigned long maxValue, unsigned long stepValue)
+    : ULongProperty(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view ULongProperty::className() const {
     return "ULongProperty";
 }

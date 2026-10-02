@@ -33,6 +33,13 @@ ShortProperty::ShortProperty(PropertyInfo info, short value, short minValue,
     : NumericalProperty<short>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
+ShortProperty::ShortProperty(PropertyInfo info, IsEnabled isEnabled, short value,
+                             short minValue, short maxValue, short stepValue)
+    : ShortProperty(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view ShortProperty::className() const {
     return "ShortProperty";
 }
