@@ -215,7 +215,7 @@ public:
      */
     void removeAsset(const std::string& path);
 
-    static constexpr Version CurrentVersion = Version{ 1, 5 };
+    static constexpr Version CurrentVersion = Version{ 1, 6 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;

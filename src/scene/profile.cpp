@@ -750,6 +750,33 @@ static void convertVersion14to15(nlohmann::json& profile) {
 
 } // namespace version14
 
+namespace version15 {
+
+static void convertVersion15to16(nlohmann::json& profile) {
+    // Issue #4281 surfaced a bug in which the asset panel was incorrectly named
+    // (assetsFolderPanel instead of assetsPanel) and the state of the devPanel
+    // was stored as well which only exists in debug builds of the UI.
+
+    profile["version"] = Profile::Version{ 1, 6 };
+    if (profile.find("panel_visibility") == profile.end()) {
+        // No visibility exists, nothing to do here
+        return;
+    }
+
+    nlohmann::json& panelVisibility = profile["panel_visibility"];
+    if (panelVisibility.contains("assetsFolderPanel")) {
+        // Rename assetsFolderPanel to assetsPanel
+        panelVisibility["assetsPanel"] = panelVisibility["assetsFolderPanel"];
+        panelVisibility.erase("assetsFolderPanel");
+    }
+
+    if (panelVisibility.contains("devPanel")) {
+        panelVisibility.erase("devPanel");
+    }
+}
+
+} // namespace version15
+
 Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
     : RuntimeError(std::move(msg), "profile")
     , severity(severity_)
@@ -919,6 +946,11 @@ Profile::Profile(const std::filesystem::path& path) {
 
         if (version.major == 1 && version.minor == 4) {
             version14::convertVersion14to15(profile);
+            profile["version"].get_to(version);
+        }
+
+        if (version.major == 1 && version.minor == 5) {
+            version15::convertVersion15to16(profile);
             profile["version"].get_to(version);
         }
 
