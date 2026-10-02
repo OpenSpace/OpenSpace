@@ -4,5 +4,12 @@
   "workspace.library": [
     "documentation/lua",
     "support/types/asset.lua"
-  ]
+  ],
+  "workspace.ignoreDir": [
+    "/*",
+    "!/data",
+    "!/user"
+  ],
+  "workspace.useGitIgnore": false,
+  "workspace.maxPreload": 50000
 }
