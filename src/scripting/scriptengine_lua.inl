@@ -295,21 +295,24 @@ int printFatal(lua_State* L) {
  * script is run when registering the repeated script and the `postScript` is run when
  * unregistering it or when the application closes.
  * If the `timeout` is 0, the script will be executed every frame.
- * The `identifier` has to be a unique name that cannot have been used to register a
- * repeated script before. A registered script is removed with the #removeRepeatedScript
- * function.
+ * The `printToLog` parameter determines whether the `script`, `preScript`, or
+ * `postScript` are printed to the script log. he `identifier` has to be a unique name
+ * that cannot have been used to register a repeated script before. A registered script is
+ * removed with the #removeRepeatedScript function.
  */
 [[codegen::luawrap]] void registerRepeatedScript(std::string identifier,
                                                  std::string script, double timeout = 0.0,
                                                  std::string preScript = "",
-                                                 std::string postScript = "")
+                                                 std::string postScript = "",
+                                                 bool printToLog = true)
 {
     global::scriptEngine->registerRepeatedScript(
         std::move(identifier),
         std::move(script),
         timeout,
         std::move(preScript),
-        std::move(postScript)
+        std::move(postScript),
+        ScriptEngine::ShouldBeLogged(printToLog)
     );
 }
 

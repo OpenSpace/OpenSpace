@@ -55,10 +55,11 @@ class SyncBuffer;
  */
 class ScriptEngine : public Syncable {
 public:
+    BooleanType(ShouldBeLogged);
+
     struct Script {
         BooleanType(ShouldBeSynchronized);
         BooleanType(ShouldSendToRemote);
-        BooleanType(ShouldBeLogged);
         using Callback = std::function<void(Dictionary)>;
 
         /// The Lua script that should be executed
@@ -114,7 +115,8 @@ public:
     void postSync(bool isMaster) override;
 
     void queueScript(Script script);
-    void queueScript(std::string script);
+    void queueScript(std::string script,
+        ShouldBeLogged shouldBeLogged = ShouldBeLogged::Yes);
 
     /**
      * This function should only be used by external classes if you are sure that the
@@ -127,7 +129,8 @@ public:
      * Runs the `script` every `timeout` seconds wallclock time.
      */
     void registerRepeatedScript(std::string identifier, std::string script,
-        double timeout, std::string preScript = "", std::string postScript = "");
+        double timeout, std::string preScript = "", std::string postScript = "",
+        ShouldBeLogged shouldBeLogged = ShouldBeLogged::Yes);
     void removeRepeatedScript(std::string_view identifier);
 
     void scheduleScript(std::string script, double delay);
@@ -175,6 +178,8 @@ private:
         std::string identifier;
         double timeout = 0.0;
         double lastRun = 0.0;
+
+        ShouldBeLogged shouldBeLogged = ShouldBeLogged::Yes;
     };
     std::vector<RepeatedScriptInfo> _repeatedScripts;
 
