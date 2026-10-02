@@ -428,7 +428,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const Dictionary& dictionary)
     //
     // Placement
     //
-    const Parameters::Placement placement = p.placement.value_or({});
+    const Parameters::Placement placement = p.placement.value_or(Parameters::Placement());
 
     _placement.useRadiusAzimuthElevation = placement.useRadiusAzimuthElevation.value_or(
         _placement.useRadiusAzimuthElevation
@@ -463,7 +463,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const Dictionary& dictionary)
     //
     // Style
     //
-    const Parameters::Style style = p.style.value_or({});
+    const Parameters::Style style = p.style.value_or(Parameters::Style());
 
     _style.multiplyColor = style.multiplyColor.value_or(_style.multiplyColor);
     _style.multiplyColor.setViewOption(Property::ViewOptions::Color);
@@ -476,7 +476,9 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const Dictionary& dictionary)
     _style.gammaOffset = style.gammaOffset.value_or(_style.gammaOffset);
     _style.owner.addProperty(_style.gammaOffset);
 
-    const Parameters::Style::Border border = style.border.value_or({});
+    const Parameters::Style::Border border = style.border.value_or(
+        Parameters::Style::Border()
+    );
 
     _style.border.width = border.width.value_or(_style.border.width);
     _style.border.owner.addProperty(_style.border.width);
