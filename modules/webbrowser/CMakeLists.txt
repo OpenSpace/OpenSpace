@@ -239,7 +239,6 @@ if (OS_MACOSX)
   set_target_properties(${CEF_HELPER_TARGET_RENDERER} PROPERTIES FOLDER "support")
 else ()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
-  set_openspace_cef_target_out_dir()
   add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
 
   if (WIN32)
@@ -255,7 +254,7 @@ else ()
   target_link_libraries(${CEF_HELPER_TARGET} PRIVATE libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
   if (OS_WINDOWS)
     # Add the custom manifest files to the executable.
-    add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
+    add_windows_cef_manifest("${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
   endif (OS_WINDOWS)
 endif ()
 
