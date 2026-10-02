@@ -122,7 +122,16 @@ function (internal__set_compile_options target)
     "WIN32_LEAN_AND_MEAN"
   )
 
-  target_compile_options(${target} INTERFACE "/arch:AVX2")
+  # /arch: selects an x86 instruction set extension, so it only applies to the x86 and
+  # x64 targets. The ARM64 compiler answers it with "command line warning D9002:
+  # ignoring unknown option", once per translation unit.
+  #
+  # CMAKE_CXX_COMPILER_ARCHITECTURE_ID is what identifies the target: on an ARM64 host
+  # CMAKE_SYSTEM_PROCESSOR reports the *host* (ARM64) even for an x64 build, which would
+  # drop the flag from the x64 builds made on such a machine
+  if (CMAKE_CXX_COMPILER_ARCHITECTURE_ID MATCHES "^([xX]86|[xX]64)$")
+    target_compile_options(${target} INTERFACE "/arch:AVX2")
+  endif ()
 
   if (OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS)
     target_compile_options(${target} INTERFACE
