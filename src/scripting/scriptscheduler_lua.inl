@@ -60,13 +60,17 @@ namespace {
  * script is triggered, the second argument is the script that is executed in the forward
  * direction, the optional third argument is the script executed in the backwards
  * direction, and the optional last argument is the universal script, executed in either
- * direction.
+ * direction. If a group is specified, it must be larger than 0.
  */
 [[codegen::luawrap]] void loadScheduledScript(std::string time, std::string forwardScript,
                                               std::optional<std::string> backwardScript,
                                               std::optional<std::string> universalScript,
                                               std::optional<int> group)
 {
+    if (group.has_value() && *group < 0) {
+        throw lua::LuaError("Only groups larger than 0 are allowed");
+    }
+
     ScriptScheduler::ScheduledScript script;
     script.time = Time::convertTime(time);
     script.forwardScript = std::move(forwardScript);
@@ -76,6 +80,28 @@ namespace {
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     scripts.push_back(std::move(script));
+    global::scriptScheduler->loadScripts(scripts);
+}
+
+/**
+ * Schedules a single execution of a script. If the specified `time` is passed, the
+ * provided `script` is executed exactly once.
+ */
+[[codegen::luawrap]] void scheduleSingleShotScript(std::string time, std::string script) {
+    // The main function is restricted to positive group ids, so we can use negative ones
+    // for ourself. We start arbitrarily at -1073741824 (2**-30) counting away from 0.
+    static int Counter = -1073741824;
+
+    ScriptScheduler::ScheduledScript s;
+    s.time = Time::convertTime(time);
+    s.universalScript = std::format(
+        "{};openspace.scriptScheduler.clear({})", script, Counter
+    );
+    s.group = Counter;
+    Counter--;
+
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    scripts.push_back(std::move(s));
     global::scriptScheduler->loadScripts(scripts);
 }
 
