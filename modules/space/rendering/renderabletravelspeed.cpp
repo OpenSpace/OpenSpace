@@ -69,6 +69,24 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    constexpr Property::PropertyInfo ResetLineInfo = {
+        "ResetLine",
+        "Reset Line",
+        "When triggered, the line will start again from the beginning.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo EpochInfo = {
+        "Epoch",
+        "Epoch",
+        "The epoch for the indicator, that is the time modulo the travel time in which "
+        "the length of the indicator is exactly 0. Due to the way the indicator is "
+        "calculated, this value will stay the same even as the indicator finishes each "
+        "trip. So for a trip duration of 1s the epochs of 2.5, 3.5, 6.5, 10.5 are all "
+        "equivalent.",
+        Property::Visibility::AdvancedUser
+    };
+
     constexpr Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
@@ -147,6 +165,8 @@ Documentation RenderableTravelSpeed::Documentation() {
 RenderableTravelSpeed::RenderableTravelSpeed(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _targetIdentifier(TargetInfo)
+    , _resetLine(ResetLineInfo)
+    , _epoch(EpochInfo, -1.0)
     , _travelSpeed(
         SpeedInfo,
         distanceconstants::LightSecond,
@@ -162,6 +182,14 @@ RenderableTravelSpeed::RenderableTravelSpeed(const Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
     setRenderBin(RenderBin::Overlay);
+
+    _epoch.onChange([this]() { reinitiateTravel(_epoch); });
+    addProperty(_epoch);
+
+    _resetLine.onChange([this]() {
+        reinitiateTravel(global::timeManager->time().j2000Seconds());
+    });
+    addProperty(_resetLine);
 
     _lineColor = p.color.value_or(_lineColor);
     _lineColor.setViewOption(Property::ViewOptions::Color);
@@ -267,14 +295,21 @@ void RenderableTravelSpeed::updateVertexData() {
     glNamedBufferSubData(_vbo, 0, sizeof(positions), &positions);
 }
 
-void RenderableTravelSpeed::reinitiateTravel() {
-    _initiationTime = global::timeManager->time().j2000Seconds();
+void RenderableTravelSpeed::reinitiateTravel(std::optional<double> time) {
+    if (time.has_value()) {
+        _epoch = *time;
+        _initiationTime = _epoch;
+    }
+    else {
+        _initiationTime = global::timeManager->time().j2000Seconds();
+    }
     _arrivalTime = _initiationTime + _travelTime;
 }
 
 void RenderableTravelSpeed::update(const UpdateData& data) {
-    if (_initiationTime == -1.0) {
-        _initiationTime = data.time.j2000Seconds();
+    if (_epoch == -1.0) {
+        _epoch = data.time.j2000Seconds();
+        _initiationTime = _epoch;
     }
 
     SceneGraphNode* sourceNode = parent();

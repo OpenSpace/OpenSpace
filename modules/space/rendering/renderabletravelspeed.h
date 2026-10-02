@@ -29,6 +29,7 @@
 
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -51,12 +52,14 @@ public:
 
 private:
     void updateVertexData();
-    void reinitiateTravel();
+    void reinitiateTravel(std::optional<double> time = std::nullopt);
 
     UniformCache(lineColor, opacity) _uniformCache;
 
     StringProperty _targetIdentifier;
     SceneGraphNode* _targetNode = nullptr;
+    TriggerProperty _resetLine;
+    DoubleProperty _epoch;
     DoubleProperty _travelSpeed;
     FloatProperty _indicatorLength;
     FloatProperty _fadeLength;
