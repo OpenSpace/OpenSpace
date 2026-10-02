@@ -40,6 +40,14 @@ UShortProperty::UShortProperty(PropertyInfo info, unsigned short value,
     )
 {}
 
+UShortProperty::UShortProperty(PropertyInfo info, IsEnabled isEnabled,
+                               unsigned short value, unsigned short minValue,
+                               unsigned short maxValue, unsigned short stepValue)
+    : UShortProperty(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view UShortProperty::className() const {
     return "UShortProperty";
 }

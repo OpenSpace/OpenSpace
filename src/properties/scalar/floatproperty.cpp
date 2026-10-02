@@ -33,6 +33,13 @@ FloatProperty::FloatProperty(PropertyInfo info, float value, float minValue,
     : NumericalProperty<float>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
+FloatProperty::FloatProperty(PropertyInfo info, IsEnabled isEnabled, float value,
+                             float minValue, float maxValue, float stepValue)
+    : FloatProperty(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view FloatProperty::className() const {
     return "FloatProperty";
 }

@@ -39,6 +39,13 @@ Vec3Property::Vec3Property(PropertyInfo info, glm::vec3 value, glm::vec3 minValu
     )
 {}
 
+Vec3Property::Vec3Property(PropertyInfo info, IsEnabled isEnabled, glm::vec3 value,
+                           glm::vec3 minValue, glm::vec3 maxValue, glm::vec3 stepValue)
+    : Vec3Property(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view Vec3Property::className() const {
     return "Vec3Property";
 }

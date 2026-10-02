@@ -46,7 +46,6 @@ Property::Property(PropertyInfo info)
     : _identifier(info.identifier)
     , _guiName(info.guiName)
     , _description(info.description)
-    , _isEnabled(info.isEnabled)
 #ifdef _DEBUG
     , _id(Identifier++)
 #endif // _DEBUG

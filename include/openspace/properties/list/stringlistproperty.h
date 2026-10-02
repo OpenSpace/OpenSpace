@@ -33,6 +33,8 @@ class StringListProperty : public ListProperty<std::string> {
 public:
     explicit StringListProperty(PropertyInfo info,
         std::vector<std::string> values = std::vector<std::string>());
+    explicit StringListProperty(PropertyInfo info, IsEnabled isEnabled,
+        std::vector<std::string> values = std::vector<std::string>());
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

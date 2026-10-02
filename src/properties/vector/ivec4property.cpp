@@ -39,6 +39,14 @@ IVec4Property::IVec4Property(PropertyInfo info, glm::ivec4 value, glm::ivec4 min
     )
 {}
 
+IVec4Property::IVec4Property(PropertyInfo info, IsEnabled isEnabled, glm::ivec4 value,
+                             glm::ivec4 minValue, glm::ivec4 maxValue,
+                             glm::ivec4 stepValue)
+    : IVec4Property(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view IVec4Property::className() const {
     return "IVec4Property";
 }

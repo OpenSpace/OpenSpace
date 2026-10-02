@@ -39,6 +39,13 @@ Mat4Property::Mat4Property(PropertyInfo info, glm::mat4 value, glm::mat4 minValu
     )
 {}
 
+Mat4Property::Mat4Property(PropertyInfo info, IsEnabled isEnabled, glm::mat4 value,
+                           glm::mat4 minValue, glm::mat4 maxValue, glm::mat4 stepValue)
+    : Mat4Property(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view Mat4Property::className() const {
     return "Mat4Property";
 }

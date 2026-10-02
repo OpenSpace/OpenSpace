@@ -33,6 +33,13 @@ IntProperty::IntProperty(PropertyInfo info, int value, int minValue, int maxValu
     : NumericalProperty<int>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
+IntProperty::IntProperty(PropertyInfo info, IsEnabled isEnabled, int value, int minValue,
+                         int maxValue, int stepValue)
+    : IntProperty(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view IntProperty::className() const {
     return "IntProperty";
 }

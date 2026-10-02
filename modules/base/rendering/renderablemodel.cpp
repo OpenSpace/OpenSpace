@@ -209,8 +209,7 @@ namespace {
         "The single color to use for entire model (RGBA).",
         Property::Visibility::AdvancedUser,
         Property::NeedsConfirmation::No,
-        Property::IsEnablable::Yes,
-        Property::IsEnabled::No
+        Property::IsEnablable::Yes
     };
 
     // Renders a 3D model. The provided model may contain textures and animations and is
@@ -405,7 +404,7 @@ RenderableModel::RenderableModel(const Dictionary& dictionary)
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(BlendingOptionInfo)
     , _renderWireframe(RenderWireframeInfo, false)
-    , _overrideColor(OverrideColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _overrideColor(OverrideColorInfo, Property::IsEnabled::No, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _customNodeTransformsOwner(CustomNodeTransformsInfo)
 {

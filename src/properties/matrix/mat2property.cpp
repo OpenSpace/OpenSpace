@@ -39,6 +39,14 @@ Mat2Property::Mat2Property(PropertyInfo info, glm::mat2x2 value, glm::mat2x2 min
     )
 {}
 
+Mat2Property::Mat2Property(PropertyInfo info, IsEnabled isEnabled, glm::mat2x2 value,
+                           glm::mat2x2 minValue, glm::mat2x2 maxValue,
+                           glm::mat2x2 stepValue)
+    : Mat2Property(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view Mat2Property::className() const {
     return "Mat2Property";
 }

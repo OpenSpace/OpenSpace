@@ -39,6 +39,14 @@ DMat3Property::DMat3Property(PropertyInfo info, glm::dmat3x3 value, glm::dmat3x3
     )
 {}
 
+DMat3Property::DMat3Property(PropertyInfo info, IsEnabled isEnabled, glm::dmat3x3 value,
+                             glm::dmat3x3 minValue, glm::dmat3x3 maxValue,
+                             glm::dmat3x3 stepValue)
+    : DMat3Property(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view DMat3Property::className() const {
     return "DMat3Property";
 }

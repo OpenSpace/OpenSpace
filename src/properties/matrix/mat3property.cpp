@@ -39,6 +39,14 @@ Mat3Property::Mat3Property(PropertyInfo info, glm::mat3x3 value, glm::mat3x3 min
     )
 {}
 
+Mat3Property::Mat3Property(PropertyInfo info, IsEnabled isEnabled, glm::mat3x3 value,
+                           glm::mat3x3 minValue, glm::mat3x3 maxValue,
+                           glm::mat3x3 stepValue)
+    : Mat3Property(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view Mat3Property::className() const {
     return "Mat3Property";
 }

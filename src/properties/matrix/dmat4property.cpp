@@ -39,6 +39,14 @@ DMat4Property::DMat4Property(PropertyInfo info, glm::dmat4x4 value, glm::dmat4x4
     )
 {}
 
+DMat4Property::DMat4Property(PropertyInfo info, IsEnabled isEnabled, glm::dmat4x4 value,
+                             glm::dmat4x4 minValue, glm::dmat4x4 maxValue,
+                             glm::dmat4x4 stepValue)
+    : DMat4Property(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view DMat4Property::className() const {
     return "DMat4Property";
 }

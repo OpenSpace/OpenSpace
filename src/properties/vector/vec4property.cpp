@@ -39,6 +39,13 @@ Vec4Property::Vec4Property(PropertyInfo info, glm::vec4 value, glm::vec4 minValu
     )
 {}
 
+Vec4Property::Vec4Property(PropertyInfo info, IsEnabled isEnabled, glm::vec4 value,
+                           glm::vec4 minValue, glm::vec4 maxValue, glm::vec4 stepValue)
+    : Vec4Property(std::move(info), value, minValue, maxValue, stepValue)
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view Vec4Property::className() const {
     return "Vec4Property";
 }
