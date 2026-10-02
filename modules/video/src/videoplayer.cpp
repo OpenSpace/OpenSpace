@@ -300,11 +300,10 @@ VideoPlayer::VideoPlayer(const Dictionary& dictionary)
 
     if (_playbackMode == PlaybackMode::MapToSimulationTime) {
         if (!p.startTime.has_value() || !p.endTime.has_value()) {
-            LERROR(
+            throw RuntimeError(
                 "Video tile layer tried to map to simulation time but lacked start or "
                 "end time"
             );
-            return;
         }
         _startJ200Time = Time::convertTime(*p.startTime);
         _endJ200Time = Time::convertTime(*p.endTime);
