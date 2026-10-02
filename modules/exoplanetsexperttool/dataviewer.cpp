@@ -122,8 +122,9 @@ namespace openspace::exoplanets {
 
 DataViewer::DataViewer(std::string identifier, std::string guiName)
     : PropertyOwner({ std::move(identifier), std::move(guiName) })
-    , _externalSelection(ExternalSelectionInfo)
     , _glyphHandler(*this)
+    , _spatialSelectionHandler()
+    , _externalSelection(ExternalSelectionInfo)
 {
     _externalSelection.setReadOnly(true);
     addProperty(_externalSelection);
@@ -191,6 +192,7 @@ bool DataViewer::initializeData(DataSettings settings) {
         _systemViewer->removeAllExoplanetSystems();
     }
 
+    hideSelectionVolume();
     _dataSettings = std::move(settings);
 
     // Set the inclination column to use in the regular exoplanet module to be the same
@@ -229,7 +231,7 @@ bool DataViewer::initializeData(DataSettings settings) {
         _columnSelectionView.orderedSelectedColumns()
     );
     _computeColumnsView = std::make_unique<ComputeColumnsView>(*this);
-    _spatialSelectionView = std::make_unique<SpatialSelectionView>(*this, _dataSettings);
+    _spatialSelectionView = std::make_unique<SpatialSelectionView>(*this);
 
     _currentlyTargettedSystem = std::nullopt;
 
@@ -251,9 +253,15 @@ bool DataViewer::initializeData(DataSettings settings) {
 
 void DataViewer::initializeGL() {
     _glyphHandler.initializeRenderables();
+    _spatialSelectionHandler.initializeRenderables();
+
     initializeCallbacks();
 
     _colorMappingView->initializeGL();
+}
+
+void DataViewer::hideSelectionVolume() {
+    _spatialSelectionHandler.hideSelectionVolume();
 }
 
 std::filesystem::path DataViewer::currentDataFile() const {
@@ -444,6 +452,14 @@ TableView* DataViewer::tableView() {
 
 SpatialSelectionView* DataViewer::spatialSelectionView() {
     return _spatialSelectionView.get();
+}
+
+SpatialSelectionHandler& DataViewer::spatialSelectionHandler() {
+    return _spatialSelectionHandler;
+}
+
+const SpatialSelectionHandler& DataViewer::spatialSelectionHandler() const {
+    return _spatialSelectionHandler;
 }
 
 std::vector<size_t> DataViewer::planetsForHost(const std::string& hostIdentifier) const {
@@ -959,6 +975,14 @@ void DataViewer::render() {
         spatialSelectionChanged = _spatialSelectionView->render(
             &_showSpatialSelectionWindow
         );
+    }
+
+    if (_showSpatialSelectionWindow && _spatialSelectionView) {
+        const SpatialSelectionQuery query = _spatialSelectionView->currentSpatialQuery();
+        _spatialSelectionHandler.updateSelectionVolume(&query);
+    }
+    else {
+        _spatialSelectionHandler.updateSelectionVolume(nullptr);
     }
 
     if (_showFilterSettingsWindow) {

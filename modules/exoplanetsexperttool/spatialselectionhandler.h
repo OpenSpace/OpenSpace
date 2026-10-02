@@ -126,6 +126,8 @@ struct SavedSelection {
  */
 class SpatialSelectionHandler {
 public:
+    constexpr static std::string_view SelectionVolumeIdentifier = "ExoplanetSelectionVolume";
+
     SpatialSelectionHandler() = default;
 
     /**
@@ -192,30 +194,10 @@ public:
     void addSavedSelection(std::string name, std::string summary,
           SpatialSelectionQuery query);
 
-    /**
-     * Removes a saved selection by index.
-     *
-     * \param index Index in the saved selections list
-     */
     void removeSavedSelection(size_t index);
 
-    /**
-     * Clears all saved selections.
-     */
     void clearSavedSelections();
-
-    /**
-     * Returns a mutable reference to the saved selections.
-     *
-     * \return Mutable vector of saved selections
-     */
     std::vector<SavedSelection>& savedSelections();
-
-    /**
-     * Returns a const reference to the saved selections.
-     *
-     * \return Const vector of saved selections
-     */
     const std::vector<SavedSelection>& savedSelections() const;
 
     /**
@@ -228,9 +210,18 @@ public:
         const std::vector<size_t>& candidates,
         const DataSettings::DataMapping& mapping) const;
 
+    void initializeRenderables();
+
+    void updateSelectionVolume(const SpatialSelectionQuery* query);
+    void hideSelectionVolume();
+
 private:
     std::vector<SavedSelection> _savedSelections;
     size_t _nextSavedSelectionId = 0;
+
+    std::vector<double> _selectionVolumeParameters;
+    bool _selectionVolumeIsVisible = false;
+    bool _selectionVolumeIsInitialized = false;
 };
 
 } // namespace openspace::exoplanets

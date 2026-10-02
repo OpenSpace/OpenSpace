@@ -29,6 +29,7 @@
 
 #include <modules/exoplanetsexperttool/datastructures.h>
 #include <modules/exoplanetsexperttool/glyphhandler.h>
+#include <modules/exoplanetsexperttool/spatialselectionhandler.h>
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
 #include <modules/exoplanetsexperttool/views/columnselectionview.h>
 #include <modules/exoplanetsexperttool/views/computecolumnsview.h>
@@ -55,6 +56,7 @@ public:
     bool loadCsvFile(std::filesystem::path path);
 
     void initializeGL();
+    void hideSelectionVolume();
 
     // Accessors and functions that are needed for the other views
 
@@ -95,6 +97,9 @@ public:
     SystemViewer* systemViewer();
     TableView* tableView();
     SpatialSelectionView* spatialSelectionView();
+
+    SpatialSelectionHandler& spatialSelectionHandler();
+    const SpatialSelectionHandler& spatialSelectionHandler() const;
 
     std::vector<size_t> planetsForHost(const std::string& hostStar) const;
     const std::unordered_map<std::string, std::vector<size_t>>& hostPlanetGroups() const;
@@ -167,6 +172,7 @@ private:
     std::unique_ptr<SpatialSelectionView> _spatialSelectionView;
 
     GlyphHandler _glyphHandler;
+    SpatialSelectionHandler _spatialSelectionHandler;
 
     // Bools to toggle the views above
     bool _showTable = true;

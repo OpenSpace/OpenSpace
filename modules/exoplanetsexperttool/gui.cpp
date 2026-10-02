@@ -209,6 +209,10 @@ void Gui::initializeDataset() {
     _dataViewer.initializeData();
 }
 
+void Gui::hideSelectionVolume() {
+    _dataViewer.hideSelectionVolume();
+}
+
 void Gui::startFrame(float deltaTime, const glm::vec2& windowSize,
                      const glm::vec2& dpiScaling, const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)

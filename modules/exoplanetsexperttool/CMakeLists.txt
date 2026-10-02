@@ -36,6 +36,8 @@ set(HEADER_FILES
     gui.h
     rendering/renderableexoplanetglyphcloud.h
     rendering/renderablehostcloud.h
+    rendering/renderablespatialselectionvolume.h
+    rendering/selectionvolumemesh.h
     spatialselectionhandler.h
     views/colormappingview.h
     views/columnselectionview.h
@@ -59,6 +61,7 @@ set(SOURCE_FILES
     gui.cpp
     rendering/renderableexoplanetglyphcloud.cpp
     rendering/renderablehostcloud.cpp
+    rendering/renderablespatialselectionvolume.cpp
     spatialselectionhandler.cpp
     views/colormappingview.cpp
     views/columnselectionview.cpp
@@ -72,6 +75,8 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/selectionvolume_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/selectionvolume_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/hosts_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/hosts_gs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/hosts_vs.glsl

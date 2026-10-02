@@ -56,6 +56,7 @@ public:
     void deinitializeGL();
 
     void initializeDataset();
+    void hideSelectionVolume();
 
     bool mouseButtonCallback(MouseButton button, MouseAction action);
     bool mouseWheelCallback(double position);

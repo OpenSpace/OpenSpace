@@ -24,6 +24,11 @@
 
 #include <modules/exoplanetsexperttool/spatialselectionhandler.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/scripting/scriptengine.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
 #include <algorithm>
 #include <cmath>
 #include <format>
@@ -268,6 +273,109 @@ std::vector<size_t> SpatialSelectionHandler::combinedSavedSelections(
     std::vector<size_t> result(combinedSet.begin(), combinedSet.end());
     std::sort(result.begin(), result.end());
     return result;
+}
+
+
+void SpatialSelectionHandler::initializeRenderables() {
+    using namespace std::string_literals;
+
+    ghoul::Dictionary selectionGui;
+    selectionGui.setValue("Name", "Spatial Selection"s);
+    selectionGui.setValue("Path", "/ExoplanetExplorer"s);
+
+    ghoul::Dictionary selectionRenderable;
+    selectionRenderable.setValue("Type", "RenderableSpatialSelectionVolume"s);
+    selectionRenderable.setValue("Enabled", false);
+    selectionRenderable.setValue("Opacity", 0.08);
+    selectionRenderable.setValue("RenderBinMode", "PostDeferredTransparent"s);
+
+    ghoul::Dictionary selectionNode;
+    selectionNode.setValue("Identifier", std::string(SelectionVolumeIdentifier));
+    selectionNode.setValue("Renderable", selectionRenderable);
+    selectionNode.setValue("GUI", selectionGui);
+    global::scriptEngine->queueScript(std::format(
+        "if not openspace.hasSceneGraphNode('{}') then "
+        "openspace.addSceneGraphNode({}) end",
+        SelectionVolumeIdentifier, ghoul::formatLua(selectionNode)
+    ));
+
+    _selectionVolumeIsInitialized = true;
+    _selectionVolumeIsVisible = false;
+    _selectionVolumeParameters.clear();
+}
+
+void SpatialSelectionHandler::hideSelectionVolume() {
+    updateSelectionVolume(nullptr);
+    _selectionVolumeParameters.clear();
+}
+
+void SpatialSelectionHandler::updateSelectionVolume(const SpatialSelectionQuery* query) {
+    if (!_selectionVolumeIsInitialized || !global::windowDelegate->isMaster()) {
+        return;
+    }
+    std::vector<double> parameters;
+    if (query) {
+        if (const SphereVolume* sphere = std::get_if<SphereVolume>(query)) {
+            parameters = {
+                0.0, sphere->center.x, sphere->center.y, sphere->center.z, sphere->radius
+            };
+        }
+        else if (const BoxVolume* box = std::get_if<BoxVolume>(query)) {
+            parameters = {
+                1.0, box->center.x, box->center.y, box->center.z,
+                box->dimensions.x, box->dimensions.y, box->dimensions.z
+            };
+        }
+        else if (const SkyMapRect* sky = std::get_if<SkyMapRect>(query)) {
+            parameters = {
+                2.0, sky->raMin, sky->raMax, sky->decMin, sky->decMax,
+                sky->useDistanceFilter ? 1.0 : 0.0,
+                sky->useDistanceFilter ? sky->distMin : 0.0, sky->distMax
+            };
+        }
+    }
+    for (double value : parameters) {
+        if (!std::isfinite(value)) {
+            parameters.clear();
+            break;
+        }
+    }
+    const bool isVisible = !parameters.empty();
+    if (isVisible == _selectionVolumeIsVisible &&
+        (!isVisible || parameters == _selectionVolumeParameters))
+    {
+        return;
+    }
+    std::string script = std::format(
+        "if openspace.hasSceneGraphNode('{}') then ", SelectionVolumeIdentifier
+    );
+    const std::string path = std::format(
+        "Scene.{}.Renderable", SelectionVolumeIdentifier
+    );
+    if (isVisible && parameters != _selectionVolumeParameters) {
+        std::string values;
+        for (double value : parameters) {
+            if (!values.empty()) {
+                values += ',';
+            }
+            values += std::format("{:.17g}", value);
+        }
+        script += std::format(
+            "openspace.setPropertyValueSingle('{}.ShapeParameters', {{ {} }}); ",
+            path, values
+        );
+    }
+    script += std::format(
+        "openspace.setPropertyValueSingle('{}.Enabled', {}) end", path, isVisible
+    );
+    global::scriptEngine->queueScript({
+        .code = std::move(script),
+        .addToLog = ScriptEngine::Script::ShouldBeLogged::No
+    });
+    _selectionVolumeIsVisible = isVisible;
+    if (isVisible) {
+        _selectionVolumeParameters = std::move(parameters);
+    }
 }
 
 } // namespace openspace::exoplanets

@@ -26,6 +26,7 @@
 
 #include <modules/exoplanetsexperttool/rendering/renderablehostcloud.h>
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
+#include <modules/exoplanetsexperttool/rendering/renderablespatialselectionvolume.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/syncengine.h>
@@ -94,6 +95,11 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     , _gui("ExoplanetsToolGui")
 {
     addProperty(_enabled);
+    _enabled.onChange([this]() {
+        if (!_enabled) {
+            _gui.hideSelectionVolume();
+        }
+    });
     addProperty(_showInfoWindowAtStartup);
     addProperty(_dataConfigFile);
 
@@ -366,6 +372,9 @@ void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dic
     fRenderable->registerClass<RenderableExoplanetGlyphCloud>(
         "RenderableExoplanetGlyphCloud"
     );
+    fRenderable->registerClass<RenderableSpatialSelectionVolume>(
+        "RenderableSpatialSelectionVolume"
+    );
 }
 
 std::vector<openspace::Documentation>
@@ -373,7 +382,8 @@ ExoplanetsExpertToolModule::documentations() const
 {
     return {
         RenderableHostCloud::Documentation(),
-        RenderableExoplanetGlyphCloud::Documentation()
+        RenderableExoplanetGlyphCloud::Documentation(),
+        RenderableSpatialSelectionVolume::Documentation()
     };
 }
 

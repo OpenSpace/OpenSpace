@@ -25,6 +25,7 @@
 #include <modules/exoplanetsexperttool/views/spatialselectionview.h>
 
 #include <modules/exoplanetsexperttool/dataviewer.h>
+#include <modules/exoplanetsexperttool/spatialselectionhandler.h>
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
@@ -718,21 +719,26 @@ const std::vector<std::vector<SkyPoint>> ZodiacConstellationLines = {
     { { 190.42f, -1.45f }, { 184.98f, -0.67f }, { 177.67f, 1.77f } }
 };
 
-
 } // namespace
 
 namespace openspace::exoplanets {
 
-SpatialSelectionView::SpatialSelectionView(DataViewer& dataViewer,
-                                           const DataSettings& dataSettings)
+SpatialSelectionView::SpatialSelectionView(DataViewer& dataViewer)
     : _dataViewer(dataViewer)
-    , _dataSettings(dataSettings)
 {
     // Default Sky Map rectangle over a meaningful patch
     _skyMapRect.raMin = 280.0;
     _skyMapRect.raMax = 310.0;
     _skyMapRect.decMin = 35.0;
     _skyMapRect.decMax = 55.0;
+}
+
+SpatialSelectionHandler& SpatialSelectionView::handler() {
+    return _dataViewer.spatialSelectionHandler();
+}
+
+const SpatialSelectionHandler& SpatialSelectionView::handler() const {
+    return _dataViewer.spatialSelectionHandler();
 }
 
 InteractionMode SpatialSelectionView::interactionMode() const {
@@ -745,14 +751,6 @@ void SpatialSelectionView::setInteractionMode(InteractionMode mode) {
 
 bool SpatialSelectionView::isSelectionMode() const {
     return _mode == InteractionMode::Selection;
-}
-
-SpatialSelectionHandler& SpatialSelectionView::handler() {
-    return _handler;
-}
-
-const SpatialSelectionHandler& SpatialSelectionView::handler() const {
-    return _handler;
 }
 
 void SpatialSelectionView::initConstellationLines() const {
@@ -873,7 +871,7 @@ void SpatialSelectionView::updateSkyMapCache() const {
 std::vector<size_t> SpatialSelectionView::currentSpatialSelection(
                                                const std::vector<size_t>& candidates) const
 {
-    return _handler.select(
+    return handler().select(
         _dataViewer.data(),
         candidates,
         currentSpatialQuery(),
@@ -905,7 +903,7 @@ void SpatialSelectionView::applyCurrentSelection() {
 }
 
 void SpatialSelectionView::applyCombinedSavedSelections() {
-    std::vector<size_t> combined = _handler.combinedSavedSelections(
+    std::vector<size_t> combined = handler().combinedSavedSelections(
         _dataViewer.data(),
         _dataViewer.currentFiltering(),
         _dataViewer.dataMapping()
@@ -1393,7 +1391,7 @@ bool SpatialSelectionView::renderCurrentSelectionActions() {
         }
 
         std::string name = _saveNameBuffer;
-        _handler.addSavedSelection(name, summary, currentSpatialQuery());
+        handler().addSavedSelection(name, summary, currentSpatialQuery());
         _saveNameBuffer[0] = '\0'; // reset buffer
         savedSelectionsChanged = true;
     }
@@ -1408,7 +1406,7 @@ bool SpatialSelectionView::renderSavedSelectionsManager() {
         "combination at once."
     );
 
-    std::vector<SavedSelection>& saved = _handler.savedSelections();
+    std::vector<SavedSelection>& saved = handler().savedSelections();
     if (saved.empty()) {
         ImGui::TextDisabled("No saved selections yet.");
         return false;
@@ -1419,7 +1417,7 @@ bool SpatialSelectionView::renderSavedSelectionsManager() {
     }
     ImGui::SameLine();
     if (ImGui::Button("Clear All Saved")) {
-        _handler.clearSavedSelections();
+        handler().clearSavedSelections();
         return true;
     }
 
@@ -1429,7 +1427,7 @@ bool SpatialSelectionView::renderSavedSelectionsManager() {
     for (size_t i = 0; i < saved.size(); ++i) {
         ImGui::PushID(static_cast<int>(i));
 
-        const std::vector<size_t> indices = _handler.select(
+        const std::vector<size_t> indices = handler().select(
             _dataViewer.data(),
             _dataViewer.currentFiltering(),
             saved[i].query,
@@ -1458,7 +1456,7 @@ bool SpatialSelectionView::renderSavedSelectionsManager() {
     }
 
     if (toRemove != static_cast<size_t>(-1)) {
-        _handler.removeSavedSelection(toRemove);
+        handler().removeSavedSelection(toRemove);
     }
 
     ImGui::EndChild();

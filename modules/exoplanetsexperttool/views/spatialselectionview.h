@@ -79,7 +79,10 @@ enum class Shape3DType {
  */
 class SpatialSelectionView {
 public:
-    SpatialSelectionView(DataViewer& dataViewer, const DataSettings& dataSettings);
+    SpatialSelectionView(DataViewer& dataViewer);
+
+    SpatialSelectionHandler& handler();
+    const SpatialSelectionHandler& handler() const;
 
     /**
      * Returns the active mouse interaction mode.
@@ -120,20 +123,6 @@ public:
 
     SpatialSelectionQuery currentSpatialQuery() const;
 
-    /**
-     * Returns a mutable reference to the spatial selection handler.
-     *
-     * \return Reference to SpatialSelectionHandler
-     */
-    SpatialSelectionHandler& handler();
-
-    /**
-     * Returns a const reference to the spatial selection handler.
-     *
-     * \return Const reference to SpatialSelectionHandler
-     */
-    const SpatialSelectionHandler& handler() const;
-
 private:
     void renderModeSelector();
     bool renderMethodTabs();
@@ -156,12 +145,6 @@ private:
 
     /// Reference to the main DataViewer coordinator
     DataViewer& _dataViewer;
-
-    /// Dataset settings and column mappings
-    const DataSettings& _dataSettings;
-
-    /// Handler performing the spatial calculations and maintaining saved selections
-    SpatialSelectionHandler _handler;
 
     /// Active mouse interaction mode
     InteractionMode _mode = InteractionMode::Navigation;
