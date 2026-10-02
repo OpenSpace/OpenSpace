@@ -91,7 +91,7 @@ HttpSynchronization::HttpSynchronization(const Dictionary& dict,
 
     _identifier = p.identifier;
     _version = p.version;
-    _unzipFiles = p.unzipFiles.value_or(_unzipFiles);
+    _shouldUnzipFiles = p.unzipFiles.value_or(_shouldUnzipFiles);
     if (p.unzipFilesDestination.has_value()) {
         _unzipFilesDestination = *p.unzipFilesDestination;
     }
@@ -427,7 +427,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             failed = true;
         }
 
-        if (_unzipFiles && originalName.extension() == ".zip") {
+        if (_shouldUnzipFiles && originalName.extension() == ".zip") {
             std::string source = originalName.string();
             const std::string dest =
                 _unzipFilesDestination.has_value() ?
