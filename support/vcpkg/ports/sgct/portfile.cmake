@@ -9,8 +9,8 @@
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO sgct/sgct
-  REF 487fac461b1d66b4d79c427d527d98303136ace0
-  SHA512 ad60757440d476f41a8295e3ff834cc5d471fe28fb845f41e2197daddbea80a3ed74dd826d599dd8497419bfb0665e749a21e80bcfd730e26fb9ef8bb135b27b
+  REF ad83444a779d0eac0b404dca8d383958c4c60d93
+  SHA512 4c4c59a49ec3978e9171f360ef046af30ca075fc169bda7be9a7d230a42021edcb72e1a82cf9e2236649bccf75b37c7c50df5b52068934b00d82af00c7828432
   HEAD_REF master
 )
 
@@ -22,10 +22,20 @@ vcpkg_check_features(
     scalable   SGCT_SCALABLE_SUPPORT
 )
 
+# Spout's SDK is x86-only, which is why the manifest gates spout2 on 'windows & !arm64'.
+# SGCT defaults SGCT_SPOUT_SUPPORT the same way from the target architecture, but it is
+# passed explicitly so the port never depends on that detection succeeding
+if (VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
+  set(SPOUT_OPTION -DSGCT_SPOUT_SUPPORT=OFF)
+else ()
+  set(SPOUT_OPTION -DSGCT_SPOUT_SUPPORT=ON)
+endif ()
+
 vcpkg_cmake_configure(
   SOURCE_PATH "${SOURCE_PATH}"
   OPTIONS
     ${FEATURE_OPTIONS}
+    ${SPOUT_OPTION}
     -DSGCT_BUILD_TESTS=OFF
     -DSGCT_ENABLE_EDIT_CONTINUE=OFF
   # Only the release calibrator is shipped, so building it a second time is wasted work.

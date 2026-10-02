@@ -41,6 +41,17 @@ elseif(VCPKG_TARGET_IS_LINUX)
     list(APPEND OPTIONS -DSOLOUD_BACKEND_ALSA=ON)
 endif()
 
+# SoLoud decodes MP3 through the vendored dr_mp3.h, which selects its NEON SIMD path on
+# _M_ARM64 and then brace-initializes a drmp3_f4 (= float32x4_t) from four floats. MSVC
+# models float32x4_t as the __n128 union rather than a plain vector type, so that is
+# "error C2078: too many initializers". DR_MP3_NO_SIMD is dr_mp3's own switch for
+# selecting the scalar decoder instead; MP3 decoding happens once at load time here, so
+# the SIMD path is not worth a patch against the vendored amalgamation
+if (VCPKG_TARGET_IS_WINDOWS AND VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
+    set(VCPKG_C_FLAGS "${VCPKG_C_FLAGS} /DDR_MP3_NO_SIMD")
+    set(VCPKG_CXX_FLAGS "${VCPKG_CXX_FLAGS} /DDR_MP3_NO_SIMD")
+endif ()
+
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}/contrib"
     OPTIONS
