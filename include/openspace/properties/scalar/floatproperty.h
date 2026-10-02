@@ -39,6 +39,9 @@ public:
     explicit FloatProperty(PropertyInfo info, float value = 0.f,
         float minValue = std::numeric_limits<float>::lowest(),
         float maxValue = std::numeric_limits<float>::max(), float stepValue = 0.01f);
+    explicit FloatProperty(PropertyInfo info, IsEnabled isEnabled, float value = 0.f,
+        float minValue = std::numeric_limits<float>::lowest(),
+        float maxValue = std::numeric_limits<float>::max(), float stepValue = 0.01f);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

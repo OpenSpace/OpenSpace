@@ -109,28 +109,24 @@ public:
          */
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
                              NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No,
-                             IsEnablable isEnablable_ = IsEnablable::No,
-                             IsEnabled isEnabled_ = IsEnabled::Yes)
+                             IsEnablable isEnablable_ = IsEnablable::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
             , needsConfirmation(needsConfirmation_)
             , isEnablable(isEnablable_)
-            , isEnabled(isEnabled_)
         {}
 
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
                                Visibility vis,
                              NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No,
-                             IsEnablable isEnablable_ = IsEnablable::No,
-                             IsEnabled isEnabled_ = IsEnabled::Yes)
+                             IsEnablable isEnablable_ = IsEnablable::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
             , visibility(vis)
             , needsConfirmation(needsConfirmation_)
             , isEnablable(isEnablable_)
-            , isEnabled(isEnabled_)
         {}
 
         /// The unique identifier that is part of the fully qualified URI of this Property
@@ -145,9 +141,6 @@ public:
         NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
         /// Determines if the Property is enablable (linked to a boolean)
         IsEnablable isEnablable = IsEnablable::No;
-        /// Determines if the property is enabled, if it is enablable
-        IsEnabled isEnabled = IsEnabled::Yes;
-
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an
@@ -593,7 +586,7 @@ protected:
     std::string _description;
 
     /// If this property is enablable, this will tell if it is enabled or not
-    IsEnabled _isEnabled;
+    IsEnabled _isEnabled = IsEnabled::No;
     /**
      * The meta data necessary for external applications.
      */

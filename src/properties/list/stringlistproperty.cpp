@@ -33,6 +33,13 @@ StringListProperty::StringListProperty(PropertyInfo info, std::vector<std::strin
     : ListProperty(std::move(info), std::move(values))
 {}
 
+StringListProperty::StringListProperty(PropertyInfo info, IsEnabled isEnabled,
+                                       std::vector<std::string> values)
+    : StringListProperty(std::move(info), std::move(values))
+{
+    _isEnabled = isEnabled;
+}
+
 std::string_view StringListProperty::className() const {
     return "StringListProperty";
 }

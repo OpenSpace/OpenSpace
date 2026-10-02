@@ -41,6 +41,11 @@ public:
         unsigned short minValue = std::numeric_limits<unsigned short>::lowest(),
         unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
         unsigned short stepValue = 1);
+    explicit UShortProperty(PropertyInfo info, IsEnabled isEnabled,
+        unsigned short value = 0,
+        unsigned short minValue = std::numeric_limits<unsigned short>::lowest(),
+        unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
+        unsigned short stepValue = 1);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;
