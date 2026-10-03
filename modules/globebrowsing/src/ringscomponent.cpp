@@ -479,10 +479,17 @@ void RingsComponent::draw(const RenderData& data, const ShadowComponent::ShadowM
         _camPositionObjectSpace = glm::normalize(
             glm::vec3(camToObjectTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0))
         );
+        _camPositionObjectSpaceRaw = glm::vec3(
+            camToObjectTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+        );
 
         _shader->setUniform(
             _uniformCacheAdvancedRings.camPositionObj,
             _camPositionObjectSpace
+        );
+        _shader->setUniform(
+            _uniformCacheAdvancedRings.camPositionObjRaw,
+            _camPositionObjectSpaceRaw
         );
 
         glEnable(GL_DEPTH_TEST);

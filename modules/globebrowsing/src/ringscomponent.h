@@ -112,9 +112,9 @@ private:
         opacity, ellipsoidRadii
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, sunPositionObj, camPositionObj, textureForwards, textureBackwards,
-        textureUnlit, textureColor, textureTransparency,
-        opacity, ellipsoidRadii
+        sunPosition, sunPositionObj, camPositionObj, textureForwards, camPositionObjRaw,
+        textureBackwards, textureUnlit, textureColor, textureTransparency, opacity,
+        ellipsoidRadii
     ) _uniformCacheAdvancedRings;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) _geomUniformCache;
 
@@ -140,6 +140,7 @@ private:
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
     glm::vec3 _camPositionObjectSpace = glm::vec3(0.f);
+    glm::vec3 _camPositionObjectSpaceRaw = glm::vec3(0.f);
     glm::vec3 _ellipsoidRadii = glm::vec3(1.f);
 
     // Callback for readiness state changes
