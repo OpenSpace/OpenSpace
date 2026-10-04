@@ -13,12 +13,6 @@ set -e
 
 case "$1" in
   configure)
-    # The bundled Node.js binary used by the web GUI module has to be executable, but the
-    # packaging step does not preserve the executable bit for it
-    if [ -f "@OPENSPACE_INSTALL_ROOT@/modules/webgui/ext/nodejs/node" ]; then
-      chmod +x "@OPENSPACE_INSTALL_ROOT@/modules/webgui/ext/nodejs/node"
-    fi
-    
     ln -sfn "@OPENSPACE_INSTALL_ROOT@/bin/openspace-launcher" /usr/bin/openspace
 
     mkdir -p /usr/share/applications
