@@ -61,6 +61,23 @@ LauncherWindow  QComboBox#config:disabled {
   color: rgb(225, 225, 225);
 }
 
+/*
+ * The popup of the profile and window configuration dropdowns. No rule for
+ * QTreeView::branch must be added as it  would replace the expansion arrows of the
+ * folders with the images named in such a rule
+ */
+LauncherWindow  QTreeView#configpopup {
+  background: rgb(96, 96, 96);
+  border: 1px solid rgb(225, 225, 225);
+  outline: none;
+  color: white;
+  show-decoration-selected: 1;
+}
+
+LauncherWindow  QTreeView#configpopup::item:selected {
+  background: rgb(110, 110, 110);
+}
+
 LauncherWindow  QMenu#newprofile {
   background: rgb(60, 60, 60);
   min-width: 8em;
