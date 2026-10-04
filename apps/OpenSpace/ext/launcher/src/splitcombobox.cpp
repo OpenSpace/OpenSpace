@@ -27,8 +27,6 @@
 #include "customicons.h"
 #include <openspace/filesystem/filesystem.h>
 #include <openspace/format.h>
-#include <QColor>
-#include <QFont>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QStandardItemModel>
@@ -45,14 +43,6 @@ namespace {
     // The indentation of a single level in the tree. The popup is only as wide as the
     // combo box itself, so this is a bit tighter than the default of most styles
     constexpr int TreeIndentation = 16;
-
-    // The color in which the header of a section is shown. This is a bit darker than the
-    // entries themselves so that it is still recognizable as a header
-    const QColor HeaderColor = QColor(235, 235, 235);
-
-    // The number of points by which the entries in the popup are shown larger than the
-    // rest of the user interface
-    constexpr int PopupFontSizeIncrease = 1;
 
     // Compares two relative paths such that, at the first component in which the two
     // differ, a path that continues into a subfolder is sorted before a path that ends
@@ -119,12 +109,11 @@ SplitComboBox::SplitComboBox(QWidget* parent, std::filesystem::path userPath,
     _treeView->setExpandsOnDoubleClick(false);
     _treeView->setIndentation(TreeIndentation);
 
-    // The combo box stamps its own font onto the view while taking it over, which
-    // happens after the style sheet has been resolved. So the size of the font has to be
-    // set here as a `font-size` in the style sheet would be overwritten again
-    QFont font = _treeView->font();
-    font.setPointSize(font.pointSize() + PopupFontSizeIncrease);
-    _treeView->setFont(font);
+    // A style sheet that is set on a widget does not reach a popup since the popup is a
+    // window of its own rather than a child widget. So the view has to be given the
+    // style sheet of the launcher itself; the rules in there that do not concern the
+    // view are simply ignored
+    _treeView->setStyleSheet(window()->styleSheet());
 
     // The event filters have to be installed after the view was handed over since the
     // combo box installs filters of its own in there and the filter that was installed
@@ -240,7 +229,6 @@ void SplitComboBox::addSection(const std::string& header,
     // The color has to be set on the item itself rather than through the style sheet
     // since the item delegate always takes the color of a disabled item from the
     // palette, which makes a `::item:disabled` rule have no effect on it
-    headerItem->setForeground(HeaderColor);
     _model->appendRow(headerItem);
 
     const std::vector<std::filesystem::path> files =
