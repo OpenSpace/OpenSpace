@@ -30,6 +30,19 @@ local Ganymede = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 2631000,
+    -- Hapke Parameters (AI-cited)
+    -- https://www.mao.kiev.ua/biblio/cards/show_sources_u.php?authid=725
+    Hapke = {
+      W = 0.442,
+      Theta = 23.0,
+      C = 0.0,
+      B = -0.210,
+      BS0 = 0.450, 
+      BC0 = 0.0,
+      HS = 0.031, 
+      HC = 0.0,
+      Phi = 0.0
+    },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "ganymede.labels",

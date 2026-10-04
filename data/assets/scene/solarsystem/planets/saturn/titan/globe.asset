@@ -18,6 +18,20 @@ local Titan = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 2576000,
+    -- Hapke Parameters (AI-cited).
+    -- Probably limited.
+    -- https://doi.org/10.1016/j.pss.2006.06.015
+    Hapke = {
+      W = 0.680,
+      Theta = 12.0,
+      C = 0.0,
+      B = -0.150,
+      BS0 = 0.0, 
+      BC0 = 0.0,
+      HS = 0.0, 
+      HC = 0.0,
+      Phi = 0.0
+    },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "titan.labels",

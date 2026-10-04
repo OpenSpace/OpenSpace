@@ -18,6 +18,19 @@ local Mimas = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 207000, 197000, 191000 },
+    -- Hapke Parameters (AI-cited).
+    -- https://doi.org/10.18372/2411-6602.08.2209
+    Hapke = {
+      W = 0.962,
+      Theta = 13.0,
+      C = 0.0,
+      B = -0.380,
+      BS0 = 0.720, 
+      BC0 = 0.0,
+      HS = 0.004, 
+      HC = 0.0,
+      Phi = 0.0
+    },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "mimas.labels",

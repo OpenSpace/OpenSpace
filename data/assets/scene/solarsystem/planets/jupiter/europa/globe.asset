@@ -30,6 +30,19 @@ local Europa = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 1560800,
+    -- Hapke Parameters (AI-cited)
+    -- https://api.semanticscholar.org/CorpusID:120612688
+    Hapke = {
+      W = 0.964,
+      Theta = 10.0,
+      C = 0.113,
+      B = -0.429,
+      BS0 = 0.50, 
+      BC0 = 0.0,
+      HS = 0.0016, 
+      HC = 1.0,
+      Phi = 0.0
+    },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "europa.labels",

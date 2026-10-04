@@ -30,6 +30,20 @@ local Io = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 1821600,
+    -- Hapke Parameters (AI-cited).
+    -- Extremely limited.
+    -- https://doi.org/10.1016/0019-1035(86)90053-9
+    Hapke = {
+      W = 0.720,
+      Theta = 25.0,
+      C = 0.0,
+      B = -0.300,
+      BS0 = 0.900, 
+      BC0 = 0.0,
+      HS = 0.012, 
+      HC = 0.0,
+      Phi = 0.0
+    },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "io.labels",

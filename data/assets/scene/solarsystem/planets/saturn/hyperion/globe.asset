@@ -18,6 +18,19 @@ local Hyperion = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 360200, 266000, 205400 },
+    -- Hapke Parameters (AI-cited)
+    -- https://doi.org/10.1016/j.icarus.2010.11.004
+    Hapke = {
+      W = 0.550,
+      Theta = 28.0,
+      C = 0.0,
+      B = -0.220,
+      BS0 = 0.650, 
+      BC0 = 0.0,
+      HS = 0.015, 
+      HC = 0.0,
+      Phi = 0.0
+    },
     Labels = {
       -- @TODO (2021-05-21, emmbr26) These labels do not seem to be visible
       Enabled = false,

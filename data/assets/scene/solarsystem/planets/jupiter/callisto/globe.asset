@@ -30,6 +30,19 @@ local Callisto = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 2410000,
+    -- Hapke Parameters (AI-cited)
+    -- https://doi.org/10.18372/2411-6602.08.2209
+    Hapke = {
+      W = 0.198,
+      Theta = 21.0,
+      C = 0.0,
+      B = -0.245,
+      BS0 = 0.954, 
+      BC0 = 0.0,
+      HS = 0.027, 
+      HC = 0.0,
+      Phi = 0.0
+    },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "callisto.labels",

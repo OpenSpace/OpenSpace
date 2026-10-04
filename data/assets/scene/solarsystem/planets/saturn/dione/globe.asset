@@ -15,6 +15,19 @@ local labelsPath = asset.resource({
 local Dione = {
   Identifier = "Dione",
   Parent = transforms.DionePosition.Identifier,
+    -- Hapke Parameters (AI-cited)
+    -- https://doi.org/10.3847/PSJ/ac867e
+    Hapke = {
+      W = 0.940,
+      Theta = 18.0,
+      C = 0.0,
+      B = -0.310,
+      BS0 = 0.810, 
+      BC0 = 0.0,
+      HS = 0.005, 
+      HC = 0.0,
+      Phi = 0.0
+    },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 561400,

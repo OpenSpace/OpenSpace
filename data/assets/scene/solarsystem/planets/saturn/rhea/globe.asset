@@ -18,6 +18,32 @@ local Rhea = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 765000,
+    -- Hapke Parameters (AI-cited).
+    -- Asymmetrical, strongly limited.
+    -- https://doi.org/10.3847/PSJ/ac867e
+    Hapke = {
+      W = 0.950,
+      Theta = 13.0,
+      C = 0.0,
+      B = -0.320,
+      BS0 = 0.850, 
+      BC0 = 0.0,
+      HS = 0.004, 
+      HC = 0.0,
+      Phi = 0.0
+    },
+    -- Right hemisphere
+    -- Hapke = {
+    --   W = 0.870,
+    --   Theta = 16.0,
+    --   C = 0.0,
+    --   B = -0.290,
+    --   BS0 = 0.700, 
+    --   BC0 = 0.0,
+    --   HS = 0.007, 
+    --   HC = 0.0,
+    --   Phi = 0.0
+    -- },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "rhea.labels",

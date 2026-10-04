@@ -18,6 +18,20 @@ local Iapetus = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 734000,
+    -- Hapke Parameters (AI-cited).
+    -- Limited.
+    -- https://doi.org/10.1016/j.icarus.2010.04.011
+    Hapke = {
+      W = 0.160,
+      Theta = 20.0,
+      C = 0.0,
+      B = -0.250,
+      BS0 = 0.850, 
+      BC0 = 0.0,
+      HS = 0.030, 
+      HC = 0.0,
+      Phi = 0.0
+    },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "iapetus.labels",

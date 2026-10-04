@@ -18,6 +18,19 @@ local Enceladus = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 252000,
+    -- Hapke Parameters
+    -- https://doi.org/10.1016/j.icarus.2020.113848
+    Hapke = {
+      W = 0.998,
+      Theta = 6.0,
+      C = 1.0,
+      B = 0.399,
+      BS0 = 0.21, 
+      BC0 = 0.0, --?
+      HS = 0.014, 
+      HC = 1.0, --?
+      Phi = 0.0 --?
+    },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "enceladus.labels",

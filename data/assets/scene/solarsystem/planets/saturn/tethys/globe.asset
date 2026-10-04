@@ -18,6 +18,19 @@ local Tethys = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 531100,
+    -- Hapke Parameters (AI-cited).
+    -- https://doi.org/10.18372/2411-6602.08.2209
+    Hapke = {
+      W = 0.958,
+      Theta = 14.0,
+      C = 0.0,
+      B = -0.350,
+      BS0 = 0.770, 
+      BC0 = 0.0,
+      HS = 0.005, 
+      HC = 0.0,
+      Phi = 0.0
+    },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "tethys.labels",
