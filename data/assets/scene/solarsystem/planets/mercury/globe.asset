@@ -29,6 +29,19 @@ local Mercury = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 2439700,
+    -- Hapke Parameters
+    -- https://doi.org/10.1016/j.icarus.2015.11.040
+    Hapke = {
+      W = 0.2824,
+      Theta = 13.0,
+      C = 0.1294,
+      B = 0.2588,
+      BS0 = 0.0, -- ?
+      BC0 = 0.0, -- ?
+      HS = 0.05, -- ?
+      HC = 0.9597,
+      Phi = 0.0056
+    },
     CameraMinHeight = 300,
     Labels = {
       Enabled = false,

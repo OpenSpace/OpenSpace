@@ -33,6 +33,19 @@ local Mars = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = MarsRadii,
+    -- Hapke Parameters
+    -- https://arxiv.org/pdf/1208.4518
+    Hapke = {
+      W = 0.85,
+      Theta = 17.0,
+      C = 0.6,
+      B = 0.12,
+      BS0 = 1.0,
+      BC0 = 0.0,
+      HS = 0.05,
+      HC = 1.0,
+      Phi = 0.0
+    },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "mars.labels",

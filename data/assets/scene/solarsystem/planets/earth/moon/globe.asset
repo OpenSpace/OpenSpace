@@ -26,6 +26,19 @@ local Moon = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 1738140,
+    -- Hapke Parameters
+    -- https://elib.dlr.de/203152/1/Bachelorarbeit_Alexander_Kuzminykh_20210818.pdf
+    Hapke = {
+      W = 0.3236,
+      Theta = 23.4,
+      C = 0.3045,
+      B = 0.2396,
+      BS0 = 1.8024,
+      BC0 = 0.0,
+      HS = 0.0715,
+      HC = 1.0,
+      Phi = 0.3
+    },
     ShadowGroup = {
       Sources = {
         { Name = sunAsset.Sun.Identifier, Radius = 696300000 },
