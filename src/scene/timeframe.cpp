@@ -86,9 +86,7 @@ TimeFrame::TimeFrame()
     addProperty(_isInTimeFrame);
 }
 
-bool TimeFrame::initialize() {
-    return true;
-}
+void TimeFrame::initialize() {}
 
 bool TimeFrame::isActive() const {
     return _isInTimeFrame;

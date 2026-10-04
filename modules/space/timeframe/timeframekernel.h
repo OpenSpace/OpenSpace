@@ -36,7 +36,7 @@ class TimeFrameKernel : public TimeFrame {
 public:
     explicit TimeFrameKernel(const Dictionary& dictionary);
 
-    bool initialize() override;
+    void initialize() override;
     void update(const Time& time) override;
 
     static openspace::Documentation Documentation();

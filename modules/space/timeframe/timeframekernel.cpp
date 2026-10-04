@@ -423,7 +423,7 @@ TimeFrameKernel::TimeFrameKernel(const Dictionary& dictionary)
     codegen::bake<Parameters>(dictionary);
 }
 
-bool TimeFrameKernel::initialize() {
+void TimeFrameKernel::initialize() {
     const Parameters p = codegen::bake<Parameters>(_initialization);
 
     // Either the SPK or the CK variable must be specified
@@ -459,8 +459,6 @@ bool TimeFrameKernel::initialize() {
     // of the vector and improve performance in the `update` lookup
     normalizeTimeRanges(_timeRangesSPK);
     normalizeTimeRanges(_timeRangesCK);
-
-    return true;
 }
 
 void TimeFrameKernel::update(const Time& time) {
