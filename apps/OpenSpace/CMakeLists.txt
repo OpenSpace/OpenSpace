@@ -65,7 +65,7 @@ if (OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION)
   target_compile_definitions(OpenSpace PRIVATE "OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION")
 endif ()
 
-if (UNIX AND NOT APPLE)
+if (UNIX)
   # The packages ship the Qt libraries in the same folder as the executable (see
   # support/cmake/packaging.cmake), which the loader only finds through this RPATH. The
   # build tree keeps the default RPATH pointing at the vcpkg libraries, so running from

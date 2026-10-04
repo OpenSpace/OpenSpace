@@ -84,8 +84,10 @@ void SettingsDialog::createWidgets() {
 
         QLabel* conf = new QLabel("Starting Profile");
         conf->setToolTip(
+            "<html><div style=\"width: 300px;\">"
             "With this setting, you can choose a profile that will be loaded the next "
             "time you start the application"
+            "</div></html>"
         );
         layout->addWidget(conf, 1, 0);
 
@@ -110,8 +112,10 @@ void SettingsDialog::createWidgets() {
 
         _rememberLastProfile = new QCheckBox("Keep Last Profile");
         _rememberLastProfile->setToolTip(
+            "<html><div style=\"width: 300px;\">"
             "If this setting is checked, the application will remember the profile that "
             "was loaded into OpenSpace and will use it at the next startup as well"
+            "</div></html>"
         );
         
         connect(
@@ -145,8 +149,10 @@ void SettingsDialog::createWidgets() {
 
         QLabel* conf = new QLabel("Starting Window Configuration");
         conf->setToolTip(
+            "<html><div style=\"width: 300px;\">"
             "With this setting, you can choose a window configuration that will be "
             "loaded the next time you start the application"
+            "</div></html>"
         );
         layout->addWidget(conf, 5, 0);
 
@@ -171,8 +177,10 @@ void SettingsDialog::createWidgets() {
 
         _rememberLastConfiguration = new QCheckBox("Keep Last Configuration");
         _rememberLastConfiguration->setToolTip(
+            "<html><div style=\"width: 300px;\">"
             "If this setting is checked, the application will remember the window "
             "configuration and will use it at the next startup as well"
+            "</div></html>"
         );
         connect(
             _rememberLastConfiguration,
@@ -251,9 +259,11 @@ void SettingsDialog::createWidgets() {
 
         _bypassLauncher = new QCheckBox("Bypass Launcher");
         _bypassLauncher->setToolTip(
+            "<html><div style=\"width: 300px;\">"
             "If this value is selected, the Launcher will no longer be shown at startup. "
             "Note that this also means that it will not be easy to get back to this "
             "setting to reenable the Launcher either."
+            "</div></html>"
         );
         connect(
             _bypassLauncher,
@@ -296,8 +306,10 @@ void SettingsDialog::createWidgets() {
 
         QLabel* conf = new QLabel("Layer Server");
         conf->setToolTip(
+            "<html><div style=\"width: 300px;\">"
             "This setting sets the default server to be used for the layers that "
             "are hosted by the OpenSpace team"
+            "</div></html>"
         );
         layout->addWidget(conf, 14, 0);
 
@@ -323,11 +335,13 @@ void SettingsDialog::createWidgets() {
 
         _mrf.isEnabled = new QCheckBox("Enable MRF Caching");
         _mrf.isEnabled->setToolTip(
+            "<html><div style=\"width: 300px;\">"
             "If this setting is checked, the MRF caching for globe layers will be "
             "enabled. This means that all planetary images that are loaded over the "
             "internet will also be cached locally and stored between application runs. "
             "This will speedup the loading the second time at the expense of hard disk "
             "space."
+            "</div></html>"
         );
         connect(
             _mrf.isEnabled,
@@ -351,12 +365,14 @@ void SettingsDialog::createWidgets() {
         layout->addWidget(_mrf.isEnabled, 16, 0, 1, 2);
 
         QLabel* mrfConf = new QLabel("MRF Cache Location");
-        conf->setToolTip(
+        mrfConf->setToolTip(
+            "<html><div style=\"width: 300px;\">"
             "This is the place where the MRF cache files are located. Please note that "
             "these files can potentially become quite large when using OpenSpace for a "
             "long while and when visiting new places regularly. If this value is left "
             "blank, the cached files will be stored in the 'mrf_cache' folder in the "
             "OpenSpace base folder."
+            "</div></html>"
         );
         layout->addWidget(mrfConf, 17, 0);
 

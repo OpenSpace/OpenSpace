@@ -352,12 +352,16 @@ bool SpiceManager::hasSpkCoverage(const std::string& target, double et) const {
     assert_msg(!target.empty(), "Empty target");
 
     const int id = naifId(target);
+    return hasSpkCoverage(id, et);
+}
+
+bool SpiceManager::hasSpkCoverage(int target, double et) const {
     // SOLAR SYSTEM BARYCENTER special case, implicitly included by Spice
-    if (id == 0) {
+    if (target == 0) {
         return true;
     }
 
-    const auto it = _spkIntervals.find(id);
+    const auto it = _spkIntervals.find(target);
     if (it != _spkIntervals.end()) {
         const std::vector<std::pair<double, double>>& intervalVector = it->second;
         for (const std::pair<double, double>& vecElement : intervalVector) {
@@ -389,7 +393,11 @@ bool SpiceManager::hasCkCoverage(const std::string& frame, double et) const {
     assert_msg(!frame.empty(), "Empty target");
 
     const int id = frameId(frame);
-    const auto it = _ckIntervals.find(id);
+    return hasCkCoverage(id, et);
+}
+
+bool SpiceManager::hasCkCoverage(int frame, double et) const {
+    const auto it = _ckIntervals.find(frame);
     if (it != _ckIntervals.end()) {
         const std::vector<std::pair<double, double>>& intervalVector = it->second;
         for (const std::pair<double, double>& i : intervalVector) {

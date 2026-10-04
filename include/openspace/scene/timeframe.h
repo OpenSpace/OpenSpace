@@ -43,7 +43,7 @@ public:
     TimeFrame();
     virtual ~TimeFrame() override = default;
 
-    virtual bool initialize();
+    virtual void initialize();
     virtual void update(const Time& time) = 0;
 
     bool isActive() const;

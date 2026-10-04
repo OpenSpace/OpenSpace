@@ -694,6 +694,10 @@ void SceneGraphNode::initialize() {
     if (_transform.scale) {
         _transform.scale->initialize();
     }
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
+
     _state = State::Initialized;
 
     // Want this computed after the renderable and transforms have been initialized

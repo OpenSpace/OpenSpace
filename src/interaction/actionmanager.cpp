@@ -114,13 +114,13 @@ void ActionManager::triggerAction(const std::string& identifier,
             .code = std::move(script),
             .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
             .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No,
-            .addToLog = ScriptEngine::Script::ShouldBeLogged(shouldBeLogged)
+            .addToLog = ScriptEngine::ShouldBeLogged(shouldBeLogged)
         });
     }
     else {
         global::scriptEngine->queueScript({
             .code = std::move(script),
-            .addToLog = ScriptEngine::Script::ShouldBeLogged(shouldBeLogged)
+            .addToLog = ScriptEngine::ShouldBeLogged(shouldBeLogged)
         });
     }
 }

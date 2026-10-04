@@ -120,7 +120,7 @@ void ScriptEngine::deinitialize() {
     _registeredLibraries.clear();
     for (const RepeatedScriptInfo& info : _repeatedScripts) {
         if (info.postScript.empty()) {
-            queueScript(info.postScript);
+            queueScript(info.postScript, info.shouldBeLogged);
         }
     }
     _repeatedScripts.clear();
@@ -629,7 +629,10 @@ void ScriptEngine::postSync(bool isMaster) {
         global::windowDelegate->applicationTime();
     for (RepeatedScriptInfo& info : _repeatedScripts) {
         if (now - info.lastRun >= info.timeout) {
-            runScript({ info.script });
+            runScript({
+                .code = info.script,
+                .addToLog = info.shouldBeLogged
+            });
             info.lastRun = now;
         }
     }
@@ -653,13 +656,17 @@ void ScriptEngine::queueScript(Script script) {
     _incomingScripts.push(std::move(script));
 }
 
-void ScriptEngine::queueScript(std::string script) {
-    queueScript({ .code = std::move(script) });
+void ScriptEngine::queueScript(std::string script, ShouldBeLogged shouldBeLogged) {
+    queueScript({
+        .code = std::move(script),
+        .addToLog = shouldBeLogged
+    });
 }
 
 void ScriptEngine::registerRepeatedScript(std::string identifier, std::string script,
                                           double timeout, std::string preScript,
-                                          std::string postScript)
+                                          std::string postScript,
+                                          ShouldBeLogged shouldBeLogged)
 {
     auto it = std::find_if(
         _repeatedScripts.begin(),
@@ -676,14 +683,18 @@ void ScriptEngine::registerRepeatedScript(std::string identifier, std::string sc
     }
 
     if (!preScript.empty()) {
-        runScript({ std::move(preScript) });
+        runScript({
+           .code = std::move(preScript),
+           .addToLog = shouldBeLogged
+        });
     }
-    _repeatedScripts.emplace_back(
-        std::move(script),
-        std::move(postScript),
-        std::move(identifier),
-        timeout
-    );
+    _repeatedScripts.push_back({
+        .script = std::move(script),
+        .postScript = std::move(postScript),
+        .identifier = std::move(identifier),
+        .timeout = timeout,
+        .shouldBeLogged = shouldBeLogged
+    });
 }
 
 void ScriptEngine::removeRepeatedScript(std::string_view identifier) {
@@ -696,7 +707,7 @@ void ScriptEngine::removeRepeatedScript(std::string_view identifier) {
     );
     if (it != _repeatedScripts.end()) {
         if (!it->postScript.empty()) {
-            queueScript(it->postScript);
+            queueScript(it->postScript, it->shouldBeLogged);
         }
 
         _repeatedScripts.erase(it);

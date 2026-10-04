@@ -1040,7 +1040,7 @@ TEST_CASE("Version 1.0 -> 1.1", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.0 -> 1.2", "[profile]") {
@@ -1049,7 +1049,7 @@ TEST_CASE("Version 1.0 -> 1.2", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.0 -> 1.3", "[profile]") {
@@ -1058,7 +1058,7 @@ TEST_CASE("Version 1.0 -> 1.3", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.0 -> 1.4", "[profile]") {
@@ -1067,7 +1067,7 @@ TEST_CASE("Version 1.0 -> 1.4", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.0 -> 1.5", "[profile]") {
@@ -1076,7 +1076,7 @@ TEST_CASE("Version 1.0 -> 1.5", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.1 -> 1.2", "[profile]") {
@@ -1085,7 +1085,7 @@ TEST_CASE("Version 1.1 -> 1.2", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.1 -> 1.3", "[profile]") {
@@ -1094,7 +1094,7 @@ TEST_CASE("Version 1.1 -> 1.3", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.1 -> 1.4", "[profile]") {
@@ -1103,7 +1103,7 @@ TEST_CASE("Version 1.1 -> 1.4", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.1 -> 1.5", "[profile]") {
@@ -1112,7 +1112,7 @@ TEST_CASE("Version 1.1 -> 1.5", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.2 -> 1.3", "[profile]") {
@@ -1121,7 +1121,7 @@ TEST_CASE("Version 1.2 -> 1.3", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.2 -> 1.4", "[profile]") {
@@ -1130,7 +1130,7 @@ TEST_CASE("Version 1.2 -> 1.4", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.2 -> 1.5", "[profile]") {
@@ -1139,7 +1139,7 @@ TEST_CASE("Version 1.2 -> 1.5", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.3 -> 1.4", "[profile]") {
@@ -1148,7 +1148,7 @@ TEST_CASE("Version 1.3 -> 1.4", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.3 -> 1.5", "[profile]") {
@@ -1157,7 +1157,7 @@ TEST_CASE("Version 1.3 -> 1.5", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 TEST_CASE("Version 1.4 -> 1.5", "[profile]") {
@@ -1166,7 +1166,18 @@ TEST_CASE("Version 1.4 -> 1.5", "[profile]") {
 
     Profile src = Profile(absPath(Src));
     Profile dst = Profile(absPath(Dest));
-    CHECK(src == dst);
+    CHECK_PROFILE_EQ(src, dst);
+}
+
+TEST_CASE("Version 1.5 -> 1.6 Panel Visibility", "[profile]") {
+    constexpr std::string_view Src =
+        "${TESTDIR}/profile/conversion/issue-4281_15.profile";
+    constexpr std::string_view Dest =
+        "${TESTDIR}/profile/conversion/issue-4281_16.profile";
+
+    Profile src = Profile(absPath(Src));
+    Profile dst = Profile(absPath(Dest));
+    CHECK_PROFILE_EQ(src, dst);
 }
 
 

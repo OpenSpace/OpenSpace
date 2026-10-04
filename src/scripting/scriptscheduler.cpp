@@ -282,7 +282,8 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             codegen::lua::LoadFile,
             codegen::lua::LoadScheduledScript,
             codegen::lua::Clear,
-            codegen::lua::ScheduledScripts
+            codegen::lua::ScheduledScripts,
+            codegen::lua::ScheduleSingleShotScript
         }
     };
 }

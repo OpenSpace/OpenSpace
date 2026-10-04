@@ -32,9 +32,6 @@ function(set_cef_targets cef_root main_target)
   cmake_policy(SET CMP0074 NEW)
   find_package(CEF REQUIRED)
 
-  # ensure out target dir is set
-  set_openspace_cef_target_out_dir()
-
   # main CEF executable target
   set(CEF_TARGET ${main_target} PARENT_SCOPE)
 endfunction ()
@@ -137,8 +134,7 @@ function(run_cef_windows_config CEF_TARGET CEF_ROOT MODULE_PATH)
   endif ()
 
   # Add the custom manifest files to the executable.
-  set_openspace_cef_target_out_dir()
-  add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${MODULE_PATH}" "${CEF_TARGET}" "exe")
+  add_windows_cef_manifest("${MODULE_PATH}" "${CEF_TARGET}" "exe")
 endfunction ()
 
 function(run_cef_linux_config CEF_TARGET CEF_ROOT)
@@ -155,9 +151,6 @@ function(run_cef_linux_config CEF_TARGET CEF_ROOT)
     add_logical_target("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
     target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
   endif ()
-
-  # Add the custom manifest files to the executable.
-  set_openspace_cef_target_out_dir()
 endfunction ()
 
 function(set_modules_dependency_on_cef_libraries LIB_DEPENDENT)

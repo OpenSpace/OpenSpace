@@ -36,16 +36,15 @@ class TimeFrameKernel : public TimeFrame {
 public:
     explicit TimeFrameKernel(const Dictionary& dictionary);
 
-    bool initialize() override;
+    void initialize() override;
     void update(const Time& time) override;
 
     static openspace::Documentation Documentation();
 
 private:
     Dictionary _initialization;
-
-    std::vector<TimeRange> _timeRangesSPK;
-    std::vector<TimeRange> _timeRangesCK;
+    std::optional<int> _object;
+    std::optional<int> _reference;
 };
 
 } // namespace openspace
