@@ -261,6 +261,102 @@ namespace {
         Property::Visibility::Developer
     };
 
+    constexpr Property::PropertyInfo HapkeEnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "If enabled, the Hapke (2012) reflectance model is used for the shading of the "
+        "globe instead of the Oren-Nayar diffuse model. Requires that shading is "
+        "performed.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo HapkeNormalizeInfo = {
+        "NormalizeToStandardGeometry",
+        "Normalize to standard geometry",
+        "If enabled, the Hapke reflectance is divided by the Hapke reflectance at the "
+        "standard photometric geometry (incidence 30 degrees, emission 0 degrees, phase "
+        "angle 30 degrees). This is useful when the color layers are albedo maps that "
+        "are already photometrically normalized to that geometry, as the surface then "
+        "has the texture's brightness at that geometry and only the angular variation "
+        "comes from the Hapke model. If disabled, the texture color is multiplied by "
+        "the raw Hapke reflectance factor, which makes the globe considerably darker.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo HapkeWInfo = {
+        "W",
+        "Single scattering albedo (w)",
+        "The Hapke single scattering albedo w.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo HapkeThetaInfo = {
+        "Theta",
+        "Macroscopic roughness (theta, degrees)",
+        "The Hapke macroscopic roughness (mean slope angle) in degrees.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo HapkeCInfo = {
+        "C",
+        "Backscatter fraction (c)",
+        "The backscatter fraction c of the double Henyey-Greenstein phase function.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo HapkeBInfo = {
+        "B",
+        "Anisotropy (b)",
+        "The anisotropy parameter b of the double Henyey-Greenstein phase function.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo HapkeBS0Info = {
+        "BS0",
+        "Shadow hiding amplitude (B_S0)",
+        "The amplitude of the shadow hiding opposition effect.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo HapkeBC0Info = {
+        "BC0",
+        "Coherent backscatter amplitude (B_C0)",
+        "The amplitude of the coherent backscatter opposition effect. 0 disables it.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo HapkeHSInfo = {
+        "HS",
+        "Shadow hiding width (h_S)",
+        "The angular width of the shadow hiding opposition effect.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo HapkeHCInfo = {
+        "HC",
+        "Coherent backscatter width (h_C)",
+        "The angular width of the coherent backscatter opposition effect.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo HapkePhiInfo = {
+        "Phi",
+        "Porosity / filling factor (phi)",
+        "The filling factor (porosity) phi of the regolith. Values above roughly 0.75 "
+        "are clamped in the shader.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo HapkeExposureInfo = {
+        "Exposure",
+        "Exposure",
+        "A constant multiplier applied to the Hapke reflectance, similar to the "
+        "exposure of a camera. 1 leaves the physically based result unchanged, larger "
+        "values brighten the lit parts of the globe. Values above 1 are not physically "
+        "correct and can saturate bright areas.",
+        Property::Visibility::User
+    };
+
     constexpr Property::PropertyInfo NActiveLayersInfo = {
         "NActiveLayers",
         "Number of active layers",
@@ -604,6 +700,45 @@ namespace {
 
         std::optional<Dictionary> shadows
             [[codegen::reference("globebrowsing_shadowscomponent")]];
+
+        // The parameters for the Hapke (2012) reflectance model. All values are optional
+        // and default to the lunar parameters. Specifying this table enables the model,
+        // which then replaces the Oren-Nayar diffuse shading of the globe.
+        struct Hapke {
+            // [[codegen::verbatim(HapkeWInfo.description)]]
+            std::optional<float> w [[codegen::inrange(0.f, 1.f)]];
+
+            // [[codegen::verbatim(HapkeThetaInfo.description)]]
+            std::optional<float> theta [[codegen::inrange(0.f, 89.f)]];
+
+            // [[codegen::verbatim(HapkeCInfo.description)]]
+            std::optional<float> c;
+
+            // [[codegen::verbatim(HapkeBInfo.description)]]
+            std::optional<float> b;
+
+            // [[codegen::verbatim(HapkeBS0Info.description)]]
+            std::optional<float> bS0 [[codegen::greaterequal(0.f)]];
+
+            // [[codegen::verbatim(HapkeBC0Info.description)]]
+            std::optional<float> bC0 [[codegen::greaterequal(0.f)]];
+
+            // [[codegen::verbatim(HapkeHSInfo.description)]]
+            std::optional<float> hS [[codegen::greater(0.f)]];
+
+            // [[codegen::verbatim(HapkeHCInfo.description)]]
+            std::optional<float> hC [[codegen::greater(0.f)]];
+
+            // [[codegen::verbatim(HapkePhiInfo.description)]]
+            std::optional<float> phi [[codegen::inrange(0.f, 1.f)]];
+
+            // [[codegen::verbatim(HapkeExposureInfo.description)]]
+            std::optional<float> exposure [[codegen::greaterequal(0.f)]];
+
+            // [[codegen::verbatim(HapkeNormalizeInfo.description)]]
+            std::optional<bool> normalizeToStandardGeometry;
+        };
+        std::optional<Hapke> hapke;
     };
 } // namespace
 #include "renderableglobe_codegen.cpp"
@@ -652,6 +787,21 @@ RenderableGlobe::RenderableGlobe(const Dictionary& dictionary)
         IntProperty(NumberShadowSamplesInfo, 5, 1, 7)
     })
     , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping" })
+    , _hapkeProperties({
+        BoolProperty(HapkeEnabledInfo, false),
+        BoolProperty(HapkeNormalizeInfo, true),
+        FloatProperty(HapkeWInfo, 0.3236f, 0.001f, 0.999f),
+        FloatProperty(HapkeThetaInfo, 23.4f, 0.f, 60.f),
+        FloatProperty(HapkeCInfo, 0.3045f, -1.f, 1.f),
+        FloatProperty(HapkeBInfo, 0.2396f, 0.f, 0.99f),
+        FloatProperty(HapkeBS0Info, 1.8024f, 0.f, 5.f),
+        FloatProperty(HapkeBC0Info, 0.f, 0.f, 5.f),
+        FloatProperty(HapkeHSInfo, 0.0715f, 0.001f, 1.f),
+        FloatProperty(HapkeHCInfo, 1.f, 0.001f, 1.f),
+        FloatProperty(HapkePhiInfo, 0.3f, 0.f, 0.74f),
+        FloatProperty(HapkeExposureInfo, 1.f, 0.f, 20.f)
+    })
+    , _hapkePropertyOwner({ "Hapke", "Hapke" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
@@ -756,6 +906,37 @@ RenderableGlobe::RenderableGlobe(const Dictionary& dictionary)
     _orenNayarRoughness = p.orenNayarRoughness.value_or(_orenNayarRoughness);
     addProperty(_orenNayarRoughness);
 
+    if (p.hapke.has_value()) {
+        const Parameters::Hapke& h = *p.hapke;
+        // Specifying the table enables the model
+        _hapkeProperties.enabled = true;
+        _hapkeProperties.normalize =
+            h.normalizeToStandardGeometry.value_or(_hapkeProperties.normalize);
+        _hapkeProperties.w = h.w.value_or(_hapkeProperties.w);
+        _hapkeProperties.theta = h.theta.value_or(_hapkeProperties.theta);
+        _hapkeProperties.c = h.c.value_or(_hapkeProperties.c);
+        _hapkeProperties.b = h.b.value_or(_hapkeProperties.b);
+        _hapkeProperties.bS0 = h.bS0.value_or(_hapkeProperties.bS0);
+        _hapkeProperties.bC0 = h.bC0.value_or(_hapkeProperties.bC0);
+        _hapkeProperties.hS = h.hS.value_or(_hapkeProperties.hS);
+        _hapkeProperties.hC = h.hC.value_or(_hapkeProperties.hC);
+        _hapkeProperties.phi = h.phi.value_or(_hapkeProperties.phi);
+        _hapkeProperties.exposure = h.exposure.value_or(_hapkeProperties.exposure);
+    }
+    _hapkePropertyOwner.addProperty(_hapkeProperties.enabled);
+    _hapkePropertyOwner.addProperty(_hapkeProperties.normalize);
+    _hapkePropertyOwner.addProperty(_hapkeProperties.w);
+    _hapkePropertyOwner.addProperty(_hapkeProperties.theta);
+    _hapkePropertyOwner.addProperty(_hapkeProperties.c);
+    _hapkePropertyOwner.addProperty(_hapkeProperties.b);
+    _hapkePropertyOwner.addProperty(_hapkeProperties.bS0);
+    _hapkePropertyOwner.addProperty(_hapkeProperties.bC0);
+    _hapkePropertyOwner.addProperty(_hapkeProperties.hS);
+    _hapkePropertyOwner.addProperty(_hapkeProperties.hC);
+    _hapkePropertyOwner.addProperty(_hapkeProperties.phi);
+    _hapkePropertyOwner.addProperty(_hapkeProperties.exposure);
+    addPropertySubOwner(_hapkePropertyOwner);
+
     _nActiveLayers.setReadOnly(true);
     addProperty(_nActiveLayers);
 
@@ -778,6 +959,7 @@ RenderableGlobe::RenderableGlobe(const Dictionary& dictionary)
     _eclipseShadowsEnabled.onChange(notifyShaderRecompilation);
     _eclipseHardShadows.onChange(notifyShaderRecompilation);
     _performShading.onChange(notifyShaderRecompilation);
+    _hapkeProperties.enabled.onChange(notifyShaderRecompilation);
     _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
     _shadowMappingProperties.shadowMapping.onChange(notifyShaderRecompilation);
 
@@ -1168,13 +1350,49 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
     }
 
     if (_performShading) {
-        const float onr = _orenNayarRoughness;
-        _localRenderer.program->setUniform("orenNayarRoughness", onr);
-        _globalRenderer.program->setUniform("orenNayarRoughness", onr);
+        {
+            // The uniform is optimized away when the Hapke model replaces Oren-Nayar
+            using IgnoreError = opengl::ProgramObject::IgnoreError;
+            const float onr = _orenNayarRoughness;
+            for (opengl::ProgramObject* prog :
+                 { _localRenderer.program.get(), _globalRenderer.program.get() })
+            {
+                prog->setIgnoreUniformLocationError(IgnoreError::Yes);
+                prog->setUniform("orenNayarRoughness", onr);
+                prog->setIgnoreUniformLocationError(IgnoreError::No);
+            }
+        }
 
         const float amb = _ambientIntensity;
         _localRenderer.program->setUniform("ambientIntensity", amb);
         _globalRenderer.program->setUniform("ambientIntensity", amb);
+
+        if (_hapkeProperties.enabled) {
+            // The shader expects the roughness angle in radians
+            const float thetaRad = glm::radians(_hapkeProperties.theta.value());
+            const bool normalize = _hapkeProperties.normalize;
+
+            // The uniforms might have been optimized away if the shader has not yet been
+            // recompiled with the Hapke model enabled
+            using IgnoreError = opengl::ProgramObject::IgnoreError;
+            for (opengl::ProgramObject* prog :
+                 { _localRenderer.program.get(), _globalRenderer.program.get() })
+            {
+                prog->setIgnoreUniformLocationError(IgnoreError::Yes);
+                prog->setUniform("hapke.w", _hapkeProperties.w.value());
+                prog->setUniform("hapke.theta", thetaRad);
+                prog->setUniform("hapke.c", _hapkeProperties.c.value());
+                prog->setUniform("hapke.b", _hapkeProperties.b.value());
+                prog->setUniform("hapke.B_S0", _hapkeProperties.bS0.value());
+                prog->setUniform("hapke.B_C0", _hapkeProperties.bC0.value());
+                prog->setUniform("hapke.h_S", _hapkeProperties.hS.value());
+                prog->setUniform("hapke.h_C", _hapkeProperties.hC.value());
+                prog->setUniform("hapke.phi", _hapkeProperties.phi.value());
+                prog->setUniform("hapkeNormalize", normalize);
+                prog->setUniform("hapkeExposure", _hapkeProperties.exposure.value());
+                prog->setIgnoreUniformLocationError(IgnoreError::No);
+            }
+        }
     }
 
     _localRenderer.program->setUniform("opacity", opacity());
@@ -1873,6 +2091,10 @@ void RenderableGlobe::recompileShaders() {
         std::to_string(_useAccurateNormals && hasHeightLayer)
     );
     pairs.emplace_back("performShading", std::to_string(_performShading));
+    pairs.emplace_back(
+        "useHapke",
+        std::to_string(_performShading && _hapkeProperties.enabled)
+    );
     pairs.emplace_back("useEclipseShadows", std::to_string(_eclipseShadowsEnabled));
     pairs.emplace_back("useEclipseHardShadows", std::to_string(_eclipseHardShadows));
     pairs.emplace_back(

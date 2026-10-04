@@ -257,6 +257,24 @@ private:
 
     PropertyOwner _shadowMappingPropertyOwner;
 
+    // Hapke (2012) reflectance model. If enabled, it replaces the Oren-Nayar diffuse term
+    struct {
+        BoolProperty enabled;
+        BoolProperty normalize;
+        FloatProperty w;
+        FloatProperty theta;  // In degrees
+        FloatProperty c;
+        FloatProperty b;
+        FloatProperty bS0;
+        FloatProperty bC0;
+        FloatProperty hS;
+        FloatProperty hC;
+        FloatProperty phi;
+        FloatProperty exposure;
+    } _hapkeProperties;
+
+    PropertyOwner _hapkePropertyOwner;
+
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
     LayerManager _layerManager;

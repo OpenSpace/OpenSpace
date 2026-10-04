@@ -27,6 +27,7 @@
 
 #include "tile.glsl"
 #include "blending.glsl"
+#include "hapke.glsl"
 
 // First layer type from LayerShaderManager is height map
 #define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeightLayers} + 1
@@ -59,6 +60,7 @@
 // Other key value pairs used for settings
 #define USE_ACCURATE_NORMALS #{useAccurateNormals}
 #define PERFORM_SHADING #{performShading}
+#define USE_HAPKE #{useHapke}
 #define USE_ECLIPSE_SHADOWS #{useEclipseShadows}
 #define USE_ECLIPSE_HARD_SHADOWS #{useEclipseHardShadows}
 #define SHOW_CHUNK_EDGES #{showChunkEdges}
@@ -381,13 +383,44 @@ vec4 calculateShadedColor(vec4 currentColor, vec3 ellipsoidNormalCameraSpace,
 
   vec3 n = normalize(ellipsoidNormalCameraSpace);
 
+#if USE_HAPKE
+  // Hapke (2012) reflectance replacing the Oren-Nayar diffuse term. The result includes
+  // the cosine of the incidence angle. lightDirectionCameraSpace points from the light to
+  // the surface and viewDirectionCameraSpace from the camera to the surface, whereas the
+  // Hapke model wants both pointing away from the surface
+  HapkeDerived hapkeD = hapkeDerive(hapke);
+  float power = hapkeReflectance(
+    -lightDirectionCameraSpace,
+    n,
+    -viewDirectionCameraSpace,
+    hapke,
+    hapkeD
+  );
+
+  if (hapkeNormalize) {
+    // Standard photometric geometry: incidence 30, emission 0, phase angle 30 degrees
+    const vec3 RefNormal = vec3(0.0, 0.0, 1.0);
+    const vec3 RefLight = vec3(0.5, 0.0, 0.8660254);
+    float refPower = hapkeReflectance(RefLight, RefNormal, RefNormal, hapke, hapkeD);
+    power /= max(refPower, 1e-6);
+  }
+
+  // Artistic exposure control, 1.0 leaves the Hapke result unchanged
+  power *= hapkeExposure;
+#else // USE_HAPKE
   float power = orenNayarDiffuse(-lightDirectionCameraSpace, viewDirectionCameraSpace,
     ellipsoidNormalCameraSpace, roughness);
+#endif // USE_HAPKE
 
   vec3 l = lightDirectionCameraSpace;
   power = max(smoothstep(0.0, 0.1, max(dot(-l, n), 0.0)) * power, 0.0);
 
-  vec4 color = vec4(shadedColor + currentColor.rgb * power, currentColor.a);
+  vec3 litColor = shadedColor + currentColor.rgb * power;
+#if USE_HAPKE
+  // Roll off bright values (e.g. from a raised Hapke exposure) instead of clipping them
+  litColor = toneMap(litColor);
+#endif // USE_HAPKE
+  vec4 color = vec4(litColor, currentColor.a);
   return color;
 }
 

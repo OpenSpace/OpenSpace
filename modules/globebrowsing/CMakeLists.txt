@@ -132,6 +132,7 @@ set(SHADER_FILES
   shaders/geojson_points_vs.glsl
   shaders/geojson_vs.glsl
   shaders/globalrenderer_vs.glsl
+  shaders/hapke.glsl
   shaders/interpolate_fs.glsl
   shaders/interpolate_vs.glsl
   shaders/localrenderer_vs.glsl
