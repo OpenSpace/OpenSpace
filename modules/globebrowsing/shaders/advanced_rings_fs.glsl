@@ -58,7 +58,7 @@ uniform vec3 ellipsoidRadii;
 
 vec3 toneMap(vec3 color) {
     // Rec.709 -> ACEScg approximation
-    const mat3 InputMatrix = mat3(
+    const mat3 inputMatrix = mat3(
         0.84247906224151, 0.04232824226101, 0.04237565490570,
         0.07781254037158, 0.87843363533593, 0.07843363533593,
         0.07970839738700, 0.07923812240305, 0.87919070975837
@@ -74,7 +74,7 @@ vec3 toneMap(vec3 color) {
     vec3 result = 15.53 * c5 - 40.07 * c4 + 31.96 * c3 - 6.87 * c2 + 0.45 * color;
 
     // ACEScg → Rec.709 conversion
-    const mat3 OutputMatrix = mat3(
+    const mat3 outputMatrix = mat3(
         1.1961604724, -0.0528489811, -0.0528489811,
         -0.0984852928, 1.1528414546, -0.0984852928,
         -0.0976751805, -0.0999924735, 1.1513342746
