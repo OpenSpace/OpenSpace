@@ -272,6 +272,7 @@ public:
      * \pre \p target must not be empty
      */
     bool hasSpkCoverage(const std::string& target, double et) const;
+    bool hasSpkCoverage(int target, double et) const;
 
     /**
      * Returns a list of loaded SPK coverage intervals for \p target.
@@ -300,6 +301,7 @@ public:
      * \pre \p target must not be empty
      */
     bool hasCkCoverage(const std::string& frame, double et) const;
+    bool hasCkCoverage(int frame, double et) const;
 
     /**
      * Returns a list of loaded CK coverage intervals for \p target.

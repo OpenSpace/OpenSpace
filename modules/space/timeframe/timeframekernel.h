@@ -43,9 +43,8 @@ public:
 
 private:
     Dictionary _initialization;
-
-    std::vector<TimeRange> _timeRangesSPK;
-    std::vector<TimeRange> _timeRangesCK;
+    std::optional<int> _object;
+    std::optional<int> _reference;
 };
 
 } // namespace openspace

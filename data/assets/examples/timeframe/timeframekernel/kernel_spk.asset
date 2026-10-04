@@ -17,10 +17,7 @@ local Node = {
   Identifier = "TimeFrameKernel_Example_SPK",
   TimeFrame = {
     Type = "TimeFrameKernel",
-    SPK = {
-      Kernels = data .. "apollo15-1.bsp",
-      Object = "-915"
-    }
+    Object = "-915"
   },
   Renderable = {
     Type = "RenderableCartesianAxes"
@@ -33,9 +30,11 @@ local Node = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(data .. "apollo15-1.bsp")
   openspace.addSceneGraphNode(Node)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Node)
+  openspace.spice.unloadKernel(data .. "apollo15-1.bsp")
 end)

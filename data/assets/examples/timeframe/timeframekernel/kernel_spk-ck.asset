@@ -18,17 +18,8 @@ local Node = {
   Identifier = "TimeFrameKernel_Example_Combined_SPK-CK",
   TimeFrame = {
     Type = "TimeFrameKernel",
-    SPK = {
-      Kernels = data .. "juice_orbc_000031_230414_310721_v03.bsp",
-      Object = "JUICE"
-    },
-    CK = {
-      Kernels = {
-        data .. "juice_sc_meas_230413_230415_s230414_v01.bc",
-        data .. "juice_step_230414_v01.tsc"
-      },
-      Reference = "-28002"
-    }
+    Object = "JUICE"
+    Reference = "-28002"
   },
   Renderable = {
     Type = "RenderableCartesianAxes"
@@ -41,9 +32,15 @@ local Node = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(data .. "juice_orbc_000031_230414_310721_v03.bsp")
+  openspace.spice.loadKernel(data .. "juice_sc_meas_230413_230415_s230414_v01.bc")
+  openspace.spice.loadKernel(data .. "juice_step_230414_v01.tsc")
   openspace.addSceneGraphNode(Node)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Node)
+  openspace.spice.unloadKernel(data .. "juice_step_230414_v01.tsc")
+  openspace.spice.unloadKernel(data .. "juice_sc_meas_230413_230415_s230414_v01.bc")
+  openspace.spice.unloadKernel(data .. "juice_orbc_000031_230414_310721_v03.bsp")
 end)
