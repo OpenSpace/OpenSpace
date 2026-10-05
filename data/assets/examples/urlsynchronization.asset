@@ -51,7 +51,7 @@ asset.resource({
   UseHash = false
 })
 
--- Load a zip file and then directly uncip it
+-- Load a zip file and then directly unzip it
 asset.resource({
   Name = "Example Zip Direct",
   Type = "UrlSynchronization",
