@@ -5,6 +5,19 @@ local transforms = asset.require("./transforms")
 local Miranda = {
   Identifier = "Miranda",
   Parent = transforms.MirandaPosition.Identifier,
+  -- Hapke Parameters
+  -- https://doi.org/10.1006/icar.2001.6596
+  Hapke = {
+    W = 0.58,
+    Theta = 23.0,
+    C = 0.0,
+    B = -0.28,
+    BS0 = 1.00,
+    BC0 = 4.0,
+    HS = 0.025,
+    HC = 0.001,
+    Phi = 0.0
+  },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 471600, 468000, 466000 }

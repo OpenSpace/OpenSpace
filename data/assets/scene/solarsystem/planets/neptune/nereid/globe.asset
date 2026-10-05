@@ -5,6 +5,20 @@ local transforms = asset.require("./transforms")
 local Nereid = {
   Identifier = "Nereid",
   Parent = transforms.NereidPosition.Identifier,
+  -- Nereid (AI-cited)
+  -- Borrowed from Umbriel.
+  -- https://doi.org/10.1006/icar.2001.6596 and https://doi.org/10.1029/91JA01735
+  Hapke = {
+    W = 0.33,
+    Theta = 23.0,
+    C = 0.0,
+    B = -0.28,
+    BS0 = 0.80,
+    BC0 = 4.0,
+    HS = 0.035,
+    HC = 0.001,
+    Phi = 0.0
+  },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 357000, 340000, 340000 }

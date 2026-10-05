@@ -5,6 +5,20 @@ local transforms = asset.require("./transforms")
 local Triton = {
   Identifier = "Triton",
   Parent = transforms.TritonPosition.Identifier,
+  -- Triton (AI-cited)
+  -- Very limited. Only W.
+  -- https://doi.org/10.1029/91JA01464 and https://doi.org/10.1029/91JA01736
+  Hapke = {
+    W = 0.96, -- Official value.
+    Theta = 10.0,
+    C = 0.0,
+    B = -0.40,
+    BS0 = 0.0,
+    BC0 = 0.0,
+    HS = 0.0,
+    HC = 0.0,
+    Phi = 0.0
+  },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 2709000, 2706000, 2705000 }

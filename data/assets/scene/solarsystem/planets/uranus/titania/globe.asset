@@ -6,6 +6,19 @@ local coreKernels = asset.require("spice/core")
 local Titania = {
   Identifier = "Titania",
   Parent = transforms.TitaniaPosition.Identifier,
+  -- Hapke Parameters (AI-cited).
+  -- https://doi.org/10.1006/icar.2001.6596
+  Hapke = {
+    W = 0.49,
+    Theta = 23.0,
+    C = 0.0,
+    B = -0.28,
+    BS0 = 0.75,
+    BC0 = 4.0,
+    HS = 0.025,
+    HC = 0.001,
+    Phi = 0.0
+  },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 1576800, 1576800, 1576800 }
