@@ -175,11 +175,13 @@ public:
      *
      * \param info The PropertyInfo structure that contains all the required static
      *        information for initializing this Property
+     * \param isEnabled Whether this Property should be enabled. This setting is only used
+     *        if the Property is also enablable
      *
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    explicit Property(PropertyInfo info);
+    explicit Property(PropertyInfo info, IsEnabled isEnabled = IsEnabled::No);
 
     /**
      * The destructor taking care of deallocating all unused memory. This method will not
@@ -587,6 +589,7 @@ protected:
 
     /// If this property is enablable, this will tell if it is enabled or not
     IsEnabled _isEnabled = IsEnabled::No;
+
     /**
      * The meta data necessary for external applications.
      */

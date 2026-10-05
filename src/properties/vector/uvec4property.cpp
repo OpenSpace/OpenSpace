@@ -42,10 +42,15 @@ UVec4Property::UVec4Property(PropertyInfo info, glm::uvec4 value, glm::uvec4 min
 UVec4Property::UVec4Property(PropertyInfo info, IsEnabled isEnabled, glm::uvec4 value,
                              glm::uvec4 minValue, glm::uvec4 maxValue,
                              glm::uvec4 stepValue)
-    : UVec4Property(std::move(info), value, minValue, maxValue, stepValue)
-{
-    _isEnabled = isEnabled;
-}
+    : NumericalProperty<glm::uvec4>(
+        std::move(info),
+        isEnabled,
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
 
 std::string_view UVec4Property::className() const {
     return "UVec4Property";

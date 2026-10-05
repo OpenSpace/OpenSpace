@@ -68,10 +68,15 @@ OptionProperty::OptionProperty(PropertyInfo info)
 {}
 
 OptionProperty::OptionProperty(PropertyInfo info, IsEnabled isEnabled)
-    : OptionProperty(std::move(info))
-{
-    _isEnabled = isEnabled;
-}
+    : NumericalProperty<int>(
+        std::move(info),
+        isEnabled,
+        0,
+        std::numeric_limits<int>::lowest(),
+        std::numeric_limits<int>::max(),
+        1
+    )
+{}
 
 std::string_view OptionProperty::className() const {
     return "OptionProperty";

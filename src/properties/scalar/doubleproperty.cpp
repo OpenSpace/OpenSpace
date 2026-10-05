@@ -35,10 +35,15 @@ DoubleProperty::DoubleProperty(PropertyInfo info, double value, double minValue,
 
 DoubleProperty::DoubleProperty(PropertyInfo info, IsEnabled isEnabled, double value,
                                double minValue, double maxValue, double stepValue)
-    : DoubleProperty(std::move(info), value, minValue, maxValue, stepValue)
-{
-    _isEnabled = isEnabled;
-}
+    : NumericalProperty<double>(
+        std::move(info),
+        isEnabled,
+        value,
+        minValue,
+        maxValue,
+        stepValue
+    )
+{}
 
 std::string_view DoubleProperty::className() const {
     return "DoubleProperty";

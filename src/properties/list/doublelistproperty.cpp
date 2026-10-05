@@ -35,10 +35,8 @@ DoubleListProperty::DoubleListProperty(PropertyInfo info, std::vector<double> va
 
 DoubleListProperty::DoubleListProperty(PropertyInfo info, IsEnabled isEnabled,
                                        std::vector<double> values)
-    : DoubleListProperty(std::move(info), std::move(values))
-{
-    _isEnabled = isEnabled;
-}
+    : ListProperty(std::move(info), isEnabled, std::move(values))
+{}
 
 std::string_view DoubleListProperty::className() const {
     return "DoubleListProperty";

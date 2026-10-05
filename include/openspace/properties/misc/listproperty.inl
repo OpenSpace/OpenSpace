@@ -25,8 +25,14 @@
 namespace openspace {
 
 template <typename T>
+ListProperty<T>::ListProperty(Property::PropertyInfo info, Property::IsEnabled isEnabled,
+                              std::vector<T> values)
+    : TemplateProperty<std::vector<T>>(std::move(info), isEnabled, std::move(values))
+{}
+
+template <typename T>
 ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values)
-    : TemplateProperty<std::vector<T>>(std::move(info), std::move(values))
+    : ListProperty<T>(std::move(info), Property::IsEnabled::No, std::move(values))
 {}
 
 template <typename T>

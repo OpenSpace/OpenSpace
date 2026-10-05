@@ -25,8 +25,13 @@
 namespace openspace {
 
 template <typename T>
-TemplateProperty<T>::TemplateProperty(Property::PropertyInfo info, T value)
-    : Property(std::move(info))
+TemplateProperty<T>::TemplateProperty(PropertyInfo info, T value)
+    : TemplateProperty<T>(std::move(info), IsEnabled::No, std::move(value))
+{}
+
+template <typename T>
+TemplateProperty<T>::TemplateProperty(PropertyInfo info, IsEnabled isEnabled, T value)
+    : Property(std::move(info), isEnabled)
     , _value(std::move(value))
 {}
 

@@ -35,10 +35,15 @@ LongProperty::LongProperty(PropertyInfo info, long value, long minValue, long ma
 
 LongProperty::LongProperty(PropertyInfo info, IsEnabled isEnabled, long value,
                            long minValue, long maxValue, long stepValue)
-    : LongProperty(std::move(info), value, minValue, maxValue, stepValue)
-{
-    _isEnabled = isEnabled;
-}
+    : NumericalProperty<long>(
+        std::move(info),
+        isEnabled,
+        value,
+        minValue,
+        maxValue,
+        stepValue
+    )
+{}
 
 std::string_view LongProperty::className() const {
     return "LongProperty";

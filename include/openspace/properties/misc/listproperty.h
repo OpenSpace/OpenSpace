@@ -33,6 +33,8 @@ template <typename T>
 class ListProperty : public TemplateProperty<std::vector<T>> {
 public:
     explicit ListProperty(Property::PropertyInfo info, std::vector<T> values);
+    ListProperty(Property::PropertyInfo info, Property::IsEnabled isEnabled,
+        std::vector<T> values);
 
     ~ListProperty() override = 0;
 };

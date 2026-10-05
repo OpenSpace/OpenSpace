@@ -41,7 +41,14 @@ Vec4Property::Vec4Property(PropertyInfo info, glm::vec4 value, glm::vec4 minValu
 
 Vec4Property::Vec4Property(PropertyInfo info, IsEnabled isEnabled, glm::vec4 value,
                            glm::vec4 minValue, glm::vec4 maxValue, glm::vec4 stepValue)
-    : Vec4Property(std::move(info), value, minValue, maxValue, stepValue)
+    : NumericalProperty<glm::vec4>(
+        std::move(info),
+        isEnabled,
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
 {
     _isEnabled = isEnabled;
 }

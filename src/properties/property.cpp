@@ -42,10 +42,11 @@ std::string Property::ViewOptions::MinMaxRange = "MinMaxRange";
 uint64_t Property::Identifier = 0;
 #endif // _DEBUG
 
-Property::Property(PropertyInfo info)
+Property::Property(PropertyInfo info, IsEnabled isEnabled)
     : _identifier(info.identifier)
     , _guiName(info.guiName)
     , _description(info.description)
+    , _isEnabled(isEnabled)
 #ifdef _DEBUG
     , _id(Identifier++)
 #endif // _DEBUG

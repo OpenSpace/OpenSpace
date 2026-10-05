@@ -41,10 +41,8 @@ SelectionProperty::SelectionProperty(PropertyInfo info)
 {}
 
 SelectionProperty::SelectionProperty(Property::PropertyInfo info, IsEnabled isEnabled)
-    : SelectionProperty(std::move(info))
-{
-    _isEnabled = isEnabled;
-}
+    : TemplateProperty(std::move(info), isEnabled, std::set<std::string>())
+{}
 
 std::string_view SelectionProperty::className() const {
     return "SelectionProperty";

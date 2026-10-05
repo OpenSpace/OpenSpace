@@ -43,10 +43,15 @@ UIntProperty::UIntProperty(Property::PropertyInfo info, unsigned int value,
 UIntProperty::UIntProperty(Property::PropertyInfo info, IsEnabled isEnabled,
                            unsigned int value, unsigned int minValue,
                            unsigned int maxValue, unsigned int stepValue)
-    : UIntProperty(std::move(info), value, minValue, maxValue, stepValue)
-{
-    _isEnabled = isEnabled;
-}
+    : NumericalProperty<unsigned int>(
+        std::move(info),
+        isEnabled,
+        value,
+        minValue,
+        maxValue,
+        stepValue
+    )
+{}
 
 std::string_view UIntProperty::className() const {
     return "UIntProperty";

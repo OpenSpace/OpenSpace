@@ -42,10 +42,15 @@ IVec2Property::IVec2Property(PropertyInfo info, glm::ivec2 value, glm::ivec2 min
 IVec2Property::IVec2Property(PropertyInfo info, IsEnabled isEnabled, glm::ivec2 value,
                              glm::ivec2 minValue, glm::ivec2 maxValue,
                              glm::ivec2 stepValue)
-    : IVec2Property(std::move(info), value, minValue, maxValue, stepValue)
-{
-    _isEnabled = isEnabled;
-}
+    : NumericalProperty<glm::ivec2>(
+        std::move(info),
+        isEnabled,
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
 
 std::string_view IVec2Property::className() const {
     return "IVec2Property";

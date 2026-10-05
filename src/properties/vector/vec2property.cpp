@@ -41,10 +41,15 @@ Vec2Property::Vec2Property(PropertyInfo info, glm::vec2 value, glm::vec2 minValu
 
 Vec2Property::Vec2Property(PropertyInfo info, IsEnabled isEnabled, glm::vec2 value,
                            glm::vec2 minValue, glm::vec2 maxValue, glm::vec2 stepValue)
-    : Vec2Property(std::move(info), value, minValue, maxValue, stepValue)
-{
-    _isEnabled = isEnabled;
-}
+    : NumericalProperty<glm::vec2>(
+        std::move(info),
+        isEnabled,
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
 
 std::string_view Vec2Property::className() const {
     return "Vec2Property";

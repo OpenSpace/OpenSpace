@@ -42,10 +42,15 @@ DVec3Property::DVec3Property(PropertyInfo info, glm::dvec3 value, glm::dvec3 min
 DVec3Property::DVec3Property(PropertyInfo info, IsEnabled isEnabled, glm::dvec3 value,
                              glm::dvec3 minValue, glm::dvec3 maxValue,
                              glm::dvec3 stepValue)
-    : DVec3Property(std::move(info), value, minValue, maxValue, stepValue)
-{
-    _isEnabled = isEnabled;
-}
+    : NumericalProperty<glm::dvec3>(
+        std::move(info),
+        isEnabled,
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
 
 std::string_view DVec3Property::className() const {
     return "DVec3Property";

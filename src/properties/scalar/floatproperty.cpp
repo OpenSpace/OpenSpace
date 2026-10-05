@@ -35,7 +35,14 @@ FloatProperty::FloatProperty(PropertyInfo info, float value, float minValue,
 
 FloatProperty::FloatProperty(PropertyInfo info, IsEnabled isEnabled, float value,
                              float minValue, float maxValue, float stepValue)
-    : FloatProperty(std::move(info), value, minValue, maxValue, stepValue)
+    : NumericalProperty<float>(
+        std::move(info),
+        isEnabled,
+        value,
+        minValue,
+        maxValue,
+        stepValue
+    )
 {
     _isEnabled = isEnabled;
 }
