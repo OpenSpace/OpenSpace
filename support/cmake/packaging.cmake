@@ -549,6 +549,14 @@ install(FILES "${PROJECT_SOURCE_DIR}/openspace.cfg" DESTINATION .)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/data/" DESTINATION data)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/config/" DESTINATION config)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/modules/" DESTINATION modules)
+
+if (UNIX AND OPENSPACE_MODULE_WEBGUI AND
+    EXISTS "${PROJECT_SOURCE_DIR}/modules/webgui/ext/nodejs/node")
+  install(PROGRAMS "${PROJECT_SOURCE_DIR}/modules/webgui/ext/nodejs/node"
+    DESTINATION modules/webgui/ext/nodejs
+  )
+endif ()
+
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/scripts/" DESTINATION scripts)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/shaders/" DESTINATION shaders)
 
