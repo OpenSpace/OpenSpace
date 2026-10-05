@@ -361,8 +361,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     _windowConfigBox->setAccessibleName("Select window configuration");
     _windowConfigBox->setEnabled(sgctConfigEnabled);
     _windowConfigBox->populateList(sgctConfigName);
-    // Trigger currentIndexChanged so the preview file read is performed
-    _windowConfigBox->currentIndexChanged(_windowConfigBox->currentIndex());
     connect(
         _windowConfigBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::selectConfiguration
