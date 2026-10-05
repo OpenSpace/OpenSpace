@@ -32,10 +32,10 @@ DMat2Property::DMat2Property(PropertyInfo info, glm::dmat2x2 value, glm::dmat2x2
                              glm::dmat2x2 maxValue, glm::dmat2x2 stepValue)
     : NumericalProperty<glm::dmat2x2>(
         std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
     )
 {}
 
@@ -45,10 +45,10 @@ DMat2Property::DMat2Property(PropertyInfo info, IsEnabled isEnabled, glm::dmat2x
     : NumericalProperty<glm::dmat2x2>(
         std::move(info),
         isEnabled,
-        value,
-        minValue,
-        maxValue,
-        stepValue
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
     )
 {}
 
