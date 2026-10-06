@@ -53,6 +53,7 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
+#include <QStandardItemModel>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <functional>
@@ -1074,16 +1075,15 @@ void SchemaFormWidget::setFieldActive(const std::string& memberName, bool active
 void SchemaFormWidget::syncFieldWith(const std::string& memberName,
                                      SchemaFormWidget* other)
 {
-    // Cross-connect text edits so typing in one form updates the other. setText() emits
-    // textChanged but NOT textEdited, so the cross-connections cannot loop. Signals are
-    // left unblocked so that other textChanged listeners (e.g. identifier
-    // auto-generation) still fire
+    // Cross-connect text changes so that changing one form updates the other.
+    // QLineEdit::setText only emits textChanged when the new text is different from the
+    // old, so the cross-connections cannot get into an infinite loop.
     QLineEdit* thisEdit = resolveLineEdit(widgetForMember(memberName));
     QLineEdit* otherEdit = resolveLineEdit(other->widgetForMember(memberName));
 
     if (thisEdit && otherEdit) {
-        connect(thisEdit, &QLineEdit::textEdited, otherEdit, &QLineEdit::setText);
-        connect(otherEdit, &QLineEdit::textEdited, thisEdit, &QLineEdit::setText);
+        connect(thisEdit, &QLineEdit::textChanged, otherEdit, &QLineEdit::setText);
+        connect(otherEdit, &QLineEdit::textChanged, thisEdit, &QLineEdit::setText);
     }
 
     // Cross-connect optional field toggle state so adding/removing the field in one form
@@ -2033,7 +2033,7 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
         horizontalLayout->setSpacing(4);
 
         // Returns identifiers excluding this node's own
-        QStringList filteredIdentifiers = [this]() {
+        auto filteredIdentifiers = [this]() {
             QStringList identifiers = _registry->knownIdentifiers();
             std::shared_ptr<PropertyMap> lockedProperties = _properties.lock();
             if (!lockedProperties) {
@@ -2044,11 +2044,30 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
                 identifiers.removeAll(QString::fromStdString(it->second.toString()));
             }
             return identifiers;
-        }();
+        };
 
         QComboBox* combo = new QComboBox(container);
         combo->setEditable(true);
-        combo->addItems(filteredIdentifiers);
+        // Fills the combo, or shows a disabled placeholder entry so that the dropdown
+        // still opens when there are no identifiers
+        auto fillCombo = [filteredIdentifiers](QComboBox* box) {
+            const QStringList identifiers = filteredIdentifiers();
+            if (identifiers.isEmpty()) {
+                box->addItem("No identifiers available");
+                // Make it disabled looking so you can't select it
+                auto* model = qobject_cast<QStandardItemModel*>(box->model());
+                if (model) {
+                    model->item(0)->setEnabled(false);
+                }
+            }
+            else {
+                box->addItems(identifiers);
+            }
+        };
+        fillCombo(combo);
+        // An editable combo selects the first entry when filled; start empty and let
+        // populateWidget set the stored value
+        combo->setCurrentIndex(-1);
         if (!member.description.empty()) {
             combo->lineEdit()->setPlaceholderText(
                 QString::fromStdString(member.description)
@@ -2059,12 +2078,16 @@ QWidget* SchemaFormWidget::createFlatWidget(const SchemaMember& member) {
             _registry,
             &IdentifierRegistry::registryChanged,
             combo,
-            [combo, filteredIdentifiers]() {
+            [combo, fillCombo]() {
                 const QString current = combo->currentText();
+                // The line edit has its own signals that blockSignals on the combo does
+                // not cover. Block them both while updating
                 combo->blockSignals(true);
+                combo->lineEdit()->blockSignals(true);
                 combo->clear();
-                combo->addItems(filteredIdentifiers);
+                fillCombo(combo);
                 combo->setCurrentText(current);
+                combo->lineEdit()->blockSignals(false);
                 combo->blockSignals(false);
             }
         );
