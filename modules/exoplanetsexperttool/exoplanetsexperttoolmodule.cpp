@@ -31,8 +31,8 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/logging/logmanager.h>
 #include <string_view>
 
 namespace {
@@ -355,7 +355,7 @@ void ExoplanetsExpertToolModule::decode(SyncBuffer* syncBuffer) {
     LDEBUG("Decode: Done decoding glyph data");
 }
 
-void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dict) {
+void ExoplanetsExpertToolModule::internalInitialize(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     if (p.dataConfigFile.has_value()) {
@@ -366,7 +366,7 @@ void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dic
     _showInfoWindowAtStartup = p.showInfoAtStartup.value_or(false);
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    assert_msg(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableHostCloud>("RenderableHostCloud");
     fRenderable->registerClass<RenderableExoplanetGlyphCloud>(

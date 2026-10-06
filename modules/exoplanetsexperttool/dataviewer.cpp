@@ -33,17 +33,18 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryluaformatter.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
-#include <ghoul/misc/stringhelper.h>
+
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -306,7 +307,7 @@ bool DataViewer::isNumericColumn(const ColumnKey& key) const {
     if (_computedColumns.contains(key)) {
         return true;
     }
-    ghoul_assert(_data.size() > 0, "Data size cannot be zero");
+    assert_msg(_data.size() > 0, "Data size cannot be zero");
     // Test type using the first data point
     std::variant<const char*, float> aValue = columnValue(key, _data.front());
     return std::holds_alternative<float>(aValue);
@@ -359,7 +360,7 @@ bool DataViewer::hasColumnDescription(const ColumnKey& key) const {
 }
 
 const char* DataViewer::columnDescription(const ColumnKey& key) const {
-    ghoul_assert(hasColumnDescription(key), "Must have a description");
+    assert_msg(hasColumnDescription(key), "Must have a description");
     if (auto it = _computedColumns.find(key); it != _computedColumns.end()) {
         return it->second.description.c_str();
     }
@@ -1283,13 +1284,13 @@ void DataViewer::updateFilteredRowsProperty(std::optional<std::vector<size_t>> c
         const std::string script = std::format(
             "openspace.setPropertyValueSingle('{}', {{{}}})",
             filteredRowsProperty->uri(),
-            ghoul::join(indices, ",")
+            join(indices, ",")
         );
 
-        global::scriptEngine->queueScript({
-            .code = script,
-            .addToLog = ScriptEngine::Script::ShouldBeLogged::No
-        });
+        global::scriptEngine->queueScript(
+            script,
+            ScriptEngine::ShouldBeLogged::No
+        );
     }
 }
 

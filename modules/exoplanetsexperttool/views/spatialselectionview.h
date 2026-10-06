@@ -28,7 +28,7 @@
 #include <modules/exoplanetsexperttool/datastructures.h>
 #include <modules/exoplanetsexperttool/spatialselectionhandler.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <string>
 #include <vector>
 

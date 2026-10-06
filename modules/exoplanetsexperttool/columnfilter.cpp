@@ -25,9 +25,9 @@
 #include <modules/exoplanetsexperttool/columnfilter.h>
 
 #include <modules/exoplanetsexperttool/datahelper.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <string_view>
 
 namespace {
@@ -91,10 +91,10 @@ namespace {
     }
 
     std::string stripOuterParens(std::string group) {
-        ghoul::trimWhitespace(group);
+        openspace::trimWhitespace(group);
         if (group.size() >= 2 && group.front() == '(' && group.back() == ')') {
             group = group.substr(1, group.size() - 2);
-            ghoul::trimWhitespace(group);
+            openspace::trimWhitespace(group);
         }
         return group;
     }
@@ -131,7 +131,7 @@ ColumnFilter::ColumnFilter(std::string query, Type type)
         try {
             passFilter(0.f); // dummy value
         }
-        catch (const ghoul::RuntimeError& e) {
+        catch (const RuntimeError& e) {
             _valid = false;
             LWARNING(std::format("Failed creating numeric filter. {}", e.message));
         }
@@ -160,7 +160,7 @@ std::vector<ColumnFilter::AndGroup> ColumnFilter::parseQuery(
 }
 
 ColumnFilter::SubQuery ColumnFilter::parseTerm(std::string raw, Type type) {
-    ghoul::trimWhitespace(raw);
+    trimWhitespace(raw);
 
     SubQuery sq;
 
@@ -169,7 +169,7 @@ ColumnFilter::SubQuery ColumnFilter::parseTerm(std::string raw, Type type) {
         if (!raw.empty() && raw.front() == '-') {
             sq.exclude = true;
             raw = raw.substr(1);
-            ghoul::trimWhitespace(raw);
+            trimWhitespace(raw);
         }
 
         if (raw.size() >= 2 && raw.front() == '"' && raw.back() == '"') {
@@ -206,13 +206,13 @@ bool ColumnFilter::passFilter(std::variant<const char*, float> value) const {
         return passFilter(std::string(val));
     }
     else {
-        throw ghoul::RuntimeError("Mismatching value and filter type!");
+        throw RuntimeError("Mismatching value and filter type!");
     }
 }
 
 bool ColumnFilter::passFilter(float value) const {
     if (_type != Type::Numeric) {
-        throw ghoul::RuntimeError("Can only pass numbers to numeric filters");
+        throw RuntimeError("Can only pass numbers to numeric filters");
     }
 
     if (!isValid()) {
@@ -255,12 +255,12 @@ bool ColumnFilter::passFilter(float value) const {
                 std::string right = equals ? q.substr(pos + 2) : q.substr(pos + 1);
 
                 if (right.empty()) {
-                    throw ghoul::RuntimeError("Right side of query is empty");
+                    throw RuntimeError("Right side of query is empty");
                 }
 
                 const float rVal = data::parseFloatData(right);
                 if (std::isnan(rVal)) {
-                    throw ghoul::RuntimeError(
+                    throw RuntimeError(
                         "Right side of query '" + q + "' is not a valid number"
                     );
                 }
@@ -274,12 +274,12 @@ bool ColumnFilter::passFilter(float value) const {
                 std::string right = equals ? q.substr(pos + 2) : q.substr(pos + 1);
 
                 if (right.empty()) {
-                    throw ghoul::RuntimeError("Right side of query is empty");
+                    throw RuntimeError("Right side of query is empty");
                 }
 
                 const float rVal = data::parseFloatData(right);
                 if (std::isnan(rVal)) {
-                    throw ghoul::RuntimeError(
+                    throw RuntimeError(
                         "Right side of query '" + q + "' is not a valid number"
                     );
                 }
@@ -292,12 +292,12 @@ bool ColumnFilter::passFilter(float value) const {
                 std::string right = q.substr(pos + 1);
 
                 if (right.empty()) {
-                    throw ghoul::RuntimeError("Right side of query is empty");
+                    throw RuntimeError("Right side of query is empty");
                 }
 
                 const float rVal = data::parseFloatData(right);
                 if (std::isnan(rVal)) {
-                    throw ghoul::RuntimeError(
+                    throw RuntimeError(
                         "Right side of query '" + q + "' is not a valid number"
                     );
                 }
@@ -306,7 +306,7 @@ bool ColumnFilter::passFilter(float value) const {
                 }
             }
             else {
-                throw ghoul::RuntimeError(std::format("Invalid filter query '{}'", q));
+                throw RuntimeError(std::format("Invalid filter query '{}'", q));
             }
 
             passGroup = passGroup && passSubquery;
@@ -320,14 +320,14 @@ bool ColumnFilter::passFilter(float value) const {
 
 bool ColumnFilter::passFilter(const std::string& value) const {
     if (_type != Type::Text) {
-        throw ghoul::RuntimeError("Can only pass text to text based filters");
+        throw RuntimeError("Can only pass text to text based filters");
     }
 
     std::string lowercaseValue = value;
     std::transform(lowercaseValue.begin(), lowercaseValue.end(), lowercaseValue.begin(),
         [](unsigned char c) { return std::tolower(c); });
 
-    ghoul::trimWhitespace(lowercaseValue);
+    trimWhitespace(lowercaseValue);
 
     // Special case: a single, single-term, empty, non-exact group => check
     // against non-existing value

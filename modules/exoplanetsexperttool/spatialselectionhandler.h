@@ -27,7 +27,7 @@
 
 #include <modules/exoplanetsexperttool/datastructures.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <string>
 #include <variant>
 #include <vector>

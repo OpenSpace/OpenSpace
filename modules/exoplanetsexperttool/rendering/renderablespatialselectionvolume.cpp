@@ -5,12 +5,12 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
 
 namespace {
     using namespace openspace;
@@ -56,7 +56,7 @@ openspace::Documentation RenderableSpatialSelectionVolume::Documentation() {
 }
 
 RenderableSpatialSelectionVolume::RenderableSpatialSelectionVolume(
-                                            const ghoul::Dictionary& dictionary)
+                                            const Dictionary& dictionary)
     : Renderable(dictionary)
     , _shapeParameters(ShapeParametersInfo)
     , _color(ColorInfo, glm::vec3(0.2f, 0.85f, 0.65f), glm::vec3(0.f), glm::vec3(1.f))
@@ -81,7 +81,7 @@ void RenderableSpatialSelectionVolume::initializeGL() {
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/selectionvolume_vs.glsl"),
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/selectionvolume_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
     glBindVertexArray(_vao);
@@ -152,7 +152,7 @@ void RenderableSpatialSelectionVolume::updateMesh() {
 void RenderableSpatialSelectionVolume::update(const UpdateData&) {
     if (_program && _program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
     }
     if (_meshIsDirty && _program) {
         updateMesh();
@@ -191,7 +191,7 @@ void RenderableSpatialSelectionVolume::render(const RenderData& data, RendererTa
 
     glBindVertexArray(0);
     _program->deactivate();
-    ghoul::opengl::OpenGLStateCache& state = global::renderEngine->openglStateCache();
+    opengl::OpenGLStateCache& state = global::renderEngine->openglStateCache();
     state.resetBlendState();
     state.resetDepthState();
     state.resetLineState();

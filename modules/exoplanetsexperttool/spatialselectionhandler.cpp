@@ -26,9 +26,9 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryluaformatter.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <algorithm>
 #include <cmath>
 #include <format>
@@ -279,24 +279,24 @@ std::vector<size_t> SpatialSelectionHandler::combinedSavedSelections(
 void SpatialSelectionHandler::initializeRenderables() {
     using namespace std::string_literals;
 
-    ghoul::Dictionary selectionGui;
+    Dictionary selectionGui;
     selectionGui.setValue("Name", "Spatial Selection"s);
     selectionGui.setValue("Path", "/ExoplanetExplorer"s);
 
-    ghoul::Dictionary selectionRenderable;
+    Dictionary selectionRenderable;
     selectionRenderable.setValue("Type", "RenderableSpatialSelectionVolume"s);
     selectionRenderable.setValue("Enabled", false);
     selectionRenderable.setValue("Opacity", 0.08);
     selectionRenderable.setValue("RenderBinMode", "PostDeferredTransparent"s);
 
-    ghoul::Dictionary selectionNode;
+    Dictionary selectionNode;
     selectionNode.setValue("Identifier", std::string(SelectionVolumeIdentifier));
     selectionNode.setValue("Renderable", selectionRenderable);
     selectionNode.setValue("GUI", selectionGui);
     global::scriptEngine->queueScript(std::format(
         "if not openspace.hasSceneGraphNode('{}') then "
         "openspace.addSceneGraphNode({}) end",
-        SelectionVolumeIdentifier, ghoul::formatLua(selectionNode)
+        SelectionVolumeIdentifier, formatLua(selectionNode)
     ));
 
     _selectionVolumeIsInitialized = true;
@@ -368,10 +368,10 @@ void SpatialSelectionHandler::updateSelectionVolume(const SpatialSelectionQuery*
     script += std::format(
         "openspace.setPropertyValueSingle('{}.Enabled', {}) end", path, isVisible
     );
-    global::scriptEngine->queueScript({
-        .code = std::move(script),
-        .addToLog = ScriptEngine::Script::ShouldBeLogged::No
-    });
+    global::scriptEngine->queueScript(
+        std::move(script),
+        ScriptEngine::ShouldBeLogged::No
+    );
     _selectionVolumeIsVisible = isVisible;
     if (isVisible) {
         _selectionVolumeParameters = std::move(parameters);

@@ -28,19 +28,18 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/exoplanetsexperttool/dataviewer.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 
 struct ImGuiContext;
 struct ImPlotContext;
 
-namespace ghoul::opengl {
+namespace openspace::opengl {
     class ProgramObject;
     class Texture;
-} // namespace ghoul::opengl
+} // namespace openspace::opengl
 
 namespace openspace::exoplanets::gui {
 
@@ -83,9 +82,9 @@ private:
     GLuint vao = 0;
     GLuint vbo = 0;
     GLuint vboElements = 0;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<opengl::ProgramObject> _program;
     UniformCache(tex, ortho) _uniformCache;
-    std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
+    std::unique_ptr<opengl::Texture> _fontTexture;
 
     std::vector<Context> _contexts;
 

@@ -33,14 +33,16 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/opengl/framebufferobject.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
+
+
 #include <optional>
 #include <string_view>
 
@@ -230,8 +232,7 @@ Documentation RenderableExoplanetGlyphCloud::Documentation() {
     );
 }
 
-RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
-                                                     const ghoul::Dictionary& dictionary)
+RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _scale(ScaleInfo, 1.f, 0.f, 10.f)
     , _selectedIndices(SelectionInfo)
@@ -476,6 +477,7 @@ void RenderableExoplanetGlyphCloud::deinitializeGL() {
 
     if (_programInclination) {
         global::renderEngine->removeRenderProgram(_programInclination.get());
+        global::renderEngine->removeRenderProgram(_programInclination.get());
         _programInclination = nullptr;
     }
 
@@ -492,7 +494,7 @@ void RenderableExoplanetGlyphCloud::initializeShaders() {
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_fs.glsl"),
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_gs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_programRings, _uniformCacheRings);
+    opengl::updateUniformLocations(*_programRings, _uniformCacheRings);
 
     _programInclination = global::renderEngine->buildRenderProgram(
         "ExoGlyphCloud_Inclination",
@@ -500,7 +502,7 @@ void RenderableExoplanetGlyphCloud::initializeShaders() {
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_inclination_fs.glsl"),
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_inclination_gs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_programInclination, _uniformCacheInclination);
+    opengl::updateUniformLocations(*_programInclination, _uniformCacheInclination);
 
     _programStars = global::renderEngine->buildRenderProgram(
         "ExoGlyphCloud_StarGlyph",
@@ -508,7 +510,7 @@ void RenderableExoplanetGlyphCloud::initializeShaders() {
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_star_fs.glsl"),
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_star_gs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_programStars, _uniformCacheStars);
+    opengl::updateUniformLocations(*_programStars, _uniformCacheStars);
 }
 
 void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks&) {
@@ -517,7 +519,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     }
 
     // Select the appropriate program and uniform cache based on mode
-    ghoul::opengl::ProgramObject* program = nullptr;
+    opengl::ProgramObject* program = nullptr;
     if (_glyphMode == GlyphMode::Rings) {
         program = _programRings.get();
     }
@@ -525,7 +527,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
         program = _programInclination.get();
     }
     else {
-        throw ghoul::MissingCaseException();
+        throw MissingCaseException();
     }
 
     program->activate();
@@ -561,7 +563,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
 }
 
 void RenderableExoplanetGlyphCloud::setupCommonUniforms(
-                                                    ghoul::opengl::ProgramObject& program,
+                                                    opengl::ProgramObject& program,
                                                                    const RenderData& data)
 {
     const glm::dmat4 modelTransform =
@@ -602,7 +604,7 @@ void RenderableExoplanetGlyphCloud::setupCommonUniforms(
 }
 
 void RenderableExoplanetGlyphCloud::setupRingsSpecificUniforms(
-                                                    ghoul::opengl::ProgramObject& program,
+                                                    opengl::ProgramObject& program,
                                                                    const RenderData& data)
 {
     program.setUniform(_uniformCacheRings.useFixedRingWidth, _useFixedRingWidth);
@@ -641,14 +643,14 @@ void RenderableExoplanetGlyphCloud::renderMainPass() {
 }
 
 void RenderableExoplanetGlyphCloud::renderIndexTexture(
-                                                    ghoul::opengl::ProgramObject& program)
+                                                    opengl::ProgramObject& program)
 {
     // Start by getting the viewport size
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     program.setUniform("isRenderIndexStep", true);
-    GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+    GLint defaultFBO = opengl::FramebufferObject::getActiveObject();
 
     glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFbo);
     GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
@@ -684,7 +686,7 @@ void RenderableExoplanetGlyphCloud::renderIndexTexture(
 }
 
 void RenderableExoplanetGlyphCloud::renderSelectedPoints(
-                                                    ghoul::opengl::ProgramObject& program)
+                                                    opengl::ProgramObject& program)
 {
     const size_t nSelected = _selectedIndices.value().size();
     if (nSelected == 0) {
@@ -776,17 +778,17 @@ void RenderableExoplanetGlyphCloud::renderStars(const RenderData& data) {
 void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
     if (_programInclination->isDirty()) {
         _programInclination->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_programInclination, _uniformCacheInclination);
+        opengl::updateUniformLocations(*_programInclination, _uniformCacheInclination);
     }
 
     if (_programRings->isDirty()) {
         _programRings->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_programRings, _uniformCacheRings);
+        opengl::updateUniformLocations(*_programRings, _uniformCacheRings);
     }
 
     if (_programStars->isDirty()) {
         _programStars->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_programStars, _uniformCacheStars);
+        opengl::updateUniformLocations(*_programStars, _uniformCacheStars);
     }
 
     updateDataIfChanged();
@@ -883,28 +885,28 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
 void RenderableExoplanetGlyphCloud::createGlyphIdTexture(const glm::uvec3 dimensions) {
     // TODO (emmbr, 2022-11-15): at some point try using a integer value for the texture instead.
     // But for now, just make it work!
-    _glyphIdTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+    _glyphIdTexture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit{
             .dimensions = dimensions,
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit{
-            .filter = ghoul::opengl::Texture::FilterMode::Nearest
+        opengl::Texture::SamplerInit{
+            .filter = opengl::Texture::FilterMode::Nearest
         }
     );
 
     // And a depth buffer of the same dimension
-    _depthTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+    _depthTexture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit{
             .dimensions = dimensions,
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::DepthComponent,
+            .format = opengl::Texture::Format::DepthComponent,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit{
-            .filter = ghoul::opengl::Texture::FilterMode::Linear
+        opengl::Texture::SamplerInit{
+            .filter = opengl::Texture::FilterMode::Linear
         }
     );
 
@@ -982,7 +984,7 @@ void RenderableExoplanetGlyphCloud::mapVertexAttributes(GLuint vao) {
             offsetof(GlyphData, colors)
         );
     }
-    else throw ghoul::MissingCaseException();
+    else throw MissingCaseException();
 }
 
 void RenderableExoplanetGlyphCloud::updateDataIfChanged() {

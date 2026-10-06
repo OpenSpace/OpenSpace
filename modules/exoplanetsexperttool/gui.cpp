@@ -27,15 +27,11 @@
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/mission/missionmanager.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
+
 #include <implot.h>
 #include <string_view>
 
@@ -106,13 +102,13 @@ void Gui::initializeGL() {
         // TODO: can set style by altering this value
     }
 
-    _program = ghoul::opengl::ProgramObject::Build(
+    _program = opengl::ProgramObject::Build(
         "ExoToolGui",
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/gui_vs.glsl"),
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/gui_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     ImGuiIO& io = ImGui::GetIO();
 
@@ -130,14 +126,14 @@ void Gui::initializeGL() {
             io.Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
         }
 
-        _fontTexture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit{
+        _fontTexture = std::make_unique<opengl::Texture>(
+            opengl::Texture::FormatInit{
                 .dimensions = glm::uvec3(texSize.x, texSize.y, 1),
                 .type = GL_TEXTURE_2D,
-                .format = ghoul::opengl::Texture::Format::RGBA,
+                .format = opengl::Texture::Format::RGBA,
                 .dataType = GL_UNSIGNED_BYTE
             },
-            ghoul::opengl::Texture::SamplerInit{},
+            opengl::Texture::SamplerInit{},
             reinterpret_cast<std::byte*>(texData)
         );
         _fontTexture->setName("ExoGui Text");
@@ -237,7 +233,7 @@ void Gui::startFrame(float deltaTime, const glm::vec2& windowSize,
 void Gui::endFrame() {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
     render();
@@ -270,7 +266,7 @@ void Gui::endFrame() {
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_fontTexture);
 
     // Setup orthographic projection matrix

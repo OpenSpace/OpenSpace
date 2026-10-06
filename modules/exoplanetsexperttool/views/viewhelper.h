@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__
 
 #include <modules/imgui/include/imgui_include.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <string_view>
 
 namespace openspace::view {

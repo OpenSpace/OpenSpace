@@ -28,9 +28,9 @@
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/logging/logmanager.h>
 
 
 namespace {

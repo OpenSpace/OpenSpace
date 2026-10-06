@@ -26,22 +26,19 @@
 
 #include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/csvreader.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/coordinateconversion.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/progressbar.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/csvreader.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/logging/logmanager.h>
-#include <scn/scan.h>
-#include <charconv>
+
 #include <cmath>
 #include <fstream>
 #include <limits>
@@ -56,11 +53,12 @@ namespace {
         if (s.empty()) {
             return true;
         }
-        std::string lc = ghoul::toLowerCase(s);
+        std::string lc = openspace::toLowerCase(s);
         return (lc == "null") || (lc == "nan");
     }
 
     void from_json(const nlohmann::json& j, openspace::exoplanets::DataSettings& s) {
+        using namespace openspace;
         using namespace openspace::exoplanets;
 
         try {
@@ -155,10 +153,10 @@ namespace {
                 groupInfo.at("group_title").get_to(group.title);
 
                 if (groupInfo.contains("type")) {
-                    if (ghoul::toUpperCase(groupInfo.at("type").get<std::string>()) == "OR") {
+                    if (toUpperCase(groupInfo.at("type").get<std::string>()) == "OR") {
                         group.type = DataSettings::QuickFilterGroup::Type::Or;
                     }
-                    else if (ghoul::toUpperCase(groupInfo.at("type").get<std::string>()) == "AND") {
+                    else if (toUpperCase(groupInfo.at("type").get<std::string>()) == "AND") {
                         group.type = DataSettings::QuickFilterGroup::Type::And;
                     }
                     else {
@@ -276,7 +274,7 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
 
     LINFO(std::format("Reading CSV file: '{}'", csvFilePath));
 
-    std::vector<std::vector<std::string>> csvContent = ghoul::loadCSVFile(
+    std::vector<std::vector<std::string>> csvContent = loadCSVFile(
         csvFilePath,
         true
     );
@@ -495,7 +493,7 @@ void DataLoader::saveData(const std::filesystem::path& targetPath,
     }
 
     if (!columns.empty()) {
-        f << ghoul::join(columns, ",") << std::endl;
+        f << join(columns, ",") << std::endl;
     }
     else {
         std::string line;
@@ -522,7 +520,7 @@ void DataLoader::saveData(const std::filesystem::path& targetPath,
         for (auto [_, value] : item.dataColumns) {
             if (std::holds_alternative<float>(value)) {
                 float v = std::get<float>(value);
-                line += std::isnan(v) ? "" : ghoul::to_string(v);
+                line += std::isnan(v) ? "" : to_string(v);
             }
             else {
                 line += std::get<std::string>(value);

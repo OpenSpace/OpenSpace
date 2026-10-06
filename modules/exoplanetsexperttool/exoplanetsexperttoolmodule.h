@@ -78,7 +78,7 @@ public:
     std::vector<openspace::Documentation> documentations() const override;
 
 protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
 
     BoolProperty _enabled;
     BoolProperty _showInfoWindowAtStartup;

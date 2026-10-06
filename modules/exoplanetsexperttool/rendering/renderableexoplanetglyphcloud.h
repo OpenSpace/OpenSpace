@@ -33,21 +33,20 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/syncdata.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/uniformcache.h>
 #include <array>
 
 namespace openspace { struct Documentation; }
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace openspace::filesystem { class File; }
+namespace openspace::opengl { class ProgramObject; }
 
 namespace openspace::exoplanets {
 
 class RenderableExoplanetGlyphCloud : public Renderable {
 public:
-    RenderableExoplanetGlyphCloud(const ghoul::Dictionary& dictionary);
+    RenderableExoplanetGlyphCloud(const Dictionary& dictionary);
 
     static const size_t MaxNumberColors = 4;
 
@@ -77,16 +76,16 @@ private:
 
     // Rendering helper methods
     void setupCommonUniforms(
-        ghoul::opengl::ProgramObject& program,
+        opengl::ProgramObject& program,
         const RenderData& data
     );
     void setupRingsSpecificUniforms(
-        ghoul::opengl::ProgramObject& program,
+        opengl::ProgramObject& program,
         const RenderData& data
     );
     void renderMainPass();
-    void renderIndexTexture(ghoul::opengl::ProgramObject& program);
-    void renderSelectedPoints(ghoul::opengl::ProgramObject& program);
+    void renderIndexTexture(opengl::ProgramObject& program);
+    void renderSelectedPoints(opengl::ProgramObject& program);
 
     void renderStars(const RenderData& data);
 
@@ -94,7 +93,7 @@ private:
     bool _selectionChanged = true;
     bool _glyphModeChanged = false;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programRings = nullptr;
+    std::unique_ptr<opengl::ProgramObject> _programRings = nullptr;
 
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, opacity, scale, maxIndex,
         currentIndex, cameraPosition, isHighlightMode, darkenFactor,
@@ -102,7 +101,7 @@ private:
         renderOption, up, right, cameraLookUp,  useFixedRingWidth
     ) _uniformCacheRings;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programInclination = nullptr;
+    std::unique_ptr<opengl::ProgramObject> _programInclination = nullptr;
 
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, opacity, scale, maxIndex,
         currentIndex, cameraPosition, isHighlightMode, darkenFactor
@@ -164,8 +163,8 @@ private:
     GLuint _selectedVbo = 0;
 
     // Point id from screenspace position
-    std::unique_ptr<ghoul::opengl::Texture> _glyphIdTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _depthTexture;
+    std::unique_ptr<opengl::Texture> _glyphIdTexture;
+    std::unique_ptr<opengl::Texture> _depthTexture;
     GLuint _glyphIdFbo = 0;
 
     glm::ivec2 _lastViewPortSize;
@@ -182,7 +181,7 @@ private:
     GLuint _starsVao = 0;
     GLuint _starsVbo = 0;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programStars = nullptr;
+    std::unique_ptr<opengl::ProgramObject> _programStars = nullptr;
 
     UniformCache(
         modelMatrix, cameraViewProjectionMatrix, opacity, scale, cameraPosition,

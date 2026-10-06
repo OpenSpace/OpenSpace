@@ -29,16 +29,19 @@
 #include <modules/exoplanetsexperttool/views/tableview.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <openspace/engine/globals.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/stringhelper.h>
+
 #include <modules/imgui/include/imgui_include.h>
 
 namespace {
+    using namespace openspace;
+
     void setRenderableEnabled(std::string_view id, bool value) {
         using namespace openspace;
         global::scriptEngine->queueScript(std::format(
@@ -49,9 +52,8 @@ namespace {
     };
 
     // This should match the implementation in the exoplanet module
-    std::string planetIdentifier(const openspace::exoplanets::ExoplanetItem& p) {
-        using namespace openspace::exoplanets;
-        return openspace::makeIdentifier(p.name);
+    std::string planetIdentifier(const exoplanets::ExoplanetItem& p) {
+        return makeIdentifier(p.name);
     }
 
     // Format string for system window name
@@ -62,18 +64,15 @@ namespace {
     // Set increased reach factors of all exoplanet renderables, to trigger fading out of
     // glyph cloud
     void setIncreasedReachfactors() {
-        using namespace openspace;
         global::scriptEngine->queueScript(
             "openspace.setPropertyValue('{exoplanet_planet}.ApproachFactor', 15000000.0)"
             "openspace.setPropertyValue('{exoplanet_system}.ApproachFactor', 15000000.0)"
         );
     }
 
-    void colorTrail(const openspace::exoplanets::ExoplanetItem& p,
+    void colorTrail(const exoplanets::ExoplanetItem& p,
                     const glm::vec3& color)
     {
-        using namespace openspace;
-
         const std::string planetTrailId = planetIdentifier(p) + "_Trail";
         const std::string planetDiscId = planetIdentifier(p) + "_Disc";
 
@@ -83,28 +82,26 @@ namespace {
             );
             global::scriptEngine->queueScript(std::format(
                 "openspace.setPropertyValueSingle('{}', {});",
-                propertyId, ghoul::to_string(color)
+                propertyId, to_string(color)
             ));
         }
 
-        if (openspace::renderable(planetDiscId)) {
+        if (renderable(planetDiscId)) {
             std::string propertyId = std::format(
                 "Scene.{}.Renderable.MultiplyColor", planetDiscId
             );
             global::scriptEngine->queueScript(std::format(
                 "openspace.setPropertyValueSingle('{}', {});",
-                propertyId, ghoul::to_string(color)
+                propertyId, to_string(color)
             ));
         }
     };
 
-    void setTrailThicknessAndFade(const openspace::exoplanets::ExoplanetItem& p,
+    void setTrailThicknessAndFade(const exoplanets::ExoplanetItem& p,
                                   float width, float fade)
     {
-        using namespace openspace;
-
         const std::string id = planetIdentifier(p) + "_Trail";
-        if (!openspace::renderable(id)) {
+        if (!renderable(id)) {
             return;
         }
         std::string appearance =
@@ -117,14 +114,14 @@ namespace {
         ));
     };
 
-    void resetTrailWidth(const openspace::exoplanets::ExoplanetItem& p) {
+    void resetTrailWidth(const exoplanets::ExoplanetItem& p) {
         setTrailThicknessAndFade(p, 10.f, 1.f);
     };
 
     // Render the initials of each word of the text, with the full text as a tooltip
     void renderAbbreviated(const std::string& text) {
         std::string abbreviation;
-        for (const std::string& word : ghoul::tokenizeString(text, ' ')) {
+        for (const std::string& word : tokenizeString(text, ' ')) {
             if (!word.empty()) {
                 abbreviation += word[0];
             }

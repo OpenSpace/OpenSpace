@@ -27,26 +27,25 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/syncdata.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <array>
 
 namespace openspace { struct Documentation; }
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace openspace::filesystem { class File; }
+namespace openspace::opengl { class ProgramObject; }
 
 namespace openspace::exoplanets {
 
 class RenderableHostCloud : public Renderable {
 public:
-    RenderableHostCloud(const ghoul::Dictionary& dictionary);
+    RenderableHostCloud(const Dictionary& dictionary);
 
     static const size_t MaxNumberColors = 2;
 
@@ -76,17 +75,17 @@ private:
 
     // Rendering helper methods
     void setupUniforms(
-        ghoul::opengl::ProgramObject& program,
+        opengl::ProgramObject& program,
         const RenderData& data
     );
     void renderMainPass();
-    void renderIndexTexture(ghoul::opengl::ProgramObject& program);
-    void renderSelectedPoints(ghoul::opengl::ProgramObject& program);
+    void renderIndexTexture(opengl::ProgramObject& program);
+    void renderSelectedPoints(opengl::ProgramObject& program);
 
     bool _renderDataIsDirty = true;
     bool _selectionChanged = true;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
+    std::unique_ptr<opengl::ProgramObject> _program = nullptr;
 
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, opacity, scale, maxIndex,
         currentIndex, cameraPosition, isHighlightMode, darkenFactor, renderOption, up,
@@ -131,8 +130,8 @@ private:
     GLuint _selectedVbo = 0;
 
     // Point id from screenspace position
-    std::unique_ptr<ghoul::opengl::Texture> _glyphIdTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _depthTexture;
+    std::unique_ptr<opengl::Texture> _glyphIdTexture;
+    std::unique_ptr<opengl::Texture> _depthTexture;
     GLuint _glyphIdFbo = 0;
 
     glm::ivec2 _lastViewPortSize;

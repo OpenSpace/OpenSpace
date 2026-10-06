@@ -30,11 +30,11 @@
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryluaformatter.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <chrono>
 
 namespace {
@@ -88,64 +88,64 @@ void GlyphHandler::initializeRenderables() {
     _dataViewer.updateGlyphRenderData();
 
     // Glyphs
-    ghoul::Dictionary gui;
+    Dictionary gui;
     gui.setValue("Name", "Glyphs - Planets"s);
     gui.setValue("Path", "/ExoplanetExplorer"s);
 
-    ghoul::Dictionary renderable;
+    Dictionary renderable;
     renderable.setValue("Type", "RenderableExoplanetGlyphCloud"s);
     renderable.setValue("Scale", static_cast<double>(DefaultGlyphScale));
     renderable.setValue("UseFixedWidth", false);
     renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
 
-    ghoul::Dictionary node;
+    Dictionary node;
     node.setValue("Identifier", std::string(GlyphCloudIdentifier));
     node.setValue("Renderable", renderable);
     node.setValue("GUI", gui);
 
     global::scriptEngine->queueScript(
-        std::format("openspace.addSceneGraphNode({})", ghoul::formatLua(node))
+        std::format("openspace.addSceneGraphNode({})", formatLua(node))
     );
 
     // Stars
-    ghoul::Dictionary hostsGui;
+    Dictionary hostsGui;
     hostsGui.setValue("Name", "Glyphs - Stars"s);
     hostsGui.setValue("Path", "/ExoplanetExplorer"s);
 
-    ghoul::Dictionary hostsRenderable;
+    Dictionary hostsRenderable;
     hostsRenderable.setValue("Type", "RenderableHostCloud"s);
     hostsRenderable.setValue("Scale", static_cast<double>(DefaultGlyphScale));
     hostsRenderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
     hostsRenderable.setValue("Enabled", false);
 
-    ghoul::Dictionary hostsNode;
+    Dictionary hostsNode;
     hostsNode.setValue("Identifier", std::string(HostCloudIdentifier));
     hostsNode.setValue("Renderable", hostsRenderable);
     hostsNode.setValue("GUI", hostsGui);
 
     global::scriptEngine->queueScript(
-        std::format("openspace.addSceneGraphNode({})", ghoul::formatLua(hostsNode))
+        std::format("openspace.addSceneGraphNode({})", formatLua(hostsNode))
     );
 }
 
 void GlyphHandler::updateSelectionInRenderable(const std::vector<size_t>& selection) {
     const std::string indices = formatIndicesList(selection);
 
-    global::scriptEngine->queueScript({
-        .code = std::format(
+    global::scriptEngine->queueScript(
+        std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Renderable.Selection', {{ {} }})",
             GlyphCloudIdentifier, indices
         ),
-        .addToLog = ScriptEngine::Script::ShouldBeLogged::No
-    });
+        ScriptEngine::ShouldBeLogged::No
+    );
 
-    global::scriptEngine->queueScript({
-        .code = std::format(
+    global::scriptEngine->queueScript(
+        std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Renderable.Selection', {{ {} }})",
             HostCloudIdentifier, indices
         ),
-        .addToLog = ScriptEngine::Script::ShouldBeLogged::No
-    });
+        ScriptEngine::ShouldBeLogged::No
+    );
 }
 
 int GlyphHandler::getHoveredPlanetIndex() const {
@@ -227,7 +227,7 @@ void GlyphHandler::setGlyphMode(GlyphMode mode) {
             // or provide a reasonable default color
             break;
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 
     _mode = mode;
@@ -333,7 +333,7 @@ void GlyphHandler::renderModeSpecificSettings() {
         renderStarSettings();
     }
     else {
-        throw ghoul::MissingCaseException();
+        throw MissingCaseException();
     }
 }
 
