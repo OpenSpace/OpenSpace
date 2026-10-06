@@ -27,16 +27,18 @@
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/topic/jsonconverters.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "LuaScriptTopic";
 
     std::string formatLua(const nlohmann::json::const_iterator& it);
@@ -112,7 +114,7 @@ namespace {
         if (it->is_null()) {
             return "nil";
         }
-        throw ghoul::lua::LuaFormatException("Format error");
+        throw lua::LuaFormatException("Format error");
     }
 
     std::string generateScript(const std::string& function,
@@ -189,7 +191,7 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
 {
     ScriptEngine::Script::Callback callback;
     if (shouldReturn) {
-        callback = [this](const ghoul::Dictionary& data) {
+        callback = [this](const Dictionary& data) {
             if (_connection) {
                 sendData(data);
                 _waitingForReturnValue = false;

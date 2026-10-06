@@ -32,10 +32,9 @@
 #include <string>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 struct Milestone {
@@ -59,9 +58,9 @@ class MissionPhase {
 public:
     /**
      * Constructs a MissionPhase from the information provided in the \p dictionary. See
-     * the MissionPhase::Documentation for accepted ghoul::Dictionary values.
+     * the MissionPhase::Documentation for accepted Dictionary values.
      *
-     * \param dictionary The ghoul::Dictionary that contains information about the current
+     * \param dictionary The Dictionary that contains information about the current
      *        MissionPhase
      *
      * \throw SpecificationError If the \p dictionary does not adhere to the Documentation
@@ -69,7 +68,7 @@ public:
      *        time range
      * \throw RuntimeError If neither subphases or a time range is specified
      */
-    explicit MissionPhase(const ghoul::Dictionary& dictionary);
+    explicit MissionPhase(const Dictionary& dictionary);
 
     /**
      * Returns the name of the MissionPhase.
@@ -151,8 +150,8 @@ public:
     Trace phaseTrace(double time, int maxDepth = -1) const;
 
     /**
-     * Returns the Documentation that describes the ghoul::Dictionarty that this
-     * MissionPhase can be constructed from.
+     * Returns the Documentation that describes the Dictionarty that this MissionPhase can
+     * be constructed from.
      *
      * \return The Documentation that describes the required structure for a Dictionary
      */

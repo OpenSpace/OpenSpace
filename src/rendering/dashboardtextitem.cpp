@@ -26,10 +26,10 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/font/font.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/misc/dictionary.h>
 #include <optional>
 
 namespace {
@@ -69,7 +69,7 @@ Documentation DashboardTextItem::Documentation() {
     );
 }
 
-DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary)
+DashboardTextItem::DashboardTextItem(const Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, "Mono")
     , _fontSize(FontSizeInfo, 10.f, 6.f, 144.f, 1.f)

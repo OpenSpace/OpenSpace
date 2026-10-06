@@ -56,7 +56,7 @@ Documentation StaticTranslation::Documentation() {
     );
 }
 
-StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
+StaticTranslation::StaticTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
     , _position(PositionInfo, glm::dvec3(0.0), glm::dvec3(-1e35), glm::dvec3(1e35))
 {

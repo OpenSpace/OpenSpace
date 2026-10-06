@@ -33,7 +33,7 @@ namespace openspace {
 
 class ReadSpeckTask : public Task {
 public:
-    explicit ReadSpeckTask(const ghoul::Dictionary& dictionary);
+    explicit ReadSpeckTask(const Dictionary& dictionary);
     ~ReadSpeckTask() override = default;
 
     std::string description() override;

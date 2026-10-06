@@ -64,8 +64,7 @@ public:
      * \param synchronizationRepositories The list of repositories that will be asked to
      *        resolve the identifier request
      */
-    HttpSynchronization(const ghoul::Dictionary& dict,
-        std::filesystem::path synchronizationRoot,
+    HttpSynchronization(const Dictionary& dict, std::filesystem::path synchronizationRoot,
         std::vector<std::string> synchronizationRepositories);
 
     /**

@@ -24,12 +24,12 @@
 
 #include <openspace/engine/downloadmanager.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/misc/thread.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/misc/thread.h>
 #include <curl/curl.h>
 #include <cerrno>
 #include <cstdio>
@@ -77,11 +77,11 @@ namespace {
             return 0;
         }
 
-        ghoul_assert(p, "Passed progress information is nullptr");
+        assert_msg(p, "Passed progress information is nullptr");
         ProgressInformation* i = static_cast<ProgressInformation*>(p);
-        ghoul_assert(i, "Passed pointer is not a ProgressInformation");
-        ghoul_assert(i && i->future, "FileFuture is not initialized");
-        ghoul_assert(i && i->callback, "Callback pointer is nullptr");
+        assert_msg(i, "Passed pointer is not a ProgressInformation");
+        assert_msg(i && i->future, "FileFuture is not initialized");
+        assert_msg(i && i->callback, "Callback pointer is nullptr");
 
         if (i->future->abortDownload) {
             i->future->isAborted = true;
@@ -211,10 +211,10 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
 
     if (_useMultithreadedDownload) {
         std::thread t = std::thread(downloadFunction);
-        ghoul::thread::setPriority(
+        thread::setPriority(
             t,
-            ghoul::thread::ThreadPriorityClass::Idle,
-            ghoul::thread::ThreadPriorityLevel::Lowest
+            thread::ThreadPriorityClass::Idle,
+            thread::ThreadPriorityLevel::Lowest
         );
 
         t.detach();
@@ -244,7 +244,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 
         CURL* curl = curl_easy_init();
         if (!curl) {
-            throw ghoul::RuntimeError("Error initializing cURL");
+            throw RuntimeError("Error initializing cURL");
         }
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -266,8 +266,8 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             if (res == CURLE_OK && ct) {
                 std::string extension = std::string(ct);
                 std::stringstream ss(extension);
-                ghoul::getline(ss, extension ,'/');
-                ghoul::getline(ss, extension);
+                getline(ss, extension ,'/');
+                getline(ss, extension);
                 file.format = extension;
             }
             else {
@@ -320,10 +320,10 @@ void DownloadManager::fileExtension(const std::string& url,
     };
     if (_useMultithreadedDownload) {
         std::thread t = std::thread(requestFunction);
-        ghoul::thread::setPriority(
+        thread::setPriority(
             t,
-            ghoul::thread::ThreadPriorityClass::Idle,
-            ghoul::thread::ThreadPriorityLevel::Lowest
+            thread::ThreadPriorityClass::Idle,
+            thread::ThreadPriorityLevel::Lowest
         );
         t.detach();
     }

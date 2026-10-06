@@ -162,31 +162,45 @@ target_precompile_headers(${globebrowsing_module} PRIVATE
 # Gdal
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
-if (WIN32)
-  add_library(gdal SHARED IMPORTED)
-  target_include_directories(gdal SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include)
-  set_target_properties(gdal PROPERTIES IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib)
-  set_target_properties(gdal PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal241.dll)
-  target_link_libraries(openspace-module-globebrowsing PRIVATE gdal)
-else (WIN32)
-  find_package(GDAL REQUIRED)
-
-  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${GDAL_INCLUDE_DIR})
-  target_link_libraries(openspace-module-globebrowsing PRIVATE ${GDAL_LIBRARY})
-  mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
-endif () # WIN32
+begin_dependency("GDAL")
+find_package(GDAL CONFIG REQUIRED)
+if (MSVC AND TARGET LERC::LERC)
+  # GDAL's vendored FindLERC.cmake module (used to locate its optional Lerc dependency) is
+  # a plain find_library call with no debug/release awareness, so it caches a single
+  # IMPORTED_LOCATION shared by every configuration in this multi-config generator,
+  # causing LNK2038 CRT/runtime-library mismatches whenever it happens to resolve to
+  # the "wrong" variant for the config being linked. Give it proper per-config locations
+  # instead, matching how the other vcpkg CONFIG packages (e.g. GEOS) already behave.
+  set_target_properties(LERC::LERC PROPERTIES
+    IMPORTED_LOCATION_DEBUG "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/lib/Lerc.lib"
+    IMPORTED_LOCATION_RELEASE "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/Lerc.lib"
+    IMPORTED_CONFIGURATIONS "DEBUG;RELEASE"
+  )
+endif ()
+if (MSVC AND TARGET PkgConfig::PC_SPATIALITE)
+  # GDAL's SPATIALITE dependency is resolved through pkg-config (FindSPATIALITE.cmake),
+  # which produces one flat, non-config-aware list of absolute library paths. Depending
+  # on which PKG_CONFIG_PATH happened to be active at configure time, that list can
+  # contain the debug variant of geos/geos_c even when linking Release/RelWithDebInfo
+  # (or vice versa), causing LNK2038 CRT mismatches. We already link the proper,
+  # per-config-aware GEOS::geos/GEOS::geos_c targets below, so drop pkg-config's raw
+  # geos/geos_c entries here instead of keeping two conflicting copies in sync.
+  get_target_property(_globebrowsing_spatialite_libs PkgConfig::PC_SPATIALITE INTERFACE_LINK_LIBRARIES)
+  list(FILTER _globebrowsing_spatialite_libs EXCLUDE REGEX "/geos(_c)?\\.lib$")
+  set_target_properties(PkgConfig::PC_SPATIALITE PROPERTIES
+    INTERFACE_LINK_LIBRARIES "${_globebrowsing_spatialite_libs}"
+  )
+  unset(_globebrowsing_spatialite_libs)
+endif ()
+target_link_libraries(openspace-module-globebrowsing PRIVATE GDAL::GDAL)
+end_dependency("GDAL")
 
 begin_dependency("GEOS")
-add_subdirectory(ext/geos SYSTEM)
-target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
-
-if (MSVC)
-  target_compile_options(geos PRIVATE "/W0")
-else ()
-  target_compile_options(geos PRIVATE "-w")
+find_package(GEOS CONFIG REQUIRED)
+target_link_libraries(openspace-module-globebrowsing PRIVATE GEOS::geos)
+if (MSVC AND TARGET GEOS::geos_c)
+  # Re-add geos_c (stripped from spatialite's pkg-config link line above) via the
+  # proper per-config-aware target so its symbols are still resolved correctly.
+  target_link_libraries(openspace-module-globebrowsing PRIVATE GEOS::geos_c)
 endif ()
-
-set_property(TARGET geos PROPERTY FOLDER "External")
-set_property(TARGET geos_c PROPERTY FOLDER "External")
-set_property(TARGET ryu PROPERTY FOLDER "External")
 end_dependency("GEOS")

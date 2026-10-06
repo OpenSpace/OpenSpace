@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___EVENT___H__
 #define __OPENSPACE_CORE___EVENT___H__
 
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/tstring.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
 #include <cstdint>
 #include <filesystem>
 #include <string_view>
@@ -94,7 +94,7 @@ struct Event {
 
 template <typename T>
 T* asType(Event* e) {
-    ghoul_assert(e->type == T::Type, "Wrong type requested, check 'isType'");
+    assert_msg(e->type == T::Type, "Wrong type requested, check 'isType'");
     return static_cast<T*>(e);
 }
 
@@ -106,7 +106,7 @@ bool isType(Event* e) {
 std::string_view toString(Event::Type type);
 Event::Type fromString(std::string_view str);
 
-ghoul::Dictionary toParameter(const Event& e);
+Dictionary toParameter(const Event& e);
 
 void logAllEvents(const Event* e);
 

@@ -27,15 +27,14 @@
 
 #include <string>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 class Transition {
 public:
-    explicit Transition(const ghoul::Dictionary& dictionary);
+    explicit Transition(const Dictionary& dictionary);
 
     const std::string& from() const;
     const std::string& to() const;

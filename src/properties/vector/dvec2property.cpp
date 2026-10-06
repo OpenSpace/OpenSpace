@@ -24,7 +24,7 @@
 
 #include <openspace/properties/vector/dvec2property.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
@@ -43,16 +43,16 @@ std::string_view DVec2Property::className() const {
     return "DVec2Property";
 }
 
-ghoul::lua::LuaTypes DVec2Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes DVec2Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void DVec2Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::dvec2 DVec2Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::dvec2>(state);
+    return lua::value<glm::dvec2>(state);
 }
 
 std::string DVec2Property::stringValue() const {

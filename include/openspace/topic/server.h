@@ -51,7 +51,7 @@ public:
     Server();
     ~Server() override;
 
-    void initialize(const ghoul::Dictionary& configuration);
+    void initialize(const Dictionary& configuration);
 
     void preSync();
 

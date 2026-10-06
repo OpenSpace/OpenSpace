@@ -44,7 +44,7 @@ class DataProcessor;
  */
 class RenderableDataCygnet : public RenderableIswaCygnet {
 public:
-    explicit RenderableDataCygnet(const ghoul::Dictionary& dictionary);
+    explicit RenderableDataCygnet(const Dictionary& dictionary);
     ~RenderableDataCygnet();
 
     static openspace::Documentation Documentation();

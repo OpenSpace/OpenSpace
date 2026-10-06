@@ -25,18 +25,25 @@
 #include "modules/spout/spoutwrapper.h"
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/texture.h>
 #include <optional>
 #include <string_view>
 #include <utility>
 
-#define SPOUT_NO_GL_INCLUDE
-#include <SpoutLibrary.h>
+// gl.h (included above) pulls in glbinding and does `using namespace gl;`, bringing
+// the scoped enum `gl::GLenum` into scope unqualified. SpoutLibrary.h would otherwise
+// unconditionally redeclare a plain `typedef unsigned int GLenum;` in the global
+// namespace (and `#define GL_RGBA`, corrupting glbinding's own `GL_RGBA` enumerator) to
+// avoid needing a real GL header; SPOUT_NO_GL_TYPEDEFS (added by
+// support/vcpkg/ports/spout2/fix-gl-typedefs.patch) suppresses that so glbinding's real
+// types are used instead. This only works with glbinding included first, as above.
+#define SPOUT_NO_GL_TYPEDEFS
+#include <SpoutLibrary/SpoutLibrary.h>
 
 namespace {
     using namespace openspace;
@@ -124,7 +131,7 @@ const std::vector<std::string>& SpoutReceiver::spoutReceiverList() {
 
     for (int i = 0; i < nSenders; i++) {
         char Name[256];
-        _spoutHandle->GetSenderName(i, Name, 256);
+        _spoutHandle->GetSender(i, Name, 256);
         _receiverList.push_back(Name);
     }
 
@@ -156,9 +163,6 @@ bool SpoutReceiver::updateReceiver() {
         saveGLState();
 
         _spoutHandle->ReceiveTexture(
-            currentSpoutName,
-            width,
-            height,
             static_cast<GLuint>(*_spoutTexture),
             static_cast<GLuint>(GL_TEXTURE_2D),
             true
@@ -267,14 +271,14 @@ unsigned int SpoutReceiver::spoutTexture() const {
 bool SpoutReceiver::updateTexture(unsigned int width, unsigned int height) {
     if (width != _spoutWidth || height != _spoutHeight) {
         releaseTexture();
-        _spoutTexture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
+        _spoutTexture = std::make_unique<opengl::Texture>(
+            opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(width, height, 1),
                 .type = GL_TEXTURE_2D,
-                .format = ghoul::opengl::Texture::Format::RGBA,
+                .format = opengl::Texture::Format::RGBA,
                 .dataType = GL_UNSIGNED_BYTE
             },
-            ghoul::opengl::Texture::SamplerInit {}
+            opengl::Texture::SamplerInit {}
         );
 
         if (_spoutTexture) {
@@ -325,7 +329,7 @@ Documentation SpoutReceiverPropertyProxy::Documentation() {
 }
 
 SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(PropertyOwner& owner,
-                                                      const ghoul::Dictionary& dictionary)
+                                                       const Dictionary& dictionary)
     : _spoutName(NameReceiverInfo)
     , _spoutSelection(SelectionInfo)
     , _updateSelection(UpdateInfo)
@@ -424,7 +428,7 @@ bool SpoutSender::updateSenderStatus() {
             return false;
         }
 
-        ghoul_assert(_currentSpoutName.size() < 256, "Spout name must be < 256");
+        assert_msg(_currentSpoutName.size() < 256, "Spout name must be < 256");
         char name[256] = { 0 };
         std::memcpy(name, _currentSpoutName.data(), _currentSpoutName.size());
 
@@ -565,7 +569,7 @@ Documentation SpoutSenderPropertyProxy::Documentation() {
 }
 
 SpoutSenderPropertyProxy::SpoutSenderPropertyProxy(PropertyOwner& owner,
-                                                   const ghoul::Dictionary& dictionary)
+                                                   const Dictionary& dictionary)
     : _spoutName(NameSenderInfo)
 {
     const SenderParameters p = codegen::bake<SenderParameters>(dictionary);

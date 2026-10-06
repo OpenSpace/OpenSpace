@@ -38,7 +38,7 @@ class SceneGraphNode;
 
 class DashboardItemDistance : public DashboardTextItem {
 public:
-    explicit DashboardItemDistance(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemDistance(const Dictionary& dictionary);
     ~DashboardItemDistance() override = default;
 
     void update() override;

@@ -24,11 +24,11 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
+#include <openspace/format.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
 #include <cerrno>
 #include <cmath>
 #include <cstdint>
@@ -76,7 +76,7 @@ FieldlinesState FieldlinesState::createStateFromOsfls(const std::string& path) {
     FieldlinesState s;
     const bool success = s.loadStateFromOsfls(path);
     if (!success) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Failed to load state from osfls file {}", path
         ));
     }

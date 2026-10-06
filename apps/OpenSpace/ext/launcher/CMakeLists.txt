@@ -134,12 +134,12 @@ target_link_libraries(
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
   PRIVATE
-    sgct
+    sgct::sgct
 )
 
 target_precompile_headers(openspace-ui-launcher PRIVATE
+  <openspace/glm.h>
   <openspace/scene/profile.h>
-  <ghoul/glm.h>
   <QAbstractItemDelegate>
   <QAbstractItemModel>
   <QDialog>

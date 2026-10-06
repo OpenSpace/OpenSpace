@@ -27,7 +27,7 @@
 
 #include <modules/gaia/rendering/gaiaoptions.h>
 #include <modules/gaia/rendering/octreeculler.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <array>
 #include <filesystem>
 #include <fstream>

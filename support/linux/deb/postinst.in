@@ -1,0 +1,37 @@
+#!/bin/sh
+# Generated from support/linux/deb/postinst.in.
+#
+# The package is self-contained under @OPENSPACE_INSTALL_ROOT@ (see the comment on
+# CPACK_PACKAGING_INSTALL_PREFIX in support/cmake/packaging.cmake for why it cannot be
+# split across /usr), which leaves it invisible to the user: not on PATH, not in the
+# application menu. These three symlinks are what connect it to the desktop. They are
+# created here rather than shipped in the package because a file installed to an absolute
+# destination would escape the staging prefix only for DEB and RPM, and would be written
+# to the build machine's own filesystem for the archive generators.
+
+set -e
+
+case "$1" in
+  configure)
+    ln -sfn "@OPENSPACE_INSTALL_ROOT@/bin/openspace-launcher" /usr/bin/openspace
+
+    mkdir -p /usr/share/applications
+    ln -sfn "@OPENSPACE_INSTALL_ROOT@/share/applications/openspace.desktop" \
+      /usr/share/applications/openspace.desktop
+
+    mkdir -p /usr/share/icons/hicolor/512x512/apps
+    ln -sfn "@OPENSPACE_INSTALL_ROOT@/share/icons/hicolor/512x512/apps/openspace.png" \
+      /usr/share/icons/hicolor/512x512/apps/openspace.png
+
+    # Best-effort: a missing cache only costs a stale menu entry until the next login, and
+    # neither tool is guaranteed to exist on a minimal system
+    if command -v update-desktop-database > /dev/null 2>&1; then
+      update-desktop-database -q /usr/share/applications || true
+    fi
+    if command -v gtk-update-icon-cache > /dev/null 2>&1; then
+      gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+    fi
+    ;;
+esac
+
+exit 0

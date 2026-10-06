@@ -24,7 +24,7 @@
 
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
 #include <algorithm>
 #include <array>
 #include <string_view>

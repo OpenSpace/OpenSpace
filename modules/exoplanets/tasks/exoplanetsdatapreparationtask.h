@@ -42,7 +42,7 @@ public:
         ExoplanetDataEntry dataEntry;
     };
 
-    explicit ExoplanetsDataPreparationTask(const ghoul::Dictionary& dictionary);
+    explicit ExoplanetsDataPreparationTask(const Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;

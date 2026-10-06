@@ -27,11 +27,11 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 
 namespace openspace {
@@ -69,7 +69,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void internalInitialize(const ghoul::Dictionary& dict) override;
+    void internalInitialize(const Dictionary& dict) override;
 
     StringProperty _exoplanetsDataFolder;
     StringProperty _bvColorMapPath;

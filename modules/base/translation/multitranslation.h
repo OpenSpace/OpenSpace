@@ -31,7 +31,7 @@ namespace openspace {
 
 class MultiTranslation : public Translation {
 public:
-    explicit MultiTranslation(const ghoul::Dictionary& dictionary);
+    explicit MultiTranslation(const Dictionary& dictionary);
 
     void initialize() override;
 
@@ -40,7 +40,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    std::vector<ghoul::mm_unique_ptr<Translation>> _translations;
+    std::vector<mm_unique_ptr<Translation>> _translations;
 };
 
 } // namespace openspace

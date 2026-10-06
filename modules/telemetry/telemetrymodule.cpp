@@ -39,9 +39,9 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/misc/dictionary.h>
 #include <chrono>
 #include <functional>
 #include <limits>
@@ -164,7 +164,7 @@ void TelemetryModule::guiOnChangeAngleCalculationMode() {
     _angleCalculationMode = static_cast<AngleCalculationMode>(_modeOptions.value());
 }
 
-void TelemetryModule::internalInitialize(const ghoul::Dictionary& dictionary) {
+void TelemetryModule::internalInitialize(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _ipAddress = p.ipAddress.value_or(_ipAddress);

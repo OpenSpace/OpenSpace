@@ -25,7 +25,7 @@
 #include <modules/base/rendering/screenspacetext.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionary.h>
 #include <optional>
 
 namespace {
@@ -55,7 +55,7 @@ Documentation ScreenSpaceText::Documentation() {
     );
 }
 
-ScreenSpaceText::ScreenSpaceText(const ghoul::Dictionary& dictionary)
+ScreenSpaceText::ScreenSpaceText(const Dictionary& dictionary)
     : ScreenSpaceRenderableText(dictionary)
     , _text(TextInfo, "")
 {

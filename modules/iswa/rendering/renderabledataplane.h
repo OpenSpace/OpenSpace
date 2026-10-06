@@ -27,7 +27,7 @@
 
 #include <modules/iswa/rendering/renderabledatacygnet.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 
 namespace openspace {
 
@@ -39,7 +39,7 @@ namespace openspace {
 class RenderableDataPlane : public RenderableDataCygnet {
 friend class IswaBaseGroup;
 public:
-    explicit RenderableDataPlane(const ghoul::Dictionary& dictionary);
+    explicit RenderableDataPlane(const Dictionary& dictionary);
      ~RenderableDataPlane() = default;
 
      void initializeGL() override;

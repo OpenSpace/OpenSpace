@@ -29,21 +29,21 @@
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layergroupid.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
 #include <string>
 
 namespace openspace {
 
-void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
-                             const LayerGroup& layerGroup, const TileIndex& tileIndex)
+void GPULayerGroup::setValue(opengl::ProgramObject& program, const LayerGroup& layerGroup,
+                             const TileIndex& tileIndex)
 {
     ZoneScoped;
 
-    ghoul_assert(
+    assert_msg(
         layerGroup.activeLayers().size() == _gpuActiveLayers.size(),
         "GPU and CPU active layers must have same size"
     );
@@ -89,7 +89,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                 );
                 for (size_t j = 0; j < _gpuActiveLayers[i].gpuChunkTiles.size(); j++) {
                     GPULayer::GPUChunkTile& t = _gpuActiveLayers[i].gpuChunkTiles[j];
-                    ghoul_assert(ctp[j].has_value(), "Wrong ChunkTiles number in pile");
+                    assert_msg(ctp[j].has_value(), "Wrong ChunkTiles number in pile");
                     const ChunkTile& ct = *ctp[j];
 
                     if (ct.tile.texture) {
@@ -114,7 +114,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
     }
 }
 
-void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& layerGroup) {
+void GPULayerGroup::bind(opengl::ProgramObject& p, const LayerGroup& layerGroup) {
     const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();
     _gpuActiveLayers.resize(activeLayers.size());
     const int pileSize = layerGroup.pileSize();

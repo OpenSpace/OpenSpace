@@ -45,13 +45,11 @@ namespace geos {
     namespace geom { class Geometry; }
     namespace io { class GeoJSONFeature; }
 } // namespace geos
-namespace ghoul {
-    namespace opengl { class ProgramObject; }
-    class Dictionary;
-} // namespace ghoul
 
 namespace openspace {
 
+namespace opengl { class ProgramObject; }
+class Dictionary;
 struct Documentation;
 class LightSource;
 struct RenderData;
@@ -63,7 +61,7 @@ class RenderableGlobe;
  */
 class GeoJsonComponent : public PropertyOwner, public Fadeable {
 public:
-    GeoJsonComponent(const ghoul::Dictionary& dictionary, RenderableGlobe& globe);
+    GeoJsonComponent(const Dictionary& dictionary, RenderableGlobe& globe);
     ~GeoJsonComponent() override;
 
     void initialize();
@@ -157,8 +155,8 @@ private:
     PropertyOwner _featuresPropertyOwner;
     std::vector<std::unique_ptr<SubFeatureProps>> _features;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _linesAndPolygonsProgram = nullptr;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram = nullptr;
+    std::unique_ptr<opengl::ProgramObject> _linesAndPolygonsProgram = nullptr;
+    std::unique_ptr<opengl::ProgramObject> _pointsProgram = nullptr;
 };
 
 } // namespace openspace

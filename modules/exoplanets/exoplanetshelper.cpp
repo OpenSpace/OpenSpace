@@ -28,13 +28,13 @@
 #include <modules/exoplanets/exoplanetsmodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timeconstants.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/stringhelper.h>
 #include <glm/gtx/transform.hpp>
 #include <algorithm>
 #include <cmath>
@@ -76,7 +76,7 @@ glm::vec3 computeStarColor(float bv) {
 
     // Interpret the colormap cmap file
     std::string line;
-    while (ghoul::getline(colorMap, line)) {
+    while (openspace::getline(colorMap, line)) {
         if (line.empty() || (line[0] == '#')) {
             continue;
         }
@@ -92,7 +92,7 @@ glm::vec3 computeStarColor(float bv) {
     const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * (nValues - 1)));
     std::string color;
     for (int i = 0; i < t + 1; i++) {
-        ghoul::getline(colorMap, color);
+        openspace::getline(colorMap, color);
     }
 
     std::istringstream colorStream = std::istringstream(color);

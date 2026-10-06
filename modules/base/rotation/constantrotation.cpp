@@ -25,8 +25,8 @@
 #include <modules/base/rotation/constantrotation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
 #include <glm/gtx/quaternion.hpp>
 #include <optional>
 
@@ -69,7 +69,7 @@ Documentation ConstantRotation::Documentation() {
     );
 }
 
-ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)
+ConstantRotation::ConstantRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
     , _rotationAxis(
         RotationInfo,

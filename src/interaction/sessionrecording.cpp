@@ -24,11 +24,11 @@
 
 #include <openspace/interaction/sessionrecording.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/glm.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -47,10 +47,10 @@ namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    class LoadingError final : public ghoul::RuntimeError {
+    class LoadingError final : public RuntimeError {
     public:
         LoadingError(std::string error_, std::filesystem::path file_, int entry_)
-            : ghoul::RuntimeError(
+            : RuntimeError(
                 std::format(
                     "Error loading session recording '{}' (entry #{}): {}",
                     file_, entry_, error_
@@ -63,7 +63,7 @@ namespace {
         {}
 
         LoadingError(std::string error_, std::filesystem::path file_)
-            : ghoul::RuntimeError(
+            : RuntimeError(
                 std::format("Error loading session recording '{}': {}", file_, error_),
                 "SessionRecording"
             )
@@ -72,7 +72,7 @@ namespace {
         {}
 
         explicit LoadingError(std::string error_)
-            : ghoul::RuntimeError(error_, "SessionRecording")
+            : RuntimeError(error_, "SessionRecording")
             , error(std::move(error_))
         {}
 
@@ -468,7 +468,7 @@ namespace {
 
         std::string tmpReadbackScript;
         for (int i = 0; i < numScriptLines; i++) {
-            ghoul::getline(stream, tmpReadbackScript);
+            openspace::getline(stream, tmpReadbackScript);
             size_t start = tmpReadbackScript.find_first_not_of(" ");
             tmpReadbackScript = tmpReadbackScript.substr(start);
             if (tmpReadbackScript.back() == '\r') {
@@ -629,7 +629,7 @@ bool SessionRecording::hasCameraFrame() const noexcept {
 }
 
 SessionRecording loadSessionRecording(const std::filesystem::path& filename) {
-    ghoul_assert(std::filesystem::exists(filename), "Session recording did not exist");
+    assert_msg(std::filesystem::exists(filename), "Session recording did not exist");
 
     std::ifstream file = std::ifstream(filename, std::ios::in | std::ios::binary);
     if (!file) {
@@ -657,7 +657,7 @@ SessionRecording loadSessionRecording(const std::filesystem::path& filename) {
         sessionRecording.entries.push_back(std::move(*entry));
     }
 
-    ghoul_assert(
+    assert_msg(
         std::is_sorted(
             sessionRecording.entries.begin(),
             sessionRecording.entries.end(),
@@ -674,7 +674,7 @@ SessionRecording loadSessionRecording(const std::filesystem::path& filename) {
 void saveSessionRecording(const std::filesystem::path& filename,
                           const SessionRecording& sessionRecording, DataMode dataMode)
 {
-    ghoul_assert(!std::filesystem::exists(filename), "filename must not exist");
+    assert_msg(!std::filesystem::exists(filename), "filename must not exist");
 
     // Create the intermediate folders if the filename contains multiple subfolders
     std::filesystem::path folder = filename.parent_path();
@@ -682,7 +682,7 @@ void saveSessionRecording(const std::filesystem::path& filename,
 
     std::ofstream file = std::ofstream(filename, std::ios::binary);
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format("Could not save recording '{}'", filename));
+        throw RuntimeError(std::format("Could not save recording '{}'", filename));
     }
 
     constexpr int CurrentVersion = Versions.back().second;
@@ -701,19 +701,17 @@ void saveSessionRecording(const std::filesystem::path& filename,
     }
 }
 
-std::vector<ghoul::Dictionary> sessionRecordingToDictionary(
-                                                        const SessionRecording& recording)
-{
-    std::vector<ghoul::Dictionary> result;
+std::vector<Dictionary> sessionRecordingToDictionary(const SessionRecording& recording) {
+    std::vector<Dictionary> result;
     for (const SessionRecording::Entry& entry : recording.entries) {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("Timestamp", entry.timestamp);
         e.setValue("SimulationTime", entry.simulationTime);
 
         if (std::holds_alternative<SessionRecording::Entry::Camera>(entry.value)) {
             const auto& cam = std::get<SessionRecording::Entry::Camera>(entry.value);
 
-            ghoul::Dictionary c;
+            Dictionary c;
             c.setValue("Position", cam.position);
             glm::dvec4 q = glm::dvec4(
                 cam.rotation.w,

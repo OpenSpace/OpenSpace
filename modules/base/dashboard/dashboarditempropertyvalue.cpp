@@ -25,6 +25,9 @@
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
@@ -47,9 +50,6 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/dashboardtextitem.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <optional>
 
 namespace {
@@ -98,8 +98,7 @@ Documentation DashboardItemPropertyValue::Documentation() {
     );
 }
 
-DashboardItemPropertyValue::DashboardItemPropertyValue(
-                                                      const ghoul::Dictionary& dictionary)
+DashboardItemPropertyValue::DashboardItemPropertyValue(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _propertyUri(PropertyUriInfo)
     , _displayString(DisplayStringInfo)

@@ -31,14 +31,14 @@ namespace openspace {
 
 class TimeFrameUnion : public TimeFrame {
 public:
-    explicit TimeFrameUnion(const ghoul::Dictionary& dictionary);
+    explicit TimeFrameUnion(const Dictionary& dictionary);
 
     void update(const Time&) override;
 
     static openspace::Documentation Documentation();
 
 private:
-    std::vector<ghoul::mm_unique_ptr<TimeFrame>> _timeFrames;
+    std::vector<mm_unique_ptr<TimeFrame>> _timeFrames;
 };
 
 } // namespace openspace

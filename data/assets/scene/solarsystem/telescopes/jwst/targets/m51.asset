@@ -6,10 +6,11 @@ local M51Image = {
   Identifier = "M51Image",
   Type = "ScreenSpaceImageLocal",
   Name = "M51 Galaxy",
-  UseRadiusAzimuthElevation = true,
-  FaceCamera = false,
-  RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
-  UsePerspectiveProjection = false,
+  Placement = {
+    UseRadiusAzimuthElevation = true,
+    FaceCamera = false,
+    RadiusAzimuthElevation = { 1.0, 0.5, 0.1 }
+  },
   Opacity = 1.0,
   TexturePath = m51.image .. "m51-galaxy.png",
   Tag = { "mission_jwst_target" },

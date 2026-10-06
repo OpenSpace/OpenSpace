@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
 #include <openspace/navigation/orbitalnavigator/directmanipulation.h>
 #include <openspace/navigation/orbitalnavigator/idlemotion.h>
 #include <openspace/navigation/orbitalnavigator/orbitalinputhandler.h>
@@ -37,7 +38,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/interpolator.h>
 #include <openspace/util/syncdata.h>
-#include <ghoul/glm.h>
 #include <optional>
 #include <string_view>
 #include <utility>

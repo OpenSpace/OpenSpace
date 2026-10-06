@@ -36,10 +36,10 @@
 #include "profile/propertiesdialog.h"
 #include "profile/timedialog.h"
 #include "profile/uipanelsdialog.h"
+#include <openspace/format.h>
+#include <openspace/misc/stringconversion.h>
 #include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/stringconversion.h>
 #include <QDialogButtonBox>
 #include <QFileDialog>
 #include <QKeyEvent>
@@ -92,7 +92,7 @@ namespace {
             );
 
             std::string name = it != actions.end() ? it->name : "Unknown action";
-            results += std::format("{} ({})<br>", name, ghoul::to_string(k.key));
+            results += std::format("{} ({})<br>", name, openspace::to_string(k.key));
         }
         return results;
     }

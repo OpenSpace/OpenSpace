@@ -8,7 +8,9 @@ local Item = {
   Type = "ScreenSpaceDate",
   Identifier = "ScreenSpaceDate_Example_FontSize",
   Name = "ScreenSpace Date Example - Font Size",
-  Scale = 0.5,
+  Placement = {
+    Scale = 0.5
+  },
   FontSize = 72
 }
 

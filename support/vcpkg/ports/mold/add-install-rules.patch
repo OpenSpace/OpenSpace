@@ -1,0 +1,88 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 639d6cb..b7394ef 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -184,19 +184,75 @@ if (MD_USE_RELATIVE_RESOURCE_PATH)
+ endif()
+ 
+ target_include_directories(mdlib PUBLIC
+-  src/
+-  ext/dcd/
+-  ext/fastlz/
+-  ext/gl3w/
+-  ext/svd3/
+-  ext/xtc/)
+-
+-target_compile_definitions(mdlib PUBLIC MD_SHADER_DIR="${MD_SHADER_DIR}" PRIVATE ${MD_DEFINES})
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/dcd>
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/fastlz>
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/gl3w>
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/svd3>
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/xtc>
++  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/mold>)
++
++target_compile_definitions(mdlib PRIVATE MD_SHADER_DIR="${MD_SHADER_DIR}" ${MD_DEFINES})
+ target_compile_options(mdlib PRIVATE ${MD_FLAGS} $<$<CONFIG:Debug>:${MD_FLAGS_DEB}> $<$<CONFIG:Release>:${MD_FLAGS_REL}>)
+ set_source_files_properties(${EXT_FILES}, PROPERTIES COMPILE_OPTIONS ${MD_FLAGS_EXT})
+ target_compile_features(mdlib PRIVATE c_std_11)
+ target_link_libraries(mdlib PRIVATE ${MD_LIBS})
+ 
++# Install / export
++#
++# Upstream mdlib ships no install rules whatsoever, so find_package(mold CONFIG REQUIRED)
++# cannot succeed against it as-is. Everything below is added by the OpenSpace overlay port.
++include(GNUInstallDirs)
++include(CMakePackageConfigHelpers)
++
++install(TARGETS mdlib
++  EXPORT moldTargets
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
++
++# The public headers are included as <md_foo.h> and <core/md_foo.h>, so the src/ layout is
++# preserved underneath a single mold/ include root. The ext/ include directories are only
++# needed to compile mdlib itself; none of the public headers reach into them.
++install(DIRECTORY src/
++  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mold
++  FILES_MATCHING
++    PATTERN "*.h"
++    PATTERN "*.inl"
++    # src/shaders/gfx/common.h is a GLSL include, not a C header
++    PATTERN "shaders" EXCLUDE
++)
++
++# md_gl.c compiles these at runtime instead of baking them into the library, so they have
++# to be shipped as data for the consumer to place next to its executable. See
++# runtime-shader-path.patch.
++install(DIRECTORY src/shaders/
++  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/mold/shaders
++)
++
++install(EXPORT moldTargets
++  FILE mold-targets.cmake
++  NAMESPACE mold::
++  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/mold
++)
++
++configure_package_config_file(
++  ${CMAKE_CURRENT_SOURCE_DIR}/moldConfig.cmake.in
++  ${CMAKE_CURRENT_BINARY_DIR}/moldConfig.cmake
++  INSTALL_DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/mold
++)
++write_basic_package_version_file(
++  ${CMAKE_CURRENT_BINARY_DIR}/moldConfigVersion.cmake
++  VERSION ${PROJECT_VERSION}
++  COMPATIBILITY AnyNewerVersion
++)
++install(FILES
++  ${CMAKE_CURRENT_BINARY_DIR}/moldConfig.cmake
++  ${CMAKE_CURRENT_BINARY_DIR}/moldConfigVersion.cmake
++  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/mold
++)
++
+ get_directory_property(has_parent PARENT_DIRECTORY)
+ if (has_parent)
+     set(MD_DEFINES ${MD_DEFINES} PARENT_SCOPE)

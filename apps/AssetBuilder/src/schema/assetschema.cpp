@@ -56,7 +56,7 @@ namespace {
                     [rv](const Documentation& d) { return d.id == rv->identifier; }
                 );
 
-                ghoul_assert(it != doc.end(), "Did not find reference");
+                assert_msg(it != doc.end(), "Did not find reference");
                 SchemaReference ref = {
                     .identifier = rv->identifier,
                     .name = it->name
@@ -91,7 +91,7 @@ namespace {
                 .name = factoryInfo.name
             };
 
-            ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
+            TemplateFactoryBase* f = factoryInfo.factory.get();
             // Add documentation about base class
             auto factoryDoc = std::find_if(
                 docs.begin(),

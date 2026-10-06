@@ -24,13 +24,13 @@
 
 #include <openspace/rendering/helper.h>
 
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/scene/lightsource.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/closest_point.hpp>
 #include <algorithm>
 #include <cmath>
@@ -161,7 +161,7 @@ void initialize() {
     ZoneScoped;
     TracyGpuZone("helper::initialize");
 
-    ghoul_assert(!isInitialized, "Rendering Helper initialized twice");
+    assert_msg(!isInitialized, "Rendering Helper initialized twice");
 
     //
     // XYUVRGBA shader
@@ -181,15 +181,12 @@ void initialize() {
         fragmentFile.open(xyuvrgbaFragmentFile, std::fstream::out);
         fragmentFile << XyuvrgbaFragmentCode;
     }
-    shaders.xyuvrgba.program = ghoul::opengl::ProgramObject::Build(
+    shaders.xyuvrgba.program = opengl::ProgramObject::Build(
         "xyuvrgba",
         xyuvrgbaVertexFile,
         xyuvrgbaFragmentFile
     );
-    ghoul::opengl::updateUniformLocations(
-        *shaders.xyuvrgba.program,
-        shaders.xyuvrgba.cache
-    );
+    opengl::updateUniformLocations(*shaders.xyuvrgba.program, shaders.xyuvrgba.cache);
 
     //
     // Screenfilling shader
@@ -210,12 +207,12 @@ void initialize() {
         fragmentFile << XyuvrgbaFragmentCode;
     }
 
-    shaders.screenfilling.program = ghoul::opengl::ProgramObject::Build(
+    shaders.screenfilling.program = opengl::ProgramObject::Build(
         "screenfilling",
         xyuvrgbaVertexFile,
         xyuvrgbaFragmentFile
     );
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *shaders.screenfilling.program,
         shaders.screenfilling.cache
     );
@@ -488,7 +485,7 @@ void initialize() {
 }
 
 void deinitialize() {
-    ghoul_assert(isInitialized, "Rendering Helper not initialized");
+    assert_msg(isInitialized, "Rendering Helper not initialized");
 
     if (!xyuvrgbaVertexFile.empty()) {
         std::filesystem::remove(xyuvrgbaVertexFile);
@@ -563,9 +560,9 @@ glm::mat4 ortho(const glm::vec2& position, const glm::vec2& size, Anchor anchor)
 }
 
 
-void renderBox(ghoul::opengl::ProgramObject& program, GLint orthoLocation,
-               GLint colorLocation, const glm::vec2& position, const glm::vec2& size,
-               const glm::vec4& color, Anchor anchor)
+void renderBox(opengl::ProgramObject& program, GLint orthoLocation, GLint colorLocation,
+               const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
+               Anchor anchor)
 {
     program.setUniform(orthoLocation, ortho(position, size, anchor));
     program.setUniform(colorLocation, color);
@@ -593,13 +590,13 @@ void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4
 }
 
 void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
-               const ghoul::opengl::Texture& texture, Anchor anchor)
+               const opengl::Texture& texture, Anchor anchor)
 {
     auto& shdr = shaders.xyuvrgba;
     shdr.program->activate();
     shdr.program->setUniform(shdr.cache.hasTexture, 1);
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(texture);
     shdr.program->setUniform(shdr.cache.tex, unit);
     renderBox(

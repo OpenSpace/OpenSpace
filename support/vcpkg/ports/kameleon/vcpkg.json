@@ -1,0 +1,15 @@
+{
+  "name": "kameleon",
+  "version-date": "2026-09-14",
+  "port-version": 0,
+  "description": [
+    "Kameleon is a space weather modeling framework's data access API, providing a common interface for reading heliophysics model output formats (BATS-R-US, ENLIL, LFM, MAS, OpenGGCM, Adapt3D, and more) stored as CDF files.",
+    "Overlay port. Kameleon has no upstream registry port. This builds the OpenSpace/Kameleon fork (previously vendored as the modules/kameleon/ext/kameleon git submodule), which itself never calls install(EXPORT ...) and installs no CMake package config -- find_package(kameleon CONFIG REQUIRED) cannot succeed against it as-is. add-cmake-config.patch, ccmc-install.patch, and cdf-install.patch add install/export logic for the ccmc and cdf targets plus a generated KameleonConfig.cmake, producing Kameleon::ccmc and Kameleon::cdf targets and matching the find_package(<pkg> CONFIG REQUIRED) + namespaced-target pattern used by every other dependency in this project's vcpkg migration."
+  ],
+  "homepage": "https://github.com/OpenSpace/Kameleon",
+  "license": null,
+  "dependencies": [
+    { "name": "vcpkg-cmake", "host": true },
+    { "name": "vcpkg-cmake-config", "host": true }
+  ]
+}

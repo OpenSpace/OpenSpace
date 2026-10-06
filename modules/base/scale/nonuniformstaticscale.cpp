@@ -25,7 +25,7 @@
 #include <modules/base/scale/nonuniformstaticscale.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionary.h>
 
 namespace {
     using namespace openspace;
@@ -64,7 +64,7 @@ Documentation NonUniformStaticScale::Documentation() {
     );
 }
 
-NonUniformStaticScale::NonUniformStaticScale(const ghoul::Dictionary& dictionary)
+NonUniformStaticScale::NonUniformStaticScale(const Dictionary& dictionary)
     : Scale(dictionary)
     , _scaleValue(ScaleInfo, glm::dvec3(1.0), glm::dvec3(0.1), glm::dvec3(100.0))
 {

@@ -24,11 +24,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
 #include <limits>
 
 using namespace openspace;

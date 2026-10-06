@@ -26,7 +26,7 @@
 
 #include "jasset.h"
 #include "path.h"
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/filesystem/filesystem.h>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>

@@ -28,14 +28,14 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/crc32.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryluaformatter.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/crc32.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <string>
 #include <utility>
 
@@ -44,37 +44,37 @@
 namespace openspace {
 
 bool ActionManager::hasAction(const std::string& identifier) const {
-    ghoul_assert(!identifier.empty(), "Identifier must not be empty");
+    assert_msg(!identifier.empty(), "Identifier must not be empty");
 
-    const unsigned int hash = ghoul::hashCRC32(identifier);
+    const unsigned int hash = hashCRC32(identifier);
     const auto it = _actions.find(hash);
     return it != _actions.end();
 }
 
 void ActionManager::registerAction(Action action) {
-    ghoul_assert(!action.identifier.empty(), "Action must have an identifier");
-    ghoul_assert(!hasAction(action.identifier), "Identifier already existed");
+    assert_msg(!action.identifier.empty(), "Action must have an identifier");
+    assert_msg(!hasAction(action.identifier), "Identifier already existed");
 
-    const unsigned int hash = ghoul::hashCRC32(action.identifier);
+    const unsigned int hash = hashCRC32(action.identifier);
     global::eventEngine->publishEvent<EventActionAdded>(action.identifier);
     _actions[hash] = std::move(action);
 }
 
 void ActionManager::removeAction(const std::string& identifier) {
-    ghoul_assert(!identifier.empty(), "Identifier must not be empty");
-    ghoul_assert(hasAction(identifier), "Action was not found in the list");
+    assert_msg(!identifier.empty(), "Identifier must not be empty");
+    assert_msg(hasAction(identifier), "Action was not found in the list");
 
-    const unsigned int hash = ghoul::hashCRC32(identifier);
+    const unsigned int hash = hashCRC32(identifier);
     const auto it = _actions.find(hash);
     global::eventEngine->publishEvent<EventActionRemoved>(identifier);
     _actions.erase(it);
 }
 
 const Action& ActionManager::action(const std::string& identifier) const {
-    ghoul_assert(!identifier.empty(), "Identifier must not be empty");
-    ghoul_assert(hasAction(identifier), "Action was not found in the list");
+    assert_msg(!identifier.empty(), "Identifier must not be empty");
+    assert_msg(hasAction(identifier), "Action was not found in the list");
 
-    const unsigned int hash = ghoul::hashCRC32(identifier);
+    const unsigned int hash = hashCRC32(identifier);
     const auto it = _actions.find(hash);
     return it->second;
 }
@@ -89,11 +89,11 @@ std::vector<Action> ActionManager::actions() const {
 }
 
 void ActionManager::triggerAction(const std::string& identifier,
-                                  const ghoul::Dictionary& arguments,
+                                  const Dictionary& arguments,
                                  ActionManager::ShouldBeSynchronized shouldBeSynchronized,
                                                       ShouldBeLogged shouldBeLogged) const
 {
-    ghoul_assert(!identifier.empty(), "Identifier must not be empty");
+    assert_msg(!identifier.empty(), "Identifier must not be empty");
 
     if (!hasAction(identifier)) {
         LWARNINGC(
@@ -107,20 +107,20 @@ void ActionManager::triggerAction(const std::string& identifier,
     std::string script =
         arguments.isEmpty() ?
         a.command :
-        std::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
+        std::format("args = {}\n{}", formatLua(arguments), a.command);
 
     if (!shouldBeSynchronized || a.isLocal) {
         global::scriptEngine->queueScript({
             .code = std::move(script),
             .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
             .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No,
-            .addToLog = ScriptEngine::Script::ShouldBeLogged(shouldBeLogged)
+            .addToLog = ScriptEngine::ShouldBeLogged(shouldBeLogged)
         });
     }
     else {
         global::scriptEngine->queueScript({
             .code = std::move(script),
-            .addToLog = ScriptEngine::Script::ShouldBeLogged(shouldBeLogged)
+            .addToLog = ScriptEngine::ShouldBeLogged(shouldBeLogged)
         });
     }
 }

@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___DATALOADER___H__
 
 #include <openspace/data/datamapping.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <filesystem>
 #include <optional>
 #include <string>

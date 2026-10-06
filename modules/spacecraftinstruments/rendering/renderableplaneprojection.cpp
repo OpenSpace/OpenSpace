@@ -30,17 +30,17 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <array>
@@ -92,7 +92,7 @@ Documentation RenderablePlaneProjection::Documentation() {
     );
 }
 
-RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dictionary)
+RenderablePlaneProjection::RenderablePlaneProjection(const Dictionary& dictionary)
     : Renderable(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -102,7 +102,7 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
 
     if (p.texture.has_value()) {
         _texturePath = *p.texture;
-        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+        _textureFile = std::make_unique<filesystem::File>(_texturePath);
     }
 }
 
@@ -162,7 +162,7 @@ void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
         glm::mat4(ModelViewProjectionTransform)
     );
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_texture);
     _shader->setUniform("texture1", unit);
 
@@ -213,17 +213,17 @@ void RenderablePlaneProjection::loadTexture() {
         return;
     }
 
-    _texture = ghoul::io::texture::loadTexture(
+    _texture = io::texture::loadTexture(
         _texturePath,
         2,
-        ghoul::opengl::Texture::SamplerInit{
+        opengl::Texture::SamplerInit{
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-            //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+            //.filter = opengl::Texture::FilterMode::AnisotropicMipMap,
+            .filter = opengl::Texture::FilterMode::LinearMipMap
         }
     );
 
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+    _textureFile = std::make_unique<filesystem::File>(_texturePath);
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 }
 

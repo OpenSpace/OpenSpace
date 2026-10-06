@@ -27,13 +27,13 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/glm.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
 #include <array>
 #include <memory>
 
@@ -92,7 +92,7 @@ Documentation RenderableCartesianAxes::Documentation() {
     );
 }
 
-RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictionary)
+RenderableCartesianAxes::RenderableCartesianAxes(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _program(nullptr)
     , _xColor(XColorInfo, glm::vec4(1.f, 0.f, 0.f, 1.f), glm::vec4(0.f), glm::vec4(1.f))
@@ -121,7 +121,7 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
 void RenderableCartesianAxes::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
         "CartesianAxesProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "CartesianAxesProgram",
                 absPath("${MODULE_BASE}/shaders/axes_vs.glsl"),
@@ -165,7 +165,7 @@ void RenderableCartesianAxes::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "CartesianAxesProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

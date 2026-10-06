@@ -41,15 +41,15 @@
 #include <modules/imgui/include/guiscenecomponent.h>
 #include <modules/imgui/include/guishadowcomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <array>
 #include <cstdint>
 #include <memory>
@@ -64,7 +64,7 @@ public:
 
     ImGUIModule();
 
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
+    void internalInitialize(const Dictionary& configuration) override;
     void internalDeinitialize() override;
     void internalInitializeGL() override;
     void internalDeinitializeGL() override;
@@ -127,9 +127,9 @@ private:
     GLuint vbo = 0;
     GLuint vboElements = 0;
     bool _hasContext = false;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<opengl::ProgramObject> _program;
     UniformCache(tex, ortho) _uniformCache;
-    std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
+    std::unique_ptr<opengl::Texture> _fontTexture;
 
     std::vector<ImGuiContext*> _contexts;
 

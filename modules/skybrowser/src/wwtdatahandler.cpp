@@ -25,10 +25,10 @@
 #include <modules/skybrowser/include/wwtdatahandler.h>
 
 #include <modules/skybrowser/include/utility.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/httprequest.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
 #include <tinyxml2.h>
 #include <algorithm>
 #include <cctype>

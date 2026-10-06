@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/glm.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/glm.h>
+#include <openspace/lua/lua_helper.h>
 #include <variant>
 #include <utility>
 
@@ -36,7 +36,7 @@ namespace {
  */
 [[codegen::luawrap]] bool hasAction(std::string identifier) {
     if (identifier.empty()) {
-        throw ghoul::lua::LuaError("Identifier must not be empty");
+        throw lua::LuaError("Identifier must not be empty");
     }
     const bool res = global::actionManager->hasAction(identifier);
     return res;
@@ -47,17 +47,15 @@ namespace {
  * either by the passed name, or if it is a table, the value behind the 'Identifier' key
  * is extract and used instead.
  */
-[[codegen::luawrap]] void removeAction(
-                                      std::variant<std::string, ghoul::Dictionary> action)
-{
+[[codegen::luawrap]] void removeAction(std::variant<std::string, Dictionary> action) {
     std::string identifier;
     if (std::holds_alternative<std::string>(action)) {
         identifier = std::get<std::string>(action);
     }
     else {
-        ghoul::Dictionary d = std::get<ghoul::Dictionary>(action);
+        Dictionary d = std::get<Dictionary>(action);
         if (!d.hasValue<std::string>("Identifier")) {
-            throw ghoul::lua::LuaError(
+            throw lua::LuaError(
                 "Table passed to removeAction does not contain an Identifier"
             );
         }
@@ -65,10 +63,10 @@ namespace {
     }
 
     if (identifier.empty()) {
-        throw ghoul::lua::LuaError("Identifier must not be empty");
+        throw lua::LuaError("Identifier must not be empty");
     }
     if (!global::actionManager->hasAction(identifier)) {
-        throw ghoul::lua::LuaError(
+        throw lua::LuaError(
             std::format("Identifier '{}' for action not found", identifier)
         );
     }
@@ -123,13 +121,13 @@ struct [[codegen::Dictionary(Action)]] Action {
  */
 [[codegen::luawrap]] void registerAction(Action action) {
     if (global::actionManager->hasAction(action.identifier)) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Identifier '{}' for action already registered", action.identifier
         ));
     }
 
     if (action.guiPath.has_value() && !action.guiPath->starts_with('/')) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Tried to register action: '{0}'. The field 'GuiPath' is set to '{1}' but "
             "should be '/{1}'",
             action.identifier, *action.guiPath
@@ -155,18 +153,18 @@ struct [[codegen::Dictionary(Action)]] Action {
 * Returns information about the action as a table with the keys: `Identifier`, `Command`,
 * `Name`, `Documentation`, `GuiPath`, `IsLocal`, and `IsHidden`.
  */
-[[codegen::luawrap]] ghoul::Dictionary action(std::string identifier) {
+[[codegen::luawrap]] Dictionary action(std::string identifier) {
     if (identifier.empty()) {
-        throw ghoul::lua::LuaError("Identifier must not be empty");
+        throw lua::LuaError("Identifier must not be empty");
     }
     if (!global::actionManager->hasAction(identifier)) {
-        throw ghoul::lua::LuaError(
+        throw lua::LuaError(
             std::format("Identifier '{}' for action not found", identifier)
         );
     }
 
     const openspace::Action& action = global::actionManager->action(identifier);
-    ghoul::Dictionary res;
+    Dictionary res;
     res.setValue("Identifier", action.identifier);
     res.setValue("Command", action.command);
     res.setValue("Name", action.name);
@@ -189,11 +187,11 @@ struct [[codegen::Dictionary(Action)]] Action {
 * keys: `Identifier`, `Command`, `Name`, `Documentation`, `GuiPath`,
 * `IsLocal`, and `IsHidden`.
  */
-[[codegen::luawrap]] std::vector<ghoul::Dictionary> actions() {
-    std::vector<ghoul::Dictionary> res;
+[[codegen::luawrap]] std::vector<Dictionary> actions() {
+    std::vector<Dictionary> res;
     const std::vector<openspace::Action>& actions = global::actionManager->actions();
     for (const openspace::Action& a : actions) {
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("Identifier", a.identifier);
         d.setValue("Command", a.command);
         d.setValue("Name", a.name);
@@ -215,14 +213,12 @@ struct [[codegen::Dictionary(Action)]] Action {
 /**
  * Triggers the action given by the specified identifier.
  */
-[[codegen::luawrap]] void triggerAction(std::string id,
-                                        ghoul::Dictionary arg = ghoul::Dictionary())
-{
+[[codegen::luawrap]] void triggerAction(std::string id, Dictionary arg = Dictionary()) {
     if (id.empty()) {
-        throw ghoul::lua::LuaError("Identifier must not be empty");
+        throw lua::LuaError("Identifier must not be empty");
     }
     if (!global::actionManager->hasAction(id)) {
-        throw ghoul::lua::LuaError(std::format("Action '{}' not found", id));
+        throw lua::LuaError(std::format("Action '{}' not found", id));
     }
 
     // No sync because this is already inside a Lua script, therefor it has already been

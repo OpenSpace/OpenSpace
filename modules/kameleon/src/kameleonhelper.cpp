@@ -24,9 +24,8 @@
 
 #include <modules/kameleon/include/kameleonhelper.h>
 
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <string_view>
 
 #ifdef _MSC_VER
@@ -133,7 +132,7 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     double seqStartDbl;
     if (seqStartStr.length() == 24) {
         seqStartDbl = Time::convertTime(seqStartStr);
-        ghoul_assert(
+        assert_msg(
             seqStartDbl != stod(seqStartStr.substr(0,4)),
             "Somehow the time double got = to the year of your input time string"
         );

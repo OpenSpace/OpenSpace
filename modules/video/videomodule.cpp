@@ -31,11 +31,11 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
@@ -43,21 +43,21 @@ VideoModule::VideoModule()
     : OpenSpaceModule(VideoModule::Name)
 {}
 
-void VideoModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<TileProvider>* fTileProvider =
+void VideoModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<TileProvider>* fTileProvider =
         FactoryManager::ref().factory<TileProvider>();
-    ghoul_assert(fTileProvider, "TileProvider factory was not created");
+    assert_msg(fTileProvider, "TileProvider factory was not created");
     fTileProvider->registerClass<VideoTileProvider>("VideoTileProvider");
 
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
+    TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
+    assert_msg(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
     fSsRenderable->registerClass<ScreenSpaceVideo>("ScreenSpaceVideo");
 
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    assert_msg(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderableVideoSphere>("RenderableVideoSphere");
     fRenderable->registerClass<RenderableVideoPlane>("RenderableVideoPlane");
 }

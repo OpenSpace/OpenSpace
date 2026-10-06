@@ -39,7 +39,7 @@ public:
         ToBinary
     };
 
-    explicit ConvertRecFormatTask(const ghoul::Dictionary& dictionary);
+    explicit ConvertRecFormatTask(const Dictionary& dictionary);
     ~ConvertRecFormatTask() override = default;
 
     std::string description() override;

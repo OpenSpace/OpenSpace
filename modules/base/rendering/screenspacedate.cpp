@@ -26,12 +26,12 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {
@@ -78,7 +78,7 @@ Documentation ScreenSpaceDate::Documentation() {
     );
 }
 
-ScreenSpaceDate::ScreenSpaceDate(const ghoul::Dictionary& dictionary)
+ScreenSpaceDate::ScreenSpaceDate(const Dictionary& dictionary)
     : ScreenSpaceRenderableText(dictionary)
     , _formatString(FormatStringInfo, "Date: {}")
     , _timeFormat(TimeFormatInfo, "YYYY MON DD HR:MN:SC.### UTC ::RND")

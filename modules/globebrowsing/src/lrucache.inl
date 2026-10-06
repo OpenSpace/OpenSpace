@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
 
 namespace openspace {
 
@@ -100,7 +100,7 @@ ValueType LRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
 
 template <typename KeyType, typename ValueType, typename HasherType>
 std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popMRU() {
-    ghoul_assert(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty");
+    assert_msg(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty");
 
     auto first_it = _itemList.begin();
     _itemMap.erase(first_it->first);
@@ -111,7 +111,7 @@ std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popMRU()
 
 template <typename KeyType, typename ValueType, typename HasherType>
 std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popLRU() {
-    ghoul_assert(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty");
+    assert_msg(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty");
 
     auto lastIt = _itemList.end();
     lastIt--;

@@ -38,13 +38,10 @@
 struct SPOUTLIBRARY;
 typedef SPOUTLIBRARY* SPOUTHANDLE;
 
-namespace ghoul {
-    namespace opengl { class Texture; }
-    class Dictionary;
-} // namespace ghoul
-
 namespace openspace {
 
+namespace opengl { class Texture; }
+class Dictionary;
 struct Documentation;
 
 // @TODO(abock, 2022-03-02) This class should probably be outsourced into a stand-alone
@@ -100,7 +97,7 @@ private:
     bool _isReceiving = false;
     std::vector<std::string> _receiverList;
 
-    std::unique_ptr<ghoul::opengl::Texture> _spoutTexture;
+    std::unique_ptr<opengl::Texture> _spoutTexture;
 
     std::function<bool(const std::string&)> _onUpdateReceiverNameCallback = nullptr;
     std::function<bool(int, int, unsigned int)> _onUpdateReceiverCallback = nullptr;
@@ -116,8 +113,7 @@ public:
     static const Property::PropertyInfo& SelectionInfoProperty();
     static const Property::PropertyInfo& UpdateInfoProperty();
 
-    SpoutReceiverPropertyProxy(PropertyOwner& owner,
-        const ghoul::Dictionary& dictionary);
+    SpoutReceiverPropertyProxy(PropertyOwner& owner, const Dictionary& dictionary);
     virtual ~SpoutReceiverPropertyProxy();
 
     bool updateReceiver() override;
@@ -174,8 +170,7 @@ class SpoutSenderPropertyProxy : public SpoutSender {
 public:
     static const Property::PropertyInfo& NameInfoProperty();
 
-    SpoutSenderPropertyProxy(PropertyOwner& owner,
-        const ghoul::Dictionary& dictionary);
+    SpoutSenderPropertyProxy(PropertyOwner& owner, const Dictionary& dictionary);
     virtual ~SpoutSenderPropertyProxy();
 
     bool updateSender(unsigned int texture, unsigned int textureType) override;

@@ -38,7 +38,7 @@ class SceneGraphNode;
 
 class FixedRotation : public Rotation {
 public:
-    explicit FixedRotation(const ghoul::Dictionary& dictionary);
+    explicit FixedRotation(const Dictionary& dictionary);
 
     void initialize() override;
 
@@ -79,7 +79,7 @@ private:
     StringProperty _attachedObject;
     SceneGraphNode* _attachedNode = nullptr;
 
-    ghoul::Dictionary _constructorDictionary;
+    Dictionary _constructorDictionary;
 };
 
 } // namespace openspace

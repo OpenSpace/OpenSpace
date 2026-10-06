@@ -25,8 +25,8 @@
 #include <openspace/rendering/colormappingcomponent.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <algorithm>
 #include <cmath>
 #include <string_view>
@@ -292,7 +292,7 @@ ColorMappingComponent::ColorMappingComponent()
     addProperty(belowRangeColor);
 }
 
-ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary)
+ColorMappingComponent::ColorMappingComponent(const Dictionary& dictionary)
     : ColorMappingComponent()
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -346,7 +346,7 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
     invert = p.invert.value_or(invert);
 }
 
-ghoul::opengl::Texture* ColorMappingComponent::texture() const {
+opengl::Texture* ColorMappingComponent::texture() const {
     return _texture.get();
 }
 
@@ -400,17 +400,17 @@ void ColorMappingComponent::initializeTexture() {
     }
 
     // TODO: update this for linear mapping?
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _texture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             // @TODO (2026-02-18, abock): This was 1D before. Is this correct?
             .type = GL_TEXTURE_1D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {
-            .filter = ghoul::opengl::Texture::FilterMode::Nearest,
-            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        opengl::Texture::SamplerInit {
+            .filter = opengl::Texture::FilterMode::Nearest,
+            .wrapping = opengl::Texture::WrappingMode::ClampToEdge
         },
         img.data()
     );

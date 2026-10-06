@@ -28,21 +28,20 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/data/dataloader.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/texture.h>
 #include <memory>
 #include <optional>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 /**
@@ -58,10 +57,10 @@ struct Documentation;
 class ColorMappingComponent : public PropertyOwner {
 public:
     ColorMappingComponent();
-    explicit ColorMappingComponent(const ghoul::Dictionary& dictionary);
+    explicit ColorMappingComponent(const Dictionary& dictionary);
     ~ColorMappingComponent() override = default;
 
-    ghoul::opengl::Texture* texture() const;
+    opengl::Texture* texture() const;
 
     /**
      * Initialize the color map information (ranges, etc.) based on the input dataset.
@@ -109,7 +108,7 @@ private:
     /// One item per color parameter option
     std::vector<glm::vec2> _colorRangeData;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<opengl::Texture> _texture;
 
     dataloader::ColorMap _colorMap;
 

@@ -25,9 +25,9 @@
 #include <modules/spacecraftinstruments/util/instrumentdecoder.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <optional>
 
 namespace {
@@ -43,9 +43,9 @@ namespace {
 
 namespace openspace {
 
-InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
+InstrumentDecoder::InstrumentDecoder(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _type = ghoul::toUpperCase(p.detectorType);
+    _type = toUpperCase(p.detectorType);
 
     if (p.stopCommand.has_value() && _type == "SCANNER") {
         _stopCommand = *p.stopCommand;

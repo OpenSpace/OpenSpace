@@ -28,6 +28,8 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/data/dataloader.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/propertyowner.h>
@@ -36,17 +38,15 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
-
-namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 
+namespace filesystem { class File; }
+
 class RenderableStars : public Renderable {
 public:
-    explicit RenderableStars(const ghoul::Dictionary& dictionary);
+    explicit RenderableStars(const Dictionary& dictionary);
     ~RenderableStars() override = default;
 
     void initializeGL() override;
@@ -73,8 +73,8 @@ private:
     StringProperty _speckFile;
 
     StringProperty _colorTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
-    std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
+    std::unique_ptr<opengl::Texture> _colorTexture;
+    std::unique_ptr<filesystem::File> _colorTextureFile;
 
     struct {
         PropertyOwner container;
@@ -92,7 +92,7 @@ private:
     OptionProperty _otherDataOption;
     StringProperty _otherDataColorMapPath;
     Vec2Property _otherDataRange;
-    std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
+    std::unique_ptr<opengl::Texture> _otherDataColorMapTexture;
     Vec3Property _fixedColor;
     BoolProperty _filterOutOfRange;
 
@@ -104,8 +104,8 @@ private:
         FloatProperty gamma;
         FloatProperty scale;
 
-        std::unique_ptr<ghoul::opengl::Texture> texture;
-        std::unique_ptr<ghoul::filesystem::File> file;
+        std::unique_ptr<opengl::Texture> texture;
+        std::unique_ptr<filesystem::File> file;
     };
 
     TextureComponent _core;
@@ -127,7 +127,8 @@ private:
     BoolProperty _shouldHideOnCloseup;
     DoubleProperty _hideOnCloseupDistance;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<opengl::ProgramObject> _program;
+
     UniformCache(
         modelMatrix, cameraViewProjectionMatrix, cameraUp, eyePosition, colorOption,
         useProperMotion, diffTime, magnitudeExponent, sizeComposition, lumCent,

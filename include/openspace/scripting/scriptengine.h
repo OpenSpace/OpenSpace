@@ -27,9 +27,9 @@
 
 #include <openspace/util/syncable.h>
 
+#include <openspace/lua/luastate.h>
+#include <openspace/misc/boolean.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/misc/boolean.h>
 #include <filesystem>
 #include <functional>
 #include <mutex>
@@ -38,11 +38,11 @@
 #include <string_view>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
 struct lua_State;
 
 namespace openspace {
 
+class Dictionary;
 class SyncBuffer;
 
 /**
@@ -55,11 +55,12 @@ class SyncBuffer;
  */
 class ScriptEngine : public Syncable {
 public:
+    BooleanType(ShouldBeLogged);
+
     struct Script {
         BooleanType(ShouldBeSynchronized);
         BooleanType(ShouldSendToRemote);
-        BooleanType(ShouldBeLogged);
-        using Callback = std::function<void(ghoul::Dictionary)>;
+        using Callback = std::function<void(Dictionary)>;
 
         /// The Lua script that should be executed
         std::string code;
@@ -103,7 +104,7 @@ public:
     void deinitialize();
 
     void initializeLuaState(lua_State* state);
-    ghoul::lua::LuaState* luaState();
+    lua::LuaState* luaState();
 
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
@@ -114,7 +115,8 @@ public:
     void postSync(bool isMaster) override;
 
     void queueScript(Script script);
-    void queueScript(std::string script);
+    void queueScript(std::string script,
+        ShouldBeLogged shouldBeLogged = ShouldBeLogged::Yes);
 
     /**
      * This function should only be used by external classes if you are sure that the
@@ -127,7 +129,8 @@ public:
      * Runs the `script` every `timeout` seconds wallclock time.
      */
     void registerRepeatedScript(std::string identifier, std::string script,
-        double timeout, std::string preScript = "", std::string postScript = "");
+        double timeout, std::string preScript = "", std::string postScript = "",
+        ShouldBeLogged shouldBeLogged = ShouldBeLogged::Yes);
     void removeRepeatedScript(std::string_view identifier);
 
     void scheduleScript(std::string script, double delay);
@@ -150,7 +153,7 @@ private:
     void addBaseLibrary();
 
 
-    ghoul::lua::LuaState _state;
+    lua::LuaState _state;
     /// The library that has functions that are not placed in the `openspace.` namespace
     LuaLibrary _rootLibrary;
     std::vector<LuaLibrary> _registeredLibraries;
@@ -175,6 +178,8 @@ private:
         std::string identifier;
         double timeout = 0.0;
         double lastRun = 0.0;
+
+        ShouldBeLogged shouldBeLogged = ShouldBeLogged::Yes;
     };
     std::vector<RepeatedScriptInfo> _repeatedScripts;
 

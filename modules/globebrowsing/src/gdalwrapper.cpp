@@ -26,12 +26,12 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringhelper.h>
 #include <cpl_conv.h>
 #include <cpl_error.h>
 #include <gdal.h>
@@ -87,7 +87,7 @@ void GdalWrapper::destroy() {
 }
 
 GdalWrapper& GdalWrapper::ref() {
-    ghoul_assert(_singleton, "GdalWrapper not created");
+    assert_msg(_singleton, "GdalWrapper not created");
     return *_singleton;
 }
 
@@ -139,7 +139,7 @@ void GdalWrapper::setGdalProxyConfiguration() {
         const std::string user = global::configuration->httpProxy.user;
         const std::string password = global::configuration->httpProxy.password;
         std::string auth = global::configuration->httpProxy.authentication;
-        auth = ghoul::toUpperCase(auth);
+        auth = toUpperCase(auth);
 
         const std::string proxy = address + ":" + std::to_string(port);
         CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());

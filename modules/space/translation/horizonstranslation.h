@@ -27,9 +27,9 @@
 
 #include <openspace/scene/translation.h>
 
+#include <openspace/lua/luastate.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/util/timeline.h>
-#include <ghoul/lua/luastate.h>
 #include <array>
 #include <filesystem>
 
@@ -67,7 +67,7 @@ class HorizonsFile;
  */
 class HorizonsTranslation : public Translation {
 public:
-    explicit HorizonsTranslation(const ghoul::Dictionary& dictionary);
+    explicit HorizonsTranslation(const Dictionary& dictionary);
 
     glm::dvec3 position(const UpdateData& data) const override;
 
@@ -85,7 +85,7 @@ private:
     void saveCachedFile(const std::filesystem::path& file) const;
 
     StringListProperty _horizonsFiles;
-    ghoul::lua::LuaState _state;
+    lua::LuaState _state;
     Timeline<glm::dvec3> _timeline;
 };
 

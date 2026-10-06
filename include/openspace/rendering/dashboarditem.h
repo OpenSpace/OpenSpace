@@ -27,23 +27,22 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <ghoul/glm.h>
 #include <memory>
-
-namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 class DashboardItem : public PropertyOwner {
 public:
     static std::unique_ptr<DashboardItem> createFromDictionary(
-        const ghoul::Dictionary& dictionary
+        const Dictionary& dictionary
     );
 
-    explicit DashboardItem(const ghoul::Dictionary& dictionary);
+    explicit DashboardItem(const Dictionary& dictionary);
 
     bool isEnabled() const;
     virtual void update() = 0;
