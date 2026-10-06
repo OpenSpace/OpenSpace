@@ -782,7 +782,10 @@ namespace {
         std::string parameters;
         for (const LuaLibrary::Function::Argument& arg : f.arguments) {
             const LuaLsType t = toLuaLsType(arg.type);
-            const std::string name = luaLsParameterName(arg.name);
+            const std::string name =
+                arg.name.empty() && arg.type == "*" ?
+                "..." :
+                luaLsParameterName(arg.name);
             const bool optional = t.isOptional || arg.defaultValue.has_value();
             res += std::format("---@param {}{} {}\n", name, optional ? "?" : "", t.type);
             if (!parameters.empty()) {
@@ -1405,9 +1408,17 @@ void DocumentationEngine::writeJsonDocumentation() const {
 
     // Definition files for the Lua Language Server, used for editor support in assets
     const std::filesystem::path luaDirectory = absPath("${DOCUMENTATION}/lua");
+
+    if (std::filesystem::exists(luaDirectory)) {
+        // Remove all of the already existing files
+        std::filesystem::remove_all(luaDirectory);
+    }
+
+    // Then recreate the folder
     std::error_code ec;
     std::filesystem::create_directories(luaDirectory, ec);
 
+    // And fill it
     std::ofstream outLuaDefinitions(luaDirectory / "openspace.d.lua");
     if (outLuaDefinitions.good()) {
         outLuaDefinitions << generateLuaDefinitions();

@@ -12,6 +12,7 @@ local speck = asset.resource({
   Version = 3
 })
 
+
 local renderable = Renderable.RenderablePointCloud()
 renderable.Enabled = false
 renderable.Opacity = 1.0
