@@ -543,8 +543,11 @@ namespace {
             size_t doc = None;
         };
         struct Factory {
+            std::string registeredName;
             std::string alias;
             std::string base;
+            // The class of the global table that contains the constructor functions
+            std::string constructors;
             size_t baseDoc = None;
             std::vector<Class> classes;
         };
@@ -563,8 +566,10 @@ namespace {
                 continue;
             }
             Factory f = {
+                .registeredName = info.name,
                 .alias = uniqueName(luaLsClassName(info.name)),
                 .base = uniqueName(f.alias + "Base"),
+                .constructors = uniqueName(f.alias + "Constructors"),
                 .baseDoc = findDoc(info.name)
             };
             registerId(f.baseDoc, f.alias);
@@ -613,21 +618,42 @@ namespace {
             }
 
             std::string alias;
+            std::string constructors;
             for (const Class& c : f.classes) {
+                const std::string_view description =
+                    c.doc != None ? std::string_view(docs[c.doc].description) : "";
                 writer.writeClass(
                     out,
                     c.luaName,
                     f.base,
-                    c.doc != None ? docs[c.doc].description : "",
+                    description,
                     c.doc != None ? docs[c.doc].entries : noEntries,
                     std::format("\"{}\"", c.registeredName)
                 );
                 alias += std::format("{}{}", alias.empty() ? "" : "|", c.luaName);
+
+                // Has to match the functions created in ScriptEngine::initializeLuaState
+                if (isLuaIdentifier(f.registeredName) &&
+                    isLuaIdentifier(c.registeredName))
+                {
+                    constructors += luaLsComment(description);
+                    constructors += std::format(
+                        "---@return {}\nfunction {}.{}() end\n\n",
+                        c.luaName, f.registeredName, c.registeredName
+                    );
+                }
             }
             out += std::format(
                 "---@alias {} {}\n",
                 f.alias, alias.empty() ? f.base : alias
             );
+
+            if (isLuaIdentifier(f.registeredName)) {
+                out += std::format(
+                    "\n---@class {}\n{} = {{}}\n\n{}",
+                    f.constructors, f.registeredName, constructors
+                );
+            }
             files[f.alias] = std::move(out);
         }
 
@@ -641,6 +667,11 @@ namespace {
                 docs[o.second].entries,
                 std::nullopt
             );
+
+            // Has to match the function created in ScriptEngine::initializeLuaState
+            if (o.first == "SceneGraphNode") {
+                out += "---@return SceneGraphNode\nfunction SceneGraphNode() end\n\n";
+            }
         }
         files["Other"] = std::move(out);
 
