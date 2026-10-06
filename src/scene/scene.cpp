@@ -1059,8 +1059,8 @@ provided new value, then back to the original value, until manually stopped.
                 }
             },
             {
-                "propertySetEnabled",
-                &luascriptfunctions::propertySetEnabled<false>,
+                "setPropertyEnabled",
+                &luascriptfunctions::setPropertyEnabled<false>,
                 {
                     { "uri", "String" },
                     { "value", "Boolean" }
@@ -1083,8 +1083,8 @@ provided new value, then back to the original value, until manually stopped.
                 }
             },
             {
-                "propertySetEnabledSingle",
-                &luascriptfunctions::propertySetEnabled<true>,
+                "setPropertyEnabledSingle",
+                &luascriptfunctions::setPropertyEnabled<true>,
                 {
                     { "uri", "String" },
                     { "value", "Boolean" }

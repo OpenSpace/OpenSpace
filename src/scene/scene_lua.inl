@@ -698,10 +698,10 @@ int propertySetValue(lua_State* L) {
 }
 
 template <bool hasSingleUri>
-int propertySetEnabled(lua_State* L) {
+int setPropertyEnabled(lua_State* L) {
     ZoneScoped;
 
-    lua::checkArgumentsAndThrow(L, 2, "lua::propertySetEnabled");
+    lua::checkArgumentsAndThrow(L, 2, "lua::setPropertyEnabled");
 
     auto [uriOrRegex, isEnabled] = lua::values<std::string, bool>(L);
 
@@ -709,7 +709,7 @@ int propertySetEnabled(lua_State* L) {
         Property* prop = property(uriOrRegex);
         if (!prop) {
             LERRORC(
-                "propertySetEnabled",
+                "setPropertyEnabled",
                 std::format(
                     "{}: Property with URI '{}' was not found",
                     lua::errorLocation(L), uriOrRegex
@@ -720,7 +720,7 @@ int propertySetEnabled(lua_State* L) {
 
         if (!prop->isEnablable()) {
             LERRORC(
-                "propertySetEnabled",
+                "setPropertyEnabled",
                 std::format(
                     "{}: Property with URI '{}' is not enablable",
                     lua::errorLocation(L), uriOrRegex
@@ -755,7 +755,7 @@ int propertySetEnabled(lua_State* L) {
 
         if (matchingProps.empty()) [[unlikely]] {
             LERRORC(
-                "property_setValueEnabled",
+                "property_setPropertyEnabled",
                 std::format(
                     "{}: No property matched the requested URI '{}'",
                     lua::errorLocation(L), uriOrRegex
