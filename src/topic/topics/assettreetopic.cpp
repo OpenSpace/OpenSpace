@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/assetmanager.h>
 
 namespace {
@@ -45,7 +46,7 @@ namespace openspace {
 
 AssetTreeTopic::~AssetTreeTopic() {
     if (_subscriptionId.has_value()) {
-        global::assetManager->unsubscribeAssetTree(*_subscriptionId);
+        global::openSpaceEngine->assetManager().unsubscribeAssetTree(*_subscriptionId);
     }
 }
 
@@ -53,7 +54,7 @@ void AssetTreeTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
 
     if (event == "start_subscription") {
-        _subscriptionId = global::assetManager->subscribeAssetTree(
+        _subscriptionId = global::openSpaceEngine->assetManager().subscribeAssetTree(
             [this](const AssetManager::AssetTreeChange& change) {
                 handleChange(change);
             }
@@ -61,11 +62,11 @@ void AssetTreeTopic::handleJson(const nlohmann::json& json) {
         sendFullSnapshot();
     }
     else if (event == "stop_subscription" && _subscriptionId.has_value()) {
-        global::assetManager->unsubscribeAssetTree(*_subscriptionId);
+        global::openSpaceEngine->assetManager().unsubscribeAssetTree(*_subscriptionId);
         _subscriptionId.reset();
     }
     else if (event == "scan_assets" && _subscriptionId.has_value()) {
-        global::assetManager->rescanAssetPaths();
+        global::openSpaceEngine->assetManager().rescanAssetPaths();
     }
 }
 
@@ -168,7 +169,7 @@ void AssetTreeTopic::sendPathList(std::string_view category,
 }
 
 void AssetTreeTopic::sendFullSnapshot() {
-    AssetManager& m = *global::assetManager;
+    AssetManager& m = global::openSpaceEngine->assetManager();
 
     sendPathList("shipped", m.shippedAssetPaths());
     sendPathList("user", m.userAssetPaths());
@@ -188,7 +189,7 @@ void AssetTreeTopic::sendFullSnapshot() {
 
 void AssetTreeTopic::handleChange(const AssetManager::AssetTreeChange& change) {
     using MessageType = AssetManager::AssetTreeChange::MessageType;
-    AssetManager& m = *global::assetManager;
+    AssetManager& m = global::openSpaceEngine->assetManager();
 
     switch (change.type) {
         case MessageType::Shipped:

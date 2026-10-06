@@ -50,6 +50,7 @@
 
 namespace openspace {
 
+class AssetManager;
 class LoadingScreen;
 struct LuaLibrary;
 class Scene;
@@ -132,6 +133,7 @@ public:
     CallbackHandle addModeChangeCallback(ModeChangeCallback cb);
     void removeModeChangeCallback(CallbackHandle handle);
 
+    AssetManager& assetManager();
     // Guaranteed to return a valid pointer
     LoadingScreen* loadingScreen();
 
@@ -164,6 +166,7 @@ private:
     BoolProperty _disableAllMouseInputs;
 
     std::unique_ptr<Scene> _scene;
+    std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<LoadingScreen> _loadingScreen;
     std::unique_ptr<VersionChecker> _versionChecker;
 

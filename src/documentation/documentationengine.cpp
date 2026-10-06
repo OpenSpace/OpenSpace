@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/action.h>
@@ -356,7 +357,8 @@ nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
     }
 
     // Go through all assets and group them in a map with the key as the license name
-    std::vector<const Asset*> assets = global::assetManager->allAssets();
+    std::vector<const Asset*> assets =
+        global::openSpaceEngine->assetManager().allAssets();
 
     std::map<std::string, nlohmann::json> assetLicenses;
     for (const Asset* asset : assets) {
@@ -418,7 +420,8 @@ nlohmann::json DocumentationEngine::generateLicenseListJson() const {
         json.push_back(profile);
     }
 
-    std::vector<const Asset*> assets = global::assetManager->allAssets();
+    std::vector<const Asset*> assets =
+        global::openSpaceEngine->assetManager().allAssets();
 
     for (const Asset* asset : assets) {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();

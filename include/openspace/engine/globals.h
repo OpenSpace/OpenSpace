@@ -33,7 +33,6 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 class ActionManager;
-class AssetManager;
 class Astrocast;
 struct Configuration;
 class Dashboard;
@@ -79,7 +78,6 @@ inline MissionManager* missionManager;
 inline ModuleEngine* moduleEngine;
 inline OpenSpaceEngine* openSpaceEngine;
 inline Astrocast* astrocast;
-inline AssetManager* assetManager;
 inline RaycasterManager* raycasterManager;
 inline RenderEngine* renderEngine;
 inline std::vector<std::unique_ptr<ScreenSpaceRenderable>>* screenSpaceRenderables;

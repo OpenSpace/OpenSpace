@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <string>
 
 using namespace openspace;
@@ -34,7 +35,7 @@ namespace {
  * to the file that should be loaded.
  */
 [[codegen::luawrap]] void add(std::string assetName) {
-    global::assetManager->add(assetName);
+    global::openSpaceEngine->assetManager().add(assetName);
 }
 
 /**
@@ -43,7 +44,7 @@ namespace {
  * file.
  */
 [[codegen::luawrap]] void remove(std::string assetName) {
-    global::assetManager->remove(assetName);
+    global::openSpaceEngine->assetManager().remove(assetName);
 }
 
 /**
@@ -52,17 +53,17 @@ namespace {
  * only be loaded instead.
  */
 [[codegen::luawrap]] void reload(std::string assetName) {
-    global::assetManager->reload(assetName);
+    global::openSpaceEngine->assetManager().reload(assetName);
 }
 
 /**
  * Removes all assets that are currently loaded.
  */
 [[codegen::luawrap]] void removeAll() {
-    std::vector<const Asset*> as = global::assetManager->rootAssets();
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().rootAssets();
     std::reverse(as.begin(), as.end());
     for (const Asset* asset : as) {
-        global::assetManager->remove(asset->path().string());
+        global::openSpaceEngine->assetManager().remove(asset->path().string());
     }
 }
 
@@ -72,7 +73,7 @@ namespace {
  * tested.
  */
 [[codegen::luawrap]] bool isLoaded(std::string assetName) {
-    std::vector<const Asset*> as = global::assetManager->allAssets();
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
     for (const Asset* a : as) {
         if (a->path() == assetName) {
             return true;
@@ -86,7 +87,7 @@ namespace {
  * containing the paths to all loaded assets.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> allAssets() {
-    std::vector<const Asset*> as = global::assetManager->allAssets();
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
     std::vector<std::filesystem::path> res;
     res.reserve(as.size());
     for (const Asset* a : as) {
@@ -100,7 +101,7 @@ namespace {
  * either through a profile or by calling the `openspace.asset.add` method.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> rootAssets() {
-    return global::assetManager->rootAssetPaths();
+    return global::openSpaceEngine->assetManager().rootAssetPaths();
 }
 
 /**
@@ -108,7 +109,7 @@ namespace {
  * 'asset.require()'.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> parents(std::string assetName) {
-    std::vector<const Asset*> as = global::assetManager->allAssets();
+    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
     for (const Asset* a : as) {
         if (a->path() == assetName) {
             return a->initializedParents();
