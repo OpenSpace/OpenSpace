@@ -30,11 +30,34 @@
 #include <QStandardItemModel>
 #include <vector>
 
+namespace {
+    // Determines if a file, with or without file extension, exists for the given path
+    std::optional<std::filesystem::path> validatePath(std::filesystem::path p,
+                                                      const std::string& desiredExtension)
+    {
+        if (std::filesystem::is_directory(p)) {
+            return std::nullopt;
+        }
+
+        // We check the value of the extension here explcitly as the file name might have
+        // an extra `.` in the name
+        if (!p.has_extension() || p.extension() != desiredExtension) {
+            p = p.string() + desiredExtension;
+        }
+
+
+        return std::filesystem::is_regular_file(p) ?
+            std::optional<std::filesystem::path>(p) :
+            std::nullopt;
+    }
+} // namespace
+
 SplitComboBox::SplitComboBox(QWidget* parent, std::filesystem::path userPath,
                              std::string userHeader, std::filesystem::path hardcodedPath,
                              std::string hardcodedHeader, std::string specialFirst,
                              std::function<bool(const std::filesystem::path&)> fileFilter,
-                   std::function<std::string(const std::filesystem::path&)> createTooltip)
+                   std::function<std::string(const std::filesystem::path&)> createTooltip,
+                                                                    std::string extension)
     : QComboBox(parent)
     , _userPath(std::move(userPath))
     , _userHeader(std::move(userHeader))
@@ -43,6 +66,7 @@ SplitComboBox::SplitComboBox(QWidget* parent, std::filesystem::path userPath,
     , _specialFirst(std::move(specialFirst))
     , _fileFilter(std::move(fileFilter))
     , _createTooltip(std::move(createTooltip))
+    , _extension(std::move(extension))
 {
     setCursor(Qt::PointingHandCursor);
 
@@ -247,7 +271,7 @@ std::optional<std::filesystem::path> SplitComboBox::unrollPath(
         if (beginning == 0 && ending != std::string::npos) {
             const std::string sub = pathString.substr(beginning, ending + 1);
             if (FileSys.hasRegisteredToken(sub)) {
-                const auto file = validatePath(absPath(pathString));
+                const auto file = validatePath(absPath(pathString), _extension);
                 if (file.has_value()) {
                     return *file;
                 }
@@ -258,9 +282,9 @@ std::optional<std::filesystem::path> SplitComboBox::unrollPath(
         }
         else {
             const std::optional<std::filesystem::path> uFilePath =
-                validatePath(absPath(_userPath / inPath));
+                validatePath(absPath(_userPath / inPath), _extension);
             const std::optional<std::filesystem::path> hcFilePath =
-                validatePath(absPath(_hardCodedPath / inPath));
+                validatePath(absPath(_hardCodedPath / inPath), _extension);
 
             if (uFilePath.has_value()) {
                 return *uFilePath;
@@ -272,40 +296,13 @@ std::optional<std::filesystem::path> SplitComboBox::unrollPath(
         }
     }
     else {
-        const std::optional<std::filesystem::path> file = validatePath(inPath);
+        std::optional<std::filesystem::path> file = validatePath(inPath, _extension);
         if (file.has_value()) {
             return *file;
         }
     }
 
     // We could not confirm that file exists
-    return std::nullopt;
-}
-
-std::optional<std::filesystem::path> SplitComboBox::validatePath(
-                                                           const std::filesystem::path& p)
-{
-    if (std::filesystem::is_directory(p)) {
-        return std::nullopt;
-    }
-
-    if (p.has_extension()) {
-        return std::filesystem::is_regular_file(p) ?
-            std::optional<std::filesystem::path>(p) :
-            std::nullopt;
-    }
-
-    // Handle file check for paths without file extension
-    const std::string name = p.stem().string();
-    if (std::filesystem::exists(p.parent_path())) {
-        for (const auto& f : std::filesystem::directory_iterator(p.parent_path())) {
-            if (f.is_regular_file() && f.path().stem() == name) {
-                return f;
-            }
-        }
-    }
-
-    // Didn't find anything
     return std::nullopt;
 }
 
