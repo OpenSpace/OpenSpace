@@ -679,33 +679,49 @@ namespace {
     }
 
     std::string luaLsBaseType(std::string_view type) {
+        // First deal with the individual types
         if (type.ends_with("[]")) {
             type.remove_suffix(2);
             return luaLsBaseType(trimView(type)) + "[]";
         }
-        if (type == "String" || type == "Path") {
-            return "string";
-        }
-        if (type == "Number") {
-            return "number";
-        }
-        if (type == "Integer") {
-            return "integer";
-        }
-        if (type == "Boolean") {
-            return "boolean";
-        }
-        if (type == "Table") {
-            return "table";
-        }
-        if (type == "Function") {
-            return "function";
-        }
-        if (type == "vec2" || type == "vec3" || type == "vec4" ||
-            type == "dvec2" || type == "dvec3" || type == "dvec4")
+        else if (type == "String" || type == "Path") {  return "string"; }
+        else if (type == "Number") { return "number"; }
+        else if (type == "Integer") { return "integer"; }
+        else if (type == "Boolean") { return "boolean"; }
+        else if (type == "Table") { return "table"; }
+        else if (type == "Function") { return "function"; }
+        else if (type == "Nil") { return "nil"; }
+        else if (type == "vec2" || type == "vec3" || type == "vec4" ||
+            type == "dvec2" || type == "dvec3" || type == "dvec4" ||
+            type == "ivec2" || type == "ivec3" || type == "ivec4" ||
+            type == "mat2x2" || type == "mat3x3" || type == "mat4x4" ||
+            type == "dmat2x2" || type == "dmat3x3" || type == "dmat4x4")
         {
             return "number[]";
         }
+
+        // If we got here there is a chance we are dealing with a multiple return value
+        if (type.starts_with('(') && type.ends_with(')')) {
+            // We have a (Number, Number, Numer
+            type.remove_prefix(1);
+            type.remove_suffix(1);
+
+            std::vector<std::string_view> parts = tokenizeString(type, ',');
+            std::string result = std::accumulate(
+                parts.begin(),
+                parts.end(),
+                std::string(),
+                [](std::string lhs, std::string_view rhs) {
+                    return std::format(
+                        "{} {}", std::move(lhs), luaLsBaseType(trimView(rhs))
+                    );
+                }
+            );
+
+            // We accidentally add a leading space with the accumulate call
+            return result.substr(1);
+        }
+
 
         // Named types have no LuaLS counterpart
         return "any";
@@ -1392,13 +1408,13 @@ void DocumentationEngine::writeJsonDocumentation() const {
     std::error_code ec;
     std::filesystem::create_directories(luaDirectory, ec);
 
-    std::ofstream outLuaDefinitions(luaDirectory / "openspace.lua");
+    std::ofstream outLuaDefinitions(luaDirectory / "openspace.d.lua");
     if (outLuaDefinitions.good()) {
         outLuaDefinitions << generateLuaDefinitions();
     }
 
     for (const std::pair<const std::string, std::string>& f : generateLuaTypes()) {
-        std::ofstream outLuaTypes(luaDirectory / std::format("{}.lua", f.first));
+        std::ofstream outLuaTypes(luaDirectory / std::format("{}.d.lua", f.first));
         if (outLuaTypes.good()) {
             outLuaTypes << f.second;
         }
