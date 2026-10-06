@@ -1060,13 +1060,41 @@ provided new value, then back to the original value, until manually stopped.
             },
             {
                 "propertySetEnabled",
-                &luascriptfunctions::propertySetEnabled,
+                &luascriptfunctions::propertySetEnabled<false>,
                 {
                     { "uri", "String" },
                     { "value", "Boolean" }
                 },
                 "",
-                "Sets the enabled setting for the property with the provided uri",
+                "Sets the enabled setting for the property with the provided URI. The "
+                "`uri` identifies which property or properties are affected by this "
+                "function call and can include both wildcards `*` which match anything, "
+                "as well as tags(`{tag }`) which match scene graph nodes that have this "
+                "tag. There is also the ability to combine two tags through the `&`, "
+                "`|`, and `~` operators. `{tag1& tag2}` will match anything that has the "
+                "tag1 and the tag2. `{tag1 | tag2}` will match anything that has the "
+                "tag1 or the tag 2, and `{tag1~tag2}` will match anything that has tag1 "
+                "but not tag2.If no wildcards or tags are provided at most one property "
+                "value will be changed.With wildcards or tags all properties that match "
+                "the URI are changed instead.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
+            {
+                "propertySetEnabledSingle",
+                &luascriptfunctions::propertySetEnabled<true>,
+                {
+                    { "uri", "String" },
+                    { "value", "Boolean" }
+                },
+                "",
+                "Sets the enabled setting for the property with the provided URI. If "
+                "you want to change multiple property values simultaneously, also see "
+                "the #propertySetEnabled function.The `propertySetEnabledSingle` "
+                "function however will work more efficiently for individual property "
+                "values.",
                 {
                     std::source_location::current().file_name(),
                     std::source_location::current().line()
