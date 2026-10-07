@@ -207,6 +207,8 @@ private:
     bool _holdingCtrl = false;
 
     std::optional<std::string> _currentlyTargettedSystem = std::nullopt;
+
+    bool _isInitialized = false;
 };
 
 } // namespace openspace::exoplanets

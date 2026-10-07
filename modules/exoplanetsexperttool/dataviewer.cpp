@@ -163,7 +163,7 @@ void DataViewer::initializeData() {
 
     // Load things related to the dataset. We need to do this on initialize rather than
     // construction since we need the module to exist first (to access its settings)
-    initializeData(DataLoader::loadDataSettingsFromJson());
+    _isInitialized = initializeData(DataLoader::loadDataSettingsFromJson());
 }
 
 bool DataViewer::loadCsvFile(std::filesystem::path path) {
@@ -249,6 +249,7 @@ bool DataViewer::initializeData(DataSettings settings) {
     _colormapWasChanged = true;
     _filterChanged = true;
     _selectionChanged = true;
+
     return true;
 }
 
@@ -605,6 +606,42 @@ void DataViewer::render() {
         renderStartupInfo();
         return;
     }
+
+    // Don't render if the different views aren't initialized (which happens if
+    // data loading fails)
+    static bool noDatasetPopupOpened = false;
+    if (!_isInitialized) {
+        if (!noDatasetPopupOpened) {
+            ImGui::OpenPopup("No dataset loaded");
+            noDatasetPopupOpened = true;
+        }
+
+        ImGui::SetNextWindowSize(ImVec2(350.f, 0.f), ImGuiCond_Always);
+        if (ImGui::BeginPopupModal(
+            "No dataset loaded",
+            nullptr,
+            ImGuiWindowFlags_AlwaysAutoResize
+        )) {
+            ImGui::TextWrapped(
+                "No dataset was loaded, so the ExoplanetExplorer could not start."
+            );
+            ImGui::Spacing();
+            ImGui::TextWrapped(
+                "Run the datapreparation.py script to prepare the dataset, then start "
+                "the application."
+            );
+            ImGui::Spacing();
+
+
+            if (ImGui::Button("Close")) {
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+        return;
+    }
+    noDatasetPopupOpened = false;
 
     // Tooltip for hovered planets. Only do the (potentially expensive, since it may
     // trigger GPU picking) hover computation when the mouse is not currently captured
