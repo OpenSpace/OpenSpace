@@ -618,18 +618,20 @@ void destroy() {
     delete eventEngine;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'OpenSpaceEngine'");
-#ifdef WIN32
-    openSpaceEngine->~OpenSpaceEngine();
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    delete openSpaceEngine;
-#endif // WIN32
-
+    // We need to destroy the Server before the OpenSpace engine since there may be Topics
+    // that references the engine and or assetManager for example
     LDEBUGC("Globals", "Destroying 'Server'");
 #ifdef WIN32
     server->~Server();
 #else // ^^^^ WIN32 / !WIN32 vvvv
     delete server;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'OpenSpaceEngine'");
+#ifdef WIN32
+    openSpaceEngine->~OpenSpaceEngine();
+#else // ^^^^ WIN32 / !WIN32 vvvv
+    delete openSpaceEngine;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'SyncEngine'");
