@@ -51,7 +51,8 @@ protected:
     std::string _buffer;
 
     // A local buffer with a fixed size that can be used to format the text before it is
-    // copied into the _buffer. Doing this reduces the number of allocations during frames
+    // copied into the _buffer. Doing this reduces the number of memory allocations during
+    // frames
     std::vector<char> _localBuffer;
 };
 
