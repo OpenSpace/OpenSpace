@@ -28,15 +28,15 @@
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/util/geodetic.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
@@ -95,7 +95,7 @@ namespace {
             case GL_DOUBLE:
                 return static_cast<float>(*reinterpret_cast<const GLdouble*>(src));
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }
 
@@ -115,7 +115,7 @@ namespace {
                         "OpenGL data type unknown to GDAL: {}", static_cast<int>(glType)
                     )
                 );
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }
 
@@ -162,7 +162,7 @@ namespace {
         const double X = glm::degrees(geo.lon);
 
         const double divisor = t[2] * t[4] - t[1] * t[5];
-        ghoul_assert(divisor != 0.0, "Division by zero");
+        assert_msg(divisor != 0.0, "Division by zero");
 
         const double P = (t[0] * t[5] - t[2] * t[3] + t[2] * Y - t[5] * X) / divisor;
         const double L = (-t[0] * t[4] + t[1] * t[3] - t[1] * Y + t[4] * X) / divisor;
@@ -171,8 +171,8 @@ namespace {
 
         [[maybe_unused]] const double Xp = t[0] + P * t[1] + L * t[2];
         [[maybe_unused]] const double Yp = t[3] + P * t[4] + L * t[5];
-        ghoul_assert(std::abs(X - Xp) < 1e-10, "inverse should yield X as before");
-        ghoul_assert(std::abs(Y - Yp) < 1e-10, "inverse should yield Y as before");
+        assert_msg(std::abs(X - Xp) < 1e-10, "inverse should yield X as before");
+        assert_msg(std::abs(Y - Yp) < 1e-10, "inverse should yield Y as before");
 
         return glm::ivec2(glm::round(P), glm::round(L));
     }
@@ -202,7 +202,7 @@ namespace {
                                              [[maybe_unused]] size_t nRasters,
                                              float noDataValue)
     {
-        ghoul_assert(
+        assert_msg(
             nRasters == rawTile.tileMetaData.nValues,
             "Wrong numbers of max values"
         );
@@ -358,7 +358,7 @@ void RawTileDataReader::initialize() {
     ZoneScoped;
 
     if (_datasetFilePath.empty()) {
-        throw ghoul::RuntimeError("File path must not be empty");
+        throw RuntimeError("File path must not be empty");
     }
     std::string content = _datasetFilePath;
 
@@ -375,7 +375,7 @@ void RawTileDataReader::initialize() {
         ZoneScopedN("GDALOpen");
         _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
         if (!_dataset) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Failed to load dataset '{}'. GDAL error: {}",
                 _datasetFilePath, CPLGetLastErrorMsg()
             ));
@@ -395,7 +395,7 @@ void RawTileDataReader::initialize() {
             case GL_HALF_FLOAT:     return 1ULL;
             case GL_FLOAT:          return 1ULL;
             case GL_DOUBLE:         return 1ULL;
-            default:                throw ghoul::MissingCaseException();
+            default:                throw MissingCaseException();
         }
     }(_initData.glType);
 
@@ -443,8 +443,8 @@ void RawTileDataReader::reset() {
 RawTile::ReadError RawTileDataReader::rasterRead(int rasterBand, const IODescription& io,
                                                  char* dataDestination) const
 {
-    ghoul_assert(isInside(io.read.region, io.read.fullRegion), "write region of bounds");
-    ghoul_assert(
+    assert_msg(isInside(io.read.region, io.read.fullRegion), "write region of bounds");
+    assert_msg(
         io.write.region.start.x >= 0 && io.write.region.start.y >= 0,
         "Invalid write region"
     );
@@ -452,7 +452,7 @@ RawTile::ReadError RawTileDataReader::rasterRead(int rasterBand, const IODescrip
     const glm::ivec2 end = io.write.region.start + io.write.region.numPixels;
     [[maybe_unused]] const size_t largestIndex =
         (end.y - 1) * io.write.bytesPerLine + (end.x - 1) * _initData.bytesPerPixel;
-    ghoul_assert(largestIndex <= io.write.totalNumBytes, "Invalid write region");
+    assert_msg(largestIndex <= io.write.totalNumBytes, "Invalid write region");
 
     char* dataDest = dataDestination;
 
@@ -525,16 +525,16 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
     // Only read the minimum number of rasters
     const int nReadRasters = std::min(_rasterCount, static_cast<int>(_initData.nRasters));
 
-    switch (_initData.ghoulTextureFormat) {
-        case ghoul::opengl::Texture::Format::Red: {
+    switch (_initData.textureFormat) {
+        case opengl::Texture::Format::Red: {
             char* dest = imageDataDest;
             const RawTile::ReadError err = rasterRead(1, io, dest);
             worstError = std::max(worstError, err);
             break;
         }
-        case ghoul::opengl::Texture::Format::RG:
-        case ghoul::opengl::Texture::Format::RGB:
-        case ghoul::opengl::Texture::Format::RGBA: {
+        case opengl::Texture::Format::RG:
+        case opengl::Texture::Format::RGB:
+        case opengl::Texture::Format::RGBA: {
             if (nReadRasters == 1) { // Grayscale
                 for (int i = 0; i < 3; i++) {
                     // The final destination pointer is offsetted by one datum byte size
@@ -569,8 +569,8 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
             }
             break;
         }
-        case ghoul::opengl::Texture::Format::BGR:
-        case ghoul::opengl::Texture::Format::BGRA: {
+        case opengl::Texture::Format::BGR:
+        case opengl::Texture::Format::BGRA: {
             if (nReadRasters == 1) { // Grayscale
                 for (int i = 0; i < 3; i++) {
                     // The final destination pointer is offsetted by one datum byte size
@@ -614,7 +614,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
             break;
         }
         default: {
-            ghoul_assert(false, "Texture format not supported for tiles");
+            assert_msg(false, "Texture format not supported for tiles");
             break;
         }
     }
@@ -641,11 +641,11 @@ IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const
         }
     };
 
-    ghoul_assert(
+    assert_msg(
         io.write.region.numPixels.x == io.write.region.numPixels.y,
         "Write region must be square"
     );
-    ghoul_assert(
+    assert_msg(
         io.write.region.numPixels.x == _initData.dimensions.x,
         "Write region must match tile it writes to"
     );
@@ -667,7 +667,7 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
     const size_t bytesPerLine = _initData.bytesPerPixel * region.numPixels.x;
 
     TileMetaData ppData;
-    ghoul_assert(_initData.nRasters <= 4, "Unexpected number of rasters");
+    assert_msg(_initData.nRasters <= 4, "Unexpected number of rasters");
     ppData.nValues = static_cast<uint8_t>(_initData.nRasters);
 
     std::fill(ppData.maxValues.begin(), ppData.maxValues.end(), -FLT_MAX);

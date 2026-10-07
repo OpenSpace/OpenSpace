@@ -23,7 +23,7 @@
 ##########################################################################################
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/global_variables.cmake)
-include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/message_macros.cmake)
 
 
 # This function takes a list of module paths and returns the list of include paths that

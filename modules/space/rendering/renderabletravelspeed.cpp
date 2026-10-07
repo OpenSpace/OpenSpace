@@ -27,19 +27,19 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/programobject.h>
 #include <memory>
 
 namespace {
@@ -66,6 +66,24 @@ namespace {
         "Target object",
         "The identifier of the scene graph node to target with the speed indicator. The "
         "speed indicator will travel from the parent node to this scene graph node.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo ResetLineInfo = {
+        "ResetLine",
+        "Reset Line",
+        "When triggered, the line will start again from the beginning.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo EpochInfo = {
+        "Epoch",
+        "Epoch",
+        "The epoch for the indicator, that is the time modulo the travel time in which "
+        "the length of the indicator is exactly 0. Due to the way the indicator is "
+        "calculated, this value will stay the same even as the indicator finishes each "
+        "trip. So for a trip duration of 1s the epochs of 2.5, 3.5, 6.5, 10.5 are all "
+        "equivalent.",
         Property::Visibility::AdvancedUser
     };
 
@@ -144,9 +162,11 @@ Documentation RenderableTravelSpeed::Documentation() {
     return codegen::doc<Parameters>("space_renderable_travelspeed");
 }
 
-RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary)
+RenderableTravelSpeed::RenderableTravelSpeed(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _targetIdentifier(TargetInfo)
+    , _resetLine(ResetLineInfo)
+    , _epoch(EpochInfo, -1.0)
     , _travelSpeed(
         SpeedInfo,
         distanceconstants::LightSecond,
@@ -162,6 +182,14 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
     setRenderBin(RenderBin::Overlay);
+
+    _epoch.onChange([this]() { reinitiateTravel(_epoch); });
+    addProperty(_epoch);
+
+    _resetLine.onChange([this]() {
+        reinitiateTravel(global::timeManager->time().j2000Seconds());
+    });
+    addProperty(_resetLine);
 
     _lineColor = p.color.value_or(_lineColor);
     _lineColor.setViewOption(Property::ViewOptions::Color);
@@ -200,14 +228,14 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
 void RenderableTravelSpeed::initialize() {
     _targetNode = sceneGraphNode(_targetIdentifier);
     if (!_targetNode) {
-        throw ghoul::RuntimeError("Could not find Target Node");
+        throw RuntimeError("Could not find Target Node");
     }
 }
 
 void RenderableTravelSpeed::initializeGL() {
     _shaderProgram = BaseModule::ProgramObjectManager.request(
         "Travelspeed",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "Travelspeed",
                 absPath("${MODULE_SPACE}/shaders/travelspeed_vs.glsl"),
@@ -226,13 +254,13 @@ void RenderableTravelSpeed::initializeGL() {
     glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, 0, 0);
 
-    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
+    opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
 }
 
 void RenderableTravelSpeed::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         "Travelspeed",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -267,18 +295,25 @@ void RenderableTravelSpeed::updateVertexData() {
     glNamedBufferSubData(_vbo, 0, sizeof(positions), &positions);
 }
 
-void RenderableTravelSpeed::reinitiateTravel() {
-    _initiationTime = global::timeManager->time().j2000Seconds();
+void RenderableTravelSpeed::reinitiateTravel(std::optional<double> time) {
+    if (time.has_value()) {
+        _epoch = *time;
+        _initiationTime = _epoch;
+    }
+    else {
+        _initiationTime = global::timeManager->time().j2000Seconds();
+    }
     _arrivalTime = _initiationTime + _travelTime;
 }
 
 void RenderableTravelSpeed::update(const UpdateData& data) {
-    if (_initiationTime == -1.0) {
-        _initiationTime = data.time.j2000Seconds();
+    if (_epoch == -1.0) {
+        _epoch = data.time.j2000Seconds();
+        _initiationTime = _epoch;
     }
 
     SceneGraphNode* sourceNode = parent();
-    ghoul_assert(sourceNode, "Renderable have to be owned by scene graph node");
+    assert_msg(sourceNode, "Renderable have to be owned by scene graph node");
 
     // Target position, in the reference frame of the source node (to correctly inherit
     // parent transform)

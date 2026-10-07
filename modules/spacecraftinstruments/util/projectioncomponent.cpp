@@ -30,18 +30,18 @@
 #include <modules/spacecraftinstruments/util/labelparser.h>
 #include <modules/spacecraftinstruments/util/sequenceparser.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/framebufferobject.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/textureunit.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 #include <array>
 #include <utility>
 #include <variant>
@@ -166,9 +166,9 @@ namespace {
         // non-planet objects (comets, asteroids, etc). The default value is '1.0'.
         std::optional<float> aspectRatio;
 
-        std::optional<ghoul::Dictionary> dataInputTranslation;
+        std::optional<Dictionary> dataInputTranslation;
 
-        std::optional<ghoul::Dictionary> timesDataInputTranslation;
+        std::optional<Dictionary> timesDataInputTranslation;
     };
 } // namespace
 #include "projectioncomponent_codegen.cpp"
@@ -198,7 +198,7 @@ ProjectionComponent::ProjectionComponent()
 }
 
 void ProjectionComponent::initialize(const std::string& identifier,
-                                     const ghoul::Dictionary& dictionary)
+                                     const Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -225,7 +225,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
         sequenceSources.push_back(absPath(std::get<std::filesystem::path>(*p.sequence)));
     }
     else {
-        ghoul_assert(
+        assert_msg(
             std::holds_alternative<std::vector<std::filesystem::path>>(*p.sequence),
             "Something is wrong with the generated documentation"
         );
@@ -236,10 +236,10 @@ void ProjectionComponent::initialize(const std::string& identifier,
     }
 
     if (!p.sequenceType.has_value()) {
-        throw ghoul::RuntimeError("Missing SequenceType");
+        throw RuntimeError("Missing SequenceType");
     }
 
-    ghoul::Dictionary translations;
+    Dictionary translations;
     if (p.dataInputTranslation.has_value()) {
         translations = *p.dataInputTranslation;
     }
@@ -304,10 +304,10 @@ void ProjectionComponent::initialize(const std::string& identifier,
                 );
 
                 if (!p.timesSequence.has_value()) {
-                    throw ghoul::RuntimeError("Could not find required TimesSequence");
+                    throw RuntimeError("Could not find required TimesSequence");
                 }
 
-                ghoul::Dictionary timesTranslationDictionary;
+                Dictionary timesTranslationDictionary;
                 if (p.timesDataInputTranslation.has_value()) {
                     timesTranslationDictionary = *p.timesDataInputTranslation;
                 }
@@ -360,19 +360,17 @@ bool ProjectionComponent::initializeGL() {
     success &= auxiliaryRendertarget();
     success &= depthRendertarget();
 
-    using ghoul::opengl::Texture;
-
-    _placeholderTexture = ghoul::io::texture::loadTexture(
+    _placeholderTexture = io::texture::loadTexture(
         absPath(PlaceholderFile),
         2,
         {
-            .filter = Texture::FilterMode::LinearMipMap,
-            .wrapping = Texture::WrappingMode::ClampToBorder
+            .filter = opengl::Texture::FilterMode::LinearMipMap,
+            .wrapping = opengl::Texture::WrappingMode::ClampToBorder
         }
     );
 
     if (_dilation.isEnabled) {
-        _dilation.program = ghoul::opengl::ProgramObject::Build(
+        _dilation.program = opengl::ProgramObject::Build(
             "Dilation",
             absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_vs.glsl"),
             absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_fs.glsl")
@@ -435,16 +433,15 @@ void ProjectionComponent::imageProjectBegin() {
         // If the texture size has changed, we have to allocate new memory and copy the
         // image texture to the new target
 
-        using ghoul::opengl::Texture;
-        using ghoul::opengl::FramebufferObject;
-
         // Make a copy of the old textures
-        const std::unique_ptr<Texture> oldProjectionTexture =
+        const std::unique_ptr<opengl::Texture> oldProjectionTexture =
             std::move(_projectionTexture);
-        const std::unique_ptr<Texture> oldDilationStencil =
+        const std::unique_ptr<opengl::Texture> oldDilationStencil =
             std::move(_dilation.stencilTexture);
-        const std::unique_ptr<Texture> oldDilationTexture = std::move(_dilation.texture);
-        const std::unique_ptr<Texture> oldDepthTexture = std::move(_shadowing.texture);
+        const std::unique_ptr<opengl::Texture> oldDilationTexture =
+            std::move(_dilation.texture);
+        const std::unique_ptr<opengl::Texture> oldDepthTexture =
+            std::move(_shadowing.texture);
 
         // Generate the new textures
         generateProjectionLayerTexture(_textureSize);
@@ -453,15 +450,16 @@ void ProjectionComponent::imageProjectBegin() {
             generateDepthTexture(_textureSize);
         }
 
-        auto copyFramebuffers = [](GLuint srcFbo, Texture* src, GLuint dstFbo,
-                                   Texture* dst, const std::string& msg)
+        auto copyFramebuffers = [](GLuint srcFbo, opengl::Texture* src, GLuint dstFbo,
+                                   opengl::Texture* dst, const std::string& msg)
         {
             glNamedFramebufferTexture(srcFbo, GL_COLOR_ATTACHMENT0, *src, 0);
 
             GLenum status = glCheckNamedFramebufferStatus(srcFbo, GL_FRAMEBUFFER);
             if (status != GL_FRAMEBUFFER_COMPLETE) {
                 LERROR(std::format(
-                    "Read Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
+                    "Read Buffer ({}): {}",
+                    msg, opengl::FramebufferObject::errorChecking(status)
                 ));
             }
 
@@ -470,7 +468,8 @@ void ProjectionComponent::imageProjectBegin() {
             status = glCheckNamedFramebufferStatus(dstFbo, GL_FRAMEBUFFER);
             if (status != GL_FRAMEBUFFER_COMPLETE) {
                 LERROR(std::format(
-                    "Draw Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
+                    "Draw Buffer ({}): {}",
+                    msg, opengl::FramebufferObject::errorChecking(status)
                 ));
             }
 
@@ -486,15 +485,16 @@ void ProjectionComponent::imageProjectBegin() {
             );
         };
 
-        auto copyDepthBuffer = [](GLuint srcFbo, Texture* src, GLuint dstFbo,
-                                  Texture* dst, const std::string& msg)
+        auto copyDepthBuffer = [](GLuint srcFbo, opengl::Texture* src, GLuint dstFbo,
+                                  opengl::Texture* dst, const std::string& msg)
         {
             glNamedFramebufferTexture(srcFbo, GL_DEPTH_ATTACHMENT, *src, 0);
 
             GLenum status = glCheckNamedFramebufferStatus(srcFbo, GL_FRAMEBUFFER);
             if (status != GL_FRAMEBUFFER_COMPLETE) {
                 LERROR(std::format(
-                    "Read Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
+                    "Read Buffer ({}): {}",
+                    msg, opengl::FramebufferObject::errorChecking(status)
                 ));
             }
 
@@ -503,7 +503,8 @@ void ProjectionComponent::imageProjectBegin() {
             status = glCheckNamedFramebufferStatus(dstFbo, GL_FRAMEBUFFER);
             if (status != GL_FRAMEBUFFER_COMPLETE) {
                 LERROR(std::format(
-                    "Draw Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
+                    "Draw Buffer ({}): {}",
+                    msg, opengl::FramebufferObject::errorChecking(status)
                 ));
             }
 
@@ -610,12 +611,12 @@ bool ProjectionComponent::needsShadowMap() const {
     return _shadowing.isEnabled;
 }
 
-ghoul::opengl::Texture& ProjectionComponent::depthTexture() const {
+opengl::Texture& ProjectionComponent::depthTexture() const {
     return *_shadowing.texture;
 }
 
 void ProjectionComponent::depthMapRenderBegin() {
-    ghoul_assert(_shadowing.isEnabled, "Shadowing is not enabled");
+    assert_msg(_shadowing.isEnabled, "Shadowing is not enabled");
 
     // Keep handle to the current bound FBO
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
@@ -642,10 +643,10 @@ void ProjectionComponent::imageProjectEnd() {
     if (_dilation.isEnabled) {
         glDisable(GL_BLEND);
 
-        ghoul::opengl::TextureUnit projUnit;
+        opengl::TextureUnit projUnit;
         projUnit.bind(*_projectionTexture);
 
-        ghoul::opengl::TextureUnit stencilUnit;
+        opengl::TextureUnit stencilUnit;
         stencilUnit.bind(*_dilation.stencilTexture);
 
         _dilation.program->activate();
@@ -778,7 +779,7 @@ float ProjectionComponent::projectionFading() const {
     return _projectionFading;
 }
 
-ghoul::opengl::Texture& ProjectionComponent::projectionTexture() const {
+opengl::Texture& ProjectionComponent::projectionTexture() const {
     return _dilation.isEnabled ? *_dilation.texture : *_projectionTexture;
 }
 
@@ -837,29 +838,27 @@ void ProjectionComponent::clearAllProjections() {
 }
 
 void ProjectionComponent::generateMipMap() {
-    //_projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    //_projectionTexture->setFilter(opengl::Texture::FilterMode::LinearMipMap);
     //_mipMapDirty = false;
 }
 
-std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(
+std::shared_ptr<opengl::Texture> ProjectionComponent::loadProjectionTexture(
                                                  const std::filesystem::path& texturePath,
                                                                        bool isPlaceholder)
 {
-    using ghoul::opengl::Texture;
-
     if (isPlaceholder) {
         return _placeholderTexture;
     }
 
-    Texture::WrappingModes wrapping = {
-        Texture::WrappingMode::Repeat,
-        Texture::WrappingMode::MirroredRepeat
+    opengl::Texture::WrappingModes wrapping = {
+        opengl::Texture::WrappingMode::Repeat,
+        opengl::Texture::WrappingMode::MirroredRepeat
     };
-    std::unique_ptr<Texture> texture = ghoul::io::texture::loadTexture(
+    std::unique_ptr<opengl::Texture> texture = io::texture::loadTexture(
         absPath(texturePath),
         2,
         {
-            .filter = Texture::FilterMode::LinearMipMap,
+            .filter = opengl::Texture::FilterMode::LinearMipMap,
             .wrapping = wrapping,
             .swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
         }
@@ -870,35 +869,35 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
 bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size) {
     LINFO(std::format("Creating projection texture of size ({}, {})", size.x, size.y));
 
-    _projectionTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _projectionTexture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
 
     if (_dilation.isEnabled) {
-        _dilation.texture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
+        _dilation.texture = std::make_unique<opengl::Texture>(
+            opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(size, 1),
                 .type = GL_TEXTURE_2D,
-                .format = ghoul::opengl::Texture::Format::RGBA,
+                .format = opengl::Texture::Format::RGBA,
                 .dataType = GL_UNSIGNED_BYTE
             },
-            ghoul::opengl::Texture::SamplerInit {}
+            opengl::Texture::SamplerInit {}
         );
 
-        _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
+        _dilation.stencilTexture = std::make_unique<opengl::Texture>(
+            opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(size, 1),
                 .type = GL_TEXTURE_2D,
-                .format = ghoul::opengl::Texture::Format::Red,
+                .format = opengl::Texture::Format::Red,
                 .dataType = GL_UNSIGNED_BYTE
             },
-            ghoul::opengl::Texture::SamplerInit {}
+            opengl::Texture::SamplerInit {}
         );
     }
 
@@ -908,14 +907,14 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
 bool ProjectionComponent::generateDepthTexture(const glm::ivec2& size) {
     LINFO(std::format("Creating depth texture of size ({}, {})", size.x, size.y));
 
-    _shadowing.texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _shadowing.texture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::DepthComponent,
+            .format = opengl::Texture::Format::DepthComponent,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
     return _shadowing.texture != nullptr;
 }

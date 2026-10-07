@@ -25,9 +25,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "modules/globebrowsing/src/timequantizer.h"
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/filesystem/filesystem.h>
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 
@@ -49,7 +49,7 @@ namespace {
         try {
             tq.setResolution(resolution);
         }
-        catch (const ghoul::RuntimeError & e) {
+        catch (const RuntimeError & e) {
             res = e.message;
         }
 
@@ -68,7 +68,7 @@ namespace {
         try {
             tq.setStartEndRange(startTime, startTime);
         }
-        catch (const ghoul::RuntimeError & e) {
+        catch (const RuntimeError & e) {
             res = e.message;
         }
 
@@ -87,7 +87,7 @@ namespace {
         try {
             const TimeQuantizer tq(startTime, startTime, "1d");
         }
-        catch (const ghoul::RuntimeError & e) {
+        catch (const RuntimeError & e) {
             res = e.message;
         }
 
@@ -131,7 +131,7 @@ TEST_CASE("TimeQuantizer: Test years resolution", "[timequantizer]") {
     try {
         t1.setStartEndRange("2020-02-29T00:00:00", "2030-02-29T00:00:00");
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         REQUIRE(e.message.contains(
             "Invalid start day value of 29 for the selected month on a yearly increment, "
             "valid days are 1 - 28"
@@ -204,7 +204,7 @@ TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
     try {
         t1.setStartEndRange("2017-01-30T00:00:00", "2020-09-01T00:00:00");
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         CHECK(e.message.contains(
             "Invalid start day value of 30 for monthly increment, valid days are 1 - 28"
         ));

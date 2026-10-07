@@ -27,8 +27,8 @@
 #include <modules/spout/screenspacespout.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/textureunit.h>
 #include <optional>
 #include <utility>
 
@@ -60,7 +60,7 @@ Documentation ScreenSpaceSpout::Documentation() {
     );
 }
 
-ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
+ScreenSpaceSpout::ScreenSpaceSpout(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _spoutReceiver(*this, dictionary)
 {
@@ -86,7 +86,7 @@ void ScreenSpaceSpout::update() {
     _spoutReceiver.updateReceiver();
 }
 
-void ScreenSpaceSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceSpout::bindTexture(opengl::TextureUnit& unit) {
     if (_spoutReceiver.isReceiving()) {
         unit.bind(_spoutReceiver.spoutTexture());
     }

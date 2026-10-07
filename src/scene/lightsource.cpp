@@ -25,9 +25,9 @@
 #include <openspace/scene/lightsource.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <optional>
 
 namespace {
@@ -78,11 +78,11 @@ Documentation LightSource::Documentation() {
 }
 
 std::unique_ptr<LightSource> LightSource::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    ghoul::TemplateFactory<LightSource>* factory =
+    TemplateFactory<LightSource>* factory =
         FactoryManager::ref().factory<LightSource>();
 
     LightSource* source = factory->create(p.type, dictionary);
@@ -90,7 +90,7 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
     return std::unique_ptr<LightSource>(source);
 }
 
-LightSource::LightSource(const ghoul::Dictionary& dictionary)
+LightSource::LightSource(const Dictionary& dictionary)
     : PropertyOwner({ "LightSource" })
     , _enabled(EnabledInfo, true)
 {

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
 #include <variant>
 #include <utility>
 
@@ -34,7 +34,7 @@ namespace {
 /**
  * Load mission phases from file.
  */
-[[codegen::luawrap]] void loadMission(ghoul::Dictionary mission) {
+[[codegen::luawrap]] void loadMission(Dictionary mission) {
     // TODO: Check if mission table is valid
     global::missionManager->loadMission(Mission(mission));
 }
@@ -43,16 +43,16 @@ namespace {
  * Unloads a previously loaded mission
  */
 [[codegen::luawrap]] void unloadMission(
-                         std::variant<std::string, ghoul::Dictionary> identifierOrMission)
+                                std::variant<std::string, Dictionary> identifierOrMission)
 {
     std::string identifier;
     if (std::holds_alternative<std::string>(identifierOrMission)) {
         identifier = std::move(std::get<std::string>(identifierOrMission));
     }
     else {
-        ghoul::Dictionary dict = std::get<ghoul::Dictionary>(identifierOrMission);
+        Dictionary dict = std::get<Dictionary>(identifierOrMission);
         if (!dict.hasValue<std::string>("Identifier")) {
-            throw ghoul::lua::LuaError("Mission table needs 'Identifier'");
+            throw lua::LuaError("Mission table needs 'Identifier'");
         }
 
         identifier = dict.value<std::string>("Identifier");
@@ -60,11 +60,11 @@ namespace {
 
 
     if (identifier.empty()) {
-        throw ghoul::lua::LuaError("Mission identifier is empty");
+        throw lua::LuaError("Mission identifier is empty");
     }
 
     if (!global::missionManager->hasMission(identifier)) {
-        throw ghoul::lua::LuaError("Mission was not previously loaded");
+        throw lua::LuaError("Mission was not previously loaded");
     }
 
     global::missionManager->unloadMission(identifier);
@@ -75,7 +75,7 @@ namespace {
  */
 [[codegen::luawrap]] bool hasMission(std::string identifier) {
     if (identifier.empty()) {
-        throw ghoul::lua::LuaError("Mission identifier is empty");
+        throw lua::LuaError("Mission identifier is empty");
     }
 
     bool hasMission = global::missionManager->hasMission(identifier);
@@ -87,7 +87,7 @@ namespace {
  */
 [[codegen::luawrap]] void setCurrentMission(std::string identifier) {
     if (identifier.empty()) {
-        throw ghoul::lua::LuaError("Mission identifier is empty");
+        throw lua::LuaError("Mission identifier is empty");
     }
     global::missionManager->setCurrentMission(identifier);
 }

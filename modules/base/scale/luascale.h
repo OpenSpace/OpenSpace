@@ -27,17 +27,17 @@
 
 #include <openspace/scene/scale.h>
 
+#include <openspace/lua/luastate.h>
 #include <openspace/properties/misc/stringproperty.h>
-#include <ghoul/lua/luastate.h>
 #include <memory>
-
-namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 
+namespace filesystem { class File; }
+
 class LuaScale : public Scale {
 public:
-    explicit LuaScale(const ghoul::Dictionary& dictionary);
+    explicit LuaScale(const Dictionary& dictionary);
 
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 
@@ -45,8 +45,8 @@ public:
 
 private:
     StringProperty _luaScriptFile;
-    std::unique_ptr<ghoul::filesystem::File> _fileHandle;
-    ghoul::lua::LuaState _state;
+    std::unique_ptr<filesystem::File> _fileHandle;
+    lua::LuaState _state;
 };
 
 } // namespace openspace

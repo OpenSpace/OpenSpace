@@ -25,13 +25,13 @@
 #include <modules/base/rotation/fixedrotation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <optional>
 #include <variant>
 
@@ -283,7 +283,7 @@ Documentation FixedRotation::Documentation() {
     );
 }
 
-FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
+FixedRotation::FixedRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
     , _enabled(EnableInfo, true)
     , _xAxis {
@@ -464,7 +464,7 @@ void FixedRotation::initialize() {
             _xAxis.object = std::get<std::string>(*p.xAxis);
         }
         else {
-            ghoul_assert(std::holds_alternative<glm::vec3>(*p.xAxis), "");
+            assert_msg(std::holds_alternative<glm::vec3>(*p.xAxis), "");
             _xAxis.type = Axis::Type::Vector;
             _xAxis.vector = std::get<glm::vec3>(*p.xAxis);
         }
@@ -481,7 +481,7 @@ void FixedRotation::initialize() {
             _yAxis.object = std::get<std::string>(*p.yAxis);
         }
         else {
-            ghoul_assert(std::holds_alternative<glm::vec3>(*p.yAxis), "");
+            assert_msg(std::holds_alternative<glm::vec3>(*p.yAxis), "");
             _yAxis.type = Axis::Type::Vector;
             _yAxis.vector = std::get<glm::vec3>(*p.yAxis);
         }
@@ -498,7 +498,7 @@ void FixedRotation::initialize() {
             _zAxis.object = std::get<std::string>(*p.zAxis);
         }
         else {
-            ghoul_assert(std::holds_alternative<glm::vec3>(*p.zAxis), "");
+            assert_msg(std::holds_alternative<glm::vec3>(*p.zAxis), "");
             _zAxis.type = Axis::Type::Vector;
             _zAxis.vector = std::get<glm::vec3>(*p.zAxis);
         }
@@ -524,7 +524,7 @@ void FixedRotation::initialize() {
     }
 
     // No need to hold on to the data
-    _constructorDictionary = ghoul::Dictionary();
+    _constructorDictionary = Dictionary();
 }
 
 void FixedRotation::update(const UpdateData& data) {
@@ -640,7 +640,7 @@ glm::vec3 FixedRotation::xAxis() const {
         case Axis::Type::CoordinateSystemCompletion:
             return glm::normalize(-glm::cross(yAxis(), zAxis()));
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 
@@ -694,7 +694,7 @@ glm::vec3 FixedRotation::yAxis() const {
         case Axis::Type::CoordinateSystemCompletion:
             return glm::normalize(glm::cross(xAxis(), -zAxis()));
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 
@@ -746,7 +746,7 @@ glm::vec3 FixedRotation::zAxis() const {
         case Axis::Type::CoordinateSystemCompletion:
             return glm::normalize(glm::cross(xAxis(), yAxis()));
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 

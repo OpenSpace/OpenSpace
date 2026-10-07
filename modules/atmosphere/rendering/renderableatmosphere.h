@@ -53,7 +53,7 @@ struct ShadowConfiguration {
 
 class RenderableAtmosphere : public Renderable {
 public:
-    explicit RenderableAtmosphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableAtmosphere(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

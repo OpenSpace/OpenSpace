@@ -24,7 +24,7 @@
 
 #include <openspace/properties/matrix/dmat2property.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
@@ -43,16 +43,16 @@ std::string_view DMat2Property::className() const {
     return "DMat2Property";
 }
 
-ghoul::lua::LuaTypes DMat2Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes DMat2Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void DMat2Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::dmat2 DMat2Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::dmat2>(state);
+    return lua::value<glm::dmat2>(state);
 }
 
 std::string DMat2Property::stringValue() const {

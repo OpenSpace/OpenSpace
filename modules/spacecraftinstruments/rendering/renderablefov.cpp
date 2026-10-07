@@ -29,15 +29,15 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/programobject.h>
 #include <glm/gtx/projection.hpp>
 #include <optional>
 #include <algorithm>
@@ -212,7 +212,7 @@ Documentation RenderableFov::Documentation() {
     );
 }
 
-RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
+RenderableFov::RenderableFov(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _standOffDistance(StandoffDistanceInfo, 0.9999, 0.99, 1.0, 0.000001)
@@ -320,7 +320,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 void RenderableFov::initializeGL() {
     _program = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "FovProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "FovProgram",
                 absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
@@ -329,7 +329,7 @@ void RenderableFov::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     // Fetch information about the specific instrument
     SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
@@ -342,7 +342,7 @@ void RenderableFov::initializeGL() {
         res.shape == SpiceManager::FieldOfViewResult::Shape::Polygon ||
         res.shape == SpiceManager::FieldOfViewResult::Shape::Rectangle;
     if (!supportedShape) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             std::format("'{}' has unsupported shape", _instrument.name),
             "RenderableFov"
         );
@@ -471,7 +471,7 @@ void RenderableFov::initializeGL() {
 void RenderableFov::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         "FovProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -788,7 +788,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
             case BothIntersect:
                 break;
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }
 #endif
@@ -868,7 +868,7 @@ void RenderableFov::update(const UpdateData& data) {
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 

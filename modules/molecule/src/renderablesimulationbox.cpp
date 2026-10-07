@@ -34,16 +34,16 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/httprequest.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/textureunit.h>
 #include <glm/gtc/random.hpp>
 #include <core/md_allocator.h>
 #include <core/md_array.h>
@@ -234,7 +234,7 @@ Documentation RenderableSimulationBox::Documentation() {
     );
 }
 
-RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictionary)
+RenderableSimulationBox::RenderableSimulationBox(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _representation(RepresentationInfo)
     , _coloring(ColoringInfo)
@@ -399,12 +399,12 @@ void RenderableSimulationBox::initializeGL() {
     global::moduleEngine->module<MoleculeModule>()->initializeShaders();
 
     // Initialize billboard
-    _billboard.program = ghoul::opengl::ProgramObject::Build(
+    _billboard.program = opengl::ProgramObject::Build(
         "Simulationbox Billboard",
         absPath("${MODULE_MOLECULE}/shaders/billboard_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/billboard_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_billboard.program, _billboard.uniforms);
+    opengl::updateUniformLocations(*_billboard.program, _billboard.uniforms);
 
     glGenVertexArrays(1, &_billboard.vao);
 

@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=OpenSpace
+GenericName=Astrovisualization Software
+Comment=Explore the universe in an interactive 3D environment
+Exec=@OPENSPACE_DESKTOP_EXEC@ %U
+Icon=openspace
+Terminal=false
+Categories=Education;Science;Astronomy;
+Keywords=space;planet;astronomy;visualization;NASA;
+StartupNotify=true
+StartupWMClass=OpenSpace
+X-AppImage-Name=OpenSpace
+X-AppImage-Version=@OPENSPACE_VERSION_NUMBER@

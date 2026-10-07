@@ -35,7 +35,7 @@ namespace openspace {
 
 class ScreenSpaceSpout : public ScreenSpaceRenderable {
 public:
-    explicit ScreenSpaceSpout(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceSpout(const Dictionary& dictionary);
 
     void deinitializeGL() override;
 
@@ -44,7 +44,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
     SpoutReceiverPropertyProxy _spoutReceiver;
 };

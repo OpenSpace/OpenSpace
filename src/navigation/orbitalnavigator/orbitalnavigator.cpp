@@ -29,6 +29,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -39,8 +41,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <algorithm>
 #include <cstdlib>
@@ -287,7 +287,7 @@ namespace {
     SurfacePositionHandle calculateSurfacePositionHandle(const SceneGraphNode& node,
                                                const glm::dvec3& cameraPositionWorldSpace)
     {
-        ghoul_assert(
+        assert_msg(
             glm::length(cameraPositionWorldSpace) > 0.0,
             "Cannot have degenerate vector"
         );
@@ -1201,7 +1201,7 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
 
     const glm::dvec3 localUp = localCameraRotation * Camera::UpDirectionCameraSpace;
 
-    const glm::dquat targetRotation = ghoul::lookAtQuaternion(
+    const glm::dquat targetRotation = lookAtQuaternion(
         glm::dvec3(0.0),
         Camera::ViewDirectionCameraSpace,
         glm::normalize(localUp)
@@ -1322,7 +1322,7 @@ void OrbitalNavigator::rotateAroundAnchorUp(double deltaTime, double speedScale,
             case UpDirectionChoice::XAxis:  return glm::dvec3(1.0, 0.0, 0.0);
             case UpDirectionChoice::YAxis:  return glm::dvec3(0.0, 1.0, 0.0);
             case UpDirectionChoice::ZAxis:  return glm::dvec3(0.0, 0.0, 1.0);
-            default:                        throw ghoul::MissingCaseException();
+            default:                        throw MissingCaseException();
         }
     }(UpDirectionChoice(_upToUseForRotation.value()));
 
@@ -1403,7 +1403,7 @@ glm::dquat OrbitalNavigator::rotateGlobally(const glm::dquat& globalCameraRotati
     const glm::dvec3 cameraUpWhenFacingSurface = glm::inverse(focusNodeRotationDiff) *
         globalCameraRotation * Camera::UpDirectionCameraSpace;
 
-    return ghoul::lookAtQuaternion(
+    return lookAtQuaternion(
         glm::dvec3(0.0),
         -directionFromSurfaceToCamera,
         cameraUpWhenFacingSurface
@@ -1575,7 +1575,7 @@ double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
 }
 
 void OrbitalNavigator::updateAnchorOnSync() {
-    ghoul_assert(
+    assert_msg(
         !global::windowDelegate->isMaster(),
         "Anchor should only be synced on nodes, not on master"
     );

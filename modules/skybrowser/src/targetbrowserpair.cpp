@@ -31,14 +31,14 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringconversion.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringconversion.h>
 #include <chrono>
 #include <cstdlib>
 #include <string_view>
@@ -51,7 +51,7 @@ namespace {
 
         const std::string script = std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
-            id, ghoul::to_string(posCelestial)
+            id, to_string(posCelestial)
         );
         global::scriptEngine->queueScript(script);
     }
@@ -64,8 +64,8 @@ TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
     : _browser(browser)
     , _targetNode(targetNode)
 {
-    ghoul_assert(browser, "Sky browser is null pointer");
-    ghoul_assert(targetNode, "Sky target is null pointer");
+    assert_msg(browser, "Sky browser is null pointer");
+    assert_msg(targetNode, "Sky target is null pointer");
 
     _targetRenderable = dynamic_cast<RenderableSkyTarget*>(_targetNode->renderable());
 }
@@ -107,7 +107,7 @@ void TargetBrowserPair::setEnabled(bool enable) {
     _browser->setEnabled(enable);
     Property* prop = _targetRenderable->property("Enabled");
     BoolProperty* boolProp = dynamic_cast<BoolProperty*>(prop);
-    ghoul_assert(boolProp, "Enabled is not a boolean property");
+    assert_msg(boolProp, "Enabled is not a boolean property");
     *boolProp = enable;
 }
 
@@ -167,7 +167,7 @@ std::vector<std::string> TargetBrowserPair::selectedImages() const {
     return _browser->worldWideTelescope()->selectedImages();
 }
 
-ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
+Dictionary TargetBrowserPair::dataAsDictionary() const {
     const glm::dvec2 spherical = targetDirectionEquatorial();
     const glm::dvec3 cartesian = sphericalToCartesian(spherical);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -175,22 +175,21 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
 
     for (const std::string& imageUrl : selectedImages()) {
         const bool imageExists = module->wwtDataHandler().image(imageUrl).has_value();
-        ghoul_assert(imageExists, "Image doesn't exist in the wwt catalog!");
+        assert_msg(imageExists, "Image doesn't exist in the wwt catalog!");
         try {
             selectedImagesIndices.push_back(
                 std::stoi(module->wwtDataHandler().image(imageUrl)->identifier)
             );
         }
         catch (std::invalid_argument const& e) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Unable to parse id '{}', {}",
-                module->wwtDataHandler().image(imageUrl)->identifier,
-                e.what()
+                module->wwtDataHandler().image(imageUrl)->identifier, e.what()
             ));
         }
     }
 
-    ghoul::Dictionary res = _browser->data();
+    Dictionary res = _browser->data();
     res.setValue("id", browserId());
     res.setValue("targetId", targetNodeId());
     res.setValue("name", browserGuiName());

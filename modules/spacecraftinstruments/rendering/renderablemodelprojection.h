@@ -29,16 +29,16 @@
 
 #include <modules/spacecraftinstruments/util/image.h>
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/opengl/uniformcache.h>
 #include <memory>
-
-namespace ghoul::modelgeometry { class ModelGeometry; }
 
 namespace openspace {
 
+namespace modelgeometry { class ModelGeometry; }
+
 class RenderableModelProjection : public Renderable {
 public:
-    explicit RenderableModelProjection(const ghoul::Dictionary& dictionary);
+    explicit RenderableModelProjection(const Dictionary& dictionary);
     ~RenderableModelProjection() override;
 
     void initializeGL() override;
@@ -47,30 +47,30 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) final override;
 
-    ghoul::opengl::Texture& baseTexture() const;
+    opengl::Texture& baseTexture() const;
 
     static openspace::Documentation Documentation();
 
 private:
     glm::mat4 attitudeParameters(double time, const glm::vec3& up);
-    void imageProjectGPU(const ghoul::opengl::Texture& projectionTexture,
+    void imageProjectGPU(const opengl::Texture& projectionTexture,
         const glm::mat4& projectorMatrix);
 
     ProjectionComponent _projectionComponent;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    std::unique_ptr<opengl::ProgramObject> _programObject;
     UniformCache(performShading, directionToSunViewSpace, modelViewTransform,
         projectionTransform, projectionFading, baseTexture,
         projectionTexture) _mainUniformCache;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
+    std::unique_ptr<opengl::ProgramObject> _fboProgramObject;
     UniformCache(projectionTexture, depthTexture, needShadowMap, projectorMatrix,
         modelTransform, boresight) _fboUniformCache;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
+    std::unique_ptr<opengl::ProgramObject> _depthFboProgramObject;
     UniformCache(projectorMatrix, modelTransform) _depthFboUniformCache;
 
-    std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
+    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
     double _modelScale = 1.0;
     bool _invertModelScale = false;
 

@@ -27,7 +27,7 @@
 
 #include <openspace/util/task.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 
 namespace openspace {
 
@@ -37,7 +37,7 @@ namespace openspace {
  */
 class MilkywayConversionTask : public Task {
 public:
-    explicit MilkywayConversionTask(const ghoul::Dictionary& dictionary);
+    explicit MilkywayConversionTask(const Dictionary& dictionary);
     ~MilkywayConversionTask() override = default;
 
     std::string description() override;

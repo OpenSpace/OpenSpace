@@ -27,7 +27,7 @@
 #include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
 
 namespace {
     using namespace openspace;

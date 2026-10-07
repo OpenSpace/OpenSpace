@@ -24,7 +24,7 @@
 
 #include <modules/molecule/src/loader.h>
 
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
 #include <core/md_allocator.h>
 #include <core/md_array.h>
 #include <core/md_log.h>
@@ -75,8 +75,8 @@ namespace {
     }
 
     LoadedTrajectory* allocLoadedTrajectory(uint64_t key) {
-        ghoul_assert(findLoadedTrajectory(key) != nullptr, "Trajectory loaded");
-        ghoul_assert(
+        assert_msg(findLoadedTrajectory(key) != nullptr, "Trajectory loaded");
+        assert_msg(
             numLoadedTrajectories < static_cast<int64_t>(ARRAY_SIZE(loadedTrajectories)),
             "Loaded too many trajectories"
         );
@@ -96,7 +96,7 @@ namespace {
                 return;
             }
         }
-        ghoul_assert(false, "Did not find trajectory");
+        assert_msg(false, "Did not find trajectory");
     }
 
     bool getHeader(struct md_trajectory_o* inst, md_trajectory_header_t* header) {
@@ -117,11 +117,11 @@ namespace {
                          float* outZ)
     {
         LoadedTrajectory* trajectory = reinterpret_cast<LoadedTrajectory*>(inst);
-        ghoul_assert(trajectory, "Could not find trajectory");
-        ghoul_assert(dataSize == sizeof(int64_t), "Wrong data size");
+        assert_msg(trajectory, "Could not find trajectory");
+        assert_msg(dataSize == sizeof(int64_t), "Wrong data size");
 
         int64_t idx = *(reinterpret_cast<const int64_t*>(data));
-        ghoul_assert(
+        assert_msg(
             0 <= idx && idx < md_trajectory_num_frames(trajectory->traj),
             "Invalid index"
         );
@@ -308,8 +308,8 @@ md_trajectory_api* trajectoryApi(std::filesystem::path filename) {
 md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* mol,
                           md_allocator_i* alloc, bool deperiodizeOnLoad)
 {
-    ghoul_assert(alloc, "No allocator provided");
-    ghoul_assert(mol, "No molecule provided");
+    assert_msg(alloc, "No allocator provided");
+    assert_msg(mol, "No molecule provided");
 
     md_trajectory_api* api = trajectoryApi(filename);
     if (!api) {
@@ -361,7 +361,7 @@ md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* m
 }
 
 bool close(md_trajectory_i* traj) {
-    ghoul_assert(traj, "No trajectory provided");
+    assert_msg(traj, "No trajectory provided");
 
     LoadedTrajectory* loadedTraj = findLoadedTrajectory(reinterpret_cast<uint64_t>(traj));
     if (loadedTraj) {
@@ -369,13 +369,13 @@ bool close(md_trajectory_i* traj) {
         std::memset(traj, 0, sizeof(md_trajectory_i));
         return true;
     }
-    throw ghoul::RuntimeError(
+    throw openspace::RuntimeError(
         "Attempting to free trajectory which was not loaded with loader"
     );
 }
 
 bool setRecenterTarget(md_trajectory_i* traj, const md_bitfield_t* atomMask) {
-    ghoul_assert(traj, "No trajectory provided");
+    assert_msg(traj, "No trajectory provided");
 
     LoadedTrajectory* loadedTraj = findLoadedTrajectory(reinterpret_cast<uint64_t>(traj));
     if (loadedTraj) {
@@ -392,7 +392,7 @@ bool setRecenterTarget(md_trajectory_i* traj, const md_bitfield_t* atomMask) {
 }
 
 bool clearCache(md_trajectory_i* traj) {
-    ghoul_assert(traj, "No trajectory provided");
+    assert_msg(traj, "No trajectory provided");
 
     LoadedTrajectory* loadedTraj = findLoadedTrajectory(reinterpret_cast<uint64_t>(traj));
     if (loadedTraj) {
@@ -404,7 +404,7 @@ bool clearCache(md_trajectory_i* traj) {
 }
 
 int64_t numCacheFrames(md_trajectory_i* traj) {
-    ghoul_assert(traj, "No trajectory provided");
+    assert_msg(traj, "No trajectory provided");
 
     LoadedTrajectory* loadedTraj = findLoadedTrajectory(reinterpret_cast<uint64_t>(traj));
     if (loadedTraj) {

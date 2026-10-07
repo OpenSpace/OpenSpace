@@ -25,9 +25,9 @@
 #include <modules/video/include/videotileprovider.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <cmath>
 #include <cstdint>
 #include <limits>
@@ -58,7 +58,7 @@ Documentation VideoTileProvider::Documentation() {
     );
 }
 
-VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
+VideoTileProvider::VideoTileProvider(const Dictionary& dictionary)
     : _videoPlayer(dictionary)
 {
     ZoneScoped;

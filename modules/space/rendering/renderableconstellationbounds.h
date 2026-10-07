@@ -27,10 +27,10 @@
 
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
 
@@ -46,7 +46,7 @@ namespace openspace {
  */
 class RenderableConstellationBounds : public RenderableConstellationsBase {
 public:
-    explicit RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
+    explicit RenderableConstellationBounds(const Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -95,7 +95,7 @@ private:
     /// The list of all loaded constellation bounds
     std::vector<ConstellationBound> _constellationBounds;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<opengl::ProgramObject> _program;
 
     struct Vertex {
         float x;

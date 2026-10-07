@@ -35,7 +35,7 @@ namespace openspace {
 
 class SpiceRotation : public Rotation {
 public:
-    explicit SpiceRotation(const ghoul::Dictionary& dictionary);
+    explicit SpiceRotation(const Dictionary& dictionary);
 
     glm::dmat3 matrix(const UpdateData& data) const override;
 

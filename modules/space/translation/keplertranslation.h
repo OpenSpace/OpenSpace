@@ -27,8 +27,8 @@
 
 #include <openspace/scene/translation.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <ghoul/glm.h>
 
 namespace openspace {
 
@@ -46,10 +46,10 @@ public:
      * further processing. The \p dictionary is tested against the Documentation for
      * conformance.
      *
-     * \param dictionary The ghoul::Dictionary containing all the information about the
-     *        Keplerian elements (see Documentation)
+     * \param dictionary The Dictionary containing all the information about the Keplerian
+     *        elements (see Documentation)
      */
-    explicit KeplerTranslation(const ghoul::Dictionary& dictionary);
+    explicit KeplerTranslation(const Dictionary& dictionary);
 
     ~KeplerTranslation() override = default;
 
@@ -61,11 +61,11 @@ public:
     glm::dvec3 position(const UpdateData& data) const override;
 
     /**
-     * Method returning the openspace::Documentation that describes the ghoul::Dictionary
-     * that can be passed to the constructor.
+     * Method returning the openspace::Documentation that describes the Dictionary that
+     * can be passed to the constructor.
      *
-     * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
-     *         be passed to the constructor
+     * \return The openspace::Documentation that describes the Dictionary that can be
+     *         passed to the constructor
      */
     static openspace::Documentation Documentation();
 

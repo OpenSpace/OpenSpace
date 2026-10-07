@@ -28,11 +28,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/websocketinputstate.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
 #include <openspace/topic/jsonconverters.h>
-#include <ghoul/logging/logmanager.h>
 #include <algorithm>
 #include <iterator>
 #include <string_view>

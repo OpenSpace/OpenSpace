@@ -25,14 +25,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <openspace/engine/globals.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/defer.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/defer.h>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <chrono>
 
@@ -60,7 +60,7 @@ TEST_CASE("PropertyValue: Basic", "[propertyvalue]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.propertyValue('base.p1')",
-            .callback = [&p1](ghoul::Dictionary d) {
+            .callback = [&p1](Dictionary d) {
                 REQUIRE(d.size() == 1);
                 REQUIRE(d.hasKey("1"));
                 REQUIRE(d.hasValue<double>("1"));
@@ -86,7 +86,7 @@ TEST_CASE("PropertyValue: Empty", "[propertyvalue]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.propertyValue('other-name')",
-            .callback = [](ghoul::Dictionary d) {
+            .callback = [](Dictionary d) {
                 CHECK(d.size() == 0);
             }
         });
@@ -100,7 +100,7 @@ TEST_CASE("PropertyValue: Empty", "[propertyvalue]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.propertyValue('base.other-name')",
-            .callback = [](ghoul::Dictionary d) {
+            .callback = [](Dictionary d) {
                 CHECK(d.size() == 0);
             }
         });

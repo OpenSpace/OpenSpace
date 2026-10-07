@@ -33,7 +33,7 @@ namespace openspace {
 
 class StaticRotation : public Rotation {
 public:
-    explicit StaticRotation(const ghoul::Dictionary& dictionary);
+    explicit StaticRotation(const Dictionary& dictionary);
 
     glm::dmat3 matrix(const UpdateData& data) const override;
 

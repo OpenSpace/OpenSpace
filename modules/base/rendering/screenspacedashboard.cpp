@@ -27,11 +27,11 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <optional>
 #include <utility>
 
@@ -72,7 +72,7 @@ namespace {
         // A list of DashboardItems that are added automatically upon construction of the
         // ScreenSpaceDashboard. This value must not be specified if `UseMainDashboard` is
         // specified.
-        std::optional<std::vector<ghoul::Dictionary>>
+        std::optional<std::vector<Dictionary>>
             items [[codegen::reference("core_dashboarditem")]];
     };
 } // namespace
@@ -87,7 +87,7 @@ Documentation ScreenSpaceDashboard::Documentation() {
     );
 }
 
-ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
+ScreenSpaceDashboard::ScreenSpaceDashboard(const Dictionary& dictionary)
     : ScreenSpaceRenderableFramebuffer(dictionary)
     , _useMainDashboard(UseMainInfo, false)
 {
@@ -100,7 +100,7 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     addProperty(_useMainDashboard);
 
     if (_useMainDashboard && p.items.has_value()) {
-        throw ghoul::RuntimeError("Cannot specify items when using the main dashboard");
+        throw RuntimeError("Cannot specify items when using the main dashboard");
     }
 
     if (!_useMainDashboard) {
@@ -108,8 +108,8 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     }
 
     if (p.items.has_value()) {
-        ghoul_assert(!_useMainDashboard, "Cannot add items to the main dashboard");
-        for (const ghoul::Dictionary& item : *p.items) {
+        assert_msg(!_useMainDashboard, "Cannot add items to the main dashboard");
+        for (const Dictionary& item : *p.items) {
             std::unique_ptr<DashboardItem> i = DashboardItem::createFromDictionary(item);
             _dashboard.addDashboardItem(std::move(i));
         }

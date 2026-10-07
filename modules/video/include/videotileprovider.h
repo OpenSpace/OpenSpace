@@ -37,7 +37,7 @@ struct ChunkTile;
 
 class VideoTileProvider : public TileProvider {
 public:
-    explicit VideoTileProvider(const ghoul::Dictionary& dictionary);
+    explicit VideoTileProvider(const Dictionary& dictionary);
 
     void update() override final;
     void reset() override final;

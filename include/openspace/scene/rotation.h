@@ -27,15 +27,14 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
+#include <openspace/misc/managedmemoryuniqueptr.h>
 #include <openspace/scene/timeframe.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <limits>
-
-namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 struct UpdateData;
 
@@ -57,10 +56,9 @@ struct UpdateData;
  */
 class Rotation : public PropertyOwner {
 public:
-    static ghoul::mm_unique_ptr<Rotation> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+    static mm_unique_ptr<Rotation> createFromDictionary(const Dictionary& dictionary);
 
-    explicit Rotation(const ghoul::Dictionary& dictionary);
+    explicit Rotation(const Dictionary& dictionary);
     ~Rotation() override = default;
 
     virtual void initialize();
@@ -76,7 +74,7 @@ protected:
 
 private:
     bool _needsUpdate = true;
-    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
+    mm_unique_ptr<TimeFrame> _timeFrame;
     double _cachedTime = -std::numeric_limits<double>::max();
     glm::dmat3 _cachedMatrix = glm::dmat3(1.0);
 };

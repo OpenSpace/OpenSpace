@@ -39,8 +39,10 @@ local Colorbar = {
   ZIndex = 100,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "colorbar.png",
-  FaceCamera = false,
-  CartesianPosition = { 0.0, -0.5, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    CartesianPosition = { 0.0, -0.5, -2.0 }
+  }
 }
 
 

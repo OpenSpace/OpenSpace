@@ -26,12 +26,12 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/geodetic.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -85,8 +85,7 @@ Documentation DashboardItemGlobeLocation::Documentation() {
     );
 }
 
-DashboardItemGlobeLocation::DashboardItemGlobeLocation(
-                                                      const ghoul::Dictionary& dictionary)
+DashboardItemGlobeLocation::DashboardItemGlobeLocation(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _displayFormat(DisplayFormatInfo)
     , _significantDigits(SignificantDigitsInfo, 4, 1, 12)

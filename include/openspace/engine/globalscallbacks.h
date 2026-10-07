@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_CORE___GLOBALSCALLBACKS___H__
 #define __OPENSPACE_CORE___GLOBALSCALLBACKS___H__
 
+#include <openspace/misc/boolean.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
-#include <ghoul/misc/boolean.h>
 #include <functional>
 #include <vector>
 

@@ -35,7 +35,7 @@ public:
 
     SpoutModule();
 
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
 
     std::vector<openspace::Documentation> documentations() const override;
 };

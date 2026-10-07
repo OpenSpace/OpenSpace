@@ -27,6 +27,14 @@
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/scene.h>
@@ -34,14 +42,6 @@
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/Point.h>
 #include <geos/util/GEOSException.h>
@@ -242,11 +242,11 @@ namespace {
         // These properties will be used as default values for the geoJson rendering,
         // meaning that they will be used when there is no value given for the
         // individual geoJson features.
-        std::optional<ghoul::Dictionary> defaultProperties
+        std::optional<Dictionary> defaultProperties
             [[codegen::reference("globebrowsing_geojsonproperties")]];
 
         // A list of light sources that this object should accept light from.
-        std::optional<std::vector<ghoul::Dictionary>> lightSources
+        std::optional<std::vector<Dictionary>> lightSources
             [[codegen::reference("core_lightsource")]];
     };
 } // namespace
@@ -290,8 +290,7 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(PropertyOwner::PropertyOwnerI
     addProperty(boundingboxLatLong);
 }
 
-GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
-                                   RenderableGlobe& globe)
+GeoJsonComponent::GeoJsonComponent(const Dictionary& dictionary, RenderableGlobe& globe)
     : PropertyOwner({
         dictionary.value<std::string>(KeyIdentifier),
         dictionary.hasKey(KeyName) ? dictionary.value<std::string>(KeyName) : "",
@@ -428,9 +427,9 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     readFile();
 
     if (p.lightSources.has_value()) {
-        const std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
+        const std::vector<Dictionary> lightsources = *p.lightSources;
 
-        for (const ghoul::Dictionary& lsDictionary : lightsources) {
+        for (const Dictionary& lsDictionary : lightsources) {
             std::unique_ptr<LightSource> lightSource =
                 LightSource::createFromDictionary(lsDictionary);
             _lightSourcePropertyOwner.addPropertySubOwner(lightSource.get());
@@ -440,7 +439,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     else {
         // If no light source provided, add a deafult light source from the camera
         using namespace std::string_literals;
-        ghoul::Dictionary defaultLightSourceDict;
+        Dictionary defaultLightSourceDict;
         defaultLightSourceDict.setValue("Identifier", "Camera"s);
         defaultLightSourceDict.setValue("Type", "CameraLightSource"s);
         defaultLightSourceDict.setValue("Intensity", 1.0);
@@ -717,7 +716,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
 
             _featuresPropertyOwner.addPropertySubOwner(_features.back().get());
         }
-        catch (const ghoul::RuntimeError& error) {
+        catch (const RuntimeError& error) {
             LERROR(std::format(
                 "Error creating GeoJson layer with identifier '{}'. Problem reading "
                 "feature {} in GeoJson file '{}'",

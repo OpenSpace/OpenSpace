@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/glm.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
@@ -36,7 +37,6 @@
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
 #include <openspace/util/versionchecker.h>
-#include <ghoul/glm.h>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -121,7 +121,7 @@ public:
     void decode(std::vector<std::byte> data);
 
     Property::Visibility visibility() const;
-    void toggleShutdownMode();
+    void toggleShutdownMode(std::optional<float> timer = std::nullopt);
 
     Mode currentMode() const;
     bool setMode(Mode newMode);
@@ -164,6 +164,7 @@ private:
     BoolProperty _showPropertyConfirmationDialog;
     FloatProperty _fadeOnEnableDuration;
     BoolProperty _disableAllMouseInputs;
+    FloatProperty _defaultShutdownCountdown;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;

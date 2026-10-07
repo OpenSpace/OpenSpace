@@ -27,9 +27,9 @@
 #include <sgctedit/displaywindowunion.h>
 #include <sgctedit/monitorbox.h>
 #include <sgct/math.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
 #include <QApplication>
 #include <QCheckBox>
 #include <QFileDialog>
@@ -293,7 +293,7 @@ void SgctEdit::saveCluster() {
         };
     }
 
-    ghoul_assert(!_cluster.nodes.empty(), "There must be at least one node");
+    assert_msg(!_cluster.nodes.empty(), "There must be at least one node");
     sgct::config::Node& node = _cluster.nodes.back();
 
     //
@@ -362,7 +362,7 @@ void SgctEdit::saveCluster() {
             "Window Configuration (*.json)",
             nullptr
 #ifdef __linux__
-            // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
+            // Linux in Qt6 crashes when trying to access the native dialog here
             , QFileDialog::DontUseNativeDialog
 #endif // __linux__
         );
@@ -376,7 +376,7 @@ void SgctEdit::saveCluster() {
 
     //
     // Save the cluster configuration
-    ghoul_assert(!_configurationFilename.empty(), "Filename must not be empty");
+    assert_msg(!_configurationFilename.empty(), "Filename must not be empty");
     std::ofstream outFile;
     outFile.open(_configurationFilename, std::ofstream::out);
     if (outFile.good()) {

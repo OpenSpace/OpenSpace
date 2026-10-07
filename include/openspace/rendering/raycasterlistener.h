@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___RAYCASTERLISTENER___H__
 #define __OPENSPACE_CORE___RAYCASTERLISTENER___H__
 
-#include <ghoul/misc/boolean.h>
+#include <openspace/misc/boolean.h>
 
 namespace openspace {
 

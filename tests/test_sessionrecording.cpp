@@ -25,8 +25,8 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <filesystem>
 
 using namespace openspace;
@@ -128,6 +128,10 @@ TEST_CASE("SessionRecording: 01.00 Ascii Windows", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 01.00 Ascii Windows Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0100_ascii_windows.osrectxt"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
@@ -225,6 +229,10 @@ TEST_CASE("SessionRecording: 01.00 Binary Windows", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 01.00 Binary Windows Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0100_binary_windows.osrec"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
@@ -330,6 +338,10 @@ TEST_CASE("SessionRecording: 02.00 Ascii Windows", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 02.00 Ascii Windows Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0200_ascii_windows.osrectxt"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
@@ -421,6 +433,10 @@ TEST_CASE("SessionRecording: 02.00 Binary Windows", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 02.00 Binary Windows Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0200_binary_windows.osrec"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
@@ -520,6 +536,10 @@ TEST_CASE("SessionRecording: 03.00 Ascii Windows", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 03.00 Ascii Windows Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0300_ascii_windows.osrectxt"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
@@ -605,6 +625,10 @@ TEST_CASE("SessionRecording: 03.00 Binary Windows", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 03.00 Binary Windows Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0300_binary_windows.osrec"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
@@ -720,6 +744,10 @@ TEST_CASE("SessionRecording: 01.00 Ascii Linux", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 01.00 Ascii Linux Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0100_ascii_linux.osrectxt"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
@@ -846,6 +874,10 @@ TEST_CASE("SessionRecording: 01.00 Binary Linux", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 01.00 Binary Linux Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0100_binary_linux.osrec"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
@@ -948,6 +980,10 @@ TEST_CASE("SessionRecording: 02.00 Ascii Linux", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 02.00 Ascii Linux Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0200_ascii_linux.osrectxt"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
@@ -1074,6 +1110,10 @@ TEST_CASE("SessionRecording: 02.00 Binary Linux", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 02.00 Binary Linux Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0200_binary_linux.osrec"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
@@ -1176,6 +1216,10 @@ TEST_CASE("SessionRecording: 03.00 Ascii Linux", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 03.00 Ascii Linux Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0300_ascii_linux.osrectxt"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
@@ -1298,6 +1342,10 @@ TEST_CASE("SessionRecording: 03.00 Binary Linux", "[sessionrecording]") {
 }
 
 TEST_CASE("SessionRecording: 03.00 Binary Linux Roundtrip", "[sessionrecording]") {
+    // Delete files that might already exist
+    std::filesystem::remove(absPath("${TEMPORARY}/ascii"));
+    std::filesystem::remove(absPath("${TEMPORARY}/binary"));
+
     SessionRecording rec = loadSessionRecording(test("0300_binary_linux.osrec"));
     saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
     saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);

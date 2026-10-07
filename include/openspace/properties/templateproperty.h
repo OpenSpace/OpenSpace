@@ -68,7 +68,7 @@ public:
 
     /**
      * Returns the `std::type_info` describing the template parameter `T`. It can be used
-     * to test against a ghoul::any value before trying to assign it.
+     * to test against a any value before trying to assign it.
      *
      * \return The type info object describing the template parameter `T`
      */

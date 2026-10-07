@@ -38,7 +38,7 @@ public:
         Osfls
     };
 
-    explicit KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
+    explicit KameleonVolumeToFieldlinesTask(const Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;

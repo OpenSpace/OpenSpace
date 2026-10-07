@@ -35,7 +35,7 @@ namespace openspace {
 
 class DashboardItemSimulationIncrement : public DashboardTextItem {
 public:
-    explicit DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemSimulationIncrement(const Dictionary& dictionary);
     ~DashboardItemSimulationIncrement() override = default;
 
     void update() override;

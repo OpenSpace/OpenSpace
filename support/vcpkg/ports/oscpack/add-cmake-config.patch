@@ -1,0 +1,79 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e8bef70..f235f81 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -42,6 +42,65 @@ osc/OscOutboundPacketStream.cpp
+ 
+ )
+ 
++TARGET_LINK_LIBRARIES(oscpack PRIVATE ${LIBS})
++
++set(IP_HEADERS
++  ip/IpEndpointName.h
++  ip/NetworkingUtils.h
++  ip/PacketListener.h
++  ip/TimerListener.h
++  ip/UdpSocket.h
++)
++
++set(OSC_HEADERS
++  osc/MessageMappingOscPacketListener.h
++  osc/OscException.h
++  osc/OscHostEndianness.h
++  osc/OscOutboundPacketStream.h
++  osc/OscPacketListener.h
++  osc/OscPrintReceivedElements.h
++  osc/OscReceivedElements.h
++  osc/OscTypes.h
++)
++
++include(GNUInstallDirs)
++include(CMakePackageConfigHelpers)
++
++target_include_directories(oscpack PUBLIC
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
++  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
++)
++
++install(TARGETS oscpack
++  EXPORT oscpackTargets
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++install(FILES ${IP_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ip)
++install(FILES ${OSC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/osc)
++
++install(EXPORT oscpackTargets
++  FILE oscpackTargets.cmake
++  NAMESPACE oscpack::
++  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/oscpack
++)
++
++configure_package_config_file(
++  ${CMAKE_CURRENT_SOURCE_DIR}/oscpackConfig.cmake.in
++  ${CMAKE_CURRENT_BINARY_DIR}/oscpackConfig.cmake
++  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/oscpack
++)
++write_basic_package_version_file(
++  ${CMAKE_CURRENT_BINARY_DIR}/oscpackConfigVersion.cmake
++  VERSION 1.1.0
++  COMPATIBILITY AnyNewerVersion
++)
++install(FILES
++  ${CMAKE_CURRENT_BINARY_DIR}/oscpackConfig.cmake
++  ${CMAKE_CURRENT_BINARY_DIR}/oscpackConfigVersion.cmake
++  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/oscpack
++)
+ 
+ ADD_EXECUTABLE(OscUnitTests tests/OscUnitTests.cpp)
+ TARGET_LINK_LIBRARIES(OscUnitTests oscpack ${LIBS})
+diff --git a/oscpackConfig.cmake.in b/oscpackConfig.cmake.in
+new file mode 100644
+index 0000000..8b4da97
+--- /dev/null
++++ b/oscpackConfig.cmake.in
+@@ -0,0 +1,3 @@
++@PACKAGE_INIT@
++
++include("${CMAKE_CURRENT_LIST_DIR}/oscpackTargets.cmake")

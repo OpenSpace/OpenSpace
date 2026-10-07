@@ -39,11 +39,12 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <deque>
 #include <memory>
 
 namespace openspace {
+
+class opengl::ProgramObject;
 
 class RenderableFieldlinesSequence : public Renderable {
 public:
@@ -64,7 +65,7 @@ public:
         ByQuantity
     };
 
-    explicit RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary);
+    explicit RenderableFieldlinesSequence(const Dictionary& dictionary);
     void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
@@ -151,7 +152,7 @@ private:
 
     bool _isLoadingStateFromDisk = false;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+    std::unique_ptr<opengl::ProgramObject> _shaderProgram;
 
     /// OpenGL Vertex Array Object
     GLuint _vao = 0;
@@ -165,7 +166,7 @@ private:
     GLuint _vboPosition = 0;
 
     struct Color : public PropertyOwner {
-        explicit Color(const ghoul::Dictionary& dictionary);
+        explicit Color(const Dictionary& dictionary);
 
         /// Uniform/transfer function/topology?
         OptionProperty method;
@@ -197,7 +198,7 @@ private:
 
 
     struct Domain : public PropertyOwner {
-        explicit Domain(const ghoul::Dictionary& dictionary);
+        explicit Domain(const Dictionary& dictionary);
         BoolProperty enabled;
         Vec2Property x;
         Vec2Property y;
@@ -206,7 +207,7 @@ private:
     } _domain;
 
     struct Flow : public PropertyOwner, public Fadeable {
-        explicit Flow(const ghoul::Dictionary& dictionary);
+        explicit Flow(const Dictionary& dictionary);
         BoolProperty enabled;
         /// Simulated particles' color
         Vec4Property color;
@@ -221,7 +222,7 @@ private:
     } _flow;
 
     struct Masking : public PropertyOwner {
-        explicit Masking(const ghoul::Dictionary& dictionary);
+        explicit Masking(const Dictionary& dictionary);
         BoolProperty enabled;
         /// Selected lower and upper range limits for masking
         Vec2Property selectedRange;

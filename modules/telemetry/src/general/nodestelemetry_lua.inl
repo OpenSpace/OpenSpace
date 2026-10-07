@@ -32,15 +32,15 @@ namespace {
 /**
  * Adds the given list of nodes to the NodesTelemetry's internal list.
  */
-[[codegen::luawrap]] void addNodes(ghoul::Dictionary nodes) {
+[[codegen::luawrap]] void addNodes(Dictionary nodes) {
     TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
     if (!module) {
-        throw ghoul::lua::LuaError("Could not find the TelemetryModule");
+        throw lua::LuaError("Could not find the TelemetryModule");
         return;
     }
     TelemetryBase* ptr = module->telemetry("NodesTelemetry");
     if (!ptr) {
-        throw ghoul::lua::LuaError("Could not find the NodesTelemetry");
+        throw lua::LuaError("Could not find the NodesTelemetry");
         return;
     }
 

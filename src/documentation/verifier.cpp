@@ -25,10 +25,10 @@
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/documentation/documentationengine.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringhelper.h>
 #include <scn/scan.h>
 #include <algorithm>
 #include <cmath>
@@ -129,9 +129,7 @@ std::string DoubleVerifier::type() const {
     return "Double";
 }
 
-TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
-                                   const std::string& key) const
-{
+TestResult IntVerifier::operator()(const Dictionary& dict, const std::string& key) const {
     if (dict.hasValue<int>(key)) {
         // We have a key and the value is int, we are done
         return {
@@ -195,7 +193,7 @@ StringVerifier::StringVerifier(bool mustBeNotEmpty)
     : _mustBeNotEmpty(mustBeNotEmpty)
 {}
 
-TestResult StringVerifier::operator()(const ghoul::Dictionary& dictionary,
+TestResult StringVerifier::operator()(const Dictionary& dictionary,
                                       const std::string& key) const
 {
     TestResult res = TemplateVerifier<std::string>::operator()(dictionary, key);
@@ -228,7 +226,7 @@ IdentifierVerifier::IdentifierVerifier()
     : StringVerifier(true)
 {}
 
-TestResult IdentifierVerifier::operator()(const ghoul::Dictionary& dict,
+TestResult IdentifierVerifier::operator()(const Dictionary& dict,
                                           const std::string& key) const
 {
     TestResult res = StringVerifier::operator()(dict, key);
@@ -263,8 +261,7 @@ FileVerifier::FileVerifier(bool fileMustExist)
     , _fileMustExist(fileMustExist)
 {}
 
-TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
-                                    const std::string& key) const
+TestResult FileVerifier::operator()(const Dictionary& dict, const std::string& key) const
 {
     TestResult res = StringVerifier::operator()(dict, key);
     if (!res.success) {
@@ -299,7 +296,7 @@ DirectoryVerifier::DirectoryVerifier(bool directoryMusExist)
     , _directoryMustExist(directoryMusExist)
 {}
 
-TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
+TestResult DirectoryVerifier::operator()(const Dictionary& dict,
                                          const std::string& key) const
 {
     TestResult res = StringVerifier::operator()(dict, key);
@@ -334,7 +331,7 @@ DateTimeVerifier::DateTimeVerifier()
     : StringVerifier(true)
 {}
 
-TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
+TestResult DateTimeVerifier::operator()(const Dictionary& dict,
                                         const std::string& key) const
 {
     TestResult res = StringVerifier::operator()(dict, key);
@@ -394,7 +391,7 @@ std::string DateTimeVerifier::type() const {
     return "Date and time";
 }
 
-TestResult Color3Verifier::operator()(const ghoul::Dictionary& dictionary,
+TestResult Color3Verifier::operator()(const Dictionary& dictionary,
                                       const std::string& key) const
 {
     TestResult res = Vector3Verifier<double>::operator()(dictionary, key);
@@ -440,7 +437,7 @@ std::string Color3Verifier::type() const {
     return "Color3";
 }
 
-TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
+TestResult Color4Verifier::operator()(const Dictionary& dictionary,
                                       const std::string& key) const
 {
     TestResult res = Vector4Verifier<double>::operator()(dictionary, key);
@@ -497,7 +494,7 @@ std::string Color4Verifier::type() const {
 }
 
 template <>
-TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dict,
+TestResult TemplateVerifier<glm::ivec2>::operator()(const Dictionary& dict,
                                                     const std::string& key) const
 {
     if (dict.hasValue<glm::ivec2>(key)) {
@@ -557,7 +554,7 @@ TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dic
 }
 
 template <>
-TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dict,
+TestResult TemplateVerifier<glm::ivec3>::operator()(const Dictionary& dict,
                                                     const std::string& key) const
 {
     if (dict.hasValue<glm::ivec3>(key)) {
@@ -618,7 +615,7 @@ TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dic
 }
 
 template <>
-TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dict,
+TestResult TemplateVerifier<glm::ivec4>::operator()(const Dictionary& dict,
                                                     const std::string& key) const
 {
     if (dict.hasValue<glm::ivec4>(key)) {
@@ -685,11 +682,11 @@ TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntrie
     , count(nEntries)
 {}
 
-TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
+TestResult TableVerifier::operator()(const Dictionary& dictionary,
                                      const std::string& key) const
 {
     if (dictionary.hasValue<Type>(key)) {
-        const ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
+        const Dictionary d = dictionary.value<Dictionary>(key);
         const Documentation doc = { .entries = documentations };
         TestResult res = testSpecification(doc, d);
 
@@ -781,10 +778,10 @@ std::string IntListVerifier::type() const {
 ReferencingVerifier::ReferencingVerifier(std::string id)
     : identifier(std::move(id))
 {
-    ghoul_assert(!identifier.empty(), "identifier must not be empty");
+    assert_msg(!identifier.empty(), "identifier must not be empty");
 }
 
-TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
+TestResult ReferencingVerifier::operator()(const Dictionary& dictionary,
                                            const std::string& key) const
 {
     TestResult res = TableVerifier::operator()(dictionary, key);
@@ -810,7 +807,7 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
         return res;
     }
 
-    const ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
+    const Dictionary d = dictionary.value<Dictionary>(key);
     TestResult r = testSpecification(*it, d);
 
     // Add the 'key' as a prefix to make the offender a fully qualified identifer
@@ -833,7 +830,7 @@ std::string ReferencingVerifier::documentation() const {
 OrVerifier::OrVerifier(
            const std::vector<std::variant<Verifier*, std::shared_ptr<Verifier>>>& values_)
 {
-    ghoul_assert(!values_.empty(), "values must not be empty");
+    assert_msg(!values_.empty(), "values must not be empty");
     for (const std::variant<Verifier*, std::shared_ptr<Verifier>>& v : values_) {
         if (std::holds_alternative<Verifier*>(v)) {
             values.push_back(std::shared_ptr<Verifier>(std::get<Verifier*>(v)));
@@ -844,7 +841,7 @@ OrVerifier::OrVerifier(
     }
 }
 
-TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
+TestResult OrVerifier::operator()(const Dictionary& dictionary,
                                   const std::string& key) const
 {
     std::vector<TestResult> res(values.size());
@@ -907,7 +904,7 @@ std::string OrVerifier::type() const {
     );
     types.push_back(std::format("or {}", values.back()->type()));
 
-    return ghoul::join(types, ", ");
+    return join(types, ", ");
 }
 
 std::string OrVerifier::documentation() const {
@@ -921,7 +918,7 @@ std::string OrVerifier::documentation() const {
     );
     documentations.push_back(std::format("or {}", values.back()->documentation()));
 
-    return ghoul::join(documentations, ", ");
+    return join(documentations, ", ");
 }
 
 } // namespace openspace

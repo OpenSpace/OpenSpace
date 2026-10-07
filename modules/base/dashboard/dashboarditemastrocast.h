@@ -31,7 +31,7 @@ namespace openspace {
 
 class DashboardItemAstrocast : public DashboardTextItem {
 public:
-    explicit DashboardItemAstrocast(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemAstrocast(const Dictionary& dictionary);
     ~DashboardItemAstrocast() override = default;
 
     void update() override;

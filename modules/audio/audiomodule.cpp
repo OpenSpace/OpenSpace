@@ -26,13 +26,13 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/openspacemodule.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <soloud.h>
 #include <soloud_wav.h>
 #include <string_view>
@@ -64,7 +64,7 @@ AudioModule::AudioModule()
 
 AudioModule::~AudioModule() {}
 
-void AudioModule::internalInitialize(const ghoul::Dictionary& dictionary) {
+void AudioModule::internalInitialize(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     LDEBUG(std::format("Initializing SoLoud version: {}", SOLOUD_VERSION));
@@ -91,7 +91,7 @@ void AudioModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 }
 
 void AudioModule::internalDeinitializeGL() {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     _sounds.clear();
     _engine->deinit();
@@ -116,13 +116,13 @@ void AudioModule::garbageCollection() {
 }
 
 std::unique_ptr<SoLoud::Wav> AudioModule::loadSound(const std::filesystem::path& path) {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     std::unique_ptr<SoLoud::Wav> sound = std::make_unique<SoLoud::Wav>();
     const std::string p = path.string();
     SoLoud::result res = sound->load(p.c_str());
     if (res != 0) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error loading sound from {}. {}: {}",
             path, static_cast<int>(res), _engine->getErrorString(res)
         ));
@@ -134,7 +134,7 @@ std::unique_ptr<SoLoud::Wav> AudioModule::loadSound(const std::filesystem::path&
 void AudioModule::playAudio(const std::filesystem::path& path, std::string identifier,
                             ShouldLoop loop)
 {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
     garbageCollection();
 
     std::unique_ptr<SoLoud::Wav> sound = loadSound(path);
@@ -154,7 +154,7 @@ void AudioModule::playAudio(const std::filesystem::path& path, std::string ident
 void AudioModule::playAudio3d(const std::filesystem::path& path, std::string identifier,
                               const glm::vec3& position, ShouldLoop loop)
 {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
     garbageCollection();
 
     if (_sounds.find(identifier) != _sounds.end()) {
@@ -173,7 +173,7 @@ void AudioModule::playAudio3d(const std::filesystem::path& path, std::string ide
 }
 
 void AudioModule::stopAudio(const std::string& identifier) {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     auto it = _sounds.find(identifier);
     if (it != _sounds.end()) {
@@ -183,7 +183,7 @@ void AudioModule::stopAudio(const std::string& identifier) {
 }
 
 void AudioModule::stopAll() {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     _engine->stopAll();
     _sounds.clear();
@@ -209,7 +209,7 @@ void AudioModule::playAllFromStart() const {
 }
 
 bool AudioModule::isPlaying(const std::string& identifier) const {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     auto it = _sounds.find(identifier);
     if (it != _sounds.end()) {
@@ -221,7 +221,7 @@ bool AudioModule::isPlaying(const std::string& identifier) const {
 }
 
 void AudioModule::pauseAudio(const std::string& identifier) const {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     auto it = _sounds.find(identifier);
     if (it != _sounds.end()) {
@@ -230,7 +230,7 @@ void AudioModule::pauseAudio(const std::string& identifier) const {
 }
 
 void AudioModule::resumeAudio(const std::string& identifier) const {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     auto it = _sounds.find(identifier);
     if (it != _sounds.end()) {
@@ -239,7 +239,7 @@ void AudioModule::resumeAudio(const std::string& identifier) const {
 }
 
 bool AudioModule::isPaused(const std::string& identifier) const {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     auto it = _sounds.find(identifier);
     if (it != _sounds.end()) {
@@ -252,7 +252,7 @@ bool AudioModule::isPaused(const std::string& identifier) const {
 }
 
 void AudioModule::setLooping(const std::string& identifier, ShouldLoop loop) const {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     auto it = _sounds.find(identifier);
     if (it != _sounds.end()) {
@@ -261,7 +261,7 @@ void AudioModule::setLooping(const std::string& identifier, ShouldLoop loop) con
 }
 
 AudioModule::ShouldLoop AudioModule::isLooping(const std::string& identifier) const {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     auto it = _sounds.find(identifier);
     if (it != _sounds.end()) {
@@ -274,7 +274,7 @@ AudioModule::ShouldLoop AudioModule::isLooping(const std::string& identifier) co
 
 void AudioModule::setVolume(const std::string& identifier, float volume, float fade) const
 {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     auto it = _sounds.find(identifier);
     if (it == _sounds.end()) {
@@ -292,7 +292,7 @@ void AudioModule::setVolume(const std::string& identifier, float volume, float f
 }
 
 float AudioModule::volume(const std::string& identifier) const {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     auto it = _sounds.find(identifier);
     if (it != _sounds.end()) {
@@ -307,7 +307,7 @@ float AudioModule::volume(const std::string& identifier) const {
 void AudioModule::set3dSourcePosition(const std::string& identifier,
                                       const glm::vec3& position) const
 {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     auto it = _sounds.find(identifier);
     if (it != _sounds.end()) {
@@ -336,7 +336,7 @@ std::vector<std::string> AudioModule::currentlyPlaying() {
 }
 
 void AudioModule::setGlobalVolume(float volume, float fade) const {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     // We clamp the volume level between [0, 1] to not accidentally blow any speakers
     volume = std::clamp(volume, 0.f, 1.f);
@@ -349,7 +349,7 @@ void AudioModule::setGlobalVolume(float volume, float fade) const {
 }
 
 float AudioModule::globalVolume() const {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
     return _engine->getGlobalVolume();
 }
 
@@ -357,7 +357,7 @@ void AudioModule::set3dListenerParameters(const std::optional<glm::vec3>& positi
                                           const std::optional<glm::vec3>& lookAt,
                                           const std::optional<glm::vec3>& up) const
 {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     if (position.has_value()) {
         _engine->set3dListenerPosition(position->x, position->y, position->z);
@@ -371,12 +371,12 @@ void AudioModule::set3dListenerParameters(const std::optional<glm::vec3>& positi
 }
 
 void AudioModule::setSpeakerPosition(int channel, const glm::vec3& position) const {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
     _engine->setSpeakerPosition(channel, position.x, position.y, position.z);
 }
 
 glm::vec3 AudioModule::speakerPosition(int channel) const {
-    ghoul_assert(_engine, "No audio engine loaded");
+    assert_msg(_engine, "No audio engine loaded");
 
     float x = 0.f;
     float y = 0.f;

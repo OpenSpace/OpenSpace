@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__
 
+#include <openspace/glm.h>
+#include <openspace/misc/easing.h>
 #include <openspace/util/distanceconstants.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/easing.h>
 #include <chrono>
 #include <ratio>
 #include <type_traits>
@@ -231,14 +231,14 @@ public:
 
         if constexpr (std::is_same_v<T, double>) {
             const double percentage = percentageSpent();
-            const double diff = (_goal - _start) * ghoul::exponentialEaseOut(percentage);
+            const double diff = (_goal - _start) * exponentialEaseOut(percentage);
             return _start + diff;
         }
         else if constexpr (std::is_same_v<T, glm::dvec3>) {
             const glm::dmat4 rotMat = incrementalAnimationMatrix(
                 glm::normalize(_start),
                 glm::normalize(_goal),
-                ghoul::exponentialEaseOut(percentageSpent())
+                exponentialEaseOut(percentageSpent())
             );
             // Rotate direction
             return glm::dvec3(rotMat * glm::dvec4(_start, 1.0));
@@ -253,7 +253,7 @@ public:
             return glm::dmat4(1.0);
         }
 
-        const double percentage = ghoul::sineEaseInOut(percentageSpent());
+        const double percentage = sineEaseInOut(percentageSpent());
         const double increment = percentage - _lastPercentage;
         _lastPercentage = percentage;
 

@@ -24,7 +24,26 @@
 
 #include <openspace/openspace.h>
 
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/renderdoc.h>
+
 namespace openspace {
+
+void initialize() {
+    ZoneScoped;
+
+    filesystem::FileSystem::initialize();
+    opengl::loadRenderDoc();
+}
+
+void deinitialize() {
+    ZoneScoped;
+
+    lua::internal::deinitializeGlobalState();
+    filesystem::FileSystem::deinitialize();
+}
 
 std::string licenseText() {
     return R"(OpenSpace

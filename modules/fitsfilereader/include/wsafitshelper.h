@@ -30,9 +30,9 @@
 #include <utility>
 #include <valarray>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
+
+namespace opengl { class Texture; }
 
 template <typename T>
 struct ImageData {
@@ -50,9 +50,8 @@ struct ImageData {
           values outside of range will be overexposed
    \return The texture created from the layer in the file with the set min-max range
  */
-std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
-    const std::filesystem::path& path, size_t layerIndex,
-    const std::pair<float, float>& minMax);
+std::unique_ptr<opengl::Texture> loadTextureFromFits(const std::filesystem::path& path,
+    size_t layerIndex, const std::pair<float, float>& minMax);
 
 void readFitsHeader(const std::filesystem::path& path);
 

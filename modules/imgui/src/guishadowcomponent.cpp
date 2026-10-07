@@ -63,10 +63,10 @@ void GuiShadowComponent::render() {
         ImGui::Text("Light Source: %s", lightSource.c_str());
         ImGui::Text("Targets");
         for (const SceneGraphNode* node : sm.targets) {
-            ghoul_assert(node, "No SceneGraphNode");
-            ghoul_assert(node->renderable(), "No Renderable");
+            assert_msg(node, "No SceneGraphNode");
+            assert_msg(node->renderable(), "No Renderable");
             const Shadower* shadower = dynamic_cast<const Shadower*>(node->renderable());
-            ghoul_assert(shadower, "No shadower");
+            assert_msg(shadower, "No shadower");
 
             std::string id = node->identifier();
             ImGui::Text("  %s", id.c_str());

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/format.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/format.h>
+#include <openspace/lua/lua_helper.h>
 #include <algorithm>
 #include <map>
 #include <string>
@@ -40,13 +40,13 @@ namespace {
  * node is hosting an astrocast connection.
  */
 [[codegen::luawrap]] void bindKey(std::string key,
-                                  std::variant<std::string, ghoul::Dictionary> action)
+                                  std::variant<std::string, Dictionary> action)
 {
     std::string identifier;
-    if (std::holds_alternative<ghoul::Dictionary>(action)) {
-        const ghoul::Dictionary& d = std::get<ghoul::Dictionary>(action);
+    if (std::holds_alternative<Dictionary>(action)) {
+        const Dictionary& d = std::get<Dictionary>(action);
         if (!d.hasValue<std::string>("Identifier")) {
-            throw ghoul::lua::LuaError("Provided action table must have an Identifer");
+            throw lua::LuaError("Provided action table must have an Identifer");
         }
         identifier = d.value<std::string>("Identifier");
     }
@@ -55,15 +55,15 @@ namespace {
     }
 
     if (identifier.empty()) {
-        throw ghoul::lua::LuaError("Action must not be empty");
+        throw lua::LuaError("Action must not be empty");
     }
     if (!global::actionManager->hasAction(identifier)) {
-        throw ghoul::lua::LuaError(std::format("Action '{}' does not exist", identifier));
+        throw lua::LuaError(std::format("Action '{}' does not exist", identifier));
     }
 
     KeyWithModifier iKey = stringToKey(key);
     if (iKey.key == Key::Unknown) {
-        throw ghoul::lua::LuaError(std::format("Could not find key '{}'", key));
+        throw lua::LuaError(std::format("Could not find key '{}'", key));
     }
 
     global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(identifier));

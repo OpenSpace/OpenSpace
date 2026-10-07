@@ -27,11 +27,11 @@
 #include <modules/statemachine/include/state.h>
 #include <modules/statemachine/include/transition.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
 #include <filesystem>
 #include <string>
 #include <utility>
@@ -48,11 +48,11 @@ StateMachineModule::StateMachineModule()
     : OpenSpaceModule(Name)
 {}
 
-void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
-                                                const ghoul::Dictionary& transitions,
+void StateMachineModule::initializeStateMachine(const Dictionary& states,
+                                                const Dictionary& transitions,
                                                 std::optional<std::string> startState)
 {
-    ghoul::Dictionary dictionary;
+    Dictionary dictionary;
     dictionary.setValue("States", states);
     dictionary.setValue("Transitions", transitions);
 

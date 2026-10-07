@@ -1,0 +1,48 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9caa8df..8b4774d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -94,6 +94,34 @@ configure_file(
+ set(CCMC_ROOT_DIR "${KAMELEON_SRC_DIR}/ccmc")
+ add_subdirectory(${CCMC_ROOT_DIR})
+ 
++#########################################################################################
++# Install
++#########################################################################################
++include(GNUInstallDirs)
++include(CMakePackageConfigHelpers)
++
++install(EXPORT KameleonTargets
++  FILE KameleonTargets.cmake
++  NAMESPACE Kameleon::
++  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Kameleon
++)
++
++configure_package_config_file(
++  ${CMAKE_CURRENT_SOURCE_DIR}/KameleonConfig.cmake.in
++  ${CMAKE_CURRENT_BINARY_DIR}/KameleonConfig.cmake
++  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Kameleon
++)
++write_basic_package_version_file(
++  ${CMAKE_CURRENT_BINARY_DIR}/KameleonConfigVersion.cmake
++  VERSION ${KAMELEON_PLUS_VERSION}
++  COMPATIBILITY AnyNewerVersion
++)
++install(FILES
++  ${CMAKE_CURRENT_BINARY_DIR}/KameleonConfig.cmake
++  ${CMAKE_CURRENT_BINARY_DIR}/KameleonConfigVersion.cmake
++  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Kameleon
++)
++
+ #########################################################################################
+ # C++ Examples
+ #########################################################################################
+diff --git a/KameleonConfig.cmake.in b/KameleonConfig.cmake.in
+new file mode 100644
+index 0000000..e20162f
+--- /dev/null
++++ b/KameleonConfig.cmake.in
+@@ -0,0 +1,3 @@
++@PACKAGE_INIT@
++
++include("${CMAKE_CURRENT_LIST_DIR}/KameleonTargets.cmake")

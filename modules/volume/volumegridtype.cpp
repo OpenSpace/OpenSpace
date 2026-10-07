@@ -24,8 +24,8 @@
 
 #include <modules/volume/volumegridtype.h>
 
-#include <ghoul/format.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/format.h>
+#include <openspace/misc/exception.h>
 
 namespace openspace {
 
@@ -36,7 +36,7 @@ VolumeGridType parseGridType(const std::string& gridType) {
     if (gridType == "Spherical") {
         return VolumeGridType::Spherical;
     }
-    throw ghoul::RuntimeError(std::format("Invalid grid type: '{}'", gridType));
+    throw RuntimeError(std::format("Invalid grid type: '{}'", gridType));
 }
 
 std::string gridTypeToString(VolumeGridType gridType) {

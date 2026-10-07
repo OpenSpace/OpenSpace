@@ -22,13 +22,23 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/support/cmake/common-compile-settings")
-include(${PROJECT_SOURCE_DIR}/support/cmake/common-compile-settings/common-compile-settings.cmake)
+if (MSVC)
+  option(OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS "Enable other optimizations, like LTCG, intrinsics, etc")
+
+  include(${CMAKE_CURRENT_LIST_DIR}/platforms/msvc.cmake)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+  include(${CMAKE_CURRENT_LIST_DIR}/platforms/clang.cmake)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  include(${CMAKE_CURRENT_LIST_DIR}/platforms/gcc.cmake)
+else ()
+  message(FATAL_ERROR "Unknown compiler ${CMAKE_CXX_COMPILER_ID}")
+endif ()
 
 function (set_openspace_compile_settings target)
-  set_compile_settings(${target})
+  target_compile_features(${target} PRIVATE cxx_std_23)
+  internal__set_compile_options(${target})
 
-  if (GHOUL_ENABLE_EDIT_CONTINUE)
+  if (OPENSPACE_ENABLE_EDIT_CONTINUE)
     target_compile_options(${target} PRIVATE
       "/ZI"       # Edit and continue support
     )

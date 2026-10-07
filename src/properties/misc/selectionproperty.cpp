@@ -24,9 +24,9 @@
 
 #include <openspace/properties/misc/selectionproperty.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua.h>
+#include <openspace/lua/lua_helper.h>
 #include <algorithm>
 
 namespace {
@@ -44,12 +44,12 @@ std::string_view SelectionProperty::className() const {
     return "SelectionProperty";
 }
 
-ghoul::lua::LuaTypes SelectionProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes SelectionProperty::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void SelectionProperty::setValue(std::set<std::string> val) {
-    ghoul_assert(!_options.empty(), "Cannot set selection before options have been set");
+    assert_msg(!_options.empty(), "Cannot set selection before options have been set");
 
     if (val == _value) {
         return;
@@ -130,11 +130,11 @@ void SelectionProperty::clearOptions() {
 
 void SelectionProperty::getLuaValue(lua_State* state) const {
     const std::vector<std::string> value(_value.begin(), _value.end());
-    ghoul::lua::push(state, value);
+    lua::push(state, value);
 }
 
 std::set<std::string> SelectionProperty::toValue(lua_State* state) const {
-    std::vector<std::string> val = ghoul::lua::value<std::vector<std::string>>(state, -1);
+    std::vector<std::string> val = lua::value<std::vector<std::string>>(state, -1);
     return std::set<std::string>(val.begin(), val.end());
 }
 

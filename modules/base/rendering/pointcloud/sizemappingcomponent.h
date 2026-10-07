@@ -31,10 +31,9 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 /**
@@ -43,7 +42,7 @@ struct Documentation;
  */
 struct SizeMappingComponent : public PropertyOwner {
     SizeMappingComponent();
-    explicit SizeMappingComponent(const ghoul::Dictionary& dictionary);
+    explicit SizeMappingComponent(const Dictionary& dictionary);
     ~SizeMappingComponent() override = default;
 
     static openspace::Documentation Documentation();

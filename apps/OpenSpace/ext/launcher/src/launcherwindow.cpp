@@ -34,10 +34,10 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/settings.h>
 #include <openspace/openspace.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
 #include <sgct/config.h>
 #include <QComboBox>
 #include <QFile>
@@ -228,7 +228,8 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             }
             catch (...) {}
             return std::string();
-        }
+        },
+        ".profile"
     );
     _profileBox->setObjectName("config");
     _profileBox->setGeometry(geometry::ProfileBox);
@@ -354,7 +355,8 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             }
             catch (...) {}
             return std::string();
-        }
+        },
+        ".json"
     );
     _windowConfigBox->setObjectName("config");
     _windowConfigBox->setGeometry(geometry::WindowConfigBox);
@@ -456,7 +458,7 @@ void LauncherWindow::editProfile() {
         return;
     }
     const bool isUserProfile = path.starts_with(_userProfilePath.string());
-    ghoul_assert(
+    assert_msg(
         isUserProfile || path.starts_with(_profilePath.string()),
         "Misshapen profile path. Must be in profile or user/profile folder"
     );
@@ -468,7 +470,7 @@ void LauncherWindow::newProfile() {
 }
 
 void LauncherWindow::selectProfile(std::optional<std::string> selection) {
-    ghoul_assert(selection.has_value(), "No special item in the profiles");
+    assert_msg(selection.has_value(), "No special item in the profiles");
     if (selection.has_value()) {
         // Having the `if` statement here to satisfy the MSVC code analysis
 
@@ -527,9 +529,9 @@ void LauncherWindow::selectConfiguration(std::optional<std::string> selection) {
 
 void LauncherWindow::editConfiguration() {
     const std::string path = selectedWindowConfig();
-    ghoul_assert(!path.empty(), "There must be a configuration to edit");
-    ghoul_assert(std::filesystem::is_regular_file(path), "Path not found");
-    ghoul_assert(path.starts_with(_userConfigPath.string()), "No user config");
+    assert_msg(!path.empty(), "There must be a configuration to edit");
+    assert_msg(std::filesystem::is_regular_file(path), "Path not found");
+    assert_msg(path.starts_with(_userConfigPath.string()), "No user config");
 
     int ret = QDialog::DialogCode::Rejected;
     sgct::config::Cluster cluster;
@@ -663,7 +665,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
             );
             return;
         }
-        catch (const ghoul::RuntimeError& e) {
+        catch (const RuntimeError& e) {
             QMessageBox::critical(
                 this,
                 "Exception",
@@ -713,7 +715,9 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     if (editor.wasSaved()) {
         savePath = _userProfilePath;
         std::filesystem::path path = editor.specifiedFilename();
-        path.replace_extension("");
+        if (path.has_extension() && path.extension() == ".profile") {
+            path.replace_extension("");
+        }
         _profileBox->populateList(path.string());
     }
 }
@@ -760,16 +764,16 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
     }
 
     // Get a list of all of the potential variants
-    std::vector<std::filesystem::path> addonsCore = ghoul::filesystem::walkDirectory(
+    std::vector<std::filesystem::path> addonsCore = filesystem::walkDirectory(
         _profilePath,
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::Yes,
+        filesystem::Recursive::Yes,
+        filesystem::Sorted::Yes,
         [](const std::filesystem::path& path) { return path.extension() == ".addon"; }
     );
-    std::vector<std::filesystem::path> addonsUser = ghoul::filesystem::walkDirectory(
+    std::vector<std::filesystem::path> addonsUser = filesystem::walkDirectory(
         _userProfilePath,
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::Yes,
+        filesystem::Recursive::Yes,
+        filesystem::Sorted::Yes,
         [](const std::filesystem::path& path) { return path.extension() == ".addon"; }
     );
 
@@ -822,7 +826,7 @@ void LauncherWindow::updateAddonsBox(const std::string& profile) {
         _addonBox.model->appendRow(header);
 
         // First the custom
-        ghoul_assert(p.has_value(), "Profile must exist");
+        assert_msg(p.has_value(), "Profile must exist");
         for (const Addon& addon : p->addons.custom) {
             profileAddons.insert(addon.identifier);
 

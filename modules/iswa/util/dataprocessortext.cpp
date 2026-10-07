@@ -24,9 +24,9 @@
 
 #include <modules/iswa/util/dataprocessortext.h>
 
+#include <openspace/misc/assert.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/properties/misc/selectionproperty.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cmath>
 #include <iterator>
@@ -52,7 +52,7 @@ std::vector<std::string> DataProcessorText::readMetadata(const std::string& data
     std::vector<std::string> options;
     std::string line;
     std::stringstream memorystream = std::stringstream(data);
-    while (ghoul::getline(memorystream, line)) {
+    while (openspace::getline(memorystream, line)) {
         if (line.find(info) != 0) {
             continue;
         }
@@ -61,15 +61,15 @@ std::vector<std::string> DataProcessorText::readMetadata(const std::string& data
         std::stringstream ss = std::stringstream(line);
 
         std::string token;
-        ghoul::getline(ss, token, 'x');
+        openspace::getline(ss, token, 'x');
         const int x = std::stoi(token);
 
-        ghoul::getline(ss, token, '=');
+        openspace::getline(ss, token, '=');
         const int y = std::stoi(token);
 
         dimensions = glm::size3_t(x, y, 1);
 
-        ghoul::getline(memorystream, line);
+        openspace::getline(memorystream, line);
         // Because of the # char
         line = line.substr(1);
 
@@ -102,7 +102,7 @@ void DataProcessorText::addDataValues(const std::string& data,
     std::vector<std::vector<float>> optionValues(numOptions);
 
     // For each data point
-    while (ghoul::getline(memorystream, line)) {
+    while (openspace::getline(memorystream, line)) {
         if (!line.empty() && line[0] == '#') {
             continue;
         }
@@ -165,7 +165,7 @@ std::vector<std::vector<float>> DataProcessorText::processData(const std::string
         std::vector<std::vector<float>>(options.options().size());
     for (const std::string& o : selectedOptions) {
         auto it = std::find(allOptions.begin(), allOptions.end(), o);
-        ghoul_assert(
+        assert_msg(
             it != allOptions.end(),
             "Selected option must be in list of all options"
         );
@@ -175,7 +175,7 @@ std::vector<std::vector<float>> DataProcessorText::processData(const std::string
     }
 
     int numValues = 0;
-    while (ghoul::getline(memorystream, line)) {
+    while (openspace::getline(memorystream, line)) {
         if (!line.empty() && line[0] == '#') {
             continue;
         }

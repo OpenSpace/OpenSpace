@@ -26,20 +26,20 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/designpattern/synchronousevent.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/designpattern/event.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/programobject.h>
 #include <cmath>
 #include <cstdlib>
 
@@ -85,7 +85,7 @@ Documentation RenderableIswaCygnet::Documentation() {
     );
 }
 
-RenderableIswaCygnet::RenderableIswaCygnet(const ghoul::Dictionary& dictionary)
+RenderableIswaCygnet::RenderableIswaCygnet(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _delete(DeleteInfo)
@@ -267,12 +267,12 @@ void RenderableIswaCygnet::initializeGroup() {
     _group = IswaManager::ref().iswaGroup(_data.groupName);
 
     // Subscribe to enable and delete property
-    ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
+    SynchronousEvent<Dictionary>& groupEvent = _group->groupEvent();
 
     groupEvent.subscribe(
         identifier(),
         "enabledChanged",
-        [this](const ghoul::Dictionary& dict) {
+        [this](const Dictionary& dict) {
             LDEBUG(identifier() + " Event enabledChanged");
             _enabled = dict.value<bool>("enabled");
         }
@@ -281,7 +281,7 @@ void RenderableIswaCygnet::initializeGroup() {
     groupEvent.subscribe(
         identifier(),
         "alphaChanged",
-        [this](const ghoul::Dictionary& dict) {
+        [this](const Dictionary& dict) {
             LDEBUG(identifier() + " Event alphaChanged");
             _alpha = static_cast<float>(dict.value<double>("alpha"));
         }
@@ -290,7 +290,7 @@ void RenderableIswaCygnet::initializeGroup() {
     groupEvent.subscribe(
         identifier(),
         "clearGroup",
-        [this](ghoul::Dictionary) {
+        [this](const Dictionary&) {
             LDEBUG(identifier() + " Event clearGroup");
             global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + identifier() + "')"

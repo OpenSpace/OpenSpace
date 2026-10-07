@@ -25,14 +25,14 @@
 #include <modules/base/translation/globetranslation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {
@@ -147,7 +147,7 @@ Documentation GlobeTranslation::Documentation() {
     );
 }
 
-GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
+GlobeTranslation::GlobeTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
     , _sceneGraphNode(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)

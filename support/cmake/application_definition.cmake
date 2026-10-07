@@ -32,6 +32,8 @@ function (create_new_application application_name)
     # Register one global copy target so copy commands are defined exactly once
     if (NOT TARGET openspace_copy_external_dependencies)
       add_custom_target(openspace_copy_external_dependencies)
+      set_target_properties(openspace_copy_external_dependencies PROPERTIES FOLDER "support")
+
       add_custom_command(
         TARGET openspace_copy_external_dependencies
         POST_BUILD

@@ -27,15 +27,15 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionaryluaformatter.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <exception>
 #include <memory>
 
@@ -43,7 +43,7 @@ using namespace openspace;
 
 TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
     const Scene scene = Scene(std::make_unique<SceneInitializer>());
-    ghoul::lua::LuaState* state = global::scriptEngine->luaState();
+    lua::LuaState* state = global::scriptEngine->luaState();
     AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
 
     CHECK_NOTHROW(assetLoader.add("passassertion"));
@@ -52,7 +52,7 @@ TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
 
 TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
     Scene scene = Scene(std::make_unique<SceneInitializer>());
-    ghoul::lua::LuaState* state = global::scriptEngine->luaState();
+    lua::LuaState* state = global::scriptEngine->luaState();
     AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
 
     CHECK_NOTHROW(assetLoader.add("require"));
@@ -60,7 +60,7 @@ TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
 
 TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
     const Scene scene = Scene(std::make_unique<SceneInitializer>(1u));
-    ghoul::lua::LuaState* state = global::scriptEngine->luaState();
+    lua::LuaState* state = global::scriptEngine->luaState();
     AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
 
     CHECK_NOTHROW(assetLoader.add("assetfunctionsexist"));

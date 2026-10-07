@@ -87,7 +87,7 @@ public:
     std::filesystem::path defaultGeoPointTexture() const;
 
 protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
 
 private:
     UIntProperty _tileCacheSizeMB;

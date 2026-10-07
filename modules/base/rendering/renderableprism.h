@@ -27,11 +27,11 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <cstdint>
 #include <memory>
 
@@ -39,7 +39,7 @@ namespace openspace {
 
 class RenderablePrism : public Renderable {
 public:
-    explicit RenderablePrism(const ghoul::Dictionary& dictionary);
+    explicit RenderablePrism(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -62,7 +62,7 @@ private:
     FloatProperty _length;
     UniformCache(modelViewProjectionTransform, color) _uniformCache;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<opengl::ProgramObject> _shader;
     GLuint _vao = 0;
     GLuint _vbo = 0;
     GLuint _ibo = 0;

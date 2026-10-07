@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Ganges_Chasma",
   Name = "Ganges Chasma [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "Light-Toned_Mounds_in_Ganges_Chasma_Texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Ganges_Chasma",
   Name = "Ganges Chasma [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "Light-Toned_Mounds_in_Ganges_Chasma_Heightmap.vrt"
 }
 

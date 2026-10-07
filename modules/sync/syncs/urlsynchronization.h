@@ -51,7 +51,7 @@ public:
      * \param synchronizationRoot The base location based off which the final placement is
      *        calculated
      */
-    UrlSynchronization(const ghoul::Dictionary& dictionary,
+    UrlSynchronization(const Dictionary& dictionary,
         std::filesystem::path synchronizationRoot);
 
     /**

@@ -25,13 +25,13 @@
 #include <openspace/navigation/pathcurves/avoidcollisioncurve.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/collisionhelper.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <string_view>
@@ -62,7 +62,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     const glm::dvec3 endNodeCenter = end.node()->worldPosition();
     const double startNodeRadius = start.validBoundingSphere();
     const double endNodeRadius = end.validBoundingSphere();
-    const glm::dvec3 startViewDir = ghoul::viewDirection(start.rotation());
+    const glm::dvec3 startViewDir = viewDirection(start.rotation());
 
     // Add control points for a Catmull-Rom spline, first and last will not be intersected
     _points.push_back(start.position());
@@ -100,7 +100,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
         if (targetInOppositeDirection) {
             const glm::dquat midleRot = glm::slerp(start.rotation(), end.rotation(), 0.5);
-            const glm::dvec3 middleViewDir = ghoul::viewDirection(midleRot);
+            const glm::dvec3 middleViewDir = viewDirection(midleRot);
             const double stepOutDistance = 0.4 * glm::length(startToEnd);
 
             glm::dvec3 newPos = start.position() + 0.2 * startToEnd -

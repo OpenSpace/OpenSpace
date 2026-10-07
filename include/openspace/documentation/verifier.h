@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___VERIFIER___H__
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -36,17 +36,17 @@
 #include <variant>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
+
+class Dictionary;
 
 /**
  * The base class of all Verifier%s. Each object must have an Verifier::operator()
  * overload, that performs the actual testing of the key inside the passed
- * ghoul::Dictionary and return a TestResult. The Verifier::type method returns a
- * human-readable representation of the type that is expected by the concret subclass of
- * Verifier. Furthermore, the Verifier::documentation method returns a human-readable
- * description of the Verifier subclass and what it tests for.
+ * Dictionary and return a TestResult. The Verifier::type method returns a human-readable
+ * representation of the type that is expected by the concret subclass of Verifier.
+ * Furthermore, the Verifier::documentation method returns a human-readable description of
+ * the Verifier subclass and what it tests for.
  */
 class Verifier {
 public:
@@ -70,7 +70,7 @@ public:
      * \post If the return values' TestResult::success is `true`, its
      *       TestResult::offenders is empty
      */
-    virtual TestResult operator()(const ghoul::Dictionary& dictionary,
+    virtual TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const = 0;
 
     /**
@@ -110,10 +110,10 @@ public:
     using Type = T;
 
     /**
-     * Tests whether the \p key contained in the ghoul::Dictionary \p dictionary exists
-     * and has the same type as `T`.
+     * Tests whether the \p key contained in the Dictionary \p dictionary exists and has
+     * the same type as `T`.
      *
-     * \param dictionary The ghoul::Dictionary that contains the \p key to be tested
+     * \param dictionary The Dictionary that contains the \p key to be tested
      * \param key The key inside the \p dictinoary that is to be tested
      * \return A TestResult that contains the information whether the \p key exists in the
      *         \p dictionary and whether the key's value's type agrees with `T`
@@ -122,15 +122,15 @@ public:
      *       TestResult::offenders is empty, or it is `false` and TestResult::offenders
      *       contains \p key
      */
-    TestResult operator()(const ghoul::Dictionary& dictionary,
+    TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const override;
 
     std::string documentation() const override;
 };
 
 /**
- * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
- * `bool`. No implicit conversion is considered in this testing.
+ * A Verifier that checks whether a given key inside a Dictionary is of type `bool`. No
+ * implicit conversion is considered in this testing.
  */
 class BoolVerifier : public TemplateVerifier<bool> {
 public:
@@ -138,8 +138,8 @@ public:
 };
 
 /**
- * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
- * `double`. No implicit conversion is considered in this testing.
+ * A Verifier that checks whether a given key inside a Dictionary is of type `double`. No
+ * implicit conversion is considered in this testing.
  */
 class DoubleVerifier : public TemplateVerifier<double> {
 public:
@@ -147,27 +147,27 @@ public:
 };
 
 /**
- * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type `int`.
- * It will also return `true` if the key's value is of type `double`, but is a integer
- * value (for example, `0.0`, `12.0`, but not `0.5`).
+ * A Verifier that checks whether a given key inside a Dictionary is of type `int`. It
+ * will also return `true` if the key's value is of type `double`, but is a integer value
+ * (for example, `0.0`, `12.0`, but not `0.5`).
  */
 class IntVerifier : public TemplateVerifier<int> {
 public:
-    TestResult operator()(const ghoul::Dictionary& dict,
+    TestResult operator()(const Dictionary& dict,
         const std::string& key) const override;
 
     std::string type() const override;
 };
 
 /**
- * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
+ * A Verifier that checks whether a given key inside a Dictionary is of type
  * `std::string`. No implicit conversion is considered in this testing.
  */
 class StringVerifier : public TemplateVerifier<std::string> {
 public:
     explicit StringVerifier(bool mustBeNotEmpty = false);
 
-    TestResult operator()(const ghoul::Dictionary& dictionary,
+    TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const override;
 
     std::string type() const override;
@@ -186,7 +186,7 @@ class IdentifierVerifier : public StringVerifier {
 public:
     IdentifierVerifier();
 
-    TestResult operator()(const ghoul::Dictionary& dict,
+    TestResult operator()(const Dictionary& dict,
         const std::string& key) const override;
 
     std::string documentation() const override;
@@ -195,14 +195,14 @@ public:
 };
 
 /**
- * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
+ * A Verifier that checks whether a given key inside a Dictionary is a string and
  * optionally refers to an existing file on disk.
  */
 class FileVerifier : public StringVerifier {
 public:
     explicit FileVerifier(bool fileMustExist = true);
 
-    TestResult operator()(const ghoul::Dictionary& dict,
+    TestResult operator()(const Dictionary& dict,
         const std::string& key) const override;
 
     std::string type() const override;
@@ -214,14 +214,14 @@ private:
 };
 
 /**
- * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
+ * A Verifier that checks whether a given key inside a Dictionary is a string and
  * optionally refers to an existing directory on disk.
  */
 class DirectoryVerifier : public StringVerifier {
 public:
     explicit DirectoryVerifier(bool directoryMustExist = true);
 
-    TestResult operator()(const ghoul::Dictionary& dict,
+    TestResult operator()(const Dictionary& dict,
         const std::string& key) const override;
 
     std::string type() const override;
@@ -233,39 +233,39 @@ private:
 };
 
 /**
- * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and a
- * valid date time.
+ * A Verifier that checks whether a given key inside a Dictionary is a string and a valid
+ * date time.
  */
 class DateTimeVerifier : public StringVerifier {
 public:
     DateTimeVerifier();
 
-    TestResult operator()(const ghoul::Dictionary& dict,
+    TestResult operator()(const Dictionary& dict,
         const std::string& key) const override;
 
     std::string type() const override;
 };
 
 /**
- * A Verifier that checks whether a given key inside a ghoul::Dictionary is another
- * ghoul::Dictionary. The constructor takes a list of DocumentationEntry%s, which are used
- * recursively to check the contained table. If this list is empty, a simple type testing
- * is performed instead. If the testing finds any offending keys, it will return those
- * keys with fully qualified names, that is, the name of the table will be prepended to
- * the offending keys. Example: If the key `Table` is tested and a passed
- * DocumentationEntry checks for a nested key `a` and this does not comply, this Verifier
- * will return `Table.a` as an offender.
+ * A Verifier that checks whether a given key inside a Dictionary is another Dictionary.
+ * The constructor takes a list of DocumentationEntry%s, which are used recursively to
+ * check the contained table. If this list is empty, a simple type testing is performed
+ * instead. If the testing finds any offending keys, it will return those keys with fully
+ * qualified names, that is, the name of the table will be prepended to the offending
+ * keys. Example: If the key `Table` is tested and a passed DocumentationEntry checks for
+ * a nested key `a` and this does not comply, this Verifier will return `Table.a` as an
+ * offender.
  */
-class TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
+class TableVerifier : public TemplateVerifier<Dictionary> {
 public:
     /**
      * This constructor takes a list of DocumentationEntry%s that are used recursively to
-     * check the table (= ghoul::Dictionary) contained in the key's value. Similar to the
+     * check the table (= Dictionary) contained in the key's value. Similar to the
      * Documentation, these DocumentationEntry%s can be Exhaustive or not.
      *
      * \param documentationEntries The DocumentationEntry%s that are used to recursively
-     *        test the ghoul::Dictionary that is contained inside. If this list is empty,
-     *        only a type check is performed
+     *        test the Dictionary that is contained inside. If this list is empty, only a
+     *        type check is performed
      * \param nEntries The exact number of entries that should be in the table. If the
      *        value is not provided, any number (including 0) is allowed
      */
@@ -273,20 +273,20 @@ public:
         std::optional<size_t> nEntries = std::nullopt);
 
     /**
-     * Checks whether the \p key%'s value is a table (= ghoul::Dictionary) and (if
-     * provided) recursively checks whether the table adheres to the DocumentationEntry%s
-     * provided in the constructor. If the testing finds any offending keys, it will
-     * return those keys with fully qualified names, that is, the name of the table will
-     * be prepended to the offending keys.
+     * Checks whether the \p key%'s value is a table (= Dictionary) and (if provided)
+     * recursively checks whether the table adheres to the DocumentationEntry%s provided
+     * in the constructor. If the testing finds any offending keys, it will return those
+     * keys with fully qualified names, that is, the name of the table will be prepended
+     * to the offending keys.
      *
-     * \param dictionary The ghoul::Dictionary that is to be tested for the \p key
+     * \param dictionary The Dictionary that is to be tested for the \p key
      * \param key The key for which the \p dictionary is tested
      * \return A TestResult containing the results of the testing. If DocumentationEntry%s
      *         were specified in the constructor and one of those values find an offending
      *         key inside the table, it's name will be returned with a fully qualified
      *         name by prepending the name (= \p key) of the table
      */
-    TestResult operator()(const ghoul::Dictionary& dictionary,
+    TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const override;
 
     std::string type() const override;
@@ -355,7 +355,7 @@ public:
 
 class Color3Verifier : public Vector3Verifier<double> {
 public:
-    TestResult operator()(const ghoul::Dictionary& dictionary,
+    TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const override;
 
     std::string type() const override;
@@ -363,7 +363,7 @@ public:
 
 class Color4Verifier : public Vector4Verifier<double> {
 public:
-    TestResult operator()(const ghoul::Dictionary& dictionary,
+    TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const override;
 
     std::string type() const override;
@@ -555,7 +555,7 @@ public:
      * the \p key%'s value is checked against the stored OperatorVerifier::value using the
      * `Operator`.
      *
-     * \param dictionary The ghoul::Dictionary that contains the \p key to be tested
+     * \param dictionary The Dictionary that contains the \p key to be tested
      * \param key The key inside the \p dictinoary that is to be tested
      * \return A TestResult containing the results of the specification testing. If the
      *         \p key%'s value has the wrong type, it will be added to the TestResult's
@@ -563,7 +563,7 @@ public:
      *         `Operator` returns false, it will be added with the reason
      *         TestResult::Offense::Verification instead
      */
-    TestResult operator()(const ghoul::Dictionary& dictionary,
+    TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const override;
 
     /// The stored value which is passed to the `Operator` as a second argument
@@ -704,7 +704,7 @@ public:
      * type by invoking the template parameter `T`, and then tests if the \p key's value
      * is part of the list passed to the constructor.
      *
-     * \param dictionary The ghoul::Dictionary that contains the \p key
+     * \param dictionary The Dictionary that contains the \p key
      * \param key The key that is contained in the \p dictionary and whose value is tested
      * \return A TestResult containing the results of the specification testing. If the
      *         \p key%'s value has the wrong type, it will be added to the TestResult's
@@ -712,7 +712,7 @@ public:
      *         value is not in the list, it will be added with the reason
      *         TestResult::Offense::Verification instead
      */
-    TestResult operator()(const ghoul::Dictionary& dictionary,
+    TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const override;
 
     std::string documentation() const override;
@@ -746,7 +746,7 @@ public:
      * type by invoking the template parameter `T`, and then tests if the \p key's value
      * is not part of the list passed to the constructor.
      *
-     * \param dictionary The ghoul::Dictionary that contains the \p key
+     * \param dictionary The Dictionary that contains the \p key
      * \param key The key that is contained in the \p dictionary and whose value is tested
      * \return A TestResult containing the results of the specification testing. If the
      *         \p key%'s value has the wrong type, it will be added to the TestResult's
@@ -754,7 +754,7 @@ public:
      *         value is in the list, it will be added with the reason
      *         TestResult::Offense::Verification instead
      */
-    TestResult operator()(const ghoul::Dictionary& dictionary,
+    TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const override;
 
     std::string documentation() const override;
@@ -793,7 +793,7 @@ public:
      * is between the lower and upper limits (both inclusive) that were passed to the
      * constructor.
      *
-     * \param dictionary The ghoul::Dictionary that contains the \p key
+     * \param dictionary The Dictionary that contains the \p key
      * \param key The key that is contained in the \p dictionary and whose value is tested
      * \return A TestResult containing the results of the specification testing. If the
      *         \p key%'s value has the wrong type, it will be added to the TestResult's
@@ -802,7 +802,7 @@ public:
      *         the constructor, it will be added with the reason
      *         TestResult::Offense::Verification instead
      */
-    TestResult operator()(const ghoul::Dictionary& dictionary,
+    TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const override;
 
     std::string documentation() const override;
@@ -843,7 +843,7 @@ public:
      * is outside the lower and upper limits (both exclusive) that were passed to the
      * constructor.
      *
-     * \param dictionary The ghoul::Dictionary that contains the \p key
+     * \param dictionary The Dictionary that contains the \p key
      * \param key The key that is contained in the \p dictionary and whose value is tested
      * \return A TestResult containing the results of the specification testing. If the
      *         \p key%'s value has the wrong type, it will be added to the TestResult's
@@ -852,7 +852,7 @@ public:
      *         limit, it will be added with the reason TestResult::Offense::Verification
      *         instead
      */
-    TestResult operator()(const ghoul::Dictionary& dictionary,
+    TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const override;
 
     std::string documentation() const override;
@@ -923,12 +923,12 @@ public:
      * Documentation, the offending keys will be returned in the TestResult with their
      * fully qualified names.
      *
-     * \param dictionary The ghoul::Dictionary whose \p key should be tested
+     * \param dictionary The Dictionary whose \p key should be tested
      * \param key The key contained in the \p dictionary that should be tested
      * \return A TestResult struct that contains the results of the testing
      */
-    TestResult operator()(const ghoul::Dictionary& dictionary,
-                          const std::string& key) const override;
+    TestResult operator()(const Dictionary& dictionary,
+        const std::string& key) const override;
 
     std::string documentation() const override;
 
@@ -968,7 +968,7 @@ public:
      * Verifiers, it is added to the TestResult::offenses list with a reason of
      * TestResult::Offense::Reason::Verification.
      *
-     * \param dictionary The ghoul::Dictionary that is to be tested
+     * \param dictionary The Dictionary that is to be tested
      * \param key The key contained in \p dictionary that is to be tested
      * \return A TestResult object that contains the test results. If the value fails all
      *         Verifiers, TestResult::success is `false` and the TestResult::offenses list
@@ -976,7 +976,7 @@ public:
      *         \p key%'s value passes either of the two Verifier%s, the result's
      *         TestResult::success is `true` and the TestResult::offenses is empty
      */
-    TestResult operator()(const ghoul::Dictionary& dictionary,
+    TestResult operator()(const Dictionary& dictionary,
         const std::string& key) const override;
 
     std::string type() const override;
@@ -1247,8 +1247,7 @@ using DoubleAnnotationVerifier = AnnotationVerifier<DoubleVerifier>;
 using StringAnnotationVerifier = AnnotationVerifier<StringVerifier>;
 
 /**
- * A short-hand definition for a AnnotationVerifier with a type check for
- * `ghoul::Dictionary`
+ * A short-hand definition for a AnnotationVerifier with a type check for `Dictionary`
  */
 using TableAnnotationVerifier = AnnotationVerifier<TableVerifier>;
 

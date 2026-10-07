@@ -27,9 +27,9 @@
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/topic/jsonconverters.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <cstdint>
 #include <string_view>
@@ -86,7 +86,7 @@ void EventTopic::handleJson(const nlohmann::json& json) {
 
             _subscribedEvents[type] = true;
 
-            auto onCallback = [this, event](ghoul::Dictionary params) {
+            auto onCallback = [this, event](Dictionary params) {
                 // Include the fired event to the caller
                 params.setValue("event", event);
                 sendData(params);

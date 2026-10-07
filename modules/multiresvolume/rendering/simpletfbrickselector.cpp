@@ -27,10 +27,10 @@
 #include <modules/multiresvolume/rendering/brickcover.h>
 #include <modules/multiresvolume/rendering/histogrammanager.h>
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/transferfunction.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <cmath>
 #include <string_view>
@@ -371,7 +371,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
             float x = static_cast<float>(i) / static_cast<float>(tfWidth);
             float sample = histogram->interpolate(x);
 
-            ghoul_assert(sample >= 0, "@MISSING");
+            assert_msg(sample >= 0, "@MISSING");
             dotProduct += sample * _transferFunction->sample(i).w;
         }
         _transferFunction->texture().clearDownloadedTexture();

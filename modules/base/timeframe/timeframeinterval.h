@@ -35,7 +35,7 @@ namespace openspace {
 
 class TimeFrameInterval : public TimeFrame {
 public:
-    explicit TimeFrameInterval(const ghoul::Dictionary& dictionary);
+    explicit TimeFrameInterval(const Dictionary& dictionary);
 
     void update(const Time& time) override;
 

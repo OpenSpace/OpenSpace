@@ -28,10 +28,10 @@
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringconversion.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringconversion.h>
 #include <algorithm>
 #include <optional>
 #include <utility>
@@ -160,7 +160,7 @@ namespace {
         std::optional<Settings> settings;
 
         // Parameters that set individual adjustment parameters for this layer.
-        std::optional<ghoul::Dictionary> adjustment
+        std::optional<Dictionary> adjustment
             [[codegen::reference("globebrowsing_layeradjustment")]];
 
         enum class BlendMode {
@@ -184,7 +184,7 @@ Documentation Layer::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_layer");
 }
 
-Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGroup& parent)
+Layer::Layer(layers::Group::ID id, const Dictionary& layerDict, LayerGroup& parent)
     : PropertyOwner({
         layerDict.value<std::string>(KeyIdentifier),
         layerDict.hasKey(KeyName) ? layerDict.value<std::string>(KeyName) : "",
@@ -204,7 +204,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
 
     const layers::Layer::ID typeID =
         p.type.has_value() ?
-        ghoul::from_string<layers::Layer::ID>(*p.type) :
+        from_string<layers::Layer::ID>(*p.type) :
         layers::Layer::ID::DefaultTileProvider;
 
     initializeBasedOnType(typeID, layerDict);
@@ -495,7 +495,7 @@ glm::vec2 Layer::tileUvToTextureSamplePosition(const TileUvTransform& uvTransfor
     return uv;
 }
 
-void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDict) {
+void Layer::initializeBasedOnType(layers::Layer::ID id, Dictionary initDict) {
     switch (id) {
         // Intentional fall through. Same for all tile layers
         case layers::Layer::ID::DefaultTileProvider:

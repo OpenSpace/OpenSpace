@@ -24,7 +24,7 @@
 
 #include "form/colorwidget.h"
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <QColorDialog>
 #include <QDoubleValidator>
 #include <QGridLayout>
@@ -37,7 +37,7 @@ namespace {
     constexpr int ColorDecimalPrecision = 4;
 
     QColor toQColor(const std::vector<double>& vals) {
-        ghoul_assert(vals.size() == 3 || vals.size() == 4, "Invalid size");
+        assert_msg(vals.size() == 3 || vals.size() == 4, "Invalid size");
         return QColor::fromRgbF(
             vals[0],
             vals[1],

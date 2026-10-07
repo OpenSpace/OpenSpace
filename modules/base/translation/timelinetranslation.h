@@ -34,7 +34,7 @@ namespace openspace {
 
 class TimelineTranslation : public Translation {
 public:
-    explicit TimelineTranslation(const ghoul::Dictionary& dictionary);
+    explicit TimelineTranslation(const Dictionary& dictionary);
 
     void initialize() override;
 
@@ -43,7 +43,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    Timeline<ghoul::mm_unique_ptr<Translation>> _timeline;
+    Timeline<mm_unique_ptr<Translation>> _timeline;
     BoolProperty _shouldInterpolate;
 };
 

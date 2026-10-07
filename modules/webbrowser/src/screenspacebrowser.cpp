@@ -30,11 +30,11 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/util/keys.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/textureunit.h>
 #include <optional>
 
 namespace {
@@ -114,7 +114,7 @@ Documentation ScreenSpaceBrowser::Documentation() {
     );
 }
 
-ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
+ScreenSpaceBrowser::ScreenSpaceBrowser(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
     , _reload(ReloadInfo)
@@ -216,7 +216,7 @@ void ScreenSpaceBrowser::update() {
     }
 }
 
-void ScreenSpaceBrowser::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceBrowser::bindTexture(opengl::TextureUnit& unit) {
     _renderHandler->bindTexture(unit);
 }
 

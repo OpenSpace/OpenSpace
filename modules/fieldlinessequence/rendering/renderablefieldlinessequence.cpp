@@ -29,20 +29,20 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <filesystem>
 #include <iterator>
@@ -441,7 +441,7 @@ Documentation RenderableFieldlinesSequence::Documentation() {
     );
 }
 
-RenderableFieldlinesSequence::Color::Color(const ghoul::Dictionary& dictionary)
+RenderableFieldlinesSequence::Color::Color(const Dictionary& dictionary)
     : PropertyOwner(ColorInfo)
     , method(ColorMethodInfo)
     , quantity(ColorQuantityInfo)
@@ -539,7 +539,7 @@ RenderableFieldlinesSequence::Color::Color(const ghoul::Dictionary& dictionary)
     if (p.colorTablePaths.has_value()) {
         for (const std::filesystem::path& path : *p.colorTablePaths) {
             if (!std::filesystem::exists(path)) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Color table path '{}' is not a valid file", path
                 ));
             }
@@ -568,7 +568,7 @@ RenderableFieldlinesSequence::Color::Color(const ghoul::Dictionary& dictionary)
     addProperty(colorTablePath);
 }
 
-RenderableFieldlinesSequence::Domain::Domain(const ghoul::Dictionary& dictionary)
+RenderableFieldlinesSequence::Domain::Domain(const Dictionary& dictionary)
     : PropertyOwner({ "Domain" })
     , enabled(DomainEnabledInfo, false)
     , x(DomainXInfo)
@@ -594,7 +594,7 @@ RenderableFieldlinesSequence::Domain::Domain(const ghoul::Dictionary& dictionary
     addProperty(r);
 }
 
-RenderableFieldlinesSequence::Flow::Flow(const ghoul::Dictionary& dictionary)
+RenderableFieldlinesSequence::Flow::Flow(const Dictionary& dictionary)
     : PropertyOwner(FlowInfo)
     , enabled(FlowEnabledInfo, false)
     , color(
@@ -632,7 +632,7 @@ RenderableFieldlinesSequence::Flow::Flow(const ghoul::Dictionary& dictionary)
     addProperty(speed);
 }
 
-RenderableFieldlinesSequence::Masking::Masking(const ghoul::Dictionary& dictionary)
+RenderableFieldlinesSequence::Masking::Masking(const Dictionary& dictionary)
     : PropertyOwner(MaskingInfo)
     , enabled(MaskingEnabledInfo, false)
     , selectedRange(
@@ -687,7 +687,7 @@ RenderableFieldlinesSequence::Masking::Masking(const ghoul::Dictionary& dictiona
 }
 
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(
-                                                      const ghoul::Dictionary& dictionary)
+                                                      const Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(dictionary)
     , _domain(dictionary)
@@ -713,14 +713,14 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     if (_loadingType == LoadingType::DynamicDownloading &&
         _inputFileType == SourceFileType::Cdf)
     {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "Dynamic loading (or downloading) is only supported for .osfls and .json "
             "files"
         );
     }
 
     if (_loadingType == LoadingType::StaticLoading && !p.sourceFolder.has_value()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "Either dynamic downloading parameters or a sync folder must be specified"
         );
     }
@@ -740,7 +740,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     if (_loadingType == LoadingType::DynamicDownloading) {
         if (!p.dataID.has_value()) {
-            throw ghoul::RuntimeError(
+            throw RuntimeError(
                 "If running with dynamic downloading, DataID needs to be specified"
             );
         }
@@ -751,17 +751,17 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         );
 
         if (!p.infoURL.has_value()) {
-            throw ghoul::RuntimeError("InfoURL has to be provided");
+            throw RuntimeError("InfoURL has to be provided");
         }
         _infoURL = *p.infoURL;
 
         if (!p.dataURL.has_value()) {
-            throw ghoul::RuntimeError("DataURL has to be provided");
+            throw RuntimeError("DataURL has to be provided");
         }
         _dataURL = *p.dataURL;
     }
     else {
-        ghoul_assert(
+        assert_msg(
             p.sourceFolder.has_value(),
             "sourceFolder not specified though it should not be able to get here"
         );
@@ -778,7 +778,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             };
             _files.push_back(std::move(file));
             if (_files[0].path.empty()) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error finding file '{}' in folder '{}'",
                     e.path().filename(), path
                 ));
@@ -830,14 +830,14 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
             _tracingVariable = tracingVariable.value_or(_tracingVariable);
             for (File& file : _files) {
                 if (!tracingVariable.has_value()) {
-                    throw ghoul::RuntimeError("No tracing variable specified");
+                    throw RuntimeError("No tracing variable specified");
                 }
                 std::vector<std::string> extraMagVars =
                     extractMagnitudeVarsFromStrings(_extraVars);
                 std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
                     extractSeedPointsFromFiles(_seedPointDirectory);
                 if (seedsPerFiles.empty()) {
-                    throw ghoul::RuntimeError("No seed files found");
+                    throw RuntimeError("No seed files found");
                 }
                 convertCdfToFieldlinesState(
                     file.state,
@@ -861,7 +861,7 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
             }
             break;
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 
     _isLoadingStateFromDisk = false;
@@ -1001,7 +1001,7 @@ void RenderableFieldlinesSequence::loadFile(File& file) {
             );
         }
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERRORC(e.component, e.message);
     }
 }
@@ -1319,7 +1319,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
     if (_color.method == static_cast<int>(ColorMethod::ByQuantity)) {
         _color.transferFunction->update();
-        ghoul::opengl::TextureUnit textureUnit;
+        opengl::TextureUnit textureUnit;
         textureUnit.bind(_color.transferFunction->texture());
         _shaderProgram->setUniform("transferFunction", textureUnit);
         _shaderProgram->setUniform("selectedColorRange", _color.selectedRange);

@@ -33,7 +33,7 @@ namespace openspace {
 
 class RenderableSwitch : public Renderable {
 public:
-    explicit RenderableSwitch(const ghoul::Dictionary& dictionary);
+    explicit RenderableSwitch(const Dictionary& dictionary);
 
     void initialize() override;
     void deinitialize() override;
@@ -48,8 +48,8 @@ public:
 protected:
     DoubleProperty _distanceThreshold;
 
-    ghoul::mm_unique_ptr<Renderable> _renderableNear;
-    ghoul::mm_unique_ptr<Renderable> _renderableFar;
+    mm_unique_ptr<Renderable> _renderableNear;
+    mm_unique_ptr<Renderable> _renderableFar;
 };
 } // namespace openspace
 

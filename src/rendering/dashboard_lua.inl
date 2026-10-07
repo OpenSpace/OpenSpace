@@ -24,9 +24,9 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <utility>
 #include <variant>
 
@@ -37,7 +37,7 @@ namespace {
 /**
  * Adds a new dashboard item to the main dashboard
  */
-[[codegen::luawrap]] void addDashboardItem(ghoul::Dictionary dashboard) {
+[[codegen::luawrap]] void addDashboardItem(Dictionary dashboard) {
     try {
         global::dashboard->addDashboardItem(
             DashboardItem::createFromDictionary(std::move(dashboard))
@@ -45,12 +45,10 @@ namespace {
     }
     catch (const SpecificationError& e) {
         logError(e);
-        throw ghoul::lua::LuaError("Error adding dashboard item");
+        throw lua::LuaError("Error adding dashboard item");
     }
-    catch (const ghoul::RuntimeError& e) {
-        throw ghoul::lua::LuaError(std::format(
-            "Error adding dashboard item: {}", e.what()
-        ));
+    catch (const RuntimeError& e) {
+        throw lua::LuaError(std::format("Error adding dashboard item: {}", e.what()));
     }
 }
 
@@ -58,16 +56,16 @@ namespace {
  * Removes the dashboard item with the specified identifier.
  */
 [[codegen::luawrap]] void removeDashboardItem(
-                                  std::variant<std::string, ghoul::Dictionary> identifier)
+                                         std::variant<std::string, Dictionary> identifier)
 {
     std::string identifierStr;
     if (std::holds_alternative<std::string>(identifier)) {
         identifierStr = std::get<std::string>(identifier);
     }
     else {
-        ghoul::Dictionary d = std::get<ghoul::Dictionary>(identifier);
+        Dictionary d = std::get<Dictionary>(identifier);
         if (!d.hasValue<std::string>("Identifier")) {
-            throw ghoul::lua::LuaError("Passed table does not contain an Identifier");
+            throw lua::LuaError("Passed table does not contain an Identifier");
         }
         identifierStr = d.value<std::string>("Identifier");
     }

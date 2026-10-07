@@ -30,14 +30,14 @@
 #include <string_view>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
+
+class Dictionary;
 
 class Decoder {
 public:
-    static std::unique_ptr<Decoder> createFromDictionary(
-        const ghoul::Dictionary& dictionary, std::string_view type);
+    static std::unique_ptr<Decoder> createFromDictionary(const Dictionary& dictionary,
+        std::string_view type);
 
     virtual ~Decoder() = default;
 

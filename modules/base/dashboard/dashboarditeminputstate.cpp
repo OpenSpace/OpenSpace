@@ -27,9 +27,9 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringhelper.h>
 #include <optional>
 #include <utility>
 
@@ -104,7 +104,7 @@ Documentation DashboardItemInputState::Documentation() {
     );
 }
 
-DashboardItemInputState::DashboardItemInputState(const ghoul::Dictionary& dictionary)
+DashboardItemInputState::DashboardItemInputState(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _showWhenEnabled(ShowWhenEnabledInfo, true)
     , _showWhenDisabled(ShowWhenDisabledInfo, true)
@@ -173,7 +173,7 @@ void DashboardItemInputState::update() {
         }
     }
 
-    _buffer = ghoul::join(std::move(text), "\n");
+    _buffer = join(std::move(text), "\n");
 }
 
 } // namespace openspace

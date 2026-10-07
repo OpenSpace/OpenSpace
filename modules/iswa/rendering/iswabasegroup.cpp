@@ -24,8 +24,8 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <utility>
 
 namespace {
@@ -79,11 +79,11 @@ bool IswaBaseGroup::isType(const std::string& type) const {
 
 void IswaBaseGroup::updateGroup() {
     LDEBUG(std::format("Group {} published updateGroup", identifier()));
-    _groupEvent.publish("updateGroup", ghoul::Dictionary());
+    _groupEvent.publish("updateGroup", Dictionary());
 }
 
 void IswaBaseGroup::clearGroup() {
-    _groupEvent.publish("clearGroup", ghoul::Dictionary());
+    _groupEvent.publish("clearGroup", Dictionary());
     LDEBUG(std::format("Group {} published clearGroup", identifier()));
     unregisterProperties();
 }
@@ -92,21 +92,21 @@ std::shared_ptr<DataProcessor> IswaBaseGroup::dataProcessor() {
     return _dataProcessor;
 }
 
-ghoul::Event<ghoul::Dictionary>& IswaBaseGroup::groupEvent() {
+SynchronousEvent<Dictionary>& IswaBaseGroup::groupEvent() {
     return _groupEvent;
 }
 
 void IswaBaseGroup::registerProperties() {
     _enabled.onChange([this]() {
         LDEBUG(std::format("Group {} published enabledChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("enabled", _enabled.value());
         _groupEvent.publish("enabledChanged", d);
     });
 
     _alpha.onChange([this]() {
         LDEBUG(std::format("Group {} published alphaChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("alpha", static_cast<double>(_alpha));
         _groupEvent.publish("alphaChanged", d);
     });

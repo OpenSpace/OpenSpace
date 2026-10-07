@@ -26,7 +26,7 @@
 
 #include <modules/molecule/src/cache.h>
 #include <modules/molecule/src/coloring.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
 #include <core/md_allocator.h>
 #include <core/md_bitfield.h>
 #include <md_molecule.h>

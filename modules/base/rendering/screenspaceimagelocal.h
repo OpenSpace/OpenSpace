@@ -29,13 +29,13 @@
 
 #include <openspace/properties/misc/stringproperty.h>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
+
+namespace opengl { class Texture; }
 
 class ScreenSpaceImageLocal : public ScreenSpaceRenderable {
 public:
-    explicit ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceImageLocal(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -45,11 +45,11 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
     StringProperty _texturePath;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<opengl::Texture> _texture;
     bool _isLoadingLazily = false;
     bool _shouldUnloadTexture = false;
     bool _textureIsDirty = false;
