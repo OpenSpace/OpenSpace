@@ -1192,10 +1192,10 @@ void AssetManager::notifyAssetTreeSubscribers(const AssetTreeChange& change) con
 
 void AssetManager::rescanAssetPaths() {
     auto scanAssets = [](const std::filesystem::path& root) {
-        return ghoul::filesystem::walkDirectory(
+        return filesystem::walkDirectory(
             root,
-            ghoul::filesystem::Recursive::Yes,
-            ghoul::filesystem::Sorted::Yes,
+            filesystem::Recursive::Yes,
+            filesystem::Sorted::Yes,
             [](const std::filesystem::path& p) {
                 return (
                     std::filesystem::is_regular_file(p) &&

@@ -37,7 +37,7 @@ namespace {
         // is just to get the state value in text. Should we use a local toString function
         // instead?
         EventAssetLoading e("", state);
-        ghoul::Dictionary params = toParameter(e);
+        Dictionary params = toParameter(e);
         return params.value<std::string>("State");
     }
 } // namespace

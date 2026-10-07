@@ -340,13 +340,13 @@ bool openFileLocation(const std::filesystem::path& path) {
     path.make_preferred();
 
     if (!std::filesystem::exists(path)) {
-        throw ghoul::lua::LuaError(std::format("Could not find path '{}'", path));
+        throw lua::LuaError(std::format("Could not find path '{}'", path));
     }
 
     const bool success = openFileLocation(path);
 
     if (!success) {
-        throw ghoul::lua::LuaError(std::format("Could not open path '{}'", path));
+        throw lua::LuaError(std::format("Could not open path '{}'", path));
     }
 }
 
