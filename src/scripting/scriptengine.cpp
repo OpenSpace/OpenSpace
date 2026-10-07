@@ -803,6 +803,7 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::WalkDirectoryFiles,
             codegen::lua::WalkDirectoryFolders,
             codegen::lua::DirectoryForPath,
+            codegen::lua::OpenFileExplorer,
             codegen::lua::UnzipFile,
             codegen::lua::RegisterRepeatedScript,
             codegen::lua::RemoveRepeatedScript,

@@ -244,7 +244,7 @@ void renderListProperty(const std::string& name, std::string_view fullIdentifier
 
     const bool hasNewValue = ImGui::InputText(name.c_str(), buffer.data(), BufferSize);
     if (hasNewValue) {
-        std::vector<std::string> tokens = tokenizeString(buffer.data(), ',');
+        std::vector<std::string> tokens = tokenizeString(std::string(buffer.data()), ',');
         std::string script = "{";
         for (std::string& token : tokens) {
             if (!token.empty()) {

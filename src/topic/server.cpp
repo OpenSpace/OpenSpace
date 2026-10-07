@@ -39,8 +39,9 @@
 #include <openspace/misc/templatefactory.h>
 #include <openspace/topic/connection.h>
 #include <openspace/topic/serverinterface.h>
-#include <openspace/topic/topics/authorizationtopic.h>
 #include <openspace/topic/topics/actionkeybindtopic.h>
+#include <openspace/topic/topics/assettreetopic.h>
+#include <openspace/topic/topics/authorizationtopic.h>
 #include <openspace/topic/topics/camerapathtopic.h>
 #include <openspace/topic/topics/cameratopic.h>
 #include <openspace/topic/topics/documentationtopic.h>
@@ -129,6 +130,7 @@ void Server::initialize(const Dictionary& configuration) {
 
     // Add the topics to the topic factory
     fTopic->registerClass<ActionKeybindTopic>("actionsKeybinds");
+    fTopic->registerClass<AssetTreeTopic>("assetTree");
     fTopic->registerClass<AuthorizationTopic>("authorize");
     fTopic->registerClass<CameraTopic>("camera");
     fTopic->registerClass<CameraPathTopic>("cameraPath");

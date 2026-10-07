@@ -1408,12 +1408,6 @@ namespace {
             if (equalLoc != std::string_view::npos &&  // -> there is an equal sign
                 equalLoc < commaLoc && equalLoc < paranLoc) // -> comes before next , )
             {
-                // If the variable has a default value allocated with it, we wrap the type
-                // in an optional type to represent that
-                OptionalType* ot = new OptionalType;
-                ot->tag = VariableType::Tag::OptionalType;
-                ot->type = v->type;
-
                 // Skip over the actual value for the default parameter as it would
                 // otherwise confuse the rest of this function. This can be a bit tricky
                 // since the default value can take a few different forms. The tricky ones
@@ -1471,8 +1465,23 @@ namespace {
                     equalLoc,
                     cursor - equalLoc
                 );
-                ot->defaultArgument = std::string(defaultValue);
-                v->type = ot;
+
+                if (v->type->tag == VariableType::Tag::OptionalType) {
+                    // If the value of the variable is already an optional, we can reuse
+                    // it and just insert the default value
+                    OptionalType* ot = static_cast<OptionalType*>(v->type);
+                    ot->defaultArgument = std::string(defaultValue);
+                }
+                else {
+                    // If it isn't already an optional, we have to create one and wrap our
+                    // existing type
+
+                    OptionalType* ot = new OptionalType;
+                    ot->tag = VariableType::Tag::OptionalType;
+                    ot->type = v->type;
+                    ot->defaultArgument = std::string(defaultValue);
+                    v->type = ot;
+                }
             }
 
             f->arguments.push_back(v);

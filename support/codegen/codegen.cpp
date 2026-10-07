@@ -1013,8 +1013,12 @@ namespace {
                 Variable* var = f->arguments[i];
 
                 result += "                ";
+                // A std::nullopt default means the function itself takes a
+                // std::optional, so the value is passed through like any other optional
                 if (var->type->isOptionalType() &&
-                    static_cast<OptionalType*>(var->type)->defaultArgument.has_value())
+                    static_cast<OptionalType*>(var->type)->defaultArgument.has_value() &&
+                    static_cast<OptionalType*>(var->type)->defaultArgument.value() !=
+                        "std::nullopt")
                 {
                     OptionalType* ot = static_cast<OptionalType*>(var->type);
                     // If there is a default argument, the function actually wants the

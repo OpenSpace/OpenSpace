@@ -362,7 +362,7 @@ void SgctEdit::saveCluster() {
             "Window Configuration (*.json)",
             nullptr
 #ifdef __linux__
-            // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
+            // Linux in Qt6 crashes when trying to access the native dialog here
             , QFileDialog::DontUseNativeDialog
 #endif // __linux__
         );
