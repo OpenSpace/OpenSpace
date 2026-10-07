@@ -281,7 +281,7 @@ void Property::notifyChangeListeners() {
     payload["value"] = nlohmann::json::parse(jsonValue());
     // If the property is enablable we send true false, otherwise it will be undefined
     if (_metaData.isEnablable) {
-        payload["isEnabled"] = _isEnabled.value();
+        payload["isEnabled"] = _isEnabled.value;
     }
     payload["type"] = "value";
     global::server->passDataToTopic("propertyTree", payload);
