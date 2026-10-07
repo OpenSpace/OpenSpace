@@ -737,11 +737,17 @@ void SystemViewer::renderVisualsTabContent(const std::string& host,
 
         const std::string rotationAxisId = hostIdentifier + "_RotationAxis";
         const Renderable* rotationAxis = renderable(rotationAxisId);
-        if (rotationAxis) {
-            bool enabled = rotationAxis->isEnabled();
-            if (ImGui::Checkbox("Show star rotation axis", &enabled)) {
-                setRenderableEnabled(rotationAxisId, enabled);
-            }
+        if (!rotationAxis) {
+            ImGui::BeginDisabled();
+        }
+        bool enabled = rotationAxis ? rotationAxis->isEnabled() : false;
+        if (ImGui::Checkbox("Show star rotation axis", &enabled)) {
+            setRenderableEnabled(rotationAxisId, enabled);
+        }
+
+        if (!rotationAxis) {
+            ImGui::SetItemTooltip("This star does not have data for the rotation axis");
+            ImGui::EndDisabled();
         }
 
         if (!planetIndices.empty()) {
