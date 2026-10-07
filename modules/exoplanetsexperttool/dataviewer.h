@@ -132,6 +132,10 @@ public:
 
     void renderColumnValue(const ColumnKey& key, const ExoplanetItem& item) const;
 
+    // Render a small box on the same line, colored by the relative uncertainty of the
+    // value. Nothing is rendered if there is no uncertainty data
+    void renderUncertaintyIndicator(const ColumnKey& key, const ExoplanetItem& item) const;
+
     // Write the information about the rendered points to a file
     void updateGlyphRenderData();
 
@@ -149,6 +153,13 @@ private:
     // hovered item has "<key>err1"/"<key>err2" columns
     void renderUncertaintyTooltip(const ColumnKey& key, const ExoplanetItem& item,
         float value) const;
+
+    // The upper (x) and lower (y) uncertainty of the column, if any
+    std::optional<glm::vec2> uncertaintyErrors(const ColumnKey& key,
+        const ExoplanetItem& item) const;
+
+    std::optional<float> uncertaintyPercent(const ColumnKey& key,
+        const ExoplanetItem& item, float value) const;
 
     void renderPlanetTooltip(int index) const;
     void handleDoubleClickHoveredPlanet(int index);

@@ -34,6 +34,16 @@ ImVec4 toImVec4(const glm::vec4& v) {
     return ImVec4(v.x, v.y, v.z, v.w);
 }
 
+glm::vec4 uncertaintyColor(float percent) {
+    if (percent > 30.f) {
+        return colors::Error;
+    }
+    if (percent > 10.f) {
+        return colors::Warning;
+    }
+    return colors::Good;
+}
+
 void renderDescriptiveText(const char* text) {
     ImGui::TextColored(toImVec4(colors::DescriptiveText), text);
 }

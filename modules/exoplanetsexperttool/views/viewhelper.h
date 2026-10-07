@@ -44,6 +44,9 @@ namespace helper {
 
     ImVec4 toImVec4(const glm::vec4& v);
 
+    // Good/Warning/Error color for a relative uncertainty, given in percent
+    glm::vec4 uncertaintyColor(float percent);
+
     void renderDescriptiveText(const char* text);
     void renderHelpMarker(const char* text);
 

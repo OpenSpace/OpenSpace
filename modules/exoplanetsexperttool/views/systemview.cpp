@@ -463,6 +463,7 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
         view::helper::renderDescriptiveText(columnLabel(key).c_str());
         ImGui::SameLine(indent);
         _dataViewer.renderColumnValue(key, item);
+        _dataViewer.renderUncertaintyIndicator(key, item);
 
         if (!inlineKey.empty()) {
             ImGui::SameLine();
@@ -583,6 +584,8 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
     for (const std::string& name : planetNames) {
         columnWidth = std::max(columnWidth, ImGui::CalcTextSize(name.c_str()).x);
     }
+    // Room for the uncertainty indicator after the value
+    columnWidth += ImGui::GetTextLineHeight() + style.ItemSpacing.x;
     columnWidth += padding;
 
     auto columnIndent = [&](size_t columnIndex) {
@@ -636,6 +639,7 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
             }
             else {
                 _dataViewer.renderColumnValue(colKey, p);
+                _dataViewer.renderUncertaintyIndicator(colKey, p);
             }
         }
 

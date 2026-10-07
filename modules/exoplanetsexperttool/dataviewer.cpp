@@ -1151,28 +1151,86 @@ void DataViewer::renderColumnValue(const ColumnKey& key, const ExoplanetItem& it
     }
 }
 
-void DataViewer::renderUncertaintyTooltip(const ColumnKey& key,
-                                          const ExoplanetItem& item,
-                                          float value) const
+std::optional<glm::vec2> DataViewer::uncertaintyErrors(const ColumnKey& key,
+                                                       const ExoplanetItem& item) const
 {
     // The asymmetrical uncertainty values are stored in columns with the same name,
     // ending with "err1" (upper) and "err2" (lower)
     auto upperIt = item.dataColumns.find(key + "err1");
     auto lowerIt = item.dataColumns.find(key + "err2");
     if (upperIt == item.dataColumns.end() || lowerIt == item.dataColumns.end()) {
-        return;
+        return std::nullopt;
     }
     if (!std::holds_alternative<float>(upperIt->second) ||
         !std::holds_alternative<float>(lowerIt->second))
     {
+        return std::nullopt;
+    }
+
+    const float errorUpper = std::get<float>(upperIt->second);
+    const float errorLower = std::get<float>(lowerIt->second);
+    if (std::isnan(errorUpper) && std::isnan(errorLower)) {
+        return std::nullopt;
+    }
+    return glm::vec2(errorUpper, errorLower);
+}
+
+std::optional<float> DataViewer::uncertaintyPercent(const ColumnKey& key,
+                                                    const ExoplanetItem& item,
+                                                    float value) const
+{
+    const std::optional<glm::vec2> errors = uncertaintyErrors(key, item);
+    if (!errors.has_value() || value == 0.f || std::isnan(value) ||
+        std::isnan(errors->x) || std::isnan(errors->y))
+    {
+        return std::nullopt;
+    }
+    return std::abs((errors->x - errors->y) / value) * 100.f;
+}
+
+void DataViewer::renderUncertaintyIndicator(const ColumnKey& key,
+                                            const ExoplanetItem& item) const
+{
+    const std::variant<const char*, float> value = columnValue(key, item);
+    if (!std::holds_alternative<float>(value)) {
+        return;
+    }
+    const float v = std::get<float>(value);
+    const std::optional<float> percent = uncertaintyPercent(key, item, v);
+    if (!percent.has_value()) {
         return;
     }
 
-    float errorUpper = std::get<float>(upperIt->second);
-    float errorLower = std::get<float>(lowerIt->second);
-    if (std::isnan(errorUpper) && std::isnan(errorLower)) {
+    ImGui::SameLine(0.f, 0.5f * ImGui::GetStyle().ItemSpacing.x);
+
+    const float lineHeight = ImGui::GetTextLineHeight();
+    const float boxSize = 0.45f * lineHeight;
+    const ImVec2 pos = ImGui::GetCursorScreenPos();
+    const ImVec2 min = ImVec2(pos.x, pos.y + 0.5f * (lineHeight - boxSize));
+    const ImVec2 max = ImVec2(min.x + boxSize, min.y + boxSize);
+    ImGui::GetWindowDrawList()->AddRectFilled(
+        min,
+        max,
+        ImGui::GetColorU32(
+            view::helper::toImVec4(view::helper::uncertaintyColor(*percent))
+        ),
+        0.2f * boxSize
+    );
+    // Reserve the layout space, so the box can be hovered
+    ImGui::Dummy(ImVec2(boxSize, lineHeight));
+    renderUncertaintyTooltip(key, item, v);
+}
+
+void DataViewer::renderUncertaintyTooltip(const ColumnKey& key,
+                                          const ExoplanetItem& item,
+                                          float value) const
+{
+    const std::optional<glm::vec2> errors = uncertaintyErrors(key, item);
+    if (!errors.has_value()) {
         return;
     }
+    const float errorUpper = errors->x;
+    const float errorLower = errors->y;
 
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -1191,20 +1249,11 @@ void DataViewer::renderUncertaintyTooltip(const ColumnKey& key,
             );
         }
 
-        if (value != 0.f && !std::isnan(errorUpper) && !std::isnan(errorLower)) {
-            float percentUncertainty =
-                std::abs((errorUpper - errorLower) / value) * 100.f;
-
-            glm::vec4 color = view::colors::Good;
-            if (percentUncertainty > 30.f) {
-                color = view::colors::Error;
-            }
-            else if (percentUncertainty > 10.f) {
-                color = view::colors::Warning;
-            }
-
+        if (std::optional<float> percent = uncertaintyPercent(key, item, value)) {
             ImGui::TextColored(
-                view::helper::toImVec4(color), "(%.1f%%)", percentUncertainty
+                view::helper::toImVec4(view::helper::uncertaintyColor(*percent)),
+                "(%.1f%%)",
+                *percent
             );
         }
         ImGui::EndTooltip();
