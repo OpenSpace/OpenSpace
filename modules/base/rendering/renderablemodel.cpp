@@ -205,7 +205,7 @@ namespace {
 
     constexpr Property::PropertyInfo OverrideColorInfo = {
         "OverrideColor",
-        "Override Color",
+        "Override color",
         "The single color to use for entire model (RGBA).",
         Property::Visibility::AdvancedUser,
         Property::NeedsConfirmation::No,
