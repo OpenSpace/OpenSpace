@@ -121,7 +121,7 @@ public:
      * streaming buffer. Calls #checkNodeIntersection for every branch. \p deltaStars
      * keeps track of how many stars that were added/removed this render call.
      */
-    std::map<int, std::vector<float>> traverseData(const glm::dmat4& mvp,
+    std::unordered_map<int, std::vector<float>> traverseData(const glm::dmat4& mvp,
         const glm::vec2& screenSize, int& deltaStars, RenderMode mode,
         float lodPixelThreshold);
 
@@ -222,7 +222,7 @@ private:
      *        call
      * \param mode The render mode that should be used
      */
-    std::map<int, std::vector<float>> checkNodeIntersection(OctreeNode& node,
+    std::unordered_map<int, std::vector<float>> checkNodeIntersection(OctreeNode& node,
         const glm::dmat4& mvp, const glm::vec2& screenSize, int& deltaStars,
         RenderMode mode);
 
@@ -235,7 +235,7 @@ private:
      * \param deltaStars Keeps track of how many stars that were removed
      * \param recursive Defines if decentents should be removed as well
      */
-    std::map<int, std::vector<float>> removeNodeFromCache(OctreeNode& node,
+    std::unordered_map<int, std::vector<float>> removeNodeFromCache(OctreeNode& node,
         int& deltaStars, bool recursive = true);
 
     /**
