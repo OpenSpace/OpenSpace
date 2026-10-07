@@ -40,7 +40,7 @@ public:
         long minValue = std::numeric_limits<long>::lowest(),
         long maxValue = std::numeric_limits<long>::max(),
         long stepValue = long(1));
-    explicit LongProperty(PropertyInfo info, IsEnabled isEnabled, long value = long(0),
+    LongProperty(PropertyInfo info, IsEnabled isEnabled, long value = long(0),
         long minValue = std::numeric_limits<long>::lowest(),
         long maxValue = std::numeric_limits<long>::max(),
         long stepValue = long(1));

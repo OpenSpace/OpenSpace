@@ -38,7 +38,7 @@ public:
         glm::vec2 minValue = glm::vec2(std::numeric_limits<float>::lowest()),
         glm::vec2 maxValue = glm::vec2(std::numeric_limits<float>::max()),
         glm::vec2 stepValue = glm::vec2(0.01f));
-    explicit Vec2Property(PropertyInfo info, IsEnabled isEnabled,
+    Vec2Property(PropertyInfo info, IsEnabled isEnabled,
         glm::vec2 value = glm::vec2(0.f),
         glm::vec2 minValue = glm::vec2(std::numeric_limits<float>::lowest()),
         glm::vec2 maxValue = glm::vec2(std::numeric_limits<float>::max()),

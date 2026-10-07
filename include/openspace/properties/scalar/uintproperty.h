@@ -41,7 +41,7 @@ public:
         unsigned int minValue = std::numeric_limits<unsigned int>::lowest(),
         unsigned int maxValue = std::numeric_limits<unsigned int>::max(),
         unsigned int stepValue = 1);
-    explicit UIntProperty(PropertyInfo info, IsEnabled isEnabled, unsigned int value = 0,
+    UIntProperty(PropertyInfo info, IsEnabled isEnabled, unsigned int value = 0,
         unsigned int minValue = std::numeric_limits<unsigned int>::lowest(),
         unsigned int maxValue = std::numeric_limits<unsigned int>::max(),
         unsigned int stepValue = 1);

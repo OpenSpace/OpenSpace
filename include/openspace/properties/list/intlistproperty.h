@@ -33,7 +33,7 @@ class IntListProperty : public ListProperty<int> {
 public:
     explicit IntListProperty(PropertyInfo info,
         std::vector<int> values = std::vector<int>());
-    explicit IntListProperty(PropertyInfo info, IsEnabled isEnabled,
+    IntListProperty(PropertyInfo info, IsEnabled isEnabled,
         std::vector<int> values = std::vector<int>());
 
     std::string_view className() const override final;

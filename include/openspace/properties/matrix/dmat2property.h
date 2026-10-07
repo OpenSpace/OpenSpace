@@ -40,7 +40,7 @@ public:
         glm::dmat2x2 maxValue =
             createFillMat2x2<double>(std::numeric_limits<double>::max()),
         glm::dmat2x2 stepValue = createFillMat2x2<double>(0.01));
-    explicit DMat2Property(PropertyInfo info, IsEnabled isEnabled,
+    DMat2Property(PropertyInfo info, IsEnabled isEnabled,
         glm::dmat2x2 value = glm::dmat2x2(0.0),
         glm::dmat2x2 minValue =
             createFillMat2x2<double>(std::numeric_limits<double>::lowest()),

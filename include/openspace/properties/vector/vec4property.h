@@ -38,7 +38,7 @@ public:
         glm::vec4 minValue = glm::vec4(std::numeric_limits<float>::lowest()),
         glm::vec4 maxValue = glm::vec4(std::numeric_limits<float>::max()),
         glm::vec4 stepValue = glm::vec4(0.01f));
-    explicit Vec4Property(PropertyInfo info, IsEnabled isEnabled,
+    Vec4Property(PropertyInfo info, IsEnabled isEnabled,
         glm::vec4 value = glm::vec4(0.f),
         glm::vec4 minValue = glm::vec4(std::numeric_limits<float>::lowest()),
         glm::vec4 maxValue = glm::vec4(std::numeric_limits<float>::max()),

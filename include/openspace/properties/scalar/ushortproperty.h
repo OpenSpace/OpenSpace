@@ -41,8 +41,7 @@ public:
         unsigned short minValue = std::numeric_limits<unsigned short>::lowest(),
         unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
         unsigned short stepValue = 1);
-    explicit UShortProperty(PropertyInfo info, IsEnabled isEnabled,
-        unsigned short value = 0,
+    UShortProperty(PropertyInfo info, IsEnabled isEnabled, unsigned short value = 0,
         unsigned short minValue = std::numeric_limits<unsigned short>::lowest(),
         unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
         unsigned short stepValue = 1);

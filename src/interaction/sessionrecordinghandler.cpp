@@ -621,6 +621,8 @@ void SessionRecordingHandler::savePropertyBaseline(Property& prop) {
 }
 
 void SessionRecordingHandler::savePropertyEnabledBaseline(Property& prop) {
+    assert_msg(prop.isEnablable(), "Property not enablable");
+
     // The enabled state is stored under a separate key so that it does not collide with
     // the baseline of the property value. Matching how the dummy time key is written
     const std::string key = std::format("{}._isEnabled", prop.uri());

@@ -39,7 +39,7 @@ public:
     explicit DoubleProperty(PropertyInfo info, double value = 0.0,
         double minValue = std::numeric_limits<double>::lowest(),
         double maxValue = std::numeric_limits<double>::max(), double stepValue = 0.01);
-    explicit DoubleProperty(PropertyInfo info, IsEnabled isEnabled, double value = 0.0,
+    DoubleProperty(PropertyInfo info, IsEnabled isEnabled, double value = 0.0,
         double minValue = std::numeric_limits<double>::lowest(),
         double maxValue = std::numeric_limits<double>::max(), double stepValue = 0.01);
 

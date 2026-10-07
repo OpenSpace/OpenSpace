@@ -40,7 +40,7 @@ public:
         short minValue = std::numeric_limits<short>::lowest(),
         short maxValue = std::numeric_limits<short>::max(),
         short stepValue = short(1));
-    explicit ShortProperty(PropertyInfo info, IsEnabled isEnabled, short value = short(0),
+    ShortProperty(PropertyInfo info, IsEnabled isEnabled, short value = short(0),
         short minValue = std::numeric_limits<short>::lowest(),
         short maxValue = std::numeric_limits<short>::max(),
         short stepValue = short(1));

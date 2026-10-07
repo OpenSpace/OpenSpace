@@ -39,7 +39,7 @@ public:
     explicit IntProperty(PropertyInfo info, int value = 0,
         int minValue = std::numeric_limits<int>::lowest(),
         int maxValue = std::numeric_limits<int>::max(), int stepValue = 1);
-    explicit IntProperty(PropertyInfo info, IsEnabled isEnabled, int value = 0,
+    IntProperty(PropertyInfo info, IsEnabled isEnabled, int value = 0,
         int minValue = std::numeric_limits<int>::lowest(),
         int maxValue = std::numeric_limits<int>::max(), int stepValue = 1);
 

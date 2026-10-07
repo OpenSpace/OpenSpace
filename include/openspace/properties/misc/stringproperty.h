@@ -32,7 +32,7 @@ namespace openspace {
 class StringProperty : public TemplateProperty<std::string> {
 public:
     explicit StringProperty(PropertyInfo info, std::string value = "");
-    explicit StringProperty(PropertyInfo info, IsEnabled isEnabled,
+    StringProperty(PropertyInfo info, IsEnabled isEnabled,
         std::string value = "");
 
     std::string_view className() const override final;

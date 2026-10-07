@@ -40,7 +40,7 @@ public:
         glm::mat3x3 maxValue =
             createFillMat3x3<float>(std::numeric_limits<float>::max()),
         glm::mat3x3 stepValue = createFillMat3x3<float>(0.01f));
-    explicit Mat3Property(PropertyInfo info, IsEnabled isEnabled,
+    Mat3Property(PropertyInfo info, IsEnabled isEnabled,
         glm::mat3x3 value = glm::mat3x3(0.f),
         glm::mat3x3 minValue =
             createFillMat3x3<float>(std::numeric_limits<float>::lowest()),

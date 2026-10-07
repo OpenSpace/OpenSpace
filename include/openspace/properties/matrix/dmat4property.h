@@ -40,7 +40,7 @@ public:
         glm::dmat4x4 maxValue =
             createFillMat4x4<double>(std::numeric_limits<double>::max()),
         glm::dmat4x4 stepValue = createFillMat4x4<double>(0.01));
-    explicit DMat4Property(PropertyInfo info, IsEnabled isEnabled,
+    DMat4Property(PropertyInfo info, IsEnabled isEnabled,
         glm::dmat4x4 value = glm::dmat4x4(0.0),
         glm::dmat4x4 minValue =
             createFillMat4x4<double>(std::numeric_limits<double>::lowest()),

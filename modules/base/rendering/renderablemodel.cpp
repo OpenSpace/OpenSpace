@@ -24,7 +24,7 @@
 
 #include <modules/base/rendering/renderablemodel.h>
 
-#include <modules/base/basemodule.h>        
+#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -404,7 +404,13 @@ RenderableModel::RenderableModel(const Dictionary& dictionary)
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(BlendingOptionInfo)
     , _renderWireframe(RenderWireframeInfo, false)
-    , _overrideColor(OverrideColorInfo, Property::IsEnabled::No, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _overrideColor(
+        OverrideColorInfo,
+        Property::IsEnabled::No,
+        glm::vec4(1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _customNodeTransformsOwner(CustomNodeTransformsInfo)
 {

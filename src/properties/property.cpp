@@ -144,7 +144,7 @@ bool Property::viewOption(const std::string& option, bool defaultValue) const {
 }
 
 Property::IsEnablable Property::isEnablable() const {
-    return _metaData.isEnablable ? IsEnablable::Yes : IsEnablable::No;
+    return IsEnablable(_metaData.isEnablable);
 }
 
 Property::IsEnabled Property::isEnabled() const {
@@ -281,7 +281,7 @@ void Property::notifyChangeListeners() {
     payload["value"] = nlohmann::json::parse(jsonValue());
     // If the property is enablable we send true false, otherwise it will be undefined
     if (_metaData.isEnablable) {
-        payload["isEnabled"] = _isEnabled ? true : false;
+        payload["isEnabled"] = _isEnabled.value();
     }
     payload["type"] = "value";
     global::server->passDataToTopic("propertyTree", payload);

@@ -40,7 +40,7 @@ public:
         glm::dmat3x3 maxValue =
             createFillMat3x3<double>(std::numeric_limits<double>::max()),
         glm::dmat3x3 stepValue = createFillMat3x3<double>(0.01));
-    explicit DMat3Property(PropertyInfo info, IsEnabled isEnabled,
+    DMat3Property(PropertyInfo info, IsEnabled isEnabled,
         glm::dmat3x3 value = glm::dmat3x3(0.0),
         glm::dmat3x3 minValue =
             createFillMat3x3<double>(std::numeric_limits<double>::lowest()),

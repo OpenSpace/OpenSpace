@@ -41,7 +41,7 @@ public:
         unsigned long minValue = std::numeric_limits<unsigned long>::lowest(),
         unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
         unsigned long stepValue = 1ul);
-    explicit ULongProperty(PropertyInfo info, IsEnabled isEnabled,
+    ULongProperty(PropertyInfo info, IsEnabled isEnabled,
         unsigned long value = 0ul,
         unsigned long minValue = std::numeric_limits<unsigned long>::lowest(),
         unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
