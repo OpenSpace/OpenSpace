@@ -867,3 +867,83 @@ TEST_CASE(
     CHECK(!r.empty());
 }
 
+TEST_CASE("Parsing/LuaWrapper/Basic:  Optional parameter", "[Parsing][LuaWrapper]") {
+    constexpr std::string_view Source = R"(
+[[codegen::luawrap]] void func(std::optional<float> arg) {}
+[[codegen::luawrap]] void func2(std::optional<float> arg = std::nullopt) {}
+)";
+
+    Code code = parse(Source);
+    CHECK(code.structs.empty());
+    CHECK(code.enums.empty());
+    REQUIRE(code.luaWrapperFunctions.size() == 2);
+
+    {
+        Function* f = code.luaWrapperFunctions[0];
+        REQUIRE(f);
+        CHECK(f->functionName == "func");
+        CHECK(f->documentation.empty());
+
+        VariableType* ret = f->returnValue;
+        CHECK(ret == nullptr);
+
+        REQUIRE(f->arguments.size() == 1);
+        Variable* v = f->arguments[0];
+        REQUIRE(v);
+        CHECK(v->name == "arg");
+        REQUIRE(v->type->tag == VariableType::Tag::OptionalType);
+        OptionalType* ot = static_cast<OptionalType*>(v->type);
+        CHECK(!ot->defaultArgument.has_value());
+        REQUIRE(ot->type->tag == VariableType::Tag::BasicType);
+        BasicType* bt = static_cast<BasicType*>(ot->type);
+        CHECK(bt->type == BasicType::Type::Float);
+
+        CHECK(v->attributes.annotation.empty());
+        CHECK(v->attributes.key.empty());
+        CHECK(v->attributes.inlist.empty());
+        CHECK(v->attributes.inrange.empty());
+        CHECK(v->attributes.less.empty());
+        CHECK(v->attributes.lessequal.empty());
+        CHECK(v->attributes.greater.empty());
+        CHECK(v->attributes.greaterequal.empty());
+        CHECK(v->attributes.notinlist.empty());
+        CHECK(v->attributes.reference.empty());
+        CHECK(v->attributes.unequal.empty());
+    }
+
+    {
+        Function* f = code.luaWrapperFunctions[1];
+        REQUIRE(f);
+        CHECK(f->functionName == "func2");
+        CHECK(f->documentation.empty());
+
+        VariableType* ret = f->returnValue;
+
+        REQUIRE(f->arguments.size() == 1);
+        Variable* v = f->arguments[0];
+        REQUIRE(v);
+        CHECK(v->name == "arg");
+        REQUIRE(v->type->tag == VariableType::Tag::OptionalType);
+        OptionalType* ot = static_cast<OptionalType*>(v->type);
+        REQUIRE(ot->defaultArgument.has_value());
+        CHECK(ot->defaultArgument == "std::nullopt");
+        REQUIRE(ot->type->tag == VariableType::Tag::BasicType);
+        BasicType* bt = static_cast<BasicType*>(ot->type);
+        CHECK(bt->type == BasicType::Type::Float);
+
+        CHECK(v->attributes.annotation.empty());
+        CHECK(v->attributes.key.empty());
+        CHECK(v->attributes.inlist.empty());
+        CHECK(v->attributes.inrange.empty());
+        CHECK(v->attributes.less.empty());
+        CHECK(v->attributes.lessequal.empty());
+        CHECK(v->attributes.greater.empty());
+        CHECK(v->attributes.greaterequal.empty());
+        CHECK(v->attributes.notinlist.empty());
+        CHECK(v->attributes.reference.empty());
+        CHECK(v->attributes.unequal.empty());
+    }
+
+    const std::string r = generateResult(code);
+    CHECK(!r.empty());
+}
