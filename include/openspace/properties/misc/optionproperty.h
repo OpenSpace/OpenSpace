@@ -63,7 +63,7 @@ public:
      * \return The name of this class for reflection purposes
      */
     std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+    lua::LuaTypes typeLua() const override final;
 
     using TemplateProperty<int>::operator=;
 

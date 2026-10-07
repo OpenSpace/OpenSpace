@@ -40,10 +40,9 @@
 #include <functional>
 #include <memory>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 struct LayerGroup;
 struct TileIndex;
@@ -51,7 +50,7 @@ struct TileProvider;
 
 class Layer : public PropertyOwner, public Fadeable {
 public:
-    Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGroup& parent);
+    Layer(layers::Group::ID id, const Dictionary& layerDict, LayerGroup& parent);
 
     void initialize();
     void deinitialize();
@@ -83,7 +82,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    void initializeBasedOnType(layers::Layer::ID typeId, ghoul::Dictionary initDict);
+    void initializeBasedOnType(layers::Layer::ID typeId, Dictionary initDict);
     void addVisibleProperties();
 
     LayerGroup& _parent;

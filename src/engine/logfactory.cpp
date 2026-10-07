@@ -25,13 +25,13 @@
 #include <openspace/engine/logfactory.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/htmllog.h>
-#include <ghoul/logging/log.h>
-#include <ghoul/logging/loglevel.h>
-#include <ghoul/logging/textlog.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/htmllog.h>
+#include <openspace/logging/log.h>
+#include <openspace/logging/loglevel.h>
+#include <openspace/logging/textlog.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
 #include <filesystem>
 #include <optional>
 #include <string_view>
@@ -75,7 +75,7 @@ namespace {
         // was used to create the log message.
         std::optional<bool> logLevelStamping;
 
-        enum class [[codegen::map(ghoul::logging::LogLevel)]] LogLevel {
+        enum class [[codegen::map(openspace::logging::LogLevel)]] LogLevel {
             AllLogging,
             Trace,
             Debug,
@@ -97,7 +97,7 @@ Documentation LogFactoryDocumentation() {
     return codegen::doc<Parameters>("core_logfactory");
 }
 
-std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<logging::Log> createLog(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     const std::filesystem::path filename = absPath(p.file);
@@ -107,7 +107,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     const bool dateStamp = p.dateStamping.value_or(true);
     const bool categoryStamp = p.categoryStamping.value_or(true);
     const bool logLevelStamp = p.logLevelStamping.value_or(true);
-    const ghoul::logging::LogLevel level = codegen::map<ghoul::logging::LogLevel>(
+    const logging::LogLevel level = codegen::map<logging::LogLevel>(
         p.logLevel.value_or(Parameters::LogLevel::AllLogging)
     );
 
@@ -120,31 +120,31 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
             };
             const std::vector<std::filesystem::path> jsFiles = { absPath(JsPath) };
 
-            return std::make_unique<ghoul::logging::HTMLLog>(
+            return std::make_unique<logging::HTMLLog>(
                 filename,
                 nLogRotation,
-                ghoul::logging::Log::TimeStamping(timeStamp),
-                ghoul::logging::Log::DateStamping(dateStamp),
-                ghoul::logging::Log::CategoryStamping(categoryStamp),
-                ghoul::logging::Log::LogLevelStamping(logLevelStamp),
+                logging::Log::TimeStamping(timeStamp),
+                logging::Log::DateStamping(dateStamp),
+                logging::Log::CategoryStamping(categoryStamp),
+                logging::Log::LogLevelStamping(logLevelStamp),
                 cssFiles,
                 jsFiles,
                 level
             );
         }
         case Parameters::Type::Text:
-            return std::make_unique<ghoul::logging::TextLog>(
+            return std::make_unique<logging::TextLog>(
                 filename,
                 nLogRotation,
-                ghoul::logging::TextLog::Append(append),
-                ghoul::logging::Log::TimeStamping(timeStamp),
-                ghoul::logging::Log::DateStamping(dateStamp),
-                ghoul::logging::Log::CategoryStamping(categoryStamp),
-                ghoul::logging::Log::LogLevelStamping(logLevelStamp),
+                logging::TextLog::Append(append),
+                logging::Log::TimeStamping(timeStamp),
+                logging::Log::DateStamping(dateStamp),
+                logging::Log::CategoryStamping(categoryStamp),
+                logging::Log::LogLevelStamping(logLevelStamp),
                 level
             );
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 

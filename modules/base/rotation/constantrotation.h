@@ -34,7 +34,7 @@ namespace openspace {
 
 class ConstantRotation : public Rotation {
 public:
-    explicit ConstantRotation(const ghoul::Dictionary& dictionary);
+    explicit ConstantRotation(const Dictionary& dictionary);
 
     glm::dmat3 matrix(const UpdateData& data) const override;
 

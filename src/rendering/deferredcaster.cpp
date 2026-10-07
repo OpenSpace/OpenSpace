@@ -27,11 +27,11 @@
 namespace openspace {
 
 void Deferredcaster::preRaycast(const RenderData&, const DeferredcastData&,
-                                ghoul::opengl::ProgramObject&)
+                                opengl::ProgramObject&)
 {}
 
 void Deferredcaster::postRaycast(const RenderData&, const DeferredcastData&,
-                                 ghoul::opengl::ProgramObject&)
+                                 opengl::ProgramObject&)
 {}
 
 } // namespace openspace

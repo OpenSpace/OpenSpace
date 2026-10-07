@@ -25,7 +25,7 @@
 #include <openspace/engine/settings.h>
 
 #include <openspace/json.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/misc/stringhelper.h>
 #include <fstream>
 #include <sstream>
 
@@ -46,7 +46,7 @@ namespace openspace {
 
 namespace version1 {
     static Settings parseSettings(nlohmann::json json) {
-        ghoul_assert(json.at("version").get<int>() == 1, "Wrong value");
+        assert_msg(json.at("version").get<int>() == 1, "Wrong value");
 
         Settings settings = {
             .hasStartedBefore = get_to<bool>(json, "started-before"),
@@ -59,7 +59,7 @@ namespace version1 {
         };
         // Normalize the path separate to the generic separator
         if (settings.profile.has_value()) {
-            settings.profile = ghoul::replaceAll(*settings.profile, "\\", "/");
+            settings.profile = replaceAll(*settings.profile, "\\", "/");
         }
 
         std::optional<std::string> visibility = get_to<std::string>(json, "visibility");
@@ -77,7 +77,7 @@ namespace version1 {
                 settings.visibility = Property::Visibility::Developer;
             }
             else {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Unknown visibility value '{}'", *visibility
                 ));
             }
@@ -90,7 +90,7 @@ namespace version1 {
 
         if (auto it = json.find("mrf");  it != json.end()) {
             if (!it->is_object()) {
-                throw ghoul::RuntimeError("'mrf' is not an object");
+                throw RuntimeError("'mrf' is not an object");
             }
             Settings::MRF mrf = {
                 .isEnabled = get_to<bool>(*it, "enabled"),
@@ -142,9 +142,7 @@ Settings loadSettings(const std::filesystem::path& filename) {
         return version1::parseSettings(setting);
     }
 
-    throw ghoul::RuntimeError(std::format(
-        "Unrecognized version for setting: {}", version
-    ));
+    throw RuntimeError(std::format("Unrecognized version for setting: {}", version));
 }
 
 void saveSettings(const Settings& settings, const std::filesystem::path& filename) {
@@ -188,7 +186,7 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
                 json["visibility"] = "Developer";
                 break;
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }
     if (settings.bypassLauncher.has_value()) {

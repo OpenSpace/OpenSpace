@@ -1,0 +1,25 @@
+diff --git a/src/ccmc/CMakeLists.txt b/src/ccmc/CMakeLists.txt
+index f795502..a7bc95e 100644
+--- a/src/ccmc/CMakeLists.txt
++++ b/src/ccmc/CMakeLists.txt
+@@ -53,4 +53,17 @@ if(NOT KAMELEON_LIBRARY_ONLY)
+ endif(NOT KAMELEON_LIBRARY_ONLY)
+ 
+ # link all libraries
+-target_link_libraries(ccmc ${CCMC_DEPENDENT_LIBS})
+\ No newline at end of file
++target_link_libraries(ccmc PUBLIC ${CCMC_DEPENDENT_LIBS})
++
++# Install
++include(GNUInstallDirs)
++target_include_directories(ccmc INTERFACE
++  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/kameleon>
++)
++install(TARGETS ccmc
++  EXPORT KameleonTargets
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
++install(FILES ${CCMC_HEADER} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kameleon/ccmc)
+\ No newline at end of file

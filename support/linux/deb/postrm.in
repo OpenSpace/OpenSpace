@@ -1,0 +1,36 @@
+#!/bin/sh
+# Generated from support/linux/deb/postrm.in. Removes what postinst linked into /usr.
+#
+# Only on an actual removal: on "upgrade" this runs for the *old* version after the new
+# version's postinst has already re-pointed the links, and deleting them there would leave
+# the upgraded package with no launcher.
+
+set -e
+
+case "$1" in
+  remove|purge)
+    for link in \
+      /usr/bin/openspace \
+      /usr/share/applications/openspace.desktop \
+      /usr/share/icons/hicolor/512x512/apps/openspace.png
+    do
+      # Only remove a symlink that still points into this version's tree, never a file or
+      # a link that something else owns by now
+      if [ -L "$link" ]; then
+        target=$(readlink "$link")
+        case "$target" in
+          @OPENSPACE_INSTALL_ROOT@/*) rm -f "$link" ;;
+        esac
+      fi
+    done
+
+    if command -v update-desktop-database > /dev/null 2>&1; then
+      update-desktop-database -q /usr/share/applications || true
+    fi
+    if command -v gtk-update-icon-cache > /dev/null 2>&1; then
+      gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+    fi
+    ;;
+esac
+
+exit 0

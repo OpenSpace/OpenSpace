@@ -29,7 +29,7 @@
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 
 namespace openspace {
 
@@ -40,8 +40,8 @@ BrowserClient::BrowserClient(WebRenderHandler* handler,
     : _renderHandler(handler)
     , _keyboardHandler(keyboardHandler)
 {
-    ghoul_assert(handler, "No WebRenderHandler provided");
-    ghoul_assert(keyboardHandler, "No WebKeyboardHandler provided");
+    assert_msg(handler, "No WebRenderHandler provided");
+    assert_msg(keyboardHandler, "No WebKeyboardHandler provided");
 
     DefaultBrowserLauncher* browserLauncher = new DefaultBrowserLauncher;
     _lifeSpanHandler = browserLauncher;

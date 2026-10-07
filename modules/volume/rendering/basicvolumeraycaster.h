@@ -31,18 +31,16 @@
 #include <openspace/util/boxgeometry.h>
 #include <memory>
 
-namespace ghoul::opengl { class TextureUnit; }
-
 namespace openspace {
 
+namespace opengl { class TextureUnit; }
 class TransferFunction;
 class TransferFunctionHandler;
 class VolumeClipPlanes;
 
 class BasicVolumeRaycaster : public VolumeRaycaster {
 public:
-    BasicVolumeRaycaster(
-        std::shared_ptr<ghoul::opengl::Texture> texture,
+    BasicVolumeRaycaster(std::shared_ptr<opengl::Texture> texture,
         std::shared_ptr<TransferFunction> transferFunction,
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
     ~BasicVolumeRaycaster() override;
@@ -51,13 +49,11 @@ public:
     void deinitialize();
 
     void renderEntryPoints(const RenderData& data,
-        ghoul::opengl::ProgramObject& program) override;
+        opengl::ProgramObject& program) override;
     void renderExitPoints(const RenderData& data,
-        ghoul::opengl::ProgramObject& program) override;
-    void preRaycast(const RaycastData& data,
-        ghoul::opengl::ProgramObject& program) override;
-    void postRaycast(const RaycastData& data,
-        ghoul::opengl::ProgramObject& program) override;
+        opengl::ProgramObject& program) override;
+    void preRaycast(const RaycastData& data, opengl::ProgramObject& program) override;
+    void postRaycast(const RaycastData& data, opengl::ProgramObject& program) override;
     bool isCameraInside(const RenderData& data, glm::vec3& localPosition) override;
 
     std::filesystem::path boundsVertexShaderPath() const override;
@@ -66,8 +62,8 @@ public:
     std::filesystem::path helperPath() const override;
 
 
-    void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
-    std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
+    void setVolumeTexture(std::shared_ptr<opengl::Texture> texture);
+    std::shared_ptr<opengl::Texture> volumeTexture() const;
     void setTransferFunction(std::shared_ptr<TransferFunction>
         transferFunction);
 
@@ -86,7 +82,7 @@ private:
     glm::dmat4 modelViewTransform(const RenderData& data);
 
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
-    std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
+    std::shared_ptr<opengl::Texture> _volumeTexture;
     std::shared_ptr<TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType = VolumeGridType::Cartesian;
@@ -95,8 +91,8 @@ private:
     float _rNormalization = 0.f;
     float _rUpperBound = 1.f;
 
-    std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
-    std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
+    std::unique_ptr<opengl::TextureUnit> _tfUnit;
+    std::unique_ptr<opengl::TextureUnit> _textureUnit;
     float _stepSize = 0.f;
 };
 

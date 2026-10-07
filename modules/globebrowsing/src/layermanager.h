@@ -32,10 +32,9 @@
 #include <functional>
 #include <memory>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 class Layer;
 struct LayerGroup;
@@ -49,11 +48,10 @@ public:
 
     LayerManager();
 
-    void initialize(
-        const std::map<layers::Group::ID, std::vector<ghoul::Dictionary>>& dict);
+    void initialize(const std::map<layers::Group::ID, std::vector<Dictionary>>& dict);
     void deinitialize();
 
-    Layer* addLayer(layers::Group::ID id, const ghoul::Dictionary& layerDict);
+    Layer* addLayer(layers::Group::ID id, const Dictionary& layerDict);
     void deleteLayer(layers::Group::ID id, const std::string& layerName);
 
     LayerGroup& layerGroup(layers::Group::ID groupId);

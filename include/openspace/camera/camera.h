@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___CAMERA___H__
 #define __OPENSPACE_CORE___CAMERA___H__
 
+#include <openspace/glm.h>
 #include <openspace/util/syncdata.h>
-#include <ghoul/glm.h>
 #include <istream>
 #include <mutex>
 #include <ostream>
@@ -143,7 +143,7 @@ public:
 
     // Static constants
     // (2021-07-16, emmbr) Note that this hard coded vector for the view direction is also
-    // used in a qauternion -> view direction helper function in ghoul/glm.h
+    // used in a qauternion -> view direction helper function in openspace/glm.h
     static constexpr glm::dvec3 ViewDirectionCameraSpace = glm::dvec3(0.0, 0.0, -1.0);
     static constexpr glm::dvec3 UpDirectionCameraSpace = glm::dvec3(0.0, 1.0, 0.0);
 

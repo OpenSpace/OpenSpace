@@ -27,8 +27,8 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/texture.h>
 #include <array>
 
 namespace openspace {
@@ -39,7 +39,7 @@ class SpoutReceiverPropertyProxy;
 
 class SpoutImageProvider : public TileProvider {
 public:
-    explicit SpoutImageProvider(const ghoul::Dictionary& dictionary);
+    explicit SpoutImageProvider(const Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;
@@ -56,7 +56,7 @@ private:
     void internalInitialize() override final;
     void internalDeinitialize() override final;
 
-    std::array<std::unique_ptr<ghoul::opengl::Texture>, 2> tileTexture;
+    std::array<std::unique_ptr<opengl::Texture>, 2> tileTexture;
     std::array<Tile, 2> tiles;
 #ifdef OPENSPACE_HAS_SPOUT
     std::array<GLuint, 2> fbo = { 0, 0 };

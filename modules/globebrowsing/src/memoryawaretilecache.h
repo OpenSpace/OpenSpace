@@ -28,10 +28,10 @@
 #include <modules/globebrowsing/src/lrucache.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <ghoul/opengl/texture.h>
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
@@ -89,7 +89,7 @@ public:
     void setSizeEstimated(size_t estimatedSize);
     bool exist(const ProviderTileKey& key) const;
     Tile get(const ProviderTileKey& key);
-    ghoul::opengl::Texture* texture(const TileTextureInitData& initData);
+    opengl::Texture* texture(const TileTextureInitData& initData);
     void createTileAndPut(ProviderTileKey key, RawTile rawTile);
     void put(const ProviderTileKey& key,
         const TileTextureInitData::HashKey& initDataKey, Tile tile);
@@ -121,7 +121,7 @@ private:
          *         there are no textures left, nullptr is returned. TextureContainer still
          *         owns the texture so no delete should be called on the raw pointer
          */
-        ghoul::opengl::Texture* getTextureIfFree();
+        opengl::Texture* getTextureIfFree();
 
         const TileTextureInitData& tileTextureInitData() const;
 
@@ -131,7 +131,7 @@ private:
         size_t size() const;
 
     private:
-        std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+        std::vector<std::unique_ptr<opengl::Texture>> _textures;
 
         const TileTextureInitData _initData;
         size_t _freeTexture = 0;

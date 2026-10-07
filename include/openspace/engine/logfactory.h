@@ -27,34 +27,31 @@
 
 #include <memory>
 
-namespace ghoul {
-    namespace logging { class Log; }
-    class Dictionary;
-} // namespace ghoul
-
 namespace openspace {
 
+namespace logging { class Log; }
+class Dictionary;
 struct Documentation;
 
 /**
- * This function provides the capabilities to create a new ghoul::logging::Log from the
- * provided ghoul::Dictionary%. The Dictionary must at least contain a `Type` value that
- * determines the type of the created Log. Currently the types `HTML` and `Text` are
- * supported which create a ghoul::logging::TextLog%, and ghoul::logging::HTMLLog
- * respectively with both also require the `FileName` value for the location at which the
- * logfile should be created. Both logs can be customized using the `Append`,
- * `TimeStamping`, `DateStamping`, `CategoryStamping`, and `LogLevelStamping` values.
+ * This function provides the capabilities to create a new logging::Log from the provided
+ * Dictionary. The Dictionary must at least contain a `Type` value that determines the
+ * type of the created Log. Currently the types `HTML` and `Text` are supported which
+ * create a logging::TextLog%, and logging::HTMLLog respectively with both also require
+ * the `FileName` value for the location at which the logfile should be created. Both logs
+ * can be customized using the `Append`, `TimeStamping`, `DateStamping`,
+ * `CategoryStamping`, and `LogLevelStamping` values.
  *
- * \param dictionary The dictionary from which the ghoul::logging::Log should be created
- * \return The created ghoul::logging::Log
+ * \param dictionary The dictionary from which the logging::Log should be created
+ * \return The created logging::Log
  *
- * \throw ghoul::RuntimeError If there was an error creating the ghoul::logging::Log
+ * \throw RuntimeError If there was an error creating the logging::Log
  * \post The return value will not be `nullptr`
  *
- * \see ghoul::logging::TextLog
- * \see ghoul::logging::HTMLLog
+ * \see logging::TextLog
+ * \see logging::HTMLLog
  */
-std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary);
+std::unique_ptr<logging::Log> createLog(const Dictionary& dictionary);
 
 /**
  * Returns the Documentation that describes a Dictionary used to create a log by using the

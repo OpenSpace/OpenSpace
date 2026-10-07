@@ -29,17 +29,17 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/settings.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionaryjsonformatter.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringconversion.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/openspacemodule.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringconversion.h>
-#include <ghoul/misc/stringhelper.h>
 #include <memory>
 #include <new>
 #include <numeric>
@@ -133,7 +133,7 @@ namespace {
             // Per default, log messages are written to the console, the onscreen text,
             // and (if available) the Visual Studio output window. This table can define
             // other logging methods that will be used additionally.
-            std::optional<std::vector<ghoul::Dictionary>> logs
+            std::optional<std::vector<Dictionary>> logs
                 [[codegen::reference("core_logfactory")]];
 
             // At startup, a list of system capabilities is created and logged. This value
@@ -169,10 +169,6 @@ namespace {
         };
         // Right now only contains the path where the documentation is written to.
         std::optional<Documentation> documentation;
-
-        // The countdown that the application will wait between pressing ESC and actually
-        // shutting down. If ESC is pressed again in this time, the shutdown is aborted.
-        std::optional<float> shutdownCountdown [[codegen::greater(0.0)]];
 
         // If this is set to 'true', the name of the profile will be appended to the cache
         // directory, thus not reusing the same directory. This is useful in cases where
@@ -247,7 +243,7 @@ namespace {
         std::optional<HttpProxy> httpProxy;
 
         // Defines the connections (WebSocket or TcpSocket) that are allowed
-        std::optional<ghoul::Dictionary> server [[codegen::reference("core_server")]];
+        std::optional<Dictionary> server [[codegen::reference("core_server")]];
 
         struct OpenGLDebugContext {
             // Determines whether the OpenGL context should be a debug context.
@@ -353,8 +349,8 @@ namespace {
 
 namespace openspace {
 
-ghoul::Dictionary Configuration::createDictionary() {
-    ghoul::Dictionary res;
+Dictionary Configuration::createDictionary() {
+    Dictionary res;
 
     res.setValue("WindowConfiguration", windowConfiguration);
     res.setValue("Asset", asset);
@@ -363,7 +359,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("PropertyVisibility", static_cast<int>(propertyVisibility));
     res.setValue("ShowPropertyConfirmation", static_cast<int>(showPropertyConfirmation));
 
-    ghoul::Dictionary globalCustomizationScriptsDict;
+    Dictionary globalCustomizationScriptsDict;
     for (size_t i = 0; i < globalCustomizationScripts.size(); i++) {
         globalCustomizationScriptsDict.setValue(
             std::to_string(i),
@@ -372,14 +368,14 @@ ghoul::Dictionary Configuration::createDictionary() {
     }
     res.setValue("GlobalCustomizationScripts", globalCustomizationScriptsDict);
 
-    ghoul::Dictionary fontsDict;
+    Dictionary fontsDict;
     for (const auto& [name, path] : fonts) {
         fontsDict.setValue(name, path);
     }
     res.setValue("Fonts", fontsDict);
 
     {
-        ghoul::Dictionary fontSizeDict;
+        Dictionary fontSizeDict;
         fontSizeDict.setValue("FrameInfo", static_cast<double>(fontSize.frameInfo));
         fontSizeDict.setValue("Shutdown", static_cast<double>(fontSize.shutdown));
         fontSizeDict.setValue("Log", static_cast<double>(fontSize.log));
@@ -390,12 +386,12 @@ ghoul::Dictionary Configuration::createDictionary() {
     }
 
     {
-        ghoul::Dictionary loggingDict;
+        Dictionary loggingDict;
         loggingDict.setValue("Level", logging.level);
         loggingDict.setValue("ForceImmediateFlush", logging.forceImmediateFlush);
         loggingDict.setValue("CapabilitiesVerbosity", logging.capabilitiesVerbosity);
 
-        ghoul::Dictionary logsDict;
+        Dictionary logsDict;
         for (size_t i = 0; i < logging.logs.size(); i++) {
             logsDict.setValue(std::to_string(i), logging.logs[i]);
         }
@@ -409,7 +405,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("ScriptLogRotation", scriptLogRotation);
 
     {
-        ghoul::Dictionary documentationDict;
+        Dictionary documentationDict;
         documentationDict.setValue("Path", documentation.path);
 
         res.setValue("Documentation", documentationDict);
@@ -419,7 +415,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("UseMultithreadedInitialization", useMultithreadedInitialization);
 
     {
-        ghoul::Dictionary loadingScreenDict;
+        Dictionary loadingScreenDict;
         loadingScreenDict.setValue("IsShowingMessages", loadingScreen.isShowingMessages);
         loadingScreenDict.setValue(
             "IsShowingNodeNames",
@@ -436,8 +432,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("IsCheckingOpenGLState", isCheckingOpenGLState);
     res.setValue("IsLoggingOpenGLCalls", isLoggingOpenGLCalls);
     res.setValue("IsPrintingEvents", isPrintingEvents);
-    res.setValue("ConsoleKey", ghoul::to_string(consoleKey));
-    res.setValue("ShutdownCountdown", static_cast<double>(shutdownCountdown));
+    res.setValue("ConsoleKey", to_string(consoleKey));
     res.setValue("shouldUseScreenshotDateTime", shouldUseScreenshotDateTime);
     res.setValue("sandboxedLua", sandboxedLua);
     res.setValue("OnScreenTextScaling", onScreenTextScaling);
@@ -450,7 +445,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("BypassLauncher", bypassLauncher);
     res.setValue("LayerServer", layerServerToString(layerServer));
 
-    ghoul::Dictionary moduleConfigurationsDict;
+    Dictionary moduleConfigurationsDict;
     for (const auto& [key, value] : moduleConfigurations) {
         moduleConfigurationsDict.setValue(key, value);
     }
@@ -459,7 +454,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("Server", server);
 
     {
-        ghoul::Dictionary openGLDebugContextDict;
+        Dictionary openGLDebugContextDict;
         openGLDebugContextDict.setValue("IsActive", openGLDebugContext.isActive);
         openGLDebugContextDict.setValue(
             "PrintStacktrace",
@@ -470,29 +465,27 @@ ghoul::Dictionary Configuration::createDictionary() {
             openGLDebugContext.isSynchronous
         );
 
-        ghoul::Dictionary identifierFiltersDict;
+        Dictionary identifierFiltersDict;
         for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); i++) {
-            {
-                ghoul::Dictionary identifierFilterDict;
-                identifierFilterDict.setValue(
-                    "Type",
-                    openGLDebugContext.identifierFilters[i].type
-                );
-                identifierFilterDict.setValue(
-                    "Source",
-                    openGLDebugContext.identifierFilters[i].source
-                );
-                identifierFilterDict.setValue(
-                    "Identifier",
-                    static_cast<int>(openGLDebugContext.identifierFilters[i].identifier)
-                );
+            Dictionary identifierFilterDict;
+            identifierFilterDict.setValue(
+                "Type",
+                openGLDebugContext.identifierFilters[i].type
+            );
+            identifierFilterDict.setValue(
+                "Source",
+                openGLDebugContext.identifierFilters[i].source
+            );
+            identifierFilterDict.setValue(
+                "Identifier",
+                static_cast<int>(openGLDebugContext.identifierFilters[i].identifier)
+            );
 
-                identifierFiltersDict.setValue(std::to_string(i), identifierFilterDict);
-            }
+            identifierFiltersDict.setValue(std::to_string(i), identifierFilterDict);
         }
         openGLDebugContextDict.setValue("IdentifierFilters", identifierFiltersDict);
 
-        ghoul::Dictionary severityFiltersDict;
+        Dictionary severityFiltersDict;
         for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); i++) {
             severityFiltersDict.setValue(
                 std::to_string(i),
@@ -505,7 +498,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     }
 
     {
-        ghoul::Dictionary httpProxyDict;
+        Dictionary httpProxyDict;
         httpProxyDict.setValue("UsingHttpProxy", httpProxy.usingHttpProxy);
         httpProxyDict.setValue("Address", httpProxy.address);
         httpProxyDict.setValue("Port", static_cast<int>(httpProxy.port));
@@ -520,7 +513,7 @@ ghoul::Dictionary Configuration::createDictionary() {
 }
 
 void parseLuaState(Configuration& configuration) {
-    using namespace ghoul::lua;
+    using namespace lua;
 
     // Shorten the rest of this function
     Configuration& c = configuration;
@@ -531,7 +524,7 @@ void parseLuaState(Configuration& configuration) {
     lua_newtable(s);
 
     // We go through all of the entries and lift them from global scope into the table on
-    // the stack so that we can create a ghoul::Dictionary from this new table
+    // the stack so that we can create a Dictionary from this new table
     const Documentation doc = Configuration::Documentation();
     for (const DocumentationEntry& e : doc.entries) {
         lua_pushstring(s, e.key.c_str());
@@ -540,8 +533,8 @@ void parseLuaState(Configuration& configuration) {
     }
 
 
-    ghoul::Dictionary d;
-    ghoul::lua::luaDictionaryFromState(s, d);
+    Dictionary d;
+    lua::luaDictionaryFromState(s, d);
     lua_settop(s, 0);
     const Parameters p = codegen::bake<Parameters>(d);
 
@@ -582,7 +575,7 @@ void parseLuaState(Configuration& configuration) {
     if (p.consoleKey.has_value()) {
         const KeyWithModifier km = stringToKey(*p.consoleKey);
         if (km.modifier != KeyModifier::None) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Console key '{}' must be a 'bare' key and cannot contain any modifiers",
                 *p.consoleKey
             ));
@@ -591,7 +584,6 @@ void parseLuaState(Configuration& configuration) {
         c.consoleKey = km.key;
     }
 
-    c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
     c.shouldUseScreenshotDateTime =
         p.screenshotUseDateTime.value_or(c.shouldUseScreenshotDateTime);
     c.sandboxedLua = p.sandboxedLua.value_or(c.sandboxedLua);
@@ -628,10 +620,10 @@ void parseLuaState(Configuration& configuration) {
 
     // ModuleConfigurations depend on the list of modules that are added, which has to be
     // done dynamically. Hence we can't have it written directly into the struct
-    if (d.hasValue<ghoul::Dictionary>("ModuleConfigurations")) {
-        ghoul::Dictionary dict = d.value<ghoul::Dictionary>("ModuleConfigurations");
+    if (d.hasValue<Dictionary>("ModuleConfigurations")) {
+        Dictionary dict = d.value<Dictionary>("ModuleConfigurations");
         for (std::string_view key : dict.keys()) {
-            c.moduleConfigurations[std::string(key)] = dict.value<ghoul::Dictionary>(key);
+            c.moduleConfigurations[std::string(key)] = dict.value<Dictionary>(key);
         }
     }
 
@@ -707,7 +699,7 @@ void patchConfiguration(Configuration& configuration, const Settings& settings) 
     // Just in case we have a configuration file that does not specify anything
     // about the globebrowsing module
     if (it == configuration.moduleConfigurations.end()) {
-        configuration.moduleConfigurations["GlobeBrowsing"] = ghoul::Dictionary();
+        configuration.moduleConfigurations["GlobeBrowsing"] = Dictionary();
     }
     if (settings.mrf.isEnabled.has_value()) {
         configuration.moduleConfigurations["GlobeBrowsing"].setValue(
@@ -773,7 +765,7 @@ std::filesystem::path findConfiguration(const std::string& filename) {
 
         if (directory == nextDirectory) {
             // We have reached the root of the file system and did not find the file
-            throw ghoul::RuntimeError(
+            throw RuntimeError(
                 std::format("Could not find configuration file '{}'", filename),
                 "ConfigurationManager"
             );
@@ -785,20 +777,20 @@ std::filesystem::path findConfiguration(const std::string& filename) {
 Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
                                         const std::filesystem::path& settingsFile)
 {
-    ghoul_assert(std::filesystem::is_regular_file(configurationFile), "File must exist");
+    assert_msg(std::filesystem::is_regular_file(configurationFile), "File must exist");
 
     Configuration result;
     // Having the configuration not sandboxed is safe as there is no way for a third-party
     // file to have any input this early in the loading phase
-    result.state = ghoul::lua::LuaState(ghoul::lua::LuaState::Sandboxed::No);
+    result.state = lua::LuaState(lua::LuaState::Sandboxed::No);
 
     // Load the configuration file into the state
-    ghoul::lua::runScriptFile(result.state, configurationFile);
+    lua::runScriptFile(result.state, configurationFile);
 
     // If an override file exist, we want to run it straight after
     const std::filesystem::path override = std::format("{}.override", configurationFile);
     if (std::filesystem::exists(override)) {
-        ghoul::lua::runScriptFile(result.state, override);
+        lua::runScriptFile(result.state, override);
     }
 
     parseLuaState(result);
@@ -833,7 +825,7 @@ void registerPathTokens(const Configuration& configuration) {
 
         const bool overrideTemporary = (fullKey == "${TEMPORARY}");
 
-        using Override = ghoul::filesystem::FileSystem::Override;
+        using Override = filesystem::FileSystem::Override;
         FileSys.registerPathToken(
             std::move(fullKey),
             path.second,
@@ -847,7 +839,7 @@ Configuration::LayerServer stringToLayerServer(std::string_view server) {
     else if (server == "NewYork") { return Configuration::LayerServer::NewYork; }
     else if (server == "Sweden") { return Configuration::LayerServer::Sweden; }
     else if (server == "None") { return Configuration::LayerServer::None; }
-    else { throw ghoul::MissingCaseException(); }
+    else { throw MissingCaseException(); }
 }
 
 std::string layerServerToString(Configuration::LayerServer server) {
@@ -856,7 +848,7 @@ std::string layerServerToString(Configuration::LayerServer server) {
         case Configuration::LayerServer::NewYork: return "NewYork";
         case Configuration::LayerServer::Sweden: return "Sweden";
         case Configuration::LayerServer::None: return "None";
-        default: throw ghoul::MissingCaseException();
+        default: throw MissingCaseException();
     }
 }
 

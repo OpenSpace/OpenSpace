@@ -26,15 +26,15 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/luastate.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/task.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <filesystem>
 #include <string_view>
@@ -47,7 +47,7 @@ namespace {
 namespace openspace {
 
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
     std::vector<std::unique_ptr<Task>> tasks;
 
@@ -58,8 +58,8 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
             std::vector<std::unique_ptr<Task>> subTasks = tasksFromFile(path);
             std::move(subTasks.begin(), subTasks.end(), std::back_inserter(tasks));
         }
-        else if (dictionary.hasValue<ghoul::Dictionary>(key)) {
-            const ghoul::Dictionary subTask = dictionary.value<ghoul::Dictionary>(key);
+        else if (dictionary.hasValue<Dictionary>(key)) {
+            const Dictionary subTask = dictionary.value<Dictionary>(key);
             const std::string& taskType = subTask.value<std::string>("Type");
             std::unique_ptr<Task> task = Task::createFromDictionary(subTask);
             if (!task) {
@@ -82,14 +82,14 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
         return std::vector<std::unique_ptr<Task>>();
     }
 
-    ghoul::lua::LuaState state;
+    lua::LuaState state;
     global::scriptEngine->initializeLuaState(state);
 
-    ghoul::Dictionary tasksDictionary;
+    Dictionary tasksDictionary;
     try {
-        ghoul::lua::loadDictionaryFromFile(absTasksFile, tasksDictionary, state);
+        lua::loadDictionaryFromFile(absTasksFile, tasksDictionary, state);
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERROR(std::format(
             "Could not load tasks file '{}'. Lua error: ({}) {}",
             absTasksFile, e.message, e.component

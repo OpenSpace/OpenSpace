@@ -28,9 +28,9 @@
 #include <modules/imgui/include/renderproperties.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <memory>
 #include <type_traits>
@@ -281,7 +281,7 @@ void GuiPropertyComponent::render() {
 
     if (_useTreeLayout) {
         for ([[maybe_unused]] PropertyOwner* owner : owners) {
-            ghoul_assert(
+            assert_msg(
                 dynamic_cast<SceneGraphNode*>(owner),
                 "When using the tree layout, all owners must be SceneGraphNodes"
             );
@@ -358,16 +358,13 @@ void GuiPropertyComponent::render() {
                 // We know that we are done now since we stable_sort:ed them above
                 break;
             }
-            const std::vector<std::string> paths =
-                ghoul::tokenizeString(gui.substr(1), '/');
+            const std::vector<std::string> paths = tokenizeString(gui.substr(1), '/');
             addPathToTree(root, paths, nOwner);
         }
 
         simplifyTree(root);
 
         renderTree(root, renderProp);
-
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 
         for (PropertyOwner* pOwner : owners) {
             // We checked above that pOwner is a SceneGraphNode

@@ -25,7 +25,7 @@
 #include <modules/globebrowsing/src/layeradjustment.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionary.h>
 #include <optional>
 #include <utility>
 
@@ -114,7 +114,7 @@ LayerAdjustment::LayerAdjustment()
     addVisibleProperties();
 }
 
-void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict) {
+void LayerAdjustment::setValuesFromDictionary(const Dictionary& adjustmentDict) {
     const Parameters p = codegen::bake<Parameters>(adjustmentDict);
 
     if (p.type.has_value()) {

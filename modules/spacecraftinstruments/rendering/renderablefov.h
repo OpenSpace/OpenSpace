@@ -27,14 +27,14 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/glm.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <cstdint>
 #include <utility>
 
@@ -42,7 +42,7 @@ namespace openspace {
 
 class RenderableFov : public Renderable {
 public:
-    explicit RenderableFov(const ghoul::Dictionary& dictionary);
+    explicit RenderableFov(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -72,7 +72,7 @@ private:
     FloatProperty _lineWidth;
     DoubleProperty _standOffDistance;
     BoolProperty _alwaysDrawFov;
-    ghoul::opengl::ProgramObject* _program = nullptr;
+    opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewProjectionTransform, colorStart, colorEnd,
         activeColor, targetInFieldOfViewColor, intersectionStartColor,
         intersectionEndColor, squareColor, interpolation, opacity) _uniformCache;

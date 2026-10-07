@@ -55,7 +55,7 @@ struct Parameters {
  * \param file The file to the TLE file. This file must be a valid file
  * \return Information about all of the contained objects in the \p file
  *
- * \throw ghoul::RuntimeError If the provided \p file is not a valid TLE file
+ * \throw RuntimeError If the provided \p file is not a valid TLE file
  * \pre \p file must be a file and must exist
  */
 std::vector<Parameters> readTleFile(const std::filesystem::path& file);
@@ -67,7 +67,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file);
  * \param file The file to the OMM file. This file must be a valid file
  * \return Information about all of the contained objects in the \p file
  *
- * \throw ghoul::RuntimeError If the provided \p file is not a valid OMM file
+ * \throw RuntimeError If the provided \p file is not a valid OMM file
  * \pre \p file must be a file and must exist
  */
 std::vector<Parameters> readOmmFile(const std::filesystem::path& file);
@@ -81,7 +81,7 @@ std::vector<Parameters> readOmmFile(const std::filesystem::path& file);
  * \param file The file to the CSV file. This file must be a valid file
  * \return Information about all of the contained objects in the \p file
  *
- * \throw ghoul::RuntimeError If the provided \p file is not a valid CSV file
+ * \throw RuntimeError If the provided \p file is not a valid CSV file
  * \pre \p file must be a file and must exist
  */
 std::vector<Parameters> readCsvFile(const std::filesystem::path& file);
@@ -94,7 +94,7 @@ std::vector<Parameters> readCsvFile(const std::filesystem::path& file);
  * \param file The CSV file containing the information about the objects
  * \return Information about all of the contained objects in the \p file
  *
- * \throw ghoul::RuntimeError If the provided \p file is not a valid JPL SBDB CSV format
+ * \throw RuntimeError If the provided \p file is not a valid JPL SBDB CSV format
  * \pre \p file must be a file and must exist
  */
 std::vector<Parameters> readSbdbFile(const std::filesystem::path& file);
@@ -106,7 +106,7 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file);
  * \param file The DAT file contained the ephemerides information
  * \return Information about all of the contained objects in the \p file
  *
- * \throw ghoul::RuntimeError If the provided \p file is not a valid MPC DAT file
+ * \throw RuntimeError If the provided \p file is not a valid MPC DAT file
  * \pre \p file must be a file and must exist
  */
 std::vector<Parameters> readMpcFile(const std::filesystem::path& file);
@@ -129,7 +129,7 @@ enum class Format {
  * \param format The format of the provided \p file
  * \return Information about all of the contained objects in the \p file
  *
- * \throw ghoul::RuntimeError If the provided \p is not in the provided file
+ * \throw RuntimeError If the provided \p is not in the provided file
  * \pre \p file must be a file and must exist
  */
 std::vector<Parameters> readFile(const std::filesystem::path& file, Format format);
@@ -142,7 +142,7 @@ std::vector<Parameters> readFile(const std::filesystem::path& file, Format forma
  * \param format The format of the provided \p file
  * \return Information about all of the contained objects in the \p files
  *
- * \throw ghoul::RuntimeError If the provided \p is not in the provided files
+ * \throw RuntimeError If the provided \p is not in the provided files
  * \pre Each entry in \p files must be a file and must exist
  */
 std::vector<Parameters> readFiles(const std::vector<std::filesystem::path>& files,

@@ -31,8 +31,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
 #include <glm/gtx/color_space.hpp>
 #include <algorithm>
 #include <cmath>
@@ -148,7 +148,7 @@ Documentation ScreenSpaceSkyBrowser::Documentation() {
     return codegen::doc<Parameters>("skybrowser_screenspace_skybrowser");
 }
 
-ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
+ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const Dictionary& dictionary)
     : ScreenSpaceBrowser(dictionary)
     , _isHidden(IsHiddenInfo, true)
     , _isPointingSpacecraft(PointSpacecraftInfo, false)
@@ -326,8 +326,8 @@ ScreenSpaceSkyBrowser::showDisplayCopies() const
     return vec;
 }
 
-ghoul::Dictionary ScreenSpaceSkyBrowser::data() const {
-    ghoul::Dictionary res;
+Dictionary ScreenSpaceSkyBrowser::data() const {
+    Dictionary res;
     std::vector<int> color = { _wwtBorderColor.r, _wwtBorderColor.g, _wwtBorderColor.b };
 
     res.setValue("fov", verticalFov());
@@ -342,9 +342,9 @@ ghoul::Dictionary ScreenSpaceSkyBrowser::data() const {
 
     std::vector<std::pair<std::string, glm::dvec3>> copies = displayCopies();
     std::vector<std::pair<std::string, bool>> showCopies = showDisplayCopies();
-    ghoul::Dictionary copiesData;
+    Dictionary copiesData;
     for (size_t i = 0; i < copies.size(); i++) {
-        ghoul::Dictionary copy;
+        Dictionary copy;
         copy.setValue("position", copies[i].second);
         copy.setValue("show", showCopies[i].second);
         copy.setValue("idShowProperty", showCopies[i].first);

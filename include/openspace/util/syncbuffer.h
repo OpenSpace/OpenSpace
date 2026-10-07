@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
 #define __OPENSPACE_CORE___SYNCBUFFER___H__
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <cstddef>
 #include <string>
 #include <vector>

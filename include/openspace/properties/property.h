@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_CORE___PROPERTY___H__
 #define __OPENSPACE_CORE___PROPERTY___H__
 
+#include <openspace/misc/boolean.h>
+#include <openspace/misc/easing.h>
+#include <openspace/lua/lua_types.h>
 #include <openspace/util/json_helper.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/easing.h>
-#include <ghoul/lua/lua_types.h>
 #include <cstdint>
 #include <functional>
 #include <limits>
@@ -227,7 +227,7 @@ public:
      * \return The Lua type that will be consumed or produced by the Property::getLuaValue
      *         and Property::setLuaValue methods
      */
-    virtual ghoul::lua::LuaTypes typeLua() const = 0;
+    virtual lua::LuaTypes typeLua() const = 0;
 
     /**
      * This method encodes the encapsulated \p value of this Property as a `std::string`.
@@ -478,8 +478,7 @@ public:
      */
     virtual void setLuaInterpolationTarget(lua_State* state);
 
-    virtual void interpolateValue(float t,
-        ghoul::EasingFunc<float> easingFunction = nullptr);
+    virtual void interpolateValue(float t, EasingFunc<float> easingFunction = nullptr);
 
     /**
      * Creates the information that is general to every Property and adds the

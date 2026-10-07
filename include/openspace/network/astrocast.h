@@ -27,13 +27,13 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/designpattern/synchronousevent.h>
+#include <openspace/io/socket/tcpsocket.h>
+#include <openspace/misc/exception.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/designpattern/event.h>
-#include <ghoul/io/socket/tcpsocket.h>
-#include <ghoul/misc/exception.h>
 #include <atomic>
 #include <cstdint>
 #include <deque>
@@ -99,7 +99,7 @@ public:
 
     Status status();
     int nConnections();
-    ghoul::Event<>& connectionEvent();
+    SynchronousEvent<>& connectionEvent();
 
     static LuaLibrary luaLibrary();
 
@@ -154,8 +154,8 @@ private:
     double _initialTimeDiff = 0.0;
 
     std::unique_ptr<std::thread> _receiveThread = nullptr;
-    std::unique_ptr<ghoul::io::TcpSocket> _socket;
-    std::shared_ptr<ghoul::Event<>> _connectionEvent;
+    std::unique_ptr<io::TcpSocket> _socket;
+    std::shared_ptr<SynchronousEvent<>> _connectionEvent;
 
     TimeManager::CallbackHandle _timeJumpCallback = -1;
     TimeManager::CallbackHandle _timeTimelineChangeCallback = -1;

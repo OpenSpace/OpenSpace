@@ -24,21 +24,21 @@
 
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <type_traits>
 
 namespace {
     using namespace openspace;
 
-    size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
+    size_t numberOfRasters(opengl::Texture::Format format) {
         switch (format) {
-            case ghoul::opengl::Texture::Format::Red:  return 1;
-            case ghoul::opengl::Texture::Format::RG:   return 2;
-            case ghoul::opengl::Texture::Format::RGB:  return 3;
-            case ghoul::opengl::Texture::Format::BGR:  return 3;
-            case ghoul::opengl::Texture::Format::RGBA: return 4;
-            case ghoul::opengl::Texture::Format::BGRA: return 4;
-            default:                                  throw ghoul::MissingCaseException();
+            case opengl::Texture::Format::Red:  return 1;
+            case opengl::Texture::Format::RG:   return 2;
+            case opengl::Texture::Format::RGB:  return 3;
+            case opengl::Texture::Format::BGR:  return 3;
+            case opengl::Texture::Format::RGBA: return 4;
+            case opengl::Texture::Format::BGRA: return 4;
+            default:                            throw MissingCaseException();
         }
     }
 
@@ -53,34 +53,34 @@ namespace {
             case GL_HALF_FLOAT:     return sizeof(GLhalf);
             case GL_FLOAT:          return sizeof(GLfloat);
             case GL_DOUBLE:         return sizeof(GLdouble);
-            default:                throw ghoul::MissingCaseException();
+            default:                throw MissingCaseException();
         }
     }
 
-    unsigned int uniqueIdForTextureFormat(ghoul::opengl::Texture::Format textureFormat) {
+    unsigned int uniqueIdForTextureFormat(opengl::Texture::Format textureFormat) {
         switch (textureFormat) {
-            case ghoul::opengl::Texture::Format::Red:            return 0;
-            case ghoul::opengl::Texture::Format::RG:             return 1;
-            case ghoul::opengl::Texture::Format::RGB:            return 2;
-            case ghoul::opengl::Texture::Format::BGR:            return 3;
-            case ghoul::opengl::Texture::Format::RGBA:           return 4;
-            case ghoul::opengl::Texture::Format::BGRA:           return 5;
-            case ghoul::opengl::Texture::Format::DepthComponent: return 6;
-            default:                                  throw ghoul::MissingCaseException();
+            case opengl::Texture::Format::Red:            return 0;
+            case opengl::Texture::Format::RG:             return 1;
+            case opengl::Texture::Format::RGB:            return 2;
+            case opengl::Texture::Format::BGR:            return 3;
+            case opengl::Texture::Format::RGBA:           return 4;
+            case opengl::Texture::Format::BGRA:           return 5;
+            case opengl::Texture::Format::DepthComponent: return 6;
+            default:                                      throw MissingCaseException();
         }
     }
 
     TileTextureInitData::HashKey calculateHashKey(const glm::ivec3& dimensions,
-                                             const ghoul::opengl::Texture::Format& format,
-                                                                     const GLenum& glType)
+                                                  const opengl::Texture::Format& format,
+                                                  const GLenum& glType)
     {
-        ghoul_assert(dimensions.x > 0, "Incorrect dimension");
-        ghoul_assert(dimensions.y > 0, "Incorrect dimension");
-        ghoul_assert(dimensions.x <= 1024, "Incorrect dimension");
-        ghoul_assert(dimensions.y <= 1024, "Incorrect dimension");
-        ghoul_assert(dimensions.z == 1, "Incorrect dimension");
+        assert_msg(dimensions.x > 0, "Incorrect dimension");
+        assert_msg(dimensions.y > 0, "Incorrect dimension");
+        assert_msg(dimensions.x <= 1024, "Incorrect dimension");
+        assert_msg(dimensions.y <= 1024, "Incorrect dimension");
+        assert_msg(dimensions.z == 1, "Incorrect dimension");
         const unsigned int formatId = uniqueIdForTextureFormat(format);
-        ghoul_assert(formatId < 256, "Incorrect format");
+        assert_msg(formatId < 256, "Incorrect format");
 
         TileTextureInitData::HashKey res = 0ULL;
 
@@ -105,7 +105,7 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id,
                 tileSize,
                 tileSize,
                 GL_FLOAT,
-                ghoul::opengl::Texture::Format::Red,
+                opengl::Texture::Format::Red,
                 TileTextureInitData::ShouldAllocateDataOnCPU::Yes
             );
         }
@@ -115,7 +115,7 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id,
                 tileSize,
                 tileSize,
                 GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA
+                opengl::Texture::Format::BGRA
             );
         }
         case layers::Group::ID::Overlays: {
@@ -124,7 +124,7 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id,
                 tileSize,
                 tileSize,
                 GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA
+                opengl::Texture::Format::BGRA
             );
         }
         case layers::Group::ID::NightLayers: {
@@ -133,7 +133,7 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id,
                 tileSize,
                 tileSize,
                 GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA
+                opengl::Texture::Format::BGRA
             );
         }
         case layers::Group::ID::WaterMasks: {
@@ -142,27 +142,27 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id,
                 tileSize,
                 tileSize,
                 GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA
+                opengl::Texture::Format::BGRA
             );
         }
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 
 TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum type,
-                                         ghoul::opengl::Texture::Format textureFormat,
+                                         opengl::Texture::Format textureFormat_,
                                          ShouldAllocateDataOnCPU allocCpu)
     : dimensions(width, height, 1)
     , glType(type)
-    , ghoulTextureFormat(textureFormat)
-    , nRasters(numberOfRasters(ghoulTextureFormat))
+    , textureFormat(textureFormat_)
+    , nRasters(numberOfRasters(textureFormat_))
     , bytesPerDatum(numberOfBytes(glType))
     , bytesPerPixel(nRasters * bytesPerDatum)
     , bytesPerLine(bytesPerPixel * width)
     , totalNumBytes(bytesPerLine * height)
     , shouldAllocateDataOnCPU(allocCpu)
-    , hashKey(calculateHashKey(dimensions, ghoulTextureFormat, glType))
+    , hashKey(calculateHashKey(dimensions, textureFormat_, glType))
 {}
 
 TileTextureInitData& TileTextureInitData::operator=(const TileTextureInitData& rhs) {

@@ -26,7 +26,7 @@
 
 #include "profile/assettreeitem.h"
 #include "filesystemaccess.h"
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/misc/stringhelper.h>
 #include <sstream>
 #include <string_view>
 #include <utility>
@@ -61,7 +61,7 @@ namespace {
     }
 
     bool importGetNextLine(ImportElement& elem, std::istringstream& iss) {
-        ghoul::getline(iss, elem.line);
+        openspace::getline(iss, elem.line);
         const bool ok = iss.good();
         if (!ok) {
             elem.line = "";

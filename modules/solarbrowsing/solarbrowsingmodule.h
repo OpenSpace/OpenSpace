@@ -27,9 +27,9 @@
 
 #include <openspace/util/openspacemodule.h>
 
-namespace ghoul::filesystem { class CacheManager; }
-
 namespace openspace {
+
+namespace filesystem { class CacheManager; }
 
 class SolarBrowsingModule : public OpenSpaceModule {
 public:
@@ -37,13 +37,13 @@ public:
 
     SolarBrowsingModule();
     ~SolarBrowsingModule() override = default;
-    ghoul::filesystem::CacheManager* cacheManager() const;
+    filesystem::CacheManager* cacheManager() const;
 
     std::vector<openspace::Documentation> documentations() const override;
 
 protected:
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
-    std::unique_ptr<ghoul::filesystem::CacheManager> _cacheManager;
+    void internalInitialize(const Dictionary& dictionary) override;
+    std::unique_ptr<filesystem::CacheManager> _cacheManager;
 };
 
 } // namespace openspace

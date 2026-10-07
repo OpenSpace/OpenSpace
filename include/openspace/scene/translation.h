@@ -27,25 +27,23 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
+#include <openspace/misc/managedmemoryuniqueptr.h>
 #include <openspace/scene/timeframe.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <functional>
 #include <limits>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 struct UpdateData;
 
 class Translation : public PropertyOwner {
 public:
-    static ghoul::mm_unique_ptr<Translation> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+    static mm_unique_ptr<Translation> createFromDictionary(const Dictionary& dictionary);
 
-    explicit Translation(const ghoul::Dictionary& dictionary);
+    explicit Translation(const Dictionary& dictionary);
     ~Translation() override = default;
 
     virtual void initialize();
@@ -67,7 +65,7 @@ protected:
 
 private:
     bool _needsUpdate = true;
-    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
+    mm_unique_ptr<TimeFrame> _timeFrame;
     double _cachedTime = -std::numeric_limits<double>::max();
     glm::dvec3 _cachedPosition = glm::dvec3(0.0);
     std::function<void()> _onParameterChangeCallback;

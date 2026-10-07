@@ -26,13 +26,13 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
 #include <limits>
 #include <optional>
 #include <utility>
@@ -100,25 +100,25 @@ namespace {
         // The [Renderable](#core_renderable) object that is shown in this ScreenSpace
         // object. See the list of creatable renderable objects for options that can be
         // used for this type.
-        ghoul::Dictionary renderable [[codegen::reference("core_renderable")]];
+        Dictionary renderable [[codegen::reference("core_renderable")]];
 
         struct Transform {
             // The [Translation](#core_translation) object that is used for the provided
             // [Renderable](#core_renderable). If no value is specified, a
             // [StaticTranslation](#base_translation_static) is created instead.
-            std::optional<ghoul::Dictionary> translation
+            std::optional<Dictionary> translation
                 [[codegen::reference("core_translation")]];
 
             // The [Rotation](#core_rotation) object that is used for the provided
             // [Renderable](#core_renderable). If no value is specified, a
             // [StaticRotation](#base_rotation_static) is created instead.
-            std::optional<ghoul::Dictionary> rotation
+            std::optional<Dictionary> rotation
                 [[codegen::reference("core_rotation")]];
 
             // The [Scale](#core_scale) object that is used for the provided
             // [Renderable](#core_renderable). If no value is specified, a
             // [StaticScale](#base_scale_static) is created instead.
-            std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
+            std::optional<Dictionary> scale [[codegen::reference("core_scale")]];
         };
         // The collection of transformations that are applied to the
         // [Renderable](#core_renderable) before it is shown on screen.
@@ -154,7 +154,7 @@ Documentation ScreenSpaceRenderableRenderable::Documentation() {
 }
 
 ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
     : ScreenSpaceRenderableFramebuffer(dictionary)
     , _time(
         TimeInfo,
@@ -195,9 +195,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
     _renderable = Renderable::createFromDictionary(p.renderable);
     addPropertySubOwner(_renderable.get());
 
-    _transform.parent = ghoul::mm_unique_ptr<PropertyOwner>(
-        new PropertyOwner(TransformInfo)
-    );
+    _transform.parent = mm_unique_ptr<PropertyOwner>(new PropertyOwner(TransformInfo));
     addPropertySubOwner(_transform.parent.get());
 
     if (p.transform.has_value() && p.transform->translation.has_value()) {
@@ -205,7 +203,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
             Translation::createFromDictionary(*p.transform->translation);
     }
     else {
-        ghoul::Dictionary translation;
+        Dictionary translation;
         translation.setValue("Type", std::string("StaticTranslation"));
         translation.setValue("Position", glm::dvec3(0.0));
         _transform.translation = Translation::createFromDictionary(translation);
@@ -216,7 +214,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
         _transform.rotation = Rotation::createFromDictionary(*p.transform->rotation);
     }
     else {
-        ghoul::Dictionary rotation;
+        Dictionary rotation;
         rotation.setValue("Type", std::string("StaticRotation"));
         rotation.setValue("Rotation", glm::dvec3(0.0));
         _transform.rotation = Rotation::createFromDictionary(rotation);
@@ -227,7 +225,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
         _transform.scale = Scale::createFromDictionary(*p.transform->scale);
     }
     else {
-        ghoul::Dictionary scale;
+        Dictionary scale;
         scale.setValue("Type", std::string("StaticScale"));
         scale.setValue("Scale", 1.0);
         _transform.scale = Scale::createFromDictionary(scale);

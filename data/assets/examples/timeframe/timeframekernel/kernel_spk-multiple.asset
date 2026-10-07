@@ -16,13 +16,7 @@ local Node = {
   Identifier = "TimeFrameKernel_Example_SPK_Multiple",
   TimeFrame = {
     Type = "TimeFrameKernel",
-    SPK = {
-      Kernels = {
-        data .. "vgr1_jup230.bsp",
-        data .. "vgr1_sat337.bsp"
-      },
-      Object = "VOYAGER 1"
-    }
+    Object = "VOYAGER 1"
   },
   Renderable = {
     Type = "RenderableCartesianAxes"
@@ -35,9 +29,13 @@ local Node = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(data .. "vgr1_jup230.bsp")
+  openspace.spice.loadKernel(data .. "vgr1_sat337.bsp")
   openspace.addSceneGraphNode(Node)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Node)
+  openspace.spice.unloadKernel(data .. "vgr1_sat337.bsp")
+  openspace.spice.unloadKernel(data .. "vgr1_jup230.bsp")
 end)

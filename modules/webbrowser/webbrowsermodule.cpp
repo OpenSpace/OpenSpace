@@ -30,16 +30,16 @@
 #include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <algorithm>
 #include <optional>
 
@@ -154,7 +154,7 @@ WebBrowserModule::WebBrowserModule()
 
 WebBrowserModule::~WebBrowserModule() {}
 
-void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
+void WebBrowserModule::internalInitialize(const Dictionary& dictionary) {
     ZoneScoped;
 
     // Remove any previously existing cache folder
@@ -184,9 +184,9 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _eventHandler->initialize();
 
     // Register ScreenSpaceBrowser
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+    TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+    assert_msg(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }
 
@@ -210,7 +210,7 @@ void WebBrowserModule::internalDeinitialize() {
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
     ZoneScoped;
 
-    ghoul_assert(browser, "Browser must not be a nullptr");
+    assert_msg(browser, "Browser must not be a nullptr");
     if (_enabled) {
         _browsers.push_back(browser);
         if (_updateBrowserBetweenRenderables) {
@@ -257,7 +257,7 @@ bool WebBrowserModule::isEnabled() const {
 bool WebBrowserModule::canUseAcceleratedRendering() {
 // Linux doesn't have a problem with the rendering
 #ifdef WIN32
-    ghoul::systemcapabilities::Version acceleratedVersion = {
+    systemcapabilities::Version acceleratedVersion = {
         .major = 4, .minor = 5, .release = 0
     };
     auto it = std::find(
@@ -269,7 +269,7 @@ bool WebBrowserModule::canUseAcceleratedRendering() {
     bool isExtensionsOk = it != OpenGLCap.extensions().end();
     bool isVendorOk =
         OpenGLCap.gpuVendor() ==
-        ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Vendor::Nvidia;
+        systemcapabilities::OpenGLCapabilitiesComponent::Vendor::Nvidia;
     return isVersionOk && isExtensionsOk &&
            isVendorOk && !_disableAcceleratedRendering;
 #else  // ^^^^ WIN32 // !WIN32 vvvv

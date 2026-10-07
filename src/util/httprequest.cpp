@@ -24,20 +24,21 @@
 
 #include <openspace/util/httprequest.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <curl/curl.h>
 #include <array>
 #include <cstdint>
+#include <system_error>
 #include <utility>
 
 namespace openspace {
 
-HttpRequest::HttpRequest(std::string url, ghoul::logging::LogLevel failureVerbosity)
+HttpRequest::HttpRequest(std::string url, logging::LogLevel failureVerbosity)
     : _url(std::move(url))
     , _failureVerbosity(failureVerbosity)
 {
-    ghoul_assert(!_url.empty(), "url must not be empty");
+    assert_msg(!_url.empty(), "url must not be empty");
 }
 
 void HttpRequest::onProgress(ProgressCallback cb) {
@@ -153,7 +154,7 @@ const std::string& HttpRequest::url() const {
 
 
 
-HttpDownload::HttpDownload(std::string url, ghoul::logging::LogLevel failureVerbosity)
+HttpDownload::HttpDownload(std::string url, logging::LogLevel failureVerbosity)
     : _httpRequest(std::move(url), failureVerbosity)
 {
     _httpRequest.onData([this](char* buffer, size_t size) {
@@ -257,14 +258,13 @@ std::atomic_int HttpFileDownload::nCurrentFileHandles = 0;
 std::mutex HttpFileDownload::_directoryCreationMutex;
 
 HttpFileDownload::HttpFileDownload(std::string url, std::filesystem::path destination,
-                                   Overwrite overwrite,
-                                   ghoul::logging::LogLevel failureVerbosity
+                                   Overwrite overwrite, logging::LogLevel failureVerbosity
 )
     : HttpDownload(std::move(url), failureVerbosity)
     , _destination(std::move(destination))
 {
     if (!overwrite && std::filesystem::is_regular_file(_destination)) {
-        throw ghoul::RuntimeError(std::format("File '{}' already exists", _destination));
+        throw RuntimeError(std::format("File '{}' already exists", _destination));
     }
 }
 
@@ -316,26 +316,20 @@ bool HttpFileDownload::setup() {
     return false;
 #else // ^^^^ WIN32 / !WIN32 vvvv
     if (errno) {
-#ifdef __unix__
-        std::array<char, 256> buffer;
+        // `strerror_r` cannot be called directly here since it has two incompatible
+        // signatures: glibc's version returns a `char*`, whereas the POSIX one that musl
+        // provides returns an `int` and only fills the buffer. `generic_category` wraps
+        // whichever of the two the standard library was built against, and is thread-safe
+        // either way, unlike a plain `strerror`
         LERRORC(
             "HttpFileDownload",
             std::format(
                 "Cannot open file '{}': {}",
                 _destination,
-                std::string(strerror_r(errno, buffer.data(), sizeof(buffer)))
+                std::generic_category().message(errno)
             )
         );
         return false;
-#else // ^^^^ __unix__ / !__unix__ vvvv
-        LERRORC(
-            "HttpFileDownload",
-            std::format(
-                "Cannot open file '{}': {}", _destination, std::string(strerror(errno))
-            )
-        );
-        return false;
-#endif // __unix__
     }
 
     LERRORC("HttpFileDownload", std::format("Cannot open file '{}'", _destination));
@@ -352,7 +346,7 @@ bool HttpFileDownload::teardown() {
         _hasHandle = false;
         _file.close();
         nCurrentFileHandles--;
-        ghoul_assert(nCurrentFileHandles >= 0, "More handles returned than taken out");
+        assert_msg(nCurrentFileHandles >= 0, "More handles returned than taken out");
         return _file.good();
     }
     else {
@@ -368,7 +362,7 @@ bool HttpFileDownload::handleData(char* buffer, size_t size) {
 
 
 HttpMemoryDownload::HttpMemoryDownload(std::string url,
-                                       ghoul::logging::LogLevel failureVerbosity)
+                                       logging::LogLevel failureVerbosity)
     : HttpDownload(std::move(url), failureVerbosity)
 {}
 

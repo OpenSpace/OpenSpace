@@ -27,10 +27,10 @@
 #include <modules/globebrowsing/src/lruthreadpool.h>
 #include <modules/globebrowsing/src/rawtile.h>
 #include <modules/globebrowsing/src/tileloadjob.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/assert.h>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -188,7 +188,7 @@ bool AsyncTileDataProvider::shouldBeDeleted() const {
 void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileDataReader) {
     ZoneScoped;
 
-    ghoul_assert(_enqueuedTileRequests.empty(), "No enqueued requests left");
+    assert_msg(_enqueuedTileRequests.empty(), "No enqueued requests left");
 
     // Reset raw tile data reader
     if (resetRawTileDataReader == ResetRawTileDataReader::Yes) {

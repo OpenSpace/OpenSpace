@@ -30,6 +30,14 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/messagestructures.h>
@@ -44,14 +52,6 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <array>
 #include <iterator>
@@ -74,9 +74,9 @@ namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    struct SessionRecordingError final : public ghoul::RuntimeError {
+    struct SessionRecordingError final : public RuntimeError {
         explicit SessionRecordingError(std::string msg)
-            : ghoul::RuntimeError(std::move(msg), "SessionRecording")
+            : RuntimeError(std::move(msg), "SessionRecording")
         {}
     };
 
@@ -233,7 +233,7 @@ void SessionRecordingHandler::tickPlayback(double dt) {
     );
 
     if (isSavingFramesDuringPlayback()) {
-        ghoul_assert(
+        assert_msg(
             dt == _playback.saveScreenshots.deltaTime || dt == 0.0,
             "Misaligned delta times"
         );
@@ -297,7 +297,7 @@ void SessionRecordingHandler::render() const {
 
     constexpr std::string_view FontName = "Mono";
     constexpr float FontSizeFrameinfo = 32.f;
-    const std::shared_ptr<ghoul::fontrendering::Font> font =
+    const std::shared_ptr<fontrendering::Font> font =
         global::fontManager->font(FontName, FontSizeFrameinfo);
 
     glm::vec2 penPosition = global::renderEngine->fontResolution() - glm::ivec2(150, 0);
@@ -315,12 +315,12 @@ void SessionRecordingHandler::render() const {
         _playback.waitForLoading ? "true" : "false",
         global::navigationHandler->camera()->scaling()
     );
-    ghoul::fontrendering::RenderFont(
+    fontrendering::RenderFont(
         *font,
         penPosition,
         text,
         glm::vec4(1.f),
-        ghoul::fontrendering::CrDirection::Down
+        fontrendering::CrDirection::Down
     );
 }
 
@@ -769,7 +769,7 @@ void SessionRecordingHandler::removeStateChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(it != _stateChangeCallbacks.end(), "handle must be a valid callback");
+    assert_msg(it != _stateChangeCallbacks.end(), "handle must be a valid callback");
     _stateChangeCallbacks.erase(it);
 }
 
@@ -790,7 +790,7 @@ std::vector<std::string> SessionRecordingHandler::playbackList() const {
         std::filesystem::path p = std::filesystem::proximate(e.path(), path);
         std::string filename = p.string();
         // Normalize the paths
-        filename = ghoul::replaceAll(filename, "\\", "/");
+        filename = replaceAll(filename, "\\", "/");
 #ifdef WIN32
         DWORD attributes = GetFileAttributes(e.path().string().c_str());
         bool isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;

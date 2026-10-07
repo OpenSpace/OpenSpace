@@ -42,37 +42,5 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 
-option(KAMELEON_LIBRARY_ONLY "Build with Kameleon as library only" ON)
-option(KAMELEON_USE_HDF5 "Kameleon use HDF5" OFF)
-set(KAMELEON_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/kameleon)
-set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)
-add_subdirectory(${KAMELEON_ROOT_DIR} SYSTEM)
-target_include_directories(${kameleon_module} SYSTEM PUBLIC ${KAMELEON_INCLUDES})
-target_link_libraries(${kameleon_module} PRIVATE ccmc)
-mark_as_advanced(CDF_BUILD_ZLIB CDF_INCLUDES CDF_LIBRARY CDF_USE_STATIC_LIBS
-  CDF_USE_ZLIB HDF5_DIR HDF5_USE_STATIC_LIBRARIES KAMELEON_LIBRARY_ONLY KAMELEON_USE_HDF5
-)
-set_target_properties(ccmc PROPERTIES FOLDER "External")
-if (TARGET cdf)
-  if (MSVC)
-    target_compile_options(cdf PRIVATE "/W0")
-    target_compile_definitions(cdf PRIVATE "_SCL_SECURE_NO_WARNINGS")
-  else ()
-    target_compile_options(cdf PRIVATE "-w")
-  endif ()
-
-  set_target_properties(cdf PROPERTIES FOLDER "External")
-endif ()
-
-target_precompile_headers(cdf PRIVATE
-  [["stdio.h"]]
-  [["stdlib.h"]]
-  [["string.h"]]
-)
-
-target_precompile_headers(ccmc PRIVATE
-  "$<$<COMPILE_LANGUAGE:CXX>:iostream>"
-  "$<$<COMPILE_LANGUAGE:CXX>:map>"
-  "$<$<COMPILE_LANGUAGE:CXX>:unordered_map>"
-  "$<$<COMPILE_LANGUAGE:CXX>:vector>"
-)
+find_package(Kameleon CONFIG REQUIRED)
+target_link_libraries(${kameleon_module} PUBLIC Kameleon::ccmc)

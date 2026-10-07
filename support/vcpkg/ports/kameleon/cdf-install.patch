@@ -1,0 +1,24 @@
+diff --git a/ext/cdf/CMakeLists.txt b/ext/cdf/CMakeLists.txt
+index 0af65b4..988ed66 100644
+--- a/ext/cdf/CMakeLists.txt
++++ b/ext/cdf/CMakeLists.txt
+@@ -66,6 +66,19 @@ include_directories(${CDF_INCLUDE_DIRS})
+ set(CDF_INCLUDE_DIRS ${CDF_INCLUDE_DIRS} PARENT_SCOPE)
+ set(CDF_LIBRARIES ${CDF_LIBRARIES} PARENT_SCOPE)
+ 
++# Install
++include(GNUInstallDirs)
++target_include_directories(cdf INTERFACE
++  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/kameleon/cdf>
++)
++install(TARGETS cdf
++  EXPORT KameleonTargets
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
++install(FILES ${CDF_HEADER} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kameleon/cdf)
++
+ 
+ 
+ 

@@ -25,11 +25,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeconstants.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
 #include <optional>
 #include <utility>
 #include <variant>

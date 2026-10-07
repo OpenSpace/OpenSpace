@@ -28,9 +28,9 @@
 #include <modules/iswa/util/dataprocessortext.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
 
 namespace {
     struct [[codegen::Dictionary(RenderableDataPlane)]] Parameters {};
@@ -46,7 +46,7 @@ Documentation RenderableDataPlane::Documentation() {
     );
 }
 
-RenderableDataPlane::RenderableDataPlane(const ghoul::Dictionary& dictionary)
+RenderableDataPlane::RenderableDataPlane(const Dictionary& dictionary)
     : RenderableDataCygnet(dictionary)
 {}
 

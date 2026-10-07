@@ -30,20 +30,20 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/systemcapabilities/generalcapabilitiescomponent.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -324,7 +324,7 @@ namespace {
         // A list of strings with the names of all the columns that are to be read from
         // the specified FITS file. No need to define if data already has been processed.
         // [Works only with FileReaderOption::Fits].
-        std::optional<ghoul::Dictionary> columnNames;
+        std::optional<Dictionary> columnNames;
 
         // [codegen::verbatim(LodPixelThresholdInfo.description)]]
         std::optional<float> lodPixelThreshold;
@@ -368,7 +368,7 @@ Documentation RenderableGaiaStars::Documentation() {
     );
 }
 
-RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
+RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _filePath(FilePathInfo)
     , _colorTexturePath(ColorTextureInfo)
@@ -400,7 +400,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     addProperty(Fadeable::_opacity);
 
-    _dataFile = std::make_unique<ghoul::filesystem::File>(p.file);
+    _dataFile = std::make_unique<filesystem::File>(p.file);
     _dataFile->setCallback([this]() { _dataIsDirty = true; });
 
     _filePath = p.file;
@@ -434,7 +434,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _renderMode.onChange([this]() { _buffersAreDirty = true; });
     addProperty(_renderMode);
 
-    _colorTextureFile = std::make_unique<ghoul::filesystem::File>(p.colorMap);
+    _colorTextureFile = std::make_unique<filesystem::File>(p.colorMap);
     _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
     _colorTexturePath = p.colorMap;
     _colorTexturePath.onChange([this]() { _colorTextureIsDirty = true; });
@@ -519,7 +519,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         _lastRow.onChange([this]() { _dataIsDirty = true; });
         addProperty(_lastRow);
 
-        const ghoul::Dictionary d = p.columnNames.value_or(ghoul::Dictionary());
+        const Dictionary d = p.columnNames.value_or(Dictionary());
 
         // Ugly fix for ASCII sorting when there are more columns read than 10
         std::set<int> intKeys;
@@ -532,7 +532,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         }
 
         if (_firstRow > _lastRow) {
-            throw ghoul::RuntimeError("User defined FirstRow is bigger than LastRow");
+            throw RuntimeError("User defined FirstRow is bigger than LastRow");
         }
     }
 
@@ -549,20 +549,20 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableGaiaStars::initializeGL() {
-    _program = ghoul::opengl::ProgramObject::Build(
+    _program = opengl::ProgramObject::Build(
         "GaiaStar",
         absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
         absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
         absPath("${MODULE_GAIA}/shaders/gaia_point_gs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     _programTM = global::renderEngine->buildRenderProgram(
         "ToneMapping",
         absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
         absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_point_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_programTM, _uniformCacheTM);
+    opengl::updateUniformLocations(*_programTM, _uniformCacheTM);
 
     glCreateVertexArrays(1, &_vaoEmpty);
     glCreateBuffers(1, &_ssboIdx);
@@ -589,14 +589,14 @@ void RenderableGaiaStars::initializeGL() {
 
     glCreateFramebuffers(1, &_fbo);
     // Generate a new texture and attach it to our FBO
-    _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _fboTexture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(global::renderEngine->renderingResolution(), 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
     glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
     const GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
@@ -787,7 +787,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.bpRpThreshold, _bpRpThreshold);
     _program->setUniform(_uniformCache.distThreshold, _distThreshold);
 
-    ghoul::opengl::TextureUnit colorUnit;
+    opengl::TextureUnit colorUnit;
     if (_colorTexture) {
         colorUnit.bind(*_colorTexture);
         _program->setUniform(_uniformCache.colorTexture, colorUnit);
@@ -809,7 +809,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     // Use ToneMapping shaders and render to default FBO again
     _programTM->activate();
 
-    ghoul::opengl::TextureUnit fboTexUnit;
+    opengl::TextureUnit fboTexUnit;
     if (_fboTexture) {
         fboTexUnit.bind(*_fboTexture);
         _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
@@ -845,7 +845,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Reload data file. This may reconstruct the Octree as well
         const bool success = readDataFile();
         if (!success) {
-            throw ghoul::RuntimeError("Error loading Gaia Star data");
+            throw RuntimeError("Error loading Gaia Star data");
         }
         _dataIsDirty = false;
         // Make sure we regenerate buffers if data has reloaded
@@ -854,14 +854,14 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
     if (_program->isDirty()) [[unlikely]] {
         global::renderEngine->removeRenderProgram(_program.get());
-        _program = ghoul::opengl::ProgramObject::Build(
+        _program = opengl::ProgramObject::Build(
             "GaiaStar",
             absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
             absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
             absPath("${MODULE_GAIA}/shaders/gaia_point_gs.glsl")
         );
 
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
 
         _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
         _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
@@ -874,7 +874,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
             absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_point_fs.glsl")
         );
-        ghoul::opengl::updateUniformLocations(*_programTM, _uniformCacheTM);
+        opengl::updateUniformLocations(*_programTM, _uniformCacheTM);
     }
 
     if (_buffersAreDirty) {
@@ -921,8 +921,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Index)
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
 
-        _ssboIdxBinding = std::make_unique<ghoul::opengl::BufferBinding<
-            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>
+        _ssboIdxBinding = std::make_unique<opengl::BufferBinding<
+            opengl::bufferbinding::Buffer::ShaderStorage>
         >();
         glBindBufferBase(
             GL_SHADER_STORAGE_BUFFER,
@@ -934,8 +934,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Combined SSBO with all data
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
 
-        _ssboDataBinding = std::make_unique<ghoul::opengl::BufferBinding<
-            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>
+        _ssboDataBinding = std::make_unique<opengl::BufferBinding<
+            opengl::bufferbinding::Buffer::ShaderStorage>
         >();
         glBindBufferBase(
             GL_SHADER_STORAGE_BUFFER,
@@ -958,7 +958,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             );
             LDEBUG(std::format("Loaded texture from '{}'", _colorTexturePath.value()));
 
-            _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
+            _colorTextureFile = std::make_unique<filesystem::File>(
                 _colorTexturePath.value()
             );
             _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
@@ -976,14 +976,14 @@ void RenderableGaiaStars::update(const UpdateData&) {
         );
 
         if (hasChanged) {
-            _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-                ghoul::opengl::Texture::FormatInit {
+            _fboTexture = std::make_unique<opengl::Texture>(
+                opengl::Texture::FormatInit {
                     .dimensions = glm::uvec3(screenSize, 1),
                     .type = GL_TEXTURE_2D,
-                    .format = ghoul::opengl::Texture::Format::RGBA,
+                    .format = opengl::Texture::Format::RGBA,
                     .dataType = GL_FLOAT
                 },
-                ghoul::opengl::Texture::SamplerInit {}
+                opengl::Texture::SamplerInit {}
             );
             LDEBUG("Re-Generating Gaia Framebuffer Texture");
 

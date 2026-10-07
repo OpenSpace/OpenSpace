@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/shadowmapping.h>
 
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -35,19 +36,17 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
-
-namespace ghoul::modelgeometry { class ModelGeometry; }
 
 namespace openspace {
 
+namespace modelgeometry { class ModelGeometry; }
 class LightSource;
 struct LuaLibrary;
 
 class RenderableModel : public Renderable, public Shadower {
 public:
-    explicit RenderableModel(const ghoul::Dictionary& dictionary);
+    explicit RenderableModel(const Dictionary& dictionary);
     ~RenderableModel() override = default;
 
     void initialize() override;
@@ -75,7 +74,7 @@ private:
     glm::dvec3 center() const override;
 
     std::filesystem::path _file;
-    std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
+    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
     bool _invertModelScale = false;
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
@@ -106,7 +105,7 @@ private:
 
     std::filesystem::path _vertexShaderPath;
     std::filesystem::path _fragmentShaderPath;
-    ghoul::opengl::ProgramObject* _program = nullptr;
+    opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, normalTransform, meshTransform,
         meshNormalTransform, ambientIntensity, diffuseIntensity, specularIntensity,
         specularPower, performShading, use_forced_color, has_texture_diffuse,
@@ -132,22 +131,22 @@ private:
     bool _shouldRenderTwice = false;
 
     /// Opacity program
-    ghoul::opengl::ProgramObject* _quadProgram = nullptr;
+    opengl::ProgramObject* _quadProgram = nullptr;
     UniformCache(opacity, colorTexture, depthTexture, viewport,
         resolution) _uniformOpacityCache;
 
     // Store the original RenderBin
     Renderable::RenderBin _originalRenderBin;
 
-    ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
+    opengl::ProgramObject* _depthMapProgram = nullptr;
 
     /**
      * Transformation defined by translation, rotation and scale.
      */
     struct NodeTransform {
-        ghoul::mm_unique_ptr<Translation> translation;
-        ghoul::mm_unique_ptr<Rotation> rotation;
-        ghoul::mm_unique_ptr<Scale> scale;
+        mm_unique_ptr<Translation> translation;
+        mm_unique_ptr<Rotation> rotation;
+        mm_unique_ptr<Scale> scale;
     };
     std::map<std::string, NodeTransform> _customNodeTransforms;
     bool _replaceWithCustomNodeTransforms = false;

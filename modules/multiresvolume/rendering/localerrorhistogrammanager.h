@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___LOCALERRORHISTOGRAMMANAGER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___LOCALERRORHISTOGRAMMANAGER___H__
 
+#include <openspace/glm.h>
 #include <openspace/util/histogram.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 #include <fstream>
 #include <map>

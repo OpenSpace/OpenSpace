@@ -24,8 +24,8 @@
 
 #include <openspace/properties/misc/optionproperty.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace {
     using namespace openspace;
@@ -71,10 +71,8 @@ std::string_view OptionProperty::className() const {
     return "OptionProperty";
 }
 
-ghoul::lua::LuaTypes OptionProperty::typeLua() const {
-    return ghoul::lua::LuaTypes(
-        ghoul::lua::LuaTypes::Number | ghoul::lua::LuaTypes::String
-    );
+lua::LuaTypes OptionProperty::typeLua() const {
+    return lua::LuaTypes(lua::LuaTypes::Number | lua::LuaTypes::String);
 }
 
 const std::vector<OptionProperty::Option>& OptionProperty::options() const {
@@ -167,27 +165,27 @@ std::string OptionProperty::getDescriptionByValue(int value) {
 }
 
 void OptionProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 void OptionProperty::setLuaValue(lua_State* state) {
     int thisValue = 0;
 
-    if (ghoul::lua::hasValue<double>(state)) {
-        thisValue = static_cast<int>(ghoul::lua::value<double>(state));
+    if (lua::hasValue<double>(state)) {
+        thisValue = static_cast<int>(lua::value<double>(state));
     }
-    else if (ghoul::lua::hasValue<int>(state)) {
-        thisValue = ghoul::lua::value<int>(state);
+    else if (lua::hasValue<int>(state)) {
+        thisValue = lua::value<int>(state);
     }
-    else if (ghoul::lua::hasValue<std::string>(state)) {
-        std::string value = ghoul::lua::value<std::string>(state);
+    else if (lua::hasValue<std::string>(state)) {
+        std::string value = lua::value<std::string>(state);
         const auto it = std::find_if(
             _options.cbegin(),
             _options.cend(),
             [&value](const Option& option) { return option.description == value; }
         );
         if (it == _options.cend()) {
-            throw ghoul::RuntimeError(
+            throw RuntimeError(
                 std::format("Could not find option '{}'", value),
                 std::string(uri())
             );
@@ -195,7 +193,7 @@ void OptionProperty::setLuaValue(lua_State* state) {
         thisValue = it->value;
     }
     else {
-        throw ghoul::RuntimeError("Error extracting value in OptionProperty");
+        throw RuntimeError("Error extracting value in OptionProperty");
     }
 
     setValue(thisValue);
@@ -257,14 +255,14 @@ nlohmann::json OptionProperty::generateAdditionalJsonDescription() const {
 }
 
 int OptionProperty::toValue(lua_State* state) const {
-    if (ghoul::lua::hasValue<double>(state)) {
-        return static_cast<int>(ghoul::lua::value<double>(state));
+    if (lua::hasValue<double>(state)) {
+        return static_cast<int>(lua::value<double>(state));
     }
-    else if (ghoul::lua::hasValue<int>(state)) {
-        return ghoul::lua::value<int>(state);
+    else if (lua::hasValue<int>(state)) {
+        return lua::value<int>(state);
     }
     else {
-        throw ghoul::RuntimeError("Error extracting value in IntProperty");
+        throw RuntimeError("Error extracting value in IntProperty");
     }
 }
 

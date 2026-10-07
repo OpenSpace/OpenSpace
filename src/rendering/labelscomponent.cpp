@@ -24,14 +24,14 @@
 
 #include <openspace/rendering/labelscomponent.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
 #include <cmath>
 #include <optional>
 
@@ -155,7 +155,7 @@ Documentation LabelsComponent::Documentation() {
     return codegen::doc<Parameters>("core_labelscomponent");
 }
 
-LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
+LabelsComponent::LabelsComponent(const Dictionary& dictionary)
     : PropertyOwner({ "Labels" })
     , _enabled(EnabledInfo, false)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -233,8 +233,8 @@ void LabelsComponent::initialize() {
     _font = global::fontManager->font(
         "Mono",
         _fontSize,
-        ghoul::fontrendering::FontManager::Outline::Yes,
-        ghoul::fontrendering::FontManager::LoadGlyphs::No
+        fontrendering::FontManager::Outline::Yes,
+        fontrendering::FontManager::LoadGlyphs::No
     );
 
     loadLabels();
@@ -293,7 +293,7 @@ void LabelsComponent::render(const RenderData& data,
     const int renderOption =
         _faceCamera ? RenderOptionFaceCamera : RenderOptionPositionNormal;
 
-    const ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
+    const fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
         .enableDepth = true,
         .enableFalseDepth = false,
         .scale = std::pow(10.f, _size),
@@ -320,7 +320,7 @@ void LabelsComponent::render(const RenderData& data,
         );
         const glm::vec3 scaledPos = glm::vec3(transformedPos * scale);
 
-        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
+        fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
             e.text,

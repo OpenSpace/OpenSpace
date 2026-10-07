@@ -8,7 +8,7 @@
     {
       "type": "property",
       "value": {
-        "property": "ScreenSpace.ScreenSpaceInsetBlackout_Example.BorderColor",
+        "property": "ScreenSpace.ScreenSpaceInsetBlackout_Example.Style.Border.Color",
         "value": [
           1.0,
           1.0,
@@ -19,7 +19,7 @@
     {
       "type": "property",
       "value": {
-        "property": "ScreenSpace.ScreenSpaceInsetBlackout_Example.BorderWidth",
+        "property": "ScreenSpace.ScreenSpaceInsetBlackout_Example.Style.Border.Width",
         "value": 2.0
       }
     },

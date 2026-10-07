@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "MSL_EDL_Landing_Site",
   Name = "MSL EDL Landing Site [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "MSL_EDL_Landing_Site_6_Days_texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "MSL_EDL_Landing_Site",
   Name = "MSL EDL Landing Site [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "MSL_EDL_Landing_Site_6_Days_hole_filled_heightmap.vrt"
 }
 

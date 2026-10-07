@@ -24,7 +24,7 @@
 
 #include "welcomedialog.h"
 
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/filesystem/filesystem.h>
 #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QLabel>

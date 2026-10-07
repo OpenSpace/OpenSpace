@@ -24,6 +24,7 @@
 
 #include <openspace/util/factorymanager.h>
 
+#include <openspace/misc/assert.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -35,7 +36,6 @@
 #include <openspace/topic/topics/topic.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
 #include <utility>
 
 namespace openspace {
@@ -43,16 +43,16 @@ namespace openspace {
 FactoryManager* FactoryManager::_manager = nullptr;
 
 FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
-    : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
+    : RuntimeError(std::format("Could not find TemplateFactory for type '{}'", t))
     , type(std::move(t))
 {
-    ghoul_assert(!type.empty(), "Type must not be empty");
+    assert_msg(!type.empty(), "Type must not be empty");
 }
 
 FactoryManager::FactoryManager() {}
 
 void FactoryManager::initialize() {
-    ghoul_assert(!_manager, "Factory Manager must not have been initialized");
+    assert_msg(!_manager, "Factory Manager must not have been initialized");
 
     _manager = new FactoryManager;
     _manager->addFactory<DashboardItem>("DashboardItem");
@@ -69,7 +69,7 @@ void FactoryManager::initialize() {
 }
 
 void FactoryManager::deinitialize() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
+    assert_msg(_manager, "Factory Manager must have been initialized");
 
     delete _manager;
     _manager = nullptr;
@@ -80,7 +80,7 @@ bool FactoryManager::isInitialized() {
 }
 
 FactoryManager& FactoryManager::ref() {
-    ghoul_assert(_manager, "Factory Manager must have been initialized");
+    assert_msg(_manager, "Factory Manager must have been initialized");
     return *_manager;
 }
 

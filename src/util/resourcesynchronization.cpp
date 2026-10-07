@@ -25,10 +25,10 @@
 #include <openspace/util/resourcesynchronization.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <fstream>
 #include <utility>
 
@@ -59,13 +59,13 @@ Documentation ResourceSynchronization::Documentation() {
 }
 
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    ghoul::TemplateFactory<ResourceSynchronization>* factory =
+    TemplateFactory<ResourceSynchronization>* factory =
         FactoryManager::ref().factory<ResourceSynchronization>();
-    ghoul_assert(factory, "ResourceSynchronization factory did not exist");
+    assert_msg(factory, "ResourceSynchronization factory did not exist");
     ResourceSynchronization* sync = factory->create(p.type, dictionary);
     sync->_name = p.name;
     return std::unique_ptr<ResourceSynchronization>(sync);

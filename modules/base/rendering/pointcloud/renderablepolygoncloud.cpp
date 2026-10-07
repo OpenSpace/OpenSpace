@@ -25,11 +25,11 @@
 #include <modules/base/rendering/pointcloud/renderablepolygoncloud.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/programobject.h>
 #include <array>
 #include <memory>
 
@@ -60,7 +60,7 @@ Documentation RenderablePolygonCloud::Documentation() {
     );
 }
 
-RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictionary)
+RenderablePolygonCloud::RenderablePolygonCloud(const Dictionary& dictionary)
     : RenderablePointCloud(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -100,7 +100,7 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     // alpha. This is also why we do not need to update the texture
     TextureFormat textureFormat = {
         .resolution = glm::uvec2(TexSize),
-        .format = ghoul::opengl::Texture::Format::RGBA,
+        .format = opengl::Texture::Format::RGBA,
         .internalFormat = GL_RGBA8
     };
 
@@ -182,8 +182,8 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
     glVertexArrayAttribFormat(_polygonVao, 0, 4, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_polygonVao, 0, 0);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> program =
-        ghoul::opengl::ProgramObject::Build(
+    std::unique_ptr<opengl::ProgramObject> program =
+        opengl::ProgramObject::Build(
             "RenderablePointCloud_Polygon",
             absPath("${MODULE_BASE}/shaders/polygon_vs.glsl"),
             absPath("${MODULE_BASE}/shaders/polygon_fs.glsl"),

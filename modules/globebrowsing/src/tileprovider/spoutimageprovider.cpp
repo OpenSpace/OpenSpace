@@ -26,8 +26,8 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <limits>
 #include <optional>
 
@@ -54,9 +54,7 @@ Documentation SpoutImageProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_spoutimage");
 }
 
-SpoutImageProvider::SpoutImageProvider(
-                                     [[maybe_unused]] const ghoul::Dictionary& dictionary)
-{
+SpoutImageProvider::SpoutImageProvider([[maybe_unused]] const Dictionary& dictionary) {
     ZoneScoped;
 
 #ifdef OPENSPACE_HAS_SPOUT
@@ -67,14 +65,14 @@ SpoutImageProvider::SpoutImageProvider(
             if (!fbo[i]) {
                 glCreateFramebuffers(1, &fbo[i]);
             }
-            tileTexture[i] = std::make_unique<ghoul::opengl::Texture>(
-                ghoul::opengl::Texture::FormatInit {
+            tileTexture[i] = std::make_unique<opengl::Texture>(
+                opengl::Texture::FormatInit {
                     .dimensions = glm::uvec3(width / 2, height, 1),
                     .type = GL_TEXTURE_2D,
-                    .format = ghoul::opengl::Texture::Format::RGBA,
+                    .format = opengl::Texture::Format::RGBA,
                     .dataType = GL_UNSIGNED_BYTE
                 },
-                ghoul::opengl::Texture::SamplerInit {}
+                opengl::Texture::SamplerInit {}
             );
 
             if (!tileTexture[i]) {

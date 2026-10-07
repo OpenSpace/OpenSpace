@@ -26,8 +26,8 @@
 
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <openspace/glm.h>
 #include <openspace/util/geodetic.h>
-#include <ghoul/glm.h>
 
 using namespace openspace;
 

@@ -26,9 +26,9 @@
 
 #include "profile/line.h"
 #include <modules/space/horizonsfile.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
@@ -109,7 +109,7 @@ void HorizonsDialog::openSaveAs() {
         "Horizons data file (*.hrz)",
         nullptr
 #ifdef __linux__
-        // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
+        // Linux in Qt6 crashes when trying to access the native dialog here
         , QFileDialog::DontUseNativeDialog
 #endif // __linux__
     );

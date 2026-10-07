@@ -28,15 +28,15 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/invariants.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/util/resourcesynchronization.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <functional>
 #include <string_view>
@@ -54,8 +54,8 @@ Asset::Asset(AssetManager& manager, std::filesystem::path assetPath,
     , _assetPath(std::move(assetPath))
     , _explicitEnabled(explicitEnabled)
 {
-    ghoul_precondition(!_assetPath.empty(), "Asset path must not be empty");
-    ghoul_precondition(
+    precondition(!_assetPath.empty(), "Asset path must not be empty");
+    precondition(
         std::filesystem::is_regular_file(_assetPath),
         "Asset path file must exist"
     );
@@ -103,8 +103,8 @@ void Asset::setState(State state) {
 }
 
 void Asset::addSynchronization(ResourceSynchronization* synchronization) {
-    ghoul_precondition(synchronization != nullptr, "Synchronization must not be nullptr");
-    ghoul_precondition(
+    precondition(synchronization != nullptr, "Synchronization must not be nullptr");
+    precondition(
         std::find(
             _synchronizations.begin(),
             _synchronizations.end(),
@@ -205,7 +205,7 @@ bool Asset::isInitialized() const {
 }
 
 void Asset::startSynchronizations() {
-    ghoul_precondition(isLoaded(), "This Asset must have been Loaded before");
+    precondition(isLoaded(), "This Asset must have been Loaded before");
 
     // Do not attempt to resync if this is already done
     if (isSyncingOrResolved()) {
@@ -262,7 +262,7 @@ void Asset::unload() {
     while (!_requiredAssets.empty()) {
         Asset* child = *_requiredAssets.begin();
 
-        ghoul_assert(
+        assert_msg(
             _state == Asset::State::Unloaded,
             "Cannot unrequire child asset in a loaded state"
         );
@@ -274,7 +274,7 @@ void Asset::unload() {
             child->_parentAssets.cend(),
             this
         );
-        ghoul_assert(
+        assert_msg(
             parentIt != child->_parentAssets.cend(),
             "Parent asset was not correctly registered"
         );
@@ -324,7 +324,7 @@ void Asset::initialize() {
         _manager.updateAssetState(_assetPath, EventAssetLoading::State::Error);
         return;
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERROR(std::format("Failed to initialize asset '{}'", path()));
         LERROR(std::format("{}: {}", e.component, e.message));
         setState(State::InitializationFailed);
@@ -361,7 +361,7 @@ void Asset::deinitialize() {
     try {
         _manager.callOnDeinitialize(this);
     }
-    catch (const ghoul::lua::LuaRuntimeException& e) {
+    catch (const lua::LuaRuntimeException& e) {
         LERROR(std::format("Failed to deinitialize asset '{}'", _assetPath));
         LERROR(std::format("{}: {}", e.component, e.message));
         return;
@@ -378,7 +378,7 @@ void Asset::deinitialize() {
 }
 
 void Asset::require(Asset* dependency) {
-    ghoul_precondition(dependency, "Dependency must not be nullptr");
+    precondition(dependency, "Dependency must not be nullptr");
 
     auto it = std::find(_requiredAssets.cbegin(), _requiredAssets.cend(), dependency);
     if (it == _requiredAssets.cend()) {

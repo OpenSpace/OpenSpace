@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___WAYPOINT___H__
 
 #include <openspace/camera/camerapose.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <optional>
 #include <string>
 

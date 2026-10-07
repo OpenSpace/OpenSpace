@@ -35,10 +35,9 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ghoul::lua { class LuaState; }
-
 namespace openspace {
 
+namespace lua { class LuaState; }
 class Asset;
 struct LuaLibrary;
 class ResourceSynchronization;
@@ -70,7 +69,7 @@ public:
     };
     using AssetTreeCallback = std::function<void(const AssetTreeChange&)>;
 
-    AssetManager(ghoul::lua::LuaState* state, std::filesystem::path assetRootDirectory);
+    AssetManager(lua::LuaState* state, std::filesystem::path assetRootDirectory);
     ~AssetManager();
 
     void deinitialize();
@@ -366,7 +365,7 @@ private:
     std::filesystem::path _assetRootDirectory;
 
     /// The Lua state that is used for all asset initialization
-    ghoul::lua::LuaState* _luaState = nullptr;
+    lua::LuaState* _luaState = nullptr;
 
     // References to the onInitialize and the onDeinitialize functions for each Asset
     std::unordered_map<Asset*, std::vector<int>> _onInitializeFunctionRefs;

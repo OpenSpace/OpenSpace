@@ -27,7 +27,7 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <ghoul/opengl/programobjectmanager.h>
+#include <openspace/opengl/programobjectmanager.h>
 
 namespace openspace {
 
@@ -39,10 +39,10 @@ public:
     ~DigitalUniverseModule() override = default;
     std::vector<openspace::Documentation> documentations() const override;
 
-    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
+    static opengl::ProgramObjectManager ProgramObjectManager;
 
 protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
     void internalDeinitializeGL() override;
 };
 

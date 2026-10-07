@@ -24,7 +24,7 @@
 
 #include <openspace/properties/scalar/ulongproperty.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
@@ -44,16 +44,16 @@ std::string_view ULongProperty::className() const {
     return "ULongProperty";
 }
 
-ghoul::lua::LuaTypes ULongProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes ULongProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void ULongProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 unsigned long ULongProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<unsigned long>(state);
+    return lua::value<unsigned long>(state);
 }
 
 std::string ULongProperty::stringValue() const {

@@ -28,12 +28,12 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <optional>
 #include <utility>
 
@@ -83,7 +83,7 @@ Documentation DashboardItemVelocity::Documentation() {
     );
 }
 
-DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary)
+DashboardItemVelocity::DashboardItemVelocity(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo)

@@ -36,7 +36,7 @@ namespace openspace {
 
 class RenderablePlaneTimeVaryingImage : public RenderablePlane {
 public:
-    explicit RenderablePlaneTimeVaryingImage(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneTimeVaryingImage(const Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -48,10 +48,10 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
 private:
-    ghoul::opengl::Texture* loadTexture() const;
+    opengl::Texture* loadTexture() const;
     void extractTriggerTimesFromFileNames();
     bool extractMandatoryInfoFromDictionary();
     int updateActiveTriggerTimeIndex(double currentTime) const;
@@ -63,8 +63,8 @@ private:
     std::vector<double> _startTimes;
     int _activeTriggerTimeIndex = 0;
     StringProperty _sourceFolder;
-    ghoul::opengl::Texture* _texture = nullptr;
-    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textureFiles;
+    opengl::Texture* _texture = nullptr;
+    std::vector<std::unique_ptr<opengl::Texture>> _textureFiles;
     bool _isLoadingLazily = false;
     bool _textureIsDirty = false;
 };

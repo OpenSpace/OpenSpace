@@ -27,14 +27,14 @@
 #include <modules/solarbrowsing/solarbrowsingmodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
 #include <scn/scan.h>
 #include <execution>
 #include <format>
@@ -65,12 +65,16 @@ namespace {
         im.filePath = filePath;
 
         std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
+        if (!stream.is_open()) {
+            LERROR(std::format("Could not open '{}'", filePath));
+            return std::nullopt;
+        }
         std::streamsize size = stream.tellg();
         stream.seekg(0, std::ios::beg);
         std::vector<char> buffer(size);
         if (!stream.read(buffer.data(), size)) {
             LERROR(std::format("Failed to read data from '{}' ", filePath));
-            return im;
+            return std::nullopt;
         }
         std::string_view bufferView(buffer.data(), size);
 
@@ -242,7 +246,7 @@ namespace {
         else if (month == "OCT") { MM = "10"; }
         else if (month == "NOV") { MM = "11"; }
         else if (month == "DEC") { MM = "12"; }
-        else { ghoul_assert(false, "Bad month"); };
+        else { assert_msg(false, "Bad month"); };
 
         datetime.replace(4, 5, "-" + MM + "-");
         return datetime;
@@ -272,16 +276,14 @@ namespace {
                                                        ImageMetadataMap& imageMetadataMap)
     {
         if (!std::filesystem::is_directory(rootDir)) {
-            throw ghoul::RuntimeError(std::format(
-                "Could not load directory '{}'", rootDir
-            ));
+            throw RuntimeError(std::format("Could not load directory '{}'", rootDir));
         }
 
         std::vector<std::filesystem::path> subdirectories =
-            ghoul::filesystem::walkDirectory(
+            filesystem::walkDirectory(
                 rootDir,
-                ghoul::filesystem::Recursive::No,
-                ghoul::filesystem::Sorted::No,
+                filesystem::Recursive::No,
+                filesystem::Sorted::No,
                 [](const std::filesystem::path& path) {
                     return std::filesystem::is_directory(path);
                 }
@@ -293,10 +295,10 @@ namespace {
             subDirectoriesMap[path] = false;
         }
 
-        std::vector<std::filesystem::path> cacheFiles = ghoul::filesystem::walkDirectory(
+        std::vector<std::filesystem::path> cacheFiles = filesystem::walkDirectory(
             rootDir,
-            ghoul::filesystem::Recursive::No,
-            ghoul::filesystem::Sorted::No,
+            filesystem::Recursive::No,
+            filesystem::Sorted::No,
             [](const std::filesystem::path& path) {
                 const std::filesystem::path extension = path.extension();
                 const std::string base = path.filename().string();
@@ -335,10 +337,10 @@ namespace {
 
             // Early check if the number of files in the subdirectoy match what was stored
             // in cache, however, this does not guarantee that the files are the same
-            const bool cacheHasCorrectNFiles = ghoul::filesystem::walkDirectory(
+            const bool cacheHasCorrectNFiles = filesystem::walkDirectory(
                 subDirectory,
-                ghoul::filesystem::Recursive::No,
-                ghoul::filesystem::Sorted::No,
+                filesystem::Recursive::No,
+                filesystem::Sorted::No,
                 isValidJ2000ImageFile
             ).size() == numStates;
 
@@ -482,13 +484,13 @@ std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferF
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> tfMap;
 
     if (!std::filesystem::is_directory(rootDir)) {
-        throw ghoul::RuntimeError(std::format("Could not load directory '{}'", rootDir));
+        throw RuntimeError(std::format("Could not load directory '{}'", rootDir));
     }
 
-    std::vector<std::filesystem::path> subdirectories = ghoul::filesystem::walkDirectory(
+    std::vector<std::filesystem::path> subdirectories = filesystem::walkDirectory(
         rootDir,
-        ghoul::filesystem::Recursive::No,
-        ghoul::filesystem::Sorted::No,
+        filesystem::Recursive::No,
+        filesystem::Sorted::No,
         [](const std::filesystem::path& path) {
             return std::filesystem::is_directory(path);
         }
@@ -523,7 +525,7 @@ std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferF
 
 ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
     if (!std::filesystem::is_directory(rootDir)) {
-        throw ghoul::RuntimeError(std::format("Could not load directory '{}'", rootDir));
+        throw RuntimeError(std::format("Could not load directory '{}'", rootDir));
     }
 
     LDEBUG("Begin loading spacecraft imagery metadata");
@@ -552,10 +554,10 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
     // Get all files that were not correctly processed from cache file
     for (const auto& [directory, isValidCacheFile] : cacheFilesValidityMap) {
         LDEBUG(std::format("Loading sequence directory '{}'", directory));
-        std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
+        std::vector<std::filesystem::path> files = filesystem::walkDirectory(
             directory,
-            ghoul::filesystem::Recursive::No,
-            ghoul::filesystem::Sorted::Yes
+            filesystem::Recursive::No,
+            filesystem::Sorted::Yes
         );
 
         sequencePaths.reserve(sequencePaths.size() + files.size());
@@ -609,7 +611,7 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
             fileName,
             "{}_{}_{}__{}_{}_{}_{}"
         );
-        ghoul_assert(r, "Invalid date");
+        assert_msg(r, "Invalid date");
         auto& [year, month, day, hour, minute, second, millisecond] = r->values();
 
         if (r) {
@@ -673,7 +675,7 @@ DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
             path,
             std::format("{0}x{0}", imageSize)
         );
-        throw ghoul::RuntimeError(std::format("Could not open cache file '{}'", path));
+        throw RuntimeError(std::format("Could not open cache file '{}'", path));
     }
 
     size_t nEntries = 0;
@@ -693,7 +695,7 @@ DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
             path,
             std::format("{0}x{0}", imageSize)
         );
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Failed to read image data from cache '{}'", path
         ));
     }

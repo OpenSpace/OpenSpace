@@ -29,15 +29,15 @@
 #include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/volumegridtype.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/lua/luastate.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryluaformatter.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <algorithm>
 #include <ios>
 #include <fstream>
@@ -80,7 +80,7 @@ Documentation GenerateRawVolumeTask::Documentation() {
     );
 }
 
-GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary) {
+GenerateRawVolumeTask::GenerateRawVolumeTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _rawVolumeOutputPath = absPath(p.rawVolumeOutput);
@@ -119,8 +119,8 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     RawVolume<float> rawVolume(_dimensions);
     progressCallback(0.1f);
 
-    ghoul::lua::LuaState state;
-    ghoul::lua::runScript(state, _valueFunctionLua);
+    lua::LuaState state;
+    lua::runScript(state, _valueFunctionLua);
 
     int functionReference = luaL_ref(state, LUA_REGISTRYINDEX);
 
@@ -180,8 +180,8 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         .domainUnit = "m"
     };
 
-    const ghoul::Dictionary outputDictionary = metadata.dictionary();
-    const std::string metadataString = ghoul::formatLua(outputDictionary);
+    const Dictionary outputDictionary = metadata.dictionary();
+    const std::string metadataString = formatLua(outputDictionary);
 
     std::fstream f = std::fstream(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;

@@ -25,12 +25,12 @@
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <iterator>
 #include <utility>
@@ -78,8 +78,7 @@ Documentation RenderableTimeVaryingSphere::Documentation() {
     );
 }
 
-RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(const Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _textureSourcePath(TextureSourceInfo)
 {
@@ -104,7 +103,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
     namespace fs = std::filesystem;
     const fs::path sourceFolder = absPath(_textureSourcePath);
     if (!std::filesystem::is_directory(sourceFolder)) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "Source folder for RenderableTimeVaryingSphere is not a valid directory"
         );
     }
@@ -117,8 +116,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         }
         std::filesystem::path filePath = e.path();
         const double time = extractTriggerTimeFromFileName(filePath);
-        std::unique_ptr<ghoul::opengl::Texture> t =
-            ghoul::io::texture::loadTexture(filePath, 2);
+        std::unique_ptr<opengl::Texture> t = io::texture::loadTexture(filePath, 2);
         _files.push_back({ std::move(filePath), time, std::move(t) });
     }
 
@@ -131,7 +129,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
     );
     // Ensure that there are available and valid source files left
     if (_files.empty()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "Source folder for RenderableTimeVaryingSphere contains no files"
         );
     }
@@ -171,7 +169,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     }
 }
 
-void RenderableTimeVaryingSphere::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderableTimeVaryingSphere::bindTexture(opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
         unit.bind(*_texture);
     }

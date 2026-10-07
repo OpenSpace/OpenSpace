@@ -27,14 +27,14 @@
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
 #include <algorithm>
 #include <memory>
 
@@ -137,7 +137,7 @@ namespace {
                                                   const glm::dmat3& lightSourceToShadower,
                                                                        double lengthScale)
     {
-        ghoul_assert(
+        assert_msg(
             srcTerminator.size() == dstTerminator.size(),
             "Unmatched termiator pts"
         );
@@ -210,7 +210,7 @@ Documentation RenderableEclipseCone::Documentation() {
     );
 }
 
-RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary)
+RenderableEclipseCone::RenderableEclipseCone(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _numberOfPoints(NumberPointsInfo, 191, 1, 300)
     , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 2.f)
@@ -275,7 +275,7 @@ void RenderableEclipseCone::initializeGL() {
 
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "ShadowCylinderProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "ShadowCylinderProgram",
                 absPath("${MODULE_SPACE}/shaders/eclipsecone_vs.glsl"),
@@ -284,13 +284,13 @@ void RenderableEclipseCone::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderableEclipseCone::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         "ShadowCylinderProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -339,7 +339,7 @@ void RenderableEclipseCone::render(const RenderData& data, RendererTasks&) {
 void RenderableEclipseCone::update(const UpdateData& data) {
     if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+        opengl::updateUniformLocations(*_shader, _uniformCache);
     }
     createCone(data.time.j2000Seconds());
 }
@@ -422,7 +422,7 @@ void RenderableEclipseCone::createCone(double et) {
     // the order of one of them. It doesn't matter which one, so we pick this one
     std::reverse(resDst.terminatorPoints.begin(), resDst.terminatorPoints.end());
 
-    ghoul_assert(
+    assert_msg(
         resSrc.terminatorPoints.size() == resDst.terminatorPoints.size(),
         "Inconsistent number of terminator points retrieved"
     );

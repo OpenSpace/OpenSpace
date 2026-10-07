@@ -25,14 +25,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <openspace/engine/globals.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/defer.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/defer.h>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <chrono>
 
@@ -60,11 +60,11 @@ TEST_CASE("Property: Basic", "[property]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.property('base.p1')",
-            .callback = [&p1](ghoul::Dictionary d) {
+            .callback = [&p1](Dictionary d) {
                 REQUIRE(d.size() == 1);
                 REQUIRE(d.hasKey("1"));
-                REQUIRE(d.hasValue<ghoul::Dictionary>("1"));
-                ghoul::Dictionary e = d.value<ghoul::Dictionary>("1");
+                REQUIRE(d.hasValue<Dictionary>("1"));
+                Dictionary e = d.value<Dictionary>("1");
                 REQUIRE(e.size() == 1);
                 REQUIRE(e.hasKey("1"));
                 REQUIRE(e.hasValue<std::string>("1"));
@@ -90,11 +90,11 @@ TEST_CASE("Property: Empty", "[property]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.property('other-name')",
-            .callback = [](ghoul::Dictionary d) {
+            .callback = [](Dictionary d) {
                 REQUIRE(d.size() == 1);
                 REQUIRE(d.hasKey("1"));
-                REQUIRE(d.hasValue<ghoul::Dictionary>("1"));
-                ghoul::Dictionary e = d.value<ghoul::Dictionary>("1");
+                REQUIRE(d.hasValue<Dictionary>("1"));
+                Dictionary e = d.value<Dictionary>("1");
                 CHECK(e.size() == 0);
             }
         });
@@ -108,11 +108,11 @@ TEST_CASE("Property: Empty", "[property]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.property('base.other-name')",
-            .callback = [](ghoul::Dictionary d) {
+            .callback = [](Dictionary d) {
                 REQUIRE(d.size() == 1);
                 REQUIRE(d.hasKey("1"));
-                REQUIRE(d.hasValue<ghoul::Dictionary>("1"));
-                ghoul::Dictionary e = d.value<ghoul::Dictionary>("1");
+                REQUIRE(d.hasValue<Dictionary>("1"));
+                Dictionary e = d.value<Dictionary>("1");
                 CHECK(e.size() == 0);
             }
         });
@@ -136,11 +136,11 @@ TEST_CASE("Property: Multiple", "[property]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.property('base.*')",
-            .callback = [&p1, &p2](ghoul::Dictionary d) {
+            .callback = [&p1, &p2](Dictionary d) {
                 REQUIRE(d.size() == 1);
                 REQUIRE(d.hasKey("1"));
-                REQUIRE(d.hasValue<ghoul::Dictionary>("1"));
-                ghoul::Dictionary e = d.value<ghoul::Dictionary>("1");
+                REQUIRE(d.hasValue<Dictionary>("1"));
+                Dictionary e = d.value<Dictionary>("1");
                 REQUIRE(e.size() == 2);
 
                 // Sorting the results as the property return order is undefined
@@ -191,11 +191,11 @@ TEST_CASE("Property: Multiple/2", "[property]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.property('base1.*')",
-            .callback = [&p1, &p2](ghoul::Dictionary d) {
+            .callback = [&p1, &p2](Dictionary d) {
                 REQUIRE(d.size() == 1);
                 REQUIRE(d.hasKey("1"));
-                REQUIRE(d.hasValue<ghoul::Dictionary>("1"));
-                ghoul::Dictionary e = d.value<ghoul::Dictionary>("1");
+                REQUIRE(d.hasValue<Dictionary>("1"));
+                Dictionary e = d.value<Dictionary>("1");
                 REQUIRE(e.size() == 2);
 
                 // Sorting the results as the property return order is undefined
@@ -227,11 +227,11 @@ TEST_CASE("Property: Multiple/2", "[property]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.property('*.p1')",
-            .callback = [&p1, &p21](ghoul::Dictionary d) {
+            .callback = [&p1, &p21](Dictionary d) {
                 REQUIRE(d.size() == 1);
                 REQUIRE(d.hasKey("1"));
-                REQUIRE(d.hasValue<ghoul::Dictionary>("1"));
-                ghoul::Dictionary e = d.value<ghoul::Dictionary>("1");
+                REQUIRE(d.hasValue<Dictionary>("1"));
+                Dictionary e = d.value<Dictionary>("1");
                 REQUIRE(e.size() == 2);
 
                 // Sorting the results as the property return order is undefined
@@ -263,11 +263,11 @@ TEST_CASE("Property: Multiple/2", "[property]") {
 
         global::scriptEngine->queueScript({
             .code = "return openspace.property('base*.p1')",
-            .callback = [&p1, &p21](ghoul::Dictionary d) {
+            .callback = [&p1, &p21](Dictionary d) {
                 REQUIRE(d.size() == 1);
                 REQUIRE(d.hasKey("1"));
-                REQUIRE(d.hasValue<ghoul::Dictionary>("1"));
-                ghoul::Dictionary e = d.value<ghoul::Dictionary>("1");
+                REQUIRE(d.hasValue<Dictionary>("1"));
+                Dictionary e = d.value<Dictionary>("1");
                 REQUIRE(e.size() == 2);
 
                 // Sorting the results as the property return order is undefined

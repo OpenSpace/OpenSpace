@@ -31,6 +31,9 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/query/query.h>
@@ -41,9 +44,6 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/collisionhelper.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <iterator>
 
@@ -235,7 +235,7 @@ float PathNavigator::estimatedRemainingTimeInPath() const {
 }
 
 void PathNavigator::updateCamera(double deltaTime) {
-    ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
+    assert_msg(camera() != nullptr, "Camera must not be nullptr");
 
     if (!hasCurrentPath() || !_isPlaying) {
         return;
@@ -311,7 +311,7 @@ void PathNavigator::updateCamera(double deltaTime) {
     }
 }
 
-void PathNavigator::createPath(ghoul::Dictionary dictionary) {
+void PathNavigator::createPath(Dictionary dictionary) {
     const OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
         // Silently ignore any paths that are being created during a session recording
@@ -339,7 +339,7 @@ void PathNavigator::createPath(ghoul::Dictionary dictionary) {
     catch (const PathCurve::TooShortPathError&) {
         // Do nothing
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERROR(std::format("Could not create path. Reason: {}", e.message));
         return;
     }
@@ -446,7 +446,7 @@ double PathNavigator::minValidBoundingSphere() const {
 }
 
 double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const {
-    ghoul_assert(node != nullptr, "Node must not be nulltpr");
+    assert_msg(node != nullptr, "Node must not be nulltpr");
     auto sphere = [](const SceneGraphNode* n) {
         // Use the biggest of the bounding sphere and interaction sphere, so we don't
         // accidentally choose a bounding sphere that is much smaller than the interaction
@@ -604,7 +604,7 @@ void PathNavigator::removeRollRotation(CameraPose& pose) const {
 
     const glm::dvec3 lookAtPos = cameraPos + NotTooCloseDistance * cameraDir;
 
-    const glm::dquat rollFreeRotation = ghoul::lookAtQuaternion(
+    const glm::dquat rollFreeRotation = lookAtQuaternion(
         cameraPos,
         lookAtPos,
         camera()->lookUpVectorWorldSpace()

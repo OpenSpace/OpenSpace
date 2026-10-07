@@ -27,9 +27,9 @@
 
 struct mat4_t;
 
-namespace ghoul::opengl { class Texture; }
+namespace openspace::opengl { class Texture; }
 
-namespace postprocessing {
+namespace openspace::postprocessing {
 
 void initialize(int width, int height);
 void resize(int width, int height);
@@ -91,18 +91,18 @@ struct Settings {
     } fxaa;
 
     struct {
-        ghoul::opengl::Texture* color = nullptr;
-        ghoul::opengl::Texture* depth = nullptr;
-        ghoul::opengl::Texture* normal = nullptr;
-        ghoul::opengl::Texture* velocity = nullptr;
-        ghoul::opengl::Texture* emissive = nullptr;
-        ghoul::opengl::Texture* postTonemap = nullptr;
+        opengl::Texture* color = nullptr;
+        opengl::Texture* depth = nullptr;
+        opengl::Texture* normal = nullptr;
+        opengl::Texture* velocity = nullptr;
+        opengl::Texture* emissive = nullptr;
+        opengl::Texture* postTonemap = nullptr;
     } inputTextures;
 };
 
 void postprocess(const Settings& settings, const glm::mat4& viewMat,
     const glm::mat4& projMat);
 
-} // namespace postprocessing
+} // namespace openspace::postprocessing
 
 #endif // __OPENSPACE_MODULE_MOLECULE___POSTPROCESSING___H__

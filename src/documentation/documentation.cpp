@@ -25,10 +25,10 @@
 #include <openspace/documentation/documentation.h>
 
 #include <openspace/documentation/verifier.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
 #include <compare>
 #include <set>
 #include <sstream>
@@ -72,10 +72,10 @@ namespace openspace {
 const std::string DocumentationEntry::Wildcard = "*";
 
 SpecificationError::SpecificationError(TestResult res, std::string comp)
-    : ghoul::RuntimeError("Error in specification", std::move(comp))
+    : RuntimeError("Error in specification", std::move(comp))
     , result(std::move(res))
 {
-    ghoul_assert(!result.success, "Result's success must be false");
+    assert_msg(!result.success, "Result's success must be false");
 }
 
 void logError(const SpecificationError& error, std::string component) {
@@ -92,17 +92,17 @@ void logError(const SpecificationError& error, std::string component) {
     }
     for (const TestResult::Offense& o : error.result.offenses) {
         if (o.explanation.empty()) {
-            LERRORC(ghoul::to_string(o.reason), o.offender);
+            LERRORC(to_string(o.reason), o.offender);
         }
         else {
             LERRORC(
-                ghoul::to_string(o.reason),
+                to_string(o.reason),
                 std::format("{}: {}", o.offender, o.explanation)
             );
         }
     }
     for (const TestResult::Warning& w : error.result.warnings) {
-        LWARNINGC(ghoul::to_string(w.reason), w.offender);
+        LWARNINGC(to_string(w.reason), w.offender);
     }
 }
 
@@ -114,8 +114,8 @@ DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> 
     , isPrivate(priv)
     , documentation(std::move(doc))
 {
-    ghoul_assert(!key.empty(), "Key must not be empty");
-    ghoul_assert(verifier, "Verifier must not be nullptr");
+    assert_msg(!key.empty(), "Key must not be empty");
+    assert_msg(verifier, "Verifier must not be nullptr");
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
@@ -130,7 +130,7 @@ DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
 {}
 
 TestResult testSpecification(const Documentation& documentation,
-                             const ghoul::Dictionary& dictionary)
+                             const Dictionary& dictionary)
 {
     TestResult result;
     result.success = true;
@@ -202,7 +202,7 @@ TestResult testSpecification(const Documentation& documentation,
 }
 
 void testSpecificationAndThrow(const Documentation& documentation,
-                               const ghoul::Dictionary& dictionary, std::string component)
+                               const Dictionary& dictionary, std::string component)
 {
     // Perform testing against the documentation/specification
     const TestResult testResult = testSpecification(documentation, dictionary);
@@ -211,70 +211,68 @@ void testSpecificationAndThrow(const Documentation& documentation,
     }
 }
 
+template <>
+std::string to_string(const openspace::TestResult& value) {
+    if (value.success) {
+        return "Success";
+    }
+
+    std::stringstream stream;
+    stream << "Specification Failure. ";
+
+    for (const openspace::TestResult::Offense& offense : value.offenses) {
+        stream << std::format(" {}", to_string(offense));
+        if (!offense.explanation.empty()) {
+            stream << std::format(" ({})", offense.explanation);
+        }
+        stream << '\n';
+    }
+
+    for (const openspace::TestResult::Warning& warning : value.warnings) {
+        stream << std::format(" {}\n", to_string(warning));
+    }
+
+    return stream.str();
+}
+
+template <>
+std::string to_string(const openspace::TestResult::Offense& value) {
+    std::stringstream stream;
+    stream << value.offender + ": " + to_string(value.reason);
+
+    if (!value.explanation.empty()) {
+        stream << std::format(" ({})", value.explanation);
+    }
+
+    return stream.str();
+}
+
+template <>
+std::string to_string(const openspace::TestResult::Offense::Reason& value) {
+    using Reason = openspace::TestResult::Offense::Reason;
+    switch (value) {
+        case Reason::Unknown: return "Unknown";
+        case Reason::MissingKey: return "Missing key";
+        case Reason::UnknownIdentifier: return "Unknown documentation identifier";
+        case Reason::Verification: return "Verification failed";
+        case Reason::WrongType: return "Wrong type";
+        default: throw MissingCaseException();
+    }
+}
+
+template <>
+std::string to_string(const openspace::TestResult::Warning& value) {
+    return value.offender + ": " + to_string(value.reason);
+}
+
+template <>
+std::string to_string(const openspace::TestResult::Warning::Reason& value) {
+    switch (value) {
+        case openspace::TestResult::Warning::Reason::Deprecated:
+            return "Deprecated";
+        default:
+            throw MissingCaseException();
+    }
+}
+
 } // namespace openspace
-
-namespace ghoul {
-    template <>
-    std::string to_string(const openspace::TestResult& value) {
-        if (value.success) {
-            return "Success";
-        }
-
-        std::stringstream stream;
-        stream << "Specification Failure. ";
-
-        for (const openspace::TestResult::Offense& offense : value.offenses) {
-            stream << std::format(" {}", ghoul::to_string(offense));
-            if (!offense.explanation.empty()) {
-                stream << std::format(" ({})", offense.explanation);
-            }
-            stream << '\n';
-        }
-
-        for (const openspace::TestResult::Warning& warning : value.warnings) {
-            stream << std::format(" {}\n", ghoul::to_string(warning));
-        }
-
-        return stream.str();
-    }
-
-    template <>
-    std::string to_string(const openspace::TestResult::Offense& value) {
-        std::stringstream stream;
-        stream << value.offender + ": " + ghoul::to_string(value.reason);
-
-        if (!value.explanation.empty()) {
-            stream << std::format(" ({})", value.explanation);
-        }
-
-        return stream.str();
-    }
-
-    template <>
-    std::string to_string(const openspace::TestResult::Offense::Reason& value) {
-        using Reason = openspace::TestResult::Offense::Reason;
-        switch (value) {
-            case Reason::Unknown: return "Unknown";
-            case Reason::MissingKey: return "Missing key";
-            case Reason::UnknownIdentifier: return "Unknown documentation identifier";
-            case Reason::Verification: return "Verification failed";
-            case Reason::WrongType: return "Wrong type";
-            default: throw ghoul::MissingCaseException();
-        }
-    }
-
-    template <>
-    std::string to_string(const openspace::TestResult::Warning& value) {
-        return value.offender + ": " + ghoul::to_string(value.reason);
-    }
-
-    template <>
-    std::string to_string(const openspace::TestResult::Warning::Reason& value) {
-        switch (value) {
-            case openspace::TestResult::Warning::Reason::Deprecated:
-                return "Deprecated";
-            default:
-                throw ghoul::MissingCaseException();
-        }
-    }
-} // namespace ghoul

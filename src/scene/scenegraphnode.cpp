@@ -32,6 +32,13 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
@@ -42,13 +49,6 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
 #include <algorithm>
 #include <cmath>
 #include <memory>
@@ -259,8 +259,7 @@ namespace {
         // Renderable is specified, this scene graph node is an internal node and can be
         // used for either group children, or apply common transformations to a group of
         // children.
-        std::optional<ghoul::Dictionary> renderable
-            [[codegen::reference("core_renderable")]];
+        std::optional<Dictionary> renderable [[codegen::reference("core_renderable")]];
 
         // [[codegen::verbatim(BoundingSphereInfo.description)]]
         std::optional<double> boundingSphere;
@@ -275,19 +274,18 @@ namespace {
             // This node describes a translation that is applied to the scene graph node
             // and all its children. Depending on the 'Type' of the translation, this can
             // either be a static translation or a time-varying one.
-            std::optional<ghoul::Dictionary> translation
+            std::optional<Dictionary> translation
                 [[codegen::reference("core_translation")]];
 
             // This nodes describes a rotation that is applied to the scene graph node and
             // all its children. Depending on the 'Type' of the rotation, this can either
             // be a static rotation or a time-varying one.
-            std::optional<ghoul::Dictionary> rotation
-                [[codegen::reference("core_rotation")]];
+            std::optional<Dictionary> rotation [[codegen::reference("core_rotation")]];
 
             // This node describes a scaling that is applied to the scene graph node and
             // all its children. Depending on the 'Type' of the scaling, this can either
             // be a static scaling or a time-varying one.
-            std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
+            std::optional<Dictionary> scale [[codegen::reference("core_scale")]];
         };
 
         // This describes a set of transformations that are applied to this scene graph
@@ -328,8 +326,7 @@ namespace {
         std::optional<std::variant<std::string, std::vector<std::string>>> onExit;
 
         // Specifies the time frame for when this node should be active.
-        std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_timeframe")]];
+        std::optional<Dictionary> timeFrame [[codegen::reference("core_timeframe")]];
 
         // A tag or list of tags that can be used to reference to a group of scene graph
         // nodes.
@@ -378,15 +375,15 @@ namespace openspace {
 int SceneGraphNode::nextIndex = 0;
 #endif // Debugging_Core_SceneGraphNode_Indices
 
-ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
+                                                             const Dictionary& dictionary)
 {
     ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     SceneGraphNode* n = global::memoryManager->PersistentMemory.alloc<SceneGraphNode>();
-    ghoul::mm_unique_ptr<SceneGraphNode> result = ghoul::mm_unique_ptr<SceneGraphNode>(n);
+    mm_unique_ptr<SceneGraphNode> result = mm_unique_ptr<SceneGraphNode>(n);
 
 #ifdef Debugging_Core_SceneGraphNode_Indices
     result->index = nextIndex++;
@@ -413,7 +410,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
         if (p.gui->path.has_value()) {
             if (!p.gui->path->starts_with('/')) {
-                throw ghoul::RuntimeError("GuiPath must start with /");
+                throw RuntimeError("GuiPath must start with /");
             }
             result->_guiPath = *p.gui->path;
         }
@@ -483,7 +480,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ZoneScopedN("Renderable");
 
         result->_renderable = Renderable::createFromDictionary(*p.renderable);
-        ghoul_assert(result->_renderable, "Failed to create Renderable");
+        assert_msg(result->_renderable, "Failed to create Renderable");
         result->_renderable->_parent = result.get();
         result->addPropertySubOwner(result->_renderable.get());
     }
@@ -559,7 +556,7 @@ Documentation SceneGraphNode::Documentation() {
     return codegen::doc<Parameters>("core_scenegraphnode");
 }
 
-ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
+opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
 
 SceneGraphNode::SceneGraphNode()
     : PropertyOwner({ "" })
@@ -586,24 +583,24 @@ SceneGraphNode::SceneGraphNode()
     , _showDebugSphere(ShowDebugSphereInfo, false)
 {
     {
-        ghoul::Dictionary translation;
+        Dictionary translation;
         translation.setValue("Type", std::string("StaticTranslation"));
         translation.setValue("Position", glm::dvec3(0.0));
-        _transform.translation = ghoul::mm_unique_ptr<Translation>(
+        _transform.translation = mm_unique_ptr<Translation>(
             global::memoryManager->PersistentMemory.alloc<StaticTranslation>(translation)
         );
 
-        ghoul::Dictionary rotation;
+        Dictionary rotation;
         rotation.setValue("Type", std::string("StaticRotation"));
         rotation.setValue("Rotation", glm::dvec3(0.0));
-        _transform.rotation = ghoul::mm_unique_ptr<Rotation>(
+        _transform.rotation = mm_unique_ptr<Rotation>(
             global::memoryManager->PersistentMemory.alloc<StaticRotation>(rotation)
         );
 
-        ghoul::Dictionary scale;
+        Dictionary scale;
         scale.setValue("Type", std::string("StaticScale"));
         scale.setValue("Scale", 1.0);
-        _transform.scale = ghoul::mm_unique_ptr<Scale>(
+        _transform.scale = mm_unique_ptr<Scale>(
             global::memoryManager->PersistentMemory.alloc<StaticScale>(scale)
         );
     }
@@ -697,6 +694,10 @@ void SceneGraphNode::initialize() {
     if (_transform.scale) {
         _transform.scale->initialize();
     }
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
+
     _state = State::Initialized;
 
     // Want this computed after the renderable and transforms have been initialized
@@ -723,7 +724,7 @@ void SceneGraphNode::initializeGL() {
 
     // The first one to get here will create program shared between all scene graph nodes
     if (_debugSphereProgram == nullptr) {
-        std::unique_ptr<ghoul::opengl::ProgramObject> shader =
+        std::unique_ptr<opengl::ProgramObject> shader =
             global::renderEngine->buildRenderProgram(
                 "DebugSphere",
                 absPath("${SHADERS}/core/xyzuvrgba_vs.glsl"),
@@ -735,7 +736,7 @@ void SceneGraphNode::initializeGL() {
         // benefit that we would gain from it
         _debugSphereProgram = shader.release();
         _debugSphereProgram->setIgnoreUniformLocationError(
-            ghoul::opengl::ProgramObject::IgnoreError::Yes
+            opengl::ProgramObject::IgnoreError::Yes
         );
     }
 
@@ -776,13 +777,13 @@ void SceneGraphNode::deinitializeGL() {
 
 void SceneGraphNode::traversePreOrder(const std::function<void(SceneGraphNode*)>& fn) {
     fn(this);
-    for (ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
+    for (mm_unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePreOrder(fn);
     }
 }
 
 void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)>& fn) {
-    for (ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
+    for (mm_unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePostOrder(fn);
     }
     fn(this);
@@ -808,13 +809,13 @@ void SceneGraphNode::update(const UpdateData& data) {
         return;
     }
 
-    ghoul_assert(_transform.translation, "No translation exists");
+    assert_msg(_transform.translation, "No translation exists");
     _transform.translation->update(data);
 
-    ghoul_assert(_transform.rotation, "No rotation exists");
+    assert_msg(_transform.rotation, "No rotation exists");
     _transform.rotation->update(data);
 
-    ghoul_assert(_transform.scale, "No scale exists");
+    assert_msg(_transform.scale, "No scale exists");
     _transform.scale->update(data);
     UpdateData newUpdateData = data;
 
@@ -939,18 +940,18 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
 }
 
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
-    ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
+    assert_msg(_parent != nullptr, "Node must be attached to a parent");
 
     // 1. Remove `this` from its currents parent's children
     auto iter = std::find_if(
         _parent->_children.begin(),
         _parent->_children.end(),
-        [this](const ghoul::mm_unique_ptr<SceneGraphNode>& node) {
+        [this](const mm_unique_ptr<SceneGraphNode>& node) {
             return node.get() == this;
         }
     );
-    ghoul_assert(iter != _parent->_children.end(), "This was not a child of its parent");
-    ghoul::mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
+    assert_msg(iter != _parent->_children.end(), "This was not a child of its parent");
+    mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
     _parent->_children.erase(iter);
 
     // 2. Reparent `this`
@@ -960,9 +961,9 @@ void SceneGraphNode::setParent(SceneGraphNode& parent) {
     _parent->_children.push_back(std::move(c));
 }
 
-void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {
-    ghoul_assert(child != nullptr, "Child may not be null");
-    ghoul_assert(child->parent() == nullptr, "Child may not already have a parent");
+void SceneGraphNode::attachChild(mm_unique_ptr<SceneGraphNode> child) {
+    assert_msg(child != nullptr, "Child may not be null");
+    assert_msg(child->parent() == nullptr, "Child may not already have a parent");
 
     // Create link between parent and child
     child->_parent = this;
@@ -973,17 +974,17 @@ void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {
     childRaw->setScene(_scene);
 }
 
-ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
-    ghoul_assert(
+mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
+    assert_msg(
         child._dependentNodes.empty(),
         "Nodes cannot depend on a node being detached"
     );
-    ghoul_assert(child._parent != nullptr, "Node must be attached to a parent");
+    assert_msg(child._parent != nullptr, "Node must be attached to a parent");
 
     const auto iter = std::find_if(
         _children.begin(),
         _children.end(),
-        [&child] (const ghoul::mm_unique_ptr<SceneGraphNode>& c) {
+        [&child] (const mm_unique_ptr<SceneGraphNode>& c) {
             return &child == c.get();
         }
     );
@@ -1003,7 +1004,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode&
 
     // Remove link between parent and child
     child._parent = nullptr;
-    ghoul::mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
+    mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
     _children.erase(iter);
 
     return c;
@@ -1011,7 +1012,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode&
 
 void SceneGraphNode::clearChildren() {
     traversePreOrder([](SceneGraphNode* node) { node->clearDependencies(); });
-    for (const ghoul::mm_unique_ptr<SceneGraphNode>& c : _children) {
+    for (const mm_unique_ptr<SceneGraphNode>& c : _children) {
         if (_scene) {
             c->setScene(nullptr);
         }
@@ -1161,7 +1162,7 @@ void SceneGraphNode::computeScreenSpaceData(const RenderData& newData) {
 SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
-    ghoul_assert(glm::length(targetModelSpace) > 0.0, "Cannot have degenerate vector");
+    assert_msg(glm::length(targetModelSpace) > 0.0, "Cannot have degenerate vector");
 
     if (_renderable) {
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
@@ -1311,7 +1312,7 @@ void SceneGraphNode::setScene(Scene* scene) {
 std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     std::vector<SceneGraphNode*> nodes;
     nodes.reserve(_children.size());
-    for (const ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
+    for (const mm_unique_ptr<SceneGraphNode>& child : _children) {
         nodes.push_back(child.get());
     }
     return nodes;
@@ -1393,7 +1394,7 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& id) {
         return this;
     }
     else {
-        for (ghoul::mm_unique_ptr<SceneGraphNode>& it : _children) {
+        for (mm_unique_ptr<SceneGraphNode>& it : _children) {
             SceneGraphNode* tmp = it->childNode(id);
             if (tmp) {
                 return tmp;

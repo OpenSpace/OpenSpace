@@ -29,23 +29,23 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/astrocast.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <cstdarg>
 #include <cstddef>
@@ -92,6 +92,30 @@ namespace {
         "This value determines the delay in seconds after which the tooltip is shown.",
         Property::Visibility::Developer
     };
+
+    ImGuiKey toImGuiKey(openspace::Key key) {
+        using openspace::Key;
+        switch (key) {
+            case Key::Tab: return ImGuiKey_Tab;
+            case Key::Left: return ImGuiKey_LeftArrow;
+            case Key::Right: return ImGuiKey_RightArrow;
+            case Key::Up: return ImGuiKey_UpArrow;
+            case Key::Down: return ImGuiKey_DownArrow;
+            case Key::Home: return ImGuiKey_Home;
+            case Key::End: return ImGuiKey_End;
+            case Key::Delete: return ImGuiKey_Delete;
+            case Key::BackSpace: return ImGuiKey_Backspace;
+            case Key::Enter: return ImGuiKey_Enter;
+            case Key::Escape: return ImGuiKey_Escape;
+            case Key::A: return ImGuiKey_A;
+            case Key::C: return ImGuiKey_C;
+            case Key::V: return ImGuiKey_V;
+            case Key::X: return ImGuiKey_X;
+            case Key::Y: return ImGuiKey_Y;
+            case Key::Z: return ImGuiKey_Z;
+            default: return ImGuiKey_None;
+        }
+    }
 } // namespace
 
 namespace openspace {
@@ -255,7 +279,7 @@ ImGUIModule::ImGUIModule()
     );
 }
 
-void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
+void ImGUIModule::internalInitialize(const Dictionary&) {
     LDEBUGC("ImGUIModule", "Initializing GUI");
 
     _sceneProperty.setPropertyOwnerFunction([]() {
@@ -314,23 +338,6 @@ void ImGUIModule::internalInitializeGL() {
         ImGuiIO& io = ImGui::GetIO();
         io.IniFilename = _iniFileBuffer.data();
         io.DeltaTime = 1.f / 60.f;
-        io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
-        io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
-        io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(Key::Right);
-        io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(Key::Up);
-        io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(Key::Down);
-        io.KeyMap[ImGuiKey_Home] = static_cast<int>(Key::Home);
-        io.KeyMap[ImGuiKey_End] = static_cast<int>(Key::End);
-        io.KeyMap[ImGuiKey_Delete] = static_cast<int>(Key::Delete);
-        io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(Key::BackSpace);
-        io.KeyMap[ImGuiKey_Enter] = static_cast<int>(Key::Enter);
-        io.KeyMap[ImGuiKey_Escape] = static_cast<int>(Key::Escape);
-        io.KeyMap[ImGuiKey_A] = static_cast<int>(Key::A);
-        io.KeyMap[ImGuiKey_C] = static_cast<int>(Key::C);
-        io.KeyMap[ImGuiKey_V] = static_cast<int>(Key::V);
-        io.KeyMap[ImGuiKey_X] = static_cast<int>(Key::X);
-        io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
-        io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
 
         io.Fonts->AddFontFromFileTTF(absPath(GuiFont).string().c_str(), FontSize);
         captionFont = io.Fonts->AddFontFromFileTTF(
@@ -399,13 +406,13 @@ void ImGUIModule::internalInitializeGL() {
         comp->initialize();
     }
 
-    _program = ghoul::opengl::ProgramObject::Build(
+    _program = opengl::ProgramObject::Build(
         "GUI",
         absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
         absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     {
         unsigned char* texData = nullptr;
@@ -416,14 +423,14 @@ void ImGUIModule::internalInitializeGL() {
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
         }
 
-        _fontTexture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
+        _fontTexture = std::make_unique<opengl::Texture>(
+            opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(texSize.x, texSize.y, 1),
                 .type = GL_TEXTURE_2D,
-                .format = ghoul::opengl::Texture::Format::RGBA,
+                .format = opengl::Texture::Format::RGBA,
                 .dataType = GL_UNSIGNED_BYTE
             },
-            ghoul::opengl::Texture::SamplerInit {},
+            opengl::Texture::SamplerInit {},
             reinterpret_cast<std::byte*>(texData)
         );
         _fontTexture->setName("GUI Text");
@@ -511,7 +518,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
     //
@@ -581,7 +588,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_fontTexture);
 
     // Setup orthographic projection matrix
@@ -629,7 +636,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
             else {
                 glBindTexture(
                     GL_TEXTURE_2D,
-                    static_cast<GLuint>(reinterpret_cast<intptr_t>(pcmd->TextureId))
+                    static_cast<GLuint>(pcmd->GetTexID())
                 );
                 glScissor(
                     static_cast<int>(pcmd->ClipRect.x),
@@ -674,38 +681,22 @@ bool ImGUIModule::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
         return false;
     }
 
-    const bool hasShift = hasKeyModifier(modifier, KeyModifier::Shift);
-    const bool hasCtrl = hasKeyModifier(modifier, KeyModifier::Control);
-    const bool hasAlt = hasKeyModifier(modifier, KeyModifier::Alt);
-
     ImGuiIO& io = ImGui::GetIO();
 
-    const bool consumeEvent = io.WantCaptureKeyboard;
-    if (consumeEvent) {
-        if (action == KeyAction::Press) {
-            io.KeysDown[keyIndex] = true;
-        }
-        io.KeyShift = hasShift;
-        io.KeyCtrl = hasCtrl;
-        io.KeyAlt = hasAlt;
+    // Always update the modifier and keys, even if event is not consumed, so keys and
+    // modifiers are set to false on release
+
+    if (const ImGuiKey k = toImGuiKey(key); k != ImGuiKey_None) {
+        const bool isDown = (action != KeyAction::Release);
+        io.AddKeyEvent(k, isDown);
     }
 
-    // Even if the event is not consumed, set keys and modifiers to false when they are
-    // released
-    if (action == KeyAction::Release) {
-        io.KeysDown[keyIndex] = false;
-    }
-    if (!hasShift) {
-        io.KeyShift = false;
-    }
-    if (!hasCtrl) {
-        io.KeyCtrl = false;
-    }
-    if (!hasAlt) {
-        io.KeyAlt = false;
-    }
+    io.AddKeyEvent(ImGuiMod_Shift, hasKeyModifier(modifier, KeyModifier::Shift));
+    io.AddKeyEvent(ImGuiMod_Ctrl, hasKeyModifier(modifier, KeyModifier::Control));
+    io.AddKeyEvent(ImGuiMod_Alt, hasKeyModifier(modifier, KeyModifier::Alt));
+    io.AddKeyEvent(ImGuiMod_Super, hasKeyModifier(modifier, KeyModifier::Super));
 
-    return consumeEvent;
+    return io.WantCaptureKeyboard;
 }
 
 bool ImGUIModule::charCallback(unsigned int character, KeyModifier) {

@@ -26,12 +26,12 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <utility>
 
 namespace {
@@ -88,8 +88,7 @@ Documentation RenderableSphereImageOnline::Documentation() {
     );
 }
 
-RenderableSphereImageOnline::RenderableSphereImageOnline(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableSphereImageOnline::RenderableSphereImageOnline(const Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _textureUrl(TextureInfo)
 {
@@ -134,24 +133,24 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            _texture = ghoul::io::texture::loadTexture(
+            _texture = io::texture::loadTexture(
                 reinterpret_cast<void*>(imageFile.buffer),
                 imageFile.size,
                 2,
-                { .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap },
+                { .filter = opengl::Texture::FilterMode::LinearMipMap },
                 imageFile.format
             );
 
             _textureIsDirty = false;
         }
-        catch (const ghoul::io::texture::InvalidLoadException& e) {
+        catch (const io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }
     }
 }
 
-void RenderableSphereImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderableSphereImageOnline::bindTexture(opengl::TextureUnit& unit) {
     if (_texture) {
         unit.bind(*_texture);
     }

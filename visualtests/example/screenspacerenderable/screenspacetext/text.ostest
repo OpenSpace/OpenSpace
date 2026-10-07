@@ -8,7 +8,7 @@
     {
       "type": "property",
       "value": {
-        "property": "ScreenSpace.ScreenSpaceText_Example.Scale",
+        "property": "ScreenSpace.ScreenSpaceText_Example.Placement.Scale",
         "value": 0.75
       }
     },

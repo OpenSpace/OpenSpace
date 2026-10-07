@@ -27,15 +27,15 @@
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/openglstatecache.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <fstream>
 #include <memory>
 #include <optional>
@@ -91,13 +91,13 @@ Documentation ShadowComponent::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_shadowscomponent");
 }
 
-ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
+ShadowComponent::ShadowComponent(const Dictionary& dictionary)
     : PropertyOwner({ "ShadowsComponent" })
     , _saveDepthTexture(SaveDepthTextureInfo)
     , _distanceFraction(DistanceFractionInfo, 20, 1, 10000)
     , _enabled(EnabledInfo, true)
 {
-    using ghoul::filesystem::File;
+    using filesystem::File;
 
     // @TODO (abock, 2021-03-25)  This is not really a nice solution as this key name is
     // coded into the RenderableGlobe. Instead, the parent should unpack the dictionary

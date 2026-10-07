@@ -24,13 +24,13 @@
 
 #include <modules/globebrowsing/src/timequantizer.h>
 
+#include <openspace/format.h>
+#include <openspace/glm.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
 #include <date/date.h>
 #include <algorithm>
 #include <charconv>
@@ -229,7 +229,7 @@ void DateTime::incrementOnce(int value, char unit) {
             _year += value;
             break;
         default:
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Invalid unit in incrementOnce '{}'. Expected 'y', 'M', 'd', 'h', or 'm'",
                 unit
             ));
@@ -279,7 +279,7 @@ void DateTime::decrementOnce(int value, char unit) {
             break;
 
         default:
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Invalid unit format in TQ decrementOnce '{}'. Expected 'y', 'M', 'd', "
                 "'h', or 'm'", unit
             ));
@@ -353,9 +353,7 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
     _resolutionUnit = unit;
     if (*p) {
         // not a number
-        throw ghoul::RuntimeError(std::format(
-            "Cannot convert {} to number", numberString
-        ));
+        throw RuntimeError(std::format("Cannot convert {} to number", numberString));
     }
     else {
         verifyResolutionRestrictions(static_cast<int>(value), unit);
@@ -393,13 +391,13 @@ void TimeQuantizer::verifyStartTimeRestrictions() {
         dayUpperLimit = 31;
     }
     if (_start.day() < 1 || _start.day() > dayUpperLimit) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Invalid start day value of {} for {}, valid days are 1 - {}",
             _start.day(), helpfulDescription, dayUpperLimit
         ));
     }
     if (_start.hour() != 0 || _start.minute() != 0 || _start.second() != 0) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Invalid start time value of {}:{}:{}, time must be 00:00:00",
             _start.hour(), _start.minute(), _start.second()
         ));
@@ -412,7 +410,7 @@ void TimeQuantizer::verifyResolutionRestrictions(const int value, const char uni
             break;
         case 'M':
             if (value < 1 || value > 6) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Invalid resolution count of {} for (M)onth option. Valid counts are "
                     "1, 2, 3, 4, or 6", value
                 ));
@@ -420,7 +418,7 @@ void TimeQuantizer::verifyResolutionRestrictions(const int value, const char uni
             break;
         case 'd':
             if (value < 1 || value > 28) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Invalid resolution count of {} for (d)ay option. Valid counts are "
                     "1 - 28", value
                 ));
@@ -428,7 +426,7 @@ void TimeQuantizer::verifyResolutionRestrictions(const int value, const char uni
             break;
         case 'h':
             if ((value < 1 || value > 4) && value != 6 && value != 12) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Invalid resolution count of {} for (h)our option. Valid counts are "
                     "1, 2, 3, 4, 6, or 12", value
                 ));
@@ -436,14 +434,14 @@ void TimeQuantizer::verifyResolutionRestrictions(const int value, const char uni
             break;
         case 'm':
             if (value != 15 && value != 30) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Invalid resolution count of {} for (m)inute option. Valid counts "
                     "are 15 or 30", value
                 ));
             }
             break;
         default:
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Invalid unit format '{}'. Expected 'y', 'M', 'd', 'h', or 'm'", unit
             ));
     }
@@ -472,7 +470,7 @@ double TimeQuantizer::computeSecondsFromResolution(int valueIn, const char unit)
             value *= (30.4 * 24.0 * 60.0 * 60.0);
             break;
         default:
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Invalid resolution unit format '{}'. Expected 'y', 'M', 'd', 'h', 'm', "
                 "or 's'", unit
             ));
@@ -618,7 +616,7 @@ void TimeQuantizer::doFirstApproximation(DateTime& quantized, const DateTime& un
             }
             break;
         default:
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Invalid unit '{}'. Expected 'y', 'M', 'd', 'h', or 'm'", unit
             ));
     }
@@ -633,7 +631,7 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
 
     const double startSeconds = s.J2000();
     const double endSeconds = e.J2000();
-    ghoul_assert(
+    assert_msg(
         static_cast<int>(endSeconds - startSeconds) % static_cast<int>(_resolution) == 0,
         "Quantization error"
     );

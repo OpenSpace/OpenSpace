@@ -40,17 +40,17 @@ public:
      * the file that contains the general pertubation information as well as the file
      * format that is to be used.
      *
-     * \param dictionary The ghoul::Dictionary that contains the information for this
+     * \param dictionary The Dictionary that contains the information for this
      *        TLETranslation
      */
-    explicit GPTranslation(const ghoul::Dictionary& dictionary);
+    explicit GPTranslation(const Dictionary& dictionary);
 
     /**
-     * Method returning the openspace::Documentation that describes the ghoul::Dictionary
-     * that can be passed to the constructor.
+     * Method returning the openspace::Documentation that describes the Dictionary that
+     * can be passed to the constructor.
      *
-     * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
-     *         be passed to the constructor
+     * \return The openspace::Documentation that describes the Dictionary that can be
+     *         passed to the constructor
      */
     static openspace::Documentation Documentation();
 };

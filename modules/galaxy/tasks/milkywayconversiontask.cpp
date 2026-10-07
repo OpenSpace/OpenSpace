@@ -28,7 +28,7 @@
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/volumesampler.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionary.h>
 #include <vector>
 
 namespace {
@@ -52,7 +52,7 @@ Documentation MilkywayConversionTask::Documentation() {
     );
 }
 
-MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
+MilkywayConversionTask::MilkywayConversionTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _inFilenamePrefix = p.inFilenamePrefix;
     _inFilenameSuffix = p.inFilenameSuffix;

@@ -27,8 +27,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/logging/logmanager.h>
 #include <algorithm>
 #include <cstdlib>
 #include <limits>

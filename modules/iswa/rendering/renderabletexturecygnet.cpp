@@ -26,10 +26,10 @@
 
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <utility>
 
 namespace {
@@ -48,18 +48,18 @@ Documentation RenderableTextureCygnet::Documentation() {
     );
 }
 
-RenderableTextureCygnet::RenderableTextureCygnet(const ghoul::Dictionary& dictionary)
+RenderableTextureCygnet::RenderableTextureCygnet(const Dictionary& dictionary)
     : RenderableIswaCygnet(dictionary)
 {
     registerProperties();
 }
 
 bool RenderableTextureCygnet::updateTexture() {
-    _textures[0] = ghoul::io::texture::loadTexture(
+    _textures[0] = io::texture::loadTexture(
         reinterpret_cast<void*>(_imageFile.buffer),
         _imageFile.size,
         2,
-        { .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap },
+        { .filter = opengl::Texture::FilterMode::LinearMipMap },
         _imageFile.format
     );
 

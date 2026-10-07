@@ -25,7 +25,7 @@
 #include "profile/deltatimesdialog.h"
 
 #include "profile/line.h"
-#include <ghoul/format.h>
+#include <openspace/format.h>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QKeyEvent>

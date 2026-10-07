@@ -27,8 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <modules/globebrowsing/src/layergroupid.h>
 #include <modules/globebrowsing/src/tileindex.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <limits>
 #include <optional>
 
@@ -55,7 +55,7 @@ Documentation TileIndexTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_tileindex");
 }
 
-TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dictionary)
+TileIndexTileProvider::TileIndexTileProvider(const Dictionary& dictionary)
     : TextTileProvider(tileTextureInitData(layers::Group::ID::ColorLayers, false))
     , _uniqueBackgroundColors(UniqueBackgroundColors, false)
 {

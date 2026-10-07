@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 #define __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/gl.h>
 #include <vector>
 
 #ifdef _MSC_VER
@@ -45,9 +45,9 @@
 //#pragma clang diagnostic pop
 #endif // _MSC_VER
 
-namespace ghoul::opengl { class TextureUnit; }
-
 namespace openspace {
+
+namespace opengl { class TextureUnit; }
 
 class WebRenderHandler : public CefRenderHandler {
 public:
@@ -86,7 +86,7 @@ public:
 
     bool isTextureReady() const;
     void updateTexture();
-    void bindTexture(ghoul::opengl::TextureUnit& unit);
+    void bindTexture(opengl::TextureUnit& unit);
 
 protected:
     GLuint _texture = 0;

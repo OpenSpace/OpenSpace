@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___SCREENLOG___H__
 #define __OPENSPACE_CORE___SCREENLOG___H__
 
-#include <ghoul/logging/log.h>
+#include <openspace/logging/log.h>
 
-#include <ghoul/misc/profiling.h>
+#include <openspace/misc/profiling.h>
 #include <chrono>
 #include <mutex>
 #include <string_view>
@@ -36,22 +36,22 @@
 namespace openspace {
 
 /**
- * The ScreenLog is an implementation of the ghoul::logging::Log abstract interface that
- * can be used to present log messages in an on-screen GUI. For this, every incoming log
- * message (#log) is tagged with the current time and all stored log messages can expire
- * based on the time-to-live as specified in the constructor (#removeExpiredEntries).
+ * The ScreenLog is an implementation of the logging::Log abstract interface that can be
+ * used to present log messages in an on-screen GUI. For this, every incoming log message
+ * (#log) is tagged with the current time and all stored log messages can expire based on
+ * the time-to-live as specified in the constructor (#removeExpiredEntries).
  */
-class ScreenLog : public ghoul::logging::Log {
+class ScreenLog : public logging::Log {
 public:
     /// Just a shortcut for the LogLevel access
-    using LogLevel = ghoul::logging::LogLevel;
+    using LogLevel = logging::LogLevel;
 
     /**
      * This struct stores the incoming log entries with their #level, #timeString,
      * #category, #message, and the generated #timeStamp used for the expiry calculation.
      */
     struct LogEntry {
-        /// The ghoul::logging::LogLevel of the log message
+        /// The logging::LogLevel of the log message
         LogLevel level;
 
         /// The timepoint when the log message arrived at the ScreenLog
@@ -69,13 +69,13 @@ public:
 
     /**
      * Constructor that creates a ScreenLog with the provided \p timeToLive, and the
-     * minimum \p logLevel that is stored. Log message with a lower
-     * ghoul::logging::LogLevel are automatically discarded.
+     * minimum \p logLevel that is stored. Log message with a lower logging::LogLevel are
+     * automatically discarded.
      *
      * \param timeToLive The time-to-live for the messages in this ScreenLog. Expired
      *        messages are removed whenever the #removeExpiredEntries method is called
-     * \param logLevel The minimum ghoul::logging::LogLevel that messages must
-     *        have in order to be stored in the ScreenLog
+     * \param logLevel The minimum logging::LogLevel that messages must have in order to
+     *        be stored in the ScreenLog
      */
     explicit ScreenLog(std::chrono::seconds timeToLive,
         LogLevel logLevel = LogLevel::Info);
@@ -86,14 +86,14 @@ public:
     ~ScreenLog() override = default;
 
     /**
-     * Overwritten ghoul::loggling::Log method that is called whenever a new log message
-     * shall be stored.
+     * Overwritten loggling::Log method that is called whenever a new log message shall be
+     * stored.
      *
-     * \param level The ghoul::logging::LogLevel of the incoming log message
+     * \param level The logging::LogLevel of the incoming log message
      * \param category The category of the log message
      * \param message The actual log message that was transmitted
      */
-    void log(ghoul::logging::LogLevel level, std::string_view category,
+    void log(logging::LogLevel level, std::string_view category,
         std::string_view message) override;
 
     /**
