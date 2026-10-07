@@ -332,9 +332,11 @@ void DashboardItemDistance::update() {
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
+    std::fill(_localBuffer.begin(), _localBuffer.end(), char(0));
     try {
         // @CPP26(abock): This can be replaced with std::runtime_format
-        _buffer = std::vformat(
+        char* end = std::vformat_to(
+            _localBuffer.data(),
             _formatString.value(),
             std::make_format_args(
                 sourceInfo.second,
@@ -343,6 +345,7 @@ void DashboardItemDistance::update() {
                 dist.second
             )
         );
+        _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
     catch (const std::format_error&) {
         LERROR("Illegal format string");

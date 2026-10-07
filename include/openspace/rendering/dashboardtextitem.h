@@ -29,6 +29,7 @@
 
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <vector>
 
 namespace openspace {
 
@@ -48,6 +49,10 @@ protected:
 
     std::shared_ptr<fontrendering::Font> _font;
     std::string _buffer;
+
+    // A local buffer with a fixed size that can be used to format the text before it is
+    // copied into the _buffer. Doing this reduces the number of allocations during frames
+    std::vector<char> _localBuffer;
 };
 
 } // openspace

@@ -233,8 +233,10 @@ void DashboardItemAngle::update() {
     const glm::dvec3 a = referenceInfo.first - sourceInfo.first;
     const glm::dvec3 b = destinationInfo.first - sourceInfo.first;
 
+    std::fill(_localBuffer.begin(), _localBuffer.end(), char(0));
     if (glm::length(a) == 0.0 || glm::length(b) == 0) {
-        _buffer = std::format(
+        char* end = std::format_to(
+            _localBuffer.data(),
             "Could not compute angle at {} between {} and {}. At least two of the three "
             "items are placed in the same location",
             sourceInfo.second, destinationInfo.second, referenceInfo.second
@@ -245,10 +247,12 @@ void DashboardItemAngle::update() {
             glm::acos(glm::dot(a, b) / (glm::length(a) * glm::length(b)))
         );
 
-        _buffer = std::format(
+        char* end = std::format_to(
+            _localBuffer.data(),
             "Angle at {} between {} and {}: {} degrees",
             sourceInfo.second, destinationInfo.second, referenceInfo.second, angle
         );
+        _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
 }
 
