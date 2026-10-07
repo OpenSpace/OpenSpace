@@ -100,7 +100,8 @@ create_new_module(
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-add_subdirectory(ext/implot SYSTEM)
-target_link_libraries(${exoplanets_expert_tool_module} PRIVATE Implot)
-set_target_properties(Implot PROPERTIES FOLDER "External")
+begin_dependency("ImPlot")
+find_package(implot CONFIG REQUIRED)
+target_link_libraries(${exoplanets_expert_tool_module} PUBLIC implot::implot)
+end_dependency("ImPlot")
 

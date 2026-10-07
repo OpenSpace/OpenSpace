@@ -50,6 +50,7 @@
       "name": "imgui",
       "default-features": false
     },
+    "implot",
     "glbinding",
     "glm",
     "json-schema-validator",
