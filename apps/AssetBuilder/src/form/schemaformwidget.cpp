@@ -1077,7 +1077,7 @@ void SchemaFormWidget::syncFieldWith(const std::string& memberName,
 {
     // Cross-connect text changes so that changing one form updates the other.
     // QLineEdit::setText only emits textChanged when the new text is different from the
-    // old, so the cross-connections cannot get into an infinite loop.
+    // old, so the cross-connections cannot get into an infinite loop
     QLineEdit* thisEdit = resolveLineEdit(widgetForMember(memberName));
     QLineEdit* otherEdit = resolveLineEdit(other->widgetForMember(memberName));
 
