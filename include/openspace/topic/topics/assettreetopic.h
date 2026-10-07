@@ -22,40 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DASHBOARDTEXTITEM___H__
-#define __OPENSPACE_CORE___DASHBOARDTEXTITEM___H__
+#ifndef __OPENSPACE_CORE___ASSETTREE_TOPIC___H__
+#define __OPENSPACE_CORE___ASSETTREE_TOPIC___H__
 
-#include <openspace/rendering/dashboarditem.h>
+#include <openspace/topic/topics/topic.h>
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <vector>
+#include <openspace/scene/assetmanager.h>
 
 namespace openspace {
 
-namespace fontrendering { class Font; }
+struct Schema;
 
-class DashboardTextItem : public DashboardItem {
+class AssetTreeTopic : public Topic {
 public:
-    explicit DashboardTextItem(const Dictionary& dictionary);
+    AssetTreeTopic() = default;
+    ~AssetTreeTopic() override;
 
-    void render(glm::vec2& penPosition) override;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
-    static openspace::Documentation Documentation();
+    static openspace::Schema Schema();
 
-protected:
-    StringProperty _fontName;
-    FloatProperty _fontSize;
+private:
+    void sendPathList(std::string_view category,
+        const std::vector<std::filesystem::path>& paths);
+    void sendFullSnapshot();
+    void handleChange(const AssetManager::AssetTreeChange& change);
 
-    std::shared_ptr<fontrendering::Font> _font;
-    std::string _buffer;
-
-    // A local buffer with a fixed size that can be used to format the text before it is
-    // copied into the _buffer. Doing this reduces the number of memory allocations during
-    // frames
-    std::vector<char> _localBuffer;
+    bool _isDone = false;
+    std::optional<size_t> _subscriptionId;
 };
 
-} // openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___DASHBOARDTEXTITEM___H__
+#endif // __OPENSPACE_CORE___ASSETTREE_TOPIC___H__

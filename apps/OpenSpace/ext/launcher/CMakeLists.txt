@@ -90,7 +90,7 @@ set(SOURCE_FILES
   src/sgctedit/windowcontrol.cpp
 )
 
-find_package(QT NAMES Qt6 COMPONENTS Core Widgets Network REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets Network REQUIRED)
 set(MOC_FILES "")
 set(RESOURCE_FILES "")
 set(LIBRARIES "")
@@ -112,10 +112,10 @@ target_link_libraries(
   PUBLIC
     openspace-core
     openspace-module-collection
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Network
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::Network
   PRIVATE
     sgct::sgct
 )

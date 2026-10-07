@@ -89,6 +89,8 @@ DashboardTextItem::DashboardTextItem(const Dictionary& dictionary)
     addProperty(_fontSize);
 
     _font = global::fontManager->font(_fontName, _fontSize);
+
+    _localBuffer.resize(1024);
 }
 
 void DashboardTextItem::render(glm::vec2& penPosition) {
