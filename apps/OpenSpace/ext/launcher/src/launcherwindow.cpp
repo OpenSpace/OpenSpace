@@ -228,7 +228,8 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             }
             catch (...) {}
             return std::string();
-        }
+        },
+        ".profile"
     );
     _profileBox->setObjectName("config");
     _profileBox->setGeometry(geometry::ProfileBox);
@@ -354,7 +355,8 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             }
             catch (...) {}
             return std::string();
-        }
+        },
+        ".json"
     );
     _windowConfigBox->setObjectName("config");
     _windowConfigBox->setGeometry(geometry::WindowConfigBox);
@@ -713,7 +715,9 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     if (editor.wasSaved()) {
         savePath = _userProfilePath;
         std::filesystem::path path = editor.specifiedFilename();
-        path.replace_extension("");
+        if (path.has_extension() && path.extension() == ".profile") {
+            path.replace_extension("");
+        }
         _profileBox->populateList(path.string());
     }
 }

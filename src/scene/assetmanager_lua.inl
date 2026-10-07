@@ -101,13 +101,7 @@ namespace {
  * either through a profile or by calling the `openspace.asset.add` method.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> rootAssets() {
-    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().rootAssets();
-    std::vector<std::filesystem::path> res;
-    res.reserve(as.size());
-    for (const Asset* a : as) {
-        res.push_back(a->path());
-    }
-    return res;
+    return global::openSpaceEngine->assetManager().rootAssetPaths();
 }
 
 /**

@@ -42,7 +42,8 @@ public:
         std::filesystem::path hardcodedPath, std::string hardcodedHeader,
         std::string specialFirst,
         std::function<bool(const std::filesystem::path&)> fileFilter,
-        std::function<std::string(const std::filesystem::path&)> createTooltip);
+        std::function<std::string(const std::filesystem::path&)> createTooltip,
+        std::string extension);
 
     void populateList(const std::string& preset);
 
@@ -58,9 +59,6 @@ private:
     // variable expansion path (i.e ${...})
     std::optional<std::filesystem::path> unrollPath(const std::string& pathString);
 
-    // Determines if a file, with or without file extension, exists for the given path
-    std::optional<std::filesystem::path> validatePath(const std::filesystem::path& p);
-
     // Extracts GUI text from the path
     std::string guiText(std::filesystem::path path);
 
@@ -73,6 +71,7 @@ private:
 
     std::function<bool(const std::filesystem::path&)> _fileFilter;
     std::function<std::string(const std::filesystem::path&)> _createTooltip;
+    const std::string _extension;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SPLITCOMBOBOX___H__

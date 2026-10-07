@@ -71,6 +71,23 @@ std::vector<std::string> tokenizeString(const std::string& input, char separator
     return result;
 }
 
+std::vector<std::string_view> tokenizeString(std::string_view input, char separator) {
+    size_t separatorPos = input.find(separator);
+    if (separatorPos == std::string_view::npos) {
+        return { input };
+    }
+
+    std::vector<std::string_view> result;
+    size_t prevSeparator = 0;
+    while (separatorPos != std::string::npos) {
+        result.push_back(input.substr(prevSeparator, separatorPos - prevSeparator));
+        prevSeparator = separatorPos + 1;
+        separatorPos = input.find(separator, separatorPos + 1);
+    }
+    result.push_back(input.substr(prevSeparator));
+    return result;
+}
+
 std::string join(std::vector<std::string> input, const std::string& separator) {
     if (input.empty()) {
         return std::string();

@@ -247,8 +247,6 @@ DashboardItemDistance::DashboardItemDistance(const Dictionary& dictionary)
 
     _formatString = p.formatString.value_or(_formatString);
     addProperty(_formatString);
-
-    _localBuffer.resize(256);
 }
 
 std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
@@ -347,7 +345,6 @@ void DashboardItemDistance::update() {
                 dist.second
             )
         );
-
         _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
     catch (const std::format_error&) {
