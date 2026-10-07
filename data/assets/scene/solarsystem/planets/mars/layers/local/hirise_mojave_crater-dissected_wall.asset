@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Mojave_Crater",
   Name = "Mojave Crater [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "Dissected_Wall_of_Mojave_Crater_Texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Mojave_Crater",
   Name = "Mojave Crater [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "Dissected_Wall_of_Mojave_Crater_Heightmap.vrt"
 }
 

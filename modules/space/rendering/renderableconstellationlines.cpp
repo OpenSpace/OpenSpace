@@ -27,17 +27,17 @@
 #include <openspace/data/dataloader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
 #include <scn/scan.h>
 #include <algorithm>
 #include <filesystem>
@@ -137,8 +137,7 @@ Documentation RenderableConstellationLines::Documentation() {
     );
 }
 
-RenderableConstellationLines::RenderableConstellationLines(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableConstellationLines::RenderableConstellationLines(const Dictionary& dictionary)
     : RenderableConstellationsBase(dictionary)
     , _speckFile(FileInfo)
     , _drawElements(DrawElementsInfo, true)
@@ -245,7 +244,7 @@ void RenderableConstellationLines::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/constellationlines_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     createConstellations();
 }
@@ -318,22 +317,20 @@ void RenderableConstellationLines::render(const RenderData& data, RendererTasks&
 void RenderableConstellationLines::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 
 void RenderableConstellationLines::loadData() {
     if (_speckFile.value().empty()) {
-        throw ghoul::RuntimeError("Error loading data");
+        throw RuntimeError("Error loading data");
     }
     std::filesystem::path fileName = absPath(_speckFile);
 
     LINFO(std::format("Loading Speck file '{}'", fileName));
     std::ifstream file(fileName);
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format(
-            "Failed to open Speck file '{}'", fileName
-        ));
+        throw RuntimeError(std::format("Failed to open Speck file '{}'", fileName));
     }
 
     const float scale = static_cast<float>(toMeter(_constellationUnit));
@@ -346,7 +343,7 @@ void RenderableConstellationLines::loadData() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        ghoul::getline(file, line);
+        openspace::getline(file, line);
 
         if (file.eof()) {
             break;
@@ -393,7 +390,7 @@ void RenderableConstellationLines::loadData() {
         }
         while (dummy != "{");
 
-        ghoul::getline(file, line);
+        openspace::getline(file, line);
 
         // Read the identifier
         std::stringstream id(line);
@@ -401,18 +398,18 @@ void RenderableConstellationLines::loadData() {
 
         id >> dummy; // id command
         dummy.clear();
-        ghoul::getline(id, identifier);
-        ghoul::trimWhitespace(identifier);
+        openspace::getline(id, identifier);
+        trimWhitespace(identifier);
         constellationLine.name = constellationFullName(identifier);
 
         // Read the number of vertices
-        ghoul::getline(file, line);
+        openspace::getline(file, line);
         std::stringstream dim(line);
         dim >> constellationLine.numV;
 
         // We can now read the vertices data:
         for (int l = 0; l < constellationLine.numV; l++) {
-            ghoul::getline(file, line);
+            openspace::getline(file, line);
             if (line.substr(0, 1) == "}") {
                 break;
             }
@@ -439,12 +436,12 @@ void RenderableConstellationLines::loadData() {
             maxRadius = std::max(maxRadius, r);
         }
 
-        ghoul::getline(file, line);
+        openspace::getline(file, line);
         if (line.substr(0, 1) == "}") {
             _renderingConstellationsMap.insert({ lineIndex++, constellationLine });
         }
         else {
-            throw ghoul::RuntimeError("Error parsing file");
+            throw RuntimeError("Error parsing file");
         }
     }
     setBoundingSphere(maxRadius);

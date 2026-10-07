@@ -30,10 +30,9 @@
 #include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
 #include <memory>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 struct RenderData;
 class RenderableGlobe;
@@ -50,7 +49,7 @@ public:
 
     bool isReady() const;
 
-    void addGeoJsonLayer(const ghoul::Dictionary& layerDict);
+    void addGeoJsonLayer(const Dictionary& layerDict);
     void deleteLayer(const std::string& layerIdentifier);
 
     void update();

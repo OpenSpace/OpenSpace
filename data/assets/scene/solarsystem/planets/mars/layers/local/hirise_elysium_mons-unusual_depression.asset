@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Elyisum_Mons",
   Name = "Elyisum Mons [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "Unusual_Depression_Near_Elysium_Mons_Texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Elyisum_Mons",
   Name = "Elyisum Mons [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "Unusual_Depression_Near_Elysium_Mons_Heightmap.vrt"
 }
 

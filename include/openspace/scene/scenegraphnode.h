@@ -27,15 +27,15 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
+#include <openspace/misc/managedmemoryuniqueptr.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/util/ellipsoid.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <atomic>
 #include <chrono>
 #include <functional>
@@ -46,12 +46,11 @@
 
 // #define Debugging_Core_SceneGraphNode_Indices
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
 
+namespace opengl { class ProgramObject; }
 class Camera;
+class Dictionary;
 struct Documentation;
 class Renderable;
 struct RenderData;
@@ -83,8 +82,8 @@ public:
     SceneGraphNode();
     ~SceneGraphNode() override;
 
-    static ghoul::mm_unique_ptr<SceneGraphNode> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+    static mm_unique_ptr<SceneGraphNode> createFromDictionary(
+        const Dictionary& dictionary);
 
     void initialize();
     void initializeGL();
@@ -94,8 +93,8 @@ public:
     void update(const UpdateData& data);
     void render(const RenderData& data, RendererTasks& tasks);
 
-    void attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child);
-    ghoul::mm_unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child);
+    void attachChild(mm_unique_ptr<SceneGraphNode> child);
+    mm_unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child);
     void clearChildren();
     void setParent(SceneGraphNode& parent);
 
@@ -164,7 +163,7 @@ private:
         const glm::vec4& color) const;
 
     std::atomic<State> _state = State::Loaded;
-    std::vector<ghoul::mm_unique_ptr<SceneGraphNode>> _children;
+    std::vector<mm_unique_ptr<SceneGraphNode>> _children;
     SceneGraphNode* _parent = nullptr;
     std::vector<SceneGraphNode*> _dependencies;
     std::vector<SceneGraphNode*> _dependentNodes;
@@ -175,7 +174,7 @@ private:
     std::vector<std::string> _onRecedeAction;
     std::vector<std::string> _onExitAction;
 
-    ghoul::mm_unique_ptr<Renderable> _renderable;
+    mm_unique_ptr<Renderable> _renderable;
 
     /// If this value is `true` GUIs are asked to hide this node from collections, as it
     /// might be a node that is not very interesting (for example barycenters)
@@ -192,12 +191,12 @@ private:
      * Transformation defined by translation, rotation and scale.
      */
     struct {
-        ghoul::mm_unique_ptr<Translation> translation;
-        ghoul::mm_unique_ptr<Rotation> rotation;
-        ghoul::mm_unique_ptr<Scale> scale;
+        mm_unique_ptr<Translation> translation;
+        mm_unique_ptr<Rotation> rotation;
+        mm_unique_ptr<Scale> scale;
     } _transform;
 
-    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
+    mm_unique_ptr<TimeFrame> _timeFrame;
 
     // Cached transform data
     glm::dvec3 _worldPositionCached = glm::dvec3(0.0);
@@ -225,7 +224,7 @@ private:
     std::chrono::high_resolution_clock::time_point _lastScreenSpaceUpdateTime;
 
     BoolProperty _showDebugSphere;
-    static ghoul::opengl::ProgramObject* _debugSphereProgram;
+    static opengl::ProgramObject* _debugSphereProgram;
 
     std::optional<double> _overrideBoundingSphere;
     std::optional<double> _overrideInteractionSphere;

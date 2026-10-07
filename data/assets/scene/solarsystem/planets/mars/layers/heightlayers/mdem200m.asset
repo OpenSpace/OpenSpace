@@ -36,7 +36,7 @@ asset.meta = {
   Description = "ESRI Hosted ars HRSC MOLA Blended DEM",
   Author = "esri_astro",
   URL = "https://www.arcgis.com/home/item.html?id=225adad86379474ebc3d51a74573c99b",
-  License = "Esri Master License Agreement"
+  License = "Esri Master License Agreement + CC BY-SA 3.0 IGO (ESA)"
 }
 
 

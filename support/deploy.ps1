@@ -56,8 +56,8 @@ function Invoke-CMake {
   $tracyArgs = if ($Tracy) { @("-D", "TRACY_ENABLE=ON", "-D", "SGCT_TRACY_SUPPORT=ON") } else { @() }
   $cmakeArgs = @(
     "-D", "SGCT_BUILD_TESTS=OFF",
-    "-D", "GHOUL_HIGH_DEBUG_MODE=OFF",
-    "-D", "GHOUL_HAVE_TESTS=OFF",
+    "-D", "OPENSPACE_HIGH_DEBUG_MODE=OFF",
+    "-D", "OPENSPACE_HAVE_TESTS=OFF",
     "-D", "OPENSPACE_HAVE_TESTS=OFF"
   ) + $tracyArgs + @("-S", ".", "-B", "build-deploy")
   cmake @cmakeArgs
@@ -145,7 +145,7 @@ $sevenZipArgs = @(
   "modules/*/shaders/*",
   "modules/*/scripts/*",
   "modules/globebrowsing/gdal_data/*",
-  "modules/molecule/ext/mold/src/shaders/*",
+  "modules/molecule/shaders/mold/*",
   "modules/webgui/ext/nodejs/node.exe",
   "-x!documentation/.git"
 )

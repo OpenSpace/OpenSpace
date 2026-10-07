@@ -25,18 +25,20 @@
 #include <modules/base/rotation/multirotation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     // Combines multiple individual rotations that are applied one after the other. The
     // rotations are applied in the order in which they are specified in the `Rotations`
     // key.
     struct [[codegen::Dictionary(MultiRotation)]] Parameters {
         // The list of rotations that are applied one after the other.
-        std::vector<ghoul::Dictionary> rotations [[codegen::reference("core_rotation")]];
+        std::vector<Dictionary> rotations [[codegen::reference("core_rotation")]];
     };
 } // namespace
 #include "multirotation_codegen.cpp"
@@ -50,14 +52,14 @@ Documentation MultiRotation::Documentation() {
     );
 }
 
-MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary)
+MultiRotation::MultiRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     int i = 0;
-    for (const ghoul::Dictionary& rot : p.rotations) {
-        ghoul::mm_unique_ptr<Rotation> rotation = Rotation::createFromDictionary(rot);
+    for (const Dictionary& rot : p.rotations) {
+        mm_unique_ptr<Rotation> rotation = Rotation::createFromDictionary(rot);
         rotation->setGuiName(std::format("{}: {}", i, rotation->guiName()));
         rotation->setIdentifier(std::format("{}_{}", i, rotation->identifier()));
         addPropertySubOwner(rotation.get());
@@ -68,13 +70,13 @@ MultiRotation::MultiRotation(const ghoul::Dictionary& dictionary)
 
 void MultiRotation::initialize() {
     Rotation::initialize();
-    for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {
+    for (const mm_unique_ptr<Rotation>& rot : _rotations) {
         rot->initialize();
     }
 }
 
 void MultiRotation::update(const UpdateData& data) {
-    for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {
+    for (const mm_unique_ptr<Rotation>& rot : _rotations) {
         rot->update(data);
     }
     Rotation::update(data);
@@ -82,7 +84,7 @@ void MultiRotation::update(const UpdateData& data) {
 
 glm::dmat3 MultiRotation::matrix(const UpdateData& data) const {
     glm::dmat3 res = glm::dmat3(1.0);
-    for (const ghoul::mm_unique_ptr<Rotation>& rot : _rotations) {
+    for (const mm_unique_ptr<Rotation>& rot : _rotations) {
         res *= rot->matrix(data);
     }
     return res;

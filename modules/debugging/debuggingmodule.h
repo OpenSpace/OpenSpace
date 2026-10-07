@@ -27,10 +27,10 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/font/font.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <ghoul/font/font.h>
 
 namespace openspace {
 
@@ -45,7 +45,7 @@ public:
     LuaLibrary luaLibrary() const override;
 
 protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
     void internalInitializeGL() override;
 
 private:
@@ -54,7 +54,7 @@ private:
     Vec2Property _statisticsOffset;
     BoolProperty _showFrameInformation;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;
+    std::shared_ptr<fontrendering::Font> _fontFrameInfo;
 };
 
 } // namespace openspace

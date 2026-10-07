@@ -37,7 +37,7 @@ class SceneGraphNode;
 
 class DashboardItemAngle : public DashboardTextItem {
 public:
-    explicit DashboardItemAngle(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemAngle(const Dictionary& dictionary);
     ~DashboardItemAngle() override = default;
 
     void update() override;

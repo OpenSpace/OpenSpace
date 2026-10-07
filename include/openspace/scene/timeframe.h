@@ -27,25 +27,23 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/misc/managedmemoryuniqueptr.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
-
-namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 class Time;
 
 class TimeFrame : public PropertyOwner {
 public:
-    static ghoul::mm_unique_ptr<TimeFrame> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+    static mm_unique_ptr<TimeFrame> createFromDictionary(const Dictionary& dictionary);
 
     TimeFrame();
     virtual ~TimeFrame() override = default;
 
-    virtual bool initialize();
+    virtual void initialize();
     virtual void update(const Time& time) = 0;
 
     bool isActive() const;

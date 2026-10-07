@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___NOTIFICATIONLOG___H__
 #define __OPENSPACE_CORE___NOTIFICATIONLOG___H__
 
-#include <ghoul/logging/log.h>
+#include <openspace/logging/log.h>
 
-#include <ghoul/misc/profiling.h>
+#include <openspace/misc/profiling.h>
 #include <functional>
 #include <mutex>
 
@@ -38,7 +38,7 @@ namespace openspace {
  * callback is specified using `std::function`. Trying to log messages when the callback
  * object has been deleted results in undefined behavior.
  */
-class NotificationLog : public ghoul::logging::Log {
+class NotificationLog : public logging::Log {
 public:
     /**
      * The type of function that is used as a callback in this log.
@@ -47,7 +47,7 @@ public:
         std::string_view timeString,
         std::string_view dateString,
         std::string_view category,
-        ghoul::logging::LogLevel logLevel,
+        logging::LogLevel logLevel,
         std::string_view message)>;
 
     /**
@@ -57,7 +57,7 @@ public:
      * \param minimumLogLevel The minimum log level that this logger will accept
      */
     NotificationLog(CallbackFunction callbackFunction,
-        ghoul::logging::LogLevel minimumLogLevel = ghoul::logging::LogLevel::Warning);
+        logging::LogLevel minimumLogLevel = logging::LogLevel::Warning);
 
     /**
      * Method that logs a message with a given level and category to the console.
@@ -66,7 +66,7 @@ public:
      * \param category The category of this message
      * \param message The message body of the log message
      */
-    void log(ghoul::logging::LogLevel level, std::string_view category,
+    void log(logging::LogLevel level, std::string_view category,
         std::string_view message) override;
 
 private:
@@ -74,6 +74,6 @@ private:
     TracyLockable(std::mutex, _mutex);
 };
 
-} // namespace ghoul::logging
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___NOTIFICATIONLOG___H__

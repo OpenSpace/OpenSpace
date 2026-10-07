@@ -24,14 +24,16 @@
 
 #include <openspace/util/coordinateconversion.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua_helper.h>
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "Coordinateconversion";
 
     // J2000 Galactic reference frame
@@ -49,7 +51,7 @@ namespace {
         if (hOrDIndex == std::string::npos || mIndex == std::string::npos ||
             sIndex == std::string::npos)
         {
-            throw ghoul::lua::LuaRuntimeException(std::format(
+            throw lua::LuaRuntimeException(std::format(
                 "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
                 "and Dec 'XdYmZs'", str
             ));
@@ -65,7 +67,7 @@ namespace {
             // Hours or degrees must be an integer
             double temp = std::stod(sHoursOrDegrees);
             if (std::floor(temp) != temp) {
-                throw ghoul::lua::LuaRuntimeException(std::format(
+                throw lua::LuaRuntimeException(std::format(
                     "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
                     "and Dec 'XdYmZs', where X must be an integer", str
                 ));
@@ -75,7 +77,7 @@ namespace {
             // Minutes must be an integer
             temp = std::stod(sMinutes);
             if (std::floor(temp) != temp) {
-                throw ghoul::lua::LuaRuntimeException(std::format(
+                throw lua::LuaRuntimeException(std::format(
                     "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
                     "and Dec 'XdYmZs', where Y must be an integer", str
                 ));
@@ -88,7 +90,7 @@ namespace {
             return { hoursOrDegrees, minutes, seconds };
         }
         catch (const std::invalid_argument&) {
-            throw ghoul::lua::LuaRuntimeException(std::format(
+            throw lua::LuaRuntimeException(std::format(
                 "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
                 "and Dec 'XdYmZs'", str
             ));
@@ -97,7 +99,7 @@ namespace {
 
     std::tuple<int, int, double> parseRa(const std::string& ra) {
         if (ra.contains('d')) {
-            throw ghoul::lua::LuaRuntimeException(std::format(
+            throw lua::LuaRuntimeException(std::format(
                 "Ra '{}' format is incorrect. Correct format is: 'XhYmZs'", ra
             ));
         }
@@ -106,7 +108,7 @@ namespace {
 
     std::tuple<int, int, double> parseDec(const std::string& dec) {
         if (dec.contains('h')) {
-            throw ghoul::lua::LuaRuntimeException(std::format(
+            throw lua::LuaRuntimeException(std::format(
                 "Dec '{}' format is incorrect. Correct format is: 'XdYmZs'", dec
             ));
         }
@@ -213,7 +215,7 @@ glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
  */
 glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     if (ra.size() < 6 || dec.size() < 6) {
-        throw ghoul::lua::LuaRuntimeException(std::format(
+        throw lua::LuaRuntimeException(std::format(
             "Ra '{}' or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
             "and Dec 'XdYmZs'", ra, dec
         ));

@@ -27,12 +27,12 @@
 #include <modules/base/rendering/renderablenodeline.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
 
 namespace {
     using namespace openspace;
@@ -107,7 +107,7 @@ Documentation RenderableDistanceLabel::Documentation() {
     );
 }
 
-RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
+RenderableDistanceLabel::RenderableDistanceLabel(const Dictionary& dictionary)
     : RenderableLabel(dictionary)
     , _nodelineId(NodeLineInfo)
     , _distanceUnit(DistanceUnitInfo)

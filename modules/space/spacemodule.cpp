@@ -40,6 +40,11 @@
 #include <modules/space/translation/spicetranslation.h>
 #include <modules/space/rotation/spicerotation.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/objectmanager.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/timeframe.h>
@@ -47,11 +52,6 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/objectmanager.h>
-#include <ghoul/misc/templatefactory.h>
 #include <optional>
 
 #include "spacemodule_lua.inl"
@@ -76,7 +76,7 @@ namespace {
 
 namespace openspace {
 
-ghoul::opengl::ProgramObjectManager SpaceModule::ProgramObjectManager;
+opengl::ProgramObjectManager SpaceModule::ProgramObjectManager;
 
 Documentation SpaceModule::Documentation() {
     return codegen::doc<Parameters>("module_space");
@@ -92,10 +92,10 @@ SpaceModule::SpaceModule()
     addProperty(_showSpiceExceptions);
 }
 
-void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+void SpaceModule::internalInitialize(const Dictionary& dictionary) {
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    assert_msg(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderableConstellationBounds>(
         "RenderableConstellationBounds"
@@ -112,9 +112,9 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableTravelSpeed>("RenderableTravelSpeed");
 
 
-    ghoul::TemplateFactory<Translation>* fTranslation =
+    TemplateFactory<Translation>* fTranslation =
         FactoryManager::ref().factory<Translation>();
-    ghoul_assert(fTranslation, "Ephemeris factory was not created");
+    assert_msg(fTranslation, "Ephemeris factory was not created");
 
     fTranslation->registerClass<KeplerTranslation>("KeplerTranslation");
     fTranslation->registerClass<SpiceTranslation>("SpiceTranslation");
@@ -122,16 +122,14 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fTranslation->registerClass<HorizonsTranslation>("HorizonsTranslation");
 
 
-    ghoul::TemplateFactory<Rotation>* fRotation =
-        FactoryManager::ref().factory<Rotation>();
-    ghoul_assert(fRotation, "Rotation factory was not created");
+    TemplateFactory<Rotation>* fRotation = FactoryManager::ref().factory<Rotation>();
+    assert_msg(fRotation, "Rotation factory was not created");
 
     fRotation->registerClass<SpiceRotation>("SpiceRotation");
 
 
-    ghoul::TemplateFactory<TimeFrame>* fTimeFrame =
-        FactoryManager::ref().factory<TimeFrame>();
-    ghoul_assert(fTimeFrame, "Scale factory was not created");
+    TemplateFactory<TimeFrame>* fTimeFrame = FactoryManager::ref().factory<TimeFrame>();
+    assert_msg(fTimeFrame, "Scale factory was not created");
     fTimeFrame->registerClass<TimeFrameKernel>("TimeFrameKernel");
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -139,7 +137,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 }
 
 void SpaceModule::internalDeinitializeGL() {
-    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
+    ProgramObjectManager.releaseAll(opengl::ProgramObjectManager::Warnings::Yes);
 }
 
 std::vector<Documentation> SpaceModule::documentations() const {
@@ -170,6 +168,7 @@ LuaLibrary SpaceModule::luaLibrary() const {
             codegen::lua::ReadKeplerFile
         },
         .scripts = {
+            absPath("${MODULE_SPACE}/scripts/sbdb.lua"),
             absPath("${MODULE_SPACE}/scripts/spice.lua")
         }
     };

@@ -28,31 +28,31 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/model/modelgeometry.h>
+#include <openspace/io/model/modelreader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/framebufferobject.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/distanceconversion.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timeconversion.h>
-#include <openspace/util/updatestructures.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/model/modelgeometry.h>
-#include <ghoul/io/model/modelreader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/util/distanceconversion.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timeconversion.h>
+#include <openspace/util/updatestructures.h>
 #include <array>
 #include <cmath>
 #include <cstdlib>
@@ -300,7 +300,7 @@ namespace {
             [[codegen::inrange(glm::dvec3(-360.0), glm::dvec3(360.0))]];
 
         // [[codegen::verbatim(LightSourcesInfo.description)]]
-        std::optional<std::vector<ghoul::Dictionary>> lightSources
+        std::optional<std::vector<Dictionary>> lightSources
             [[codegen::reference("core_lightsource")]];
 
         // [[codegen::verbatim(EnableDepthTestInfo.description)]]
@@ -336,19 +336,18 @@ namespace {
             // This describes a translation that is applied to an internal model node
             // identified with name and all its children. Depending on the 'Type' of the
             // translation, this can either be a static translation or a time-varying one.
-            std::optional<ghoul::Dictionary> translation
+            std::optional<Dictionary> translation
                 [[codegen::reference("core_translation")]];
 
             // This describes a rotation that is applied to an internal model node
             // identified with name and all its children. Depending on the 'Type' of the
             // rotation, this can either be a static rotation or a time-varying one.
-            std::optional<ghoul::Dictionary> rotation
-                [[codegen::reference("core_rotation")]];
+            std::optional<Dictionary> rotation [[codegen::reference("core_rotation")]];
 
             // This describes a scaling that is applied to an internal model node
             // identified with name and all its children. Depending on the 'Type' of the
             // scaling, this can either be a static scaling or a time-varying one.
-            std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
+            std::optional<Dictionary> scale [[codegen::reference("core_scale")]];
         };
 
         // A map of custom transformations to apply to internal model nodes. The keys of
@@ -376,7 +375,7 @@ Documentation RenderableModel::Documentation() {
     );
 }
 
-RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
+RenderableModel::RenderableModel(const Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , Shadower(dictionary)
     , _enableAnimation(EnableAnimationInfo, false)
@@ -431,7 +430,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _file = p.geometryFile;
     if (!std::filesystem::exists(_file)) {
-        throw ghoul::RuntimeError(std::format("Cannot find model file '{}'", _file));
+        throw RuntimeError(std::format("Cannot find model file '{}'", _file));
     }
 
     _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
@@ -457,7 +456,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             _modelScale = std::get<double>(*p.modelScale);
         }
         else {
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
         }
 
         if (_invertModelScale) {
@@ -490,7 +489,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             }
         }
         else {
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
         }
     }
 
@@ -527,9 +526,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _fragmentShaderPath = p.fragmentShader.value_or(_fragmentShaderPath);
 
     if (p.lightSources.has_value()) {
-        const std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
+        const std::vector<Dictionary> lightsources = *p.lightSources;
 
-        for (const ghoul::Dictionary& lsDictionary : lightsources) {
+        for (const Dictionary& lsDictionary : lightsources) {
             std::unique_ptr<LightSource> lightSource =
                 LightSource::createFromDictionary(lsDictionary);
             _lightSourcePropertyOwner.addPropertySubOwner(lightSource.get());
@@ -683,7 +682,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 ));
             }
             else {
-                ghoul::Dictionary translation;
+                Dictionary translation;
                 translation.setValue("Type", std::string("StaticTranslation"));
                 translation.setValue("Position", glm::dvec3(0.0));
                 _customNodeTransforms[nodeName].translation =
@@ -701,7 +700,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 ));
             }
             else {
-                ghoul::Dictionary rotation;
+                Dictionary rotation;
                 rotation.setValue("Type", std::string("StaticRotation"));
                 rotation.setValue("Rotation", glm::dvec3(0.0));
                 _customNodeTransforms[nodeName].rotation =
@@ -718,7 +717,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 ));
             }
             else {
-                ghoul::Dictionary scale;
+                Dictionary scale;
                 scale.setValue("Type", std::string("StaticScale"));
                 scale.setValue("Scale", 1.0);
                 _customNodeTransforms[nodeName].scale =
@@ -765,10 +764,10 @@ void RenderableModel::initializeGL() {
     ZoneScoped;
 
     // Load model
-    _geometry = ghoul::io::ModelReader::ref().loadModel(
+    _geometry = io::ModelReader::ref().loadModel(
         _file,
-        ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
-        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+        io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
+        io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
     );
     _modelHasAnimation = _geometry->hasAnimation();
     _geometry->setReplaceWithCustomTransforms(_replaceWithCustomNodeTransforms);
@@ -824,7 +823,7 @@ void RenderableModel::initializeGL() {
     }
     _program = BaseModule::ProgramObjectManager.request(
         program,
-        [this, program]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [this, program]() -> std::unique_ptr<opengl::ProgramObject> {
             const std::filesystem::path vs =
                 _vertexShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
@@ -840,14 +839,14 @@ void RenderableModel::initializeGL() {
     // We don't really know what kind of shader the user provides us with, so we can't
     // make the assumption that we are going to use all uniforms
     _program->setIgnoreUniformLocationError(
-        ghoul::opengl::ProgramObject::IgnoreError::Yes
+        opengl::ProgramObject::IgnoreError::Yes
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     _quadProgram = BaseModule::ProgramObjectManager.request(
         "ModelOpacityProgram",
-        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [&]() -> std::unique_ptr<opengl::ProgramObject> {
             const std::filesystem::path vs =
                 absPath("${MODULE_BASE}/shaders/modelopacity_vs.glsl");
             const std::filesystem::path fs =
@@ -860,7 +859,7 @@ void RenderableModel::initializeGL() {
             );
         }
     );
-    ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
+    opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
 
     // Screen quad VAO
     glCreateBuffers(1, &_vbo);
@@ -969,21 +968,21 @@ void RenderableModel::deinitializeGL() {
     }
     BaseModule::ProgramObjectManager.release(
         program,
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
 
     BaseModule::ProgramObjectManager.release(
         "ModelOpacityProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
 
     _program = nullptr;
     _quadProgram = nullptr;
-    ghoul::opengl::FramebufferObject::deactivate();
+    opengl::FramebufferObject::deactivate();
 
     if (_castShadow) {
         releaseDepthMapResources();
@@ -991,21 +990,19 @@ void RenderableModel::deinitializeGL() {
 }
 
 void RenderableModel::createDepthMapResources() {
-    using ProgramObject = ghoul::opengl::ProgramObject;
-
     _depthMapProgram = BaseModule::ProgramObjectManager.request(
         "ModelDepthMapProgram",
-        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [&]() -> std::unique_ptr<opengl::ProgramObject> {
             std::filesystem::path vs =
                 absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl");
             std::filesystem::path fs =
                 absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl");
 
-            std::unique_ptr<ProgramObject> prog =
+            std::unique_ptr<opengl::ProgramObject> p =
                 global::renderEngine->buildRenderProgram("ModelDepthMapProgram", vs, fs);
-            prog->setIgnoreAttributeLocationError(ProgramObject::IgnoreError::Yes);
-            prog->setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
-            return prog;
+            p->setIgnoreAttributeLocationError(opengl::ProgramObject::IgnoreError::Yes);
+            p->setIgnoreUniformLocationError(opengl::ProgramObject::IgnoreError::Yes);
+            return p;
         }
     );
 }
@@ -1013,7 +1010,7 @@ void RenderableModel::createDepthMapResources() {
 void RenderableModel::releaseDepthMapResources() {
     BaseModule::ProgramObjectManager.release(
         "ModelDepthMapProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -1125,7 +1122,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     // Does only really need to be set when _castShadow changes
     _program->setUniform(_uniformCache.has_shadow_depth_map, _castShadow);
 
-    ghoul::opengl::TextureUnit shadowUnit;
+    opengl::TextureUnit shadowUnit;
     if (_castShadow && _lightSource) {
         ShadowInfo sm = global::renderEngine->renderer().shadowInformation(_shadowGroup);
 
@@ -1166,7 +1163,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     }
     else {
         // Prepare framebuffer
-        const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+        const GLint defaultFBO = opengl::FramebufferObject::getActiveObject();
 
         // Re-bind first texture to use the currently not used Ping-Pong texture in the
         // FramebufferRenderer
@@ -1204,7 +1201,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Bind the G-buffer depth texture for a manual depth test towards the rest of the
         // scene
-        ghoul::opengl::TextureUnit gBufferDepthTextureUnit;
+        opengl::TextureUnit gBufferDepthTextureUnit;
         gBufferDepthTextureUnit.bind(
             global::renderEngine->renderer().gBufferDepthTexture()
         );
@@ -1247,11 +1244,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _quadProgram->setUniform(_uniformOpacityCache.opacity, opacity());
 
         // Bind textures
-        ghoul::opengl::TextureUnit colorTextureUnit;
+        opengl::TextureUnit colorTextureUnit;
         colorTextureUnit.bind(global::renderEngine->renderer().additionalColorTexture1());
         _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
 
-        ghoul::opengl::TextureUnit depthTextureUnit;
+        opengl::TextureUnit depthTextureUnit;
         depthTextureUnit.bind(global::renderEngine->renderer().additionalDepthTexture());
         _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
 
@@ -1284,12 +1281,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 void RenderableModel::update(const UpdateData& data) {
     if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
     if (_quadProgram->isDirty()) [[unlikely]] {
         _quadProgram->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
+        opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
     }
 
     if (!hasOverrideRenderBin()) {

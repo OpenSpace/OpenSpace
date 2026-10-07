@@ -96,26 +96,26 @@
 #include <modules/base/timeframe/timeframeinterval.h>
 #include <modules/base/timeframe/timeframeunion.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/templatefactory.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texturemanager.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texturemanager.h>
 
 namespace openspace {
 
-ghoul::opengl::ProgramObjectManager BaseModule::ProgramObjectManager;
-ghoul::opengl::TextureManager BaseModule::TextureManager;
+opengl::ProgramObjectManager BaseModule::ProgramObjectManager;
+opengl::TextureManager BaseModule::TextureManager;
 
 BaseModule::BaseModule()
     : OpenSpaceModule(BaseModule::Name)
 {}
 
-void BaseModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
+void BaseModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
+    assert_msg(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
     fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
     fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
@@ -131,9 +131,9 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fSsRenderable->registerClass<ScreenSpaceText>("ScreenSpaceText");
 
 
-    ghoul::TemplateFactory<DashboardItem>* fDashboard =
+    TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
-    ghoul_assert(fDashboard, "Dashboard factory was not created");
+    assert_msg(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemAngle>("DashboardItemAngle");
     fDashboard->registerClass<DashboardItemAstrocast>("DashboardItemAstrocast");
@@ -160,17 +160,17 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fDashboard->registerClass<DashboardItemVelocity>("DashboardItemVelocity");
 
 
-    ghoul::TemplateFactory<LightSource>* fLightSource =
+    TemplateFactory<LightSource>* fLightSource =
         FactoryManager::ref().factory<LightSource>();
-    ghoul_assert(fLightSource, "Light Source factory was not created");
+    assert_msg(fLightSource, "Light Source factory was not created");
 
     fLightSource->registerClass<CameraLightSource>("CameraLightSource");
     fLightSource->registerClass<SceneGraphLightSource>("SceneGraphLightSource");
 
 
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    assert_msg(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
@@ -206,9 +206,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
 
 
-    ghoul::TemplateFactory<Rotation>* fRotation =
-        FactoryManager::ref().factory<Rotation>();
-    ghoul_assert(fRotation, "Rotation factory was not created");
+    TemplateFactory<Rotation>* fRotation = FactoryManager::ref().factory<Rotation>();
+    assert_msg(fRotation, "Rotation factory was not created");
 
     fRotation->registerClass<ConstantRotation>("ConstantRotation");
     fRotation->registerClass<FixedRotation>("FixedRotation");
@@ -219,8 +218,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRotation->registerClass<TimelineRotation>("TimelineRotation");
 
 
-    ghoul::TemplateFactory<Scale>* fScale = FactoryManager::ref().factory<Scale>();
-    ghoul_assert(fScale, "Scale factory was not created");
+    TemplateFactory<Scale>* fScale = FactoryManager::ref().factory<Scale>();
+    assert_msg(fScale, "Scale factory was not created");
 
     fScale->registerClass<LuaScale>("LuaScale");
     fScale->registerClass<MultiScale>("MultiScale");
@@ -230,17 +229,16 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fScale->registerClass<TimelineScale>("TimelineScale");
 
 
-    ghoul::TemplateFactory<TimeFrame>* fTimeFrame =
-        FactoryManager::ref().factory<TimeFrame>();
-    ghoul_assert(fTimeFrame, "Scale factory was not created");
+    TemplateFactory<TimeFrame>* fTimeFrame = FactoryManager::ref().factory<TimeFrame>();
+    assert_msg(fTimeFrame, "Scale factory was not created");
 
     fTimeFrame->registerClass<TimeFrameInterval>("TimeFrameInterval");
     fTimeFrame->registerClass<TimeFrameUnion>("TimeFrameUnion");
 
 
-    ghoul::TemplateFactory<Translation>* fTranslation =
+    TemplateFactory<Translation>* fTranslation =
         FactoryManager::ref().factory<Translation>();
-    ghoul_assert(fTranslation, "Translation factory was not created");
+    assert_msg(fTranslation, "Translation factory was not created");
 
     fTranslation->registerClass<GlobeTranslation>("GlobeTranslation");
     fTranslation->registerClass<LuaTranslation>("LuaTranslation");
@@ -249,16 +247,15 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fTranslation->registerClass<TimelineTranslation>("TimelineTranslation");
 
 
-    ghoul::TemplateFactory<Task>* fTask =
-        FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "Task factory was not created");
+    TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    assert_msg(fTask, "Task factory was not created");
 
     fTask->registerClass<ConvertModelTask>("ConvertModelTask");
 }
 
 void BaseModule::internalDeinitializeGL() {
-    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
-    TextureManager.releaseAll(ghoul::opengl::TextureManager::Warnings::Yes);
+    ProgramObjectManager.releaseAll(opengl::ProgramObjectManager::Warnings::Yes);
+    TextureManager.releaseAll(opengl::TextureManager::Warnings::Yes);
 }
 
 std::vector<Documentation> BaseModule::documentations() const {

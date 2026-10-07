@@ -25,9 +25,9 @@
 #include <modules/video/include/screenspacevideo.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <filesystem>
 
 namespace {
@@ -54,7 +54,7 @@ Documentation ScreenSpaceVideo::Documentation() {
     );
 }
 
-ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)
+ScreenSpaceVideo::ScreenSpaceVideo(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _videoPlayer(dictionary)
 {
@@ -103,7 +103,7 @@ void ScreenSpaceVideo::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
-void ScreenSpaceVideo::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceVideo::bindTexture(opengl::TextureUnit& unit) {
     unit.bind(*_videoPlayer.frameTexture());
 }
 

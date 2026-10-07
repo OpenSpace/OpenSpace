@@ -25,8 +25,8 @@
 #include <modules/debugging/rendering/screenspacedebugplane.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/textureunit.h>
 #include <optional>
 
 namespace {
@@ -57,7 +57,7 @@ Documentation ScreenSpaceDebugPlane::Documentation() {
     );
 }
 
-ScreenSpaceDebugPlane::ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary)
+ScreenSpaceDebugPlane::ScreenSpaceDebugPlane(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _texture(TextureInfo, -1, -1, 4096)
 {
@@ -69,7 +69,7 @@ ScreenSpaceDebugPlane::ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary
     _objectSize = glm::ivec2(256);
 }
 
-void ScreenSpaceDebugPlane::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceDebugPlane::bindTexture(opengl::TextureUnit& unit) {
     unit.bind(_texture);
 }
 

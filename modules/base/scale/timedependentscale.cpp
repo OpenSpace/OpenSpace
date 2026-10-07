@@ -25,9 +25,9 @@
 #include <modules/base/scale/timedependentscale.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <optional>
 
@@ -92,7 +92,7 @@ Documentation TimeDependentScale::Documentation() {
     );
 }
 
-TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
+TimeDependentScale::TimeDependentScale(const Dictionary& dictionary)
     : Scale(dictionary)
     , _referenceDate(ReferenceDateInfo, "")
     , _speed(SpeedInfo, 1.0, 0.0, 1e12)

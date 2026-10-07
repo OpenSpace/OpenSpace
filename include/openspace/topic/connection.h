@@ -32,12 +32,11 @@
 #include <string>
 #include <thread>
 
-namespace ghoul::io { class Socket; }
-
 namespace openspace {
 
 using TopicId = size_t;
 
+namespace io { class Socket; }
 class Topic;
 
 // @TODO (abock, 2022-05-06) This is not really elegant as there is no need for a
@@ -58,7 +57,7 @@ public:
         int patch = 0;
     };
 
-    Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address,
+    Connection(std::unique_ptr<io::Socket> s, std::string address,
         bool authorized = false, const std::string& password = "");
 
     void handleMessage(const std::string& message);
@@ -70,7 +69,7 @@ public:
 
     bool isAuthorized() const;
 
-    ghoul::io::Socket* socket();
+    io::Socket* socket();
     std::thread& thread();
     void setThread(std::thread&& thread);
 
@@ -79,7 +78,7 @@ public:
 
 private:
     std::map<TopicId, std::unique_ptr<Topic>> _topics;
-    std::unique_ptr<ghoul::io::Socket> _socket;
+    std::unique_ptr<io::Socket> _socket;
     std::thread _thread;
     std::mutex _mutex;
 

@@ -24,16 +24,16 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/format.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryluaformatter.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringconversion.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/time.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/stringconversion.h>
 #include <algorithm>
 #include <numeric>
 #include <tuple>
@@ -66,9 +66,9 @@ namespace {
  *        anything other than `.navstate`)
  * \return A Lua table representing the loaded navigation state
  */
-[[codegen::luawrap]] ghoul::Dictionary loadNavigationStateFromFile(std::string filePath) {
+[[codegen::luawrap]] Dictionary loadNavigationStateFromFile(std::string filePath) {
     if (filePath.empty()) {
-        throw ghoul::lua::LuaError("Filepath string is empty");
+        throw lua::LuaError("Filepath string is empty");
     }
 
     NavigationState ns = global::navigationHandler->loadNavigationState(filePath);
@@ -101,7 +101,7 @@ namespace {
     );
 
     if (filePath.empty()) {
-        throw ghoul::lua::LuaError("Filepath string is empty");
+        throw lua::LuaError("Filepath string is empty");
     }
 
     NavigationState ns = global::navigationHandler->loadNavigationState(filePath);
@@ -119,14 +119,12 @@ namespace {
  *        for the NavigationState
  * \return A Lua table representing the current NavigationState of the camera
  */
-[[codegen::luawrap]] ghoul::Dictionary getNavigationState(
-                                                         std::optional<std::string> frame)
-{
+[[codegen::luawrap]] Dictionary getNavigationState(std::optional<std::string> frame) {
     NavigationState state;
     if (frame.has_value()) {
         const SceneGraphNode* referenceFrame = sceneGraphNode(*frame);
         if (!referenceFrame) {
-            throw ghoul::lua::LuaError(
+            throw lua::LuaError(
                 std::format("Could not find node '{}' as reference frame", *frame)
             );
         }
@@ -146,7 +144,7 @@ namespace {
  * \param useTimeStamp If true, and the provided NavigationState includes a timestamp, the
  *        time will be set as well
  */
-[[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState,
+[[codegen::luawrap]] void setNavigationState(Dictionary navigationState,
                                              bool useTimeStamp = false)
 {
     NavigationState ns = NavigationState(navigationState);
@@ -168,7 +166,7 @@ namespace {
  */
 [[codegen::luawrap]] void saveNavigationState(std::string path, std::string frame = "") {
     if (path.empty()) {
-        throw ghoul::lua::LuaError("Filepath string is empty");
+        throw lua::LuaError("Filepath string is empty");
     }
     global::navigationHandler->saveNavigationState(path, frame);
 }
@@ -271,7 +269,7 @@ namespace {
 {
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError("Unknown node: " + identifier);
+        throw lua::LuaError("Unknown node: " + identifier);
     }
 
     global::navigationHandler->orbitalNavigator().setFocusNode(
@@ -310,9 +308,9 @@ namespace {
     global::navigationHandler->orbitalNavigator().joystickStates().setAxisMapping(
         std::move(joystickName),
         axis,
-        ghoul::from_string<JoystickCameraStates::AxisType>(axisType),
+        from_string<JoystickCameraStates::AxisType>(axisType),
         JoystickCameraStates::AxisInvert(shouldInvert),
-        ghoul::from_string<JoystickCameraStates::JoystickType>(joystickType),
+        from_string<JoystickCameraStates::JoystickType>(joystickType),
         isSticky,
         JoystickCameraStates::AxisFlip(shouldFlip),
         sensitivity
@@ -405,17 +403,17 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \param axis The joystick axis for which to find the information
  * \return An object with information about the joystick axis
  */
-[[codegen::luawrap]] ghoul::Dictionary joystickAxis(std::string joystickName, int axis) {
+[[codegen::luawrap]] Dictionary joystickAxis(std::string joystickName, int axis) {
     JoystickCameraStates::AxisInformation info =
         global::navigationHandler->orbitalNavigator().joystickStates().axisMapping(
             joystickName,
             axis
         );
 
-    ghoul::Dictionary dict;
-    dict.setValue("Type", ghoul::to_string(info.type));
+    Dictionary dict;
+    dict.setValue("Type", to_string(info.type));
     dict.setValue("Inverted", static_cast<bool>(info.invert));
-    dict.setValue("JoystickType", ghoul::to_string(info.joystickType));
+    dict.setValue("JoystickType", to_string(info.joystickType));
     dict.setValue("Sticky", info.isSticky);
     dict.setValue("Flip", static_cast<bool>(info.flip));
     dict.setValue("Sensitivity", info.sensitivity);
@@ -490,7 +488,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
                                              std::string action = "Press",
                                              bool isRemote = true)
 {
-    JoystickAction act = ghoul::from_string<JoystickAction>(action);
+    JoystickAction act = from_string<JoystickAction>(action);
 
     global::navigationHandler->orbitalNavigator().joystickStates().bindButtonCommand(
         joystickName,
@@ -646,8 +644,8 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
     try {
         global::navigationHandler->orbitalNavigator().triggerIdleMotion(choice);
     }
-    catch (const ghoul::RuntimeError& e) {
-        throw ghoul::lua::LuaError(e.message);
+    catch (const RuntimeError& e) {
+        throw lua::LuaError(e.message);
     }
 }
 
@@ -764,13 +762,13 @@ void flyToGeoInternal(std::string node, double latitude, double longitude,
     if (!node.empty()) {
         n = sceneGraphNode(node);
         if (!n) {
-            throw ghoul::lua::LuaError("Unknown scene graph node: " + node);
+            throw lua::LuaError("Unknown scene graph node: " + node);
         }
     }
     else {
         n = global::navigationHandler->orbitalNavigator().anchorNode();
         if (!n) {
-            throw ghoul::lua::LuaError("No anchor node is set");
+            throw lua::LuaError("No anchor node is set");
         }
     }
 
@@ -791,7 +789,7 @@ void flyToGeoInternal(std::string node, double latitude, double longitude,
         return;
     }
 
-    ghoul::Dictionary instruction;
+    Dictionary instruction;
     instruction.setValue("TargetType", std::string("Node"));
     instruction.setValue("Target", n->identifier());
     instruction.setValue("Position", positionModelCoords);
@@ -799,7 +797,7 @@ void flyToGeoInternal(std::string node, double latitude, double longitude,
 
     if (duration.has_value()) {
         if (*duration < 0) {
-            throw ghoul::lua::LuaError("Duration must be a positive value");
+            throw lua::LuaError("Duration must be a positive value");
         }
         instruction.setValue("Duration", *duration);
     }
@@ -905,7 +903,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 {
     SceneGraphNode* n = sceneGraphNode(nodeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError("Unknown globe identifier: " + nodeIdentifier);
+        throw lua::LuaError("Unknown globe identifier: " + nodeIdentifier);
     }
 
     glm::vec3 p = cartesianCoordinatesFromGeo(*n, latitude, longitude, altitude);
@@ -944,14 +942,14 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
         std::holds_alternative<double>(*useUpFromTargetOrDuration) &&
         duration.has_value())
     {
-        throw ghoul::lua::LuaError("Duration cannot be specified twice");
+        throw lua::LuaError("Duration cannot be specified twice");
     }
 
     if (!sceneGraphNode(nodeIdentifier)) {
-        throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
+        throw lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
 
-    ghoul::Dictionary insDict;
+    Dictionary insDict;
     insDict.setValue("TargetType", std::string("Node"));
     insDict.setValue("Target", nodeIdentifier);
     if (useUpFromTargetOrDuration.has_value()) {
@@ -964,7 +962,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
         else {
             double d = std::get<double>(*useUpFromTargetOrDuration);
             if (d < 0.0) {
-                throw ghoul::lua::LuaError("Duration must be a positive value");
+                throw lua::LuaError("Duration must be a positive value");
             }
             insDict.setValue("Duration", d);
         }
@@ -972,7 +970,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
     if (duration.has_value()) {
         double d = *duration;
         if (d < 0.0) {
-            throw ghoul::lua::LuaError("Duration must be a positive value");
+            throw lua::LuaError("Duration must be a positive value");
         }
         insDict.setValue("Duration", d);
     }
@@ -1008,10 +1006,10 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
                                                            std::optional<double> duration)
 {
     if (!sceneGraphNode(nodeIdentifier)) {
-        throw ghoul::lua::LuaError(std::format("Unknown node name: {}", nodeIdentifier));
+        throw lua::LuaError(std::format("Unknown node name: {}", nodeIdentifier));
     }
 
-    ghoul::Dictionary insDict;
+    Dictionary insDict;
     insDict.setValue("TargetType", std::string("Node"));
     insDict.setValue("Target", nodeIdentifier);
     insDict.setValue("Height", height);
@@ -1025,7 +1023,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
         else {
             double d = std::get<double>(*useUpFromTargetOrDuration);
             if (d < 0.0) {
-                throw ghoul::lua::LuaError("Duration must be a positive value");
+                throw lua::LuaError("Duration must be a positive value");
             }
             insDict.setValue("Duration", d);
         }
@@ -1033,7 +1031,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
     if (duration.has_value()) {
         double d = *duration;
         if (d < 0.0) {
-            throw ghoul::lua::LuaError("Duration must be a positive value");
+            throw lua::LuaError("Duration must be a positive value");
         }
         insDict.setValue("Duration", d);
     }
@@ -1054,7 +1052,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * \param duration An optional duration for the motion to take, in seconds. For example, a
  *        value of 5 means "fly to this position over a duration of 5 seconds"
  */
-[[codegen::luawrap]] void flyToNavigationState(ghoul::Dictionary navigationState,
+[[codegen::luawrap]] void flyToNavigationState(Dictionary navigationState,
                                                std::optional<double> duration)
 {
     try {
@@ -1066,17 +1064,17 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
     }
     catch (const SpecificationError& e) {
         logError(e, "flyToNavigationState");
-        throw ghoul::lua::LuaError(std::format("Unable to create a path: {}", e.what()));
+        throw lua::LuaError(std::format("Unable to create a path: {}", e.what()));
     }
 
-    ghoul::Dictionary instruction;
+    Dictionary instruction;
     instruction.setValue("TargetType", std::string("NavigationState"));
     instruction.setValue("NavigationState", navigationState);
 
     if (duration.has_value()) {
         double d = *duration;
         if (d < 0.0) {
-            throw ghoul::lua::LuaError("Duration must be a positive value");
+            throw lua::LuaError("Duration must be a positive value");
         }
         instruction.setValue("Duration", d);
     }
@@ -1097,10 +1095,10 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 [[codegen::luawrap]] void zoomToFocus(std::optional<double> duration) {
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
-        throw ghoul::lua::LuaError("Could not determine current focus node");
+        throw lua::LuaError("Could not determine current focus node");
     }
 
-    ghoul::Dictionary insDict;
+    Dictionary insDict;
     insDict.setValue("TargetType", std::string("Node"));
     insDict.setValue("Target", node->identifier());
     insDict.setValue("PathType", std::string("Linear"));
@@ -1108,7 +1106,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
     if (duration.has_value()) {
         double d = *duration;
         if (d < 0.0) {
-            throw ghoul::lua::LuaError("Duration must be a positive value");
+            throw lua::LuaError("Duration must be a positive value");
         }
         insDict.setValue("Duration", d);
     }
@@ -1129,15 +1127,15 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 [[codegen::luawrap]] void zoomToDistance(double distance, std::optional<double> duration)
 {
     if (distance <= 0.0) {
-        throw ghoul::lua::LuaError("The distance must be larger than zero");
+        throw lua::LuaError("The distance must be larger than zero");
     }
 
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
-        throw ghoul::lua::LuaError("Could not determine current focus node");
+        throw lua::LuaError("Could not determine current focus node");
     }
 
-    ghoul::Dictionary insDict;
+    Dictionary insDict;
     insDict.setValue("TargetType", std::string("Node"));
     insDict.setValue("Target", node->identifier());
     insDict.setValue("Height", distance);
@@ -1146,7 +1144,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
     if (duration.has_value()) {
         double d = *duration;
         if (d < 0.0) {
-            throw ghoul::lua::LuaError("Duration must be a positive value");
+            throw lua::LuaError("Duration must be a positive value");
         }
         insDict.setValue("Duration", d);
     }
@@ -1171,17 +1169,17 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
                                                  std::optional<double> duration)
 {
     if (distance <= 0.0) {
-        throw ghoul::lua::LuaError("The distance must be larger than zero");
+        throw lua::LuaError("The distance must be larger than zero");
     }
 
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
-        throw ghoul::lua::LuaError("Could not determine current focus node");
+        throw lua::LuaError("Could not determine current focus node");
     }
 
     distance *= node->boundingSphere();
 
-    ghoul::Dictionary insDict;
+    Dictionary insDict;
     insDict.setValue("TargetType", std::string("Node"));
     insDict.setValue("Target", node->identifier());
     insDict.setValue("Height", distance);
@@ -1190,7 +1188,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
   if (duration.has_value()) {
         double d = *duration;
         if (d < 0.0) {
-            throw ghoul::lua::LuaError("Duration must be a positive value");
+            throw lua::LuaError("Duration must be a positive value");
         }
         insDict.setValue("Duration", d);
     }
@@ -1212,7 +1210,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * \param fadeDuration An optional duration for the fading. If not included, the property
  *        in Navigation Handler will be used
  */
-[[codegen::luawrap]] void jumpToNavigationState(ghoul::Dictionary navigationState,
+[[codegen::luawrap]] void jumpToNavigationState(Dictionary navigationState,
                                                 std::optional<bool> useTimeStamp,
                                                 std::optional<double> fadeDuration)
 {
@@ -1225,7 +1223,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
     }
     catch (const SpecificationError& e) {
         logError(e, "jumpToNavigationState");
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Unable to jump to navigation state: {}", e.what()
         ));
     }
@@ -1241,7 +1239,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 
     std::string script = std::format(
         "openspace.navigation.setNavigationState({}, {})",
-        ghoul::formatLua(ns.dictionary()), setTime
+        formatLua(ns.dictionary()), setTime
     );
 
     if (fadeDuration.has_value()) {
@@ -1267,7 +1265,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
                                  std::optional<double> fadeDuration)
 {
     if (SceneGraphNode* n = sceneGraphNode(nodeIdentifier);  !n) {
-        throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
+        throw lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
 
     std::string script = std::format(

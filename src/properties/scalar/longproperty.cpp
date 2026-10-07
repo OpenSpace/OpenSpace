@@ -24,7 +24,7 @@
 
 #include <openspace/properties/scalar/longproperty.h>
 
-#include <ghoul/lua/lua_types.h>
+#include <openspace/lua/lua_types.h>
 
 namespace openspace {
 
@@ -37,16 +37,16 @@ std::string_view LongProperty::className() const {
     return "LongProperty";
 }
 
-ghoul::lua::LuaTypes LongProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes LongProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void LongProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 long LongProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<long>(state);
+    return lua::value<long>(state);
 }
 
 std::string LongProperty::stringValue() const {

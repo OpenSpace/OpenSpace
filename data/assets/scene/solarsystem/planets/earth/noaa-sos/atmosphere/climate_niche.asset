@@ -67,8 +67,10 @@ local Colorbar = {
   Type = "ScreenSpaceImageLocal",
   ZIndex = 100,
   TexturePath = syncedDirectory .. "niche-scale.png",
-  FaceCamera = false,
-  CartesianPosition = { 0.0, -0.5, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    CartesianPosition = { 0.0, -0.5, -2.0 }
+  }
 }
 
 

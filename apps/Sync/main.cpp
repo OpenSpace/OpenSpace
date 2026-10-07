@@ -23,27 +23,26 @@
  ****************************************************************************************/
 
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/engine/configuration.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/logging/consolelog.h>
+#include <openspace/openspace.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/engine/globals.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/task.h>
 #include <openspace/util/taskloader.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/logging/consolelog.h>
 
 int main(int, char**) {
     using namespace openspace;
 
-    ghoul::initialize();
+    initialize();
 
     std::filesystem::path configFile = findConfiguration();
     std::filesystem::path settings = findSettings();

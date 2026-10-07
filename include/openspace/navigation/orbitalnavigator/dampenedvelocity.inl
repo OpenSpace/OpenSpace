@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 
 namespace openspace {
 

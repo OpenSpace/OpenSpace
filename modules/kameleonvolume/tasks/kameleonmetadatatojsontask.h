@@ -33,7 +33,7 @@ namespace openspace {
 
 class KameleonMetadataToJsonTask : public Task {
 public:
-    explicit KameleonMetadataToJsonTask(const ghoul::Dictionary& dictionary);
+    explicit KameleonMetadataToJsonTask(const Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;

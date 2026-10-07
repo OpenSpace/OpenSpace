@@ -1,0 +1,29 @@
+# Generated from support/linux/rpm/post_uninstall.in, used as the %postun scriptlet.
+#
+# $1 is the number of versions that will remain: 0 on a real erase, 1 during an upgrade.
+# On an upgrade this runs for the *old* version after the new one's %post has already
+# re-pointed the links, so removing them there would break the upgraded package.
+
+if [ "$1" = "0" ]; then
+  for link in \
+    /usr/bin/openspace \
+    /usr/share/applications/openspace.desktop \
+    /usr/share/icons/hicolor/512x512/apps/openspace.png
+  do
+    if [ -L "$link" ]; then
+      target=$(readlink "$link")
+      case "$target" in
+        @OPENSPACE_INSTALL_ROOT@/*) rm -f "$link" ;;
+      esac
+    fi
+  done
+
+  if command -v update-desktop-database > /dev/null 2>&1; then
+    update-desktop-database -q /usr/share/applications || true
+  fi
+  if command -v gtk-update-icon-cache > /dev/null 2>&1; then
+    gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+  fi
+fi
+
+exit 0

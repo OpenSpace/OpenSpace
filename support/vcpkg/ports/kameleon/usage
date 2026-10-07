@@ -1,0 +1,6 @@
+kameleon provides CMake targets:
+
+    find_package(Kameleon CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE Kameleon::ccmc)
+
+Kameleon::ccmc transitively links Kameleon::cdf; consumers do not need to link it directly.

@@ -26,8 +26,8 @@
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include <openspace/engine/configuration.h>
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/json.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <nlohmann/json-schema.hpp>
 #include <sgct/config.h>
 #include <filesystem>

@@ -37,15 +37,14 @@ guards for correctness. At the moment this includes:
  * Correct usage of the name in the final comment of the file
  * Correct year of copyright notice
  * Naming convention
-   * OpenSpace include guards start with OPENSPACE, Ghoul with GHOUL,
-     module includes have the module name in it
+   * OpenSpace include guards start with OPENSPACE module includes have the module name in it
    * The correct submodule is used
  * Checking for duplicates between all files
  * Checking that no file includes glm header directly
  * Checking whether any files starts with the UTF-8 Byte-order mark
  * Checking whether a file as empty-only lines
  * Checking whether the default assert macros are used anywhere instead of the
-   ghoul_assert macro
+   assert_msg macro
  * Checking whether there are TABs in the file
 
 If this script is executed from the base directory of OpenSpace, no arguments need to
@@ -210,7 +209,7 @@ def check_naming_convention_component(lines, component):
 def check_naming_convention_subcomponent(lines, component, file):
   ifndef_symbol, _ = get_ifndef_symbol(lines)
 
-  if component == "ghoul" or component == "openspace_core":
+  if component == "openspace_core":
     return
 
   subcomponent_part = ifndef_symbol[2 + len(component) + 1 :]
@@ -238,7 +237,7 @@ def check_duplicates(lines, previousSymbols):
 
 def check_glm_header(lines, file):
   Allowed_Files = [
-    'ghoul/glm.h'
+    'openspace/glm.h'
   ]
 
   for f in Allowed_Files:
@@ -250,7 +249,7 @@ def check_glm_header(lines, file):
               '#include "glm/glm.hpp>"' in s]
 
   if len(index) > 0:
-    return 'File used wrong glm include. Use "#include <ghoul/glm.h>" instead'
+    return 'File used wrong glm include. Use "#include <openspace/glm.h>" instead'
   else:
     return ''
 
@@ -301,8 +300,8 @@ def check_empty_only_line(lines):
 
 
 def check_assert_usage(lines):
-  # _assert checks for both ghoul_assert and static_assert, which are both reasonable
-  index = [i + 1 for i,s in enumerate(lines) if ('assert(' in s and not '_assert(' in s) and s.strip()[0:2] != '//']
+  # _assert checks for both assert_msg and static_assert, which are both reasonable
+  index = [i + 1 for i,s in enumerate(lines) if ('assert(' in s and not '_assert(' in s and not 'assert_msg' in s) and s.strip()[0:2] != '//']
   if len(index) > 0:
     return index
   else:
@@ -348,7 +347,7 @@ def check_for_std_getline(lines):
   index = [i for i,s in enumerate(lines)
           if 'std::getline' in s]
   if len(index) > 0:
-    return 'File used wrong std::getline function. Use ghoul::getline from "ghoul/misc/stringhelper.h" instead'
+    return 'File used wrong std::getline function. Use openspace::getline from "openspace/misc/stringhelper.h" instead'
   else:
     return ''
 
@@ -420,8 +419,8 @@ def check_header_file(file, component):
     if core_dependency:
       print(file, '\t', 'Wrong dependency (core depends on module)', core_dependency)
 
-    if (not 'ghoul_gl.h' in file):
-      # ghoul_gl.h is allowed to use 'using namespace' to pull the gl namespace in
+    if (not 'gl.h' in file):
+      # gl.h is allowed to use 'using namespace' to pull the gl namespace in
       using_namespaces = check_using_namespace(lines)
       if using_namespaces:
         print(file, '\t', 'Using namespace found in header file')
@@ -558,8 +557,8 @@ def check_source_file(file, component):
 
     std_getlines = check_for_std_getline(lines)
     if std_getlines:
-      if not 'ghoul/src/misc/stringhelper.cpp' in file:
-        print(file, '\t', 'std::getline found instead of ghoul::getline: ', std_getlines)
+      if not 'src/misc/stringhelper.cpp' in file:
+        print(file, '\t', 'std::getline found instead of openspace::getline: ', std_getlines)
 
 
 
@@ -624,12 +623,6 @@ check_files(
   'openspace_module',
   check_header_file
 )
-check_files(
-  [basePath + 'ext/ghoul/include/**/*.h'],
-  [],
-  'ghoul',
-  check_header_file
-)
 
 if not is_silent_mode:
   print("")
@@ -660,12 +653,6 @@ check_files(
   'openspace_module',
   check_inline_file
 )
-check_files(
-  [basePath + 'ext/ghoul/include/**/*.inl'],
-  [],
-  'ghoul',
-  check_inline_file
-)
 
 if not is_silent_mode:
   print("")
@@ -692,13 +679,5 @@ check_files(
     basePath + 'modules/**/*_codegen.cpp'
   ],
   'openspace_module',
-  check_source_file
-)
-check_files(
-  [basePath + 'ext/ghoul/src/**/*.cpp'],
-  [
-    basePath + 'ext/ghoul/src/misc/levmarqsolver.cpp'
-  ],
-  'ghoul',
   check_source_file
 )

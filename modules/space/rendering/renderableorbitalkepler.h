@@ -28,20 +28,20 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/space/kepler.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/programobject.h>
 #include <limits>
 
 namespace openspace {
 
 class RenderableOrbitalKepler : public Renderable {
 public:
-    explicit RenderableOrbitalKepler(const ghoul::Dictionary& dictionary);
+    explicit RenderableOrbitalKepler(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -128,8 +128,8 @@ private:
     /// The backend storage for the vertex buffer object containing all points
     std::vector<TrailVBOLayout> _vertexBufferData;
 
-    ghoul::opengl::ProgramObject* _trailProgram = nullptr;
-    ghoul::opengl::ProgramObject* _pointProgram = nullptr;
+    opengl::ProgramObject* _trailProgram = nullptr;
+    opengl::ProgramObject* _pointProgram = nullptr;
     UIntProperty _segmentQuality;
     UIntProperty _startRenderIdx;
     UIntProperty _sizeRender;

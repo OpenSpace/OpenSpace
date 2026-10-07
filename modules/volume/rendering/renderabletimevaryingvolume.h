@@ -46,7 +46,7 @@ class VolumeClipPlanes;
 
 class RenderableTimeVaryingVolume : public Renderable {
 public:
-    explicit RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
+    explicit RenderableTimeVaryingVolume(const Dictionary& dictionary);
     ~RenderableTimeVaryingVolume() override;
 
     void initializeGL() override;
@@ -63,7 +63,7 @@ private:
         bool onGpu = false;
         RawVolumeMetadata metadata;
         std::shared_ptr<RawVolume<float>> rawVolume;
-        std::shared_ptr<ghoul::opengl::Texture> texture;
+        std::shared_ptr<opengl::Texture> texture;
         std::shared_ptr<Histogram> histogram;
     };
 

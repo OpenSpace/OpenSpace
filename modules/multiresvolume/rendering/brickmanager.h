@@ -28,9 +28,9 @@
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <vector>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
+
+namespace opengl { class Texture; }
 
 class BrickManager {
 public:
@@ -50,7 +50,7 @@ public:
     bool diskToPBO(BufferIndex pboIndex);
     void pboToAtlas(BufferIndex pboIndex);
 
-    ghoul::opengl::Texture* textureAtlas();
+    opengl::Texture* textureAtlas();
     unsigned int pbo(BufferIndex pboIndex) const;
     const std::vector<int>& brickList(BufferIndex index) const;
 
@@ -82,7 +82,7 @@ private:
     int _zCoord = 0;
 
     /// Texture where the actual atlas is kept
-    ghoul::opengl::Texture* _textureAtlas = nullptr;
+    opengl::Texture* _textureAtlas = nullptr;
 
     std::vector<std::vector<int>> _brickLists;
 

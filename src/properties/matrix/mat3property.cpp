@@ -24,7 +24,7 @@
 
 #include <openspace/properties/matrix/mat3property.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
@@ -43,16 +43,16 @@ std::string_view Mat3Property::className() const {
     return "Mat3Property";
 }
 
-ghoul::lua::LuaTypes Mat3Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes Mat3Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void Mat3Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::mat3 Mat3Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::mat3>(state);
+    return lua::value<glm::mat3>(state);
 }
 
 std::string Mat3Property::stringValue() const {

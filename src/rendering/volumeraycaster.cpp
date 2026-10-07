@@ -26,8 +26,8 @@
 
 namespace openspace {
 
-void VolumeRaycaster::preRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {}
-void VolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {}
+void VolumeRaycaster::preRaycast(const RaycastData&, opengl::ProgramObject&) {}
+void VolumeRaycaster::postRaycast(const RaycastData&, opengl::ProgramObject&) {}
 
 bool VolumeRaycaster::isCameraInside(const RenderData&, glm::vec3&) {
     return false;

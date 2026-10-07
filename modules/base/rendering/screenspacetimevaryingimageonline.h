@@ -34,13 +34,13 @@
 #include <filesystem>
 #include <future>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
+
+namespace opengl { class Texture; }
 
 class ScreenSpaceTimeVaryingImageOnline : public ScreenSpaceRenderable {
 public:
-    explicit ScreenSpaceTimeVaryingImageOnline(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceTimeVaryingImageOnline(const Dictionary& dictionary);
 
     void initialize() override;
     void deinitializeGL() override;
@@ -51,7 +51,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
     void loadJsonData(const std::filesystem::path& path);
     void computeSequenceEndTime();
     void loadImage(const std::string& imageUrl);
@@ -65,7 +65,7 @@ private:
     std::future<DownloadManager::MemoryFile> _imageFuture;
     std::map<double, std::string> _urls;
     std::string _currentUrl;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<opengl::Texture> _texture;
     std::vector<double> _timestamps;
 
     int _activeIndex = -1;

@@ -35,6 +35,12 @@
 #include <openspace/topic/server.h>
 #include <openspace/topic/connection.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringconversion.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
@@ -44,12 +50,6 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringconversion.h>
-#include <ghoul/misc/templatefactory.h>
 #include <algorithm>
 #include <memory>
 #include <optional>
@@ -250,7 +250,7 @@ SkyBrowserModule::SkyBrowserModule()
     });
 }
 
-void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
+void SkyBrowserModule::internalInitialize(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     _allowCameraRotation = p.allowCameraRotation.value_or(_allowCameraRotation);
@@ -268,18 +268,18 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     );
     _topicUpdateInterval = p.updateInterval.value_or(_topicUpdateInterval);
 
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+    TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+    assert_msg(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
 
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    assert_msg(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
 
-    ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
-    ghoul_assert(fTopic, "Topic factory was not created");
+    TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
+    assert_msg(fTopic, "Topic factory was not created");
     fTopic->registerClass<SkyBrowserTopic>("skybrowser");
 
     DocEng.addSchema(SkyBrowserTopic::Schema());
@@ -329,7 +329,7 @@ void SkyBrowserModule::lookAtTarget(const std::string& id) {
 }
 
 void SkyBrowserModule::setHoverIndicator(SceneGraphNode* circle) {
-    ghoul_assert(circle, "No indicator specified");
+    assert_msg(circle, "No indicator specified");
     _hoverIndicator = circle;
 
     // Always disable it per default. It should only be visible on interaction
@@ -371,7 +371,7 @@ void SkyBrowserModule::moveHoverIndicator(const std::string& imageUrl, bool useS
     // Note that the position can only be set through the script engine
     const std::string script = std::format(
         "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
-        id, ghoul::to_string(pos)
+        id, to_string(pos)
     );
     global::scriptEngine->queueScript(script);
 }
@@ -391,7 +391,7 @@ void SkyBrowserModule::disableHoverIndicator(bool useScript) {
     else {
         Property* prop = _hoverIndicator->renderable()->property("Fade");
         FloatProperty* floatProp = dynamic_cast<FloatProperty*>(prop);
-        ghoul_assert(floatProp, "Fade property is not a float property");
+        assert_msg(floatProp, "Fade property is not a float property");
         *floatProp = 0.f;
     }
 }

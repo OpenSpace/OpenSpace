@@ -29,15 +29,15 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 #include <variant>
 #include <utility>
 
@@ -127,32 +127,30 @@ Documentation Renderable::Documentation() {
     return codegen::doc<Parameters>("core_renderable");
 }
 
-ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
-{
+mm_unique_ptr<Renderable> Renderable::createFromDictionary(const Dictionary& dictionary) {
     ZoneScoped;
 
     if (!dictionary.hasKey(KeyType)) {
-        throw ghoul::RuntimeError("Tried to create Renderable but no 'Type' was found");
+        throw RuntimeError("Tried to create Renderable but no 'Type' was found");
     }
 
     // This should be done in the constructor instead with noexhaustive
     testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     const std::string renderableType = dictionary.value<std::string>(KeyType);
-    ghoul::TemplateFactory<Renderable>* factory =
+    TemplateFactory<Renderable>* factory =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "Renderable factory did not exist");
+    assert_msg(factory, "Renderable factory did not exist");
     Renderable* result = factory->create(
         renderableType,
         dictionary,
         &global::memoryManager->PersistentMemory
     );
     result->_type = renderableType;
-    return ghoul::mm_unique_ptr<Renderable>(result);
+    return mm_unique_ptr<Renderable>(result);
 }
 
-Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings settings)
+Renderable::Renderable(const Dictionary& dictionary, RenderableSettings settings)
     : PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _renderableType(RenderableTypeInfo, "Renderable")
@@ -171,7 +169,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
     }
 
     if (_automaticallyUpdateRenderBin) {
-        ghoul_assert(!p.renderBinMode.has_value(), "Something misfired in constructor");
+        assert_msg(!p.renderBinMode.has_value(), "Something misfired in constructor");
         registerUpdateRenderBinFromOpacity();
     }
 
@@ -182,7 +180,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
             }
         }
         else {
-            ghoul_assert(std::holds_alternative<std::vector<std::string>>(*p.tag), "");
+            assert_msg(std::holds_alternative<std::vector<std::string>>(*p.tag), "");
             for (std::string tag : std::get<std::vector<std::string>>(*p.tag)) {
                 addTag(std::move(tag));
             }
@@ -340,7 +338,7 @@ float Renderable::opacity() const noexcept {
 }
 
 SceneGraphNode* Renderable::parent() const noexcept {
-    ghoul_assert(dynamic_cast<SceneGraphNode*>(owner()), "Owner is not a SceneGraphNode");
+    assert_msg(dynamic_cast<SceneGraphNode*>(owner()), "Owner is not a SceneGraphNode");
     return static_cast<SceneGraphNode*>(owner());
 }
 

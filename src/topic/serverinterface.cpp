@@ -25,9 +25,9 @@
 #include <openspace/topic/serverinterface.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/websocketserver.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/io/socket/tcpsocketserver.h>
+#include <openspace/io/socket/websocketserver.h>
 
 namespace {
     using namespace openspace;
@@ -144,14 +144,14 @@ Documentation ServerInterface::Documentation() {
 }
 
 std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
     // TODO: Use documentation to verify dictionary
     auto si = std::make_unique<ServerInterface>(dictionary);
     return si;
 }
 
-ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
+ServerInterface::ServerInterface(const Dictionary& dictionary)
     : PropertyOwner({ "", "", "" })
     , _socketType(TypeInfo)
     , _port(PortInfo, 0)
@@ -239,10 +239,10 @@ void ServerInterface::initialize() {
 
     switch (static_cast<InterfaceType>(_socketType.value())) {
         case InterfaceType::TcpSocket:
-            _socketServer = std::make_unique<ghoul::io::TcpSocketServer>();
+            _socketServer = std::make_unique<io::TcpSocketServer>();
             break;
         case InterfaceType::WebSocket:
-            _socketServer = std::make_unique<ghoul::io::WebSocketServer>();
+            _socketServer = std::make_unique<io::WebSocketServer>();
             break;
     }
     _socketServer->listen(_port);
@@ -315,7 +315,7 @@ bool ServerInterface::clientIsBlocked(const std::string& clientAddress) const {
     return false;
 }
 
-ghoul::io::SocketServer* ServerInterface::server() {
+io::SocketServer* ServerInterface::server() {
     return _socketServer.get();
 }
 

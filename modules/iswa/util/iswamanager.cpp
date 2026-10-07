@@ -34,17 +34,17 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/stringconversion.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/stringconversion.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <array>
 #include <cctype>
@@ -131,12 +131,12 @@ IswaManager::~IswaManager() {
 }
 
 void IswaManager::initialize() {
-    ghoul_assert(!isInitialized(), "IswaManager is already initialized");
+    assert_msg(!isInitialized(), "IswaManager is already initialized");
     _instance = new IswaManager;
 }
 
 void IswaManager::deinitialize() {
-    ghoul_assert(isInitialized(), "IswaManager is not initialized");
+    assert_msg(isInitialized(), "IswaManager is not initialized");
     delete _instance;
     _instance = nullptr;
 }
@@ -146,7 +146,7 @@ bool IswaManager::isInitialized() {
 }
 
 IswaManager& IswaManager::ref() {
-    ghoul_assert(isInitialized(), "IswaManager is not initialized");
+    assert_msg(isInitialized(), "IswaManager is not initialized");
     return *_instance;
 }
 
@@ -276,13 +276,13 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
     ss << SpiceManager::ref().dateFromEphemerisTime(timestamp);;
     std::string token;
 
-    ghoul::getline(ss, token, ' ');
+    openspace::getline(ss, token, ' ');
     url += token + "-";
-    ghoul::getline(ss, token, ' ');
+    openspace::getline(ss, token, ' ');
     url = std::format("{}{}-", url, monthNumber(token));
-    ghoul::getline(ss, token, 'T');
+    openspace::getline(ss, token, 'T');
     url += token + "%20";
-    ghoul::getline(ss, token, '.');
+    openspace::getline(ss, token, '.');
     url += token;
 
     return url;
@@ -397,15 +397,15 @@ std::string IswaManager::jsonPlaneToLuaTable(MetadataFuture& data) {
     "Parent = '" + parent + "', "
     "Renderable = {"
         "Type = '" + _cygnetType[data.type] + _geom[data.geom] + "', "
-        "Id = " + ghoul::to_string(data.id) + ", "
+        "Id = " + to_string(data.id) + ", "
         "Frame = '" + frame + "' , "
-        "GridMin = " + ghoul::to_string(min) + ", "
-        "GridMax = " + ghoul::to_string(max) + ", "
-        "SpatialScale = " + ghoul::to_string(spatialScale) + ", "
-        "UpdateTime = " + ghoul::to_string(updateTime) + ", "
+        "GridMin = " + to_string(min) + ", "
+        "GridMax = " + to_string(max) + ", "
+        "SpatialScale = " + to_string(spatialScale) + ", "
+        "UpdateTime = " + to_string(updateTime) + ", "
         "CoordinateType = '" + coordinateType + "', "
         "Group = '"+ data.group + "',"
-        "XOffset = "+ ghoul::to_string(xOffset) + ","
+        "XOffset = "+ to_string(xOffset) + ","
         "}"
     "}";
 
@@ -455,9 +455,9 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
             "Type = 'KameleonPlane', "
             "Id = 0 ,"
             "Frame = '" + frame + "' , "
-            "GridMin = " + ghoul::to_string(min) + ", "
-            "GridMax = " + ghoul::to_string(max) + ", "
-            "SpatialScale = " + ghoul::to_string(spatialScale) + ", "
+            "GridMin = " + to_string(min) + ", "
+            "GridMax = " + to_string(max) + ", "
+            "SpatialScale = " + to_string(spatialScale) + ", "
             "UpdateTime = 0, "
             "kwPath = '" + info.path + "' ,"
             "axisCut = '" + cut + "',"
@@ -504,10 +504,10 @@ std::string IswaManager::jsonSphereToLuaTable(MetadataFuture& data) {
         "Type = '" + _cygnetType[data.type] + _geom[data.geom] + "', "
         "Id = " + std::to_string(data.id) + ", "
         "Frame = '" + frame + "' , "
-        "GridMin = " + ghoul::to_string(min) + ", "
-        "GridMax = " + ghoul::to_string(max) + ", "
-        "UpdateTime = " + ghoul::to_string(updateTime) + ", "
-        "Radius = " + ghoul::to_string(radius) + ", "
+        "GridMin = " + to_string(min) + ", "
+        "GridMax = " + to_string(max) + ", "
+        "UpdateTime = " + to_string(updateTime) + ", "
+        "Radius = " + to_string(radius) + ", "
         "CoordinateType = '" + coordinateType + "', "
         "Group = '"+ data.group + "',"
         "}"
@@ -689,7 +689,7 @@ void IswaManager::fillCygnetInfo(std::string jsonString) {
     }
 }
 
-ghoul::Event<>& IswaManager::iswaEvent() {
+SynchronousEvent<>& IswaManager::iswaEvent() {
     return _iswaEvent;
 }
 

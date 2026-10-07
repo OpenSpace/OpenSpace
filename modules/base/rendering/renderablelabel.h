@@ -36,13 +36,13 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <memory>
 
-namespace ghoul::fontrendering { class Font; }
-
 namespace openspace {
+
+namespace fontrendering { class Font; }
 
 class RenderableLabel : public Renderable {
 public:
-    explicit RenderableLabel(const ghoul::Dictionary& dictionary);
+    explicit RenderableLabel(const Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -84,7 +84,7 @@ private:
 
     OptionProperty _orientationOption;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::shared_ptr<fontrendering::Font> _font;
 
     std::string _colorMapFile;
     std::string _labelFile;

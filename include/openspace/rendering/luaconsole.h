@@ -36,12 +36,10 @@
 #include <functional>
 #include <memory>
 
-namespace ghoul {
-    namespace fontrendering { class Font; }
-    namespace opengl { class ProgramObject; }
-} // namespace ghoul
-
 namespace openspace {
+
+namespace fontrendering { class Font; }
+namespace opengl { class ProgramObject; }
 
 class LuaConsole : public PropertyOwner {
 public:
@@ -127,8 +125,8 @@ private:
     float _targetHeight = 0.f;
     float _fullHeight = 0.f;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
-    std::shared_ptr<ghoul::fontrendering::Font> _historyFont;
+    std::shared_ptr<fontrendering::Font> _font;
+    std::shared_ptr<fontrendering::Font> _historyFont;
 };
 
 } // namespace openspace

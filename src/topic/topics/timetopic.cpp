@@ -26,8 +26,8 @@
 
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/misc/profiling.h>
 #include <optional>
 #include <string_view>
 

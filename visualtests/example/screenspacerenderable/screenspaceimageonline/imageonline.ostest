@@ -8,7 +8,7 @@
     {
       "type": "property",
       "value": {
-        "property": "ScreenSpace.ScreenSpaceImageOnline_Example.Scale",
+        "property": "ScreenSpace.ScreenSpaceImageOnline_Example.Placement.Scale",
         "value": 0.75
       }
     },

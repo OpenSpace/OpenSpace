@@ -25,7 +25,7 @@
 #include <modules/base/dashboard/dashboarditemspacing.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionary.h>
 #include <optional>
 
 namespace {
@@ -56,7 +56,7 @@ Documentation DashboardItemSpacing::Documentation() {
     );
 }
 
-DashboardItemSpacing::DashboardItemSpacing(const ghoul::Dictionary& dictionary)
+DashboardItemSpacing::DashboardItemSpacing(const Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _spacing(SpacingInfo, 15.f, 0.f, 2048.f)
 {

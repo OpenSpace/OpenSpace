@@ -27,7 +27,7 @@
 
 #include <modules/iswa/rendering/renderabletexturecygnet.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/opengl/gl.h>
 
 namespace openspace {
 
@@ -38,7 +38,7 @@ namespace openspace {
  */
 class RenderableTexturePlane : public RenderableTextureCygnet {
 public:
-    explicit RenderableTexturePlane(const ghoul::Dictionary& dictionary);
+    explicit RenderableTexturePlane(const Dictionary& dictionary);
     virtual ~RenderableTexturePlane() = default;
 
     void initializeGL() override;

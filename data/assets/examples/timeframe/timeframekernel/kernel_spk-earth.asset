@@ -1,0 +1,29 @@
+-- SPK Earth
+-- This example creates a time frame based on the information provided by the core SPICE
+-- files. The availability of the EARTH id is used to control this TimeFrame.
+
+asset.require("spice/core")
+
+local Node = {
+  Identifier = "TimeFrameKernel_Example_SPK_Earth",
+  TimeFrame = {
+    Type = "TimeFrameKernel",
+    Object = "EARTH"
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "TimeFrameKernel - Basic (SPK)",
+    Path = "/Examples"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

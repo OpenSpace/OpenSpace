@@ -24,7 +24,7 @@
 
 #include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
 #include <ip/IpEndpointName.h>
 #include <string_view>
 

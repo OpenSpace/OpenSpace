@@ -24,11 +24,11 @@
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
@@ -250,7 +250,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     );
 
     if (!table) {
-        throw ghoul::RuntimeError(std::format("Failed to open Fits file '{}'", filePath));
+        throw RuntimeError(std::format("Failed to open Fits file '{}'", filePath));
     }
 
     int nStars = table->readRows - firstRow + 1;
@@ -386,7 +386,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
     std::string line;
     while (true) {
         const std::streampos position = fileStream.tellg();
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
 
         if (line.empty() || line[0] == '#') {
             continue;
@@ -442,7 +442,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
         std::vector<float> readValues(nValuesPerStar);
         nStars++;
 
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
         std::stringstream str = std::stringstream(line);
 
         // Read values

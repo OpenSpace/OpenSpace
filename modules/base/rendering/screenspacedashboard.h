@@ -36,7 +36,7 @@ struct LuaLibrary;
 
 class ScreenSpaceDashboard : public ScreenSpaceRenderableFramebuffer {
 public:
-    explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceDashboard(const Dictionary& dictionary);
     ~ScreenSpaceDashboard() override = default;
 
     void initializeGL() override;

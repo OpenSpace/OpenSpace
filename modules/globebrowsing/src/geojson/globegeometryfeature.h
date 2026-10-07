@@ -26,20 +26,20 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYFEATURE___H__
 
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/texturecomponent.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <chrono>
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace geos::geom { class Geometry; }
-namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
+namespace opengl { class ProgramObject; }
 namespace rendering {
     struct LightSourceRenderData;
     struct VertexXYZNormal;
@@ -123,8 +123,8 @@ public:
 
     void setOffsets(glm::vec3 offsets);
 
-    void initializeGL(ghoul::opengl::ProgramObject* pointsProgram,
-        ghoul::opengl::ProgramObject* linesAndPolygonsProgram);
+    void initializeGL(opengl::ProgramObject* pointsProgram,
+        opengl::ProgramObject* linesAndPolygonsProgram);
     void deinitializeGL();
     bool isReady() const;
     bool isPoints() const;
@@ -221,8 +221,8 @@ private:
     bool _hasTexture = false;
     std::unique_ptr<TextureComponent> _pointTexture;
 
-    ghoul::opengl::ProgramObject* _linesAndPolygonsProgram = nullptr;
-    ghoul::opengl::ProgramObject* _pointsProgram = nullptr;
+    opengl::ProgramObject* _linesAndPolygonsProgram = nullptr;
+    opengl::ProgramObject* _pointsProgram = nullptr;
 };
 
 } // namespace openspace

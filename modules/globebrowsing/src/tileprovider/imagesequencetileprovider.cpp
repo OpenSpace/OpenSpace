@@ -26,8 +26,8 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <algorithm>
 #include <limits>
 #include <optional>
@@ -82,7 +82,7 @@ Documentation ImageSequenceTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_imagesequence");
 }
 
-ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& dictionary)
+ImageSequenceTileProvider::ImageSequenceTileProvider(const Dictionary& dictionary)
     : _index(IndexInfo, 0, 0)
     , _nImages(NumImagesInfo, 0, 0)
     , _currentImage(CurrentImageInfo)

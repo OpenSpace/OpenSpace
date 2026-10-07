@@ -26,11 +26,11 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <optional>
 #include <string>
 #include <utility>
@@ -46,8 +46,7 @@ namespace {
 
         // The time frame in which this `Translation` is applied. If the in-game time is
         // outside this range, no translation will be applied.
-        std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_timeframe")]];
+        std::optional<Dictionary> timeFrame [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "translation_codegen.cpp"
@@ -58,8 +57,7 @@ Documentation Translation::Documentation() {
     return codegen::doc<Parameters>("core_translation");
 }
 
-ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+mm_unique_ptr<Translation> Translation::createFromDictionary(const Dictionary& dictionary)
 {
     ZoneScoped;
 
@@ -71,10 +69,10 @@ ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
         &global::memoryManager->PersistentMemory
     );
     result->_type = p.type;
-    return ghoul::mm_unique_ptr<Translation>(result);
+    return mm_unique_ptr<Translation>(result);
 }
 
-Translation::Translation(const ghoul::Dictionary& dictionary)
+Translation::Translation(const Dictionary& dictionary)
     : PropertyOwner({ "Translation" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

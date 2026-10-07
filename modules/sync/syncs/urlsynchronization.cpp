@@ -26,16 +26,16 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/downloadeventengine.h>
 #include <openspace/util/httprequest.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cstdint>
 #include <fstream>
@@ -95,7 +95,7 @@ Documentation UrlSynchronization::Documentation() {
     return codegen::doc<Parameters>("sync_synchronization_url");
 }
 
-UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
+UrlSynchronization::UrlSynchronization(const Dictionary& dictionary,
                                        std::filesystem::path synchronizationRoot)
     : ResourceSynchronization(std::move(synchronizationRoot))
 {
@@ -109,7 +109,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
         _urls = std::get<std::vector<std::string>>(p.url);
     }
     else {
-        throw ghoul::MissingCaseException();
+        throw MissingCaseException();
     }
 
     _filename = p.filename.value_or(_filename);
@@ -231,7 +231,7 @@ bool UrlSynchronization::isEachFileValid() {
         // We need to mutex-protect the access to the time conversion for now
         const std::unique_lock lock(_mutex);
 
-        ghoul::getline(file >> std::ws, line);
+        openspace::getline(file >> std::ws, line);
         const std::string& fileIsValidToDate = line;
         const double fileValidAsJ2000 = Time::convertTime(fileIsValidToDate);
 

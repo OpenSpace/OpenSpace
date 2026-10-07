@@ -31,7 +31,7 @@ namespace openspace {
 
 class MultiRotation : public Rotation {
 public:
-    explicit MultiRotation(const ghoul::Dictionary& dictionary);
+    explicit MultiRotation(const Dictionary& dictionary);
 
     void initialize() override;
 
@@ -41,7 +41,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    std::vector<ghoul::mm_unique_ptr<Rotation>> _rotations;
+    std::vector<mm_unique_ptr<Rotation>> _rotations;
 };
 
 } // namespace openspace

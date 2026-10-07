@@ -25,11 +25,11 @@
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
 #include <limits>
 #include <optional>
 
@@ -57,7 +57,7 @@ Documentation SingleImageProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_singleimage");
 }
 
-SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
+SingleImageProvider::SingleImageProvider(const Dictionary& dictionary)
     : _filePath(FilePathInfo)
 {
     ZoneScoped;
@@ -89,15 +89,13 @@ void SingleImageProvider::reset() {
         return;
     }
 
-    _tileTexture = ghoul::io::texture::loadTexture(
+    _tileTexture = io::texture::loadTexture(
         _filePath.value(),
         2,
-        { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
+        { .filter = opengl::Texture::FilterMode::AnisotropicMipMap }
     );
     if (!_tileTexture) {
-        throw ghoul::RuntimeError(std::format(
-            "Unable to load texture '{}'", _filePath.value()
-        ));
+        throw RuntimeError(std::format("Unable to load texture '{}'", _filePath.value()));
     }
 
     _tile = {

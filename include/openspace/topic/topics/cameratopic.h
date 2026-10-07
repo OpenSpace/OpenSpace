@@ -27,7 +27,7 @@
 
 #include <openspace/topic/topics/topic.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <chrono>
 
 namespace openspace {

@@ -24,9 +24,9 @@
 
 #include <openspace/navigation/pathcurves/zoomoutoverviewcurve.h>
 
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
 #include <string_view>
 

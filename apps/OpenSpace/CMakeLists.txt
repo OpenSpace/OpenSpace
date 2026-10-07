@@ -22,45 +22,11 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/message_macros.cmake)
 include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 
 # We are getting all_enabled_modules from the handle_applications.cmake file which gets
 # it from the main CMakeLists file
-
-#####
-# OpenVR
-#####
-option(OPENSPACE_OPENVR_SUPPORT "Build OpenSpace application with OpenVR support" OFF)
-
-if (OPENSPACE_OPENVR_SUPPORT)
-  begin_header("Dependency: OpenVR")
-  find_package(OpenVR REQUIRED)
-
-  set(SGCT_OPENVR_DEFINITIONS OPENVR_SUPPORT)
-  if (NOT SGCT_OPENVR_INCLUDE_DIRECTORY)
-    if (WIN32)
-      find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
-        NAMES SGCTOpenVR.h
-        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr NO_DEFAULT_PATH
-        REQUIRED
-      )
-    else ()
-      find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
-        NAMES SGCTOpenVR.h
-        PATH_SUFFIXES SGCTOpenVR
-        PATHS ${PROJECT_SOURCE_DIR}/ext/sgct/additional_includes/openvr
-        REQUIRED
-      )
-    endif ()
-  else ()
-    set(SGCT_OPENVR_FILES
-      ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.h
-      ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.cpp
-    )
-  endif ()
-  end_header("Dependency: OpenVR")
-endif ()
 
 #####
 # Spout
@@ -99,38 +65,46 @@ if (OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION)
   target_compile_definitions(OpenSpace PRIVATE "OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION")
 endif ()
 
+if (UNIX)
+  # The packages ship the Qt libraries in the same folder as the executable (see
+  # support/cmake/packaging.cmake), which the loader only finds through this RPATH. The
+  # build tree keeps the default RPATH pointing at the vcpkg libraries, so running from
+  # bin/ during development is unaffected
+  set_target_properties(OpenSpace PROPERTIES INSTALL_RPATH "$ORIGIN")
+endif ()
+
 begin_header("Dependency: SGCT")
 
-set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_JSON OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
-
-if (NOT OPENSPACE_HAVE_TESTS)
-  # Unless overriden, disable sgct tests if OpenSpace tests are disabled
-  set(SGCT_BUILD_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
-endif()
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
-target_link_libraries(OpenSpace PRIVATE sgct)
-
-set_target_properties(sgct PROPERTIES FOLDER "External")
-set_target_properties(glfw PROPERTIES FOLDER "External")
-if (TARGET SGCTTest)
-  set_target_properties(SGCTTest PROPERTIES FOLDER "External")
-endif ()
+# SGCT is resolved through the vcpkg overlay port at support/vcpkg/ports/sgct, which
+# fetches a pinned commit of https://github.com/SGCT/SGCT from GitHub. To move to a newer
+# SGCT, update REF and SHA512 in that port's portfile.cmake
+find_package(sgct CONFIG REQUIRED)
+target_link_libraries(OpenSpace PRIVATE sgct::sgct)
 
 if (UNIX)
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
 endif ()
 
+# The sgct port installs sgct.schema.json next to its CMake config, which is what
+# ${sgct_DIR} points at
 add_custom_command(TARGET OpenSpace POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/sgct.schema.json
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  ${sgct_DIR}/sgct.schema.json
   ${CMAKE_CURRENT_SOURCE_DIR}/../../config/schema/sgct.schema.json
   COMMAND_EXPAND_LISTS
 )
+
+# The calibrator is a standalone SGCT tool that is not linked against, so it only has to
+# end up next to the OpenSpace binary. The paths come from the top-level CMakeLists
+if (EXISTS "${OPENSPACE_SGCT_CALIBRATOR}")
+  add_custom_command(TARGET OpenSpace POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${OPENSPACE_SGCT_CALIBRATOR}"
+    ${OPENSPACE_SGCT_CALIBRATOR_PATTERNS}
+    $<TARGET_FILE_DIR:OpenSpace>
+    COMMAND_EXPAND_LISTS
+  )
+endif ()
 
 end_header("Dependency: SGCT")
 
@@ -143,21 +117,52 @@ if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
   target_compile_definitions(OpenSpace PRIVATE OPENSPACE_HAS_LAUNCHER)
   end_header("Dependency: Profile Editor")
 
-  if (WIN32)
-    # Find the windeployqt application
-    get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
-    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+  if (WIN32 AND OPENSPACE_USE_SYSTEM_QT)
+    # A system Qt keeps its runtime plugins (platforms/qwindows.dll, styles, imageformats,
+    # tls, ...) inside its own installation, and they are loaded by name at runtime rather
+    # than being link dependencies of OpenSpace. windeployqt is the only thing that knows
+    # where that installation put them, so it places them next to the executable.
+    find_program(OPENSPACE_WINDEPLOYQT_EXECUTABLE
+      NAMES windeployqt
+      HINTS "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}"
+      NO_DEFAULT_PATH
+      REQUIRED
+    )
+
     add_custom_command(
       TARGET OpenSpace POST_BUILD
-      COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
-      COMMENT "Deploying Qt libraries"
+      COMMAND ${OPENSPACE_WINDEPLOYQT_EXECUTABLE}
+        --no-translations
+        --no-compiler-runtime
+        --verbose=0
+        "$<TARGET_FILE:OpenSpace>"
+      COMMENT "Deploying Qt runtime dependencies via windeployqt"
+      VERBATIM
+    )
+  endif ()
+
+  # Qt is linked dynamically (LGPL compliance), whether it comes from vcpkg or, with
+  # OPENSPACE_USE_SYSTEM_QT, from the system. The Qt libraries themselves are picked up by
+  # the $<TARGET_RUNTIME_DLLS:OpenSpace> copy further down on Windows and are found
+  # through the RPATH on Linux, but the runtime plugins (platforms/qwindows.dll, styles,
+  # imageformats, tls, ...) are loaded by name at runtime and are not link dependencies,
+  # so they have to be copied next to the executable, where Qt's default plugin search
+  # path picks them up
+  if (NOT OPENSPACE_USE_SYSTEM_QT)
+    add_custom_command(
+      TARGET OpenSpace POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+        "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/$<IF:$<CONFIG:Debug>,debug/,>Qt6/plugins"
+        "$<TARGET_FILE_DIR:OpenSpace>"
+      COMMENT "Deploying Qt runtime plugins"
+      VERBATIM
     )
   endif ()
 endif ()
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
-# target as of July 2017, which is needed.
+# target as of July 2017, which is needed
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # wanted by CEF
   set(PROJECT_ARCH "x86_64")
@@ -190,7 +195,7 @@ endif ()
 
 if (WIN32)
   add_custom_command(TARGET OpenSpace POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:OpenSpace> $<TARGET_FILE_DIR:OpenSpace>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:OpenSpace> $<TARGET_FILE_DIR:OpenSpace>
     COMMAND_EXPAND_LISTS
   )
 endif ()

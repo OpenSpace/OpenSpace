@@ -90,7 +90,7 @@ Documentation StaticRotation::Documentation() {
     );
 }
 
-StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
+StaticRotation::StaticRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
     , _eulerRotation(
         RotationInfo,

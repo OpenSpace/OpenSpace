@@ -12,7 +12,7 @@
     {
       "type": "property",
       "value": {
-        "property": "ScreenSpace.ScreenSpaceDate_Example_Timezone.Scale",
+        "property": "ScreenSpace.ScreenSpaceDate_Example_Timezone.Placement.Scale",
         "value": 0.75
       }
     },

@@ -28,13 +28,12 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <memory>
-
-namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 class SceneGraphNode;
 struct RenderData;
@@ -42,9 +41,9 @@ struct RenderData;
 class LightSource : public PropertyOwner {
 public:
     static std::unique_ptr<LightSource> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+        const Dictionary& dictionary);
 
-    explicit LightSource(const ghoul::Dictionary& dictionary);
+    explicit LightSource(const Dictionary& dictionary);
     ~LightSource() override = default;
 
     virtual glm::vec3 directionViewSpace(const RenderData& renderData) const = 0;

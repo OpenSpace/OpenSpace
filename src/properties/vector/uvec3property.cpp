@@ -24,7 +24,7 @@
 
 #include <openspace/properties/vector/uvec3property.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
@@ -43,16 +43,16 @@ std::string_view UVec3Property::className() const {
     return "UVec3Property";
 }
 
-ghoul::lua::LuaTypes UVec3Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes UVec3Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void UVec3Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::uvec3 UVec3Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::uvec3>(state);
+    return lua::value<glm::uvec3>(state);
 }
 
 std::string UVec3Property::stringValue() const {

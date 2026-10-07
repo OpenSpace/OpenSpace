@@ -28,13 +28,13 @@
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <optional>
 #include <sstream>
 
@@ -290,7 +290,7 @@ bool ExoplanetsModule::hasDataFiles() const {
 }
 
 std::filesystem::path ExoplanetsModule::exoplanetsDataPath() const {
-    ghoul_assert(hasDataFiles(), "Data files not loaded");
+    assert_msg(hasDataFiles(), "Data files not loaded");
 
     return absPath(std::format(
         "{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName
@@ -298,7 +298,7 @@ std::filesystem::path ExoplanetsModule::exoplanetsDataPath() const {
 }
 
 std::filesystem::path ExoplanetsModule::lookUpTablePath() const {
-    ghoul_assert(hasDataFiles(), "Data files not loaded");
+    assert_msg(hasDataFiles(), "Data files not loaded");
 
     return absPath(std::format(
         "{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName
@@ -306,7 +306,7 @@ std::filesystem::path ExoplanetsModule::lookUpTablePath() const {
 }
 
 std::filesystem::path ExoplanetsModule::teffToBvConversionFilePath() const {
-    ghoul_assert(hasDataFiles(), "Data files not loaded");
+    assert_msg(hasDataFiles(), "Data files not loaded");
 
     return absPath(std::format(
         "{}/{}", _exoplanetsDataFolder.value(), TeffToBvConversionFileName
@@ -365,7 +365,7 @@ float ExoplanetsModule::habitableZoneOpacity() const {
     return _habitableZoneOpacity;
 }
 
-void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
+void ExoplanetsModule::internalInitialize(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     if (p.dataFolder.has_value()) {
@@ -407,10 +407,10 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     _useOptimisticZone = p.useOptimisticZone.value_or(_useOptimisticZone);
     _habitableZoneOpacity = p.habitableZoneOpacity.value_or(_habitableZoneOpacity);
 
-    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+    TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fTask, "No task factory existed");
+    assert_msg(fTask, "No task factory existed");
     fTask->registerClass<ExoplanetsDataPreparationTask>("ExoplanetsDataPreparationTask");
     fRenderable->registerClass<RenderableOrbitDisc>("RenderableOrbitDisc");
 }

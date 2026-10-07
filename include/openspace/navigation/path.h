@@ -32,11 +32,10 @@
 #include <string>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
 struct CameraPose;
+class Dictionary;
 struct Documentation;
 
 class Path {
@@ -194,7 +193,7 @@ private:
  *
  * \return The created path
  */
-Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
+Path createPathFromDictionary(const Dictionary& dictionary,
     std::optional<Path::Type> forceType = std::nullopt);
 
 } // namespace openspace

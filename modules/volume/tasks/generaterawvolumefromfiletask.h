@@ -27,14 +27,14 @@
 
 #include <openspace/util/task.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <filesystem>
 
 namespace openspace {
 
 class GenerateRawVolumeFromFileTask : public Task {
 public:
-    explicit GenerateRawVolumeFromFileTask(const ghoul::Dictionary& dictionary);
+    explicit GenerateRawVolumeFromFileTask(const Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;

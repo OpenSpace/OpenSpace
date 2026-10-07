@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/misc/assert.h>
+#include <openspace/opengl/texture.h>
 #include <utility>
 
 namespace openspace {
@@ -43,10 +43,9 @@ TextureSliceVolumeReader<VoxelType>::~TextureSliceVolumeReader() {}
 
 template <typename VoxelType>
 void TextureSliceVolumeReader<VoxelType>::initialize() {
-    ghoul_assert(_paths.size() > 0, "No paths to read slices from");
+    assert_msg(_paths.size() > 0, "No paths to read slices from");
 
-    std::shared_ptr<ghoul::opengl::Texture> firstSlice =
-        ghoul::io::texture::loadTexture(_paths[0], 2);
+    std::shared_ptr<opengl::Texture> firstSlice = io::texture::loadTexture(_paths[0], 2);
 
     glm::uvec3 dimensions = firstSlice->dimensions();
     _sliceDimensions = glm::uvec2(dimensions.x, dimensions.y);
@@ -56,7 +55,7 @@ void TextureSliceVolumeReader<VoxelType>::initialize() {
 
 template <typename VoxelType>
 VoxelType TextureSliceVolumeReader<VoxelType>::get(const glm::ivec3& coordinates) const {
-    ghoul::opengl::Texture& slice = getSlice(coordinates.z);
+    opengl::Texture& slice = getSlice(coordinates.z);
     slice.downloadTexture();
     return slice.texel<VoxelType>(glm::uvec3(coordinates.x, coordinates.y, 0));
 }
@@ -72,20 +71,18 @@ void TextureSliceVolumeReader<VoxelType>::setPaths(std::vector<std::string> path
 }
 
 template <typename VoxelType>
-ghoul::opengl::Texture&
-TextureSliceVolumeReader<VoxelType>::getSlice(int sliceIndex) const
-{
-    ghoul_assert(_isInitialized, "Volume is not initialized");
-    ghoul_assert(
+opengl::Texture& TextureSliceVolumeReader<VoxelType>::getSlice(int sliceIndex) const {
+    assert_msg(_isInitialized, "Volume is not initialized");
+    assert_msg(
         sliceIndex >= 0 && sliceIndex < static_cast<int>(_paths.size()),
         "Slice index " + std::to_string(sliceIndex) + "is outside the range"
     );
 
     if (!_cache.has(sliceIndex)) {
-        std::shared_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::texture::loadTexture(_paths[sliceIndex], 2);
+        std::shared_ptr<opengl::Texture> texture =
+            io::texture::loadTexture(_paths[sliceIndex], 2);
 
-        ghoul_assert(
+        assert_msg(
             glm::ivec2(texture->dimensions()) == _sliceDimensions,
             "Slice dimensions do not agree"
         );

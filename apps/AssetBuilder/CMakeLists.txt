@@ -41,8 +41,10 @@ set(HEADER_FILES
   include/welcomedialog.h
   include/form/collapsiblesection.h
   include/form/colorwidget.h
+  include/form/flowlayout.h
   include/form/matrixwidget.h
   include/form/schemaformwidget.h
+  include/form/stringlistwidget.h
   include/form/searchdropdown.h
   include/schema/assetschema.h
 )
@@ -63,8 +65,10 @@ set(SOURCE_FILES
   src/welcomedialog.cpp
   src/form/collapsiblesection.cpp
   src/form/colorwidget.cpp
+  src/form/flowlayout.cpp
   src/form/matrixwidget.cpp
   src/form/schemaformwidget.cpp
+  src/form/stringlistwidget.cpp
   src/form/searchdropdown.cpp
   src/schema/assetschema.cpp
 )
@@ -72,6 +76,17 @@ set(SOURCE_FILES
 find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
 qt6_wrap_cpp(MOC_FILES ${HEADER_FILES})
 qt6_add_resources(RESOURCE_FILES resources/resources.qrc)
+
+# stb_image is a bit weird in which it required _exactly_ one instatiation of the
+# implementation. All other parts in the system are only using the header-includes of the
+# project. Since this is the top-level application we need to include the impl version
+# here to have exactly one implementation. Less than 1: Linker error. More than 1: ODR
+# violation
+#
+# OpenSpace only links the *write* half (stbi_write_*): the *read* half (stbi_load, ...)
+# is already satisfied by assimp, which vendors its own stb_image copy, so linking the
+# stbimage port's read implementation too would be a duplicate-symbol conflict
+find_package(stbimage CONFIG REQUIRED)
 
 create_new_application(AssetBuilder
   main.cpp
@@ -92,6 +107,7 @@ target_link_libraries(AssetBuilder PRIVATE
   Qt6::Core
   Qt6::Gui
   Qt6::Widgets
+  unofficial::stbimage::stbimage-write-impl
 )
 
 target_precompile_headers(AssetBuilder PRIVATE

@@ -25,9 +25,9 @@
 #include <openspace/interaction/touchmarker.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
 
 namespace {
     using namespace openspace;
@@ -94,7 +94,7 @@ void TouchMarker::initializeGL() {
         absPath("${SHADERS}/core/touchmarker_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void TouchMarker::deinitializeGL() {

@@ -26,14 +26,16 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <algorithm>
 #include <limits>
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     // Switches between different specified tile providers based on the level of detail
     // that is requested by the Globe. All other things being equal, this corresponds to
     // the distance of the camera to the planet, with a closer distance resulting in a
@@ -53,7 +55,7 @@ namespace {
             int maxLevel [[codegen::greaterequal(0)]];
 
             // The tile provider that should be used at this stage.
-            ghoul::Dictionary tileProvider [[codegen::reference("globebrowsing_layer")]];
+            Dictionary tileProvider [[codegen::reference("globebrowsing_layer")]];
         };
 
         // The list of all tile providers that are used by this TileProviderByLevel.
@@ -74,7 +76,7 @@ Documentation TileProviderByLevel::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_bylevel");
 }
 
-TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
+TileProviderByLevel::TileProviderByLevel(const Dictionary& dictionary) {
     ZoneScoped;
 
     Parameters p = codegen::bake<Parameters>(dictionary);
@@ -89,7 +91,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
     for (size_t i = 0; i < p.levelTileProviders.size(); i++) {
         Parameters::Provider provider = p.levelTileProviders[i];
-        ghoul::Dictionary& tileProviderDict = provider.tileProvider;
+        Dictionary& tileProviderDict = provider.tileProvider;
         tileProviderDict.setValue("LayerGroupID", p.layerGroupID);
 
         // Pass down the caching information from the enclosing dictionary

@@ -24,7 +24,7 @@
 
 #include <openspace/util/sphere.h>
 
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
 #include <cstddef>
 #include <cstring>
 #include <string_view>

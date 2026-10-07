@@ -22,45 +22,130 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
-#include <ghoul/misc/stringhelper.h>
+#include <zip/zip.h>
+#include <openspace/misc/stringhelper.h>
 #include <vector>
+#ifdef WIN32
+#include <windows.h>
+#include <shellapi.h>
+#else // ^^^^ WIN32 // !WIN32 vvvv
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#endif // WIN32
 
 using namespace openspace;
 
 namespace {
 
-int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
+int printInternal(logging::LogLevel level, lua_State* L) {
     const int nArguments = lua_gettop(L);
     for (int i = 1; i <= nArguments; i++) {
-        log(level, "print", ghoul::lua::luaValueToString(L, i));
+        log(level, "print", lua::luaValueToString(L, i));
     }
     lua_pop(L, nArguments);
     return 0;
 }
 
 int printTrace(lua_State* L) {
-    return printInternal(ghoul::logging::LogLevel::Trace, L);
+    return printInternal(logging::LogLevel::Trace, L);
 }
 
 int printDebug(lua_State* L) {
-    return printInternal(ghoul::logging::LogLevel::Debug, L);
+    return printInternal(logging::LogLevel::Debug, L);
 }
 
 int printInfo(lua_State* L) {
-    return printInternal(ghoul::logging::LogLevel::Info, L);
+    return printInternal(logging::LogLevel::Info, L);
 }
 
 int printWarning(lua_State* L) {
-    return printInternal(ghoul::logging::LogLevel::Warning, L);
+    return printInternal(logging::LogLevel::Warning, L);
 }
 
 int printError(lua_State* L) {
-    return printInternal(ghoul::logging::LogLevel::Error, L);
+    return printInternal(logging::LogLevel::Error, L);
 }
 
 int printFatal(lua_State* L) {
-    return printInternal(ghoul::logging::LogLevel::Fatal, L);
+    return printInternal(logging::LogLevel::Fatal, L);
+}
+
+/**
+ * Open a file path using Windows explorer and in Linux the default explorer application.
+ *
+ * \param path The file path to open in the file explorer
+ * \return Windows: `true` if the explorer window was successfully launched, `false`
+ *         otherwise.
+ *
+ *         Linux: `true` if the request to launch the file manager was successfully handed
+ *         off, `false` otherwise. This does not guarantee that xdg-open successfully
+ *         opened the requested path
+ */
+bool openFileLocation(const std::filesystem::path& path) {
+#ifdef WIN32
+    std::wstring arg = path.wstring();
+    if (std::filesystem::is_directory(path)) {
+        arg = std::format(L"/select,\"{}\"", path.wstring());
+    }
+
+    HINSTANCE result = ShellExecuteW(
+        nullptr,
+        L"open",
+        L"explorer.exe",
+        arg.c_str(),
+        nullptr,
+        SW_SHOWNORMAL
+    );
+
+    // If successful ShellExecuteW returns a value greater than 32
+    return reinterpret_cast<std::intptr_t>(result) > 32;
+#else // ^^^^ WIN32 // !WIN32 vvvv
+    // xdg-open doesn't have a "select this file" option
+    const pid_t pid = fork();
+
+    if (pid < 0) {
+        return false;
+    }
+
+    if (pid == 0) {
+        // Intermediate child
+        const pid_t grandchild = fork();
+
+        if (grandchild < 0) {
+            _exit(EXIT_FAILURE);
+        }
+
+        // We launch the xdg-open from a grandchild to avoid having to deal with zombie
+        // processes that we'd have to cleanup. Instead we let the grandchild be culled by
+        // the system
+        if (grandchild == 0) {
+            execlp(
+                "xdg-open",
+                "xdg-open",
+                path.string().c_str(),
+                static_cast<char*>(nullptr)
+            );
+
+            // `execlp` only returns if it failed and we're currently in the child process
+            // so we should kill it
+            _exit(EXIT_FAILURE);
+        }
+
+        // Intermediate child is no longer needed
+        _exit(EXIT_SUCCESS);
+    }
+
+    // Reap the intermediate child, should return almost immediately
+    int status = 0;
+    if (waitpid(pid, &status, 0) == -1) {
+        return false;
+    }
+
+    // Successfully started the child process, which is now independent of OpenSpace
+    return WIFEXITED(status) && WEXITSTATUS(status) == EXIT_SUCCESS;
+#endif // WIN32
 }
 
 /**
@@ -81,7 +166,7 @@ int printFatal(lua_State* L) {
     FileSys.registerPathToken(
         std::move(pathToken),
         std::move(path),
-        ghoul::filesystem::FileSystem::Override::Yes
+        filesystem::FileSystem::Override::Yes
     );
 }
 
@@ -109,7 +194,7 @@ int printFatal(lua_State* L) {
 [[codegen::luawrap]] std::string readFile(std::filesystem::path file) {
     std::filesystem::path p = absPath(file);
     if (!std::filesystem::is_regular_file(p)) {
-        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file));
+        throw lua::LuaError(std::format("Could not open file '{}'", file));
     }
 
     std::ifstream f(p);
@@ -125,14 +210,14 @@ int printFatal(lua_State* L) {
 [[codegen::luawrap]] std::vector<std::string> readFileLines(std::filesystem::path file) {
     std::filesystem::path p = absPath(file);
     if (!std::filesystem::is_regular_file(p)) {
-        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file));
+        throw lua::LuaError(std::format("Could not open file '{}'", file));
     }
 
     std::ifstream f = std::ifstream(p);
     std::vector<std::string> contents;
     while (f.good()) {
         std::string line;
-        ghoul::getline(f, line);
+        getline(f, line);
         contents.push_back(std::move(line));
     }
 
@@ -180,10 +265,10 @@ int printFatal(lua_State* L) {
     }
 
     namespace fs = std::filesystem;
-    return ghoul::filesystem::walkDirectory(
+    return filesystem::walkDirectory(
         path,
-        ghoul::filesystem::Recursive(recursive),
-        ghoul::filesystem::Sorted(sorted),
+        filesystem::Recursive(recursive),
+        filesystem::Sorted(sorted),
         [](const fs::path& p) { return fs::is_directory(p) || fs::is_regular_file(p); }
     );
 }
@@ -205,10 +290,10 @@ int printFatal(lua_State* L) {
     }
 
     namespace fs = std::filesystem;
-    return ghoul::filesystem::walkDirectory(
+    return filesystem::walkDirectory(
         path,
-        ghoul::filesystem::Recursive(recursive),
-        ghoul::filesystem::Sorted(sorted),
+        filesystem::Recursive(recursive),
+        filesystem::Sorted(sorted),
         [](const fs::path& p) { return fs::is_regular_file(p); }
     );
 }
@@ -229,10 +314,10 @@ int printFatal(lua_State* L) {
         return std::vector<std::filesystem::path>();
     }
 
-    return ghoul::filesystem::walkDirectory(
+    return filesystem::walkDirectory(
         path,
-        ghoul::filesystem::Recursive(recursive),
-        ghoul::filesystem::Sorted(sorted),
+        filesystem::Recursive(recursive),
+        filesystem::Sorted(sorted),
         [](const std::filesystem::path& p) { return std::filesystem::is_directory(p); }
     );
 }
@@ -248,6 +333,24 @@ int printFatal(lua_State* L) {
 }
 
 /**
+ * Open a file or folder path in the native OS explorer window. For Windows the path is
+ * opened in windows explorer and for Linux the default explorer app.
+ */
+[[codegen::luawrap]] void openFileExplorer(std::filesystem::path path) {
+    path.make_preferred();
+
+    if (!std::filesystem::exists(path)) {
+        throw lua::LuaError(std::format("Could not find path '{}'", path));
+    }
+
+    const bool success = openFileLocation(path);
+
+    if (!success) {
+        throw lua::LuaError(std::format("Could not open path '{}'", path));
+    }
+}
+
+/**
  * This function extracts the contents of a zip file. The first argument is the path to
  * the zip file. The second argument is the directory where to put the extracted files. If
  * the third argument is true, the compressed file will be deleted after the decompression
@@ -257,7 +360,7 @@ int printFatal(lua_State* L) {
                                     bool deleteSource = false)
 {
     if (!std::filesystem::exists(source)) {
-        throw ghoul::lua::LuaError("Source file was not found");
+        throw lua::LuaError("Source file was not found");
     }
 
     struct zip_t* z = zip_open(source.c_str(), 0, 'r');
@@ -265,15 +368,20 @@ int printFatal(lua_State* L) {
     zip_close(z);
 
     if (is64) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Error while unzipping '{}': Zip64 archives are not supported", source
         ));
     }
 
+    if (!std::filesystem::exists(destination)) {
+        std::filesystem::create_directories(destination);
+    }
+
     int ret = zip_extract(source.c_str(), destination.c_str(), nullptr, nullptr);
     if (ret != 0) {
-        throw ghoul::lua::LuaError(std::format(
-            "Error while unzipping '{}': {}", source, ret
+        const char* error = zip_strerror(ret);
+        throw lua::LuaError(std::format(
+            "Error while unzipping '{}': {}", source, error
         ));
     }
 
@@ -290,21 +398,24 @@ int printFatal(lua_State* L) {
  * script is run when registering the repeated script and the `postScript` is run when
  * unregistering it or when the application closes.
  * If the `timeout` is 0, the script will be executed every frame.
- * The `identifier` has to be a unique name that cannot have been used to register a
- * repeated script before. A registered script is removed with the #removeRepeatedScript
- * function.
+ * The `printToLog` parameter determines whether the `script`, `preScript`, or
+ * `postScript` are printed to the script log. he `identifier` has to be a unique name
+ * that cannot have been used to register a repeated script before. A registered script is
+ * removed with the #removeRepeatedScript function.
  */
 [[codegen::luawrap]] void registerRepeatedScript(std::string identifier,
                                                  std::string script, double timeout = 0.0,
                                                  std::string preScript = "",
-                                                 std::string postScript = "")
+                                                 std::string postScript = "",
+                                                 bool printToLog = true)
 {
     global::scriptEngine->registerRepeatedScript(
         std::move(identifier),
         std::move(script),
         timeout,
         std::move(preScript),
-        std::move(postScript)
+        std::move(postScript),
+        ScriptEngine::ShouldBeLogged(printToLog)
     );
 }
 

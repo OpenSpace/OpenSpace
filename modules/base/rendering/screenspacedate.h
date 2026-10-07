@@ -33,7 +33,7 @@ namespace openspace {
 
 class ScreenSpaceDate : public ScreenSpaceRenderableText {
 public:
-    explicit ScreenSpaceDate(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceDate(const Dictionary& dictionary);
 
     void update() override;
 

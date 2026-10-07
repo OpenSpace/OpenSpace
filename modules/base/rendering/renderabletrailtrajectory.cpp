@@ -149,7 +149,7 @@ Documentation RenderableTrailTrajectory::Documentation() {
     );
 }
 
-RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& dictionary)
+RenderableTrailTrajectory::RenderableTrailTrajectory(const Dictionary& dictionary)
     : RenderableTrail(dictionary)
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)

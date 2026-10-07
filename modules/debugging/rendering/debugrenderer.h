@@ -27,21 +27,21 @@
 
 #include <openspace/util/updatestructures.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/gl.h>
 #include <memory>
 #include <vector>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
+
+namespace opengl { class ProgramObject; }
 
 /**
  * A helper class for quick rendering of vertices IN clipping space. The class is
- * practically stateless. It only stores a ghoul::opengl::ProgramObject which can be
- * reused despite the fact that rendering calls are invoked from different callers.
- * Therefore a static reference is provided for convenience which is accessed through
- * #ref. Note: That constructors are still public and the class is not a strict singleton.
+ * practically stateless. It only stores a opengl::ProgramObject which can be reused
+ * despite the fact that rendering calls are invoked from different callers. Therefore a
+ * static reference is provided for convenience which is accessed through #ref. Note:
+ * That constructors are still public and the class is not a strict singleton.
  */
 class DebugRenderer {
 public:
@@ -55,7 +55,7 @@ public:
     /**
      * Instantiate a new DebugRenderer with a custom shader program.
      */
-    explicit DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject);
+    explicit DebugRenderer(std::unique_ptr<opengl::ProgramObject> programObject);
     ~DebugRenderer() = default;
 
     /**
@@ -127,7 +127,7 @@ public:
         const glm::vec4& rgba = glm::vec4(1.f, 1.f, 1.f, 0.3f)) const;
 
 protected:
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    std::unique_ptr<opengl::ProgramObject> _programObject;
 
     /// A raw pointer for the reason that it should not be deleted by the static
     /// destructor and the normal destructor. This class has ownership

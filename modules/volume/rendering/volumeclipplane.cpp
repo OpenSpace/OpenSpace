@@ -26,7 +26,7 @@
 
 #include <modules/volume/rendering/volumeclipplane.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionary.h>
 
 namespace {
     using namespace openspace;
@@ -57,7 +57,7 @@ namespace {
 
 namespace openspace {
 
-VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
+VolumeClipPlane::VolumeClipPlane(const Dictionary& dictionary)
     : PropertyOwner({ "" }) // @TODO Missing name
     , _normal(
         NormalInfo,

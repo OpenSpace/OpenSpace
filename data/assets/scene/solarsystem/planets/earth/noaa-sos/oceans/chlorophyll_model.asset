@@ -42,10 +42,14 @@ local Colorbar = {
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "colorbar.png",
-  FaceCamera = false,
-  Scale = 0.3,
-  BackgroundColor = { 1.0, 1.0, 1.0, 1.0 },
-  CartesianPosition = { 0.0, -0.5, -2.0 }
+  Style = {
+    BackgroundColor = { 1.0, 1.0, 1.0, 1.0 }
+  },
+  Placement = {
+    FaceCamera = false,
+    Scale = 0.3,
+    CartesianPosition = { 0.0, -0.5, -2.0 }
+  }
 }
 
 

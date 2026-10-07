@@ -28,6 +28,8 @@
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -36,8 +38,6 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timeconstants.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
@@ -141,7 +141,7 @@ void GuiSpaceTimeComponent::render() {
     if (!nodes.empty()) {
         // Only check if we found the current focus node if we have any nodes at all only
         // then it would be a real error
-        ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
+        assert_msg(iCurrentFocus != nodes.end(), "Focus node not found");
     }
     int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
 

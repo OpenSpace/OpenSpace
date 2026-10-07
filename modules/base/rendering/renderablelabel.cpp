@@ -26,15 +26,15 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/glm.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/openglstatecache.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <algorithm>
 #include <cmath>
 #include <optional>
@@ -250,7 +250,7 @@ Documentation RenderableLabel::Documentation() {
     );
 }
 
-RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
+RenderableLabel::RenderableLabel(const Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _blendMode(BlendModeInfo)
     , _text(TextInfo, "")
@@ -310,8 +310,8 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
         _font = global::fontManager->font(
             "Mono",
             _fontSize,
-            ghoul::fontrendering::FontManager::Outline::Yes,
-            ghoul::fontrendering::FontManager::LoadGlyphs::No
+            fontrendering::FontManager::Outline::Yes,
+            fontrendering::FontManager::LoadGlyphs::No
         );
     });
     addProperty(_fontSize);
@@ -367,8 +367,8 @@ void RenderableLabel::initializeGL() {
     _font = global::fontManager->font(
         "Mono",
         _fontSize,
-        ghoul::fontrendering::FontManager::Outline::Yes,
-        ghoul::fontrendering::FontManager::LoadGlyphs::No
+        fontrendering::FontManager::Outline::Yes,
+        fontrendering::FontManager::LoadGlyphs::No
     );
 }
 
@@ -421,7 +421,7 @@ void RenderableLabel::renderLabels(const RenderData& data,
                                    const glm::dvec3& orthoRight,
                                    const glm::dvec3& orthoUp, float fadeInVariable)
 {
-    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
+    fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
         .enableDepth = true,
         .enableFalseDepth = false,
         .scale = std::pow(10.f, _size),
@@ -441,7 +441,7 @@ void RenderableLabel::renderLabels(const RenderData& data,
     );
 
     glm::vec4 textColor = glm::vec4(glm::vec3(_color), fadeInVariable * opacity());
-    ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
+    fontrendering::FontRenderer::defaultProjectionRenderer().render(
         *_font,
         transformedPos,
         _text.value(),
@@ -492,7 +492,7 @@ float RenderableLabel::unit(int unit) const {
         case MegaParsec:       return static_cast<float>(1e6 * Prsec);
         case GigaParsec:       return static_cast<float>(1e9 * Prsec);
         case GigaLightyear:    return static_cast<float>(306391534.73091 * Prsec);
-        default:               throw ghoul::MissingCaseException();
+        default:               throw MissingCaseException();
     }
 }
 
@@ -510,7 +510,7 @@ std::string_view RenderableLabel::toString(int unit) const {
         case MegaParsec:       return MegaparsecUnit;
         case GigaParsec:       return GigaparsecUnit;
         case GigaLightyear:    return GigalightyearUnit;
-        default:               throw ghoul::MissingCaseException();
+        default:               throw MissingCaseException();
     }
 }
 

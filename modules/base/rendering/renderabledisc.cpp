@@ -26,14 +26,14 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 #include <optional>
 
@@ -91,7 +91,7 @@ Documentation RenderableDisc::Documentation() {
     );
 }
 
-RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
+RenderableDisc::RenderableDisc(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
     , _size(SizeInfo, 1.f, 0.001f, 1e13f)
@@ -121,8 +121,8 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
 
 void RenderableDisc::initialize() {
     _texture = std::make_unique<TextureComponent>(1);
-    _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+    _texture->setFilterMode(opengl::Texture::FilterMode::AnisotropicMipMap);
+    _texture->setWrapping(opengl::Texture::WrappingMode::ClampToEdge);
     _texture->setShouldWatchFileForChanges(true);
 }
 
@@ -154,7 +154,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.width, _width);
     _shader->setUniform(_uniformCache.opacity, opacity());
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_texture->texture());
     _shader->setUniform(_uniformCache.colorTexture, unit);
 
@@ -196,7 +196,7 @@ void RenderableDisc::initializeShader() {
 }
 
 void RenderableDisc::updateUniformLocations() {
-   ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+   opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 float RenderableDisc::planeSize() const {

@@ -27,16 +27,16 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
 #include <glm/gtx/quaternion.hpp>
 #include <limits>
 #include <memory>
@@ -286,7 +286,7 @@ RenderableNodeArrow::Shading::Shading()
     addProperty(specularIntensity);
 }
 
-RenderableNodeArrow::RenderableNodeArrow(const ghoul::Dictionary& dictionary)
+RenderableNodeArrow::RenderableNodeArrow(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _start(StartNodeInfo)
     , _end(EndNodeInfo)
@@ -366,7 +366,7 @@ RenderableNodeArrow::RenderableNodeArrow(const ghoul::Dictionary& dictionary)
 void RenderableNodeArrow::initializeGL() {
     _shaderProgram = BaseModule::ProgramObjectManager.request(
         "NodeDirectionLineProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "NodeDirectionLineProgram",
                 absPath("${MODULE_BASE}/shaders/arrow_vs.glsl"),
@@ -379,7 +379,7 @@ void RenderableNodeArrow::initializeGL() {
 void RenderableNodeArrow::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         "NodeDirectionLineProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

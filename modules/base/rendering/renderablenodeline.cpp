@@ -27,17 +27,17 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
 #include <memory>
 
 namespace {
@@ -163,7 +163,7 @@ Documentation RenderableNodeLine::Documentation() {
     );
 }
 
-RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
+RenderableNodeLine::RenderableNodeLine(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _start(StartNodeInfo, "Root")
     , _end(EndNodeInfo, "Root")
@@ -277,7 +277,7 @@ std::string RenderableNodeLine::end() const {
 void RenderableNodeLine::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
         "NodeLineProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "NodeLineProgram",
                 absPath("${MODULE_BASE}/shaders/line_vs.glsl"),
@@ -303,7 +303,7 @@ void RenderableNodeLine::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "NodeLineProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

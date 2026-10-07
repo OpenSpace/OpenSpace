@@ -33,7 +33,7 @@ namespace openspace {
 
 class StaticScale : public Scale {
 public:
-    explicit StaticScale(const ghoul::Dictionary& dictionary);
+    explicit StaticScale(const Dictionary& dictionary);
 
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 

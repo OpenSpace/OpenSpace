@@ -24,19 +24,6 @@
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
-execute_process(
-  COMMAND git apply --verbose --recount --whitespace=fix "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_1_md_os_h.patch"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-execute_process(
-  COMMAND git apply --verbose --recount --whitespace=fix "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_2_md_os_c.patch"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-execute_process(
-  COMMAND git apply --verbose --recount --whitespace=fix "${CMAKE_CURRENT_SOURCE_DIR}/pathpatch_3_md_gl_c.patch"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-
 set(HEADER_FILES
   moleculemodule.h
   src/renderablemolecule.h
@@ -92,17 +79,14 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-option(MD_USE_RELATIVE_RESOURCE_PATH OFF)
-option(MD_UNITTEST OFF)
-option(MD_BENCHMARK OFF)
+begin_dependency("mold")
+find_package(mold CONFIG REQUIRED)
+target_link_libraries(${molecule_module} PRIVATE mold::mdlib)
 
-add_subdirectory(ext/mold SYSTEM)
-if (MSVC)
-  target_compile_options(mdlib PRIVATE "/W0")
-  target_compile_definitions(mdlib PRIVATE "_SCL_SECURE_NO_WARNINGS")
-else ()
-  target_compile_options(mdlib PRIVATE "-w")
-endif ()
-
-target_link_libraries(${molecule_module} PRIVATE mdlib)
-set_target_properties(mdlib PROPERTIES FOLDER "External")
+# mold's OpenGL backend compiles its GLSL at runtime and, per the overlay port's
+# runtime-shader-path.patch, looks for it at <exe_dir>/../modules/molecule/shaders/mold
+# (or one level further up for a Windows multi-config build tree). The shaders ship inside
+# the vcpkg package, so copy them into that location. This is a configure-time copy rather
+# than a build step because the source is an immutable installed package.
+file(COPY "${MOLD_SHADER_DIR}/" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/shaders/mold")
+end_dependency("mold")

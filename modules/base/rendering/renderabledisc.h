@@ -27,18 +27,18 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
 namespace openspace {
 
 class RenderableDisc : public Renderable {
 public:
-    explicit RenderableDisc(const ghoul::Dictionary& dictionary);
+    explicit RenderableDisc(const Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -59,7 +59,7 @@ protected:
     FloatProperty _size;
     FloatProperty _width;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<opengl::ProgramObject> _shader;
 
     PlaneGeometry _plane;
     std::unique_ptr<TextureComponent> _texture;

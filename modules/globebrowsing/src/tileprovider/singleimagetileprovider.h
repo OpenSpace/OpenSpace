@@ -27,14 +27,14 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
+#include <openspace/opengl/texture.h>
 #include <openspace/properties/misc/stringproperty.h>
-#include <ghoul/opengl/texture.h>
 
 namespace openspace {
 
 class SingleImageProvider : public TileProvider {
 public:
-    explicit SingleImageProvider(const ghoul::Dictionary& dictionary);
+    explicit SingleImageProvider(const Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;
@@ -50,7 +50,7 @@ public:
 private:
     StringProperty _filePath;
 
-    std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
+    std::unique_ptr<opengl::Texture> _tileTexture;
     Tile _tile;
 };
 
