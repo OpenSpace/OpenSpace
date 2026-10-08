@@ -23,7 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
-#include <format>
+#include <glm/gtx/color_space.hpp>
+#include <algorithm>
 #include <string>
 
 namespace openspace::view {
@@ -42,6 +43,27 @@ glm::vec4 uncertaintyColor(float percent) {
         return colors::Warning;
     }
     return colors::Good;
+}
+
+glm::vec4 uncertaintyIndicatorColor(float percent) {
+    //// Saturation + alpha
+    //const float saturation = std::clamp(percent / 30.f, 0.f, 1.f);
+    //const glm::vec3 rgb = glm::rgbColor(glm::vec3(0.f, saturation, 1.f));
+
+    //const float alpha = std::clamp(percent / 10.f, 0.f, 1.f);
+
+    //return glm::vec4(rgb, alpha);
+
+    // Transparency only, same color
+    //const float alpha = std::clamp(percent / 30.f, 0.f, 1.f);
+    //return glm::vec4(colors::Error.r, colors::Error.g, colors::Error.b, alpha);
+
+    // Red if larger than 30 percent, orange with decreasing opacity if lower
+    if (percent > 30.f) {
+        return colors::Error;
+    }
+    const float alpha = std::clamp(percent / 30.f, 0.f, 1.f);
+    return glm::vec4(colors::Warning.r, colors::Warning.g, colors::Warning.b, alpha);
 }
 
 void renderDescriptiveText(const char* text) {

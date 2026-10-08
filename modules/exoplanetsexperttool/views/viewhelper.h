@@ -47,6 +47,9 @@ namespace helper {
     // Good/Warning/Error color for a relative uncertainty, given in percent
     glm::vec4 uncertaintyColor(float percent);
 
+    // Fixed red hue with saturation scaled by relative uncertainty, in percent
+    glm::vec4 uncertaintyIndicatorColor(float percent);
+
     void renderDescriptiveText(const char* text);
     void renderHelpMarker(const char* text);
 

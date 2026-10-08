@@ -1212,7 +1212,7 @@ void DataViewer::renderUncertaintyIndicator(const ColumnKey& key,
         min,
         max,
         ImGui::GetColorU32(
-            view::helper::toImVec4(view::helper::uncertaintyColor(*percent))
+            view::helper::toImVec4(view::helper::uncertaintyIndicatorColor(*percent))
         ),
         0.2f * boxSize
     );
