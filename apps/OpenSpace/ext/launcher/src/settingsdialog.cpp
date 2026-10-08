@@ -262,7 +262,7 @@ void SettingsDialog::createWidgets() {
             "<html><div style=\"width: 300px;\">"
             "If this value is selected, the Launcher will no longer be shown at startup. "
             "Note that this also means that it will not be easy to get back to this "
-            "setting to reenable the Launcher either."
+            "setting to re-enable the Launcher either."
             "</div></html>"
         );
         connect(

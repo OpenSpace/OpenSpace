@@ -98,14 +98,14 @@ public:
     void quitPath();
 
     /**
-     * Return the identifer of the node that is the current appropriate anchor node, of
+     * Return the identifier of the node that is the current appropriate anchor node, of
      * the start and end waypoint's reference node. Dtermined based on how far along the
      * path we have traveled.
      */
     std::string currentAnchor() const;
 
     /**
-     * Return wether the path has reached its end point or not.
+     * Return whether the path has reached its end point or not.
      */
     bool hasReachedEnd() const;
 

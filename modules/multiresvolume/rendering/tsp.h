@@ -69,7 +69,7 @@ public:
     bool readCache();
     bool writeCache();
     bool construct();
-    bool initalizeSSO();
+    bool initializeSSO();
 
     const Header& header() const;
     static long long dataPosition();

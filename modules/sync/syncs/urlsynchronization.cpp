@@ -280,7 +280,7 @@ void UrlSynchronization::createSyncFile(bool) const {
     const std::string currentTimeAsISO8601 = Time::currentWallTime();
     const double currentTimeAsJ2000 = Time::convertTime(currentTimeAsISO8601);
 
-    // With the format YYYY-MM... any year thats larger than 4 digits throws an error
+    // With the format YYYY-MM... any year that's larger than 4 digits throws an error
     // Limit the future date to year 9999
     const double futureTimeAsJ2000 = std::min(
         currentTimeAsJ2000 + _secondsUntilResync,

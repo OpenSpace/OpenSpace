@@ -822,7 +822,7 @@ public:
     FieldOfViewResult fieldOfView(int instrument) const;
 
     /**
-     * The structure retuned by the #terminatorEllipse method.
+     * The structure returned by the #terminatorEllipse method.
      */
     struct TerminatorEllipseResult {
         /// The vector from the target body at #targetEphemerisTime to the observer at the
@@ -882,7 +882,7 @@ public:
      * function, all subsequent calls will not throw an error, but fail silently instead.
      * If set to UseException::Yes, a SpiceException is thrown whenever an error occurs.
      *
-     * \param useException The new exeception handling method that the SpiceManager should
+     * \param useException The new exception handling method that the SpiceManager should
      *        use
      */
     void setExceptionHandling(UseException useException);

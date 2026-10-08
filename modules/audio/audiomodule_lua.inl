@@ -150,7 +150,7 @@ namespace {
 }
 
 /**
- * Returns whether the track refered to by the \p identifier is currently playing or
+ * Returns whether the track referred to by the \p identifier is currently playing or
  * paused. If it was be paused through a previous call to #pauseAudio, this function will
  * return `true`. If it has just been created or resumed through a call to #resumeAudio,
  * it will return `false`. The \p identifier must be a name for a sound that was started

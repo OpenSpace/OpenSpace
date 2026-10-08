@@ -77,7 +77,7 @@ namespace {
     constexpr Property::PropertyInfo UpdateInfo = {
         "UpdateSelection",
         "Update selection",
-        "If this property is trigged, the 'SpoutSelection' options will be refreshed.",
+        "If this property is triggered, the 'SpoutSelection' options will be refreshed.",
         Property::Visibility::AdvancedUser
     };
 

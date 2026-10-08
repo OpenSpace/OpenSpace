@@ -296,7 +296,7 @@ void LoadingScreen::render() {
 
     // We need to have a fudge factor for smaller screens or we end up testing all loading
     // texts successfully against the logo as it takes up such a large portion of the
-    // screen. We don't want to incrase the size though and cap it at a screen size of
+    // screen. We don't want to increase the size though and cap it at a screen size of
     // 1920 pixels horizontally
     const float sizeAdjustment = std::min(static_cast<float>(res.x) / 1920.f, 1.f);
 

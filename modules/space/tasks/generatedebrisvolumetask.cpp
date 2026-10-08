@@ -182,7 +182,7 @@ double epochFromSubstring(const std::string& epochString) {
     // The epochString is in the form:
     // YYDDD.DDDDDDDD
     // With YY being the last two years of the launch epoch, the first DDD the day
-    // of the year and the remaning a fractional part of the day
+    // of the year and the remaining a fractional part of the day
 
     // The main overview of this function:
     // 1. Reconstruct the full year from the YY part
@@ -653,7 +653,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     *   2. loop to create a rawVolume for each timestep.
     */
 
-    // 1    // todo: handle if endTime is earlyer than startTime
+    // 1    // todo: handle if endTime is earlier than startTime
     double startTimeInSeconds = Time::convertTime(_startTime);
     double endTimeInSeconds = Time::convertTime(_endTime);
     double timeSpan = endTimeInSeconds - startTimeInSeconds;

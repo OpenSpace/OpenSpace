@@ -139,7 +139,7 @@ glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
         _timeline.firstKeyframeAfter(data.time.j2000Seconds(), false);
 
     if (lastBefore && firstAfter) {
-        // We're inbetween first and last value
+        // We're in between first and last value
         const double timelineDiff = firstAfter->timestamp - lastBefore->timestamp;
         const double timeDiff = data.time.j2000Seconds() - lastBefore->timestamp;
         const double diff = (timelineDiff > DBL_EPSILON) ? timeDiff / timelineDiff : 0.0;

@@ -506,7 +506,7 @@ void LuaConsole::render() {
     // for the '> ' characters in the beginning of the command
     const size_t totalCommandSize = 2 + currentCommand.size() +
         _autoCompleteState.suggestion.size();
-    // Scalefactor 0.925f chosen arbitraily to fit characters on screen with some margin
+    // Scalefactor 0.925f chosen arbitrarily to fit characters on screen with some margin
     const size_t nCharactersPerRow = std::max(
         static_cast<size_t>(1),
         static_cast<size_t>(res.x * 0.925f / static_cast<float>(_font->glyph('m')->width))
@@ -514,7 +514,7 @@ void LuaConsole::render() {
     size_t nCommandRows = static_cast<size_t>(
         std::ceil(static_cast<double>(totalCommandSize) / nCharactersPerRow)
     );
-    // We're intrested in the zero based index when computing the input position.
+    // We're interested in the zero based index when computing the input position.
     // If the characters fit on one line we should not add any extra rows
     nCommandRows = nCommandRows > 1 ? nCommandRows - 1 : 0;
 
@@ -664,7 +664,7 @@ void LuaConsole::render() {
         const glm::vec4 Yellow(1.0f, 1.0f, 0.f, 1.f);
 
         const std::string masterOnlyExecutionText =
-            "Master only script execution (Nodes and Peers will not recieve scripts)";
+            "Master only script execution (Nodes and Peers will not receive scripts)";
         const glm::vec2 loc = locationForRightJustifiedText(masterOnlyExecutionText);
         RenderFont(*_font, loc, masterOnlyExecutionText, Yellow);
     }
@@ -689,7 +689,7 @@ void LuaConsole::render() {
         const glm::vec4 LightBlue(0.4f, 0.4f, 1.f, 1.f);
 
         const std::string localExecutionText =
-            "Local script execution (Peers will not recieve scripts)";
+            "Local script execution (Peers will not receive scripts)";
         const glm::vec2 loc = locationForRightJustifiedText(localExecutionText);
         RenderFont(*_font, loc, localExecutionText, LightBlue);
     }
@@ -1148,7 +1148,7 @@ bool LuaConsole::gatherPathSuggestions(size_t contextStart) {
     _autoCompleteState.input = userTypedPath;
 
     if (pathEnd != std::string::npos) {
-        // There is something after the path so we want to insert inbetween
+        // There is something after the path so we want to insert in between
         _autoCompleteState.insertPosition = contextStart + pathEnd;
     }
     else {
@@ -1174,7 +1174,7 @@ void LuaConsole::gatherFunctionSuggestions(size_t contextStart) {
     _autoCompleteState.input = possibleFunction.substr(0, functionEnd);
 
     if (functionEnd != std::string::npos) {
-        // There is something after the function so we want to insert inbetween
+        // There is something after the function so we want to insert in between
         _autoCompleteState.insertPosition = contextStart + functionEnd;
     }
     else {
@@ -1273,7 +1273,7 @@ void LuaConsole::applySuggestion() {
     if (_autoCompleteState.context == Context::Function &&
         !_autoCompleteState.suggestion.ends_with('.'))
     {
-        // We're in a leaf function => add parantheses
+        // We're in a leaf function => add parentheses
         currentCommand.insert(_inputPosition, "()");
         // Set the cursor position to be between the brackets
         _inputPosition++;

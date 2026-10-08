@@ -505,7 +505,7 @@ void DocumentationEngine::writeJsonSchema() {
                     target[key] == value,
                     std::format(
                         "Conflicting $def '{}': existing definition '{}' differs from "
-                        "incomming definition '{}'. Each $def name must be unique and/or "
+                        "incoming definition '{}'. Each $def name must be unique and/or "
                         "identical across all property schemas.",
                         key, target[key].get<std::string>(), value.get<std::string>()
                     )

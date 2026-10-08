@@ -102,7 +102,7 @@ namespace {
             // The compression algorithm to use for cached tiles.
             std::optional<Compression> compression;
 
-            // The quality setting of the compression alogrithm, only valid for JPEG.
+            // The quality setting of the compression algorithm, only valid for JPEG.
             std::optional<int> quality [[codegen::inrange(0, 100)]];
 
             // The block-size of the MRF cache.

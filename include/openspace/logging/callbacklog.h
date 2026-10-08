@@ -84,7 +84,7 @@ public:
 
     /**
      * Replaces the old callback with this `callbackFunction`. This function is not
-     * checked and it is the caller's responsiblity to assure that the function object is
+     * checked and it is the caller's responsibility to assure that the function object is
      * callable.
      *
      * \param callbackFunction The new callback function that will be called henceforth

@@ -48,7 +48,7 @@ class Topic;
 // and the execution, the _connection will be an invalid pointer and the program will
 // crash. Making this a shared_ptr circumvents that problem my having the lamdba retain
 // ownership of the _connection and keeping it alive until the message is sent. The
-// message doesn't go anywhere since noone is listening, but it's better than a crash.
+// message doesn't go anywhere since no one is listening, but it's better than a crash.
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
     struct ApiVersion {

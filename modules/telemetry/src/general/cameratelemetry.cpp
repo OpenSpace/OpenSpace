@@ -57,7 +57,7 @@ namespace {
         "CameraSpeedDistanceUnit",
         "Camera speed unit (distance)",
         "Choose a distance unit that is used for the camera speed. "
-        "For example, if the distacne unit 'Kilometer' is chosen, then the unit used for "
+        "For example, if the distance unit 'Kilometer' is chosen, then the unit used for "
         "the camera speed will be kilometers per second.",
         Property::Visibility::User
     };
@@ -71,15 +71,15 @@ namespace {
     constexpr Property::PropertyInfo PositionPrecisionInfo = {
         "PositionPrecision",
         "Position precision",
-        "The precision in meters used to determin when to send updated camera positional "
-        "data to the Open Sound Control receiver.",
+        "The precision in meters used to determine when to send updated camera "
+        "positional data to the Open Sound Control receiver.",
         Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo RotationPrecisionInfo = {
         "RotationPrecision",
         "Rotation precision",
-        "The precision used to determin when to send updated camera rotational data to "
+        "The precision used to determine when to send updated camera rotational data to "
         "the Open Sound Control receiver.",
         Property::Visibility::User
     };
@@ -87,8 +87,8 @@ namespace {
     constexpr Property::PropertyInfo SpeedPrecisionInfo = {
         "SpeedPrecision",
         "Speed precision",
-        "The precision in meters per second used to determin when to send updated camera "
-        "speed data to the Open Sound Control receiver.",
+        "The precision in meters per second used to determine when to send updated "
+        "camera speed data to the Open Sound Control receiver.",
         Property::Visibility::User
     };
 } // namespace
@@ -135,7 +135,7 @@ bool CameraTelemetry::updateData(const Camera* camera) {
 
     const glm::dquat cameraRotation = camera->rotationQuaternion();
     // To check if the rotation has changed above the precision threshold, check the angle
-    // and axis of the quaternion seperatly
+    // and axis of the quaternion separately
     const double rotationAngleDifference = std::abs(_cameraRotation.w - cameraRotation.w);
     const double rotationAxisDifference = glm::length(
         glm::dvec3(_cameraRotation.x, _cameraRotation.y, _cameraRotation.z) -

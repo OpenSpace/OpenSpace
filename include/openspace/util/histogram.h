@@ -50,7 +50,7 @@ public:
      *
      * \param value The Value to insert into the histogram
      * \param repeat How many times you want to insert it
-     * \return Returns `true` if succesful insertion, otherwise return `false`
+     * \return Returns `true` if successful insertion, otherwise return `false`
      */
     bool add(float value, float repeat = 1.f);
     bool add(const Histogram& histogram);

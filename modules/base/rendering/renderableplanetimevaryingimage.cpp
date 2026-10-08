@@ -204,7 +204,7 @@ void RenderablePlaneTimeVaryingImage::render(const RenderData& data, RendererTas
     }
 }
 
-// Requires time to be formated as such: 'YYYY-MM-DDTHH-MM-SS-XXX'
+// Requires time to be formatted as such: 'YYYY-MM-DDTHH-MM-SS-XXX'
 void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {
     for (const std::filesystem::path& filePath : _sourceFiles) {
         // Extract the filename from the path (without extension)

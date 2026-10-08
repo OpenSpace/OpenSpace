@@ -46,7 +46,7 @@ namespace {
     if (std::holds_alternative<Dictionary>(action)) {
         const Dictionary& d = std::get<Dictionary>(action);
         if (!d.hasValue<std::string>("Identifier")) {
-            throw lua::LuaError("Provided action table must have an Identifer");
+            throw lua::LuaError("Provided action table must have an Identifier");
         }
         identifier = d.value<std::string>("Identifier");
     }

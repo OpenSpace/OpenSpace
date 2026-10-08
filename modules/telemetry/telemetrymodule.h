@@ -105,7 +105,7 @@ public:
     AngleCalculationMode angleCalculationMode() const;
 
     /**
-     * Return whether any elevation angles are being caclulated and sent to the Open Sound
+     * Return whether any elevation angles are being calculated and sent to the Open Sound
      * Control receiver or not.
      *
      * \return `true` if elevation angles are being calculated and sent to the Open Sound

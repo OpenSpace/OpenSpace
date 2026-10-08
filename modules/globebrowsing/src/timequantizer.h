@@ -341,7 +341,7 @@ public:
     double parseTimeResolutionStr(const std::string& resolutionStr);
 
     /**
-     * Quantizes a OpenSpace Time into descrete values. If the provided Time \p t is
+     * Quantizes a OpenSpace Time into discrete values. If the provided Time \p t is
      * outside the time range, it will be clamped to the the time range.
      *
      * \param t Time instance, which will be quantized

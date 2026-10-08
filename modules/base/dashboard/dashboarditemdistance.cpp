@@ -115,7 +115,7 @@ namespace {
     // positions.
     //
     // The resulting text can be formatted in the `FormatString` and the measurement unit
-    // is chosed by changing the `Simplification` and `RequestedUnit` parameters.
+    // is chosen by changing the `Simplification` and `RequestedUnit` parameters.
     struct [[codegen::Dictionary(DashboardItemDistance)]] Parameters {
         enum class [[codegen::map(Type)]] TypeInfo {
             Node,

@@ -245,7 +245,7 @@ const StackElement* resolveType(const Struct* context, std::string_view type) {
         }
     }
 
-    // If we got this far, noone knew what to do with the type
+    // If we got this far, no one knew what to do with the type
     return nullptr;
 }
 

@@ -99,7 +99,7 @@ namespace {
     constexpr Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
         "Visibility distance",
-        "The distace in world coordinates between node and camera at which the "
+        "The distance in world coordinates between node and camera at which the "
         "screenspace object will become visible.",
         Property::Visibility::AdvancedUser
     };
@@ -742,7 +742,7 @@ void SceneGraphNode::initializeGL() {
 
     _state = State::GLInitialized;
 
-    LDEBUG(std::format("Finished initializating GL: {}", identifier()));
+    LDEBUG(std::format("Finished initializing GL: {}", identifier()));
 }
 
 void SceneGraphNode::deinitialize() {

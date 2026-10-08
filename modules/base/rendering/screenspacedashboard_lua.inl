@@ -30,7 +30,7 @@ using namespace openspace;
 namespace {
 
 /**
- * Adds a new dashboard item to an existing SceenSpaceDashboard.
+ * Adds a new dashboard item to an existing ScreenSpaceDashboard.
  */
 [[codegen::luawrap]] void addDashboardItemToScreenSpace(std::string identifier,
                                                         Dictionary dashboard)

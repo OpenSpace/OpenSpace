@@ -10,6 +10,6 @@ Example: `python main.py --test default/earth,rosetta/model default --overwrite 
 
 Additionally, a `config.json` must be provided if tests are to be submitted to the regression server. The `config.sample.json` provides a stub that can be used as the starting point for configuring the JSON file.
 
-If no `config.json` is found, all tests are run locally and are not submitted to the regression server. Instead all resulting images are stored in a `tests` folder whose subfolders mimick the folder structure found in the `visualtests` folder, resulting in images that can be manually inspected.
+If no `config.json` is found, all tests are run locally and are not submitted to the regression server. Instead all resulting images are stored in a `tests` folder whose subfolders mimic the folder structure found in the `visualtests` folder, resulting in images that can be manually inspected.
 
 If a `config.json` is provided, it requires the specification of the URL at which the regression server is located, the hardware string under which the test images are submitted, and a runner id that has to be provided by the administrator of the regression test server. If all these values are correct, test images are directly submitted to the regression server and be can used to compare against a reference image.

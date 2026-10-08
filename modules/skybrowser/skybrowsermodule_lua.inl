@@ -220,7 +220,7 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
- * Starts the setup process of the sky browers. This function calls the Lua function
+ * Starts the setup process of the sky browsers. This function calls the Lua function
  * 'sendOutIdsToBrowsers' in all nodes in the cluster.
  */
 [[codegen::luawrap]] void startSetup() {
@@ -541,7 +541,7 @@ std::string prunedIdentifier(std::string identifier) {
         "}"
     "}";
 
-    // No sync or send because this is already inside a Lua script, therefor it has
+    // No sync or send because this is already inside a Lua script, therefore it has
     // already been synced and sent to the connected nodes and peers
     const std::string script = std::format(
         "openspace.addScreenSpaceRenderable({0});"
@@ -570,8 +570,8 @@ std::string prunedIdentifier(std::string identifier) {
         module->removeTargetBrowserPair(identifier);
 
         // Remove from engine. No sync or send because this is already inside a Lua
-        // script, therefor it has already been synced and sent to the connected nodes and
-        // peers
+        // script, therefore it has already been synced and sent to the connected nodes
+        // and peers
         global::scriptEngine->queueScript({
             .code = "openspace.removeScreenSpaceRenderable('" + browser + "');",
             .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,

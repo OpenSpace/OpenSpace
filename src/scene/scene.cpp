@@ -593,7 +593,7 @@ SceneGraphNode* Scene::loadNode(const Dictionary& nodeDictionary) {
         if (!nodeDictionary.hasValue<Dictionary>(SceneGraphNode::KeyDependencies))
         {
             // TODO: Throw exception
-            LERROR("Dependencies did not have the corrent type");
+            LERROR("Dependencies did not have the correct type");
         }
         const Dictionary nodeDependencies =
             nodeDictionary.value<Dictionary>(SceneGraphNode::KeyDependencies);
@@ -758,8 +758,8 @@ void Scene::updateInterpolations() {
 
 
         // This method might crash if someone deleted the property underneath us. We take
-        // care of removing entire PropertyOwners, but we assume that Propertys live as
-        // long as their SceneGraphNodes. This is true in general, but if Propertys are
+        // care of removing entire PropertyOwners, but we assume that Property%s live as
+        // long as their SceneGraphNodes. This is true in general, but if Property%s are
         // created and destroyed often by the SceneGraphNode, this might become a problem
         i.prop->interpolateValue(finalT, i.easingFunction);
 
@@ -1057,7 +1057,7 @@ provided new value, then back to the original value, until manually stopped.
 std::string makeIdentifier(std::string str) {
     // Note that we want to preserve '-' and '_', but replace any other punctuation
     // marks. Hence, we first convert '_' to whitespaces to avoid them being replaced
-    // in the puncutation check
+    // in the punctuation check
     std::replace(str.begin(), str.end(), '_', ' ');
     std::replace_if(
         str.begin(),

@@ -68,7 +68,7 @@ namespace {
         // representation, or a rotation matrix.
         //
         // For the Euler angles, the values have to be provided in radians. To convert
-        // degres to radians, you can use the `math.rad` function.
+        // degrees to radians, you can use the `math.rad` function.
         //
         // For the Quaternion representation, the values have to be provided in the order
         // (w, x, y, z).

@@ -55,7 +55,7 @@ public:
         std::filesystem::path synchronizationRoot);
 
     /**
-     * Contructor that will terminate the synchronization thread if it is still running.
+     * Constructor that will terminate the synchronization thread if it is still running.
      */
     ~UrlSynchronization() override;
 

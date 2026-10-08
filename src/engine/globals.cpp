@@ -492,7 +492,7 @@ void destroy() {
     delete interactionHandler;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destorying 'ActionManager'");
+    LDEBUGC("Globals", "Destroying 'ActionManager'");
 #ifdef WIN32
     actionManager->~ActionManager();
 #else // ^^^^ WIN32 / !WIN32 vvvv

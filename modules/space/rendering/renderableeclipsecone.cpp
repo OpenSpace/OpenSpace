@@ -139,7 +139,7 @@ namespace {
     {
         assert_msg(
             srcTerminator.size() == dstTerminator.size(),
-            "Unmatched termiator pts"
+            "Unmatched terminator pts"
         );
 
         std::vector<VBOLayout> vertices;
@@ -352,7 +352,7 @@ void RenderableEclipseCone::createCone(double et) {
     // Sun as viewed from the Moon, then the limb of the Moon as viewed from the Sun.
     // The penumbral shadow cone is constructed by connecting the points of the limbs in
     // order. The umbral shadow cone is constructed by connecting them 180 deg out of
-    // phase (meaning top to bottom). We want the cone to eminate from the shadower, so
+    // phase (meaning top to bottom). We want the cone to emanate from the shadower, so
     // we take the distance from the shadower to the shadowee and use that as a scale for
     // the resulting vectors we get (also including the _shadowLength) as an additional
     // scale factor

@@ -225,7 +225,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
                 coordToMeters * glm::vec3(variables[0], variables[1], variables[2])
             );
 
-            // Add the extra quantites. Stored in the same array as the x,y,z variables.
+            // Add the extra quantities. Stored in the same array as the x,y,z variables.
             // Hence index of the first extra quantity = 3
             for (size_t xtraIdx = 3, k = 0; k < nExtras; k++, xtraIdx++) {
                 _extraQuantities[k].push_back(variables[xtraIdx]);
@@ -253,7 +253,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
  *                                                            == _lineCount.size()
  *  5. size_t                 - Total number of vertex points == _vertexPositions.size()
  *                                                           == _extraQuantities[i].size()
- *  6. size_t                 - Number of extra quantites     == _extraQuantities.size()
+ *  6. size_t                 - Number of extra quantities     == _extraQuantities.size()
  *                                                           == _extraQuantityNames.size()
  *  7. size_t                 - Number of total bytes that ALL _extraQuantityNames
  *                              consists of (Each such name is stored as a c_str which

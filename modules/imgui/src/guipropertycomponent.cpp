@@ -307,9 +307,9 @@ void GuiPropertyComponent::render() {
         );
     }
 
-    // If the owners list is empty, we wnat to do the normal thing (-> nothing).
+    // If the owners list is empty, we want to do the normal thing (-> nothing).
     // Otherwise, check if the first owner has a GUI group. This makes the assumption that
-    // the tree layout is only used if the owners are SceenGraphNodes (checked above)
+    // the tree layout is only used if the owners are ScreenGraphNodes (checked above)
     const bool noGuiGroups =
         owners.empty() ||
         (dynamic_cast<SceneGraphNode*>(*owners.begin()) &&

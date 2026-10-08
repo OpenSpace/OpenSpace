@@ -81,7 +81,7 @@ struct TileProvider : public PropertyOwner {
 
     /**
      * Get the associated depth transform for this TileProvider. This is necessary for
-     * TileProviders serving height map data, in order to correcly map pixel values to
+     * TileProviders serving height map data, in order to correctly map pixel values to
      * meters.
      */
     virtual TileDepthTransform depthTransform() = 0;

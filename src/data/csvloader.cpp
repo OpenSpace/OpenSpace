@@ -207,7 +207,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
                 entry.position.z = value;
             }
             else if (nameColumn.has_value() && i == *nameColumn) {
-                // Note that were we use the original stirng value, rather than the
+                // Note that were we use the original string value, rather than the
                 // converted one
                 entry.comment = strValue;
             }

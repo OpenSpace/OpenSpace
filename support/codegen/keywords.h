@@ -65,7 +65,7 @@ constexpr std::string_view MustBeNotEmpty = "notempty";
 } // namespace keywords
 
 /**
- * Looks for the occurance of a keyword in the provided text. If the full keyword,
+ * Looks for the occurrence of a keyword in the provided text. If the full keyword,
  * including the prefix `[[codegen::` exists, the beginning and last is returned as
  * indices. If the keyword was not found two `std::string_view::npos` values are returned.
  */

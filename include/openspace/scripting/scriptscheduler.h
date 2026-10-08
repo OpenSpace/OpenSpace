@@ -41,7 +41,7 @@ struct LuaLibrary;
 
 /**
  * Maintains an ordered list of `ScheduledScript`s and provides a simple interface for
- * retrieveing scheduled scripts.
+ * retrieving scheduled scripts.
  */
 class ScriptScheduler : public PropertyOwner {
 public:
@@ -91,7 +91,7 @@ public:
      *
      * \param newTime A j2000 time value specifying the new time stamp that the script
      *        scheduler should progress to
-     * \return Vector with the scheduled scripts that should be run from begining to end
+     * \return Vector with the scheduled scripts that should be run from beginning to end
      */
     std::vector<std::string> progressTo(double newTime);
 

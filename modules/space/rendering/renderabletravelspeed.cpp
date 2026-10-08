@@ -274,7 +274,7 @@ void RenderableTravelSpeed::updateVertexData() {
     // 3: start of light, 2: start of fade, 1: end of fade
     positions.headOfLight = _travelSpeed * _timeSinceStart * _directionVector;
 
-    // This if statment is there to not start the line from behind the source node
+    // This if statement is there to not start the line from behind the source node
     if (_timeSinceStart < _indicatorLength) {
         positions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0);
     }
@@ -283,7 +283,7 @@ void RenderableTravelSpeed::updateVertexData() {
             _travelSpeed * (_timeSinceStart - _indicatorLength) * _directionVector;
     }
 
-    // This if statment is there to not start the line from behind the source node
+    // This if statement is there to not start the line from behind the source node
     if (_timeSinceStart < (_indicatorLength + _fadeLength)) {
         positions.endOfFade = glm::vec3(0.0, 0.0, 0.0);
     }

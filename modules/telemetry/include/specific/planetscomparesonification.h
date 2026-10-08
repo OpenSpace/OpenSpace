@@ -56,7 +56,7 @@ private:
 
     /**
      * For this sonification, this implementiation is empty since the GUI properties keep
-     * track of tha data with the `onChange` function.
+     * track of the data with the `onChange` function.
      *
      * \param camera The camera in the scene (not used in this case)
      * \return `true` if the data was updated, otherwise `false`
@@ -85,7 +85,7 @@ private:
      * Function that scales the given planet by the given amount over the given amount of
      * seconds.
      *
-     * \param planet The identifer of the planet that should be scaled
+     * \param planet The identifier of the planet that should be scaled
      * \param scale The amount that the planet should be scaled with as a multiplier of
      *        the original size
      * \param interpolationTime The amount of time in seconds to interpolate to the new

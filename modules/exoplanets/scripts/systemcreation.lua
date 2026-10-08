@@ -148,7 +148,7 @@ function addExoplanetSystem(data)
       )
     elseif hasValue(data.StarTeff) then
       return string.format(
-        "Its size is uknown, but it has an effective temperature of %.0f Kelvin",
+        "Its size is unknown, but it has an effective temperature of %.0f Kelvin",
         data.StarTeff
       )
     elseif hasValue(data.StarRadius) then

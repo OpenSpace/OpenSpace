@@ -189,8 +189,8 @@ std::string_view ShaderObject::typeAsString() const {
 std::string_view ShaderObject::stringForShaderType(ShaderType type) {
     switch (type) {
         case ShaderType::Vertex:                return "Vertex shader";
-        case ShaderType::TesselationControl:    return "Tesselation Control shader";
-        case ShaderType::TesselationEvaluation: return "Tesselation Evaluation shader";
+        case ShaderType::TessellationControl:    return "Tessellation Control shader";
+        case ShaderType::TessellationEvaluation: return "Tessellation Evaluation shader";
         case ShaderType::Geometry:              return "Geometry shader";
         case ShaderType::Fragment:              return "Fragment shader";
         case ShaderType::Compute:               return "Compute shader";

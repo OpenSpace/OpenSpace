@@ -172,7 +172,7 @@ private:
     StringProperty _startTime;
     StringProperty _endTime;
 
-    // Variables used when syncronizing play, pause and looping behavior
+    // Variables used when synchronizing play, pause and looping behavior
     // (should only be modified by Master)
     SyncFlags _syncFlags;
     PlaybackState _playbackState = PlaybackState::Undefined;
@@ -208,7 +208,7 @@ private:
     std::unique_ptr<opengl::Texture> _frameTexture;
     /// Our OpenGL framebuffer where mpv renders to
     GLuint _fbo = 0;
-    /// If libmpv has been inititalized
+    /// If libmpv has been initialized
     bool _isInitialized = false;
     /// Prevent seeking while already seeking
     bool _isSeeking = false;

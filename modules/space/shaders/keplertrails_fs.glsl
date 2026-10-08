@@ -41,7 +41,7 @@ Fragment getFragment() {
   // float offsetPeriods = offset / period;
   // This is now done in the fragment shader instead to make smooth movement between
   // vertices. We want vertexDistance to be double up to this point, I think, (hence the
-  // unnessesary float to float conversion)
+  // unnecessary float to float conversion)
   float vertexDistance = in_data.periodFraction - in_data.offsetPeriods;
 
   // This is the alternative way of calculating

@@ -67,7 +67,7 @@ namespace {
             return boolProp;
         };
 
-        // Show some info related to the visiblity of the object
+        // Show some info related to the visibility of the object
         const Renderable* renderable = node->renderable();
         if (!renderable) {
             // Check if any of the children are visible, if it has children
@@ -201,7 +201,7 @@ Path::Path(Waypoint start, Waypoint end, Type type, std::optional<float> duratio
             estimatedDuration = *duration;
         }
         else {
-            // A duration of zero means infinite speed. Handle this explicity
+            // A duration of zero means infinite speed. Handle this explicitly
             _speedFactorFromDuration = std::numeric_limits<float>::infinity();
             estimatedDuration = 0.f;
         }
@@ -281,7 +281,7 @@ CameraPose Path::traversePath(double dt, float speedScale) {
     }
     else {
         if (std::abs(prevDistance - _traveledDistance) < LengthEpsilon) {
-            // The distaces are too large, so we are not making progress because of
+            // The distances are too large, so we are not making progress because of
             // insufficient precision
             _shouldQuit = true;
             LWARNING("Quit camera path prematurely due to insufficient precision");

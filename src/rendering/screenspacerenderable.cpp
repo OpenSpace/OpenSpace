@@ -55,7 +55,7 @@ namespace {
     constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Determines whether this sceen space object will be rendered or not.",
+        "Determines whether this screen space object will be rendered or not.",
         Property::Visibility::AdvancedUser
     };
 
@@ -809,7 +809,7 @@ glm::vec3 ScreenSpaceRenderable::raeToSpherical(const glm::vec3& rae) const {
     // Polar angle, theta, is elevation + pi/2
     const float theta = rae.z + glm::half_pi<float>();
 
-    // Azimuth in ISO spherical coordiantes (phi) is angle from x, as opposed to from
+    // Azimuth in ISO spherical coordinates (phi) is angle from x, as opposed to from
     // negative y on screen
     const float phi = rae.y - glm::half_pi<float>();
 

@@ -85,7 +85,7 @@ private:
     /**
      * For this telemetry, a more advanced custom updateData function is needed with
      * additional arguments. Therefore, this implementation is left empty and the update
-     * function is overriden to use the custom updateData function instead.
+     * function is overridden to use the custom updateData function instead.
      *
      * \param camera The camera in the scene (not used in this case)
      * \return Always return `false` (this function is empty)
@@ -95,7 +95,7 @@ private:
     /**
      * For this telemetry, a more advanced custom sendData function is needed with
      * additional arguments. Therefore, this implementation is left empty and the update
-     * function is overriden to use the custom updateData function instead.
+     * function is overridden to use the custom updateData function instead.
      */
     void sendData() override;
 
@@ -127,7 +127,7 @@ private:
 
         // The low and high precision values are used in different situations. When the
         // node is the current focus node, then the high precision value is used. This
-        // is due to the node being in the current focus and therfore needs better
+        // is due to the node being in the current focus and therefore needs better
         // precision. If the node is not the current focus node, then the low precision
         // value is used to save performance
         DoubleProperty lowDistancePrecision;

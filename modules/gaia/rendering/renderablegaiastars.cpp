@@ -473,7 +473,7 @@ RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
         }
 
         // Find out our new budget. Use dedicated video memory instead of current
-        // available to always be consistant with previous call(s)
+        // available to always be consistent with previous call(s)
         GLint nDedicatedVidMemoryInKB = 0;
         glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &nDedicatedVidMemoryInKB);
         const float dedicatedVidMem = static_cast<float>(

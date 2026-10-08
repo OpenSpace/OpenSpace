@@ -690,7 +690,7 @@ std::pair<std::string, std::string> HorizonsDialog::readTimeRange() {
             else {
                 const std::string msg = std::format(
                     "Could not find all time range information. Latest Horizons "
-                    "mesage: {}", _latestHorizonsError
+                    "message: {}", _latestHorizonsError
                 );
                 appendLog(msg, LogLevel::Warning);
             }
@@ -1083,7 +1083,7 @@ bool HorizonsDialog::handleResult(HorizonsResultCode& result) {
         }
         case HorizonsResultCode::News: {
             std::string msg = std::format(
-                "The target '{}' is too simlar to the Horizons command 'NEWS'",
+                "The target '{}' is too similar to the Horizons command 'NEWS'",
                 _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
@@ -1198,7 +1198,7 @@ bool HorizonsDialog::handleResult(HorizonsResultCode& result) {
                 );
                 appendLog(msg, LogLevel::Error);
             }
-            QMessageBox::critical(this, "Error", "An unknown error occured");
+            QMessageBox::critical(this, "Error", "An unknown error occurred");
             break;
         }
         default: {

@@ -247,7 +247,7 @@ RawTileDataReader::~RawTileDataReader() {
 }
 
 std::optional<std::string> RawTileDataReader::mrfCache() {
-    // We don't support these formats as they will typically lack crucial imformation such
+    // We don't support these formats as they will typically lack crucial information such
     // as GeoTags. It also makes little sense to cache them as they are already local
     // files. If it is crucial to cache a dataset of this type, convert it to GeoTIFF
     constexpr std::array<std::string_view, 11> Unsupported = {

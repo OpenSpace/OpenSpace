@@ -80,7 +80,7 @@ Tile TileIndexTileProvider::tile(const TileIndex& tileIndex) {
         const TileIndex::TileHashKey key = tileIndex.hashKey();
         size_t hash = std::hash<TileIndex::TileHashKey>{}(key);
 
-        // This is pretty ugly, but it's just for debugging and it is reproducable... We
+        // This is pretty ugly, but it's just for debugging and it is reproducible... We
         // take the first three bytes of the hash, treat them as an 8-bit unsigned integer
         // which makes them [0, 255] and also pseudorandom while being always the same for
         // each tile. If we divide the resulting number by 255 we get a value [0, 1] that

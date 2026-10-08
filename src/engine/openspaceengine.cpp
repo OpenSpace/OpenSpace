@@ -941,7 +941,7 @@ void OpenSpaceEngine::deinitialize() {
 
     {
         // We are storing the `hasStartedBefore` setting here instead of in the
-        // intialization phase as otherwise we'd always think that OpenSpace had been
+        // initialization phase as otherwise we'd always think that OpenSpace had been
         // started before
         Settings settings = loadSettings();
 
@@ -1761,7 +1761,7 @@ bool OpenSpaceEngine::setMode(Mode newMode) {
         return true;
     }
     else if (newMode == _currentMode) {
-        LERROR("Cannot switch to the currectly active mode");
+        LERROR("Cannot switch to the correctly active mode");
         return false;
     }
     else if (_currentMode != Mode::UserControl && newMode != Mode::UserControl) {

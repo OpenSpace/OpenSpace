@@ -149,7 +149,7 @@ bool openFileLocation(const std::filesystem::path& path) {
 }
 
 /**
- * Passes the argument to FileSystem::absolutePath, which resolves occuring path tokens
+ * Passes the argument to FileSystem::absolutePath, which resolves occurring path tokens
  * and returns the absolute path.
  */
 [[codegen::luawrap("absPath")]] std::filesystem::path absolutePath(std::string path) {

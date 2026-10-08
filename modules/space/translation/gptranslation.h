@@ -30,14 +30,14 @@
 namespace openspace {
 
 /**
- * A specialization of the KeplerTranslation that utilizes general pertubation file
+ * A specialization of the KeplerTranslation that utilizes general perturbation file
  * formats to extracts the Keplerian elements.
  */
 class GPTranslation : public KeplerTranslation {
 public:
     /**
      * Constructor for the GPTranslation class. The \p dictionary must contain a key for
-     * the file that contains the general pertubation information as well as the file
+     * the file that contains the general perturbation information as well as the file
      * format that is to be used.
      *
      * \param dictionary The Dictionary that contains the information for this
