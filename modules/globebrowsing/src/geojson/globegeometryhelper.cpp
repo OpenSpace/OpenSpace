@@ -276,7 +276,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
         }
     }
 
-    // Add egde positions
+    // Add edge positions
     for (size_t i = 0; i < maxSteps; i++) {
         if (i < edge01.size() - 1) {
             const Geodetic3 geo = {

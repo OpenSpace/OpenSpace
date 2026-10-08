@@ -90,7 +90,7 @@ namespace {
     constexpr Property::PropertyInfo UseCameraInfo = {
         "UseCamera",
         "Use camera",
-        "If this value is 'true', the latitute and longitude are updated each frame "
+        "If this value is 'true', the latitude and longitude are updated each frame "
         "to match the location of the camera.",
         Property::Visibility::AdvancedUser
     };

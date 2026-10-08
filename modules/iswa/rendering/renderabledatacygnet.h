@@ -78,7 +78,7 @@ protected:
 
     /**
      * Optional interface method. this has an implementation in datacygnet.cpp, but needs
-     * to be overriden for KameleonPlane.
+     * to be overridden for KameleonPlane.
      */
     bool updateTextureResource() override;
 

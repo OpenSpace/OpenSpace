@@ -130,7 +130,7 @@ namespace {
     constexpr Property::PropertyInfo FollowAnchorNodeInfo = {
         "FollowAnchorNodeRotation",
         "Follow anchor node rotation",
-        "If true, the camera will rotate with the current achor node if within a "
+        "If true, the camera will rotate with the current anchor node if within a "
         "certain distance from it. When this happens, the object will appear fixed in "
         "relation to the camera. The distance at which the change happens is controlled "
         "through another property.",
@@ -438,7 +438,7 @@ OrbitalNavigator::OrbitalNavigator()
     //
     // The transfer functions are derived from:
     // f(t) = d/dt (ln(1 / f_orig(t))) where f_orig is the transfer function that would be
-    // used if the interpolation was sinply linear between a start value and an end value
+    // used if the interpolation was simply linear between a start value and an end value
     // instead of current value and end value (0) as we use it when inerpolating. As an
     // example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a linear
     // interpolation from 1 to 0
@@ -1344,7 +1344,7 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime, double spee
                                                    const glm::dquat& globalCameraRotation,
                                         const SurfacePositionHandle& positionHandle) const
 {
-    // If we are orbiting around an up vector, we only want to allow verical movement and
+    // If we are orbiting around an up vector, we only want to allow vertical movement and
     // not use the x velocity
     const bool useX = !_shouldRotateAroundUp;
 

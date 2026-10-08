@@ -70,7 +70,7 @@ namespace {
     };
 
     /**
-     * Extract the camera parameters from the lsit of parameters, `par`.
+     * Extract the camera parameters from the list of parameters, `par`.
      *
      * \param par The list of parameters, in the order of orbit.x, orbit.y, zoom, roll,
      *        pan.x, pan.y. The number of parameters should match the number of degrees
@@ -316,7 +316,7 @@ DirectManipulation::DirectManipulation()
     // @TODO (2026-03-31, emmbr) This is a bit of a hack, to apply this setting to
     // RenderableGlobes per default. It's done manually before the onchange, as the
     // RenderableGlobe type has not yet been registered when this constructor is run, so
-    // the existance check fails... In the future we want to remove this and ideally,
+    // the existence check fails... In the future we want to remove this and ideally,
     // this property should not be needed at all. Direct manipulation should be made to
     // work fine for all renderable types
     _defaultRenderableTypes = std::vector<std::string>({ "RenderableGlobe" });

@@ -49,7 +49,7 @@ namespace {
     const ImVec2 Size = ImVec2(350, 500);
 
     void showTooltip(const std::string& message, double delay) {
-        // Hackish way to enfore a window size for TextWrapped (SetNextWindowSize did not
+        // Hackish way to enforce a window size for TextWrapped (SetNextWindowSize did not
         // do the trick)
         constexpr std::string::size_type FirstLineLength = 64;
         if (!ImGui::IsItemHovered() || GImGui->HoveredIdTimer <= delay) {

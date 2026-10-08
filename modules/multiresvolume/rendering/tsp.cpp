@@ -68,7 +68,7 @@ bool TSP::load() {
             return false;
         }
     }
-    initalizeSSO();
+    initializeSSO();
 
     return true;
 }
@@ -186,7 +186,7 @@ bool TSP::construct() {
     return true;
 }
 
-bool TSP::initalizeSSO() {
+bool TSP::initializeSSO() {
     if (!_dataSSBO) {
         glCreateBuffers(1, &_dataSSBO);
     }

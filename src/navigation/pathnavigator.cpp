@@ -91,7 +91,7 @@ namespace {
         "ArrivalDistanceFactor",
         "Arrival distance factor",
         "A factor used to compute the default distance from a target scene graph node "
-        "when creating a camera path. The factor will be multipled with the node's "
+        "when creating a camera path. The factor will be multiplied with the node's "
         "bounding sphere to compute the target height from the bounding sphere of the "
         "object.",
         Property::Visibility::AdvancedUser
@@ -321,7 +321,7 @@ void PathNavigator::createPath(Dictionary dictionary) {
 
     clearPath();
 
-    // If the user specified to overwride the duration, we want to inject that duration in
+    // If the user specified to overwrite the duration, we want to inject that duration in
     // here, unless the dictionary already contains a duration, in which case that value
     // has precedence
     if (_useCustomFlyToDuration && !dictionary.hasValue<double>("Duration")) {
@@ -368,7 +368,7 @@ void PathNavigator::startPath() {
         return;
     }
 
-    // Always pause the simulation time when flying, to aovid problem with objects moving.
+    // Always pause the simulation time when flying, to avoid problem with objects moving.
     // However, keep track of whether the time was running before the path was started, so
     // we can reset it on finish
     if (!global::timeManager->isPaused()) {

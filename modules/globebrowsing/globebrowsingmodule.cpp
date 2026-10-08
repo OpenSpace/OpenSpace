@@ -451,7 +451,7 @@ void GlobeBrowsingModule::removeWMSServer(const std::string& name) {
         _capabilitiesMap.erase(capIt);
     }
 
-    // Then remove the calues from the globe server list
+    // Then remove the values from the globe server list
     for (auto it = _urlList.begin(); it != _urlList.end();) {
         // We have to increment first because the erase will invalidate the iterator
         const auto eraseIt = it++;

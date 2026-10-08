@@ -822,7 +822,7 @@ void RenderablePointCloud::initialize() {
             _texture.inputMode = "Single Sprite Texture";
             break;
         case TextureInputMode::Multi:
-            _texture.inputMode = "Multipe Textures / Data-based";
+            _texture.inputMode = "Multiple Textures / Data-based";
             break;
         case TextureInputMode::Other:
             _texture.inputMode = "Other";

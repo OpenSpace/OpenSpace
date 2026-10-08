@@ -37,7 +37,7 @@ namespace {
 namespace openspace {
 
 /**
- * Go far out to get a view of both tagets, aimed to match lookAt orientation.
+ * Go far out to get a view of both targets, aimed to match lookAt orientation.
  */
 ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end) {
     const double startNodeRadius = start.validBoundingSphere();

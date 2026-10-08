@@ -202,7 +202,7 @@ namespace {
 
     LayerGroup& lg = globe->layerManager().layerGroup(group);
     if (std::holds_alternative<int>(source) && std::holds_alternative<int>(destination)) {
-        // Short circut here, no need to get the layers
+        // Short circuit here, no need to get the layers
         lg.moveLayer(std::get<int>(source), std::get<int>(destination));
         return;
     }

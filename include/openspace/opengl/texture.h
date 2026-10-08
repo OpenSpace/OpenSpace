@@ -166,7 +166,7 @@ public:
     /**
      * Creates a new Texture. If the \p data pointer is provided, the data will be
      * uploaded to the GPU. The data pointed to by \p data needs to be large enough to
-     * accomodate `format.dimensions` and `format.dataType`.
+     * accommodate `format.dimensions` and `format.dataType`.
      *
      * \param format The initialization struct describing the format of the Texture data
      * \param sampler The initialization struct describing the sampling of the data

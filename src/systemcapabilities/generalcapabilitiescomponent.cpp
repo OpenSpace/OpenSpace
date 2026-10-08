@@ -342,7 +342,7 @@ void GeneralCapabilitiesComponent::detectMemory() {
 #ifdef WIN32
     try {
         std::string memory;
-        // This function might fail if the process has insufficient priviledges to access
+        // This function might fail if the process has insufficient privileges to access
         // the WMI on Windows
         queryWMI("Win32_ComputerSystem", "TotalPhysicalMemory", memory);
         std::stringstream convert;

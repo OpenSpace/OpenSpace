@@ -106,7 +106,7 @@ namespace {
         // is not available.
         std::optional<bool> enableRemoteDebugging;
 
-        // Forcably disables accelerated rendering, even if other preconditions would
+        // Forcibly disables accelerated rendering, even if other preconditions would
         // otherwise allow the use of it to speed up the rendering of the user interface.
         // This setting can be used to circumvent an otherwise fatal crash that is caused
         // by the accelerated rendering.

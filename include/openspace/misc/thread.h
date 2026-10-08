@@ -59,7 +59,7 @@ enum class ThreadPriorityLevel {
 BooleanType(Background);
 
 /**
- * This method sets the priorty of the thread \p t to the ThreadPriorityClass
+ * This method sets the priority of the thread \p t to the ThreadPriorityClass
  * \p priorityClass and the ThreadPriorityLevel to \p priorityLevel.
  *
  * \param t The thread for which to set the priority class and level

@@ -32,21 +32,21 @@
  * Note: This needs to be a monotonic function, so that the value can
  * still be used for depth comparison.
  */
-float normalizeFloat(float inpt) {
-  if (inpt > 1.0) {
-    return inpt / pow(10.0, 30.0);
+float normalizeFloat(float input) {
+  if (input > 1.0) {
+    return input / pow(10.0, 30.0);
   }
   else {
-    return inpt - 1.0;
+    return input - 1.0;
   }
 }
 
-float denormalizeFloat(float inpt) {
-  if (inpt < 0.0) {
-    return inpt + 1.0;
+float denormalizeFloat(float input) {
+  if (input < 0.0) {
+    return input + 1.0;
   }
   else {
-    return inpt * pow(10.0, 30.0);
+    return input * pow(10.0, 30.0);
   }
 }
 

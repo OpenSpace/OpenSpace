@@ -53,7 +53,7 @@ endmacro ()
 
 # This method uses the currently active indentation level to automatically call the
 # correct version of the h1, h2, h3, hx methods. A call to `begin_header` **has** to have
-# a mached `end_header` call or bad things will happen
+# a matched `end_header` call or bad things will happen
 macro (begin_header title)
   if (NOT DEFINED __current_header_indent)
     set(__current_header_indent 0)

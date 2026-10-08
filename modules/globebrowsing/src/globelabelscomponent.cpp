@@ -74,7 +74,7 @@ namespace {
     constexpr Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
-        "Font size for the rendering labels. This is different fromt text size.",
+        "Font size for the rendering labels. This is different from the text size.",
         Property::Visibility::User
     };
 

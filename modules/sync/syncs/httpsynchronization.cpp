@@ -67,7 +67,7 @@ namespace {
 
         // The destination for the unzipping. If this value is specified, all zip files
         // contained in the synchronization will be unzipped into the same specified
-        // folder. If this value is specified, but 'unzipFiles' is false, no extaction
+        // folder. If this value is specified, but 'unzipFiles' is false, no extraction
         // will be performed.
         std::optional<std::string> unzipFilesDestination;
     };

@@ -721,7 +721,7 @@ void GlobeGeometryFeature::createPolygonGeometry() {
 
             if (_properties.tessellationEnabled()) {
                 // First determine the step size for the tessellation (larger features
-                // will not be tesselated)
+                // will not be tessellated)
                 const float stepSize = tessellationStepSize();
 
                 std::vector<Vertex> verts = subdivideTriangle(

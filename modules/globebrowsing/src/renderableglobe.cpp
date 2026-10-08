@@ -249,7 +249,7 @@ namespace {
     constexpr Property::PropertyInfo CurrentLodScaleFactorInfo = {
         "CurrentLodScaleFactor",
         "Current level of detail scale factor (read only)",
-        "The currently used scale factor whose target value is deteremined by "
+        "The currently used scale factor whose target value is determined by "
         "'TargetLodScaleFactor'.",
         Property::Visibility::AdvancedUser
     };
@@ -2702,7 +2702,8 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
             splitChunkNode(cn, 1);
         }
         else if (cn.status == Chunk::Status::DoNothing && !cn.colorTileOK) {
-            // Checking cn.heightTileOK caused always not avaiable for certain HiRISE data
+            // Checking cn.heightTileOK caused always not available for certain HiRISE
+            // data
             _allChunksAvailable = false;
         }
 

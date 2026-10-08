@@ -232,7 +232,7 @@ namespace {
         "Enabled",
         "If false, no tessellation to bend the geometry based on the curvature of the "
         "planet is performed. This leads to increased performance, but tessellation is "
-        "neccessary for large geometry that spans a big portion of the globe. Otherwise "
+        "necessary for large geometry that spans a big portion of the globe. Otherwise "
         "it may intersect the surface.",
         Property::Visibility::User
     };
@@ -243,7 +243,7 @@ namespace {
         "If true, use the 'Tessellation Level' to control the level of detail for the "
         "tessellation. The distance used will be the 'Tessellation Distance' divided by "
         "the 'Tessellation Level', so the higher the level value, the smaller each "
-        "segment in the geomoetry will be.",
+        "segment in the geometry will be.",
         Property::Visibility::AdvancedUser
     };
 
@@ -260,7 +260,7 @@ namespace {
     constexpr Property::PropertyInfo TessellationDistanceInfo = {
         "TessellationDistance",
         "Tessellation distance",
-        "Defult distance to use for tessellation of line and polygon geometry. Anything "
+        "Default distance to use for tessellation of line and polygon geometry. Anything "
         "larger than this distance will be automatically subdivided into smaller pieces "
         "matching this distance, while anything smaller will not be subdivided. Per "
         "default this will be set to a distance corresponding to about 1 degree "

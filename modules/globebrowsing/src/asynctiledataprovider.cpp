@@ -173,7 +173,7 @@ void AsyncTileDataProvider::reset() {
     // we need to wait until _enqueuedTileRequests is empty before finishing up
     _resetMode = ResetMode::ShouldResetAll;
     endEnqueuedJobs();
-    LINFO(std::format("Prepairing for resetting of tile reader '{}'", _name));
+    LINFO(std::format("Preparing for resetting of tile reader '{}'", _name));
 }
 
 void AsyncTileDataProvider::prepareToBeDeleted() {

@@ -599,7 +599,7 @@ void RenderableFluxNodes::populateStartTimes() {
         }
 
         const std::string f = filePath.filename().string();
-        // If no file extention but word "time" in file name
+        // If no file extension but word "time" in file name
         if (f.contains("time") && !f.contains('.')) {
             timeFile = filePath;
             break;
@@ -609,7 +609,7 @@ void RenderableFluxNodes::populateStartTimes() {
     if (timeFile.empty()) {
         LERROR(
             "Could not find a metadata file with time steps, such as a csv, dat, txt or "
-            "no file extention with 'time' in filename"
+            "no file extension with 'time' in filename"
         );
     }
 
@@ -652,7 +652,7 @@ void RenderableFluxNodes::populateStartTimes() {
             }
             else {
                 LERROR(std::format(
-                    "Error in file formating. Last column in file '{}' is not on UTC "
+                    "Error in file formatting. Last column in file '{}' is not on UTC "
                     "ISO8601 format", timeFile
                 ));
             }

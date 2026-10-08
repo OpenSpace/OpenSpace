@@ -137,7 +137,7 @@ private:
             // When is the button considered activated
             JoystickAction action;
 
-            // If the script should be syncronised to other remote sessions or not
+            // If the script should be synchronized to other remote sessions or not
             ButtonCommandRemote synchronization;
 
             // Short documentation on what the script of this button does

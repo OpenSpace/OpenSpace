@@ -245,7 +245,7 @@ void TelemetryModule::internalInitialize(const Dictionary& dictionary) {
 }
 
 void TelemetryModule::internalDeinitialize() {
-    // Stop the loop and tell the thread it is ok to run the last itteration
+    // Stop the loop and tell the thread it is ok to run the last iteration
     _isRunning = false;
     syncToMain.notify_one();
 

@@ -178,10 +178,10 @@ namespace {
         // A data ID that corresponds to what dataset to use if using dynamic downloading.
         std::optional<int> dataID;
 
-        // A URL that returns a JSON formated page with metadata needed for the dataURL.
+        // A URL that returns a JSON formatted page with metadata needed for the dataURL.
         std::optional<std::string> infoURL;
 
-        // A URL that returns a JSON formated page with a list of each available file.
+        // A URL that returns a JSON formatted page with a list of each available file.
         std::optional<std::string> dataURL;
 
         // [[codegen::verbatim(FitsLayerInfo.description)]]
@@ -672,8 +672,8 @@ void RenderableTimeVaryingFitsSphere::computeSequenceEndTime() {
     else if (_files.size() == 1) {
         _sequenceEndTime = _files[0].time + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
-            // TODO (2025-06-10, Elon) Alternativly check at construction and throw
-            // exeption
+            // TODO (2025-06-10, Elon) Alternatively check at construction and throw
+            // exception
             LWARNING(
                 "Only one file in data set, but ShowAtAllTimes set to false. "
                 "Using arbitrary 2 hours to visualize data file instead"
@@ -715,7 +715,7 @@ void RenderableTimeVaryingFitsSphere::trackOldest(File& file) {
         {
             File* oldest = _loadedFiles.front();
             // The edge case of when queue just got full and user jumped back to where
-            // they started which would make the oldes file in queue to be the active
+            // they started which would make the oldest file in queue to be the active
             // file. In that case we need to make sure we do not unload it
             if (oldest == &file) {
                 return;

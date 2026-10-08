@@ -239,7 +239,7 @@ private:
         int& deltaStars, bool recursive = true);
 
     /**
-     * Contruct default children nodes for specified node.
+     * Construct default children nodes for specified node.
      */
     void createNodeChildren(OctreeNode& node);
 

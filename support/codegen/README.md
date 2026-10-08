@@ -1,6 +1,6 @@
 # Overview
-The `codegen` application automatically generated often-used and repetetive C++ code which is saved to an external file that can be included in the main application.  This is handled through the use of attribute markers in specific locations.  At the moment, there are three different locations that can accept attributes:
-1. `struct`s can be marked with the `[[codegen::Dictionary(Name)]]` attribute, where *Name* is a unique name (mostly the class name of the Renderable for which the code is generated).  Everything touched by the code generation has to be delared inside a struct (referred to as a *root struct*).  Member variables, structs, documentations can be modified by adding attributes of the style `[[codegen::TYPE(PARAMETER)]]` where *TYPE* is a keyword for the attribute and *PARAMETER* are optional parameters that might be necessary. Multiple attributes can be added by separating them with a comma (`[[codegen::key(ABC), codegen::inrange(0.0, 1.0)]]`). Structs can also be commented either with `//` comment lines or `/*` block comments before the definition of the struct begins
+The `codegen` application automatically generated often-used and repetitive C++ code which is saved to an external file that can be included in the main application.  This is handled through the use of attribute markers in specific locations.  At the moment, there are three different locations that can accept attributes:
+1. `struct`s can be marked with the `[[codegen::Dictionary(Name)]]` attribute, where *Name* is a unique name (mostly the class name of the Renderable for which the code is generated).  Everything touched by the code generation has to be declared inside a struct (referred to as a *root struct*).  Member variables, structs, documentations can be modified by adding attributes of the style `[[codegen::TYPE(PARAMETER)]]` where *TYPE* is a keyword for the attribute and *PARAMETER* are optional parameters that might be necessary. Multiple attributes can be added by separating them with a comma (`[[codegen::key(ABC), codegen::inrange(0.0, 1.0)]]`). Structs can also be commented either with `//` comment lines or `/*` block comments before the definition of the struct begins
 2. `enum class` can be marked with the `[[codegen::stringify]]` or `[[codegen::map]]` attribute to either create conversion functions that convert enum values to and from `string` values (for the first attribute) or that can map an enum to a second enum where all of the values have the same name. Alternatively `[[codegen::arrayify]]` will cause a function to be created that returns a vector containing all of the elements of the enum
 3. A C-style function can be marked with `[[codegen::luawrap]]` which will generate code that extracts the necessary functions from a Lua state to call the function and then push the return value of the function back to the Lua stack.  The generated code also contains information about the name of the function, descriptions of the arguments and return values, and also the documentation for the marked function
 
@@ -36,11 +36,11 @@ Running the codegen will create a number of functions in the generated `_codegen
 
 If a struct  was marked with `codegen::Dictionary` the following functions will exist (this example assumes that the name of the marked struct was `P`):
  - `P bake(const Dictionary&)`:  Will extract the parameters used to create `P` out of the passed Dictionary and will also verify that all parameters that are non-optional do exist and that all parameters have the correct type
- - `openspace::Documentation doc(std::string, openspace::Documentation)`:  Returns the documentation object that describes the parameters that a `Dictionary` need to fulfill to be successfully passed into the `bake` function.  The first parameter is the identifier of the documentation which needs to be unique. The optional second argument is a parent Documentation whose entires will be copied
+ - `openspace::Documentation doc(std::string, openspace::Documentation)`:  Returns the documentation object that describes the parameters that a `Dictionary` need to fulfill to be successfully passed into the `bake` function.  The first parameter is the identifier of the documentation which needs to be unique. The optional second argument is a parent Documentation whose entries will be copied
 
 If any enum in the file was marked with the `codegen::map(abc)` attribute the function `codegen::map<myspace::ABC>` is available that returns the corresponding type to the passed in value.
 
-If any enum is marked with with `codegen::stringify()` attribute, the `toString` and `fromString` methods are created with allow the enum values to be converted to and from std representations repectively.
+If any enum is marked with with `codegen::stringify()` attribute, the `toString` and `fromString` methods are created with allow the enum values to be converted to and from std representations respectively.
 
 If a function `abc` was marked with the `codegen::luawrap` attribute, the generated file will contain a namespace `codegen::lua` with a struct `Abc` in it that contains all of the information about the marked function.
 
@@ -61,7 +61,7 @@ All types and variable definitions can have comments defined directly before the
  - C++ types: `bool`, `int`, `float`, `double`, `std::vector`, `std::optional`, `std::variant`, `std::string`, `std::filesystem::path`
  - `glm::ivec2`, `glm::ivec3`, `glm::ivec4`, `glm::dvec2`, `glm::dvec3`, `glm::dvec4`, `glm::vec2`, `glm::vec3`, `glm::vec4`, `glm::mat2x2`, `glm::mat2x3`, `glm::mat2x4`, `glm::mat3x2`, `glm::mat3x3`, `glm::mat3x4`, `glm::mat4x2`, `glm::mat4x3`, `glm::mat4x4`, `glm::dmat2x2`, `glm::dmat2x3`, `glm::dmat2x4`, `glm::dmat3x2`, `glm::dmat3x3`, `glm::dmat3x4`, `glm::dmat4x2`, `glm::dmat4x3`, `glm::dmat4x4`, `Dictionary`
  - `struct`s (must be defined inside the root struct)
- - `enum class` (must be defind inside the root struct)
+ - `enum class` (must be defined inside the root struct)
 
 The variable's name will be used to get a value out of the dictionary in the baking process.  The only transformation of the name is that the first letter is capitalized (`referenceName` will be looked up as `ReferenceName`).
 

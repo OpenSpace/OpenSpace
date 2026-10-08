@@ -66,7 +66,7 @@ namespace {
         "DisplayString",
         "Display string",
         "The String that is being displayed. It must either be empty (in which case only "
-        "the value itself will be displayed), or it must contain extact one or more "
+        "the value itself will be displayed), or it must contain exactly one or more "
         "instances of {}, which will be replaced with the value(s) of the property "
         "during rendering. For scalar types, there has to be exactly one instance of {}, "
         "for vector types, there need to be as many {} as there are components in the "

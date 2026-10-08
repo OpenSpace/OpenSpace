@@ -39,7 +39,7 @@ namespace {
             return std::nullopt;
         }
 
-        // We check the value of the extension here explcitly as the file name might have
+        // We check the value of the extension here explicitly as the file name might have
         // an extra `.` in the name
         if (!p.has_extension() || p.extension() != desiredExtension) {
             p = p.string() + desiredExtension;
@@ -263,7 +263,7 @@ std::optional<std::filesystem::path> SplitComboBox::unrollPath(
     const std::filesystem::path inPath =
         std::filesystem::path(pathString).make_preferred();
 
-    // Determine if realtive or absolute path
+    // Determine if relative or absolute path
     if (inPath.is_relative()) {
         // Check type of relative path
         const size_t beginning = pathString.find("${");

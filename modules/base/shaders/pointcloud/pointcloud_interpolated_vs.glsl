@@ -58,7 +58,7 @@ float interpolateValue(float v0, float v1, float t) {
   const float Epsilon = 1E-7;
   const float NaN = log(-1.0); // undefined
   // To make sure we render values at knots with neighboring missing values,
-  // check 0 and 1 expicitly
+  // check 0 and 1 explicitly
   if (abs(t) < Epsilon) {
     return v0;
   }

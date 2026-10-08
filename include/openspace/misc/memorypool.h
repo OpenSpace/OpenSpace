@@ -79,7 +79,7 @@ public:
 
     /**
      * Returns a pointer to an allocated object of type T. The parameters to this function
-     * are passed on to the contructor of T.
+     * are passed on to the constructor of T.
      *
      * \tparam T The type of the object that is to be constructed
      * \param args The arguments to the constructor of T
@@ -128,7 +128,7 @@ private:
 };
 
 /**
- * This memory pool works similar to the \see TypedMemoryPool execept that instances of
+ * This memory pool works similar to the \see TypedMemoryPool except that instances of
  * the returned pointers can be returned to make them available again for future calls of
  * the allocate method.
  *

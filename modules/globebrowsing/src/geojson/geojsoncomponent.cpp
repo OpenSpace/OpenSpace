@@ -146,7 +146,7 @@ namespace {
         "CentroidCoordinate",
         "Centroid coordinate",
         "The lat long coordinate of the centroid position of the read geometry. Note "
-        "that this value does not incude the offset.",
+        "that this value does not include the offset.",
         Property::Visibility::AdvancedUser
     };
 
@@ -154,7 +154,7 @@ namespace {
         "BoundingBox",
         "Bounding box",
         "The lat long coordinates of the lower and upper corner of the bounding box of "
-        "the read geometry. Note that this value does not incude the offset.",
+        "the read geometry. Note that this value does not include the offset.",
         Property::Visibility::AdvancedUser
     };
 
@@ -437,7 +437,7 @@ GeoJsonComponent::GeoJsonComponent(const Dictionary& dictionary, RenderableGlobe
         }
     }
     else {
-        // If no light source provided, add a deafult light source from the camera
+        // If no light source provided, add a default light source from the camera
         using namespace std::string_literals;
         Dictionary defaultLightSourceDict;
         defaultLightSourceDict.setValue("Identifier", "Camera"s);

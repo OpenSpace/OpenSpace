@@ -45,7 +45,7 @@ namespace openspace::opengl {
 /**
  * This class represents a texture atlas which automatically organizes smaller textures in
  * a compact representation. The TextureAtlas is useful if many small textures are needed,
- * but the overhead of creating a separate Texture for each is not desireable. The
+ * but the overhead of creating a separate Texture for each is not desirable. The
  * TextureAtlas is created with a `size`, and in order to fill the atlas, new regions have
  * to first be requested (#newRegion) and then filled with data (#setRegionData). Due to
  * the fact that the TextureAtlas is represented by a single Texture on the GPU, the
@@ -163,7 +163,7 @@ public:
      * Returns the texture coordinates that define the provided region. If the returned
      * `topLeft` and `bottomRight` coordinates are used as texture coordinates, the result
      * will be the same as if the data would have been bound to a separate texture. The
-     * \p windowing parameter provides possiblity to offset the starting points (with the
+     * \p windowing parameter provides possibility to offset the starting points (with the
      * first two arguments and restrict the width (with the third and fourth arguments).
      * ```
      *  -------------------
@@ -207,7 +207,7 @@ public:
     /**
      * Returns the amount of pixels out of the maximum size (`width * height`) that are
      * currently in use. Please note that this is *not* equal to the amount of pixels that
-     * can possiblity be used due to fragmentation in the atlas.
+     * can possibility be used due to fragmentation in the atlas.
      *
      * \return The amount of pixels that are currently in use in the atlas
      */

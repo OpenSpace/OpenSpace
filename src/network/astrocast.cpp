@@ -553,7 +553,7 @@ void Astrocast::dataMessageReceived(const std::vector<char>& message) {
             datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
 
-            // No send because this has already been recived by a peer, don't send it
+            // No send because this has already been received by a peer, don't send it
             // back again
             global::scriptEngine->queueScript({
                 .code = sm._script,

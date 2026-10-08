@@ -1176,8 +1176,8 @@ void RenderEngine::setResolveData(Dictionary resolveData) {
 
 void RenderEngine::takeScreenshot() {
     // We only create the directory here, as we don't want to spam the users screenshot
-    // folder everytime we start OpenSpace even when we are not taking any screenshots. So
-    // the first time we actually take one, we create the folder
+    // folder every time we start OpenSpace even when we are not taking any screenshots.
+    // So the first time we actually take one, we create the folder
 
     if (!std::filesystem::is_directory(absPath("${SCREENSHOTS}"))) {
         std::filesystem::create_directories(absPath("${SCREENSHOTS}"));

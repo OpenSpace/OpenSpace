@@ -94,7 +94,7 @@ namespace {
         "InterpolateToNext",
         "Interpolate to next",
         "Trigger an interpolation to the next set of point positions. The duration of "
-        "the interpolation is set based on the Interpolaton Speed property.",
+        "the interpolation is set based on the Interpolation Speed property.",
         Property::Visibility::User
     };
 
@@ -102,7 +102,7 @@ namespace {
         "InterpolateToPrevious",
         "Interpolate to previous",
         "Trigger an interpolation to the previous set of point positions. The duration "
-        "of the interpolation is set based on the Interpolaton Speed property.",
+        "of the interpolation is set based on the Interpolation Speed property.",
         Property::Visibility::User
     };
 
@@ -110,7 +110,7 @@ namespace {
         "InterpolateToEnd",
         "Interpolate to end",
         "Trigger an interpolation all the way to the final set of positions. The "
-        "duration of the interpolation is set based on the Interpolaton Speed property.",
+        "duration of the interpolation is set based on the Interpolation Speed property.",
         Property::Visibility::NoviceUser
     };
 
@@ -118,7 +118,7 @@ namespace {
         "InterpolateToStart",
         "Interpolate to start",
         "Trigger an inverted interpolation to the initial set of positions. The duration "
-        "of the interpolation is set based on the Interpolaton Speed property.",
+        "of the interpolation is set based on the Interpolation Speed property.",
         Property::Visibility::NoviceUser
     };
 

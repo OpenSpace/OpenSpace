@@ -136,7 +136,7 @@ namespace {
             std::string timeFormat;
 
             // The text that will be used as the prototype to generate the data to load
-            // the image layer. Any occurance of `${OpenSpaceTimeId}` in this prototype
+            // the image layer. Any occurrence of `${OpenSpaceTimeId}` in this prototype
             // is replaced with the current date according to the remaining information
             // such as the resolution and the format and the resulting text is used to
             // load the corresponding images.
@@ -269,7 +269,7 @@ TemporalTileProvider::TemporalTileProvider(const Dictionary& dictionary)
                     // If the user asked for a day-of-year, the day-of-month and the month
                     // fields will not be set and calls to std::asctime will assert
                     // unfortunately. Luckily, Spice understands DOY date formats, so we
-                    // can specify those directly and noone would use a DOY and a DOM
+                    // can specify those directly and no one would use a DOY and a DOM
                     // time string in the same format string, right?  Right?!
                     date = std::format(
                         "{}-{}T{}:{}:{}",
@@ -759,7 +759,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     );
 
     // Check if a tile exists for the given key in the tileCache
-    // Initializing the tile that will contian the interpolated texture
+    // Initializing the tile that will contain the interpolated texture
     Tile ourTile;
     // The texture that will contain the interpolated image
     opengl::Texture* writeTexture = nullptr;

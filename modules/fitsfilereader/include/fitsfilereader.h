@@ -84,7 +84,7 @@ public:
     /**
      * Reads a single FITS file with pre-defined columns (defined for Viennas TGAS-file).
      * Returns a vector with all read stars with `nValuesPerStar`. If additional columns
-     * are given by `filterColumnNames`, they will be read but it will slow doen the
+     * are given by `filterColumnNames`, they will be read but it will slow done the
      * reading tremendously.
      */
     std::vector<float> readFitsFile(std::filesystem::path filePath, int& nValuesPerStar,

@@ -56,7 +56,7 @@ namespace {
 
     double extractTriggerTimeFromFilename(const std::filesystem::path& filePath) {
         // Number of characters in filename (excluding '.osfls')
-        std::string fileName = filePath.stem().string(); // excludes extention
+        std::string fileName = filePath.stem().string(); // excludes extension
 
         // Ensure the separators are correct
         fileName.replace(4, 1, "-");
@@ -179,7 +179,7 @@ namespace {
     constexpr Property::PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
         "Particle spacing",
-        "Spacing inbetween particles.",
+        "Spacing in between particles.",
         Property::Visibility::User
     };
 
@@ -908,7 +908,7 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
     else if (_files.size() == 1) {
         _sequenceEndTime = _files[0].timestamp + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
-            // TODO (2025-06-10, Elon) Alternativly check at construction and throw
+            // TODO (2025-06-10, Elon) Alternatively check at construction and throw
             // exception
             LWARNING(
                 "Only one file in data set, but ShowAtAllTimes set to false. Using a 2h "
@@ -960,7 +960,7 @@ void RenderableFieldlinesSequence::trackOldest(File& file) {
         {
             File* oldest = _loadedFiles.front();
             // The edge case of when queue just got full and user jumped back to where
-            // they started which would make the oldes file in queue to be the active
+            // they started which would make the oldest file in queue to be the active
             // file. In that case we need to make sure we do not unload it
             if (oldest == &file) {
                 return;

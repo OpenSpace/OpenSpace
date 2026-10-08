@@ -121,8 +121,8 @@ namespace {
         // The name of the author for this asset file.
         std::optional<std::string> author;
 
-        // A reprentative URL for this asset as chosen by the asset author. This might be
-        // a URL to the research group that provided the data, the personal URL of the
+        // A representative URL for this asset as chosen by the asset author. This might
+        // be a URL to the research group that provided the data, the personal URL of the
         // author, or a webpage for the group that is responsible for this asset.
         std::optional<std::string> url [[codegen::key("URL")]];
 
@@ -540,7 +540,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     // |  |- directory
     // |  |- filePath
     // |  |- enabled
-    // |- Dependants (table<dependant, Dependency dep>)
+    // |- Dependents (table<dependent, Dependency dep>)
     //
     // where Dependency is a table:
     // Dependency

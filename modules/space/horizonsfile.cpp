@@ -277,7 +277,7 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
             return HorizonsResultCode::ErrorSize;
         }
 
-        // Selected time range too big for avalable time span?
+        // Selected time range too big for available time span?
         if (line.contains("STEP_SIZE too big")) {
             return HorizonsResultCode::ErrorSpan;
         }
@@ -470,7 +470,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
             break;
         }
         case HorizonsResultCode::UnknownError:
-            LERROR("An unknown error occured");
+            LERROR("An unknown error occurred");
             break;
         default:
             LERROR("Unknown result type");

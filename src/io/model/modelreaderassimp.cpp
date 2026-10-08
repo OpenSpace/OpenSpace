@@ -504,7 +504,7 @@ namespace {
         }
 
         // If mesh is invisible (no materials or textures) drop it unless forced to render
-        // Notify unless suppresed
+        // Notify unless suppressed
         if (textureArray.empty()) {
             if (forceRenderInvisible) {
                 // Force invisible mesh to render with flashy colors

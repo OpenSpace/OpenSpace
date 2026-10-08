@@ -84,7 +84,7 @@ public:
     bool isReady() const;
 
     /**
-     * Runs parser and recieves the datastructures filled by it.
+     * Runs parser and receives the datastructures filled by it.
      *
      * \see SequenceParser
      */
