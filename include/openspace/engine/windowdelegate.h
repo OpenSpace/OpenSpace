@@ -134,6 +134,9 @@ struct WindowDelegate {
     void (*setStatisticsGraphOffset)(glm::vec2 offset) = [](glm::vec2) {};
 
     void (*setMouseCursor)(Cursor cursor) = [](Cursor) {};
+
+    std::vector<glm::mat4> (*viewProjectionMatrices)() =
+        []() { return std::vector<glm::mat4>{}; };
 };
 
 } // namespace openspace

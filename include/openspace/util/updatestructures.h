@@ -45,6 +45,7 @@ struct UpdateData {
     TransformData modelTransform;
     const Time time;
     const Time previousFrameTime;
+    const std::vector<glm::mat4> viewProjectionMatrices;
 };
 
 struct RenderData {

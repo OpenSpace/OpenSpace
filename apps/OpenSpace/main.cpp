@@ -57,6 +57,7 @@
 #include <sgct/log.h>
 #include <sgct/projection/fisheye.h>
 #include <sgct/projection/nonlinearprojection.h>
+#include <sgct/node.h>
 #include <sgct/user.h>
 #include <sgct/window.h>
 #include <stb_image.h>
@@ -1141,6 +1142,10 @@ void setSgctDelegateFunctions() {
             Cursors.find(mouse) != Cursors.end(), "Tried to create non-existent cursor"
         );
         glfwSetCursor(glfwGetCurrentContext(), Cursors[mouse]);
+    };
+
+    sgctDelegate.viewProjectionMatrices = []() {
+        return Engine::instance().thisNode().viewProjectionMatrices();
     };
 }
 

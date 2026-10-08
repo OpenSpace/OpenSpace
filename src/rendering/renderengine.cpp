@@ -638,6 +638,8 @@ void RenderEngine::updateScene() {
 
     const Time& currentTime = global::timeManager->time();
     const Time& integrateFromTime = global::timeManager->integrateFromTime();
+    std::vector<glm::mat4> viewProjectionMatrices =
+        global::windowDelegate->viewProjectionMatrices();
 
     _scene->update({
         .modelTransform = {
@@ -646,7 +648,8 @@ void RenderEngine::updateScene() {
             .scale = glm::dvec3(1.0)
         },
         .time = currentTime,
-        .previousFrameTime = integrateFromTime
+        .previousFrameTime = integrateFromTime,
+        .viewProjectionMatrices = std::move(viewProjectionMatrices)
     });
 
     LTRACE("RenderEngine::updateSceneGraph(end)");
