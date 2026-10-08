@@ -51,7 +51,7 @@ public:
      * reading tile using a TileIndex.
      *
      * \param filePath The path to a specific file GDAL can read
-     * \param initData Information about the textures that will be creatd by this reader
+     * \param initData Information about the textures that will be created by this reader
      * \param cacheProperties Contains settings about whether the reader should utilize
      *        cache
      * \param preprocess Whether the loaded data should be calculate meta data about the

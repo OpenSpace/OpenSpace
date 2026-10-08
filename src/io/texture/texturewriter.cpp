@@ -96,7 +96,7 @@ void saveTexture(const opengl::Texture& texture, const std::string& filename) {
         stbi_write_tga(filename.c_str(), w, h, nComponents, pixels.data());
     }
     // @TODO (2023-10-06, emmbr26) Fix implementation. This does not generate correct
-    // colors. Prabably the data format is currently not correct, as the other formats
+    // colors. Probably the data format is currently not correct, as the other formats
     // expect 8-bit colors while the HDR function wants 32-bit rgb(e) data. Did not
     // seem too important to fix at point of writing, as it's currently not used anywhere
     //else if (extension == "hdr") {

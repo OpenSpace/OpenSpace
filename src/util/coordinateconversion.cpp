@@ -44,7 +44,7 @@ namespace {
     constexpr double L0 = glm::radians(122.9320);
 
     std::tuple<int, int, double> parseString(const std::string& str) {
-        // Find hms or dms indicies
+        // Find hms or dms indices
         const size_t hOrDIndex = str.contains('h') ? str.find('h') : str.find('d');
         const size_t mIndex = str.find('m');
         const size_t sIndex = str.find('s');

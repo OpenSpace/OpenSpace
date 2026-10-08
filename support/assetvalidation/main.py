@@ -118,7 +118,7 @@ args.startOS = str2bool(args.startOS)
 # Finding the root OpenSpace folder
 rootDir = Path(__file__).resolve().parents[2]
 
-# Find the exectuable location and its name
+# Find the executable location and its name
 if os.name == "nt":
   # Windows
   executable = rootDir / "bin" / "RelWithDebInfo" / "OpenSpace.exe"

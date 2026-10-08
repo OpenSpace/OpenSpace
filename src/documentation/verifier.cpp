@@ -690,12 +690,12 @@ TestResult TableVerifier::operator()(const Dictionary& dictionary,
         const Documentation doc = { .entries = documentations };
         TestResult res = testSpecification(doc, d);
 
-        // Add the 'key' as a prefix to make the new offender a fully qualified identifer
+        // Add the 'key' as a prefix to make the new offender a fully qualified identifier
         for (TestResult::Offense& o : res.offenses) {
             o.offender = std::format("{}.{}", key, o.offender);
         }
 
-        // Add the 'key' as a prefix to make the new warning a fully qualified identifer
+        // Add the 'key' as a prefix to make the new warning a fully qualified identifier
         for (TestResult::Warning& w : res.warnings) {
             w.offender = std::format("{}.{}", key, w.offender);
         }
@@ -810,12 +810,12 @@ TestResult ReferencingVerifier::operator()(const Dictionary& dictionary,
     const Dictionary d = dictionary.value<Dictionary>(key);
     TestResult r = testSpecification(*it, d);
 
-    // Add the 'key' as a prefix to make the offender a fully qualified identifer
+    // Add the 'key' as a prefix to make the offender a fully qualified identifier
     for (TestResult::Offense& s : r.offenses) {
         s.offender = std::format("{}.{}", key, s.offender);
     }
 
-    // Add the 'key' as a prefix to make the warning a fully qualified identifer
+    // Add the 'key' as a prefix to make the warning a fully qualified identifier
     for (TestResult::Warning& w : r.warnings) {
         w.offender = std::format("{}.{}", key, w.offender);
     }

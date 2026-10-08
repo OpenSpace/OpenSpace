@@ -96,7 +96,7 @@ namespace {
         "Right ascension of ascending node",
         "This value determines the right ascension of the ascending node in degrees, "
         "that is the location of position along the orbit where the inclined plane and "
-        "the horizonal reference plane intersect.",
+        "the horizontal reference plane intersect.",
         Property::Visibility::AdvancedUser
     };
 

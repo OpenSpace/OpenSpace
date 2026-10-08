@@ -35,17 +35,17 @@ namespace openspace {
 class Property;
 
 /**
- * A PropertyOwner can own Propertys or other PropertyOwner and provide access to both in
- * a unified way. The `identifier`s and `name`s of Propertys and sub-owners must be unique
- * to this PropertyOwner. A Property cannot have the same name as a PropertyOwner owned by
- * this PropertyOwner. Propertys can be added using the Property::addProperty methods and
- * be removed by the Property::removeProperty method. The same holds true for sub-owners
- * (Property::addPropertySubOwner, Property::removePropertySubOwner). These methods will
- * inform the passed object about the new ownership automatically. Stored properties can
- * be accessed using the Property::properties method or the Property::property method,
- * providing an URI for the location of the property. If the URI contains separators
- * (`.`), the first name before the separator will be used as a subOwner's name and the
- * search will proceed recursively.
+ * A PropertyOwner can own Property%s or other PropertyOwner and provide access to both in
+ * a unified way. The `identifier`s and `name`s of Property%s and sub-owners must be
+ * unique to this PropertyOwner. A Property cannot have the same name as a PropertyOwner
+ * owned by this PropertyOwner. Property%s can be added using the Property::addProperty
+ * methods and be removed by the Property::removeProperty method. The same holds true for
+ * sub-owners (Property::addPropertySubOwner, Property::removePropertySubOwner). These
+ * methods will inform the passed object about the new ownership automatically. Stored
+ * properties can be accessed using the Property::properties method or the
+ * Property::property method, providing an URI for the location of the property. If the
+ * URI contains separators (`.`), the first name before the separator will be used as a
+ * subOwner's name and the search will proceed recursively.
  */
 class PropertyOwner {
 public:
@@ -80,7 +80,7 @@ public:
      * Sets the identifier for this PropertyOwner. If the PropertyOwner does not have an
      * owner itself, the identifier must be globally unique. If the PropertyOwner has an
      * owner, the identifier must be unique to the owner (including the owner's
-     * properties). No uniqueness check will be preformed here, but rather in the
+     * properties). No uniqueness check will be performed here, but rather in the
      * PropertyOwner::addProperty and PropertyOwner::addPropertySubOwner methods).
      *
      * \param identifier The identifier of this PropertyOwner. It must not contain any
@@ -271,7 +271,7 @@ public:
 
     /**
      * Adds the provided PropertyOwner to the list of sub-owners for this PropertyOwner.
-     * This means that the name of the \p owner has to be unique amonst the direct
+     * This means that the name of the \p owner has to be unique amongst the direct
      * Property's as well as other PropertyOwner's that this PropertyOwner owns. This
      * uniqueness will be tested in this method.
      *

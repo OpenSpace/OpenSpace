@@ -712,7 +712,7 @@ void RenderableSolarImagery::updateImageryTexture() {
         );
 
     if (!keyframe) {
-        // No keyframe avaialble so we clear the texture
+        // No keyframe available so we clear the texture
         if (_currentKeyframe != NoActiveKeyframe) {
             // No need to re-upload an empty image
             _isCoronaGraph = false;

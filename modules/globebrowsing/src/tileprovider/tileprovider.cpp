@@ -251,7 +251,7 @@ ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
             }
             else {
                 // We are iterating through the array one-by-one, so we are guaranteed
-                // that for tile 'i', tile 'i-1' already was initializated
+                // that for tile 'i', tile 'i-1' already was initialized
                 pile[i]->tile = pile[i - 1]->tile;
                 pile[i]->uvTransform.uvOffset = pile[i - 1]->uvTransform.uvOffset;
                 pile[i]->uvTransform.uvScale = pile[i - 1]->uvTransform.uvScale;

@@ -74,7 +74,7 @@ public:
      *
      * \param token The token in the form `${...}`
      * \param path The path the token should point to
-     * \param override If `true` an existing token will be silently overriden
+     * \param override If `true` an existing token will be silently overridden
      *
      * \pre \p token must not be empty
      * \pre \p token must start with `{` and end with `}`
@@ -301,10 +301,10 @@ BooleanType(Sorted);
  * \param sorted If this value is `true`, the resulting list will be alphabetically
  *        sorted. If it is `false`, the list will be returned in the order as the
  *        operating system determines
- * \param filter This filter function will be executed for each encounted path, both files
- *        and directories (if \p recursive is `true`). If the filter function returns
- *        `false` for a path, it will not be included in the final list, if it was a file,
- *        and its contents will not be considered, if it was a directory
+ * \param filter This filter function will be executed for each encountered path, both
+ *        files and directories (if \p recursive is `true`). If the filter function
+ *        returns `false` for a path, it will not be included in the final list, if it was
+ *        a file, and its contents will not be considered, if it was a directory
  *
  * \pre \p path must be a valid and existing directory
  */

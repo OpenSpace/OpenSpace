@@ -38,7 +38,7 @@
 #include <QSettings>
 #include <QVBoxLayout>
 
-// This is the overall organization of the widgets invloved in this application
+// This is the overall organization of the widgets involved in this application
 // MainWindow(QMainWindow)
 // └── AssetEditorWidget(QWidget)
 //     ├── SidePanel(QWidget)

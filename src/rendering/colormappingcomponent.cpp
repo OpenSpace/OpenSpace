@@ -54,7 +54,7 @@ namespace {
     constexpr Property::PropertyInfo ParameterInfo = {
         "Parameter",
         "Parameter",
-        "The paramenter in the dataset to use for the color mapping. On change, the "
+        "The parameter in the dataset to use for the color mapping. On change, the "
         "value range to used for the mapping will also be changed.",
         Property::Visibility::User
     };
@@ -71,7 +71,7 @@ namespace {
         "SetRangeFromData",
         "Set data range from data",
         "Set the data range for the color mapping based on the available data for the "
-        "curently selected data column.",
+        "currently selected data column.",
         Property::Visibility::User
     };
 

@@ -229,7 +229,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
         up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
     }
 
-    // Compute rotation so the camera is looking at the targetted node
+    // Compute rotation so the camera is looking at the targeted node
     glm::dvec3 lookAtPos = targetNode->worldPosition();
 
     // Check if we can distinguish between cameraPos and lookAt pos. Otherwise, move it

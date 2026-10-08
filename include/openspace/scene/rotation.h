@@ -51,7 +51,7 @@ struct UpdateData;
  * every time it is called.
  *
  * Generally, when implementing a new type of this class, only the
- * matrix(const UpdateDate&) verison needs to be implemented as this base class will
+ * matrix(const UpdateDate&) version needs to be implemented as this base class will
  * handle the caching.
  */
 class Rotation : public PropertyOwner {

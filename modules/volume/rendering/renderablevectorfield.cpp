@@ -645,7 +645,7 @@ void RenderableVectorField::computeVolumeFieldLines() {
         const unsigned int y = blockCoords.y * _stride;
         const unsigned int z = blockCoords.z * _stride;
 
-        // Compute average velocity accross all voxels in this block
+        // Compute average velocity across all voxels in this block
         glm::vec3 avgVelocity = glm::vec3(0.f);
         int count = 0;
 

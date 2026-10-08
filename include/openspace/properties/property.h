@@ -181,7 +181,7 @@ public:
 
     /**
      * This method returns the class name of the Property. The method is used by the
-     * TemplateFactory to create new instances of Propertys. The returned value is almost
+     * TemplateFactory to create new instances of Property%s. The returned value is almost
      * always identical to the C++ class name of the derived class.
      *
      * \return The class name of the Property
@@ -380,8 +380,8 @@ public:
     void setGroupIdentifier(std::string groupId);
 
     /**
-     * Returns the group idenfier that this Property belongs to, or `""` if it belongs to
-     * no group.
+     * Returns the group identifier that this Property belongs to, or `""` if it belongs
+     * to no group.
      *
      * \return The group identifier that this Property belongs to
      */

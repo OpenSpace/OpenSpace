@@ -139,7 +139,7 @@ private:
     glm::vec3 _mieScatteringCoeff = glm::vec3(0.f);
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
 
-    // Atmosphere Textures Dimmensions
+    // Atmosphere Textures Dimensions
     const glm::ivec2 _transmittanceTableSize;
     const glm::ivec2 _irradianceTableSize;
     const glm::ivec2 _deltaETableSize;

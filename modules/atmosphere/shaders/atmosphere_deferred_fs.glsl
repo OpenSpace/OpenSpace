@@ -282,7 +282,7 @@ Ray calculateRayRenderableGlobe(vec2 st) {
 }
 
 /*
- * Calculates the light scattering in the view direction comming from other light rays
+ * Calculates the light scattering in the view direction coming from other light rays
  * scattered in the atmosphere.
  * Following the paper:  S[L]|x - T(x,xs) * S[L]|xs
  * The view direction here is the ray: x + tv, s is the sun direction, r and mu the
@@ -347,7 +347,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // Here we use the idea of S[L](a->b) = S[L](b->a), and get the S[L](x0, v, s)
     // Then we calculate S[L] = S[L]|x - T(x, x0)*S[L]|x0
     // The "infinite" ray hist something inside the atmosphere, so we need to remove
-    // the unsused contribution to the final radiance.
+    // the unused contribution to the final radiance.
     vec4 inscatterFromSurface = texture4D(inscatterTexture, r0, mu0, muSun0, nu, rPlanet,
       muSamples, rAtmosphere, rSamples, muSSamples, nuSamples);
     inscatterRadiance = max(
@@ -437,13 +437,13 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 }
 
 /*
- * Calculates the light reflected in the view direction comming from other light rays
+ * Calculates the light reflected in the view direction coming from other light rays
  * integrated over the hemispehre plus the direct light (L0) from Sun.
  * Following the paper: R[L]= R[L0]+R[L*]
  * The ray is x + tv, v the view direction, s is the sun direction, r and mu the position
  * and zenith cosine angle as in the paper.
  * As for all calculations in the atmosphere, the center of the coordinate system is the
- * planet's center of coordiante system, i.e., the planet's position is (0,0,0).
+ * planet's center of coordinate system, i.e., the planet's position is (0,0,0).
  * Arguments:
  * x := camera position
  * t := ray displacement variable. Here, differently from the inScatter light calculation,
@@ -505,7 +505,7 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, vec3 attenuationXtoX0, vec3 gr
  * Calculates the Sun color. The ray is x + tv, v the view direction, s is the sun
  * direction, r and mu the position and zenith cosine angle as in the paper. As for all
  * calculations in the atmosphere, the center of the coordinate system is the planet's
- * center of coordiante system, i.e., the planet's position is (0,0,0). Arguments:
+ * center of coordinate system, i.e., the planet's position is (0,0,0). Arguments:
  * v := view direction (ray's direction) (normalized)
  * s := Sun direction (normalized)
  * r := ||x|| inside atmosphere (or top of atmosphere). r <= Rt here.

@@ -219,7 +219,7 @@ void registerCoreSchemas(DocumentationEngine& engine) {
 }
 
 // NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just
-//       because it has the same method name (and similar implementaiton) as the
+//       because it has the same method name (and similar implementation) as the
 //       documentation version.
 void registerCoreClasses(ScriptEngine& engine) {
     engine.addLibrary(Dashboard::luaLibrary());

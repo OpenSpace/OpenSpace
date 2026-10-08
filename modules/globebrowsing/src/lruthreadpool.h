@@ -51,7 +51,7 @@ private:
 /**
  * The `LRUThreadPool` will only enqueue a certain number of tasks. The most recently
  * enqueued task is the one that will be executed first. This class is templated on a key
- * type which used as an identifier to determine wheter or not a task with the given key
+ * type which used as an identifier to determine whether or not a task with the given key
  * has been enqueued or not. This means that a task can be enqueued several times. The
  * user must ensure that an enqueued task with a given key should be equal in outcome to a
  * second enqueued task with the same key. This is because a second enqueued task with the

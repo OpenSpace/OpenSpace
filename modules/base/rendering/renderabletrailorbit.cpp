@@ -130,7 +130,7 @@ namespace openspace {
 //    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 //                    <------ newer in time                                    oldest
 //
-// In the begining the floating value starts at 0; this means that array element 0 is
+// In the beginning the floating value starts at 0; this means that array element 0 is
 // updated and uploaded to the GPU at every frame. The FF+1 element is the newest fixed
 // location and FF-1 element is the oldest fixed location (including wrapping around the
 // array) with the times of _lastPointTime and _firstPointTime.
@@ -234,7 +234,7 @@ RenderableTrailOrbit::RenderableTrailOrbit(const Dictionary& dictionary)
     _resolution.setExponent(3.5f);
     addProperty(_resolution);
 
-    // We store the vertices with (excluding the wrapping) decending temporal order
+    // We store the vertices with (excluding the wrapping) descending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
 }
 
@@ -575,7 +575,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
                     _primaryRenderInformation.first = 0;
                 }
                 else {
-                    // Move the current pointer fowards one step to be used as the new
+                    // Move the current pointer forwards one step to be used as the new
                     // floating
                     _primaryRenderInformation.first++;
                 }

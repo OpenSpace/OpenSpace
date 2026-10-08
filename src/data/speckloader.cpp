@@ -164,7 +164,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             // datavar, unless it is a polygon orientation thing. Now, the datavar name
             // for these can be anything (have seen 'orientation' and 'ori' before, so we
             // can't really check by name for these or we will miss some if they are
-            // mispelled or whatever. So we have to go the roundabout way of adding the
+            // misspelled or whatever. So we have to go the roundabout way of adding the
             // 5 remaining values (the 6th nDataValue was already added in the
             // corresponding 'datavar' section) here
             nDataValues += 5;
@@ -283,7 +283,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         bool allZero = true;
 
         // For SPECK we know that the first 3 values are the position, so no need to
-        // check agains data mapping
+        // check against data mapping
         std::stringstream str(line);
         Dataset::Entry entry;
         str >> entry.position.x >> entry.position.y >> entry.position.z;
@@ -466,7 +466,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
         strip(rest);
 
         if (startsWith(rest, "id")) {
-            // Optional arument with identifier
+            // Optional argument with identifier
             // Remove the 'id' text
             rest = rest.substr(std::string_view("id ").size());
             const size_t index = rest.find("text");

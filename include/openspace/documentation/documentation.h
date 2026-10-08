@@ -143,7 +143,7 @@ void logError(const SpecificationError& error, std::string component = "");
  * DocumentationEntry e = { "key", new IntVerifier, "Documentation text", Optional::Yes };
  * ```
  *
- * Furthermore, these initializer lists can be crated all at once for a Documentation.
+ * Furthermore, these initializer lists can be created all at once for a Documentation.
  * Even if the Verifier%s are specified using the `new` operators, they will not leak
  * memory as the DocumentationEntry takes ownership of them in the constructor.
  */

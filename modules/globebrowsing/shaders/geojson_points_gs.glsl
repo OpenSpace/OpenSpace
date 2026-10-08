@@ -107,7 +107,7 @@ void main() {
   else if (renderMode == RenderOptionGlobeSurface) {
     // Compute up to be orthogonal to globe normal and camera right direction
     up = normalize(cross(worldNormal, right));
-    // Recompute right to be orthognal to globe normal
+    // Recompute right to be orthogonal to globe normal
     right = cross(up, worldNormal);
   }
 

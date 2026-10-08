@@ -701,7 +701,7 @@ namespace {
 
     std::string generateStructsResult(const Code& code, HeaderInfo& info) {
         // For Linux, we need to declare the functions in the following order or the
-        // overload resolution picks the top fall back implentation and triggers a
+        // overload resolution picks the top fall back implementation and triggers a
         // static_assert:
         // 1. <typename T> bakeTo(..., T*) { static_assert(false); } // fallback
         // 2. <typename T> bakeTo(..., std::optional<T>*)   declaration only

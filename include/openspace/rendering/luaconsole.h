@@ -105,7 +105,7 @@ private:
         Context context = Context::None;
         /// Flag indicating if we need to update the suggestion data
         bool isDataDirty = true;
-        /// Part of the command that we're intrested in
+        /// Part of the command that we're interested in
         std::string input;
         /// All suggestions found so far
         std::vector<std::string> suggestions;

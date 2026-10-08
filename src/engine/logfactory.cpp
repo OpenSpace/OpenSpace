@@ -59,7 +59,7 @@ namespace {
         // The number of files that should be kept around for this Log.
         std::optional<int> logRotation [[codegen::greater(0)]];
 
-        // Determines whether the log entires should be stamped with the time at which the
+        // Determines whether the log entries should be stamped with the time at which the
         // message was logged.
         std::optional<bool> timeStamping;
 

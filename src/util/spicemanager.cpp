@@ -99,7 +99,7 @@ SpiceManager::AberrationCorrection::AberrationCorrection(const std::string& iden
     auto it = Mapping.find(identifier);
 
     assert_msg(!identifier.empty(), "Identifier may not be empty");
-    assert_msg(it != Mapping.end(), std::format("Invalid identifer '{}'", identifier));
+    assert_msg(it != Mapping.end(), std::format("Invalid identifier '{}'", identifier));
 
     type = it->second.first;
     direction = it->second.second;

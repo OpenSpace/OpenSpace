@@ -36,9 +36,9 @@ uniform vec2 conservativeBounds;
 uniform bool showOptimistic;
 
 
-// Remap the radius to texture coordinates in the trasfer function texture. The texture
+// Remap the radius to texture coordinates in the transfer function texture. The texture
 // is treated as a linear scale where the color represent too cold to too hot. Account
-// for the conservative bounds my mapping one third of the texture ouside each boundary.
+// for the conservative bounds my mapping one third of the texture outside each boundary.
 // All parameters \in [0,1], where 1.0 corresponds to the max radius.
 float computeTextureCoord(float radius, float innerRadius, float conservativeInner,
                           float conservativeOuter)

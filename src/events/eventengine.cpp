@@ -119,7 +119,7 @@ void EventEngine::unregisterEventAction(uint32_t identifier) {
                 it->second.erase(jt);
 
                 // This might have been the last action so we might need to remove the
-                // entry alltogether
+                // entry altogether
                 if (it->second.empty()) {
                     _eventActions.erase(it);
                 }
@@ -152,7 +152,7 @@ void EventEngine::unregisterEventTopic(size_t topicId, Event::Type type) {
         it->second.erase(jt);
 
         // This might have been the last action so we might need to remove the entry
-        // alltogether
+        // altogether
         if (it->second.empty()) {
             _eventTopics.erase(it);
         }

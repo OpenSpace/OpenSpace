@@ -290,7 +290,7 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
 
 void IswaManager::registerGroup(std::string groupName, std::string type) {
     if (_groups.find(groupName) != _groups.end()) {
-        LWARNING("Can't add cygnet to groups with diffent type");
+        LWARNING("Can't add cygnet to groups with different type");
         return;
     }
 

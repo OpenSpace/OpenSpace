@@ -82,7 +82,7 @@ public:
 
     /**
      * Starts the synchronization for this ResourceSynchronization by first trying to find
-     * a synchronization respository that replies to the request, parsing the result and
+     * a synchronization repository that replies to the request, parsing the result and
      * then downloading each of the files that are provided in that result.
      */
     void start() override;

@@ -136,7 +136,7 @@ asset.export("ToggleZenith", ToggleZenith.Identifier)
 asset.meta = {
   Name = "Zenith",
   Description = [[A dot representation of the Local Zenith (based on the current
-    camera positon), including actions to toggle, hide and show it.]],
+    camera position), including actions to toggle, hide and show it.]],
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT license"

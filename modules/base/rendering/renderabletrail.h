@@ -45,7 +45,8 @@ class Translation;
  * concreate implementations are RenderableTrailOrbit, for objects that have a (roughly)
  * repeating orbit, and RenderableTrailTrajectory, for objects that are less orbit-like.
  * The main difference between two subclasses is that RenderableTrailOrbit updates itself
- * continously, whereas RenderableTrailTrajectory precomputes the entire trail in advance.
+ * continuously, whereas RenderableTrailTrajectory precomputes the entire trail in
+ * advance.
  *
  * This class is responsible for the rendering of the vertex buffer objects which are
  * filled by the subclasses. The buffers contain a list of TrailVBOLayout objects that is
