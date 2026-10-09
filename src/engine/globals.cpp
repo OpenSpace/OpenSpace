@@ -61,6 +61,10 @@
 #include <openspace/util/versionchecker.h>
 #include <algorithm>
 #include <array>
+#include <cstddef>
+#include <cstdint>
+#include <new>
+#include <utility>
 
 namespace openspace {
 namespace {
@@ -70,6 +74,9 @@ namespace {
     // allocation works on Linux, but it fails on Windows in some SGCT function and on Mac
     // in some random global randoms
 #ifdef WIN32
+    // The number of objects that are placed into the DataStorage below
+    constexpr int NumberOfGlobals = 33;
+
     constexpr int TotalSize =
         sizeof(MemoryManager) +
         sizeof(Server) +
@@ -103,10 +110,42 @@ namespace {
         sizeof(PropertyOwner) +
         sizeof(ScriptEngine) +
         sizeof(ScriptScheduler) +
-        sizeof(Profile);
+        sizeof(Profile) +
+        // Every object has to start at an address that satisfies its own alignment
+        // requirement, so there might be some padding in front of each of them. Reserve
+        // enough slack for a maximally sized padding per object
+        NumberOfGlobals * alignof(std::max_align_t);
 
-    std::array<std::byte, TotalSize> DataStorage;
+    alignas(std::max_align_t) std::array<std::byte, TotalSize> DataStorage;
 #endif // WIN32
+
+/**
+ * Creates the global object of type \p T. On Windows the object is placed into the
+ * statically allocated DataStorage at the position \p pos, which is advanced past the
+ * newly created object. On all other platforms the object is heap-allocated instead and
+ * \p pos is unused.
+ */
+template <typename T, typename... Args>
+T* createGlobal([[maybe_unused]] std::byte*& pos, Args&&... args) {
+#ifdef WIN32
+    constexpr std::uintptr_t Alignment = alignof(T);
+    const std::uintptr_t p = reinterpret_cast<std::uintptr_t>(pos);
+    // Align 'pos' up to the next address that satisfies T's alignment requirement
+    pos = reinterpret_cast<std::byte*>((p + Alignment - 1) & ~(Alignment - 1));
+
+    assert_msg(
+        pos + sizeof(T) <= DataStorage.data() + TotalSize,
+        "Ran out of space in the global DataStorage"
+    );
+
+    T* obj = new (pos) T(std::forward<Args>(args)...);
+    pos += sizeof(T);
+    return obj;
+#else // ^^^^ WIN32 / !WIN32 vvvv
+    return new T(std::forward<Args>(args)...);
+#endif // WIN32
+}
+
 } // namespace
 } // namespace openspace
 
@@ -120,273 +159,56 @@ void create() {
 #ifdef WIN32
     std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));
     std::byte* currentPos = DataStorage.data();
-#endif // WIN32
-
-#ifdef WIN32
-    memoryManager = new (currentPos) MemoryManager;
-    assert_msg(memoryManager, "No memoryManager");
-    currentPos += sizeof(MemoryManager);
 #else // ^^^^ WIN32 / !WIN32 vvvv
-    memoryManager = new MemoryManager;
+    std::byte* currentPos = nullptr;
 #endif // WIN32
 
-#ifdef WIN32
-    syncEngine = new (currentPos) SyncEngine(4096);
-    assert_msg(syncEngine, "No syncEngine");
-    currentPos += sizeof(SyncEngine);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    syncEngine = new SyncEngine(4096);
-#endif // WIN32
-
-#ifdef WIN32
-    server = new (currentPos) Server;
-    assert_msg(server, "No server");
-    currentPos += sizeof(Server);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    server = new Server;
-#endif // WIN32
-
-#ifdef WIN32
-    openSpaceEngine = new (currentPos) OpenSpaceEngine;
-    assert_msg(openSpaceEngine, "No openSpaceEngine");
-    currentPos += sizeof(OpenSpaceEngine);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    openSpaceEngine = new OpenSpaceEngine;
-#endif // WIN32
-
-#ifdef WIN32
-    downloadEventEngine = new (currentPos) DownloadEventEngine;
-    assert_msg(downloadEventEngine, "No downloadEventEngine");
-    currentPos += sizeof(DownloadEventEngine);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    downloadEventEngine = new DownloadEventEngine;
-#endif // WIN32
-
-#ifdef WIN32
-    eventEngine = new (currentPos) EventEngine;
-    assert_msg(eventEngine, "No eventEngine");
-    currentPos += sizeof(EventEngine);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    eventEngine = new EventEngine;
-#endif // WIN32
-
-#ifdef WIN32
-    fontManager = new (currentPos) fontrendering::FontManager({ 1536, 1536, 1 });
-    assert_msg(fontManager, "No fontManager");
-    currentPos += sizeof(fontrendering::FontManager);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    fontManager = new fontrendering::FontManager({ 1536, 1536, 1 });
-#endif // WIN32
-
-#ifdef WIN32
-    dashboard = new (currentPos) Dashboard;
-    assert_msg(dashboard, "No dashboard");
-    currentPos += sizeof(Dashboard);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    dashboard = new Dashboard;
-#endif // WIN32
-
-#ifdef WIN32
-    deferredcasterManager = new (currentPos) DeferredcasterManager;
-    assert_msg(deferredcasterManager, "No deferredcasterManager");
-    currentPos += sizeof(DeferredcasterManager);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    deferredcasterManager = new DeferredcasterManager;
-#endif // WIN32
-
-#ifdef WIN32
-    downloadManager = new (currentPos) DownloadManager;
-    assert_msg(downloadManager, "No downloadManager");
-    currentPos += sizeof(DownloadManager);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    downloadManager = new DownloadManager;
-#endif // WIN32
-
-#ifdef WIN32
-    luaConsole = new (currentPos) LuaConsole;
-    assert_msg(luaConsole, "No luaConsole");
-    currentPos += sizeof(LuaConsole);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    luaConsole = new LuaConsole;
-#endif // WIN32
-
-#ifdef WIN32
-    missionManager = new (currentPos) MissionManager;
-    assert_msg(missionManager, "No missionManager");
-    currentPos += sizeof(MissionManager);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    missionManager = new MissionManager;
-#endif // WIN32
-
-#ifdef WIN32
-    moduleEngine = new (currentPos) ModuleEngine;
-    assert_msg(moduleEngine, "No moduleEngine");
-    currentPos += sizeof(ModuleEngine);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    moduleEngine = new ModuleEngine;
-#endif // WIN32
-
-#ifdef WIN32
-    astrocast = new (currentPos) Astrocast;
-    assert_msg(astrocast, "No astrocast");
-    currentPos += sizeof(Astrocast);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    astrocast = new Astrocast;
-#endif // WIN32
-
-#ifdef WIN32
-    raycasterManager = new (currentPos) RaycasterManager;
-    assert_msg(raycasterManager, "No raycasterManager");
-    currentPos += sizeof(RaycasterManager);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    raycasterManager = new RaycasterManager;
-#endif // WIN32
-
-#ifdef WIN32
-    renderEngine = new (currentPos) RenderEngine;
-    assert_msg(renderEngine, "No renderEngine");
-    currentPos += sizeof(RenderEngine);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    renderEngine = new RenderEngine;
-#endif // WIN32
-
-#ifdef WIN32
+    memoryManager = createGlobal<MemoryManager>(currentPos);
+    syncEngine = createGlobal<SyncEngine>(currentPos, 4096);
+    server = createGlobal<Server>(currentPos);
+    openSpaceEngine = createGlobal<OpenSpaceEngine>(currentPos);
+    downloadEventEngine = createGlobal<DownloadEventEngine>(currentPos);
+    eventEngine = createGlobal<EventEngine>(currentPos);
+    fontManager = createGlobal<fontrendering::FontManager>(
+        currentPos,
+        glm::ivec3(1536, 1536, 1)
+    );
+    dashboard = createGlobal<Dashboard>(currentPos);
+    deferredcasterManager = createGlobal<DeferredcasterManager>(currentPos);
+    downloadManager = createGlobal<DownloadManager>(currentPos);
+    luaConsole = createGlobal<LuaConsole>(currentPos);
+    missionManager = createGlobal<MissionManager>(currentPos);
+    moduleEngine = createGlobal<ModuleEngine>(currentPos);
+    astrocast = createGlobal<Astrocast>(currentPos);
+    raycasterManager = createGlobal<RaycasterManager>(currentPos);
+    renderEngine = createGlobal<RenderEngine>(currentPos);
     screenSpaceRenderables =
-        new (currentPos) std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
-    assert_msg(screenSpaceRenderables, "No screenSpaceRenderables");
-    currentPos += sizeof(std::vector<std::unique_ptr<ScreenSpaceRenderable>>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    screenSpaceRenderables = new std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
-#endif // WIN32
-
-#ifdef WIN32
-    timeManager = new (currentPos) TimeManager;
-    assert_msg(timeManager, "No timeManager");
-    currentPos += sizeof(TimeManager);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    timeManager = new TimeManager;
-#endif // WIN32
-
-#ifdef WIN32
-    versionChecker = new (currentPos) VersionChecker;
-    assert_msg(versionChecker, "No versionChecker");
-    currentPos += sizeof(VersionChecker);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    versionChecker = new VersionChecker;
-#endif // WIN32
-
-#ifdef WIN32
-    windowDelegate = new (currentPos) WindowDelegate;
-    assert_msg(windowDelegate, "No windowDelegate");
-    currentPos += sizeof(WindowDelegate);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    windowDelegate = new WindowDelegate;
-#endif // WIN32
-
-#ifdef WIN32
-    configuration = new (currentPos) Configuration;
-    assert_msg(configuration, "No configuration");
-    currentPos += sizeof(Configuration);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    configuration = new Configuration;
-#endif // WIN32
-
-#ifdef WIN32
-    actionManager = new (currentPos) ActionManager;
-    assert_msg(actionManager, "No action manager");
-    currentPos += sizeof(ActionManager);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    actionManager = new ActionManager;
-#endif // WIN32
-
-#ifdef WIN32
-    interactionHandler = new (currentPos) InteractionHandler;
-    assert_msg(interactionHandler, "No interactionHandler");
-    currentPos += sizeof(InteractionHandler);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    interactionHandler = new InteractionHandler;
-#endif // WIN32
-
-#ifdef WIN32
-    keybindingManager = new (currentPos) KeybindingManager;
-    assert_msg(keybindingManager, "No keybindingManager");
-    currentPos += sizeof(KeybindingManager);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    keybindingManager = new KeybindingManager;
-#endif // WIN32
-
-#ifdef WIN32
-    keyframeRecording = new (currentPos) KeyframeRecordingHandler;
-    assert_msg(keyframeRecording, "No keyframeRecording");
-    currentPos += sizeof(KeyframeRecordingHandler);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    keyframeRecording = new KeyframeRecordingHandler;
-#endif // WIN32
-
-#ifdef WIN32
-    navigationHandler = new (currentPos) NavigationHandler;
-    assert_msg(navigationHandler, "No navigationHandler");
-    currentPos += sizeof(NavigationHandler);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    navigationHandler = new NavigationHandler;
-#endif // WIN32
-
-#ifdef WIN32
-    sessionRecordingHandler = new (currentPos) SessionRecordingHandler;
-    assert_msg(sessionRecordingHandler, "No sessionRecording");
-    currentPos += sizeof(SessionRecordingHandler);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    sessionRecordingHandler = new SessionRecordingHandler;
-#endif // WIN32
-
-#ifdef WIN32
-    rootPropertyOwner = new (currentPos) PropertyOwner({ "" });
-    assert_msg(rootPropertyOwner, "No rootPropertyOwner");
-    currentPos += sizeof(PropertyOwner);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    rootPropertyOwner = new PropertyOwner({ "" });
-#endif // WIN32
-
-#ifdef WIN32
-    screenSpaceRootPropertyOwner =
-        new (currentPos) PropertyOwner({ "ScreenSpace" });
-    assert_msg(screenSpaceRootPropertyOwner, "No screenSpaceRootPropertyOwner");
-    currentPos += sizeof(PropertyOwner);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    screenSpaceRootPropertyOwner = new PropertyOwner({ "ScreenSpace" });
-#endif // WIN32
-
-#ifdef WIN32
-    userPropertyOwner = new (currentPos) PropertyOwner({ "UserProperties" });
-    assert_msg(userPropertyOwner, "No userPropertyOwner");
-    currentPos += sizeof(PropertyOwner);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    userPropertyOwner = new PropertyOwner({ "UserProperties" });
-#endif // WIN32
-
-#ifdef WIN32
-    scriptEngine = new (currentPos) ScriptEngine;
-    assert_msg(scriptEngine, "No scriptEngine");
-    currentPos += sizeof(ScriptEngine);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    scriptEngine = new ScriptEngine;
-#endif // WIN32
-
-#ifdef WIN32
-    scriptScheduler = new (currentPos) ScriptScheduler;
-    assert_msg(scriptScheduler, "No scriptScheduler");
-    currentPos += sizeof(ScriptScheduler);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    scriptScheduler = new ScriptScheduler;
-#endif // WIN32
-
-#ifdef WIN32
-    profile = new (currentPos) Profile;
-    assert_msg(profile, "No profile");
-    //currentPos += sizeof(Profile);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    profile = new Profile;
-#endif // WIN32
+        createGlobal<std::vector<std::unique_ptr<ScreenSpaceRenderable>>>(currentPos);
+    timeManager = createGlobal<TimeManager>(currentPos);
+    versionChecker = createGlobal<VersionChecker>(currentPos);
+    windowDelegate = createGlobal<WindowDelegate>(currentPos);
+    configuration = createGlobal<Configuration>(currentPos);
+    actionManager = createGlobal<ActionManager>(currentPos);
+    interactionHandler = createGlobal<InteractionHandler>(currentPos);
+    keybindingManager = createGlobal<KeybindingManager>(currentPos);
+    keyframeRecording = createGlobal<KeyframeRecordingHandler>(currentPos);
+    navigationHandler = createGlobal<NavigationHandler>(currentPos);
+    sessionRecordingHandler = createGlobal<SessionRecordingHandler>(currentPos);
+    rootPropertyOwner = createGlobal<PropertyOwner>(
+        currentPos,
+        PropertyOwner::PropertyOwnerInfo{ .identifier = "" }
+    );
+    screenSpaceRootPropertyOwner = createGlobal<PropertyOwner>(
+        currentPos,
+        PropertyOwner::PropertyOwnerInfo{ .identifier = "ScreenSpace" }
+    );
+    userPropertyOwner = createGlobal<PropertyOwner>(
+        currentPos,
+        PropertyOwner::PropertyOwnerInfo{ .identifier = "UserProperties" }
+    );
+    scriptEngine = createGlobal<ScriptEngine>(currentPos);
+    scriptScheduler = createGlobal<ScriptScheduler>(currentPos);
+    profile = createGlobal<Profile>(currentPos);
 }
 
 void initialize() {

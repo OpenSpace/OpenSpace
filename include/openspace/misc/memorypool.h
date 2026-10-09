@@ -111,8 +111,9 @@ private:
     struct Bucket {
         /// The number of bytes that have been used in this Bucket
         size_t usage = 0;
-        /// The bucket's data storage
-        std::array<std::byte, BucketSize> payload;
+        /// The bucket's data storage. Explicitly aligned as the payload is handed out to
+        /// objects of any type and a misaligned memory could be problematic
+        alignas(std::max_align_t) std::array<std::byte, BucketSize> payload;
     };
 
     struct EmptyPair {
@@ -182,7 +183,7 @@ public:
 private:
     struct Bucket {
         /// The data storage of this bucket
-        std::array<std::byte, BucketSizeItems * sizeof(T)> payload;
+        alignas(T) std::array<std::byte, BucketSizeItems * sizeof(T)> payload;
         /// The number of bytes that have been used in this Bucket
         int usage = 0;
     };

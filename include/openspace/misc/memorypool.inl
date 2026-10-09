@@ -25,6 +25,7 @@
 #include <openspace/misc/assert.h>
 #include <openspace/misc/profiling.h>
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <numeric>
 #include <stdexcept>
@@ -112,23 +113,39 @@ void* MemoryPool<BucketSize, InjectDebugMemory, NoDealloc>::do_allocate(size_t b
         bytes <= BucketSize,
         "Cannot allocate larger memory blocks than available in a bucket"
     );
+    assert_msg(
+        alignment <= alignof(std::max_align_t),
+        "Cannot satisfy an alignment stricter than the alignment of a bucket's payload"
+    );
+
+    // Rounds a value up to the next multiple of the requested alignment
+    auto alignUp = [alignment](size_t value) {
+        return ((value + alignment - 1) / alignment) * alignment;
+    };
 
     for (EmptyPair& ep : _emptyList) {
-        if (bytes <= ep.size) {
+        // The start of a reused block does not necessarily satisfy the alignment that is
+        // requested now, so account for the padding that is needed in front of it
+        const std::uintptr_t p = reinterpret_cast<std::uintptr_t>(ep.ptr);
+        const size_t padding = alignUp(p) - p;
+
+        if (padding + bytes <= ep.size) {
             // We found an empty pair that works
-            ep.size -= bytes;
-            void* p = ep.ptr;
-            ep.ptr = static_cast<std::byte*>(ep.ptr) + bytes;
-            return p;
+            ep.size -= padding + bytes;
+            std::byte* ptr = static_cast<std::byte*>(ep.ptr) + padding;
+            ep.ptr = ptr + bytes;
+            return ptr;
         }
     }
 
-    // Find the first bucket that has enough space left for the number of items
+    // Find the first bucket that has enough space left for the number of items. The usage
+    // has to be rounded up first as the memory in front of that boundary cannot be used
+    // for this allocation
     auto it = std::find_if(
         _buckets.begin(),
         _buckets.end(),
-        [bytes](const std::unique_ptr<Bucket>& i) {
-            return i->usage + bytes <= BucketSize;
+        [bytes, alignUp](const std::unique_ptr<Bucket>& i) {
+            return alignUp(i->usage) + bytes <= BucketSize;
         }
     );
 
@@ -141,18 +158,21 @@ void* MemoryPool<BucketSize, InjectDebugMemory, NoDealloc>::do_allocate(size_t b
 
     Bucket* b = it->get();
     std::array<std::byte, BucketSize>& payload = b->payload;
+
+    // Skip ahead to the next alignment boundary so that the returned pointer satisfies
+    // the requested alignment
+    const size_t aligned = alignUp(b->usage);
+    if (InjectDebugMemory && aligned != b->usage) {
+        // Mark the bytes that are skipped over
+        std::memset(payload.data() + b->usage, AlignmentByte, aligned - b->usage);
+    }
+    b->usage = aligned;
+
     std::byte* ptr = payload.data() + b->usage;
     b->usage += bytes;
 
     if (InjectDebugMemory) {
         std::memset(ptr, DebugByte, bytes);
-    }
-    // Handle unaligned memory by padding to the next alignment boundary
-    const size_t align = alignment - (bytes % alignment);
-    if (align != alignment) {
-        // Mark the extra bytes as "used"
-        b->usage += align;
-        std::memset(ptr + bytes, AlignmentByte, align);
     }
 
     return ptr;
