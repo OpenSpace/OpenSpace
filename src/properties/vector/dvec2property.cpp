@@ -39,6 +39,19 @@ DVec2Property::DVec2Property(PropertyInfo info, glm::dvec2 value, glm::dvec2 min
     )
 {}
 
+DVec2Property::DVec2Property(PropertyInfo info, IsEnabled isEnabled, glm::dvec2 value,
+                             glm::dvec2 minValue, glm::dvec2 maxValue,
+                             glm::dvec2 stepValue)
+    : NumericalProperty<glm::dvec2>(
+        std::move(info),
+        isEnabled,
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
+
 std::string_view DVec2Property::className() const {
     return "DVec2Property";
 }

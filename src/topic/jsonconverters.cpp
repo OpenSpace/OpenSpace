@@ -101,6 +101,11 @@ void to_json(json& j, const Property& p) {
         { "uri", p.uri() },
         { "value", val }
     };
+
+    // Only add the enabled field if the property is enablable
+    if (p.isEnablable()) {
+        j["isEnabled"] = p.isEnabled() ? true : false;
+    }
 }
 
 void to_json(json& j, const Property* pP) {

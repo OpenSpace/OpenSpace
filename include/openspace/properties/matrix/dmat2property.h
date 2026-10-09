@@ -40,6 +40,13 @@ public:
         glm::dmat2x2 maxValue =
             createFillMat2x2<double>(std::numeric_limits<double>::max()),
         glm::dmat2x2 stepValue = createFillMat2x2<double>(0.01));
+    DMat2Property(PropertyInfo info, IsEnabled isEnabled,
+        glm::dmat2x2 value = glm::dmat2x2(0.0),
+        glm::dmat2x2 minValue =
+            createFillMat2x2<double>(std::numeric_limits<double>::lowest()),
+        glm::dmat2x2 maxValue =
+            createFillMat2x2<double>(std::numeric_limits<double>::max()),
+        glm::dmat2x2 stepValue = createFillMat2x2<double>(0.01));
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

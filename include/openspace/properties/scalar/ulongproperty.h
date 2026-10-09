@@ -41,6 +41,11 @@ public:
         unsigned long minValue = std::numeric_limits<unsigned long>::lowest(),
         unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
         unsigned long stepValue = 1ul);
+    ULongProperty(PropertyInfo info, IsEnabled isEnabled,
+        unsigned long value = 0ul,
+        unsigned long minValue = std::numeric_limits<unsigned long>::lowest(),
+        unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
+        unsigned long stepValue = 1ul);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

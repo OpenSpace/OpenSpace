@@ -40,6 +40,10 @@ public:
         long minValue = std::numeric_limits<long>::lowest(),
         long maxValue = std::numeric_limits<long>::max(),
         long stepValue = long(1));
+    LongProperty(PropertyInfo info, IsEnabled isEnabled, long value = long(0),
+        long minValue = std::numeric_limits<long>::lowest(),
+        long maxValue = std::numeric_limits<long>::max(),
+        long stepValue = long(1));
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

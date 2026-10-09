@@ -170,6 +170,7 @@ namespace {
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
         "double inputs on touch (from both touch input and inserted mouse inputs).",
         Property::Visibility::User,
+        Property::IsEnablable::No,
         Property::NeedsConfirmation::Yes
     };
 

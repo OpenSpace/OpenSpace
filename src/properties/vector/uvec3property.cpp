@@ -39,6 +39,19 @@ UVec3Property::UVec3Property(PropertyInfo info, glm::uvec3 value, glm::uvec3 min
     )
 {}
 
+UVec3Property::UVec3Property(PropertyInfo info, IsEnabled isEnabled, glm::uvec3 value,
+                             glm::uvec3 minValue, glm::uvec3 maxValue,
+                             glm::uvec3 stepValue)
+    : NumericalProperty<glm::uvec3>(
+        std::move(info),
+        isEnabled,
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
+
 std::string_view UVec3Property::className() const {
     return "UVec3Property";
 }

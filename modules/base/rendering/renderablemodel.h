@@ -100,7 +100,6 @@ private:
     OptionProperty _blendingFuncOption;
     BoolProperty _renderWireframe;
 
-    BoolProperty _useOverrideColor;
     Vec4Property _overrideColor;
 
     std::filesystem::path _vertexShaderPath;

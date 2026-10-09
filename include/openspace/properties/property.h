@@ -72,6 +72,10 @@ class Property {
 public:
     BooleanType(NeedsConfirmation);
 
+    // Enabled state of the property itself    
+    BooleanType(IsEnablable);
+    BooleanType(IsEnabled);
+
     /**
      * The visibility classes for Property%s. The classes are strictly ordered as
      * Hidden > Developer > AdvancedUser > User > NoviceUser > Always
@@ -104,20 +108,24 @@ public:
          * argument for the struct initialization.
          */
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
+                               IsEnablable isEnablable_ = IsEnablable::No,
                              NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
+            , isEnablable(isEnablable_)
             , needsConfirmation(needsConfirmation_)
         {}
 
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
                                Visibility vis,
+                               IsEnablable isEnablable_ = IsEnablable::No,
                              NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
             , visibility(vis)
+            , isEnablable(isEnablable_)
             , needsConfirmation(needsConfirmation_)
         {}
 
@@ -129,6 +137,8 @@ public:
         const char* description;
         /// Determines the visibility of this Property in the user interface
         Visibility visibility = Visibility::Default;
+        /// Determines if the Property is enablable (linked to a boolean)
+        IsEnablable isEnablable = IsEnablable::No;
         /// Determines if the Property require confirmation upon value change
         NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
     };
@@ -165,11 +175,13 @@ public:
      *
      * \param info The PropertyInfo structure that contains all the required static
      *        information for initializing this Property
+     * \param isEnabled Whether this Property should be enabled. This setting is only used
+     *        if the Property is also enablable
      *
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    explicit Property(PropertyInfo info);
+    explicit Property(PropertyInfo info, IsEnabled isEnabled = IsEnabled::No);
 
     /**
      * The destructor taking care of deallocating all unused memory. This method will not
@@ -467,6 +479,32 @@ public:
     bool viewOption(const std::string& option, bool defaultValue = false) const;
 
     /**
+     * Returns whether this Property can be enabled and disabled independently of its
+     * value. This is static metadata that is set through the PropertyInfo.
+     *
+     * \return `IsEnablable::Yes` if the Property is enablable, else `IsEnablable::No`
+     */
+    IsEnablable isEnablable() const;
+
+    /**
+     * Returns whether this Property is currently enabled. The result is only meaningful
+     * if the Property is enablable, see #isEnablable.
+     *
+     * \return `IsEnabled::Yes` if the Property is enabled, else `IsEnabled::No`
+     */
+    IsEnabled isEnabled() const;
+
+    /**
+     * Sets the enabled state of this Property and notifies the change listeners. This
+     * only works for Property%s that are enablable, see #isEnablable.
+     *
+     * \param isEnabled The new enabled state
+     *
+     * \throw RuntimeError If the Property is not enablable
+     */
+    void setIsEnabled(IsEnabled isEnabled);
+
+    /**
      * Get a valid JSON formatted representation of the Property's value.
      *
      * \return The value in a JSON compatible format
@@ -549,6 +587,9 @@ protected:
     /// The user-facing description of this Property
     std::string _description;
 
+    /// If this property is enablable, this will tell if it is enabled or not
+    IsEnabled _isEnabled = IsEnabled::No;
+
     /**
      * The meta data necessary for external applications.
      */
@@ -557,6 +598,7 @@ protected:
         Visibility visibility = Visibility::Default;
         std::optional<bool> readOnly;
         bool needsConfirmation = false;
+        bool isEnablable = false;
         std::unordered_map<std::string, bool> viewOptions;
     } _metaData;
 

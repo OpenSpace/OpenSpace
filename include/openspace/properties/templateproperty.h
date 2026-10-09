@@ -64,7 +64,8 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    TemplateProperty(Property::PropertyInfo info, T value);
+    TemplateProperty(PropertyInfo info, T value);
+    TemplateProperty(PropertyInfo info, IsEnabled isEnabled, T value);
 
     /**
      * Returns the `std::type_info` describing the template parameter `T`. It can be used

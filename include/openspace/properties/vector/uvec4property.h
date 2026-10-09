@@ -38,6 +38,11 @@ public:
         glm::uvec4 minValue = glm::uvec4(std::numeric_limits<unsigned int>::lowest()),
         glm::uvec4 maxValue = glm::uvec4(std::numeric_limits<unsigned int>::max()),
         glm::uvec4 stepValue = glm::uvec4(1));
+    UVec4Property(PropertyInfo info, IsEnabled isEnabled,
+        glm::uvec4 value = glm::uvec4(0),
+        glm::uvec4 minValue = glm::uvec4(std::numeric_limits<unsigned int>::lowest()),
+        glm::uvec4 maxValue = glm::uvec4(std::numeric_limits<unsigned int>::max()),
+        glm::uvec4 stepValue = glm::uvec4(1));
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

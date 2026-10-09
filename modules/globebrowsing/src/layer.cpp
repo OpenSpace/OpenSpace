@@ -85,6 +85,7 @@ namespace {
         "If this value is triggered, a script will be executed that will remove this "
         "layer before the next frame.",
         Property::Visibility::User,
+        Property::IsEnablable::No,
         Property::NeedsConfirmation::Yes
     };
 

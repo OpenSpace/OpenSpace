@@ -56,6 +56,7 @@ public:
      * \pre \p info.guiName must not be empty
      */
     explicit OptionProperty(PropertyInfo info);
+    OptionProperty(PropertyInfo info, IsEnabled isEnabled);
 
     /**
      * Returns the name of the class for reflection purposes.

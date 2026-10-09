@@ -39,6 +39,19 @@ DMat2Property::DMat2Property(PropertyInfo info, glm::dmat2x2 value, glm::dmat2x2
     )
 {}
 
+DMat2Property::DMat2Property(PropertyInfo info, IsEnabled isEnabled, glm::dmat2x2 value,
+                             glm::dmat2x2 minValue, glm::dmat2x2 maxValue,
+                             glm::dmat2x2 stepValue)
+    : NumericalProperty<glm::dmat2x2>(
+        std::move(info),
+        isEnabled,
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
+
 std::string_view DMat2Property::className() const {
     return "DMat2Property";
 }

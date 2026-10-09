@@ -41,6 +41,10 @@ public:
         unsigned int minValue = std::numeric_limits<unsigned int>::lowest(),
         unsigned int maxValue = std::numeric_limits<unsigned int>::max(),
         unsigned int stepValue = 1);
+    UIntProperty(PropertyInfo info, IsEnabled isEnabled, unsigned int value = 0,
+        unsigned int minValue = std::numeric_limits<unsigned int>::lowest(),
+        unsigned int maxValue = std::numeric_limits<unsigned int>::max(),
+        unsigned int stepValue = 1);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

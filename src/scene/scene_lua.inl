@@ -513,6 +513,14 @@ namespace {
         return 0;
     }
 
+    void setEnabledCallSingle(Property& prop, bool isEnabled) {
+        if (global::sessionRecordingHandler->isRecording()) {
+            global::sessionRecordingHandler->savePropertyEnabledBaseline(prop);
+        }
+
+        prop.setIsEnabled(Property::IsEnabled(isEnabled));
+    }
+
     template <typename T>
     void createCustomProperty(Property::PropertyInfo info,
                               std::optional<std::string> onChange)
@@ -552,7 +560,7 @@ namespace {
 
 namespace openspace::luascriptfunctions {
 
-template <bool optimization>
+template <bool hasSingleUri>
 int propertySetValue(lua_State* L) {
     ZoneScoped;
 
@@ -646,7 +654,7 @@ int propertySetValue(lua_State* L) {
 
     defer { lua_settop(L, 0); };
 
-    if constexpr (optimization) {
+    if constexpr (hasSingleUri) {
         Property* prop = property(uriOrRegex);
         if (!prop) {
             LERRORC(
@@ -689,6 +697,81 @@ int propertySetValue(lua_State* L) {
     return 0;
 }
 
+template <bool hasSingleUri>
+int setPropertyEnabled(lua_State* L) {
+    ZoneScoped;
+
+    lua::checkArgumentsAndThrow(L, 2, "lua::setPropertyEnabled");
+
+    auto [uriOrRegex, isEnabled] = lua::values<std::string, bool>(L);
+
+    if constexpr (hasSingleUri) {
+        Property* prop = property(uriOrRegex);
+        if (!prop) {
+            LERRORC(
+                "setPropertyEnabled",
+                std::format(
+                    "{}: Property with URI '{}' was not found",
+                    lua::errorLocation(L), uriOrRegex
+                )
+            );
+            return 0;
+        }
+
+        if (!prop->isEnablable()) {
+            LERRORC(
+                "setPropertyEnabled",
+                std::format(
+                    "{}: Property with URI '{}' is not enablable",
+                    lua::errorLocation(L), uriOrRegex
+                )
+            );
+            return 0;
+        }
+
+        setEnabledCallSingle(*prop, isEnabled);
+        return 0;
+    }
+    else {
+        std::string tag = groupTag(uriOrRegex);
+        if (!tag.empty()) {
+            // Remove group tag from start of regex and replace with '*'
+            uriOrRegex = removeGroupTagFromUri(uriOrRegex);
+        }
+
+        //
+        // 1. Retrieve all properties that match the regex
+        std::vector<Property*> matchingProps = findMatchesInAllProperties(
+            uriOrRegex,
+            tag
+        );
+
+        //
+        // 2. Remove all properties that are not enablable
+        std::erase_if(
+            matchingProps,
+            [](Property* prop) { return !prop->isEnablable(); }
+        );
+
+        if (matchingProps.empty()) [[unlikely]] {
+            LERRORC(
+                "property_setPropertyEnabled",
+                std::format(
+                    "{}: No property matched the requested URI '{}'",
+                    lua::errorLocation(L), uriOrRegex
+                )
+            );
+            return 0;
+        }
+
+        for (Property* prop : matchingProps) {
+            setEnabledCallSingle(*prop, isEnabled);
+        }
+
+        return 0;
+    }
+}
+
 int propertyGetValue(lua_State* L) {
     lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetValue");
     const std::string uri = lua::value<std::string>(L);
@@ -708,6 +791,51 @@ int propertyGetValue(lua_State* L) {
     prop->getLuaValue(L);
     return 1;
 }
+
+int propertyGetEnabled(lua_State* L) {
+    lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetEnabled");
+    const std::string uri = lua::value<std::string>(L);
+
+    Property* prop = property(uri);
+    if (!prop) {
+        LERRORC(
+            "propertyGetEnabled",
+            std::format(
+                "{}: Property with URI '{}' was not found",
+                lua::errorLocation(L), uri
+            )
+        );
+        return 0;
+    }
+
+    bool isEnabled = prop->isEnabled();
+    lua::push(L, isEnabled);
+
+    return 1;
+}
+
+int propertyGetEnablable(lua_State* L) {
+    lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetEnablable");
+    const std::string uri = lua::value<std::string>(L);
+
+    Property* prop = property(uri);
+    if (!prop) {
+        LERRORC(
+            "propertyGetEnablable",
+            std::format(
+                "{}: Property with URI '{}' was not found",
+                lua::errorLocation(L), uri
+            )
+        );
+        return 0;
+    }
+
+    bool isEnablable = prop->isEnablable();
+    lua::push(L, isEnablable);
+
+    return 1;
+}
+
 } // namespace openspace::luascriptfunctions
 
 namespace {

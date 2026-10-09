@@ -1027,6 +1027,79 @@ provided new value, then back to the original value, until manually stopped.
                     std::source_location::current().line()
                 }
             },
+            {
+                "propertyEnabled",
+                &luascriptfunctions::propertyGetEnabled,
+                {
+                    { "uri", "String" }
+                },
+                "Boolean",
+                "Returns true if the property identified by the provided URI is enabled "
+                "and false otherwise. This function will provide an error message if no "
+                "property matching the URI is found, or if the property is not "
+                "enablable.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
+            {
+                "propertyEnablable",
+                &luascriptfunctions::propertyGetEnablable,
+                {
+                    { "uri", "String" }
+                },
+                "Boolean",
+                "Returns true if the property identified by the provided URI is "
+                "enablable and false otherwise. This function will provide an error "
+                "message if no property matching the URI is found.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
+            {
+                "setPropertyEnabled",
+                &luascriptfunctions::setPropertyEnabled<false>,
+                {
+                    { "uri", "String" },
+                    { "value", "Boolean" }
+                },
+                "",
+                "Sets the enabled setting for the property with the provided URI. The "
+                "`uri` identifies which property or properties are affected by this "
+                "function call and can include both wildcards `*` which match anything, "
+                "as well as tags(`{tag }`) which match scene graph nodes that have this "
+                "tag. There is also the ability to combine two tags through the `&`, "
+                "`|`, and `~` operators. `{tag1& tag2}` will match anything that has the "
+                "tag1 and the tag2. `{tag1 | tag2}` will match anything that has the "
+                "tag1 or the tag 2, and `{tag1~tag2}` will match anything that has tag1 "
+                "but not tag2.If no wildcards or tags are provided at most one property "
+                "value will be changed.With wildcards or tags all properties that match "
+                "the URI are changed instead.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
+            {
+                "setPropertyEnabledSingle",
+                &luascriptfunctions::setPropertyEnabled<true>,
+                {
+                    { "uri", "String" },
+                    { "value", "Boolean" }
+                },
+                "",
+                "Sets the enabled setting for the property with the provided URI. If "
+                "you want to change multiple property values simultaneously, also see "
+                "the #propertySetEnabled function.The `propertySetEnabledSingle` "
+                "function however will work more efficiently for individual property "
+                "values.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
             codegen::lua::StopPropertyBouncing,
             codegen::lua::HasProperty,
             codegen::lua::Property,
