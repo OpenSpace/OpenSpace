@@ -92,7 +92,10 @@ void main() {
   // Apply component scaling lastly, to get comparable sizes
   float comp = in_data[0].component;
 
-  out_data.sizeFactor = comp;
+  // +1 to make space for the star visualization in the center
+  // caling by 0.9 compensates for this extra scaling, and tightens up the rings
+  // a bit to make them more comparable in size to the ring mode glyphs
+  out_data.sizeFactor = 0.9 * (comp + 1);
 
   vec4 scaledRightClip = out_data.sizeFactor *
     vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));

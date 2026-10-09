@@ -55,7 +55,8 @@ Fragment getFragment() {
   float x = in_data.texCoords.x;
   float y = in_data.texCoords.y;
 
-  float component = in_data.component;
+  // +1 because the innermost space is reserved for the star
+  float component = in_data.component + 1;
 
   bool isCurrentHoveredGlyph = in_data.glyphIndex == currentIndex;
 
