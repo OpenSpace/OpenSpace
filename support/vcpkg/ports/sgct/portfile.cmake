@@ -25,10 +25,10 @@ vcpkg_check_features(
 # Spout's SDK is x86-only, which is why the manifest gates spout2 on 'windows & !arm64'.
 # SGCT defaults SGCT_SPOUT_SUPPORT the same way from the target architecture, but it is
 # passed explicitly so the port never depends on that detection succeeding
-if (VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
-  set(SPOUT_OPTION -DSGCT_SPOUT_SUPPORT=OFF)
-else ()
+if (VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
   set(SPOUT_OPTION -DSGCT_SPOUT_SUPPORT=ON)
+else ()
+  set(SPOUT_OPTION -DSGCT_SPOUT_SUPPORT=OFF)
 endif ()
 
 vcpkg_cmake_configure(
