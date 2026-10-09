@@ -30,10 +30,12 @@ set(HEADER_FILES
     dataloader.h
     datastructures.h
     dataviewer.h
+    densityvolume.h
     exoplanetsexperttoolmodule.h
     expressionparser.h
     glyphhandler.h
     gui.h
+    rendering/renderabledensitypointcloud.h
     rendering/renderableexoplanetglyphcloud.h
     rendering/renderablehostcloud.h
     rendering/renderablespatialselectionvolume.h
@@ -55,10 +57,12 @@ set(SOURCE_FILES
     datahelper.cpp
     dataloader.cpp
     dataviewer.cpp
+    densityvolume.cpp
     exoplanetsexperttoolmodule.cpp
     expressionparser.cpp
     glyphhandler.cpp
     gui.cpp
+    rendering/renderabledensitypointcloud.cpp
     rendering/renderableexoplanetglyphcloud.cpp
     rendering/renderablehostcloud.cpp
     rendering/renderablespatialselectionvolume.cpp
@@ -75,6 +79,10 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/densitybox_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/densitybox_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/densitypoints_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/densitypoints_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/selectionvolume_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/selectionvolume_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/hosts_fs.glsl

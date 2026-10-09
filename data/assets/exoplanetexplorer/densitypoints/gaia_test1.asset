@@ -1,0 +1,30 @@
+
+local colormaps = asset.require("util/default_colormaps")
+
+local Node ={
+  Identifier = "CastDensityPoints",
+  Renderable = {
+    Type = "RenderableDensityPointCloud",
+    File = "D:/Exoplanets Experts Paper/PointCloudData/GCNS_EDR100pc.csv",
+    XColumn = "px", YColumn = "py", ZColumn = "pz",
+    Unit = "pc",
+    GridDimensions = { 128, 128, 128 },
+    Color = {
+      ColorMap = colormaps.Uniform.Viridis
+    },
+    PointSize = 3,
+    BoundingBox = {
+      Enabled = true
+    },
+    Opacity = 0.5
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(Node)
+
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(Node)
+end)
