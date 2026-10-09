@@ -103,38 +103,12 @@ public:
      * identifier, a GUI name and descriptive text that are both user facing.
      */
     struct PropertyInfo {
-        /**
-         * GCC requires an explicit constructor here, as it does not handle the default
-         * argument for the struct initialization.
-         */
-        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                               IsEnablable isEnablable_ = IsEnablable::No,
-                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
-            : identifier(ident)
-            , guiName(gui)
-            , description(desc)
-            , isEnablable(isEnablable_)
-            , needsConfirmation(needsConfirmation_)
-        {}
-
-        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                               Visibility vis,
-                               IsEnablable isEnablable_ = IsEnablable::No,
-                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
-            : identifier(ident)
-            , guiName(gui)
-            , description(desc)
-            , visibility(vis)
-            , isEnablable(isEnablable_)
-            , needsConfirmation(needsConfirmation_)
-        {}
-
         /// The unique identifier that is part of the fully qualified URI of this Property
-        const char* identifier;
+        std::string_view identifier;
         /// The name that is displayed in the user interface
-        const char* guiName;
+        std::string_view guiName;
         /// The user facing description of this Property
-        const char* description;
+        std::string_view description;
         /// Determines the visibility of this Property in the user interface
         Visibility visibility = Visibility::Default;
         /// Determines if the Property is enablable (linked to a boolean)

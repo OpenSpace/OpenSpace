@@ -178,7 +178,8 @@ struct DocumentationEntry {
      * \pre \p v must not be `nullptr`
      */
     DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
-        Optional opt = Optional::No, Private priv = Private::No, std::string doc = "");
+        Optional opt = Optional::No, Private priv = Private::No,
+        std::string_view doc = "");
 
     /**
      * The constructor for a DocumentationEntry describing a key \p k in a Documentation.
@@ -208,7 +209,7 @@ struct DocumentationEntry {
      * \pre \p v must not be `nullptr`
      */
     DocumentationEntry(std::string k, Verifier* v, Optional opt = Optional::No,
-        Private priv = Private::No, std::string doc = "");
+        Private priv = Private::No, std::string_view doc = "");
 
     /// The key that is described by this DocumentationEntry
     std::string key;
@@ -219,7 +220,7 @@ struct DocumentationEntry {
     /// Determines if the entry should be visible to the user
     Private isPrivate;
     /// The textual description of this DocumentationEntry
-    std::string documentation;
+    std::string_view documentation;
 };
 
 /**
