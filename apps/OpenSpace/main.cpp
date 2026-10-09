@@ -60,6 +60,8 @@
 #include <sgct/user.h>
 #include <sgct/window.h>
 #include <stb_image.h>
+#include <cstdint>
+#include <format>
 #include <iostream>
 #include <string_view>
 
@@ -155,12 +157,52 @@ std::vector<SpoutWindow> SpoutWindows;
 //  MiniDump generation
 //
 #ifdef WIN32
+/**
+ * Returns the name of the \p code of an exception if it is one of the ones that are
+ * commonly encountered, or an empty string view otherwise.
+ */
+std::string_view exceptionCodeName(DWORD code) {
+    switch (code) {
+        case EXCEPTION_ACCESS_VIOLATION:      return "EXCEPTION_ACCESS_VIOLATION";
+        case EXCEPTION_DATATYPE_MISALIGNMENT: return "EXCEPTION_DATATYPE_MISALIGNMENT";
+        case EXCEPTION_ILLEGAL_INSTRUCTION:   return "EXCEPTION_ILLEGAL_INSTRUCTION";
+        case EXCEPTION_IN_PAGE_ERROR:         return "EXCEPTION_IN_PAGE_ERROR";
+        case EXCEPTION_INT_DIVIDE_BY_ZERO:    return "EXCEPTION_INT_DIVIDE_BY_ZERO";
+        case EXCEPTION_FLT_DIVIDE_BY_ZERO:    return "EXCEPTION_FLT_DIVIDE_BY_ZERO";
+        case EXCEPTION_FLT_INVALID_OPERATION: return "EXCEPTION_FLT_INVALID_OPERATION";
+        case EXCEPTION_FLT_OVERFLOW:          return "EXCEPTION_FLT_OVERFLOW";
+        case EXCEPTION_STACK_OVERFLOW:        return "EXCEPTION_STACK_OVERFLOW";
+        case EXCEPTION_PRIV_INSTRUCTION:      return "EXCEPTION_PRIV_INSTRUCTION";
+        case EXCEPTION_NONCONTINUABLE_EXCEPTION:
+                                              return "EXCEPTION_NONCONTINUABLE_EXCEPTION";
+        default:                              return "";
+    }
+}
+
 LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
     SYSTEMTIME stLocalTime;
     GetLocalTime(&stLocalTime);
 
+    if (exceptionPointers && exceptionPointers->ExceptionRecord) {
+        const EXCEPTION_RECORD& record = *exceptionPointers->ExceptionRecord;
+        const std::string_view name = exceptionCodeName(record.ExceptionCode);
+        LFATAL(std::format(
+            "Exception 0x{:08X}{} at address 0x{:016X}",
+            record.ExceptionCode,
+            name.empty() ? std::string() : std::format(" ({})", name),
+            reinterpret_cast<std::uintptr_t>(record.ExceptionAddress)
+        ));
+    }
+
     LFATAL("Printing Stack Trace that lead to the crash:");
-    std::vector<std::string> trace = stackTrace();
+    std::vector<std::string> trace = stackTraceFromContext(
+        exceptionPointers ? exceptionPointers->ContextRecord : nullptr
+    );
+    if (trace.empty()) {
+        // Better than nothing, even though the frames of the filter itself will be at
+        // the top of this
+        trace = stackTrace();
+    }
     for (const std::string& s : trace) {
         LINFO(s);
     }
@@ -218,7 +260,11 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         GetCurrentProcess(),
         GetCurrentProcessId(),
         hDumpFile,
-        MiniDumpWithDataSegs,
+        static_cast<MINIDUMP_TYPE>(
+            MiniDumpWithDataSegs |
+            MiniDumpWithIndirectlyReferencedMemory |
+            MiniDumpWithThreadInfo
+        ),
         &exceptionParameter,
         nullptr,
         nullptr
