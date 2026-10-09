@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime.version": "Lua 5.4",
+  "completion.displayContext": 5,
+  "hint.setType": true,
+  "type.castNumberToInteger": false,
+  "workspace.library": [
+    "documentation/lua",
+    "support/types/asset.lua"
+  ],
+  "workspace.ignoreDir": [
+    "/.git",
+    "/.github",
+    "/.vs",
+    "/.vscode",
+    "/apps",
+    "/bin",
+    "/build",
+    "/cache",
+    "/config",
+    "/doc",
+    "/documentation",
+    "/ext",
+    "/include",
+    "/logs",
+    "/modules",
+    "/mrf_cache",
+    "/scripts",
+    "/shaders",
+    "/src",
+    "/support",
+    "/sync",
+    "/temp",
+    "/tests",
+    "/visualtests"
+  ],
+  "workspace.useGitIgnore": false,
+  "workspace.maxPreload": 5000
+}

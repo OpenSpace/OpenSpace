@@ -52,6 +52,7 @@ target_sources(
     test_luaconversions.cpp
     test_luatodictionary.cpp
     test_lua_createsinglecolorimage.cpp
+    test_lua_factoryconstructors.cpp
     test_lua_property.cpp
     test_lua_propertyvalue.cpp
     test_lua_setpropertyvalue.cpp

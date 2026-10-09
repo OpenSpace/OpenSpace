@@ -29,6 +29,8 @@
 #include <openspace/documentation/schema.h>
 #include <openspace/json.h>
 #include <openspace/properties/propertyowner.h>
+#include <map>
+#include <string>
 #include <vector>
 
 namespace openspace {
@@ -95,6 +97,8 @@ public:
     void writeJsonSchema();
 
     nlohmann::json generateScriptEngineJson() const;
+    std::string generateLuaDefinitions() const;
+    std::map<std::string, std::string> generateLuaTypes() const;
     nlohmann::json generateFactoryManagerJson() const;
     nlohmann::json generateKeybindingsJson() const;
     nlohmann::json generatePropertyOwnerJson(PropertyOwner* owner) const;

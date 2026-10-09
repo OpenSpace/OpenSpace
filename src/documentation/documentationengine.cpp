@@ -55,10 +55,14 @@
 #include <openspace/util/json_helper.h>
 #include <openspace/util/keys.h>
 #include <algorithm>
+#include <array>
+#include <cctype>
 #include <fstream>
 #include <future>
+#include <limits>
 #include <map>
 #include <optional>
+#include <set>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -237,6 +241,18 @@ namespace {
         return json;
     }
 
+    // Remove all double whitespaces from the helptext (these may be generated when using
+    // multi-line strings in Lua)
+    std::string cleanHelpText(std::string helpText) {
+        trimWhitespace(helpText);
+        size_t doubleSpace = helpText.find("  ");
+        while (doubleSpace != std::string::npos) {
+            helpText.erase(doubleSpace, 1);
+            doubleSpace = helpText.find("  ");
+        }
+        return helpText;
+    }
+
     nlohmann::json luaFunctionToJson(const LuaLibrary::Function& f,
                                      bool includeSourceLocation)
     {
@@ -255,17 +271,7 @@ namespace {
         function[ArgumentsKey] = arguments;
         function[ReturnTypeKey] = f.returnType;
 
-        // Remove all double whitespaces from the helptext (these may be generated when
-        // using multi-line strings in Lua)
-        std::string cleanedHelpText = f.helpText;
-        trimWhitespace(cleanedHelpText);
-        std::size_t doubleSpace = cleanedHelpText.find("  ");
-        while (doubleSpace != std::string::npos) {
-            cleanedHelpText.erase(doubleSpace, 1);
-            doubleSpace = cleanedHelpText.find("  ");
-        }
-
-        function[HelpKey] = cleanedHelpText;
+        function[HelpKey] = cleanHelpText(f.helpText);
 
         if (includeSourceLocation) {
             nlohmann::json sourceLocation;
@@ -275,6 +281,559 @@ namespace {
         }
 
         return function;
+    }
+
+    std::string_view trimView(std::string_view s) {
+        while (!s.empty() && ::isspace(static_cast<unsigned char>(s.front()))) {
+            s.remove_prefix(1);
+        }
+        while (!s.empty() && ::isspace(static_cast<unsigned char>(s.back()))) {
+            s.remove_suffix(1);
+        }
+        return s;
+    }
+
+    // Turns each line of the text into a LuaLS comment line
+    std::string luaLsComment(std::string_view text) {
+        std::string res;
+        size_t start = 0;
+        while (!text.empty() && start <= text.size()) {
+            size_t end = text.find('\n', start);
+            if (end == std::string_view::npos) {
+                end = text.size();
+            }
+            const std::string_view line = trimView(text.substr(start, end - start));
+            res += std::format("---{}{}\n", line.empty() ? "" : " ", line);
+            start = end + 1;
+        }
+        return res;
+    }
+
+    std::string singleLine(std::string_view text) {
+        std::string res;
+        bool hasPendingSpace = false;
+        for (const char c : text) {
+            if (::isspace(static_cast<unsigned char>(c))) {
+                hasPendingSpace = !res.empty();
+                continue;
+            }
+            if (hasPendingSpace) {
+                res += ' ';
+                hasPendingSpace = false;
+            }
+            res += c;
+        }
+        return res;
+    }
+
+    bool isLuaIdentifier(std::string_view name) {
+        if (name.empty() || ::isdigit(static_cast<unsigned char>(name.front()))) {
+            return false;
+        }
+        return std::all_of(
+            name.begin(),
+            name.end(),
+            [](char c) { return ::isalnum(static_cast<unsigned char>(c)) || c == '_'; }
+        );
+    }
+
+    // Removes everything that is not allowed in a LuaLS class name
+    std::string luaLsClassName(std::string_view name) {
+        std::string res;
+        for (const char c : name) {
+            if (::isalnum(static_cast<unsigned char>(c)) || c == '_') {
+                res += c;
+            }
+        }
+        if (res.empty()) {
+            return "Unnamed";
+        }
+        if (::isdigit(static_cast<unsigned char>(res.front()))) {
+            res.insert(res.begin(), '_');
+        }
+        return res;
+    }
+
+    // Maps the Verifier::type of the verifiers that are not handled separately
+    std::string luaLsVerifierType(const std::string& type) {
+        if (type == "Boolean") {
+            return "boolean";
+        }
+        // Lua only has one number type and the engine accepts doubles for integers
+        if (type == "Double" || type == "Integer") {
+            return "number";
+        }
+        if (type == "String" || type == "Identifier" || type == "File" ||
+            type == "Directory" || type == "Date and time")
+        {
+            return "string";
+        }
+        if (type.starts_with("Vector")) {
+            if (type.ends_with("<bool>")) {
+                return "boolean[]";
+            }
+            return "number[]";
+        }
+        if (type.starts_with("Matrix") || type.starts_with("Color")) {
+            return "number[]";
+        }
+        return "any";
+    }
+
+    // Generates the LuaLS classes for the Documentation%s and the factories
+    struct LuaLsTypeWriter {
+        /// Maps the identifier of a Documentation to the LuaLS type that describes it
+        std::map<std::string, std::string> idToType;
+
+        // Nested tables are written as classes into `out` and referenced by name
+        std::string typeOf(const Verifier& verifier, const std::string& nestedName,
+                           std::string& out) const
+        {
+            if (const auto* v = dynamic_cast<const OrVerifier*>(&verifier)) {
+                std::string res;
+                for (size_t i = 0; i < v->values.size(); i++) {
+                    if (i != 0) {
+                        res += '|';
+                    }
+                    res +=
+                        typeOf(*v->values[i], std::format("{}_{}", nestedName, i), out);
+                }
+                return res;
+            }
+
+            // Has to be before the TableVerifier as it is a subclass of it
+            if (const auto* v = dynamic_cast<const ReferencingVerifier*>(&verifier)) {
+                const auto it = idToType.find(v->identifier);
+                return it != idToType.end() ? it->second : "table";
+            }
+
+            if (const auto* v = dynamic_cast<const StringInListVerifier*>(&verifier)) {
+                std::string res;
+                for (const std::string& value : v->values) {
+                    if (value.find_first_of("\"\\") != std::string::npos) {
+                        return "string";
+                    }
+                    res += std::format("{}\"{}\"", res.empty() ? "" : "|", value);
+                }
+                return res.empty() ? "string" : res;
+            }
+
+            if (dynamic_cast<const StringListVerifier*>(&verifier)) {
+                return "string[]";
+            }
+            if (dynamic_cast<const IntListVerifier*>(&verifier)) {
+                return "number[]";
+            }
+
+            if (const auto* v = dynamic_cast<const TableVerifier*>(&verifier)) {
+                if (v->documentations.empty()) {
+                    return "table";
+                }
+
+                const bool onlyWildcards = std::all_of(
+                    v->documentations.begin(),
+                    v->documentations.end(),
+                    [](const DocumentationEntry& e) {
+                        return e.key == DocumentationEntry::Wildcard;
+                    }
+                );
+                if (!onlyWildcards) {
+                    writeClass(out, nestedName, "", "", v->documentations, std::nullopt);
+                    return nestedName;
+                }
+
+                // Lists and dictionaries are indistinguishable in the documentation
+                std::string element;
+                for (size_t i = 0; i < v->documentations.size(); i++) {
+                    if (i != 0) {
+                        element += '|';
+                    }
+                    element += typeOf(
+                        *v->documentations[i].verifier,
+                        std::format("{}.Element{}", nestedName, i == 0 ? "" : "2"),
+                        out
+                    );
+                }
+                const std::string array =
+                    element.find('|') != std::string::npos ?
+                    std::format("({})[]", element) :
+                    std::format("{}[]", element);
+                return std::format("{}|table<string, {}>", array, element);
+            }
+
+            return luaLsVerifierType(verifier.type());
+        }
+
+        // The `typeField` is the type of the `Type` key, which is used by factories
+        void writeClass(std::string& out, const std::string& name,
+                        const std::string& base, std::string_view description,
+                        const std::vector<DocumentationEntry>& entries,
+                        const std::optional<std::string>& typeField) const
+        {
+            std::string fields;
+            if (typeField.has_value()) {
+                fields += std::format("---@field Type {}\n", *typeField);
+            }
+
+            for (const DocumentationEntry& e : entries) {
+                if (e.isPrivate || (typeField.has_value() && e.key == "Type")) {
+                    continue;
+                }
+
+                const bool isWildcard = e.key == DocumentationEntry::Wildcard;
+                if (!isWildcard && !isLuaIdentifier(e.key)) {
+                    continue;
+                }
+
+                const std::string nested = std::format(
+                    "{}.{}",
+                    name, isWildcard ? "Entry" : e.key
+                );
+                const std::string type = typeOf(*e.verifier, nested, out);
+                const std::string doc = singleLine(e.documentation);
+                const std::string key =
+                    isWildcard ? "[string]" : e.key + (e.optional ? "?" : "");
+                fields += std::format(
+                    "---@field {} {}{}{}\n", key, type, doc.empty() ? "" : " ", doc
+                );
+            }
+
+            out += luaLsComment(description);
+            out += base.empty() ?
+                std::format("---@class {}\n", name) :
+                std::format("---@class {} : {}\n", name, base);
+            out += fields;
+            out += '\n';
+        }
+    };
+
+    // Returns the content of one file per factory and one for all remaining
+    // documentations
+    std::map<std::string, std::string> luaLsTypeFiles(
+                                    const std::vector<Documentation>& docs,
+                                const std::vector<FactoryManager::FactoryInfo>& factories)
+    {
+        constexpr size_t None = std::numeric_limits<size_t>::max();
+
+        std::set<std::string> usedNames;
+        auto uniqueName = [&usedNames](const std::string& name) {
+            std::string res = name;
+            int i = 2;
+            while (!usedNames.insert(res).second) {
+                res = std::format("{}_{}", name, i);
+                i++;
+            }
+            return res;
+        };
+
+        std::vector<bool> isConsumed = std::vector<bool>(docs.size(), false);
+        auto findDoc = [&](const std::string& name) {
+            for (size_t i = 0; i < docs.size(); i++) {
+                if (!isConsumed[i] && docs[i].name == name) {
+                    isConsumed[i] = true;
+                    return i;
+                }
+            }
+            return None;
+        };
+
+        struct Class {
+            std::string registeredName;
+            std::string luaName;
+            size_t doc = None;
+        };
+        struct Factory {
+            std::string registeredName;
+            std::string alias;
+            std::string base;
+            // The class of the global table that contains the constructor functions
+            std::string constructors;
+            size_t baseDoc = None;
+            std::vector<Class> classes;
+        };
+
+        LuaLsTypeWriter writer;
+        auto registerId = [&](size_t doc, const std::string& type) {
+            if (doc != None && !docs[doc].id.empty()) {
+                writer.idToType[docs[doc].id] = type;
+            }
+        };
+
+        // All names have to be known before writing as documentations reference others
+        std::vector<Factory> factoryEntries;
+        for (const FactoryManager::FactoryInfo& info : factories) {
+            if (info.name.empty()) {
+                continue;
+            }
+            Factory f = {
+                .registeredName = info.name,
+                .alias = uniqueName(luaLsClassName(info.name)),
+                .base = uniqueName(f.alias + "Base"),
+                .constructors = uniqueName(f.alias + "Constructors"),
+                .baseDoc = findDoc(info.name)
+            };
+            registerId(f.baseDoc, f.alias);
+
+            for (const std::string& c : info.factory->registeredClasses()) {
+                if (c.empty()) {
+                    continue;
+                }
+                Class cls = {
+                    .registeredName = c,
+                    .luaName = uniqueName(luaLsClassName(c)),
+                    .doc = findDoc(c)
+                };
+                registerId(cls.doc, cls.luaName);
+                f.classes.push_back(std::move(cls));
+            }
+            factoryEntries.push_back(std::move(f));
+        }
+
+        std::vector<std::pair<std::string, size_t>> others;
+        for (size_t i = 0; i < docs.size(); i++) {
+            if (isConsumed[i] || docs[i].id.empty()) {
+                continue;
+            }
+            std::string name = uniqueName(luaLsClassName(docs[i].name));
+            registerId(i, name);
+            others.emplace_back(std::move(name), i);
+        }
+
+        const std::vector<DocumentationEntry> noEntries;
+        std::map<std::string, std::string> files;
+        for (const Factory& f : factoryEntries) {
+            std::string out = "---@meta\n\n";
+            if (f.baseDoc != None) {
+                writer.writeClass(
+                    out,
+                    f.base,
+                    "",
+                    docs[f.baseDoc].description,
+                    docs[f.baseDoc].entries,
+                    "string"
+                );
+            }
+            else {
+                writer.writeClass(out, f.base, "", "", noEntries, "string");
+            }
+
+            std::string alias;
+            std::string constructors;
+            for (const Class& c : f.classes) {
+                const std::string_view description =
+                    c.doc != None ? std::string_view(docs[c.doc].description) : "";
+                writer.writeClass(
+                    out,
+                    c.luaName,
+                    f.base,
+                    description,
+                    c.doc != None ? docs[c.doc].entries : noEntries,
+                    std::format("\"{}\"", c.registeredName)
+                );
+                alias += std::format("{}{}", alias.empty() ? "" : "|", c.luaName);
+
+                // Has to match the functions created in ScriptEngine::initializeLuaState
+                if (isLuaIdentifier(f.registeredName) &&
+                    isLuaIdentifier(c.registeredName))
+                {
+                    constructors += luaLsComment(description);
+                    constructors += std::format(
+                        "---@return {}\nfunction {}.{}() end\n\n",
+                        c.luaName, f.registeredName, c.registeredName
+                    );
+                }
+            }
+            out += std::format(
+                "---@alias {} {}\n",
+                f.alias, alias.empty() ? f.base : alias
+            );
+
+            if (isLuaIdentifier(f.registeredName)) {
+                out += std::format(
+                    "\n---@class {}\n{} = {{}}\n\n{}",
+                    f.constructors, f.registeredName, constructors
+                );
+            }
+            files[f.alias] = std::move(out);
+        }
+
+        std::string out = "---@meta\n\n";
+        for (const std::pair<std::string, size_t>& o : others) {
+            writer.writeClass(
+                out,
+                o.first,
+                "",
+                docs[o.second].description,
+                docs[o.second].entries,
+                std::nullopt
+            );
+
+            // Has to match the function created in ScriptEngine::initializeLuaState
+            if (o.first == "SceneGraphNode") {
+                out += "---@return SceneGraphNode\nfunction SceneGraphNode() end\n\n";
+            }
+        }
+        files["Other"] = std::move(out);
+
+        return files;
+    }
+
+    std::string luaLsBaseType(std::string_view type) {
+        // First deal with the individual types
+        if (type.ends_with("[]")) {
+            type.remove_suffix(2);
+            return luaLsBaseType(trimView(type)) + "[]";
+        }
+        else if (type == "String" || type == "Path") {  return "string"; }
+        else if (type == "Number") { return "number"; }
+        else if (type == "Integer") { return "integer"; }
+        else if (type == "Boolean") { return "boolean"; }
+        else if (type == "Table") { return "table"; }
+        else if (type == "Function") { return "function"; }
+        else if (type == "Nil") { return "nil"; }
+        else if (type == "vec2" || type == "vec3" || type == "vec4" ||
+            type == "dvec2" || type == "dvec3" || type == "dvec4" ||
+            type == "ivec2" || type == "ivec3" || type == "ivec4" ||
+            type == "mat2x2" || type == "mat3x3" || type == "mat4x4" ||
+            type == "dmat2x2" || type == "dmat3x3" || type == "dmat4x4")
+        {
+            return "number[]";
+        }
+
+        // If we got here there is a chance we are dealing with a multiple return value
+        if (type.starts_with('(') && type.ends_with(')')) {
+            // We have a (Number, Number, Numer
+            type.remove_prefix(1);
+            type.remove_suffix(1);
+
+            std::vector<std::string_view> parts = tokenizeString(type, ',');
+            std::string result = std::accumulate(
+                parts.begin(),
+                parts.end(),
+                std::string(),
+                [](std::string lhs, std::string_view rhs) {
+                    return std::format(
+                        "{} {}", std::move(lhs), luaLsBaseType(trimView(rhs))
+                    );
+                }
+            );
+
+            // We accidentally add a leading space with the accumulate call
+            return result.substr(1);
+        }
+
+
+        // Named types have no LuaLS counterpart
+        return "any";
+    }
+
+    struct LuaLsType {
+        std::string type;
+        bool isOptional = false;
+    };
+
+    // Converts OpenSpace type strings into LuaLS format
+    LuaLsType toLuaLsType(std::string_view type) {
+        LuaLsType result;
+        size_t start = 0;
+        while (start <= type.size()) {
+            size_t end = type.find('|', start);
+            if (end == std::string_view::npos) {
+                end = type.size();
+            }
+            std::string_view part = trimView(type.substr(start, end - start));
+            if (part.ends_with('?')) {
+                result.isOptional = true;
+                part = trimView(part.substr(0, part.size() - 1));
+            }
+            if (!part.empty()) {
+                if (!result.type.empty()) {
+                    result.type += '|';
+                }
+                result.type += luaLsBaseType(part);
+            }
+            start = end + 1;
+        }
+        if (result.type.empty()) {
+            result.type = "any";
+        }
+        return result;
+    }
+
+    // Escape parameter names that would be reserved keywords in Lua
+    std::string luaLsParameterName(std::string_view name) {
+        constexpr std::array<std::string_view, 22> Keywords = {
+            "and", "break", "do", "else", "elseif", "end", "false", "for", "function",
+            "goto", "if", "in", "local", "nil", "not", "or", "repeat", "return", "then",
+            "true", "until", "while"
+        };
+        if (name.empty()) {
+            return "arg";
+        }
+        if (std::find(Keywords.begin(), Keywords.end(), name) != Keywords.end()) {
+            return std::format("{}_", name);
+        }
+        return std::string(name);
+    }
+
+    std::string luaLsFunction(const LuaLibrary::Function& f, const std::string& table) {
+        std::string res = luaLsComment(cleanHelpText(f.helpText));
+
+        std::string parameters;
+        for (const LuaLibrary::Function::Argument& arg : f.arguments) {
+            const LuaLsType t = toLuaLsType(arg.type);
+            const std::string name =
+                arg.name.empty() && arg.type == "*" ?
+                "..." :
+                luaLsParameterName(arg.name);
+            const bool optional = t.isOptional || arg.defaultValue.has_value();
+            res += std::format("---@param {}{} {}\n", name, optional ? "?" : "", t.type);
+            if (!parameters.empty()) {
+                parameters += ", ";
+            }
+            parameters += name;
+        }
+
+        if (!f.returnType.empty()) {
+            const LuaLsType t = toLuaLsType(f.returnType);
+            res += std::format("---@return {}{}\n", t.type, t.isOptional ? "?" : "");
+        }
+
+        res += std::format("function {}.{}({}) end\n\n", table, f.name, parameters);
+        return res;
+    }
+
+    // Recurses into sublibraries since each of them is a nested table in the Lua state
+    void appendLuaLsLibrary(std::string& out, const LuaLibrary& library,
+                            const std::string& parentTable)
+    {
+        std::string table = parentTable;
+        if (!library.name.empty()) {
+            table = std::format("{}.{}", parentTable, library.name);
+            out += std::format("{} = {{}}\n\n", table);
+        }
+
+        std::vector<const LuaLibrary::Function*> functions;
+        for (const LuaLibrary::Function& f : library.functions) {
+            functions.push_back(&f);
+        }
+        for (const LuaLibrary::Function& f : library.documentations) {
+            functions.push_back(&f);
+        }
+        std::sort(
+            functions.begin(),
+            functions.end(),
+            [](const LuaLibrary::Function* lhs, const LuaLibrary::Function* rhs) {
+                return lhs->name < rhs->name;
+            }
+        );
+        for (const LuaLibrary::Function* f : functions) {
+            out += luaLsFunction(*f, table);
+        }
+
+        for (const LuaLibrary& sub : library.subLibraries) {
+            appendLuaLsLibrary(out, sub, table);
+        }
     }
 } // namespace
 
@@ -337,6 +896,25 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
         sortJson(json, NameKey);
     }
     return json;
+}
+
+std::string DocumentationEngine::generateLuaDefinitions() const {
+    ZoneScoped;
+
+    const std::string os = std::string(OpenSpaceScriptingKey);
+    std::string result = std::format(
+        "---@meta\n\n---@class {0}\n{0} = {{}}\n\n", os
+    );
+    for (const LuaLibrary& l : global::scriptEngine->allLuaLibraries()) {
+        appendLuaLsLibrary(result, l, os);
+    }
+    return result;
+}
+
+std::map<std::string, std::string> DocumentationEngine::generateLuaTypes() const {
+    ZoneScoped;
+
+    return luaLsTypeFiles(_documentations, FactoryManager::ref().factories());
 }
 
 nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
@@ -826,6 +1404,31 @@ void DocumentationEngine::writeJsonDocumentation() const {
     if (outScription.good()) {
         nlohmann::json scripting = generateScriptEngineJson();
         outScription << scripting.dump();
+    }
+
+    // Definition files for the Lua Language Server, used for editor support in assets
+    const std::filesystem::path luaDirectory = absPath("${DOCUMENTATION}/lua");
+
+    if (std::filesystem::exists(luaDirectory)) {
+        // Remove all of the already existing files
+        std::filesystem::remove_all(luaDirectory);
+    }
+
+    // Then recreate the folder
+    std::error_code ec;
+    std::filesystem::create_directories(luaDirectory, ec);
+
+    // And fill it
+    std::ofstream outLuaDefinitions(luaDirectory / "openspace.d.lua");
+    if (outLuaDefinitions.good()) {
+        outLuaDefinitions << generateLuaDefinitions();
+    }
+
+    for (const std::pair<const std::string, std::string>& f : generateLuaTypes()) {
+        std::ofstream outLuaTypes(luaDirectory / std::format("{}.d.lua", f.first));
+        if (outLuaTypes.good()) {
+            outLuaTypes << f.second;
+        }
     }
 }
 
