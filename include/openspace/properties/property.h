@@ -108,25 +108,25 @@ public:
          * argument for the struct initialization.
          */
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No,
-                             IsEnablable isEnablable_ = IsEnablable::No)
+                               IsEnablable isEnablable_ = IsEnablable::No,
+                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
-            , needsConfirmation(needsConfirmation_)
             , isEnablable(isEnablable_)
+            , needsConfirmation(needsConfirmation_)
         {}
 
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
                                Visibility vis,
-                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No,
-                             IsEnablable isEnablable_ = IsEnablable::No)
+                               IsEnablable isEnablable_ = IsEnablable::No,
+                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
             , visibility(vis)
-            , needsConfirmation(needsConfirmation_)
             , isEnablable(isEnablable_)
+            , needsConfirmation(needsConfirmation_)
         {}
 
         /// The unique identifier that is part of the fully qualified URI of this Property
@@ -137,10 +137,10 @@ public:
         const char* description;
         /// Determines the visibility of this Property in the user interface
         Visibility visibility = Visibility::Default;
-        /// Determines if the Property require confirmation upon value change
-        NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
         /// Determines if the Property is enablable (linked to a boolean)
         IsEnablable isEnablable = IsEnablable::No;
+        /// Determines if the Property require confirmation upon value change
+        NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
     };
 
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an

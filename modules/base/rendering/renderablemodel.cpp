@@ -208,8 +208,8 @@ namespace {
         "Override color",
         "The single color to use for entire model (RGBA).",
         Property::Visibility::AdvancedUser,
-        Property::NeedsConfirmation::No,
-        Property::IsEnablable::Yes
+        Property::IsEnablable::Yes,
+        Property::NeedsConfirmation::No
     };
 
     // Renders a 3D model. The provided model may contain textures and animations and is
