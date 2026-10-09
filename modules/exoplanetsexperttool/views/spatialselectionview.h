@@ -25,16 +25,21 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SPATIALSELECTIONVIEW___H__
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SPATIALSELECTIONVIEW___H__
 
+#include <modules/exoplanetsexperttool/castselection/castselection.h>
 #include <modules/exoplanetsexperttool/datastructures.h>
 #include <modules/exoplanetsexperttool/spatialselectionhandler.h>
 
 #include <openspace/glm.h>
+#include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
+#include <optional>
 #include <string>
 #include <vector>
 
 namespace openspace::exoplanets {
 
 class DataViewer;
+class RenderableDensityPointCloud;
 
 /**
  * Mouse interaction mode determining whether mouse input drives camera navigation
@@ -123,14 +128,38 @@ public:
 
     SpatialSelectionQuery currentSpatialQuery() const;
 
+    /**
+     * Returns true if the Lasso tab is shown, in which case the selection does not apply
+     * to the exoplanet data and #currentSpatialQuery refers to the previous tab.
+     */
+    bool isLassoTabActive() const;
+
+    bool isDrawingLasso() const;
+
+    /**
+     * Starts or finishes a lasso stroke at \p mousePos (window pixels). Returns true if
+     * the event was consumed.
+     */
+    bool lassoMouseButton(MouseButton button, MouseAction action, KeyModifier modifier,
+        const glm::vec2& mousePos);
+
+    void lassoMousePosition(const glm::vec2& mousePos);
+
 private:
     void renderModeSelector();
     bool renderMethodTabs();
     bool renderShape3DTab();
     bool renderSkyMapTab();
     void renderDensityTab();
+    void renderLassoTab();
     bool renderCurrentSelectionActions();
     bool renderSavedSelectionsManager();
+
+    RenderableDensityPointCloud* lassoTarget() const;
+    void runLassoSelection(RenderableDensityPointCloud* target);
+    void applyLassoSelection() const;
+    void clearLassoSelection();
+    void drawLasso() const;
 
     struct ConstellationLineSegment {
         std::vector<float> ra;
@@ -199,6 +228,18 @@ private:
 
     /// Dirty flag indicating if the 2D sky map cache needs updating
     mutable bool _skyMapCacheDirty = true;
+
+    bool _lassoTabActive = false;
+    bool _isDrawingLasso = false;
+    // Set when a stroke is finished; the selection runs in the next GUI frame
+    bool _lassoPending = false;
+    std::vector<glm::vec2> _lassoStroke;
+    std::string _lassoTargetNode;
+    std::string _lassoStatus;
+    CastMethod _castMethod = CastMethod::SpaceCast;
+    float _castThresholdExponent = 0.f;
+    std::unique_ptr<CastSelection> _castSelection;
+    CastResult _castResult;
 };
 
 } // namespace openspace::exoplanets

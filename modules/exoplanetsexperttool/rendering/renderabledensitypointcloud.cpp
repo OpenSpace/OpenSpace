@@ -94,7 +94,14 @@ namespace {
         "SelectedIndices",
         "Selected indices",
         "The indices of the selected points, in the order they appear in the dataset "
-        "after rows with invalid positions have been removed."
+        "after rows with invalid positions have been removed.",
+        Property::Visibility::Hidden
+    };
+
+    constexpr Property::PropertyInfo ClearSelectionInfo = {
+        "ClearSelection",
+        "Clear selection",
+        "Clears the list of currently selected indices."
     };
 
     constexpr Property::PropertyInfo SelectionColorInfo = {
@@ -214,7 +221,7 @@ openspace::Documentation RenderableDensityPointCloud::Documentation() {
 RenderableDensityPointCloud::RenderableDensityPointCloud(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _pointSize(PointSizeInfo, 3.f, 0.5f, 64.f)
-    , _color {
+    , _color{
         .owner = PropertyOwner({"Color", "Color"}),
         .fixedColor = Vec3Property(FixedColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f)),
         .useColorMap = BoolProperty(UseColorMapInfo, true),
@@ -236,6 +243,7 @@ RenderableDensityPointCloud::RenderableDensityPointCloud(const Dictionary& dicti
     }
     , _densityThreshold(DensityThresholdInfo, 0.f, 0.f, 100.f)
     , _selectedIndices(SelectedIndicesInfo)
+    , _clearSelection(ClearSelectionInfo)
     , _boundingBox {
         .owner = PropertyOwner({"BoudningBox", "Bounding Box"}),
         .enabled = BoolProperty(ShowBoundingBoxInfo, true),
@@ -320,6 +328,9 @@ RenderableDensityPointCloud::RenderableDensityPointCloud(const Dictionary& dicti
 
     _selectedIndices.onChange([this]() { _selectionIsDirty = true; });
     addProperty(_selectedIndices);
+
+    _clearSelection.onChange([this]() { _selectedIndices.value().clear();  });
+    addProperty(_clearSelection);
 
     if (p.boundingBox.has_value()) {
         const Parameters::BoundingBox box = *p.boundingBox;
@@ -456,6 +467,10 @@ const DensityVolume* RenderableDensityPointCloud::densityVolume() const {
     return _volume.get();
 }
 
+std::optional<glm::dmat4> RenderableDensityPointCloud::modelToClipTransform() const {
+    return _modelToClip;
+}
+
 void RenderableDensityPointCloud::uploadPointData() {
     const std::vector<glm::vec3>& positions = _volume->particlePositions();
     const std::vector<float>& densities = _volume->particleDensities();
@@ -549,6 +564,8 @@ void RenderableDensityPointCloud::render(const RenderData& data, RendererTasks&)
 
     const glm::dmat4 modelView = calcModelViewTransform(data);
     const glm::mat4 projection = data.camera.projectionMatrix();
+    _modelToClip = glm::dmat4(projection) * modelView *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(_unitToMeter));
 
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);

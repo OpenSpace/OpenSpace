@@ -25,6 +25,8 @@
 #include <modules/exoplanetsexperttool/views/spatialselectionview.h>
 
 #include <modules/exoplanetsexperttool/dataviewer.h>
+#include <modules/exoplanetsexperttool/densityvolume.h>
+#include <modules/exoplanetsexperttool/rendering/renderabledensitypointcloud.h>
 #include <modules/exoplanetsexperttool/spatialselectionhandler.h>
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
@@ -32,8 +34,14 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
 #include <implot.h>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <format>
 #include <stdexcept>
@@ -753,6 +761,49 @@ bool SpatialSelectionView::isSelectionMode() const {
     return _mode == InteractionMode::Selection;
 }
 
+bool SpatialSelectionView::isLassoTabActive() const {
+    return _lassoTabActive;
+}
+
+bool SpatialSelectionView::isDrawingLasso() const {
+    return _isDrawingLasso;
+}
+
+bool SpatialSelectionView::lassoMouseButton(MouseButton button, MouseAction action,
+                                            KeyModifier modifier,
+                                            const glm::vec2& mousePos)
+{
+    if (button != MouseButton::Left) {
+        return false;
+    }
+
+    if (action == MouseAction::Press) {
+        const bool canStart = isSelectionMode() && _lassoTabActive &&
+            hasKeyModifier(modifier, KeyModifier::Shift);
+        if (!canStart) {
+            return false;
+        }
+        _isDrawingLasso = true;
+        _lassoStroke = { mousePos };
+        return true;
+    }
+
+    if (action == MouseAction::Release && _isDrawingLasso) {
+        _isDrawingLasso = false;
+        _lassoStroke.push_back(mousePos);
+        _lassoPending = true;
+        return true;
+    }
+
+    return false;
+}
+
+void SpatialSelectionView::lassoMousePosition(const glm::vec2& mousePos) {
+    if (_isDrawingLasso && glm::distance(mousePos, _lassoStroke.back()) > 2.f) {
+        _lassoStroke.push_back(mousePos);
+    }
+}
+
 void SpatialSelectionView::initConstellationLines() const {
     _cachedConstellationLines.clear();
     _cachedZodiacLines.clear();
@@ -912,6 +963,8 @@ void SpatialSelectionView::applyCombinedSavedSelections() {
 }
 
 bool SpatialSelectionView::render(bool* open) {
+    _lassoTabActive = false;
+
     if (!open || !*open) {
         return false;
     }
@@ -927,6 +980,12 @@ bool SpatialSelectionView::render(bool* open) {
     ImGui::Separator();
 
     changed |= renderMethodTabs();
+
+    if (_lassoTabActive) {
+        ImGui::End();
+        return changed;
+    }
+
     ImGui::Separator();
 
     changed |= renderCurrentSelectionActions();
@@ -982,6 +1041,11 @@ bool SpatialSelectionView::renderMethodTabs() {
         //     renderDensityTab();
         //     ImGui::EndTabItem();
         // }
+        if (ImGui::BeginTabItem("Lasso (CAST)")) {
+            _lassoTabActive = true;
+            renderLassoTab();
+            ImGui::EndTabItem();
+        }
         ImGui::EndTabBar();
     }
     return changed;
@@ -1301,6 +1365,239 @@ void SpatialSelectionView::renderDensityTab() {
     //if (changed && _liveUpdate) {
     //    applyCurrentSelection();
     //}
+}
+
+void SpatialSelectionView::renderLassoTab() {
+    ImGui::TextWrapped(
+        "In Selection Mode, hold Shift and drag with the left mouse button to draw a "
+        "lasso around the particles to select."
+    );
+    if (!isSelectionMode()) {
+        ImGui::TextColored(
+            ImVec4(1.f, 0.7f, 0.3f, 1.f),
+            "Switch to Selection Mode to draw a lasso"
+        );
+    }
+    ImGui::Spacing();
+
+    std::vector<std::string> candidates;
+    if (global::renderEngine->scene()) {
+        for (SceneGraphNode* node : global::renderEngine->scene()->allSceneGraphNodes()) {
+            if (dynamic_cast<RenderableDensityPointCloud*>(node->renderable())) {
+                candidates.push_back(node->identifier());
+            }
+        }
+    }
+    const bool hasTarget = std::find(
+        candidates.begin(), candidates.end(), _lassoTargetNode
+    ) != candidates.end();
+    if (!hasTarget && !candidates.empty()) {
+        _lassoTargetNode = candidates.front();
+    }
+
+    if (ImGui::BeginCombo("Point cloud", _lassoTargetNode.c_str())) {
+        for (const std::string& identifier : candidates) {
+            const bool isSelected = identifier == _lassoTargetNode;
+            if (ImGui::Selectable(identifier.c_str(), isSelected) && !isSelected) {
+                clearLassoSelection();
+                _lassoTargetNode = identifier;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    if (candidates.empty()) {
+        ImGui::TextDisabled("No RenderableDensityPointCloud in the scene");
+    }
+
+    constexpr std::array<const char*, 3> MethodNames = {
+        "SpaceCast", "TraceCast (not implemented)", "PointCast (not implemented)"
+    };
+    const int methodIndex = static_cast<int>(_castMethod);
+    if (ImGui::BeginCombo("Method", MethodNames[methodIndex])) {
+        for (int i = 0; i < static_cast<int>(MethodNames.size()); i++) {
+            const ImGuiSelectableFlags flags = i == static_cast<int>(CastMethod::SpaceCast) ?
+                ImGuiSelectableFlags_None :
+                ImGuiSelectableFlags_Disabled;
+            if (ImGui::Selectable(MethodNames[i], i == methodIndex, flags)) {
+                _castMethod = static_cast<CastMethod>(i);
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    RenderableDensityPointCloud* target = lassoTarget();
+
+    // The volume is recomputed or destroyed when the renderable is reinitialized
+    const bool volumeChanged = _castSelection &&
+        (!target || target->densityVolume() != &_castSelection->volume());
+    if (volumeChanged) {
+        _castSelection = nullptr;
+        _castResult = CastResult();
+    }
+
+    if (_lassoPending) {
+        _lassoPending = false;
+        runLassoSelection(target);
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    const bool hasSelection = _castSelection != nullptr;
+    if (!hasSelection) {
+        ImGui::BeginDisabled();
+    }
+
+    const bool thresholdChanged = ImGui::SliderFloat(
+        "Density threshold",
+        &_castThresholdExponent,
+        -4.f,
+        4.f,
+        "2^%.2f x base"
+    );
+    ImGui::SameLine();
+    view::helper::renderHelpMarker(
+        "Scales the density threshold used for the selection, relative to the "
+        "automatically computed base threshold (20% of the mean density inside the "
+        "lasso). Lower values grow the selection, higher values shrink it to the "
+        "densest cores."
+    );
+    if (thresholdChanged && hasSelection) {
+        _castResult = _castSelection->select(_castThresholdExponent);
+        applyLassoSelection();
+    }
+
+    if (hasSelection) {
+        const float maxDensity = _castSelection->volume().maxDensity();
+        const float percent = maxDensity > 0.f ?
+            100.f * _castResult.threshold / maxDensity :
+            0.f;
+        ImGui::Text(
+            "Threshold: %.4g (%.2f%% of max density)", _castResult.threshold, percent
+        );
+        ImGui::Text(
+            "%zu volume(s) above threshold, %zu particles selected",
+            _castResult.nComponents,
+            _castResult.selectedParticles.size()
+        );
+    }
+
+    if (ImGui::Button("Clear selection")) {
+        clearLassoSelection();
+    }
+
+    if (!hasSelection) {
+        ImGui::EndDisabled();
+    }
+
+    if (!_lassoStatus.empty()) {
+        ImGui::TextColored(ImVec4(1.f, 0.7f, 0.3f, 1.f), "%s", _lassoStatus.c_str());
+    }
+
+    drawLasso();
+}
+
+RenderableDensityPointCloud* SpatialSelectionView::lassoTarget() const {
+    if (_lassoTargetNode.empty()) {
+        return nullptr;
+    }
+    SceneGraphNode* node = sceneGraphNode(_lassoTargetNode);
+    return node ? dynamic_cast<RenderableDensityPointCloud*>(node->renderable()) : nullptr;
+}
+
+void SpatialSelectionView::runLassoSelection(RenderableDensityPointCloud* target) {
+    std::vector<glm::vec2> stroke = std::move(_lassoStroke);
+    _lassoStroke.clear();
+    _lassoStatus.clear();
+
+    if (!target || !target->densityVolume()) {
+        _lassoStatus = "No density point cloud to select from";
+        return;
+    }
+    const std::optional<glm::dmat4> modelToClip = target->modelToClipTransform();
+    if (!modelToClip.has_value()) {
+        _lassoStatus = "The point cloud has not been rendered yet";
+        return;
+    }
+
+    // The mouse positions are in the same coordinates as the ImGui display
+    const ImVec2 displaySize = ImGui::GetIO().DisplaySize;
+
+    const CastInput input = {
+        .stroke = std::move(stroke),
+        .projection = {
+            .modelToClip = *modelToClip,
+            .viewportSize = glm::vec2(displaySize.x, displaySize.y)
+        }
+    };
+    _castSelection = createCastSelection(_castMethod, *target->densityVolume(), input);
+    if (!_castSelection) {
+        _castResult = CastResult();
+        _lassoStatus = "The selected method is not implemented";
+        applyLassoSelection();
+        return;
+    }
+    if (!_castSelection->isValid()) {
+        _castSelection = nullptr;
+        _castResult = CastResult();
+        _lassoStatus = "The lasso does not enclose any part of the volume";
+        applyLassoSelection();
+        return;
+    }
+
+    _castThresholdExponent = 0.f;
+    _castResult = _castSelection->select(_castThresholdExponent);
+    applyLassoSelection();
+}
+
+void SpatialSelectionView::applyLassoSelection() const {
+    if (_lassoTargetNode.empty()) {
+        return;
+    }
+
+    std::string indices;
+    for (int i : _castResult.selectedParticles) {
+        indices += std::to_string(i) + ',';
+    }
+    if (!indices.empty()) {
+        indices.pop_back();
+    }
+
+    global::scriptEngine->queueScript(
+        std::format(
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.SelectedIndices', {{ {} }})",
+            _lassoTargetNode, indices
+        ),
+        ScriptEngine::ShouldBeLogged::No
+    );
+}
+
+void SpatialSelectionView::clearLassoSelection() {
+    _castSelection = nullptr;
+    _castResult = CastResult();
+    _lassoStroke.clear();
+    _lassoStatus.clear();
+    applyLassoSelection();
+}
+
+void SpatialSelectionView::drawLasso() const {
+    // The lasso is only valid for the camera it was drawn with
+    if (!_isDrawingLasso || _lassoStroke.size() < 2) {
+        return;
+    }
+
+    std::vector<ImVec2> imPoints;
+    imPoints.reserve(_lassoStroke.size());
+    for (const glm::vec2& p : _lassoStroke) {
+        imPoints.emplace_back(p.x, p.y);
+    }
+    ImGui::GetForegroundDrawList()->AddPolyline(
+        imPoints.data(),
+        static_cast<int>(imPoints.size()),
+        IM_COL32(255, 200, 50, 255),
+        ImDrawFlags_None,
+        2.f
+    );
 }
 
 bool SpatialSelectionView::renderCurrentSelectionActions() {

@@ -57,7 +57,9 @@ public:
     void initializeDataset();
     void hideSelectionVolume();
 
-    bool mouseButtonCallback(MouseButton button, MouseAction action);
+    bool mouseButtonCallback(MouseButton button, MouseAction action,
+        KeyModifier modifier, const glm::vec2& mousePos);
+    void mousePositionCallback(const glm::vec2& mousePos);
     bool mouseWheelCallback(double position);
     bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
     bool charCallback(unsigned int character, KeyModifier modifier);

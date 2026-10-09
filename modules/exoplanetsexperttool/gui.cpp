@@ -340,10 +340,29 @@ void Gui::endFrame() {
     glDisable(GL_SCISSOR_TEST);
 }
 
-bool Gui::mouseButtonCallback(MouseButton, MouseAction) {
+bool Gui::mouseButtonCallback(MouseButton button, MouseAction action,
+                              KeyModifier modifier, const glm::vec2& mousePos)
+{
+    SpatialSelectionView* spatialView = _dataViewer.spatialSelectionView();
+
+    // A lasso stroke must be finished even if it is released over a window
+    if (spatialView && spatialView->isDrawingLasso()) {
+        return spatialView->lassoMouseButton(button, action, modifier, mousePos);
+    }
+
     ImGuiIO& io = ImGui::GetIO();
-    bool consumeEvent = io.WantCaptureMouse;
-    return consumeEvent;
+    if (io.WantCaptureMouse) {
+        return true;
+    }
+    return spatialView &&
+        spatialView->lassoMouseButton(button, action, modifier, mousePos);
+}
+
+void Gui::mousePositionCallback(const glm::vec2& mousePos) {
+    SpatialSelectionView* spatialView = _dataViewer.spatialSelectionView();
+    if (spatialView) {
+        spatialView->lassoMousePosition(mousePos);
+    }
 }
 
 bool Gui::mouseWheelCallback(double position) {

@@ -1015,7 +1015,9 @@ void DataViewer::render() {
         );
     }
 
-    if (_showSpatialSelectionWindow && _spatialSelectionView) {
+    if (_showSpatialSelectionWindow && _spatialSelectionView &&
+        !_spatialSelectionView->isLassoTabActive())
+    {
         const SpatialSelectionQuery query = _spatialSelectionView->currentSpatialQuery();
         _spatialSelectionHandler.updateSelectionVolume(&query);
     }

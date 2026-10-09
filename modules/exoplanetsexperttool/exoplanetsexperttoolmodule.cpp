@@ -194,12 +194,13 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
                 return; // do nothing
             }
             _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
+            _gui.mousePositionCallback(_mousePosition);
         }
     );
 
     global::callback::mouseButton->emplace_back(
         [&](MouseButton button, MouseAction action,
-            KeyModifier, bool isGuiWindow) -> bool
+            KeyModifier modifier, bool isGuiWindow) -> bool
         {
             if (!_enabled || !isGuiWindow) {
                 return false;
@@ -212,7 +213,7 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
                 _mouseButtons &= ~(1 << static_cast<int>(button));
             }
 
-            return _gui.mouseButtonCallback(button, action);
+            return _gui.mouseButtonCallback(button, action, modifier, _mousePosition);
         }
     );
 

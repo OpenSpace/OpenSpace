@@ -25,6 +25,9 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
+    castselection/castselection.h
+    castselection/lasso.h
+    castselection/spacecast.h
     columnfilter.h
     datahelper.h
     dataloader.h
@@ -53,6 +56,9 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    castselection/castselection.cpp
+    castselection/lasso.cpp
+    castselection/spacecast.cpp
     columnfilter.cpp
     datahelper.cpp
     dataloader.cpp

@@ -29,6 +29,7 @@
 
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
@@ -68,6 +69,12 @@ public:
 
     const DensityVolume* densityVolume() const;
 
+    /**
+     * The transform from volume coordinates to clip space from the most recent render
+     * call, or std::nullopt if the renderable has not been rendered yet.
+     */
+    std::optional<glm::dmat4> modelToClipTransform() const;
+
     static openspace::Documentation Documentation();
 
 private:
@@ -105,6 +112,7 @@ private:
 
     FloatProperty _densityThreshold;
     IntListProperty _selectedIndices;
+    TriggerProperty _clearSelection;
 
     struct {
         PropertyOwner owner;
@@ -130,6 +138,8 @@ private:
     GLuint _boxVbo = 0;
 
     bool _selectionIsDirty = true;
+
+    std::optional<glm::dmat4> _modelToClip;
 };
 
 } // namespace openspace::exoplanets
