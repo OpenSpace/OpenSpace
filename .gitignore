@@ -65,3 +65,4 @@ support/codegen/tests/execution_luawrapper/*_codegen.cpp
 support/codegen/tests/execution_misc/*_codegen.cpp
 support/codegen/tests/execution_structs/*_codegen.cpp
 tests/horizonsTest/*.hrz
+data/assets/scene/solarsystem/planets/earth/moon/layers/colorlayers/cgi-moon-kit/moon_os_compatible.png
