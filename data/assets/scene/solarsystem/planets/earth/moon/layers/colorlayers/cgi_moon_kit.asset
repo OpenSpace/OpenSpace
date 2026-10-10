@@ -1,0 +1,45 @@
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/globe")
+
+local texture = asset.resource("cgi-moon-kit/moon_os_compatible.png")
+-- To download the texture, go to the link at the URL, then run the following
+-- in Windows Powershell:
+-- cd C:\[User]\Downloads
+-- magick lroc_color_16bit_srgb.tif -monitor png24:moon_os_compatible.png
+
+-- Then, simply place moon_os_compatible.png in a folder called "cgi-moon-kit"
+-- with the base folder in the same location as this asset.
+
+local layer = {
+    Identifier = "CGIMoon-SVS",
+    Name = "Hapke Normalized Color",
+    Enabled = asset.enabled,
+    ZIndex = 5,
+    FilePath = texture,
+    -- Opacity = 0.5,
+    Description = "Local moon.png texture."
+}
+
+
+asset.onInitialize(function ()
+    openspace.globebrowsing.addLayer(moonAsset.Moon.Identifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+   openspace.globebrowsing.deleteLayer(moonAsset.Moon.Identifier, "ColorLayers", layer)
+
+end)
+
+asset.export("layer", layer)
+
+
+asset.meta = {
+    Name = "CGI Moon SVS",
+    -- Version = "2.0", -- This is the 2025 version.
+    Description = [[These color and elevation maps are designed for use in
+        3D rendering software. They are created from data assembled by the
+        Lunar Reconnaissance Orbiter camera and laser altimeter instrument
+        teams. This is a Hapke normalized mosaic.]],
+    Author = "NASA",
+    URL = "https://svs.gsfc.nasa.gov/4720",
+    License = "Public Domain",
+  }
