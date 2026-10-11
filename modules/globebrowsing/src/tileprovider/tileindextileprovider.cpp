@@ -35,11 +35,11 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo UniqueBackgroundColors = {
+    constexpr PropertyInfo UniqueBackgroundColors = {
         "UniqueBackgroundColor",
         "Unique background color",
         "If 'true' each index tile will have a unique background color assigned to it.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(TileIndexTileProvider)]] Parameters {

@@ -142,69 +142,69 @@ namespace {
         setClipboardText(strCorners + strTop + strRight + strBottom + strLeft);
     }
 
-    constexpr Property::PropertyInfo CopyToClipboardInfo = {
+    constexpr PropertyInfo CopyToClipboardInfo = {
         "CopyToClipboard",
         "Copy to clipboard",
         "Copies the current configuration to the clipboard so that it can be pasted "
         "into the asset file.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo CalibrationPatternInfo = {
+    constexpr PropertyInfo CalibrationPatternInfo = {
         "EnableCalibrationPattern",
         "Enable calibration pattern",
         "Enables the calibration pattern. The calibration can be used to find which "
         "values to use when setting up the blackout shape.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo CalibrationColorInfo = {
+    constexpr PropertyInfo CalibrationColorInfo = {
         "EnableCalibrationColor",
         "Enable calibration color",
         "Set Blackout Shape to a bright color for easier calibration.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo AddControlPointInfo = {
+    constexpr PropertyInfo AddControlPointInfo = {
         "AddControlPoint",
         "Add control point",
         "Adds a new control point to the spline.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RemoveControlPointInfo = {
+    constexpr PropertyInfo RemoveControlPointInfo = {
         "RemoveControlPoint",
         "Remove control point",
         "Removes the selected control point from the spline.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RemoveSelectorInfo = {
+    constexpr PropertyInfo RemoveSelectorInfo = {
         "RemoveSelector",
         "Select point to remove",
         "Removes the selected control point.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo AddSelectorInfo = {
+    constexpr PropertyInfo AddSelectorInfo = {
         "AddSelector",
         "Select where to add",
         "Select where to add a new point.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo NewPointPositionInfo = {
+    constexpr PropertyInfo NewPointPositionInfo = {
         "NewPointPosition",
         "Point position",
         "X and Y coordinates for where to add the new control point.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo CalibrationTextureInfo = {
+    constexpr PropertyInfo CalibrationTextureInfo = {
         "CalibrationTexture",
         "Calibration texture",
         "Texture used as calibration pattern.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
     // Renders a screen-space shape used to black out part of the rendering. This can be
@@ -269,7 +269,7 @@ ScreenSpaceInsetBlackout::BlackoutShape::Point::Point(glm::vec2& inData,
                                                       std::string guiName)
 {
     // Creates PropertyInfo used to create Property
-    propInfo = std::make_unique<Property::PropertyInfo>(
+    propInfo = std::make_unique<PropertyInfo>(
         identifier.c_str(),
         guiName.c_str(),
         "Position (x,y) for where the control point is located."

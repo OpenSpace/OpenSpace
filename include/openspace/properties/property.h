@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_CORE___PROPERTY___H__
 #define __OPENSPACE_CORE___PROPERTY___H__
 
+#include <openspace/lua/lua_types.h>
 #include <openspace/misc/boolean.h>
 #include <openspace/misc/easing.h>
-#include <openspace/lua/lua_types.h>
+#include <openspace/properties/propertyinfo.h>
 #include <openspace/util/json_helper.h>
 #include <cstdint>
 #include <functional>
@@ -70,53 +71,6 @@ class PropertyOwner;
  */
 class Property {
 public:
-    BooleanType(NeedsConfirmation);
-
-    // Enabled state of the property itself    
-    BooleanType(IsEnablable);
-    BooleanType(IsEnabled);
-
-    /**
-     * The visibility classes for Property%s. The classes are strictly ordered as
-     * Hidden > Developer > AdvancedUser > User > NoviceUser > Always
-     */
-    enum class Visibility {
-        /// Never visible
-        Hidden = 5,
-        /// Visible in Developer mode
-        Developer = 4,
-        /// Visible in Advanced User mode
-        AdvancedUser = 3,
-        /// Visible in User mode
-        User = 2,
-        /// Visible in Novice User mode
-        NoviceUser = 1,
-        /// Visible for all types, no matter what
-        Always = 0,
-
-        /// The default visibility for properties
-        Default = Always
-    };
-
-    /**
-     * This structure is passed to the constructor of a Property and contains the unique
-     * identifier, a GUI name and descriptive text that are both user facing.
-     */
-    struct PropertyInfo {
-        /// The unique identifier that is part of the fully qualified URI of this Property
-        std::string_view identifier;
-        /// The name that is displayed in the user interface
-        std::string_view guiName;
-        /// The user facing description of this Property
-        std::string_view description;
-        /// Determines the visibility of this Property in the user interface
-        Visibility visibility = Visibility::Default;
-        /// Determines if the Property is enablable (linked to a boolean)
-        IsEnablable isEnablable = IsEnablable::No;
-        /// Determines if the Property require confirmation upon value change
-        NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
-    };
-
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an
     /// onChange callback
     using OnChangeHandle = uint32_t;
@@ -155,7 +109,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    explicit Property(PropertyInfo info, IsEnabled isEnabled = IsEnabled::No);
+    explicit Property(PropertyInfo info);
 
     /**
      * The destructor taking care of deallocating all unused memory. This method will not
@@ -379,14 +333,14 @@ public:
      *
      * \param visibility The new visibility of the Property
      */
-    void setVisibility(Visibility visibility);
+    void setVisibility(PropertyInfo::Visibility visibility);
 
     /**
      * Returns this Property%'s visibility setting.
      *
      * \return This Property%'s visibility setting
      */
-    Visibility visibility() const;
+    PropertyInfo::Visibility visibility() const;
 
     /**
      * This method determines if this Property should be read-only in external
@@ -458,7 +412,7 @@ public:
      *
      * \return `IsEnablable::Yes` if the Property is enablable, else `IsEnablable::No`
      */
-    IsEnablable isEnablable() const;
+    PropertyInfo::IsEnablable isEnablable() const;
 
     /**
      * Returns whether this Property is currently enabled. The result is only meaningful
@@ -466,7 +420,7 @@ public:
      *
      * \return `IsEnabled::Yes` if the Property is enabled, else `IsEnabled::No`
      */
-    IsEnabled isEnabled() const;
+    PropertyInfo::IsEnabled isEnabled() const;
 
     /**
      * Sets the enabled state of this Property and notifies the change listeners. This
@@ -476,7 +430,7 @@ public:
      *
      * \throw RuntimeError If the Property is not enablable
      */
-    void setIsEnabled(IsEnabled isEnabled);
+    void setIsEnabled(PropertyInfo::IsEnabled isEnabled);
 
     /**
      * Get a valid JSON formatted representation of the Property's value.
@@ -562,14 +516,14 @@ protected:
     std::string _description;
 
     /// If this property is enablable, this will tell if it is enabled or not
-    IsEnabled _isEnabled = IsEnabled::No;
+    PropertyInfo::IsEnabled _isEnabled = PropertyInfo::IsEnabled::No;
 
     /**
      * The meta data necessary for external applications.
      */
     struct {
         std::optional<std::string> group;
-        Visibility visibility = Visibility::Default;
+        PropertyInfo::Visibility visibility = PropertyInfo::Visibility::Default;
         std::optional<bool> readOnly;
         bool needsConfirmation = false;
         bool isEnablable = false;

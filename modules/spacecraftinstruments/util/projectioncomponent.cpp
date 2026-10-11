@@ -53,47 +53,47 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ProjectionComponent";
 
-    constexpr Property::PropertyInfo ProjectionInfo = {
+    constexpr PropertyInfo ProjectionInfo = {
         "PerformProjection",
         "Perform projections",
         "If this value is enabled, this ProjectionComponent will perform projections. If "
         "it is disabled, projections will be ignored.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ClearProjectionInfo = {
+    constexpr PropertyInfo ClearProjectionInfo = {
         "ClearAllProjections",
         "Clear projections",
         "If this property is triggered, it will remove all the projections that have "
         "already been applied.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FadingInfo = {
+    constexpr PropertyInfo FadingInfo = {
         "ProjectionFading",
         "Projection fading",
         "This value fades the previously performed projections in or out. If this value "
         "is equal to '1', the projections are fully visible, if the value is equal to "
         "'0', the performed projections are completely invisible.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo TextureSizeInfo = {
+    constexpr PropertyInfo TextureSizeInfo = {
         "TextureSize",
         "Texture size",
         "This value determines the size of the texture into which the images are "
         "projected and thus provides the limit to the resolution of projections that can "
         "be applied. Changing this value will not cause the texture to be automatically "
         "updated, but triggering the 'ApplyTextureSize' property is required.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ApplyTextureSizeInfo = {
+    constexpr PropertyInfo ApplyTextureSizeInfo = {
         "ApplyTextureSize",
         "Apply texture size",
         "Triggering this property applies a new size to the underlying projection "
         "texture. The old texture is resized and interpolated to fit the new size.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ProjectionComponent)]] Parameters {

@@ -53,30 +53,30 @@ namespace {
         glm::vec3 headOfLight;
     };
 
-    constexpr Property::PropertyInfo SpeedInfo = {
+    constexpr PropertyInfo SpeedInfo = {
         "TravelSpeed",
         "Speed of travel",
         "A value for how fast the speed indicator should travel, in meters per second. "
         "The default value is the speed of light.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo TargetInfo = {
+    constexpr PropertyInfo TargetInfo = {
         "TargetNode",
         "Target object",
         "The identifier of the scene graph node to target with the speed indicator. The "
         "speed indicator will travel from the parent node to this scene graph node.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ResetLineInfo = {
+    constexpr PropertyInfo ResetLineInfo = {
         "ResetLine",
         "Reset Line",
         "When triggered, the line will start again from the beginning.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EpochInfo = {
+    constexpr PropertyInfo EpochInfo = {
         "Epoch",
         "Epoch",
         "The epoch for the indicator, that is the time modulo the travel time in which "
@@ -84,41 +84,41 @@ namespace {
         "calculated, this value will stay the same even as the indicator finishes each "
         "trip. So for a trip duration of 1s the epochs of 2.5, 3.5, 6.5, 10.5 are all "
         "equivalent.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LineColorInfo = {
+    constexpr PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "An RGB color for the line.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "This value specifies the line width.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo IndicatorLengthInfo = {
+    constexpr PropertyInfo IndicatorLengthInfo = {
         "IndicatorLength",
         "Indicator length",
         "The length of the speed indicator line, given in seconds. The length will be "
         "computed as the speed times this value. For example, a value of 1 will make it "
         "as long as the distance it would travel over one second with the specified "
         "speed.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FadeLengthInfo = {
+    constexpr PropertyInfo FadeLengthInfo = {
         "FadeLength",
         "Fade length",
         "The length of the faded tail of the speed indicator, given in seconds. The "
         "length of the tail will be computed as the speed times this value. For example, "
         "a value of 1 will make it as long as the distance it would travel over one "
         "second. A linear fade will be applied over this distance to create the tail.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Visualizes a certain travel speed using a line that moves at the provided speed

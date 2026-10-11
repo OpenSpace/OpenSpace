@@ -57,95 +57,95 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableMultiresVolume";
 
-    constexpr Property::PropertyInfo StepSizeCoefficientInfo = {
+    constexpr PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
         "Stepsize coefficient",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo CurrentTimeInfo = {
+    constexpr PropertyInfo CurrentTimeInfo = {
         "CurrentTime",
         "Current time",
         "", // @TODO Missing documentation
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MemoryBudgetInfo = {
+    constexpr PropertyInfo MemoryBudgetInfo = {
         "MemoryBudget",
         "Memory budget",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StreamingBudgetInfo = {
+    constexpr PropertyInfo StreamingBudgetInfo = {
         "StreamingBudget",
         "Streaming budget",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UseGlobalTimeInfo = {
+    constexpr PropertyInfo UseGlobalTimeInfo = {
         "UseGlobalTime",
         "Global time",
         "", // @TODO Missing documentation
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LoopInfo = {
+    constexpr PropertyInfo LoopInfo = {
         "Loop",
         "Loop",
         "", // @TODO Missing documentation
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SelectorNameInfo = {
+    constexpr PropertyInfo SelectorNameInfo = {
         "Selector",
         "Brick selector",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StatsToFileInfo = {
+    constexpr PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print stats",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo StatsToFileNameInfo = {
+    constexpr PropertyInfo StatsToFileNameInfo = {
         "PrintStatsFileName",
         "Stats filename",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo ScalingExponentInfo = {
+    constexpr PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScalingInfo = {
+    constexpr PropertyInfo ScalingInfo = {
         "Scaling",
         "Scaling",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TranslationInfo = {
+    constexpr PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo RotationInfo = {
+    constexpr PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RenderableMultiresVolume)]] Parameters {

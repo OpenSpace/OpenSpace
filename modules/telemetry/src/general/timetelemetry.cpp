@@ -46,13 +46,13 @@ namespace {
         "Telemetry that sends out time information to the Open Sound Control receiver."
     };
 
-    constexpr Property::PropertyInfo TimeUnitOptionInfo = {
+    constexpr PropertyInfo TimeUnitOptionInfo = {
         "TimeUnit",
         "Time unit",
         "The time unit that the telemetry should use for the time speed. For example, if "
         "the unit is set to 'Hour' then the unit for the time speed is simulation hours "
         "per real life second.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
@@ -61,12 +61,12 @@ namespace {
         "Settings for the precision of the telemetry information."
     };
 
-    constexpr Property::PropertyInfo TimePrecisionInfo = {
+    constexpr PropertyInfo TimePrecisionInfo = {
         "TimePrecision",
         "Time precision",
         "The precision in seconds used to determine when to send updated time data to "
         "the Open Sound Control receiver.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 } // namespace
 

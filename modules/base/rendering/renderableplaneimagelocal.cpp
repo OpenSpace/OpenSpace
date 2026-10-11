@@ -44,20 +44,20 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
+    constexpr PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "A path to an image file to use as a texture for the plane. During stereo "
         "rendering, this texture is considered the left eye.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RightTextureInfo = {
+    constexpr PropertyInfo RightTextureInfo = {
         "RightTexture",
         "Right Eye Texture",
         "Sets the path of the texture that is displayed on this plane for the right eye "
         "during stereo rendering.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture is provided by a local file on disk.
@@ -238,12 +238,12 @@ void RenderablePlaneImageLocal::loadTexture() {
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
     if (_isStereo) {
-        opengl::Texture* t = _rightTexture;
+        opengl::Texture* rt = _rightTexture;
 
-        const unsigned int hash = hashCRC32File(_rightTexturePath);
+        const unsigned int rHash = hashCRC32File(_rightTexturePath);
 
         _rightTexture = BaseModule::TextureManager.request(
-            std::to_string(hash),
+            std::to_string(rHash),
             [path = _rightTexturePath.value()]() ->
                 std::unique_ptr<opengl::Texture>
             {
@@ -263,7 +263,7 @@ void RenderablePlaneImageLocal::loadTexture() {
             }
         );
 
-        BaseModule::TextureManager.release(t);
+        BaseModule::TextureManager.release(rt);
 
         _rightTextureFile = std::make_unique<filesystem::File>(_rightTexturePath.value());
         _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });

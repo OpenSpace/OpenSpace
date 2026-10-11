@@ -34,18 +34,18 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo CastShadowInfo = {
+    constexpr PropertyInfo CastShadowInfo = {
         "CastShadow",
         "Cast shadow",
         "Enable model to cast shadow on its parent renderable.",
     };
 
-    constexpr Property::PropertyInfo FrustumSizeInfo = {
+    constexpr PropertyInfo FrustumSizeInfo = {
         "FrustumSize",
         "Size of the depth-pass view frustum",
         "Sets the width & height (effectively left/right & top/bottom) of the depth-pass "
         "view frustum, z-near & z-far are calculated.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(Shadower)]] Parameters {

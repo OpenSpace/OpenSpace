@@ -54,25 +54,25 @@ namespace {
 
     constexpr std::string_view _loggerCat = "KameleonPlane";
 
-    constexpr Property::PropertyInfo FieldLineSeedsInfo = {
+    constexpr PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline seedpoints",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo ResolutionInfo = {
+    constexpr PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution%",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SliceInfo = {
+    constexpr PropertyInfo SliceInfo = {
         "Slice",
         "Slice",
         "", // @TODO Missing documentation
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableKameleonPlane)]] Parameters {
@@ -182,11 +182,11 @@ void RenderableKameleonPlane::initializeGL() {
             // unregister backgroundvalues property
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(Property::Visibility::Hidden);
+                _backgroundValues.setVisibility(PropertyInfo::Visibility::Hidden);
             }
             else {
                 // Else if autofilter is turned off, register backgroundValues
-                _backgroundValues.setVisibility(Property::Visibility::Always);
+                _backgroundValues.setVisibility(PropertyInfo::Visibility::Always);
             }
         });
     }

@@ -68,86 +68,86 @@ namespace {
         "aspects."
     };
 
-    constexpr Property::PropertyInfo SelectedUpscaleInfo = {
+    constexpr PropertyInfo SelectedUpscaleInfo = {
         "SelectedUpscale",
         "Selected planet upscale multiplier",
         "When a planet is selected to be compared, it is also upscaled as a visual "
         "indicator of which planets are currently being compared. This property "
         "determines how much the planet is scaled up as a multiplier of the original "
         "size.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SelectedScaleInterpolationTimeInfo = {
+    constexpr PropertyInfo SelectedScaleInterpolationTimeInfo = {
         "SelectedScaleInterpolationTimeInfo",
         "Selected planet scale interpolation time",
         "When a planet is selected to be compared, it is also upscaled as a visual "
         "indicator of which planets are currently being compared. This property "
         "determines over how many seconds the scaling animation should play.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FirstOptionInfo = {
+    constexpr PropertyInfo FirstOptionInfo = {
         "FirstOption",
         "Choose a planet to compare",
         "Choose a planet in the list to compare to the other selected planet.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SecondOptionInfo = {
+    constexpr PropertyInfo SecondOptionInfo = {
         "SecondOption",
         "Choose another planet to compare",
         "Choose another planet in the list to compare to the other selected planet.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ToggleAllInfo = {
+    constexpr PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "All",
         "Toggle all comparing sonification varieties for both selected planets.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SizeDayInfo = {
+    constexpr PropertyInfo SizeDayInfo = {
         "SizeDay",
         "Size/day",
         "Toggle size/day sonification for both selected planets.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo GravityInfo = {
+    constexpr PropertyInfo GravityInfo = {
         "Gravity",
         "Gravity",
         "Toggle gravity sonification for both selected planets.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo TemperatureInfo = {
+    constexpr PropertyInfo TemperatureInfo = {
         "Temperature",
         "Temperature",
         "Toggle temperature sonification for both selected planets.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo AtmosphereInfo = {
+    constexpr PropertyInfo AtmosphereInfo = {
         "Atmosphere",
         "Atmosphere",
         "Toggle atmosphere sonification for both selected planets.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MoonsInfo = {
+    constexpr PropertyInfo MoonsInfo = {
         "Moons",
         "Moons",
         "Toggle moons sonification for both selected planets.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RingsInfo = {
+    constexpr PropertyInfo RingsInfo = {
         "Rings",
         "Rings",
         "Toggle rings sonification for both selected planets.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 } // namespace
 

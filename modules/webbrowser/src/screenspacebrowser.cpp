@@ -42,41 +42,41 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ScreenSpaceBrowser";
 
-    constexpr Property::PropertyInfo DimensionsInfo = {
+    constexpr PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser dimensions",
         "The dimensions of the web browser window in pixels.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo KeyInfo = {
+    constexpr PropertyInfo KeyInfo = {
         "Key",
         "Key",
         "The string representation of a keyboard key. If a key is entered and the "
         "`KeyTrigger` property is triggered, the entered key will be sent to the browser.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo TriggerKeyInfo = {
+    constexpr PropertyInfo TriggerKeyInfo = {
         "TriggerKey",
         "Trigger key",
         "When this property is triggered, the text in the `Key` property will be used to "
         "create a keyboard input that is then sent to the browser.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo UrlInfo = {
+    constexpr PropertyInfo UrlInfo = {
         "Url",
         "URL",
         "The URL to load.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ReloadInfo = {
+    constexpr PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Reload the web browser.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     // Can be used to render a webpage in front of the camera. This can be used to show

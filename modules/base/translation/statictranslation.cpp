@@ -30,12 +30,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo PositionInfo = {
+    constexpr PropertyInfo PositionInfo = {
         "Position",
         "Position",
         "This value is used as a static offset (in meters) that is applied to the scene "
         "graph node that this transformation is attached to relative to its parent.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Provides a fixed translation to the attached scene graph node that does not change

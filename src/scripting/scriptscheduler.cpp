@@ -39,22 +39,22 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This enables or disables the ScriptScheduler. If disabled, no scheduled scripts "
         "will be executed. If enabled, scheduled scripts will be executed at their given "
         "time as normal.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
+    constexpr PropertyInfo ShouldRunAllTimeJumpInfo = {
         "ShouldRunAllTimeJump",
         "Should run all time jump",
         "If 'true': In a time jump, all scheduled scripts between the old time and the "
         "new time is executed. If 'false': In a time jump, no scripts scheduled between "
         "the new time and the old time is executed.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {

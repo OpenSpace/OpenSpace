@@ -39,32 +39,32 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo StartTimeInfo = {
+    constexpr PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start time",
         "The start time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EndTimeInfo = {
+    constexpr PropertyInfo EndTimeInfo = {
         "EndTime",
         "End time",
         "The end time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SampleIntervalInfo = {
+    constexpr PropertyInfo SampleIntervalInfo = {
         "SampleInterval",
         "Sample interval",
         "The interval between samples of the trajectory. This value (together with "
         "'TimeStampSubsampleFactor') determines how far apart (in seconds) the samples "
         "are spaced along the trajectory.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TimeSubSampleInfo = {
+    constexpr PropertyInfo TimeSubSampleInfo = {
         "TimeStampSubsampleFactor",
         "Time stamp subsampling factor",
         "The factor that is used to create subsamples along the trajectory. This value "
@@ -72,31 +72,31 @@ namespace {
         "samples are spaced along the trajectory. Subsamples are rendered as smaller "
         "points compared to normal samples (from 'SampleInterval') when rendering the "
         "trail as points.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RenderFullPathInfo = {
+    constexpr PropertyInfo RenderFullPathInfo = {
         "ShowFullTrail",
         "Render full trail",
         "If true, the entire trail will be rendered. If false, only the trail until the "
         "current time in the application will be shown.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo AccurateTrailInfo = {
+    constexpr PropertyInfo AccurateTrailInfo = {
         "AccurateTrail",
         "Use accurate trail",
         "If true, the trail around the spacecraft will be recalculated to present a "
         "smoother trail. If false, the original trail will be used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AccurateTrailPositionsInfo = {
+    constexpr PropertyInfo AccurateTrailPositionsInfo = {
         "AccurateTrailPositions",
         "Number of accurate trail points",
         "The number of vertices, each side of the object, that will be recalculated for "
         "greater accuracy. This also ensures that the object connects with the trail.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {

@@ -32,10 +32,8 @@
 namespace openspace {
 
 class SelectionProperty : public TemplateProperty<std::set<std::string>> {
-
 public:
-    SelectionProperty(PropertyInfo info);
-    SelectionProperty(PropertyInfo info, IsEnabled isEnabled);
+    explicit SelectionProperty(PropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

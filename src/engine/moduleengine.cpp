@@ -46,12 +46,12 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ModuleEngine";
 
-    constexpr Property::PropertyInfo AllModulesInfo = {
+    constexpr PropertyInfo AllModulesInfo = {
         "AllModules",
         "All modules",
         "The list of all modules that were compiled for this version of OpenSpace in the "
         "same order in which they were initialized.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 } // namespace
 

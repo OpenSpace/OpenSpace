@@ -38,38 +38,38 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo FormatStringInfo = {
+    constexpr PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format string",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the value "
         "of the elapsed time.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ReferenceTimeInfo = {
+    constexpr PropertyInfo ReferenceTimeInfo = {
         "ReferenceTime",
         "Reference time",
         "The reference time relative to which the elapsed time is specified. The format "
         "must be an ISO 8601-compliant date string.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SimplifyTimeInfo = {
+    constexpr PropertyInfo SimplifyTimeInfo = {
         "SimplifyTime",
         "Simplify time",
         "If this value is enabled, the elapsed time will be simplified into seconds, "
         "minutes, hours, etc. If the value is disabled, the elapsed time is always "
         "presented in seconds. The default value for this is 'true'.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LowestTimeUnitInfo = {
+    constexpr PropertyInfo LowestTimeUnitInfo = {
         "LowestTimeUnit",
         "Lowest time unit when simplifying",
         "If 'SimplifyTime' is enabled, this is the lowest time unit that will be shown. "
         "All finer grained timesteps will be ignored.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Displays the remaining time until a provided `ReferenceTime` or the elapsed time

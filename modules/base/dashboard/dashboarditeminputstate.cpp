@@ -36,39 +36,39 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ShowWhenEnabledInfo = {
+    constexpr PropertyInfo ShowWhenEnabledInfo = {
         "ShowWhenEnabled",
         "Show when enabled",
         "Show text when the input is enabled.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShowWhenDisabledInfo = {
+    constexpr PropertyInfo ShowWhenDisabledInfo = {
         "ShowWhenDisabled",
         "Show when disabled",
         "Show text when the input is disabled.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShowKeyboardInfo = {
+    constexpr PropertyInfo ShowKeyboardInfo = {
         "ShowKeyboard",
         "Show keyboard information",
         "Display the state of the keyboard input.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShowMouseInfo = {
+    constexpr PropertyInfo ShowMouseInfo = {
         "ShowMouse",
         "Show mouse information",
         "Display the state of the mouse input.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShowJoystickInfo = {
+    constexpr PropertyInfo ShowJoystickInfo = {
         "ShowJoystick",
         "Show joystick information",
         "Display the state of the joystick input.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Shows the current state of the different methods to provide user input: keyboard,

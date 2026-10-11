@@ -36,12 +36,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo FilePathInfo = {
+    constexpr PropertyInfo FilePathInfo = {
         "FilePath",
         "File path",
         "The file path that is used for this image provider. The file must point to an "
         "image that is then loaded and used for all tiles.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     struct [[codegen::Dictionary(SingleImageProvider)]] Parameters {

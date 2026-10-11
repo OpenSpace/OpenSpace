@@ -1399,19 +1399,19 @@ int main(int argc, char* argv[]) {
         if (commandlineArguments.propertyVisibility.has_value()) {
             if (commandlineArguments.propertyVisibility == "NoviceUser") {
                 global::configuration->propertyVisibility =
-                    Property::Visibility::NoviceUser;
+                    PropertyInfo::Visibility::NoviceUser;
             }
             else if (commandlineArguments.propertyVisibility == "User") {
                 global::configuration->propertyVisibility =
-                    Property::Visibility::User;
+                    PropertyInfo::Visibility::User;
             }
             else if (commandlineArguments.propertyVisibility == "AdvancedUser") {
                 global::configuration->propertyVisibility =
-                    Property::Visibility::AdvancedUser;
+                    PropertyInfo::Visibility::AdvancedUser;
             }
             else if (commandlineArguments.propertyVisibility == "Developer") {
                 global::configuration->propertyVisibility =
-                    Property::Visibility::Developer;
+                    PropertyInfo::Visibility::Developer;
             }
             else {
                 throw RuntimeError(std::format(

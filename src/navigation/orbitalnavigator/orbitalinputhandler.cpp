@@ -30,36 +30,36 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo MouseSensitivityInfo = {
+    constexpr PropertyInfo MouseSensitivityInfo = {
         "MouseSensitivity",
         "Mouse sensitivity",
         "Determines the sensitivity of the camera motion through the mouse. The lower "
         "the sensitivity is the less impact a mouse motion will have.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo JoystickSensitivityInfo = {
+    constexpr PropertyInfo JoystickSensitivityInfo = {
         "JoystickSensitivity",
         "Joystick sensitivity",
         "Determines the sensitivity of the camera motion through a joystick. The lower "
         "the sensitivity is the less impact a joystick motion will have.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo WebsocketSensitivityInfo = {
+    constexpr PropertyInfo WebsocketSensitivityInfo = {
         "WebsocketSensitivity",
         "Websocket sensitivity",
         "Determines the sensitivity of the camera motion through a websocket. The lower "
         "the sensitivity is the less impact a webstick motion will have.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo TouchSensitivityInfo = {
+    constexpr PropertyInfo TouchSensitivityInfo = {
         "TouchSensitivity",
         "Touch sensitivity",
         "Determines the sensitivity of the camera motion through touch interaction. The "
         "lower the sensitivity is the less the impact from touch motion will be.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     double velocityScaleFromFriction(double friction) {

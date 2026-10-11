@@ -37,61 +37,61 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ColorMapping";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Color map enabled",
         "Decides if the color mapping should be used or not.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo FileInfo = {
+    constexpr PropertyInfo FileInfo = {
         "File",
         "Color map file",
         "The path to the color map file to use. Should be a .cmap file.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ParameterInfo = {
+    constexpr PropertyInfo ParameterInfo = {
         "Parameter",
         "Parameter",
         "The parameter in the dataset to use for the color mapping. On change, the "
         "value range to used for the mapping will also be changed.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RangeInfo = {
+    constexpr PropertyInfo RangeInfo = {
         "ValueRange",
         "Value range",
         "The range of values to use in the color mapping. The lowest value will be "
         "mapped to the first color in the color map.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SetRangeFromDataInfo = {
+    constexpr PropertyInfo SetRangeFromDataInfo = {
         "SetRangeFromData",
         "Set data range from data",
         "Set the data range for the color mapping based on the available data for the "
         "currently selected data column.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo HideOutsideInfo = {
+    constexpr PropertyInfo HideOutsideInfo = {
         "HideValuesOutsideRange",
         "Hide values outside range",
         "If true, points with values outside the provided range for the coloring will be "
         "hidden, i.e. not rendered at all.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UseNoDataColorInfo = {
+    constexpr PropertyInfo UseNoDataColorInfo = {
         "ShowMissingData",
         "Show missing data",
         "If true, use a separate color (see NoDataColor) for items with values "
         "corresponding to missing data values.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo NoDataColorInfo = {
+    constexpr PropertyInfo NoDataColorInfo = {
         "NoDataColor",
         "No data color",
         "The color to use for items with values corresponding to missing data values, "
@@ -99,20 +99,20 @@ namespace {
         "value overrides any value in the color map. If a color value for the below "
         "range values is provided, the ShowMissingData property will automatically be "
         "set to true.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo UseAboveRangeColorInfo = {
+    constexpr PropertyInfo UseAboveRangeColorInfo = {
         "UseAboveRangeColor",
         "Use above range color",
         "If true, use a separate color (see AboveRangeColor) for items with values "
         "larger than the one in the provided data range. Otherwise, the values will "
         "be clamped to use the color at the upper limit of the color map. If a color is "
         "provided in the color map, this value will automatically be set to true.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AboveRangeColorInfo = {
+    constexpr PropertyInfo AboveRangeColorInfo = {
         "AboveRangeColor",
         "Above range color",
         "The color to use for items with values larger than the one in the provided "
@@ -120,20 +120,20 @@ namespace {
         "setting this value overrides any value in the color map. If a color value for "
         "the above range values is provided, the UseAboveRangeColor property will "
         "automatically be set to true.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UseBelowRangeColorInfo = {
+    constexpr PropertyInfo UseBelowRangeColorInfo = {
         "UseBelowRangeColor",
         "Use below range color",
         "If true, use a separate color (see BelowRangeColor) for items with values "
         "smaller than the one in the provided data range. Otherwise, the values will "
         "be clamped to use the color at the lower limit of the color map. If a color is "
         "provided in the color map, this value will automatically be set to true.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BelowRangeColorInfo = {
+    constexpr PropertyInfo BelowRangeColorInfo = {
         "BelowRangeColor",
         "Below range color",
         "The color to use for items with values smaller than the one in the provided "
@@ -141,14 +141,14 @@ namespace {
         "setting this value overrides any value in the color map. If a color value for "
         "the below range values is provided, the UseBelowRangeColor property will "
         "automatically be set to true.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo InvertColorMapInfo = {
+    constexpr PropertyInfo InvertColorMapInfo = {
         "Invert",
         "Invert color map",
         "If true, the colors of the color map will be read in the inverse order.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // This component handles settings for dynamic color mapping of data points based on

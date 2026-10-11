@@ -54,19 +54,19 @@ namespace {
         return glm::radians(rightAscension * 15);
     }
 
-    constexpr Property::PropertyInfo VertexInfo = {
+    constexpr PropertyInfo VertexInfo = {
         "File",
         "Vertex file path",
         "A file that contains the vertex locations of the constellations bounds, as RA "
         "Dec coordinates on the celestial sphere.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
+    constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the lines.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     // Can be used to draw bounding shapes on the night sky, where each shape encapsulates

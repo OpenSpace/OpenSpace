@@ -48,17 +48,17 @@ namespace {
 
     constexpr std::string_view _loggerCat = "IswaCygnet";
 
-    constexpr Property::PropertyInfo DeleteInfo = {
+    constexpr PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
-    constexpr Property::PropertyInfo AlphaInfo = {
+    constexpr PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
         "", // @TODO Missing documentation
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableIswaCygnet)]] Parameters {

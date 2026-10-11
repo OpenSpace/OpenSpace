@@ -43,62 +43,62 @@ namespace {
     constexpr int RenderOptionFaceCamera = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether the labels will be visible or not. They are "
         "disabled per default.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FileInfo = {
+    constexpr PropertyInfo FileInfo = {
         "File",
         "File",
         "The speck label file with the data for the labels.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
+    constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the labels.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
+    constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The size of the labels in pixels.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FontSizeInfo = {
+    constexpr PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "Font size for the labels. This is different from the text size.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MinMaxInfo = {
+    constexpr PropertyInfo MinMaxInfo = {
         "MinMaxSize",
         "Min/max size",
         "The minimum and maximum size (in pixels) of the labels.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FaceCameraInfo = {
+    constexpr PropertyInfo FaceCameraInfo = {
         "FaceCamera",
         "Face camera",
         "If enabled, the labels will be rotated to face the camera. For non-linear "
         "display rendering (for example fisheye) this should be set to false.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TransformationMatrixInfo = {
+    constexpr PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation matrix",
         "Transformation matrix to be applied to the labels.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {

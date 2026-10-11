@@ -59,79 +59,79 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableSimulationBox";
 
-    constexpr Property::PropertyInfo RepresentationInfo = {
+    constexpr PropertyInfo RepresentationInfo = {
         "Representation",
         "Representation type",
         "The visual representation type to use for the molecule."
     };
 
-    constexpr Property::PropertyInfo ColoringInfo = {
+    constexpr PropertyInfo ColoringInfo = {
         "Coloring",
         "Coloring",
         "The color mapping for the atoms."
     };
 
-    constexpr Property::PropertyInfo RepScaleInfo = {
+    constexpr PropertyInfo RepScaleInfo = {
         "RepScale",
         "Representation scale",
         "Thickness of the atoms when using the Space Fill or Licorice representations."
     };
 
-    constexpr Property::PropertyInfo AnimationSpeedInfo = {
+    constexpr PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
         "Animation speed",
         "Playback speed of the animation (in frames per second)."
     };
 
-    constexpr Property::PropertyInfo SimulationSpeedInfo = {
+    constexpr PropertyInfo SimulationSpeedInfo = {
         "SimulationSpeed",
         "Simulation speed",
         "Adjust the speed of the simulation (seconds per second)."
     };
 
-    constexpr Property::PropertyInfo LinearVelocityInfo = {
+    constexpr PropertyInfo LinearVelocityInfo = {
         "LinearVelocity",
         "Linear velocity",
         "Average linear velocity at the start of the simulation (m/s)."
     };
 
-    constexpr Property::PropertyInfo AngularVelocityInfo = {
+    constexpr PropertyInfo AngularVelocityInfo = {
         "AngularVelocity",
         "Angular velocity",
         "Average angular velocity at the start of the simulation (radians/s)."
     };
 
-    constexpr Property::PropertyInfo SimulationBoxInfo = {
+    constexpr PropertyInfo SimulationBoxInfo = {
         "SimulationBox",
         "Simulation box",
         "Size of the periodic simulation box."
     };
 
-    constexpr Property::PropertyInfo CollisionRadiusInfo = {
+    constexpr PropertyInfo CollisionRadiusInfo = {
         "CollisionRadius",
         "Collision radius",
         "Radius of the collision sphere around molecules."
     };
 
-    constexpr Property::PropertyInfo FilterInfo = {
+    constexpr PropertyInfo FilterInfo = {
         "Filter",
         "Filter",
         "The filter used to remove parts of the dataset."
     };
 
-    constexpr Property::PropertyInfo CircleColorInfo = {
+    constexpr PropertyInfo CircleColorInfo = {
         "CircleColor",
         "Circle color",
         "Color of the circle outlining the simulation."
     };
 
-    constexpr Property::PropertyInfo CircleWidthInfo = {
+    constexpr PropertyInfo CircleWidthInfo = {
         "CircleWidth",
         "Circle width",
         "Width of the circle outlining the simulation."
     };
 
-    constexpr Property::PropertyInfo CircleFalloffInfo = {
+    constexpr PropertyInfo CircleFalloffInfo = {
         "CircleFalloff",
         "Circle falloff",
         "Falloff exponent of the circle outlining the simulation."

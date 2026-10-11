@@ -31,14 +31,14 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo NormalInfo = {
+    constexpr PropertyInfo NormalInfo = {
         "Normal",
         "Normal",
         // @TODO Missing documentation
         ""
     };
 
-    constexpr Property::PropertyInfo OffsetsInfo = {
+    constexpr PropertyInfo OffsetsInfo = {
         "Offsets",
         "Offsets",
         // @TODO Missing documentation

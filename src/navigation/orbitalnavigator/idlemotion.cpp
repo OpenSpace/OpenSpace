@@ -38,72 +38,72 @@ namespace {
 
     constexpr double AngleEpsilon = 1e-7;
 
-    constexpr Property::PropertyInfo ApplyInfo = {
+    constexpr PropertyInfo ApplyInfo = {
         "Apply",
         "Apply idle motion",
         "When set to true, the chosen idle motion will be applied to the camera, moving "
         "the camera accordingly.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MotionInfo = {
+    constexpr PropertyInfo MotionInfo = {
         "Motion",
         "Motion",
         "The chosen camera motion that will be triggered when the idle motion is applied. "
         "Each option represents a predefined camera motion.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShouldTriggerWhenIdleInfo = {
+    constexpr PropertyInfo ShouldTriggerWhenIdleInfo = {
         "ShouldTriggerWhenIdle",
         "Should trigger when idle",
         "If true, the chosen idle motion will trigger automatically after a certain time "
         "(see 'IdleWaitTime' property).",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo IdleWaitTimeInfo = {
+    constexpr PropertyInfo IdleWaitTimeInfo = {
         "IdleWaitTime",
         "Idle wait time",
         "The time (seconds) until idle motion starts, if no camera interaction has been "
         "performed. Note that friction counts as camera interaction.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SpeedFactorInfo = {
+    constexpr PropertyInfo SpeedFactorInfo = {
         "SpeedFactor",
         "Speed factor",
         "A factor that can be used to increase or slow down the speed of an applied idle "
         "motion. A negative value will invert the direction. Note that a speed of exactly "
         "0 leads to no movement at all.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo InvertInfo = {
+    constexpr PropertyInfo InvertInfo = {
         "Invert",
         "Invert direction",
         "If true, the direction of the idle motion motion will be inverted compared to "
         "the default. For example, the 'Orbit' option rotates to the right per default, "
         "and will rotate to the left when inverted.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AbortOnCameraInteractionInfo = {
+    constexpr PropertyInfo AbortOnCameraInteractionInfo = {
         "AbortOnCameraInteraction",
         "Abort on camera interaction",
         "If set to true, the idle motion is aborted on camera interaction. If false, the "
         "motion will be reapplied after the interaction. Examples of camera interaction "
         "are: changing the anchor node, starting a camera path or session recording "
         "playback, or navigating manually using an input device.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo DampenInterpolationTimeInfo = {
+    constexpr PropertyInfo DampenInterpolationTimeInfo = {
         "DampenInterpolationTime",
         "Start/end dampen interpolation time",
         "The time to interpolate to/from full speed when an idle motion is triggered or "
         "canceled, in seconds.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 } // namespace
 

@@ -64,33 +64,33 @@ namespace {
 
     ImFont* captionFont = nullptr;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this object will be visible or not.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo CollapsedInfo = {
+    constexpr PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is collapsed",
         "This setting determines whether this window is collapsed or not.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo ShowHelpInfo = {
+    constexpr PropertyInfo ShowHelpInfo = {
         "ShowHelpText",
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
         "explaining what impact they have on the visuals.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo HelpTextDelayInfo = {
+    constexpr PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
         "Tooltip delay (in s)",
         "This value determines the delay in seconds after which the tooltip is shown.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
     ImGuiKey toImGuiKey(openspace::Key key) {

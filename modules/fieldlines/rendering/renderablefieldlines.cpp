@@ -58,39 +58,39 @@ namespace {
         Table = 1
     };
 
-    constexpr Property::PropertyInfo StepSizeInfo = {
+    constexpr PropertyInfo StepSizeInfo = {
         "Stepsize",
         "Fieldline step size.",
         "", // @TODO Missing documentation
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo Classification = {
+    constexpr PropertyInfo Classification = {
         "Classification",
         "Fieldline classification",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FieldlineColorInfo = {
+    constexpr PropertyInfo FieldlineColorInfo = {
         "FieldlineColor",
         "Fieldline color",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SeedPointSourceInfo = {
+    constexpr PropertyInfo SeedPointSourceInfo = {
         "Source",
         "SeedPoint source",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SeedPointFileInfo = {
+    constexpr PropertyInfo SeedPointFileInfo = {
         "SourceFile",
         "SeedPoint file",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableFieldlines)]] Parameters {

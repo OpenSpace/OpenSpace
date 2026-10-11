@@ -43,61 +43,61 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureQualityInfo = {
+    constexpr PropertyInfo TextureQualityInfo = {
         "TextureQuality",
         "Quality of texture",
         "A parameter to set the resolution of the texture. 1 is full resolution and "
         "slower frame rate. Lower value means lower resolution of texture and faster "
         "frame rate.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DisplayCopyInfo = {
+    constexpr PropertyInfo DisplayCopyInfo = {
         "DisplayCopy",
         "Display copy position",
         "Display a copy of this sky browser at an additional position. This copy will "
         "not be interactive. The position is in RAE (Radius, Azimuth, Elevation) "
         "coordinates or Cartesian, depending on if the browser uses RAE or Cartesian "
         "coordinates.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo DisplayCopyShowInfo = {
+    constexpr PropertyInfo DisplayCopyShowInfo = {
         "ShowDisplayCopy",
         "Show display copy",
         "Show the display copy.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo IsHiddenInfo = {
+    constexpr PropertyInfo IsHiddenInfo = {
         "IsHidden",
         "Is hidden",
         "If checked, the browser will be not be displayed. If it is not checked, it will "
         "be.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PointSpacecraftInfo = {
+    constexpr PropertyInfo PointSpacecraftInfo = {
         "PointSpacecraft",
         "Point spacecraft",
         "If checked, spacecrafts will point towards the coordinate of an image upon "
         "selection.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo UpdateDuringAnimationInfo = {
+    constexpr PropertyInfo UpdateDuringAnimationInfo = {
         "UpdateDuringTargetAnimation",
         "Update during target animation",
         "If checked, the sky browser display copy will update its coordinates while the "
         "target is animating.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo VerticalFovInfo = {
+    constexpr PropertyInfo VerticalFovInfo = {
         "VerticalFov",
         "Vertical field of view",
         "The vertical field of view of the target.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     /**
@@ -269,7 +269,7 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
 void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCopies) {
     const size_t start = _displayCopies.size();
     for (int i = 0; i < nCopies; i++) {
-        Property::PropertyInfo info = DisplayCopyInfo;
+        PropertyInfo info = DisplayCopyInfo;
         const float azimuth = i * glm::two_pi<float>() / nCopies;
         const glm::vec3 position = raePosition + glm::vec3(0.f, azimuth, 0.f);
         // @TODO(abock) I think the lifetime for this string is a bit tricky. I don't
@@ -284,7 +284,7 @@ void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCo
                 glm::vec3(4.f, 4.f, glm::half_pi<float>())
             )
         );
-        Property::PropertyInfo showInfo = DisplayCopyShowInfo;
+        PropertyInfo showInfo = DisplayCopyShowInfo;
         // @TODO(abock) I think the lifetime for this string is a bit tricky. I don't
         // think it will live long enough to be actually usable
         const std::string idDispCpyVis = "ShowDisplayCopy" + std::to_string(start + i);

@@ -27,22 +27,22 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo OpacityInfo = {
+    constexpr PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this object. A value of 0 means completely "
         "transparent.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo FadeInfo = {
+    constexpr PropertyInfo FadeInfo = {
         "Fade",
         "Fade",
         "This value is used by the system to be able to fade out objects independently "
         "from the Opacity value selected by the user. This value should not be directly "
         "manipulated through a user interface, but instead used by other components of "
         "the system programmatically.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 } // namespace
 

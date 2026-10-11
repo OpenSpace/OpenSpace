@@ -64,99 +64,99 @@ namespace {
         AngularFisheye
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
+    constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
         "The radius of the sphere in meters.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SegmentsInfo = {
+    constexpr PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of segments",
         "The number of segments that the sphere is split into.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OrientationInfo = {
+    constexpr PropertyInfo OrientationInfo = {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
         "outside of the sphere, or both.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MirrorTextureInfo = {
+    constexpr PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
         "Mirror texture",
         "If true, mirror the texture along the x-axis.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TextureProjectionInfo = {
+    constexpr PropertyInfo TextureProjectionInfo = {
         "TextureProjection",
         "Texture Projection",
         "Specifies the projection mapping to use for any texture loaded onto the sphere "
         "(assumes Equirectangular per default). Note that for \"Angular Fisheye\" only "
         "half the sphere will be textured - the hemisphere centered around the z-axis.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DisableFadeInOutInfo = {
+    constexpr PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
         "Disable fade-in/fade-out effects",
         "Enables/Disables the fade in and out effects.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FadeInThresholdInfo = {
+    constexpr PropertyInfo FadeInThresholdInfo = {
         "FadeInThreshold",
         "Fade-in threshold",
         "The distance from the center of the Milky Way at which the sphere should start "
         "to fade in, given as a percentage of the size of the object. A value of zero "
         "means that no fading in will happen.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FadeOutThresholdInfo = {
+    constexpr PropertyInfo FadeOutThresholdInfo = {
         "FadeOutThreshold",
         "Fade-out threshold",
         "A threshold for when the sphere should start fading out, given as a percentage "
         "of how much of the sphere that is visible before the fading should start. A "
         "value of zero means that no fading out will happen.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UseColorMapInfo = {
+    constexpr PropertyInfo UseColorMapInfo = {
         "UseColorMap",
         "Use color map",
         "Used to toggle color map on or off for the sphere. Mainly used to transform "
         "grayscale textures from data into color images.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorMapInfo = {
+    constexpr PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Transfer function (color map) path",
         "Color map / Transfer function to use if `UseColorMap` is enabled.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BlendingOptionInfo = {
+    constexpr PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending options",
         "Controls the blending function used to calculate the colors of the sphere with "
         "respect to the opacity.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DisableDepthInfo = {
+    constexpr PropertyInfo DisableDepthInfo = {
         "DisableDepth",
         "Disable depth",
         "If disabled, no depth values are taken into account for this sphere, meaning "
         "that depth values are neither written or tested against during the rendering. "
         "This can be useful for spheres that represent a background image.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Creates a simple sphere textured with an image. Per default, the sphere uses an

@@ -37,23 +37,23 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo FormatStringInfo = {
+    constexpr PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format string",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the date "
         "in the format as specified by `TimeFormat`.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TimeFormatInfo = {
+    constexpr PropertyInfo TimeFormatInfo = {
         "TimeFormat",
         "Time format",
         "The format string used for formatting the date/time before being passed to the "
         "string in FormatString. See "
         "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html for full "
         "information about how to structure this format.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Shows the current in-game simulation time. The `FormatString` and the `TimeFormat`

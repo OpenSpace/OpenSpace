@@ -68,172 +68,172 @@ namespace {
         return Time::convertTime(fileName);
     }
 
-    constexpr Property::PropertyInfo ColorMethodInfo = {
+    constexpr PropertyInfo ColorMethodInfo = {
         "ColorMethod",
         "Color method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
         "examples, temperature or particle density.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ColorQuantityInfo = {
+    constexpr PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
         "Quantity to color by",
         "Quantity used to color lines if the 'By Quantity' color method is selected.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ColorMinMaxInfo = {
+    constexpr PropertyInfo ColorMinMaxInfo = {
         "ColorMinMaxRange",
         "Color min max range",
         "A min-max range for what the lowest and highest values of the color table can "
         "be set to.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorTablePathInfo = {
+    constexpr PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to color table",
         "Color Table/Transfer Function to use for 'By Quantity' coloring.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorUniformInfo = {
+    constexpr PropertyInfo ColorUniformInfo = {
         "Color",
         "Uniform line color",
         "The uniform color of lines shown when 'Color Method' is set to 'Uniform'.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ColorUseABlendingInfo = {
+    constexpr PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
         "Additive blending",
         "Activate/deactivate additive blending.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DomainEnabledInfo = {
+    constexpr PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
         "Domain limits",
         "Enable/Disable domain limits.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo DomainXInfo = {
+    constexpr PropertyInfo DomainXInfo = {
         "LimitsX",
         "X-limits",
         "Valid range along the X-axis. [Min, Max].",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DomainYInfo = {
+    constexpr PropertyInfo DomainYInfo = {
         "LimitsY",
         "Y-limits",
         "Valid range along the Y-axis. [Min, Max].",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DomainZInfo = {
+    constexpr PropertyInfo DomainZInfo = {
         "LimitsZ",
         "Z-limits",
         "Valid range along the Z-axis. [Min, Max].",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DomainRInfo = {
+    constexpr PropertyInfo DomainRInfo = {
         "LimitsR",
         "Radial limits",
         "Valid radial range. [Min, Max].",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FlowEnabledInfo = {
+    constexpr PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
         "Flow enabled",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo FlowColorInfo = {
+    constexpr PropertyInfo FlowColorInfo = {
         "FlowColor",
         "Flow color",
         "Color of particles flow direction indication.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo FlowReversedInfo = {
+    constexpr PropertyInfo FlowReversedInfo = {
         "ReversedFlow",
         "Reversed flow",
         "Toggle to make the flow move in the opposite direction.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FlowParticleSizeInfo = {
+    constexpr PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
         "Particle size",
         "Size of the particles.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FlowParticleSpacingInfo = {
+    constexpr PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
         "Particle spacing",
         "Spacing in between particles.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FlowSpeedInfo = {
+    constexpr PropertyInfo FlowSpeedInfo = {
         "FlowSpeed",
         "Speed",
         "Speed of the flow.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MaskingEnabledInfo = {
+    constexpr PropertyInfo MaskingEnabledInfo = {
         "MaskingEnabled",
         "Masking enabled",
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
         "temperature is between 10 and 20 degrees. Also used for masking out line "
         "topologies like solar wind & closed lines.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MaskingMinMaxInfo = {
+    constexpr PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
         "Lower limit",
         "Lower and upper limit of the valid masking range.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MaskingQuantityInfo = {
+    constexpr PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
         "Quantity used for masking",
         "Quantity used for masking.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "This value specifies the line width of the fieldlines.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo TimeJumpButtonInfo = {
+    constexpr PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",
         "Jump to start of sequence",
         "Performs a time jump to the start of the sequence.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo SaveDownloadsOnShutdown = {
+    constexpr PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
         "Save downloads on shutdown",
         "This is an option for if dynamically downloaded should be saved between runs or "
         "not.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Visualizes field lines, typically across a sequence of time steps, but also

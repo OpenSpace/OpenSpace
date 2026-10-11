@@ -34,11 +34,11 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo DistanceThresholdInfo = {
+    constexpr PropertyInfo DistanceThresholdInfo = {
         "DistanceThreshold",
         "Distance threshold",
         "Threshold in meters for when the switch happens between the two renderables.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Can be used to render one of two renderables depending on the distance between the

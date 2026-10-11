@@ -43,27 +43,27 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableConstellationsBase";
 
-    constexpr Property::PropertyInfo NamesFileInfo = {
+    constexpr PropertyInfo NamesFileInfo = {
         "NamesFile",
         "Constellation names file path",
         "Specifies the file that contains the mapping between constellation "
         "abbreviations and full names of the constellations. If this value is empty, the "
         "abbreviations are used as the full names.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The line width used for the constellation shape.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo SelectionInfo = {
+    constexpr PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation selection",
         "The selected constellations are displayed on the celestial sphere.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {

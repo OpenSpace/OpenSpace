@@ -35,17 +35,17 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TargetInfo = {
+    constexpr PropertyInfo TargetInfo = {
         "Target",
         "Target",
         "This is the SPICE name for the body whose translation is to be computed by the "
         "SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') or "
         "a NAIF integer id code (such as '399'). The resulting translation will be a "
         "vector leading from the `Target` to the `Observer`.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ObserverInfo = {
+    constexpr PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
         "This is the SPICE name for the parent of the body whose translation is to be "
@@ -53,33 +53,33 @@ namespace {
         "as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0'). The "
         "resulting translation will be a vector leading from the `Target` to the "
         "`Observer`.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FrameInfo = {
+    constexpr PropertyInfo FrameInfo = {
         "Frame",
         "Reference frame",
         "This is the SPICE name of the reference frame in which the position should be "
         "calculated. The default value is GALACTIC.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FixedDateInfo = {
+    constexpr PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed date",
         "If this value is specified, the position will be locked to a specific time "
         "rather than following the in-game in the system. Setting this to an empty "
         "string will unlock the time and return to position based on current simulation "
         "time.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo TimeOffsetInfo = {
+    constexpr PropertyInfo TimeOffsetInfo = {
         "TimeOffset",
         "Time offset",
         "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
         "at which to compute the rotation.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to provide translational

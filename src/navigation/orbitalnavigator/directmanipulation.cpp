@@ -240,45 +240,45 @@ namespace {
         }
     }
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enable direct manipulation",
         "Decides whether the direct manipulation mode should be enabled or not.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo IsActiveInfo = {
+    constexpr PropertyInfo IsActiveInfo = {
         "IsActive",
         "Is active",
         "True if the direct manipulation interaction scheme is currently being applied.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AllowMouseInputInfo = {
+    constexpr PropertyInfo AllowMouseInputInfo = {
         "AllowMouseInput",
         "Allow mouse input",
         "Decides whether direct manipulation should be applied when using mouse input."
         "Otherwise, it is only applied for touch input.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DistanceThresholdInfo = {
+    constexpr PropertyInfo DistanceThresholdInfo = {
         "DistanceThreshold",
         "Distance threshold factor",
         "This threshold affects the distance from the interaction sphere at which the "
         "direct manipulation interaction mode starts being active. The value is given as "
         "a factor times the interaction sphere.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DefaultRenderableTypesInfo = {
+    constexpr PropertyInfo DefaultRenderableTypesInfo = {
         "DefaultRenderableTypes",
         "Default renderable types",
         "A list of renderable types that will automatically use the direct manipulation "
         "scheme when interacted with, keeping the finger on a static position on the "
         "interaction sphere of the object when touching. Good for relatively spherical "
         "objects. Per default, it's set to RenderableGlobes.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     constexpr std::string_view Description =

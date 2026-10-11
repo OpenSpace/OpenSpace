@@ -35,12 +35,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ShouldInterpolateInfo = {
+    constexpr PropertyInfo ShouldInterpolateInfo = {
         "ShouldInterpolate",
         "Should interpolate",
         "If this value is set to 'true', an interpolation is applied between the given "
         "keyframes. If this value is set to 'false', the interpolation is not applied.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Uses a timeline of other `Translation` classes to calculate the final translation

@@ -61,14 +61,14 @@ namespace {
     constexpr size_t ColorSize = 2;
     constexpr size_t VelocitySize = 3;
 
-    constexpr Property::PropertyInfo FilePathInfo = {
+    constexpr PropertyInfo FilePathInfo = {
         "File",
         "File path",
         "The path to the file with data for the stars to be rendered.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FileReaderOptionInfo = {
+    constexpr PropertyInfo FileReaderOptionInfo = {
         "FileReaderOption",
         "File reader option",
         "This value tells the renderable what format the input data file has. 'Fits' "
@@ -79,197 +79,197 @@ namespace {
         "Octree from binary file and render full data. 'StreamOctree' will read an index "
         "file with full Octree structure and then stream nodes during runtime. (This "
         "option is suited for bigger datasets).",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RenderModeInfo = {
+    constexpr PropertyInfo RenderModeInfo = {
         "RenderMode",
         "Render mode",
         "This value determines which predefined columns to use in rendering. If 'Static' "
         "only the position of the stars is used. 'Color' uses position + color "
         "parameters and 'Motion' uses pos, color as well as velocity for the stars.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LuminosityMultiplierInfo = {
+    constexpr PropertyInfo LuminosityMultiplierInfo = {
         "LuminosityMultiplier",
         "Luminosity multiplier",
         "Factor by which to multiply the luminosity with. [Works in Color and Motion "
         "modes].",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo CutOffThresholdInfo = {
+    constexpr PropertyInfo CutOffThresholdInfo = {
         "CutOffThreshold",
         "Cut off threshold",
         "Set threshold for when to cut off star rendering. Stars closer than this "
         "threshold are given full opacity. Farther away, stars dim proportionally to the "
         "4-logarithm of their distance.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo TmPointFilterSizeInfo = {
+    constexpr PropertyInfo TmPointFilterSizeInfo = {
         "FilterSize",
         "Filter size [px]",
         "Set the filter size in pixels used in tonemapping for point splatting "
         "rendering.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TmPointSigmaInfo = {
+    constexpr PropertyInfo TmPointSigmaInfo = {
         "Sigma",
         "Normal distribution sigma",
         "Set the normal distribution sigma used in tonemapping for point splatting "
         "rendering.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AdditionalNodesInfo = {
+    constexpr PropertyInfo AdditionalNodesInfo = {
         "AdditionalNodes",
         "Additional nodes",
         "Determines how many additional nodes around the camera that will be fetched "
         "from disk. The first value determines how many additional layers of parents "
         "that will be fetched. The second value determines how many layers of descendant "
         "that will be fetched from the found parents.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TmPointPxThresholdInfo = {
+    constexpr PropertyInfo TmPointPxThresholdInfo = {
         "PixelWeightThreshold",
         "Pixel weight threshold",
         "Set the threshold for how big the elliptic weight of a pixel has to be to "
         "contribute to the final elliptic shape. A smaller value gives a more visually "
         "pleasing result while a bigger value will speed up the rendering on skewed "
         "frustums (aka Domes).",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorTextureInfo = {
+    constexpr PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color texture",
         "The path to the texture that is used to convert from the magnitude of the star "
         "to its color. The texture is used as a one dimensional lookup function.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FirstRowInfo = {
+    constexpr PropertyInfo FirstRowInfo = {
         "FirstRow",
         "First row to read",
         "Defines the first row that will be read from the specified FITS file No need to "
         "define if data already has been processed. [Works only with "
         "FileReaderOption::Fits].",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LastRowInfo = {
+    constexpr PropertyInfo LastRowInfo = {
         "LastRow",
         "Last row to read",
         "Defines the last row that will be read from the specified FITS file; has to be "
         "equal to or greater than FirstRow. No need to define if data already has been "
         "processed. [Works only with FileReaderOption::Fits].",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NumRenderedStarsInfo = {
+    constexpr PropertyInfo NumRenderedStarsInfo = {
         "NumRenderedStars",
         "Rendered stars",
         "The number of rendered stars in the current frame.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo CpuRamBudgetInfo = {
+    constexpr PropertyInfo CpuRamBudgetInfo = {
         "CpuRamBudget",
         "CPU RAM budget",
         "Current remaining budget (bytes) on the CPU RAM for loading more node data "
         "files.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GpuStreamBudgetInfo = {
+    constexpr PropertyInfo GpuStreamBudgetInfo = {
         "GpuStreamBudget",
         "GPU stream budget",
         "Current remaining memory budget [in number of chunks] on the GPU for streaming "
         "additional stars.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LodPixelThresholdInfo = {
+    constexpr PropertyInfo LodPixelThresholdInfo = {
         "LodPixelThreshold",
         "LOD pixel threshold",
         "The number of total pixels a nodes AABB can have in clipping space before its "
         "parent is fetched as LOD cache.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MaxGpuMemoryPercentInfo = {
+    constexpr PropertyInfo MaxGpuMemoryPercentInfo = {
         "MaxGpuMemoryPercent",
         "Max GPU memory",
         "Sets the max percent of existing GPU memory budget that the streaming will use.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MaxCpuMemoryPercentInfo = {
+    constexpr PropertyInfo MaxCpuMemoryPercentInfo = {
         "MaxCpuMemoryPercent",
         "Max CPU memory",
         "Sets the max percent of existing CPU memory budget that the streaming of files "
         "will use.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FilterPosXInfo = {
+    constexpr PropertyInfo FilterPosXInfo = {
         "FilterPosX",
         "PosX threshold",
         "If defined then only stars with Position X values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FilterPosYInfo = {
+    constexpr PropertyInfo FilterPosYInfo = {
         "FilterPosY",
         "PosY threshold",
         "If defined then only stars with Position Y values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FilterPosZInfo = {
+    constexpr PropertyInfo FilterPosZInfo = {
         "FilterPosZ",
         "PosZ threshold",
         "If defined then only stars with Position Z values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FilterGMagInfo = {
+    constexpr PropertyInfo FilterGMagInfo = {
         "FilterGMag",
         "GMag threshold",
         "If defined then only stars with G mean magnitude values between [min, max] will "
         "be rendered (if min is set to 20.0 it is read as -Inf, if max is set to 20.0 it "
         "is read as +Inf). If min = max then all values equal min|max will be filtered "
         "away.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FilterBpRpInfo = {
+    constexpr PropertyInfo FilterBpRpInfo = {
         "FilterBpRp",
         "Bp-Rp threshold",
         "If defined then only stars with Bp-Rp color values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). If min = max then all values equal min|max will be filtered "
         "away.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FilterDistInfo = {
+    constexpr PropertyInfo FilterDistInfo = {
         "FilterDist",
         "Dist threshold",
         "If defined then only stars with Distances values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableGaiaStars)]] Parameters {

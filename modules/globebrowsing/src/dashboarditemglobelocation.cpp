@@ -41,19 +41,19 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo DisplayFormatInfo = {
+    constexpr PropertyInfo DisplayFormatInfo = {
         "DisplayFormat",
         "Display format",
         "Choosing the format in which the camera location is displayed.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SignificantDigitsInfo = {
+    constexpr PropertyInfo SignificantDigitsInfo = {
         "SignificantDigits",
         "Significant digits",
         "Determines the number of significant digits that are shown in the location "
         "text.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Shows the longitude/latitude location of the camera and its distance to the current

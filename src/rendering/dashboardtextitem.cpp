@@ -35,19 +35,19 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo FontNameInfo = {
+    constexpr PropertyInfo FontNameInfo = {
         "FontName",
         "Font name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FontSizeInfo = {
+    constexpr PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "This value determines the size of the font that is used to render the distance.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardTextItem)]] Parameters {

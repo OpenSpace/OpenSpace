@@ -50,22 +50,22 @@ namespace {
         Direction
     };
 
-    constexpr Property::PropertyInfo StrideInfo = {
+    constexpr PropertyInfo StrideInfo = {
         "Stride",
         "Stride",
         "Controls how densely vectors are sampled from the volume. A stride of 1 renders "
         "every vector.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FixedColorInfo = {
+    constexpr PropertyInfo FixedColorInfo = {
         "FixedColor",
         "Fixed color",
         "The color of the vectors, when no color map is used.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ColorModeInfo = {
+    constexpr PropertyInfo ColorModeInfo = {
         "ColorMode",
         "Color mode",
         "Controls how the vectors are colored. \"Fixed\" color all vectors with the same "
@@ -73,46 +73,46 @@ namespace {
         "magnitudes defined in the volume. \"Direction\" colors the vector based on "
         "their direction, as follows: +X -> Red, -X -> Cyan, +Y -> Green, -Y -> Magenta, "
         "+Z -> Blue, -Z -> Yellow.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo VectorFieldScaleInfo = {
+    constexpr PropertyInfo VectorFieldScaleInfo = {
         "VectorFieldScale",
         "Vector field scale",
         "Scales the vector field lines using an exponential scale.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the vector lines.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ColorMapInfo = {
+    constexpr PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color map",
         "The path to the color map file used for coloring the vector field.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ColorMappingDataRangeInfo = {
+    constexpr PropertyInfo ColorMappingDataRangeInfo = {
         "ColorMappingDataRange",
         "Color mapping data range",
         "The magnitude data range used to normalize the magnitude value for color "
         "lookup. Computed from the volume data if unspecified.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FilterByLuaInfo = {
+    constexpr PropertyInfo FilterByLuaInfo = {
         "FilterByLua",
         "Filter by Lua script",
         "If enabled, the vector field is filtered by the provided custom Lua script.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FilterScriptInfo = {
+    constexpr PropertyInfo FilterScriptInfo = {
         "FilterScript",
         "Filter script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -120,7 +120,7 @@ namespace {
         "current voxel position (x, y, z) given in galactic coordinates, and the "
         "velocity vector (vx, vy, vz). The function should return true/false if "
         "the voxel should be visualized or discarded, respectively.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Renders vectors from a given 3D volumetric dataset or a sparse point-like dataset,

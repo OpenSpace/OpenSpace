@@ -86,84 +86,84 @@ namespace {
     constexpr std::string_view KeyFontMono = "Mono";
     constexpr std::string_view KeyFontLight = "Light";
 
-    constexpr Property::PropertyInfo ShowOverlayClientsInfo = {
+    constexpr PropertyInfo ShowOverlayClientsInfo = {
         "ShowOverlayOnClients",
         "Show overlay information on clients",
         "If this value is enabled, the overlay information text is also automatically "
         "rendered on client nodes. This values is disabled by default.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShowLogInfo = {
+    constexpr PropertyInfo ShowLogInfo = {
         "ShowLog",
         "Show the on-screen log",
         "This value determines whether the on-screen log will be shown or hidden. Even "
         "if it is shown, all 'Debug' and 'Trace' level messages are omitted from this "
         "log.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo VerticalLogOffsetInfo = {
+    constexpr PropertyInfo VerticalLogOffsetInfo = {
         "VerticalLogOffset",
         "Vertical log offset",
         "The vertical offset for the on-screen log in [0,1] coordinates, a factor that "
         "is scaled with the vertical resolution.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShowVersionInfo = {
+    constexpr PropertyInfo ShowVersionInfo = {
         "ShowVersion",
         "Shows the version on-screen information",
         "This value determines whether the Git version information (branch and commit) "
         "hash are shown on the screen.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShowCameraInfo = {
+    constexpr PropertyInfo ShowCameraInfo = {
         "ShowCamera",
         "Shows camera information",
         "This value determines whether the information about the current camera state is "
         "shown on the screen.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ScreenshotWindowIdsInfo = {
+    constexpr PropertyInfo ScreenshotWindowIdsInfo = {
         "ScreenshotWindowId",
         "Screenshow window ids",
         "The list of window identifiers whose screenshot will be taken the next time "
         "anyone triggers a screenshot. If this list is empty (the default), all windows "
         "will have their screenshot taken. Id's that do not exist are silently ignored.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ApplyWarpingInfo = {
+    constexpr PropertyInfo ApplyWarpingInfo = {
         "ApplyWarpingScreenshot",
         "Apply warping to screenshots",
         "This value determines whether a warping should be applied before taking a "
         "screenshot. If it is enabled, all post processing is applied as well, which "
         "includes everything rendered on top of the rendering, such as the user "
         "interface.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UseNewScreenshotFolderInfo = {
+    constexpr PropertyInfo UseNewScreenshotFolderInfo = {
         "UseNewScreenshotFolder",
         "Use New Screenshot Folder",
         "If this property is triggered, a new screenshot folder is created and the "
         "numbering for screenshots is reset to start at 0. Note, this property only does "
         "something if `ScreenshotUseDateTime` is set to `true`.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScreenshotUseDateTimeInfo = {
+    constexpr PropertyInfo ScreenshotUseDateTimeInfo = {
         "ScreenshotUseDateTime",
         "Screenshot folder uses datetime",
         "If this value is set to 'true', screenshots will be saved to a folder that "
         "contains the time at which this value was enabled.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DisableMasterInfo = {
+    constexpr PropertyInfo DisableMasterInfo = {
         "DisableMasterRendering",
         "Disable master rendering",
         "If this value is enabled, the rendering on the master node will be disabled. "
@@ -171,122 +171,122 @@ namespace {
         "still respond to user input. This setting is reasonably only useful in the case "
         "of multi-pipeline environments, such as planetariums, where the output of the "
         "master node is not required and performance can be gained by disabling it.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GlobalRotationInfo = {
+    constexpr PropertyInfo GlobalRotationInfo = {
         "GlobalRotation",
         "Global rotation",
         "Applies a global view rotation. Use this to rotate the position of the focus "
         "node away from the default location on the screen. This setting persists even "
         "when a new focus node is selected. Defined using pitch, yaw, roll in radians.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScreenSpaceRotationInfo = {
+    constexpr PropertyInfo ScreenSpaceRotationInfo = {
         "ScreenSpaceRotation",
         "Screen space rotation",
         "Applies a rotation to all screen space renderables. Defined using pitch, yaw, "
         "roll in radians.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MasterRotationInfo = {
+    constexpr PropertyInfo MasterRotationInfo = {
         "MasterRotation",
         "Master rotation",
         "Applies a view rotation for only the master node, defined using pitch, yaw, "
         "roll in radians.This can be used to compensate the master view direction for "
         "tilted display systems in clustered immersive environments.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DisableHDRPipelineInfo = {
+    constexpr PropertyInfo DisableHDRPipelineInfo = {
         "DisableHDRPipeline",
         "Disable HDR rendering",
         "If this value is enabled, the rendering will disable the HDR color handling and "
         "the LDR color pipeline will be used. Be aware of possible over exposure in the "
         "final colors.",
-        Property::Visibility::Hidden
+        PropertyInfo::Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo HDRExposureInfo = {
+    constexpr PropertyInfo HDRExposureInfo = {
         "HDRExposure",
         "HDR exposure",
         "This value determines the amount of light per unit area reaching the equivalent "
         "of an electronic image sensor.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GammaInfo = {
+    constexpr PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma correction",
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
         "tristimulus values in the image.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HueInfo = {
+    constexpr PropertyInfo HueInfo = {
         "Hue",
         "Hue",
         "Hue.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SaturationInfo = {
+    constexpr PropertyInfo SaturationInfo = {
         "Saturation",
         "Saturation",
         "Saturation.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ValueInfo = {
+    constexpr PropertyInfo ValueInfo = {
         "Value",
         "Value",
         "Value.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FramerateLimitInfo = {
+    constexpr PropertyInfo FramerateLimitInfo = {
         "FramerateLimit",
         "Framerate limit",
         "If set to a value bigger than 0, the framerate will be limited to that many "
         "frames per second without using V-Sync.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo HorizFieldOfViewInfo = {
+    constexpr PropertyInfo HorizFieldOfViewInfo = {
         "HorizFieldOfView",
         "Horizontal field of view",
         "Adjusts the degrees of the horizontal field of view. The vertical field of view "
         "will be automatically adjusted to match, according to the current aspect ratio.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo GlobalBlackoutFactorInfo = {
+    constexpr PropertyInfo GlobalBlackoutFactorInfo = {
         "Factor",
         "Factor",
         "The blackout factor of the rendering. This can be used for fading in or out the "
         "rendering window.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo GlobalBlackoutColorInfo = {
+    constexpr PropertyInfo GlobalBlackoutColorInfo = {
         "Color",
         "Color",
         "The color used for the blackout of the rendering. This can be used for fading "
         "in or out the rendering window.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo GlobalBlackoutImageFactorInfo = {
+    constexpr PropertyInfo GlobalBlackoutImageFactorInfo = {
         "ImageFactor",
         "Image factor",
         "Determines the visibility of the image provided by the `Blackout.Image`, if no "
         "such image has been loaded, this value does nothing.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo GlobalBlackoutImageInfo = {
+    constexpr PropertyInfo GlobalBlackoutImageInfo = {
         "ImagePath",
         "Image Path",
         "The path to an image that is used when the blackout rendering is enabled. "
@@ -294,36 +294,36 @@ namespace {
         "`Blackout.Color` property. It also determines the color shown if the selected "
         "image has transparency or does not have the same aspect ratio as the render "
         "window.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ApplyBlackoutToMasterInfo = {
+    constexpr PropertyInfo ApplyBlackoutToMasterInfo = {
         "ApplyMaster",
         "Apply to master",
         "If this value is 'true', the blackout factor is applied to the master node. "
         "Regardless of this value, the clients will always adhere to the factor.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FXAAInfo = {
+    constexpr PropertyInfo FXAAInfo = {
         "FXAA",
         "Enable FXAA",
         "Enable FXAA.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EnabledFontColorInfo = {
+    constexpr PropertyInfo EnabledFontColorInfo = {
         "EnabledFontColor",
         "Enabled font color",
         "The font color used for enabled options.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DisabledFontColorInfo = {
+    constexpr PropertyInfo DisabledFontColorInfo = {
         "DisabledFontColor",
         "Disabled font color",
         "The font color used for disabled options.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     const PropertyOwner::PropertyOwnerInfo WindowingInfo = {

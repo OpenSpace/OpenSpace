@@ -80,29 +80,29 @@ namespace {
         {}
     };
 
-    constexpr Property::PropertyInfo RenderPlaybackInfo = {
+    constexpr PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
         "Render playback information",
         "If enabled, information about a currently played back session recording is "
         "rendering to screen.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo IgnoreRecordedScaleInfo = {
+    constexpr PropertyInfo IgnoreRecordedScaleInfo = {
         "IgnoreRecordedScale",
         "Ignore recorded scale",
         "If this value is enabled, the scale value from a recording is ignored and the "
         "computed values are used instead.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AddModelMatrixinAsciiInfo = {
+    constexpr PropertyInfo AddModelMatrixinAsciiInfo = {
         "AddModelMatrixinAscii",
         "Add model matrix in ASCII recording",
         "If this is 'true', the model matrix is written into the ASCII recording format "
         "in the line before each camera keyframe. The model matrix is the full matrix "
         "that converts the position into a J2000+Galactic reference frame.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 } // namespace
 

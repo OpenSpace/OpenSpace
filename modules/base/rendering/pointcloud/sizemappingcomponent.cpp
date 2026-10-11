@@ -37,47 +37,47 @@ namespace {
 
     constexpr std::string_view _loggerCat = "SizeMapping";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Size mapping enabled",
         "If this value is set to 'true' and at least one column was loaded as an option "
         "for size mapping, the chosen data column will be used to scale the size of the "
         "points. The first option in the list is selected per default.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo OptionInfo = {
+    constexpr PropertyInfo OptionInfo = {
         "Parameter",
         "Parameter option",
         "This value determines which parameter is used for scaling of the point. The "
         "parameter value will be used as a multiplicative factor to scale the size of "
         "the points. Note that they may however still be scaled by max size adjustment "
         "effects.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScaleFactorInfo = {
+    constexpr PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale factor",
         "This value is a multiplicative factor that is applied to the data values that "
         "are used to scale the points, when size mapping is applied.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo IsRadiusInfo = {
+    constexpr PropertyInfo IsRadiusInfo = {
         "IsRadius",
         "Size is radius",
         "If true, the size value in the data is interpreted as the radius of the points. "
         "Otherwise, it is interpreted as the diameter.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo InvertScaleInfo = {
+    constexpr PropertyInfo InvertScaleInfo = {
         "InvertScale",
         "Invert scale",
         "If true, the points will be scaled based on the inverse of the data value "
         "(1/value), so that larger values result in a smaller scale, and vice versa.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // A reusable component for point-cloud rendering that controls how per-point data

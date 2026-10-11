@@ -53,213 +53,213 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableFluxNodes";
 
-    constexpr Property::PropertyInfo GoesEnergyBinsInfo = {
+    constexpr PropertyInfo GoesEnergyBinsInfo = {
         "GoesEnergy",
         "GOES energy",
         "Select which energy bin you want to show. GOES = Geostationary Operational "
         "Environmental Satellites. Emin01 is values > 10 MeV, Default is Emin03 where "
         "values > 100 MeV.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorModeInfo = {
+    constexpr PropertyInfo ColorModeInfo = {
         "ColorMode",
         "Color mode",
         "Color lines uniformly or using color tables based on specific values on nodes, "
         "for examples flux values.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ColorTablePathInfo = {
+    constexpr PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to color table",
         "Color Table/Transfer Function to use for 'By Flux Value' coloring.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StreamColorInfo = {
+    constexpr PropertyInfo StreamColorInfo = {
         "Color",
         "Color",
         "Color of particles.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo NodeSizeInfo = {
+    constexpr PropertyInfo NodeSizeInfo = {
        "NodeSize",
        "Size of nodes",
        "Change the size of the rendered points of the nodes.",
-       Property::Visibility::User
+       PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ThresholdFluxInfo = {
+    constexpr PropertyInfo ThresholdFluxInfo = {
        "ThresholdFlux",
        "Threshold flux value",
        "This value specifies the threshold that will be changed with the flux value.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FilteringInfo = {
+    constexpr PropertyInfo FilteringInfo = {
         "FilterLower",
         "Filtering lower value in AU",
         "Use filtering to show nodes within a given range.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FilteringUpperInfo = {
+    constexpr PropertyInfo FilteringUpperInfo = {
         "FilterUpper",
         "Filtering upper value in AU",
         "Use filtering to show nodes within a given range.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AmountofNodesInfo = {
+    constexpr PropertyInfo AmountofNodesInfo = {
         "AmountOfNodes",
         "Every nth node to render in",
         "Show only every nth node.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DefaultNodeSkipInfo = {
+    constexpr PropertyInfo DefaultNodeSkipInfo = {
         "NodeSkip",
         "Every nth node to render default",
         "Show only every nth node outside of skippingmethod.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EarthNodeSkipInfo = {
+    constexpr PropertyInfo EarthNodeSkipInfo = {
         "NodeSkipEarth",
         "Every nth node to render close to Earth",
         "Show only every nth node outside of skippingmethod.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScalingmethodInfo = {
+    constexpr PropertyInfo ScalingmethodInfo = {
         "ScalingFlux",
         "Scale the flux value with color table",
         "Use scaling to color nodes with a given method.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NodeskipMethodInfo = {
+    constexpr PropertyInfo NodeskipMethodInfo = {
         "SkippingNodes",
         "How to select nodes to skip",
         "Methods to select nodes to skip.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorTableRangeInfo = {
+    constexpr PropertyInfo ColorTableRangeInfo = {
         "ColorTableRange",
         "Color table range",
         "Valid range for the color table as the exponent, with base 10, of flux values. "
         "[Min, Max].",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DomainZInfo = {
+    constexpr PropertyInfo DomainZInfo = {
         "ZLimit",
         "Z-limits",
         "Valid range along the Z-axis. [Min, Max].",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FluxColorAlphaInfo = {
+    constexpr PropertyInfo FluxColorAlphaInfo = {
         "FluxColorAlpha",
         "Flux color alpha",
         "The value of alpha for the flux color mode.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FluxNodeskipThresholdInfo = {
+    constexpr PropertyInfo FluxNodeskipThresholdInfo = {
         "SkippingNodesByFlux",
         "Skipping nodes by flux",
         "Select nodes to skip depending on flux value.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RadiusNodeSkipThresholdInfo = {
+    constexpr PropertyInfo RadiusNodeSkipThresholdInfo = {
         "SkippingNodesByRadius",
         "Skipping nodes by radius",
         "Select nodes to skip depending on Radius.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DistanceThresholdInfo = {
+    constexpr PropertyInfo DistanceThresholdInfo = {
         "DistancePlanetThreshold",
         "Threshold for distance between planet",
         "Changes threshold distance for highlighting nodes close to Earth.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ProximityNodesSizeInfo = {
+    constexpr PropertyInfo ProximityNodesSizeInfo = {
         "ProximityNodesSize",
         "Earths proximity nodes size",
         "Changes size of nodes only close to Earth.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MaxNodeDistanceSizeInfo = {
+    constexpr PropertyInfo MaxNodeDistanceSizeInfo = {
         "MaxNodeDistanceSize",
         "Max node distance size",
         "The maximum size of the nodes at a certain distance.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo CameraPerspectiveEnabledInfo = {
+    constexpr PropertyInfo CameraPerspectiveEnabledInfo = {
         "CameraPerspectiveEnabled",
         "Use camera perspective",
         "Camera perspective changes the size of the nodes dependent on the distance from "
         "camera.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DrawingCirclesInfo = {
+    constexpr PropertyInfo DrawingCirclesInfo = {
         "RenderingCircles",
         "Render as circles",
         "Using fragment shader to draw nodes as circles instead of squares.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DrawingHollowInfo = {
+    constexpr PropertyInfo DrawingHollowInfo = {
         "RenderingHollowCircles",
         "Render as hollow circles",
         "Using fragment shader to draw nodes as hollow circles.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GaussiandAlphaFilterInfo = {
+    constexpr PropertyInfo GaussiandAlphaFilterInfo = {
         "RenderingGaussianAlphaFilter",
         "Alpha by gaussian",
         "Using fragment shader to draw nodes with Gaussian filter for alpha value.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PerspectiveDistanceFactorInfo = {
+    constexpr PropertyInfo PerspectiveDistanceFactorInfo = {
         "PerspectiveDistanceFactor",
         "Perspective distance factor",
         "This value decides how far away the camera must be to start impacting the node "
         "size.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MinMaxNodeSizeInfo = {
+    constexpr PropertyInfo MinMaxNodeSizeInfo = {
         "MinMaxNodeSize",
         "Min & max node size",
         "The minimum and maximum node size.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo pulseEnabledInfo = {
+    constexpr PropertyInfo pulseEnabledInfo = {
         "PulseEnabled",
         "Nodes close to Earth pulsate",
         "Toggles the pulse for nodes close to Earth.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo gaussianPulseEnabledInfo = {
+    constexpr PropertyInfo gaussianPulseEnabledInfo = {
         "GaussianPulseEnabled",
         "Nodes close to Earth pulsate with alpha by gaussian",
         "Toggles the pulse with alpha by gaussian for nodes close to Earth.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {

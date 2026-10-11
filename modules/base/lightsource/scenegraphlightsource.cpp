@@ -39,18 +39,18 @@ namespace {
 
     using namespace openspace;
 
-    constexpr Property::PropertyInfo IntensityInfo = {
+    constexpr PropertyInfo IntensityInfo = {
         "Intensity",
         "Intensity",
         "The intensity of this light source.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo NodeInfo = {
+    constexpr PropertyInfo NodeInfo = {
         "Node",
         "Node",
         "The identifier of the scene graph node to follow.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Represents a light source placed at the position of a scene graph node. That is,

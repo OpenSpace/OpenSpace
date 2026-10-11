@@ -42,20 +42,20 @@ namespace {
 
     constexpr std::string_view _loggerCat = "GdalWrapper";
 
-    constexpr Property::PropertyInfo LogGdalErrorInfo = {
+    constexpr PropertyInfo LogGdalErrorInfo = {
         "LogGdalErrors",
         "Log GDAL errors",
         "If this value is enabled, any error that is raised by GDAL will be logged using "
         "the logmanager. If this value is disabled, any error will be ignored.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo GdalMaximumCacheInfo = {
+    constexpr PropertyInfo GdalMaximumCacheInfo = {
         "GdalMaximumCacheSize",
         "GDAL maximum cache size",
         "This function sets the maximum amount of RAM memory in MB that GDAL is "
         "permitted to use for caching.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {

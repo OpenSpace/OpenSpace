@@ -58,85 +58,85 @@ namespace {
         });
     }
 
-    constexpr Property::PropertyInfo InterpolationValueInfo = {
+    constexpr PropertyInfo InterpolationValueInfo = {
         "Value",
         "Value",
         "The value used for interpolation. The max value is set from the number of steps "
         "in the dataset, so a step of one corresponds to one step in the dataset and "
         "values in-between will be determined using interpolation.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo StepsInfo = {
+    constexpr PropertyInfo StepsInfo = {
         "NumberOfSteps",
         "Number of steps",
         "The number of steps available in the dataset, including the initial positions.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo JumpToNextInfo = {
+    constexpr PropertyInfo JumpToNextInfo = {
         "JumpToNext",
         "Jump to next",
         "Immediately set the interpolation value to correspond to the next set of point "
         "positions compared to the current.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo JumpToPrevInfo = {
+    constexpr PropertyInfo JumpToPrevInfo = {
         "JumpToPrevious",
         "Jump to previous",
         "Immediately set the interpolation value to correspond to the previous set of "
         "point positions compared to the current.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo InterpolateToNextInfo = {
+    constexpr PropertyInfo InterpolateToNextInfo = {
         "InterpolateToNext",
         "Interpolate to next",
         "Trigger an interpolation to the next set of point positions. The duration of "
         "the interpolation is set based on the Interpolation Speed property.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo InterpolateToPrevInfo = {
+    constexpr PropertyInfo InterpolateToPrevInfo = {
         "InterpolateToPrevious",
         "Interpolate to previous",
         "Trigger an interpolation to the previous set of point positions. The duration "
         "of the interpolation is set based on the Interpolation Speed property.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo InterpolateToEndInfo = {
+    constexpr PropertyInfo InterpolateToEndInfo = {
         "InterpolateToEnd",
         "Interpolate to end",
         "Trigger an interpolation all the way to the final set of positions. The "
         "duration of the interpolation is set based on the Interpolation Speed property.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo InterpolateToStartInfo = {
+    constexpr PropertyInfo InterpolateToStartInfo = {
         "InterpolateToStart",
         "Interpolate to start",
         "Trigger an inverted interpolation to the initial set of positions. The duration "
         "of the interpolation is set based on the Interpolation Speed property.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo InterpolationSpeedInfo = {
+    constexpr PropertyInfo InterpolationSpeedInfo = {
         "Speed",
         "Interpolation speed",
         "Affects how long the interpolation takes when triggered using one of the "
         "trigger properties. A value of 1 means that a step takes 1 second.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo UseSplineInfo = {
+    constexpr PropertyInfo UseSplineInfo = {
         "UseSplineInterpolation",
         "Use spline interpolation",
         "If true, the points will be interpolated using a Catmull-Rom spline instead of "
         "linearly. This leads to a smoother transition at the breakpoints, i.e. between "
         "each step.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // This is a version of the [RenderablePointCloud](#base_renderable_pointcloud) where

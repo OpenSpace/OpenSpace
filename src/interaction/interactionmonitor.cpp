@@ -30,20 +30,20 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo IdleTimeInfo = {
+    constexpr PropertyInfo IdleTimeInfo = {
         "IdleTime",
         "Idle time",
         "Time in seconds that has passed from latest registered interaction until the "
         "application goes idle.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo IsInActiveStateInfo = {
+    constexpr PropertyInfo IsInActiveStateInfo = {
         "IsInActiveState",
         "Is state active",
         "Keeps track whether the interaction session is in active state or not. False if "
         "application is in idle state, true if it is in active state.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 } // namespace
 

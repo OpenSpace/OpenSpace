@@ -68,85 +68,85 @@ namespace {
         Billboards
     };
 
-    constexpr Property::PropertyInfo VolumeRenderingEnabledInfo = {
+    constexpr PropertyInfo VolumeRenderingEnabledInfo = {
         "VolumeRenderingEnabled",
         "Volume rendering",
         "Decides whether the volume rendering component of the galaxy rendering should "
         "be enabled or not. If disabled, the volume rendering is skipped.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo StarRenderingEnabledInfo = {
+    constexpr PropertyInfo StarRenderingEnabledInfo = {
         "StarRenderingEnabled",
         "Star rendering",
         "Decides whether the point-based star rendering component of the galaxy "
         "rendering should be enabled or not. If disabled, the point-based star rendering "
         "is skipped.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo StepSizeInfo = {
+    constexpr PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step size",
         "Determines the distance between steps taken in the volume rendering. The lower "
         "the number is, the better the rendering looks, but also takes more "
         "computational resources to render.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AbsorptionMultiplyInfo = {
+    constexpr PropertyInfo AbsorptionMultiplyInfo = {
         "AbsorptionMultiply",
         "Absorption multiplier",
         "A unit-less scale factor for the probability of dust absorbing a light "
         "particle. The amount of absorption determines the spectrum of the light that is "
         "emitted from the galaxy.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EmissionMultiplyInfo = {
+    constexpr PropertyInfo EmissionMultiplyInfo = {
         "EmissionMultiply",
         "Emission multiplier",
         "A unit-less scale factor for the amount of light being emitted by dust in the "
         "galaxy.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RotationInfo = {
+    constexpr PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "The internal rotation of the volume rendering in Euler angles.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo StarRenderingMethodInfo = {
+    constexpr PropertyInfo StarRenderingMethodInfo = {
         "StarRenderingMethod",
         "Star rendering method",
         "The rendering method used for visualizing the stars.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EnabledPointsRatioInfo = {
+    constexpr PropertyInfo EnabledPointsRatioInfo = {
         "EnabledPointsRatio",
         "Enabled points",
         "The ratio of point-like stars that are rendered to produce the overall galaxy "
         "image. At a value of 0, no stars are rendered, at a value of 1 all points "
         "contained in the dataset are rendered. The specific value chosen is a "
         "compromise between image fidelity and rendering performance.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DownscaleVolumeRenderingInfo = {
+    constexpr PropertyInfo DownscaleVolumeRenderingInfo = {
         "Downscale",
         "Downscale factor volume rendering",
         "The downscaling factor used when rendering the volume.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo NumberOfRayCastingStepsInfo = {
+    constexpr PropertyInfo NumberOfRayCastingStepsInfo = {
         "Steps",
         "Number of raycasting steps",
         "The number of integration steps used during the raycasting procedure.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     void saveCachedFile(const std::filesystem::path& file,
@@ -319,7 +319,7 @@ RenderableGalaxy::RenderableGalaxy(const Dictionary& dictionary)
     addProperty(_starRenderingMethod);
     addProperty(_enabledPointsRatio);
     addProperty(_rotation);
-    _downScaleVolumeRendering.setVisibility(Property::Visibility::Developer);
+    _downScaleVolumeRendering.setVisibility(PropertyInfo::Visibility::Developer);
     addProperty(_downScaleVolumeRendering);
     addProperty(_numberOfRayCastingSteps);
 

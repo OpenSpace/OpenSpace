@@ -33,10 +33,6 @@ StringProperty::StringProperty(PropertyInfo info, std::string value)
     : TemplateProperty<std::string>(std::move(info), value)
 {}
 
-StringProperty::StringProperty(PropertyInfo info, IsEnabled isEnabled, std::string value)
-    : TemplateProperty<std::string>(std::move(info), isEnabled, value)
-{}
-
 std::string_view StringProperty::className() const {
     return "StringProperty";
 }

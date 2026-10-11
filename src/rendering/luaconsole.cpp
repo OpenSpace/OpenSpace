@@ -73,58 +73,58 @@ namespace {
     // Determines at which speed the console opens
     constexpr float ConsoleOpenSpeed = 2.5;
 
-    constexpr Property::PropertyInfo VisibleInfo = {
+    constexpr PropertyInfo VisibleInfo = {
         "IsVisible",
         "Is visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
         "will fade the console in and out.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShouldBeSynchronizedInfo = {
+    constexpr PropertyInfo ShouldBeSynchronizedInfo = {
        "ShouldBeSynchronized",
        "Should be synchronized",
        "Determines whether the entered commands will only be executed locally (if this "
        "is disabled), or whether they will be send to other connected nodes, for "
        "example in a cluster environment.",
-       Property::Visibility::AdvancedUser
+       PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShouldSendToRemoteInfo = {
+    constexpr PropertyInfo ShouldSendToRemoteInfo = {
         "ShouldSendToRemote",
         "Should send to remote",
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remote instances (other "
         "peers through an astrocast connection).",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BackgroundColorInfo = {
+    constexpr PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background color",
         "Sets the background color of the console.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EntryTextColorInfo = {
+    constexpr PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
         "Entry text color",
         "Sets the text color of the entry area of the console.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HistoryTextColorInfo = {
+    constexpr PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
         "History text color",
         "Sets the text color of the history area of the console.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HistoryLengthInfo = {
+    constexpr PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
         "History length",
         "Determines the length of the history in number of lines.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     std::string sanitizeInput(std::string str) {

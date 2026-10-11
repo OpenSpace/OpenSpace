@@ -51,56 +51,56 @@ namespace {
         Camera
     };
 
-    constexpr Property::PropertyInfo SourceTypeInfo = {
+    constexpr PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source type",
         "The type of position that is used as the triangle apex used to calculate the "
         "angle.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SourceNodeIdentifierInfo = {
+    constexpr PropertyInfo SourceNodeIdentifierInfo = {
         "SourceNodeIdentifier",
         "Source node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the apex of the triangle used to calculate "
         "the angle. The computed angle is the incident angle to Source in the triangle ("
         "Source, Reference, Destination).",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ReferenceTypeInfo = {
+    constexpr PropertyInfo ReferenceTypeInfo = {
         "ReferenceType",
         "Reference type",
         "The type of position that is used as the destination of the reference line used "
         "to calculate the angle. The computed angle is the incident angle to Source in "
         "the triangle (Source, Reference, Destination).",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ReferenceNodeIdentifierInfo = {
+    constexpr PropertyInfo ReferenceNodeIdentifierInfo = {
         "ReferenceNodeIdentifier",
         "Reference node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the reference direction to compute the angle.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo DestinationTypeInfo = {
+    constexpr PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination type",
         "The type of position that is used as the destination to calculate the angle. "
         "The computed angle is the incident angle to Source in the triangle (Source, "
         "Reference, Destination).",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo DestinationNodeIdentifierInfo = {
+    constexpr PropertyInfo DestinationNodeIdentifierInfo = {
         "DestinationNodeIdentifier",
         "Destination node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the destination for computing the angle.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Shows the angle between the lines `Source`->`Reference` and

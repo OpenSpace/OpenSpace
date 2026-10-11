@@ -138,58 +138,58 @@ namespace {
         throw MissingCaseException();
     }
 
-    constexpr Property::PropertyInfo PrintEventsInfo = {
+    constexpr PropertyInfo PrintEventsInfo = {
         "PrintEvents",
         "Print events",
         "If this is enabled, all events that are propagated through the system are "
         "printed to the log.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo VisibilityInfo = {
+    constexpr PropertyInfo VisibilityInfo = {
         "PropertyVisibility",
         "Property visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
         "are.",
-        Property::Visibility::Always
+        PropertyInfo::Visibility::Always
     };
 
-    constexpr Property::PropertyInfo FadeDurationInfo = {
+    constexpr PropertyInfo FadeDurationInfo = {
         "FadeDuration",
         "Fade duration (seconds)",
         "Controls how long time the fading in/out takes when enabling/disabling an "
         "object through a checkbox in the UI. Holding SHIFT while clicking the checkbox "
         "will enable/disable the renderable without fading, as will setting this value "
         "to zero.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DisableMouseInputInfo = {
+    constexpr PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable all mouse inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
         "double inputs on touch (from both touch input and inserted mouse inputs).",
-        Property::Visibility::User,
-        Property::IsEnablable::No,
-        Property::NeedsConfirmation::Yes
+        PropertyInfo::Visibility::User,
+        PropertyInfo::IsEnablable::No,
+        PropertyInfo::NeedsConfirmation::Yes
     };
 
-    constexpr Property::PropertyInfo DefaultShutdownCountdownInfo = {
+    constexpr PropertyInfo DefaultShutdownCountdownInfo = {
         "DefaultShutdownCountdown",
         "Default Shutdown Countdown",
         "The default shutdown countdown timer (in seconds). Unless some other time is "
         "specified in the 'toggleShutdown' function, this is the number of seconds the "
         "application will wait before shutting down",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShowPropertyConfirmationDialogInfo = {
+    constexpr PropertyInfo ShowPropertyConfirmationDialogInfo = {
         "ShowPropertyConfirmation",
         "Show property confirmation",
         "Controls whether confirmation dialogs are shown when making changes to certain "
         "properties. If checked, the dialogs will be shown for properties that require "
         "it. If unchecked, no dialogs will be shown.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     void viewportChanged() {
@@ -247,11 +247,11 @@ OpenSpaceEngine::OpenSpaceEngine()
     addProperty(_printEvents);
 
     _visibility.addOptions({
-        { static_cast<int>(Property::Visibility::NoviceUser), "Novice User" },
-        { static_cast<int>(Property::Visibility::User), "User" },
-        { static_cast<int>(Property::Visibility::AdvancedUser), "Advanced User" },
-        { static_cast<int>(Property::Visibility::Developer), "Developer" },
-        { static_cast<int>(Property::Visibility::Hidden), "Everything" }
+        { static_cast<int>(PropertyInfo::Visibility::NoviceUser), "Novice User" },
+        { static_cast<int>(PropertyInfo::Visibility::User), "User" },
+        { static_cast<int>(PropertyInfo::Visibility::AdvancedUser), "Advanced User" },
+        { static_cast<int>(PropertyInfo::Visibility::Developer), "Developer" },
+        { static_cast<int>(PropertyInfo::Visibility::Hidden), "Everything" }
     });
     addProperty(_visibility);
 
@@ -1728,8 +1728,8 @@ void OpenSpaceEngine::decode(std::vector<std::byte> data) {
     global::syncEngine->decodeSyncables(std::move(data));
 }
 
-Property::Visibility OpenSpaceEngine::visibility() const {
-    return static_cast<Property::Visibility>(_visibility.value());
+PropertyInfo::Visibility OpenSpaceEngine::visibility() const {
+    return static_cast<PropertyInfo::Visibility>(_visibility.value());
 }
 
 void OpenSpaceEngine::toggleShutdownMode(std::optional<float> timer) {

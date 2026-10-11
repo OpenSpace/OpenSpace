@@ -42,7 +42,7 @@ namespace {
     template <size_t SIZE>
     bool keyMatches(const std::string_view key,
                     const std::array<std::string_view, SIZE>& keyAlternativesArray,
-                    std::optional<const Property::PropertyInfo> propInfo = std::nullopt)
+                    std::optional<const PropertyInfo> propInfo = std::nullopt)
     {
         auto it = std::find(
             keyAlternativesArray.begin(),
@@ -61,7 +61,7 @@ namespace {
     }
 
     bool keyMatches(const std::string_view key, const std::string_view keyAlternative,
-                    std::optional<const Property::PropertyInfo> propInfo = std::nullopt)
+                    std::optional<const PropertyInfo> propInfo = std::nullopt)
     {
         const std::array<std::string_view, 1> array = { keyAlternative };
         return keyMatches(key, array, propInfo);
@@ -135,80 +135,80 @@ namespace {
         return color;
     }
 
-    constexpr Property::PropertyInfo OpacityInfo = {
+    constexpr PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this object. A value of 0 means completely "
         "transparent.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
+    constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the rendered geometry. For points it will be used as a multiply "
         "color for any provided texture.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo FillOpacityInfo = {
+    constexpr PropertyInfo FillOpacityInfo = {
         "FillOpacity",
         "Fill opacity",
         "This value determines the opacity of the filled portion of a polygon. Will also "
         "be used for extruded features.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo FillColorInfo = {
+    constexpr PropertyInfo FillColorInfo = {
         "FillColor",
         "Fill color",
         "The color of the filled portion of a rendered polygon. Will also be used for "
         "extruded features.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of any rendered lines.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo PointSizeInfo = {
+    constexpr PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point size",
         "The size of any rendered points. The size will be scaled based on the bounding "
         "sphere of the globe.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo PointTextureInfo = {
+    constexpr PropertyInfo PointTextureInfo = {
         "PointTexture",
         "Point texture",
         "A texture to be used for rendering points. No value means to use the default "
         "texture provided by the GlobeBrowsing module. If no texture is provided there "
         "either, the point will be rendered as a plane and colored by the color value.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ExtrudeInfo = {
+    constexpr PropertyInfo ExtrudeInfo = {
         "Extrude",
         "Extrude",
         "If true, extrude the geometry to intersect the globe.Lines/polygons will be "
         "extruded with polygons,and points with lines.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo PerformShadingInfo = {
+    constexpr PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform shading",
         "If true, perform shading on any create meshes, either from polygons or "
         "extruded lines. The shading will be computed based on any light sources of the "
         "GeoJson component.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo AltitudeModeInfo = {
+    constexpr PropertyInfo AltitudeModeInfo = {
         "AltitudeMode",
         "Altitude mode",
         "The altitude mode decides how any height values of the geo coordinates should "
@@ -216,48 +216,48 @@ namespace {
         "above the reference ellipsoid, while RelativeToGround takes the height map "
         "into account. For coordinates with only two values (latitude and longitude), "
         "the height is considered to be equal to zero.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo PointAnchorOptionInfo = {
+    constexpr PropertyInfo PointAnchorOptionInfo = {
         "PointTextureAnchor",
         "Point texture anchor",
         "Decides the placement of the point texture in relation to the position. Default "
         "is a the bottom of the texture, but it can also be put at the center.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo TessellationEnabledInfo = {
+    constexpr PropertyInfo TessellationEnabledInfo = {
         "Enabled",
         "Enabled",
         "If false, no tessellation to bend the geometry based on the curvature of the "
         "planet is performed. This leads to increased performance, but tessellation is "
         "necessary for large geometry that spans a big portion of the globe. Otherwise "
         "it may intersect the surface.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo UseTessellationLevelInfo = {
+    constexpr PropertyInfo UseTessellationLevelInfo = {
         "UseTessellationLevel",
         "Use tessellation level",
         "If true, use the 'Tessellation Level' to control the level of detail for the "
         "tessellation. The distance used will be the 'Tessellation Distance' divided by "
         "the 'Tessellation Level', so the higher the level value, the smaller each "
         "segment in the geometry will be.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TessellationLevelInfo = {
+    constexpr PropertyInfo TessellationLevelInfo = {
         "TessellationLevel",
         "Tessellation level",
         "When manual tessellation is enabled, this value will be used to determine how "
         "much tessellation to apply. The resulting distance used for subdividing the "
         "geometry will be the 'Tessellation Distance' divided by this value. Zero means "
         "to use the 'Tessellation Distance' as is.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TessellationDistanceInfo = {
+    constexpr PropertyInfo TessellationDistanceInfo = {
         "TessellationDistance",
         "Tessellation distance",
         "Default distance to use for tessellation of line and polygon geometry. Anything "
@@ -265,7 +265,7 @@ namespace {
         "matching this distance, while anything smaller will not be subdivided. Per "
         "default this will be set to a distance corresponding to about 1 degree "
         "longitude on the globe.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {

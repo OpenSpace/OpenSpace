@@ -68,120 +68,120 @@ namespace {
     constexpr std::string_view KeyName = "Name";
     constexpr std::string_view KeyDesc = "Description";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this object will be visible or not.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FileInfo = {
+    constexpr PropertyInfo FileInfo = {
         "File",
         "File",
         "Path to the GeoJSON file to base the rendering on.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HeightOffsetInfo = {
+    constexpr PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
         "Height offset",
         "A height offset value, in meters. Useful for moving a feature closer to or "
         "farther away from the surface.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo CoordinateOffsetInfo = {
+    constexpr PropertyInfo CoordinateOffsetInfo = {
         "CoordinateOffset",
         "Geographic coordinate offset",
         "A latitude and longitude offset value, in decimal degrees. Can be used to move "
         "the object on the surface and correct potential mismatches with other "
         "renderings. Note that changing it during runtime leads to all positions being "
         "recomputed.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DrawWireframeInfo = {
+    constexpr PropertyInfo DrawWireframeInfo = {
         "DrawWireframe",
         "Wireframe",
         "If true, draw the wire frame of the polygons. Used for testing and to "
         "investigate tessellation results.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo PreventHeightUpdateInfo = {
+    constexpr PropertyInfo PreventHeightUpdateInfo = {
         "PreventHeightUpdate",
         "Prevent update from heightmap",
         "If true, the polygon mesh will not be automatically updated based on the "
         "heightmap, even if the 'RelativeToGround' altitude option is set and the "
         "heightmap updates. The data can still be force updated.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ForceUpdateHeightDataInfo = {
+    constexpr PropertyInfo ForceUpdateHeightDataInfo = {
         "ForceUpdateHeightData",
         "Force update height data",
         "Triggering this leads to a recomputation of the heights based on the globe "
         "height map value at the geometry's positions.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PointRenderModeInfo = {
+    constexpr PropertyInfo PointRenderModeInfo = {
         "PointRenderMode",
         "Points aligned to",
         "Decides how the billboards for the points should be rendered in terms of up "
         "direction and whether the plane should face the camera. See details on the "
         "different options in the wiki.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FlyToFeatureInfo = {
+    constexpr PropertyInfo FlyToFeatureInfo = {
         "FlyToFeature",
         "Fly to feature",
         "Triggering this leads to the camera flying to a position that show the GeoJson "
         "feature. The flight will account for any lat, long or height offset.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo CentroidCoordinateInfo = {
+    constexpr PropertyInfo CentroidCoordinateInfo = {
         "CentroidCoordinate",
         "Centroid coordinate",
         "The lat long coordinate of the centroid position of the read geometry. Note "
         "that this value does not include the offset.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BoundingBoxInfo = {
+    constexpr PropertyInfo BoundingBoxInfo = {
         "BoundingBox",
         "Bounding box",
         "The lat long coordinates of the lower and upper corner of the bounding box of "
         "the read geometry. Note that this value does not include the offset.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PointSizeScaleInfo = {
+    constexpr PropertyInfo PointSizeScaleInfo = {
         "PointSizeScale",
         "Point size scale",
         "An extra scale value that can be used to increase or decrease the scale of any "
         "rendered points in the component, even if a value is set from the GeoJson file.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo LineWidthScaleInfo = {
+    constexpr PropertyInfo LineWidthScaleInfo = {
         "LineWidthScale",
         "Line width scale",
         "An extra scale value that can be used to increase or decrease the width of any "
         "rendered lines in the component, even if a value is set from the GeoJson file. "
         "Note that there is a max limit for how wide lines can be.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo DeleteInfo = {
+    constexpr PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "Triggering this will remove this GeoJson component from its globe. Note that "
         "the GUI may have to be reloaded for the change to be reflect in the user "
         "interface.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     struct [[codegen::Dictionary(GeoJsonComponent)]] Parameters {
@@ -275,7 +275,7 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(PropertyOwner::PropertyOwnerI
     )
     , flyToFeature(FlyToFeatureInfo)
 {
-    _opacity.setVisibility(Property::Visibility::AdvancedUser);
+    _opacity.setVisibility(PropertyInfo::Visibility::AdvancedUser);
     addProperty(Fadeable::_opacity);
     addProperty(Fadeable::_fade);
 

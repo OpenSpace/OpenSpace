@@ -39,45 +39,45 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
+    constexpr PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The path to a file with a one-dimensional texture to be used for the disc "
         "color. The leftmost color will be innermost color when rendering the disc, and "
         "the rightmost color will be the outermost color.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
+    constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The size of the semi-major axis of the orbit in meters.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EccentricityInfo = {
+    constexpr PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
         "The eccentricity of the orbit, which is the deviation from a perfect circle.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OffsetInfo = {
+    constexpr PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "The width of the disc, given as two values that specify the lower and upper "
         "deviation from the semi-major axis, respectively. The values are relative to "
         "the size of the semi-major axis. That is, 0 means no deviation from the "
         "semi-major axis and 1 is a whole semi-major axis's worth of deviation.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MultiplyColorInfo = {
+    constexpr PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply color",
         "If set, the disc's texture is multiplied with this color. Useful for applying a "
         "color grayscale images.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     // Renders a disc around a planetary orbit to visualize properties such as positional

@@ -31,11 +31,11 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextInfo = {
+    constexpr PropertyInfo TextInfo = {
         "Text",
         "Text",
         "The text to be displayed.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Shows a static text that can be changed via a property.

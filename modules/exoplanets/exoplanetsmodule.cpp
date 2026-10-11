@@ -43,115 +43,115 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo DataFolderInfo = {
+    constexpr PropertyInfo DataFolderInfo = {
         "DataFolder",
         "Data folder",
         "The path to the folder containing the exoplanets data and lookup table.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BvColorMapInfo = {
+    constexpr PropertyInfo BvColorMapInfo = {
         "BvColormap",
         "B-V colormap",
         "The path to a cmap file that maps a B-V color index to an RGB color.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StarTextureInfo = {
+    constexpr PropertyInfo StarTextureInfo = {
         "StarTexture",
         "Star texture",
         "The path to a grayscale image that is used for the host star surfaces.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StarGlareTextureInfo = {
+    constexpr PropertyInfo StarGlareTextureInfo = {
         "StarGlareTexture",
         "Star glare texture",
         "The path to a grayscale image that is used for the glare effect of the host "
         "stars.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NoDataTextureInfo = {
+    constexpr PropertyInfo NoDataTextureInfo = {
         "NoDataTexture",
         "No data star texture",
         "A path to a texture that is used to represent that there is missing data about "
         "the star. For example no color information.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PlanetDefaultTextureInfo = {
+    constexpr PropertyInfo PlanetDefaultTextureInfo = {
         "PlanetDefaultTexture",
         "Planet default texture",
         "The path to an image that should be used by default for the planets in all "
         "added exoplanet systems. If not specified, the planets are rendered without a "
         "texture when added.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OrbitDiscTextureInfo = {
+    constexpr PropertyInfo OrbitDiscTextureInfo = {
         "OrbitDiscTexture",
         "Orbit disc texture",
         "A path to a 1-dimensional image used as a transfer function for the exoplanets' "
         "orbit uncertainty disc.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HabitableZoneTextureInfo = {
+    constexpr PropertyInfo HabitableZoneTextureInfo = {
         "HabitableZoneTexture",
         "Habitable zone texture",
         "A path to a 1-dimensional image used as a transfer function for the habitable "
         "zone disc.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ComparisonCircleColorInfo = {
+    constexpr PropertyInfo ComparisonCircleColorInfo = {
         "ComparisonCircleColor",
         "Comparison circle color",
         "Decides the color of the 1 AU size comparison circles that are generated as "
         "part of an exoplanet system. Changing the color will not modify already "
         "existing circles.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ShowComparisonCircleInfo = {
+    constexpr PropertyInfo ShowComparisonCircleInfo = {
         "ShowComparisonCircle",
         "Show comparison circle",
         "If true, the 1 AU size comparison circle is enabled per default when an "
         "exoplanet system is created.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ShowOrbitUncertaintyInfo = {
+    constexpr PropertyInfo ShowOrbitUncertaintyInfo = {
         "ShowOrbitUncertainty",
         "Show orbit uncertainty",
         "If true, a disc showing the uncertainty for each planetary orbit is enabled per "
         "default when an exoplanet system is created.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShowHabitableZoneInfo = {
+    constexpr PropertyInfo ShowHabitableZoneInfo = {
         "ShowHabitableZone",
         "Show habitable zone",
         "If true, the habitable zone disc is enabled per default when an exoplanet "
         "system is created.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo UseOptimisticZoneInfo = {
+    constexpr PropertyInfo UseOptimisticZoneInfo = {
         "UseOptimisticZone",
         "Use optimistic zone boundaries",
         "If true, the habitable zone is computed with optimistic boundaries per default "
         "when an exoplanet system is created.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo HabitableZoneOpacityInfo = {
+    constexpr PropertyInfo HabitableZoneOpacityInfo = {
         "HabitableZoneOpacity",
         "Habitable zone opacity",
         "The opacity value used for the habitable zone renderable for a created "
         "exoplanet system.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     constexpr std::string_view ExoplanetsDataFileName = "exoplanets_data.bin";

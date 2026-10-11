@@ -39,48 +39,48 @@ namespace {
 
     constexpr std::string_view _loggerCat = "TimeFrameInterval";
 
-    constexpr Property::PropertyInfo HasStartInfo = {
+    constexpr PropertyInfo HasStartInfo = {
         "HasStart",
         "Has start",
         "If enabled, this TimeFrame will be inactive before the Start time.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo StartInfo = {
+    constexpr PropertyInfo StartInfo = {
         "Start",
         "Start",
         "Specifies the time when this TimeFrame becomes active.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo JumpToStartInfo = {
+    constexpr PropertyInfo JumpToStartInfo = {
         "JumpToStart",
         "Jump to start",
         "Performs a time jump to the start of the interval. Disabled if no start time is "
         "specified.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo HasEndInfo = {
+    constexpr PropertyInfo HasEndInfo = {
         "HasEnd",
         "Has end",
         "If enabled, this TimeFrame will be inactive after the End time.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EndInfo = {
+    constexpr PropertyInfo EndInfo = {
         "End",
         "End",
         "Specifies the time when this TimeFrame becomes inactive.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo JumpToEndInfo = {
+    constexpr PropertyInfo JumpToEndInfo = {
         "JumpToEnd",
         "Jump to end",
         "Performs a time jump to the end of the interval. Disabled if no end time is "
         "specified.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     // This `TimeFrame`'s validity is determined by a single start and end time in between

@@ -30,12 +30,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ScaleInfo = {
+    constexpr PropertyInfo ScaleInfo = {
         "Scale",
         "Scale",
         "This value is used as a scaling factor for the scene graph node that this "
         "transformation is attached to relative to its parent.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     // Scales the scene graph node that it is attached to by a fixed amount that does not

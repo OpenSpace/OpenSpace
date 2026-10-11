@@ -50,88 +50,88 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableKameleonVolume";
 
-    constexpr Property::PropertyInfo DimensionsInfo = {
+    constexpr PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Dimensions",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo VariableInfo = {
+    constexpr PropertyInfo VariableInfo = {
         "Variable",
         "Variable",
         "", // @TODO Missing documentation
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LowerDomainBoundInfo = {
+    constexpr PropertyInfo LowerDomainBoundInfo = {
         "LowerDomainBound",
         "Lower domain bound",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UpperDomainBoundInfo = {
+    constexpr PropertyInfo UpperDomainBoundInfo = {
         "UpperDomainBound",
         "Upper domain bound",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DomainScaleInfo = {
+    constexpr PropertyInfo DomainScaleInfo = {
         "DomainScale",
         "Domain scale",
         "", // @TODO Missing documentation
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LowerValueBoundInfo = {
+    constexpr PropertyInfo LowerValueBoundInfo = {
         "LowerValueBound",
         "Lower value bound",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UpperValueBoundInfo = {
+    constexpr PropertyInfo UpperValueBoundInfo = {
         "UpperValueBound",
         "Upper value bound",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GridTypeInfo = {
+    constexpr PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid type",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo StepSizeInfo = {
+    constexpr PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SourcePathInfo = {
+    constexpr PropertyInfo SourcePathInfo = {
         "SourcePath",
         "Source path",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TransferFunctionInfo = {
+    constexpr PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer function path",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo CacheInfo = {
+    constexpr PropertyInfo CacheInfo = {
         "Cache",
         "Cache",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RenderableKameleonVolume)]] Parameters {

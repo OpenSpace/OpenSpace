@@ -42,11 +42,11 @@ std::string Property::ViewOptions::MinMaxRange = "MinMaxRange";
 uint64_t Property::Identifier = 0;
 #endif // _DEBUG
 
-Property::Property(PropertyInfo info, IsEnabled isEnabled)
+Property::Property(PropertyInfo info)
     : _identifier(info.identifier)
     , _guiName(info.guiName)
     , _description(info.description)
-    , _isEnabled(isEnabled)
+    , _isEnabled(info.defaults.isEnabled)
 #ifdef _DEBUG
     , _id(Identifier++)
 #endif // _DEBUG
@@ -103,7 +103,7 @@ std::string Property::groupIdentifier() const {
     return _metaData.group.value_or("");
 }
 
-void Property::setVisibility(Visibility visibility) {
+void Property::setVisibility(PropertyInfo::Visibility visibility) {
     _metaData.visibility = visibility;
     notifyMetaDataChangeListeners();
 
@@ -115,7 +115,7 @@ void Property::setVisibility(Visibility visibility) {
     }
 }
 
-Property::Visibility Property::visibility() const {
+PropertyInfo::Visibility Property::visibility() const {
     return _metaData.visibility;
 }
 
@@ -143,18 +143,18 @@ bool Property::viewOption(const std::string& option, bool defaultValue) const {
     return it != _metaData.viewOptions.end() ? it->second : defaultValue;
 }
 
-Property::IsEnablable Property::isEnablable() const {
-    return IsEnablable(_metaData.isEnablable);
+PropertyInfo::IsEnablable Property::isEnablable() const {
+    return PropertyInfo::IsEnablable(_metaData.isEnablable);
 }
 
-Property::IsEnabled Property::isEnabled() const {
+PropertyInfo::IsEnabled Property::isEnabled() const {
     if (!_metaData.isEnablable) {
         throw RuntimeError("Tried to get enabled on a property that is not enablable");
     }
     return _isEnabled;
 }
 
-void Property::setIsEnabled(IsEnabled isEnabled) {
+void Property::setIsEnabled(PropertyInfo::IsEnabled isEnabled) {
     if (!_metaData.isEnablable) {
         throw RuntimeError("Tried to set enabled on a property that is not enablable");
     }
@@ -318,6 +318,7 @@ void Property::updateUriCache() {
 }
 
 nlohmann::json Property::generateJsonDescription() const {
+    using Visibility = PropertyInfo::Visibility;
     static const std::unordered_map<Visibility, std::string> VisibilityConverter = {
        { Visibility::Always, "Always" },
        { Visibility::NoviceUser, "NoviceUser" },

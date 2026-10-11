@@ -95,88 +95,88 @@ namespace {
         return frame;
     }
 
-    constexpr Property::PropertyInfo MoleculeFileInfo = {
+    constexpr PropertyInfo MoleculeFileInfo = {
         "MoleculeFile",
         "Molecule file",
         "The path to the file from which the molecular structure is read."
     };
 
-    constexpr Property::PropertyInfo TrajectoryFileInfo = {
+    constexpr PropertyInfo TrajectoryFileInfo = {
         "TrajectoryFile",
         "Trajectory file",
         "The path to the file from which the trajectory information is read."
     };
 
-    constexpr Property::PropertyInfo CoarseGrainedInfo = {
+    constexpr PropertyInfo CoarseGrainedInfo = {
         "CoarseGrained",
         "Coarse grained",
         "Enable if the dataset should be interpreted as coarse grained."
     };
 
-    constexpr Property::PropertyInfo ApplyPbcOnLoadInfo = {
+    constexpr PropertyInfo ApplyPbcOnLoadInfo = {
         "ApplyPbcOnLoad",
         "Apply PBC on load",
         "Applies Periodic Boundary Constraints upon loading trajectory frames."
     };
 
-    constexpr Property::PropertyInfo ApplyPbcPerFrameInfo = {
+    constexpr PropertyInfo ApplyPbcPerFrameInfo = {
         "ApplyPbcPerFrame",
         "Apply PBC per frame",
         "Applies Periodic Boundary Constraints for each interpolated frame (can be "
         "CPU-intensive)."
     };
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Enables the representation."
     };
 
-    constexpr Property::PropertyInfo TypeInfo = {
+    constexpr PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The visual representation type to use for the molecule."
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
+    constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color mapping for the atoms."
     };
 
-    constexpr Property::PropertyInfo UniformColorInfo = {
+    constexpr PropertyInfo UniformColorInfo = {
         "UniformColor",
         "Uniform color",
         "The uniform color to apply for the representation if that color mode is "
         "selected."
     };
 
-    constexpr Property::PropertyInfo FilterInfo = {
+    constexpr PropertyInfo FilterInfo = {
         "Filter",
         "Filter",
         "The filter used to remove parts of the dataset."
     };
 
-    constexpr Property::PropertyInfo ScaleInfo = {
+    constexpr PropertyInfo ScaleInfo = {
         "Scale",
         "Scale",
         "Scale for the geometric representation of atoms."
     };
 
-    constexpr Property::PropertyInfo AnimationBaseScaleInfo = {
+    constexpr PropertyInfo AnimationBaseScaleInfo = {
         "AnimationBaseScale",
         "Animation base scale",
         "Base scale for the animation. Tune this to sync up its animation with other "
         "trajectories."
     };
 
-    constexpr Property::PropertyInfo AnimationSpeedInfo = {
+    constexpr PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
         "Animation speed",
         "Playback speed of the animation (in frames per second)."
     };
 
-    constexpr Property::PropertyInfo AnimationRepeatModeInfo = {
+    constexpr PropertyInfo AnimationRepeatModeInfo = {
         "AnimationRepeatMode",
         "Animation repeat mode",
         "Controls how the animation should be repeated when the end of the animation is "

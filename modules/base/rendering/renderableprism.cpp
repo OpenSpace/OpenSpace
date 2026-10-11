@@ -41,55 +41,55 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SegmentsInfo = {
+    constexpr PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
         "The number of segments the shape of the prism should have.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LinesInfo = {
+    constexpr PropertyInfo LinesInfo = {
         "NumLines",
         "Number of lines",
         "The number of lines connecting the two shapes of the prism. They will be evenly "
         "distributed around the bounding circle that makes up the shape of the prism.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RadiusInfo = {
+    constexpr PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
         "The radius of the prism's shape in meters.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo BaseRadiusInfo = {
+    constexpr PropertyInfo BaseRadiusInfo = {
         "BaseRadius",
         "Base radius",
         "The radius of the base of the prism's shape, in meters. By default it is given "
         "the same radius as the outer shape.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the lines. The larger number, the thicker the lines.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LineColorInfo = {
+    constexpr PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "The RGB color of the line.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo LengthInfo = {
+    constexpr PropertyInfo LengthInfo = {
         "Length",
         "Length",
         "The length of the prism in meters.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Renders a prism shape defined by two polygonal shapes (base and top) connected by

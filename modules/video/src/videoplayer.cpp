@@ -49,78 +49,78 @@ namespace {
 
     constexpr std::string_view _loggerCat = "VideoPlayer";
 
-    constexpr Property::PropertyInfo VideoInfo = {
+    constexpr PropertyInfo VideoInfo = {
         "Video",
         "Video",
         "The video file that is played."
     };
 
-    constexpr Property::PropertyInfo PlayInfo = {
+    constexpr PropertyInfo PlayInfo = {
         "Play",
         "Play",
         "Play video."
     };
 
-    constexpr Property::PropertyInfo PauseInfo = {
+    constexpr PropertyInfo PauseInfo = {
         "Pause",
         "Pause",
         "Pause video."
     };
 
-    constexpr Property::PropertyInfo GoToStartInfo = {
+    constexpr PropertyInfo GoToStartInfo = {
         "GoToStart",
         "Go To start",
         "Sets the time to the beginning of the video and pauses it."
     };
 
-    constexpr Property::PropertyInfo ReloadInfo = {
+    constexpr PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Reloads the video and creates a new texture. This might be useful in case there "
         "was an error loading the video."
     };
 
-    constexpr Property::PropertyInfo AudioInfo = {
+    constexpr PropertyInfo AudioInfo = {
         "PlayAudio",
         "Play audio",
         "Decides whether to play audio when playing back the video."
     };
 
-    constexpr Property::PropertyInfo StartTimeInfo = {
+    constexpr PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start time",
         "The date and time that the video should start in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
-    constexpr Property::PropertyInfo EndTimeInfo = {
+    constexpr PropertyInfo EndTimeInfo = {
         "EndTime",
         "End time",
         "The date and time that the video should end in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
-    constexpr Property::PropertyInfo LoopVideoInfo = {
+    constexpr PropertyInfo LoopVideoInfo = {
         "LoopVideo",
         "Loop video",
         "If checked, the video is continues playing from the start when it reaches the "
         "end of the video."
     };
 
-    constexpr Property::PropertyInfo IsPlayingInfo = {
+    constexpr PropertyInfo IsPlayingInfo = {
         "IsPlaying",
         "Is Playing",
         "Indicates whether the video is currently playing.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo PlayDelayInfo = {
+    constexpr PropertyInfo PlayDelayInfo = {
         "PlayDelay",
         "Play Delay",
         "The delay, in milliseconds, that the system will wait before issuing the play "
         "command. A higher value will increase the time it takes for the video to start "
         "but may result in a more synchronized playback start.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
     bool checkMpvError(int status) {

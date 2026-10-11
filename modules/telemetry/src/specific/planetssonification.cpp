@@ -83,11 +83,11 @@ namespace {
         "Sonification of the planets in the solar system."
     };
 
-    constexpr Property::PropertyInfo ToggleAllInfo = {
+    constexpr PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "Toggle all",
         "Toggle all sonifications for all planets.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     static const PropertyOwner::PropertyOwnerInfo MercuryInfo = {
@@ -138,53 +138,53 @@ namespace {
         "Settings for the sonification of Neptune."
     };
 
-    constexpr Property::PropertyInfo PlanetToggleAllInfo = {
+    constexpr PropertyInfo PlanetToggleAllInfo = {
         "ToggleAll",
         "Toggle All",
         "Toggle all sonifications for the planet.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SizeDayInfo = {
+    constexpr PropertyInfo SizeDayInfo = {
         "SizeDay",
         "Size/Day",
         "Toggle the size/day sonification for the planet.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo GravityInfo = {
+    constexpr PropertyInfo GravityInfo = {
         "Gravity",
         "Gravity",
         "Toggle the gravity sonification for the planet.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo TemperatureInfo = {
+    constexpr PropertyInfo TemperatureInfo = {
         "Temperature",
         "Temperature",
         "Toggle the temperature sonification for the planet.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo AtmosphereInfo = {
+    constexpr PropertyInfo AtmosphereInfo = {
         "Atmosphere",
         "Atmosphere",
         "Toggle the atmosphere sonification for the planet.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MoonsInfo = {
+    constexpr PropertyInfo MoonsInfo = {
         "Moons",
         "Moons",
         "Toggle the moons sonification for the planet.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RingsInfo = {
+    constexpr PropertyInfo RingsInfo = {
         "Rings",
         "Rings",
         "Toggle the rings sonification for the planet.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
@@ -193,44 +193,44 @@ namespace {
         "Settings for the distance and angle precision of the planets sonification."
     };
 
-    constexpr Property::PropertyInfo LowDistancePrecisionInfo = {
+    constexpr PropertyInfo LowDistancePrecisionInfo = {
         "LowDistancePrecision",
         "Distance precision (low)",
         "The precision in meters used to determine when to send updated distance data "
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
         "performance.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo HighDistancePrecisionInfo = {
+    constexpr PropertyInfo HighDistancePrecisionInfo = {
         "HighDistancePrecision",
         "Distance Precision (high)",
         "The precision in meters used to determine when to send updated distance data "
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "
         "providing more accurate data.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LowAnglePrecisionInfo = {
+    constexpr PropertyInfo LowAnglePrecisionInfo = {
         "LowAnglePrecision",
         "Angle precision (low)",
         "The precision in radians used to determine when to send updated angle data "
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
         "performance.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo HighAnglePrecisionInfo = {
+    constexpr PropertyInfo HighAnglePrecisionInfo = {
         "HighAnglePrecision",
         "Angle precision (high)",
         "The precision in radians used to determine when to send updated angle data "
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "
         "providing more accurate data.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     struct [[codegen::Dictionary(PlanetsSonification)]] Parameters {

@@ -29,18 +29,18 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this object will be visible or not.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo CollapsedInfo = {
+    constexpr PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is collapsed",
         "This setting determines whether this window is collapsed or not.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 } // namespace
 

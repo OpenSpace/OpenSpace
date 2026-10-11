@@ -49,12 +49,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo PerformShadingInfo = {
+    constexpr PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform shading",
         "If true, the model will be shaded based on the location of the Sun. If false, "
         "shading is disabled and the model is fully illuminated.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     // A 3D model that acts as a projection target for spacecraft instrument images,

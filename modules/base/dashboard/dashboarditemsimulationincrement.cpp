@@ -39,24 +39,24 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SimplificationInfo = {
+    constexpr PropertyInfo SimplificationInfo = {
         "Simplification",
         "Do time simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
         "displayed in seconds.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RequestedUnitInfo = {
+    constexpr PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested unit",
         "If the simplification is disabled, this time unit is used as a destination to "
         "convert the seconds into.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo TransitionFormatInfo = {
+    constexpr PropertyInfo TransitionFormatInfo = {
         "TransitionFormat",
         "Transition format",
         "Format string used to format the text used while in a delta time transition, "
@@ -67,10 +67,10 @@ namespace {
         "current delta time unit. More information about how to make use of the format "
         "string, see the documentation at "
         "https://en.cppreference.com/w/cpp/utility/format/spec",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RegularFormatInfo = {
+    constexpr PropertyInfo RegularFormatInfo = {
         "RegularFormat",
         "Regular format",
         "The format string used to format the text if the target delta time is the same "
@@ -79,7 +79,7 @@ namespace {
         "time is paused or the empty string otherwise. More information about how to "
         "make use of the format string, see the documentation at "
         "https://en.cppreference.com/w/cpp/utility/format/spec",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     std::vector<std::string> unitList() {
@@ -138,7 +138,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
-            _doSimplification ? Property::Visibility::Hidden : Property::Visibility::User
+            _doSimplification ? PropertyInfo::Visibility::Hidden : PropertyInfo::Visibility::User
         );
     });
     addProperty(_doSimplification);
@@ -153,7 +153,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _doSimplification = false;
     }
     _requestedUnit.setVisibility(
-        _doSimplification ? Property::Visibility::Hidden : Property::Visibility::User
+        _doSimplification ? PropertyInfo::Visibility::Hidden : PropertyInfo::Visibility::User
     );
     addProperty(_requestedUnit);
 

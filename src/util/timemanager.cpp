@@ -56,26 +56,26 @@ namespace {
     // These are used when setting the time from Lua time interpolation functions when
     // called without arguments
 
-    constexpr Property::PropertyInfo DefaultTimeInterpolationDurationInfo = {
+    constexpr PropertyInfo DefaultTimeInterpolationDurationInfo = {
         "DefaultTimeInterpolationDuration",
         "Default time interpolation duration",
         "The default duration taken to interpolate between times."
     };
 
-    constexpr Property::PropertyInfo DefaultDeltaTimeInterpolationDurationInfo = {
+    constexpr PropertyInfo DefaultDeltaTimeInterpolationDurationInfo = {
         "DefaultDeltaTimeInterpolationDuration",
         "Default delta time interpolation duration",
         "The default duration taken to interpolate between delta times."
     };
 
-    constexpr Property::PropertyInfo DefaultPauseInterpolationDurationInfo = {
+    constexpr PropertyInfo DefaultPauseInterpolationDurationInfo = {
         "DefaultPauseInterpolationDuration",
         "Default pause interpolation duration",
         "The default duration taken to transition to the paused state, when "
         "interpolating."
     };
 
-    constexpr Property::PropertyInfo DefaultUnpauseInterpolationDurationInfo = {
+    constexpr PropertyInfo DefaultUnpauseInterpolationDurationInfo = {
         "DefaultUnpauseInterpolationDuration",
         "Default unpause interpolation duration",
         "The default duration taken to transition to the unpaused state, when "

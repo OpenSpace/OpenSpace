@@ -37,12 +37,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
+    constexpr PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "A URL to an image to use as a texture for this sphere. The image is expected to "
         "be an equirectangular projection.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(const std::string& url)

@@ -46,72 +46,72 @@ namespace {
     constexpr std::string_view KeyDesc = "Description";
     constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
 
-    constexpr Property::PropertyInfo TypeInfo = {
+    constexpr PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
         "changed.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo BlendModeInfo = {
+    constexpr PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blend mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
         "mode determines how this layer is added to the underlying layers beneath.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "If this value is enabled, the layer will be used for the final composition of "
         "the planet. If this value is disabled, the layer will be ignored in the "
         "composition.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ResetInfo = {
+    constexpr PropertyInfo ResetInfo = {
         "Reset",
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
         "local cache for this layer and will trigger a fresh load of all tiles.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RemoveInfo = {
+    constexpr PropertyInfo RemoveInfo = {
         "Remove",
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
         "layer before the next frame.",
-        Property::Visibility::User,
-        Property::IsEnablable::No,
-        Property::NeedsConfirmation::Yes
+        PropertyInfo::Visibility::User,
+        PropertyInfo::IsEnablable::No,
+        PropertyInfo::NeedsConfirmation::Yes
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
+    constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "
         "solid color is.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ZIndexInfo = {
+    constexpr PropertyInfo ZIndexInfo = {
         "ZIndex",
         "Z-Index",
         "Determines where the layer is placed in the list of available layers. Layers "
         "are applied in the order of their Z indices, with higher indices obscuring "
         "layers with lower values.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GuiDescriptionInfo = {
+    constexpr PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
         "Gui description",
         "This is the description for the scene graph node to be shown in the GUI. "
         "Example: Earth is a special place.",
-        Property::Visibility::Hidden
+        PropertyInfo::Visibility::Hidden
     };
 
     struct [[codegen::Dictionary(Layer), codegen::noexhaustive()]] Parameters {

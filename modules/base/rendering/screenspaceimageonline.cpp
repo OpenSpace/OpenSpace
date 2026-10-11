@@ -39,13 +39,13 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ScreenSpaceImageOnline";
 
-    constexpr Property::PropertyInfo TextureInfo = {
+    constexpr PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "The URL of the texture to be displayed on this screen space plane. If changed, "
         "the image at the new path will automatically be loaded and displayed. The "
         "default size of the plane will be set based on the size of the image.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Displays an image from a web URL on a plane in screen space.

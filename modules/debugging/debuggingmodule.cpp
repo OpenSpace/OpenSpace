@@ -49,37 +49,37 @@ namespace {
 
     constexpr std::string_view KeyFontMono = "Mono";
 
-    constexpr Property::PropertyInfo ShowStatisticsInfo = {
+    constexpr PropertyInfo ShowStatisticsInfo = {
         "ShowStatistics",
         "Show statistics",
         "Show updating, rendering, and network statistics on all rendering nodes.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StatisticsScaleInfo = {
+    constexpr PropertyInfo StatisticsScaleInfo = {
         "StatisticsScale",
         "Statistics scale",
         "This value is scaling the statistics window by the provided amount. For flat "
         "projections this is rarely necessary, but it is important when using a setup "
         "where the corners of the image are masked out.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StatisticsOffsetInfo = {
+    constexpr PropertyInfo StatisticsOffsetInfo = {
         "StatisticsOffset",
         "Statistics offset",
         "This value is offsetting the center of the statistics window by the provided "
         "amount. For flat projections this is rarely necessary, but it is important when "
         "using a setup the center of the image is distorted in some form.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShowFrameNumberInfo = {
+    constexpr PropertyInfo ShowFrameNumberInfo = {
         "ShowFrameInformation",
         "Show frame information",
         "If this value is enabled, the current frame number and frame times are rendered "
         "into the window.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 } // namespace
 

@@ -41,42 +41,42 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ColorInfo = {
+    constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color used for the grid lines.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo GridSegmentsInfo = {
+    constexpr PropertyInfo GridSegmentsInfo = {
         "GridSegments",
         "Number of grid segments",
         "Specifies the number of segments for the grid, in the radial and angular "
         "direction respectively.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo CircleSegmentsInfo = {
+    constexpr PropertyInfo CircleSegmentsInfo = {
         "CircleSegments",
         "Number of circle segments",
         "The number of segments that is used to render each circle in the grid.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RadiiInfo = {
+    constexpr PropertyInfo RadiiInfo = {
         "Radii",
         "Inner and outer radius",
         "The radii values that determine the size of the circular grid. The first value "
         "is the radius of the inmost ring and the second is the radius of the outmost "
         "ring.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {

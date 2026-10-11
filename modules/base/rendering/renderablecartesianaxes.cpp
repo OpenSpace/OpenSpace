@@ -40,25 +40,25 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo XColorInfo = {
+    constexpr PropertyInfo XColorInfo = {
         "XColor",
         "X color",
         "The color of the x-axis.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo YColorInfo = {
+    constexpr PropertyInfo YColorInfo = {
         "YColor",
         "Y color",
         "The color of the y-axis.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ZColorInfo = {
+    constexpr PropertyInfo ZColorInfo = {
         "ZColor",
         "Z color",
         "The color of the z-axis.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     // Can be used to render the local Cartesian coordinate system, or reference frame,

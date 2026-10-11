@@ -31,12 +31,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SpacingInfo = {
+    constexpr PropertyInfo SpacingInfo = {
         "Spacing",
         "Spacing",
         "This value determines the spacing (in pixels) that this item represents. The "
         "default value is 15.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Adds a variable amount of spacing between two other `DashboardItem`s.

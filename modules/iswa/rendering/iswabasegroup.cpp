@@ -33,25 +33,25 @@ namespace {
 
     constexpr std::string_view _loggerCat = "IswaBaseGroup";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "", // @TODO Missing documentation
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo AlphaInfo = {
+    constexpr PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
         "", // @TODO Missing documentation
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo DeleteInfo = {
+    constexpr PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 } // namespace
 

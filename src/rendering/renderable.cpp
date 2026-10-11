@@ -46,34 +46,34 @@ namespace {
 
     constexpr std::string_view KeyType = "Type";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Determines whether this object will be visible or not.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RenderableTypeInfo = {
+    constexpr PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable type",
         "The type of the renderable.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RenderableRenderBinModeInfo = {
+    constexpr PropertyInfo RenderableRenderBinModeInfo = {
         "RenderBinMode",
         "Render bin mode",
         "A value that specifies if the renderable should be rendered in the Background, "
         "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DimInAtmosphereInfo = {
+    constexpr PropertyInfo DimInAtmosphereInfo = {
         "DimInAtmosphere",
         "Dim in atmosphere",
         "Decides if the object should be dimmed (i.e. faded out) when the camera is in "
         "the sunny part of an atmosphere.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // This is the base class for all `Renderable` types. These objects are responsible

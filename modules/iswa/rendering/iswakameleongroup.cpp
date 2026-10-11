@@ -42,18 +42,18 @@ namespace {
 
     constexpr std::string_view _loggerCat = "IswaDataGroup";
 
-    constexpr Property::PropertyInfo ResolutionInfo = {
+    constexpr PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FieldlineSeedInfo = {
+    constexpr PropertyInfo FieldlineSeedInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline seedpoints",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 } // namespace
 

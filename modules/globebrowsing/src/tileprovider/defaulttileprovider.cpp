@@ -43,22 +43,22 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo FilePathInfo = {
+    constexpr PropertyInfo FilePathInfo = {
         "FilePath",
         "File path",
         "The path of the GDAL file or the image file that is to be used in this tile "
         "provider.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TilePixelSizeInfo = {
+    constexpr PropertyInfo TilePixelSizeInfo = {
         "TilePixelSize",
         "Tile pixel size",
         "This value is the preferred size (in pixels) for each tile. Choosing the right "
         "value is a tradeoff between more efficiency (larger images) and better quality "
         "(smaller images). The tile pixel size has to be smaller than the size of the "
         "complete image if a single image is used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     enum class [[codegen::stringify()]] Compression {

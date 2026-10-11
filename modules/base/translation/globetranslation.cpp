@@ -40,64 +40,64 @@ namespace {
 
     constexpr std::string_view _loggerCat = "GlobeTranslation";
 
-    constexpr Property::PropertyInfo GlobeInfo = {
+    constexpr PropertyInfo GlobeInfo = {
         "Globe",
         "Attached globe",
         "The node on which the longitude/latitude is specified. If the node is a globe, "
         "the correct height information for the globe is used. Otherwise, the position "
         "is specified based on the longitude and latitude on the node's interaction "
         "sphere",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LatitudeInfo = {
+    constexpr PropertyInfo LatitudeInfo = {
         "Latitude",
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
         "globe. The default value is 0.0.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LongitudeInfo = {
+    constexpr PropertyInfo LongitudeInfo = {
         "Longitude",
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
         "globe. The default value is 0.0.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo AltitudeInfo = {
+    constexpr PropertyInfo AltitudeInfo = {
         "Altitude",
         "Altitude",
         "The altitude in meters. If the 'UseHeightmap' property is 'true', this is an "
         "offset from the actual surface of the globe. If not, this is an offset from the "
         "reference ellipsoid. The default value is 0.0.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo UseHeightmapInfo = {
+    constexpr PropertyInfo UseHeightmapInfo = {
         "UseHeightmap",
         "Use heightmap",
         "If this value is 'true', the altitude specified in 'Altitude' will be treated "
         "as an offset from the heightmap. Otherwise, it will be an offset from the "
         "globe's reference ellipsoid. The default value is 'false'.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo UseCameraInfo = {
+    constexpr PropertyInfo UseCameraInfo = {
         "UseCamera",
         "Use camera",
         "If this value is 'true', the lat and lon are updated to match the camera.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UseCameraAltitudeInfo = {
+    constexpr PropertyInfo UseCameraAltitudeInfo = {
         "UseCameraAltitude",
         "Use camera altitude",
         "If this value is 'true', the altitude is updated to match the camera.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Places the scene graph node at a specific location relative to another scene graph

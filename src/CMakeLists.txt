@@ -242,6 +242,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/numericalproperty.h
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/numericalproperty.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/property.h
+    ${PROJECT_SOURCE_DIR}/include/openspace/properties/propertyinfo.h
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/propertyowner.h
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/templateproperty.h
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/templateproperty.inl

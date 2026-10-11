@@ -43,21 +43,21 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ActiveColorInfo = {
+    constexpr PropertyInfo ActiveColorInfo = {
         "ActiveColor",
         "Active color",
         "This value determines the color that the active instrument is rendered in. "
         "Shortly after activation, the used color is mixture of this and the flash "
         "color. The default value is (0.6, 1.0, 0.0).",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FlashColorInfo = {
+    constexpr PropertyInfo FlashColorInfo = {
         "FlashColor",
         "Flash color",
         "This value determines the color that is used shortly after an instrument "
         "activation. The default value is (0.9, 1.0, 0.75).",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Shows information about the status of individual instruments onboard a spacecraft

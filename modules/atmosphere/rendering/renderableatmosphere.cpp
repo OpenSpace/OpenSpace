@@ -48,136 +48,136 @@ namespace {
 
     constexpr float KilometerToMeter = 1000.f;
 
-    constexpr Property::PropertyInfo AtmosphereHeightInfo = {
+    constexpr PropertyInfo AtmosphereHeightInfo = {
         "AtmosphereHeight",
         "Atmosphere height (km)",
         "The thickness of the atmosphere in kilometers.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AverageGroundReflectanceInfo = {
+    constexpr PropertyInfo AverageGroundReflectanceInfo = {
         "AverageGroundReflectance",
         "Average ground reflectance (%)",
         "Average percentage of light reflected by the ground during the pre-calculation "
         "phase.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GroundRadianceEmissionInfo = {
+    constexpr PropertyInfo GroundRadianceEmissionInfo = {
         "GroundRadianceEmission",
         "Percentage of initial radiance emitted from ground",
         "Multiplier of the ground radiance color during the rendering phase.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RayleighHeightScaleInfo = {
+    constexpr PropertyInfo RayleighHeightScaleInfo = {
         "RayleighHeightScale",
         "Rayleigh scale height (KM)",
         "The vertical distance over which the density and pressure falls by a constant "
         "factor.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RayleighScatteringCoeffInfo = {
+    constexpr PropertyInfo RayleighScatteringCoeffInfo = {
         "RayleighScatteringCoeff",
         "Rayleigh scattering coefficient",
         "Rayleigh sea-level scattering coefficients in meters.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OzoneLayerInfo = {
+    constexpr PropertyInfo OzoneLayerInfo = {
         "Ozone",
         "Ozone layer enabled",
         "Enables/Disable Ozone Layer during pre-calculation phase.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OzoneHeightScaleInfo = {
+    constexpr PropertyInfo OzoneHeightScaleInfo = {
         "OzoneLayerHeightScale",
         "Ozone scale height (km)",
         "The vertical distance over which the density and pressure fall by a constant "
         "factor, given in kilometers.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OzoneLayerCoeffInfo = {
+    constexpr PropertyInfo OzoneLayerCoeffInfo = {
         "OzoneLayerCoeff",
         "Ozone layer extinction coefficient",
         "Ozone scattering coefficients in meters.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MieHeightScaleInfo = {
+    constexpr PropertyInfo MieHeightScaleInfo = {
         "MieHeightScale",
         "Mie scale height (km)",
         "The vertical distance over which the density and pressure fall by a constant "
         "factor, given in kilometers.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MieScatteringCoeffInfo = {
+    constexpr PropertyInfo MieScatteringCoeffInfo = {
         "MieScatteringCoeff",
         "Mie scattering coefficient",
         "Mie sea-level scattering coefficients in meters.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MieAsymmetricFactorGInfo = {
+    constexpr PropertyInfo MieAsymmetricFactorGInfo = {
         "MieAsymmetricFactorG",
         "Mie asymmetric factor G",
         "Averaging of the scattering angle over a high number of scattering events.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SunIntensityInfo = {
+    constexpr PropertyInfo SunIntensityInfo = {
         "SunIntensity",
         "Sun intensity",
         "A unitless value that controls the intensity/brightness of the Sun.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableSunOnCameraPositionInfo = {
+    constexpr PropertyInfo EnableSunOnCameraPositionInfo = {
         "SunFollowingCamera",
         "Enable Sun on camera position",
         "When selected the Sun is artificially positioned behind the observer all times.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EclipseHardShadowsInfo = {
+    constexpr PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadows",
         "Enable hard shadows for eclipses",
         "Enables/Disables hard shadows through the atmosphere.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo AtmosphereDimmingHeightInfo = {
+    constexpr PropertyInfo AtmosphereDimmingHeightInfo = {
         "AtmosphereDimmingHeight",
         "Atmosphere dimming height",
         "Percentage of the atmosphere where other objects, such as the stars, are faded.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SunsetAngleInfo = {
+    constexpr PropertyInfo SunsetAngleInfo = {
         "AtmosphereDimmingSunsetAngle",
         "Atmosphere dimming sunset angle",
         "The angle (degrees) between the Camera and the Sun where the sunset starts, and "
         "the atmosphere starts to fade in objects such as the stars.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SunAngularSize = {
+    constexpr PropertyInfo SunAngularSize = {
         "SunAngularSize",
         "Angular size of the Sun",
         "The angular size of the Sun in degrees.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LightSourceNodeInfo = {
+    constexpr PropertyInfo LightSourceNodeInfo = {
         "LightSourceNode",
         "Light source",
         "The name of a scene graph node to be used as the source of illumination for the "
         "atmosphere. If not specified, the solar system's Sun is used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {

@@ -109,9 +109,9 @@ private:
 
 class SpoutReceiverPropertyProxy : public SpoutReceiver {
 public:
-    static const Property::PropertyInfo& NameInfoProperty();
-    static const Property::PropertyInfo& SelectionInfoProperty();
-    static const Property::PropertyInfo& UpdateInfoProperty();
+    static const PropertyInfo& NameInfoProperty();
+    static const PropertyInfo& SelectionInfoProperty();
+    static const PropertyInfo& UpdateInfoProperty();
 
     SpoutReceiverPropertyProxy(PropertyOwner& owner, const Dictionary& dictionary);
     virtual ~SpoutReceiverPropertyProxy();
@@ -168,7 +168,7 @@ private:
 
 class SpoutSenderPropertyProxy : public SpoutSender {
 public:
-    static const Property::PropertyInfo& NameInfoProperty();
+    static const PropertyInfo& NameInfoProperty();
 
     SpoutSenderPropertyProxy(PropertyOwner& owner, const Dictionary& dictionary);
     virtual ~SpoutSenderPropertyProxy();

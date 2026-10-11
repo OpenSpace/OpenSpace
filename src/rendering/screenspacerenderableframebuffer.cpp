@@ -35,11 +35,11 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SizeInfo = {
+    constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "This value explicitly specifies the size of the screen space plane.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ScreenSpaceRenderableFramebuffer)]] Parameters {};

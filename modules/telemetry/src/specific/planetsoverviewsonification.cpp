@@ -56,67 +56,67 @@ namespace {
         "sonification."
     };
 
-    constexpr Property::PropertyInfo ToggleAllInfo = {
+    constexpr PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "Toggle all",
         "Toggle the sonification for all planets.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableMercuryInfo = {
+    constexpr PropertyInfo EnableMercuryInfo = {
         "Mercury",
         "Mercury",
         "Toggle sonification for Mercury.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableVenusInfo = {
+    constexpr PropertyInfo EnableVenusInfo = {
         "Venus",
         "Venus",
         "Toggle sonification for Venus.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableEarthInfo = {
+    constexpr PropertyInfo EnableEarthInfo = {
         "Earth",
         "Earth",
         "Toggle sonification for Earth.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableMarsInfo = {
+    constexpr PropertyInfo EnableMarsInfo = {
         "Mars",
         "Mars",
         "Toggle sonification for Mars.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableJupiterInfo = {
+    constexpr PropertyInfo EnableJupiterInfo = {
         "Jupiter",
         "Jupiter",
         "Toggle sonification for Jupiter.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableSaturnInfo = {
+    constexpr PropertyInfo EnableSaturnInfo = {
         "Saturn",
         "Saturn",
         "Toggle sonification for Saturn.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableUranusInfo = {
+    constexpr PropertyInfo EnableUranusInfo = {
         "Uranus",
         "Uranus",
         "Toggle sonification for Uranus.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableNeptuneInfo = {
+    constexpr PropertyInfo EnableNeptuneInfo = {
         "Neptune",
         "Neptune",
         "Toggle sonification for Neptune.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 } // namespace
 

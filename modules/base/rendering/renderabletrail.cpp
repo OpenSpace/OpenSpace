@@ -61,33 +61,33 @@ namespace {
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    constexpr Property::PropertyInfo LineColorInfo = {
+    constexpr PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "This value determines the RGB main color for the lines and points of the trail.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo EnableFadeInfo = {
+    constexpr PropertyInfo EnableFadeInfo = {
         "EnableFade",
         "Enable line fading of old points",
         "Toggles whether the trail should fade older points out. If this value is true, "
         "the 'Fade' parameter determines the speed of fading. If this value is false, "
         "the entire trail is rendered at full opacity and color.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo LineLengthInfo = {
+    constexpr PropertyInfo LineLengthInfo = {
         "LineLength",
         "Line length",
         "The extent of the rendered trail. A value of 0 will result in no trail and a "
         "value of 1 will result in a trail that covers the entire extent. The setting "
         "only applies if 'EnableFade' is true. If it is false, this setting has no "
         "effect.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LineFadeAmountInfo = {
+    constexpr PropertyInfo LineFadeAmountInfo = {
         "LineFadeAmount",
         "Line fade amount",
         "The amount of the trail that should be faded. If the value is 0 then the trail "
@@ -98,34 +98,34 @@ namespace {
         "trail that starts fading immediately, becoming fully transparent by the end of "
         "the trail.This setting only applies if the 'EnableFade' value is true. If it is "
         "false, this setting has no effect.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "Specifies the line width of the trail lines, if the selected rendering method "
         "includes lines. If the rendering mode is Points, this value is ignored.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo PointSizeInfo = {
+    constexpr PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point size",
         "Specifies the base size of the points along the line, if the selected rendering "
         "method includes points. If the rendering mode is Lines, this value is ignored. "
         "If a subsampling of the values is performed, the subsampled values are half "
         "this size.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RenderingModeInfo = {
+    constexpr PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering mode",
         "Determines how the trail should be rendered. If 'Lines' is selected, only the "
         "line part is visible, if 'Points' is selected, only the corresponding points "
         "(and subpoints) are shown. 'Lines+Points' shows both parts.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {

@@ -80,71 +80,71 @@ namespace {
         GigaLightyear
     };
 
-    constexpr Property::PropertyInfo BlendModeInfo = {
+    constexpr PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending mode",
         "This determines the blending mode that is applied to the renderable.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
+    constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The label text color.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo FontSizeInfo = {
+    constexpr PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "The font size (in points) for the label.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
+    constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "Scales the size of the label, exponentially. The value is used as the exponent "
         "in a 10^x computation to scale the label size.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo TextInfo = {
+    constexpr PropertyInfo TextInfo = {
         "Text",
         "Text",
         "The text that will be displayed on screen.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo MinMaxSizeInfo = {
+    constexpr PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min and max size",
         "The minimum and maximum size (in pixels) of the label.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TransformationMatrixInfo = {
+    constexpr PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation matrix",
         "Transformation matrix to be applied to the label.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OrientationOptionInfo = {
+    constexpr PropertyInfo OrientationOptionInfo = {
         "OrientationOption",
         "Orientation option",
         "Label orientation rendering mode.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableFadingEffectInfo = {
+    constexpr PropertyInfo EnableFadingEffectInfo = {
         "EnableFading",
         "Enable/disable fade-in effect",
         "Enable/Disable the Fade-in effect.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FadeWidthsInfo = {
+    constexpr PropertyInfo FadeWidthsInfo = {
         "FadeWidths",
         "Fade widths",
         "The distances over which the fading takes place, given in the specified unit. "
@@ -152,22 +152,22 @@ namespace {
         "one after the furthest distance. For example, with the unit Parsec (pc), a "
         "value of {1, 2} will make the label being fully faded out 1 Parsec before the "
         "closest distance and 2 Parsec away from the furthest distance.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FadeDistancesInfo = {
+    constexpr PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
         "Fade distances",
         "The distance range in which the labels should be fully opaque, specified in the "
         "chosen unit. The distance from the position of the label to the camera.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FadeUnitOptionInfo = {
+    constexpr PropertyInfo FadeUnitOptionInfo = {
         "FadeUnit",
         "Fade distance Unit",
         "Distance unit for fade-in/-out distance calculations. Defaults to \"au\".",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Renders a single text label in 3D space. The label is rendered as a billboard,

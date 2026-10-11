@@ -103,170 +103,170 @@ namespace {
     const TileIndex LeftHemisphereIndex = TileIndex(0, 0, 1);
     const TileIndex RightHemisphereIndex = TileIndex(1, 0, 1);
 
-    constexpr Property::PropertyInfo ShowChunkEdgeInfo = {
+    constexpr PropertyInfo ShowChunkEdgeInfo = {
         "ShowChunkEdges",
         "Show chunk edges",
         "Shows the borders between chunks in a red highlight.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo LevelProjectedAreaInfo = {
+    constexpr PropertyInfo LevelProjectedAreaInfo = {
         "LevelByProjectedAreaElseDistance",
         "Level by projected area (else distance)",
         "If true, the tile level is determined by the area projected on screen. If "
         "false, the distance to the center of the tile is used instead.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo PerformFrustumCullingInfo = {
+    constexpr PropertyInfo PerformFrustumCullingInfo = {
         "PerformFrustumCulling",
         "Perform frustum culling",
         "If this value is set to true, frustum culling will be performed.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PerformHorizonCullingInfo = {
+    constexpr PropertyInfo PerformHorizonCullingInfo = {
         "PerformHorizonCulling",
         "Perform horizon culling",
         "If this value is set to 'true', tiles below the horizon will be culled away.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ResetTileProviderInfo = {
+    constexpr PropertyInfo ResetTileProviderInfo = {
         "ResetTileProviders",
         "Reset tile providers",
         "Reset all tile provides for the globe and reload the data.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo ModelSpaceRenderingInfo = {
+    constexpr PropertyInfo ModelSpaceRenderingInfo = {
         "ModelSpaceRenderingCutoffLevel",
         "Model space rendering cutoff level",
         "The tile level that is used as the cut off between rendering tiles using the "
         "globe model rendering vs the flat in-game rendering method. The value is a "
         "trade-off between not having precision errors in the rendering and representing "
         "a tile as flat or curved.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DynamicLodIterationCountInfo = {
+    constexpr PropertyInfo DynamicLodIterationCountInfo = {
         "DynamicLodIterationCount",
         "Data availability checks before LOD factor impact",
         "The number of checks that have to fail/succeed in a row before the dynamic "
         "level-of-detail adjusts the actual level-of-detail up or down during a session "
         "recording.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo PerformShadingInfo = {
+    constexpr PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform shading",
         "Specifies whether the planet should be shaded by the primary light source or "
         "not. If disabled, all parts of the planet are illuminated. Note that if the "
         "globe has a corresponding atmosphere, there is a separate setting to control "
         "the shadowing induced by the atmosphere.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo AccurateNormalsInfo = {
+    constexpr PropertyInfo AccurateNormalsInfo = {
         "UseAccurateNormals",
         "Use accurate normals",
         "Determines whether higher-accuracy normals should be used in the rendering. "
         "These normals are calculated based on the height field information and are thus "
         "only available if the planet has a height map layer.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AmbientIntensityInfo = {
+    constexpr PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient intensity",
         "The intensity factor for the ambient light used for light shading.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LightSourceNodeInfo = {
+    constexpr PropertyInfo LightSourceNodeInfo = {
         "LightSourceNode",
         "Light source",
         "The identifier of a scene graph node that should be used as the source of "
         "illumination for the globe. If not specified, the solar system's Sun is used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EclipseInfo = {
+    constexpr PropertyInfo EclipseInfo = {
         "Eclipse",
         "Eclipse",
         "Enables/Disables Eclipse shadows on this globe.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EclipseHardShadowsInfo = {
+    constexpr PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadows",
         "Eclipse hard shadows",
         "Enables the rendering of eclipse shadows using hard shadows.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShadowMappingInfo = {
+    constexpr PropertyInfo ShadowMappingInfo = {
         "ShadowMapping",
         "Shadow mapping",
         "Enables shadow mapping algorithm. Used by renderable rings, too.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RenderAtDistanceInfo = {
+    constexpr PropertyInfo RenderAtDistanceInfo = {
         "RenderAtDistance",
         "Render at distance",
         "Tells the rendering engine not to perform distance based performance culling "
         "for this globe. Turning this property on will let the globe to be seen at far "
         "away distances when normally it would be hidden.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ZFightingPercentageInfo = {
+    constexpr PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
         "Z-fighting percentage",
         "The percentage of the correct distance to the surface being shadowed.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo NumberShadowSamplesInfo = {
+    constexpr PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
         "Number of shadow samples",
         "The number of samples used during shadow mapping calculation (Percentage Closer "
         "Filtering).",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo TargetLodScaleFactorInfo = {
+    constexpr PropertyInfo TargetLodScaleFactorInfo = {
         "TargetLodScaleFactor",
         "Target level of detail scale factor",
         "Determines the targeted level-of-detail of the tiles for this globe. A higher "
         "value means that the tiles rendered are a higher resolution for the same "
         "distance of the camera to the planet.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo CurrentLodScaleFactorInfo = {
+    constexpr PropertyInfo CurrentLodScaleFactorInfo = {
         "CurrentLodScaleFactor",
         "Current level of detail scale factor (read only)",
         "The currently used scale factor whose target value is determined by "
         "'TargetLodScaleFactor'.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OrenNayarRoughnessInfo = {
+    constexpr PropertyInfo OrenNayarRoughnessInfo = {
         "OrenNayarRoughness",
         "Oren-Nayar roughness",
         "The roughness factor that is used for the Oren-Nayar lighting mode.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo NActiveLayersInfo = {
+    constexpr PropertyInfo NActiveLayersInfo = {
         "NActiveLayers",
         "Number of active layers",
         "The number of currently active layers. If this value reaches the maximum, bad "
         "things will happen.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     bool isLeaf(const Chunk& cn) {

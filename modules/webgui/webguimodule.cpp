@@ -44,66 +44,66 @@ namespace {
 
     constexpr std::string_view _loggerCat = "WebGuiModule";
 
-    constexpr Property::PropertyInfo ServerProcessEnabledInfo = {
+    constexpr PropertyInfo ServerProcessEnabledInfo = {
         "ServerProcessEnabled",
         "Enable server process",
         "Enable the node js based process used to serve the Web GUI.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AddressInfo = {
+    constexpr PropertyInfo AddressInfo = {
         "Address",
         "Address",
         "The network address to use when connecting to OpenSpace from the Web GUI.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PortInfo = {
+    constexpr PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The network port to use when serving the Web GUI over HTTP.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo WebSocketInterfaceInfo = {
+    constexpr PropertyInfo WebSocketInterfaceInfo = {
         "WebSocketInterface",
         "WebSocket interface",
         "The identifier of the websocket interface to use when communicating.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ServerProcessEntryPointInfo = {
+    constexpr PropertyInfo ServerProcessEntryPointInfo = {
         "ServerProcessEntryPoint",
         "Server process entry point",
         "The node js command to invoke.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DirectoriesInfo = {
+    constexpr PropertyInfo DirectoriesInfo = {
         "Directories",
         "Directories",
         "Directories from which to to serve static content, as a string list "
         "with entries expressed as pairs, where every odd is the endpoint name and every "
         "even is the directory.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DefaultEndpointInfo = {
+    constexpr PropertyInfo DefaultEndpointInfo = {
         "DefaultEndpoint",
         "Default endpoint",
         "The 'default' endpoint. The server will redirect http requests from / to "
         "/<DefaultEndpoint>.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ServedDirectoriesInfo = {
+    constexpr PropertyInfo ServedDirectoriesInfo = {
         "ServedDirectories",
         "Served directories",
         "Directories that are currently served. This value is set by the server process, "
         "as a verification of the actually served directories. For example, an onChange "
         "callback can be registered to this, to reload browsers when the server is "
         "ready. Manual changes to this property have no effect.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(WebGuiModule)]] Parameters {

@@ -45,33 +45,33 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ShadowComponent";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Enable/Disable Shadows.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SaveDepthTextureInfo = {
+    constexpr PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
         "Save depth texture",
         "Debug.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DistanceFractionInfo = {
+    constexpr PropertyInfo DistanceFractionInfo = {
         "DistanceFraction",
         "Distance fraction",
         "Distance fraction of original distance from light source to the globe to be "
         "considered as the new light source distance.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DepthMapSizeInfo = {
+    constexpr PropertyInfo DepthMapSizeInfo = {
         "DepthMapSize",
         "Depth map size",
         "The depth map size in pixels. You must entry the width and height values.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ShadowComponent)]] Parameters {

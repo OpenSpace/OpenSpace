@@ -34,14 +34,14 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo IsInTimeFrameInfo = {
+    constexpr PropertyInfo IsInTimeFrameInfo = {
         "IsInTimeFrame",
         "Is in time frame",
         "This property indicates the current state of the TimeFrame time testing. If the "
         "current simulation time is determined to be a valid time, this property is set "
         "to true. Otherwise it will be false, meaning that the scene graph node this "
         "TimeFrame is attached to would not be shown",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
     // A `TimeFrame` object determines the time frame during which a scene graph node is

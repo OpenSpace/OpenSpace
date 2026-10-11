@@ -65,39 +65,39 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 }
 )";
 
-    constexpr Property::PropertyInfo SSAOEnabledInfo = {
+    constexpr PropertyInfo SSAOEnabledInfo = {
         "Enabled",
         "Enabled",
         "Determines whether this SSAO pass should be enabled or not."
     };
 
-    constexpr Property::PropertyInfo SSAOIntensityInfo = {
+    constexpr PropertyInfo SSAOIntensityInfo = {
         "Intensity",
         "Intensity",
         "Controls the strength of the ambient occlusion effect. Higher values darken "
         "occluded areas more strongly."
     };
 
-    constexpr Property::PropertyInfo SSAORadiusInfo = {
+    constexpr PropertyInfo SSAORadiusInfo = {
         "Radius",
         "Radius",
         "Sets the sampling radius for occlusion. Larger values produce broader, smoother "
         "shading, while smaller values create tighter shadows."
     };
 
-    constexpr Property::PropertyInfo SSAOBiasInfo = {
+    constexpr PropertyInfo SSAOBiasInfo = {
         "HorizonBias",
         "Horizon Bias",
         "" // @TODO Missing documentation
     };
 
-    constexpr Property::PropertyInfo SSAONormalBiasInfo = {
+    constexpr PropertyInfo SSAONormalBiasInfo = {
         "NormalBias",
         "Normal Bias",
         "" // @TODO Missing documentation
     };
 
-    constexpr Property::PropertyInfo ExposureInfo = {
+    constexpr PropertyInfo ExposureInfo = {
         "Exposure",
         "Exposure",
         "Controls the Exposure setting for the tonemap."

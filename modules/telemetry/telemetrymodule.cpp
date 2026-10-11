@@ -56,29 +56,29 @@ namespace {
     constexpr std::string_view DefaultSuperColliderIp = "127.0.0.1";
     constexpr int DefaultSuperColliderPort = 57120;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Enable or disable all gathering of telemetry information.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo IpAddressInfo = {
+    constexpr PropertyInfo IpAddressInfo = {
         "IpAddress",
         "IP address",
         "The network IP address that the telemetry Open Sound Control messages is sent "
         "to.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo PortInfo = {
+    constexpr PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The network port that the telemetry Open Sound Control messages are sent to.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo AngleCalculationModeInfo = {
+    constexpr PropertyInfo AngleCalculationModeInfo = {
         "AngleCalculationMode",
         "Angle calculation mode",
         "This setting changes the method used to calculate any angles in the "
@@ -87,10 +87,10 @@ namespace {
         "for centered fisheye displays or omnidirectional immersive environments. For "
         "more information, see the pages \"Angle Calculations\" and \"Surround Sound "
         "Configurations\"on the OpenSpace documentation page.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo IncludeElevationAngleInfo = {
+    constexpr PropertyInfo IncludeElevationAngleInfo = {
         "IncludeElevationAngle",
         "Include elevation angle",
         "This setting determines if an additional elevation angle should be calculated "
@@ -100,7 +100,7 @@ namespace {
         "method used for this calculation also depends on the angle calculation mode. "
         "For more information, see the page \"Angle Calculations\" on the OpenSpace "
         "documentation page.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     struct [[codegen::Dictionary(TelemetryModule)]] Parameters {

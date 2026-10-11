@@ -59,72 +59,72 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo AllowRotationInfo = {
+    constexpr PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
         "Allow camera rotation",
         "Toggles if the camera should rotate to look at the sky target if it is going "
         "outside of the current field of view.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo CameraRotSpeedInfo = {
+    constexpr PropertyInfo CameraRotSpeedInfo = {
         "CameraRotationSpeed",
         "Camera rotation speed",
         "The speed of the rotation of the camera when the camera rotates to look at a "
         "coordinate which is outside of the field of view.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo TargetSpeedInfo = {
+    constexpr PropertyInfo TargetSpeedInfo = {
         "TargetAnimationSpeed",
         "Target animation speed",
         "This determines the speed of the animation of the sky target.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo BrowserSpeedInfo = {
+    constexpr PropertyInfo BrowserSpeedInfo = {
         "BrowserAnimationSpeed",
         "Field of view animation speed",
         "This determines the speed of the animation of the field of view in the browser.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo HideWithGuiInfo = {
+    constexpr PropertyInfo HideWithGuiInfo = {
         "HideTargetsBrowsersWithGui",
         "Hide targets and browsers with GUI",
         "If checked, the targets and browsers will be disabled when the sky browser "
         "panel is minimized.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo InverseZoomInfo = {
+    constexpr PropertyInfo InverseZoomInfo = {
         "InverseZoomDirection",
         "Inverse zoom direction",
         "If checked, the zoom direction of the scroll over the AAS WWT browser will be "
         "inversed.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo SynchronizeAimInfo = {
+    constexpr PropertyInfo SynchronizeAimInfo = {
         "SynchronizeAim",
         "Synchronize aim",
         "If checked, the target and the browser will have synchronized aim.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SpaceCraftTimeInfo = {
+    constexpr PropertyInfo SpaceCraftTimeInfo = {
         "SpaceCraftAnimationTime",
         "Spacecraft animation time",
         "Sets the duration (in seconds) of the animation of the spacecraft when it is "
         "pointed to where the target is aiming.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ImageCollectionInfo = {
+    constexpr PropertyInfo ImageCollectionInfo = {
        "WwtImageCollectionUrl",
        "AAS worldwide telescope image collection URL",
        "The url of the image collection which is loaded into AAS WorldWide Telescope.",
-       Property::Visibility::AdvancedUser
+       PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {

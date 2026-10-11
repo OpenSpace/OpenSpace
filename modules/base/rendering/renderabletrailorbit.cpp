@@ -41,7 +41,7 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ForceFullOrbitTrailInfo = {
+    constexpr PropertyInfo ForceFullOrbitTrailInfo = {
         "ForceFullOrbitTrail",
         "Force full orbit trail",
         "Forces the trail to always have a visible length of one orbit. If the time "
@@ -50,49 +50,49 @@ namespace {
         "compared to the current OpenSpace time. If the current time in OpenSpace has "
         "passed the end date, the last full period of the trail will be shown. Only "
         "works if there exist a Start Time and End Time for the orbit data.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LimitToTimeRangeInfo = {
+    constexpr PropertyInfo LimitToTimeRangeInfo = {
         "LimitToTimeRange",
         "Limit to time range",
         "Only forces full trail orbit trail between start time and one orbital period "
         "after the end time.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StartTimeInfo = {
+    constexpr PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start Time",
         "The start time for the range of this orbit. The date must be in ISO 8601.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EndTimeInfo = {
+    constexpr PropertyInfo EndTimeInfo = {
         "EndTime",
         "End Time",
         "The end time for the range of this orbit. The date must be in ISO 8601.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PeriodInfo = {
+    constexpr PropertyInfo PeriodInfo = {
         "Period",
         "Period (in days)",
         "The objects period, i.e. the length of its orbit around the parent object given "
         "in (Earth) days. In the case of Earth, this would be a sidereal year "
         "(=365.242 days). If this values is specified as multiples of the period, it is "
         "possible to show the effects of precession.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ResolutionInfo = {
+    constexpr PropertyInfo ResolutionInfo = {
         "Resolution",
         "Number of samples along the orbit",
         "The number of samples along the orbit. This determines the resolution of the "
         "trail; the tradeoff being that a higher resolution is able to resolve more "
         "detail, but will take more resources while rendering, too. The higher, the "
         "smoother the trail, but also more memory will be used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {

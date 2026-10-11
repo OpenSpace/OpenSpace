@@ -35,12 +35,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo NameInfo = {
+    constexpr PropertyInfo NameInfo = {
         "SpoutName",
         "Spout sender name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
         "is not a valid name, an empty image is used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSpout)]] Parameters {

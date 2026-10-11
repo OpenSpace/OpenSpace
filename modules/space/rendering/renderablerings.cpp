@@ -53,45 +53,45 @@ namespace {
         GLfloat t;
     };
 
-    constexpr Property::PropertyInfo TextureInfo = {
+    constexpr PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The path to a texture on disk that contains a one-dimensional texture to use "
         "for these rings.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
+    constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The radius of the rings in meters.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OffsetInfo = {
+    constexpr PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "A value that is used to limit the width of the rings. Each of the two values is "
         "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
         "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
         "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NightFactorInfo = {
+    constexpr PropertyInfo NightFactorInfo = {
         "NightFactor",
         "Night factor",
         "A multiplicative factor that is applied to the side of the rings that is facing "
         "away from the Sun. If it is 1, no darkening of the night side occurs.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorFilterInfo = {
+    constexpr PropertyInfo ColorFilterInfo = {
         "ColorFilter",
         "Color filter",
         "A value that affects the filtering out of part of the rings depending on the "
         "color values of the texture. The higher value, the more rings are filtered out.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableRings)]] Parameters {

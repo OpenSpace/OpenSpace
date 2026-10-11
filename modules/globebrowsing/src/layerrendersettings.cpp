@@ -31,35 +31,35 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SetDefaultInfo = {
+    constexpr PropertyInfo SetDefaultInfo = {
         "SetDefault",
         "Set default",
         "If this value is triggered it will reset all of these values to their default "
         "values.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo GammaInfo = {
+    constexpr PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma",
         "This value is used as an exponent to adjust the color for each tile.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MultiplierInfo = {
+    constexpr PropertyInfo MultiplierInfo = {
         "Multiplier",
         "Multiplier",
         "This value is used as a multiplier to adjust the color applied after taking the "
         "gamma value as an exponent.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo OffsetInfo = {
+    constexpr PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "This value is used as an additive modifier to adjust the color applied after "
         "the gamma exponent and the multiplier has been performed.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 } // namespace
 

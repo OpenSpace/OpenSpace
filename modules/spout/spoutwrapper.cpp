@@ -50,35 +50,35 @@ namespace {
 
     constexpr std::string_view _loggerCat = "Spout";
 
-    constexpr Property::PropertyInfo NameSenderInfo = {
+    constexpr PropertyInfo NameSenderInfo = {
         "SpoutName",
         "Spout sender name",
         "This value sets the Spout sender to use a specific name.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NameReceiverInfo = {
+    constexpr PropertyInfo NameReceiverInfo = {
         "SpoutName",
         "Spout receiver name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
         "is not a valid name, the first Spout image is used instead.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SelectionInfo = {
+    constexpr PropertyInfo SelectionInfo = {
         "SpoutSelection",
         "Spout selection",
         "This property displays all available Spout sender on the system. If one them is "
         "selected, its value is stored in the 'SpoutName' property, overwriting its "
         "previous value.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UpdateInfo = {
+    constexpr PropertyInfo UpdateInfo = {
         "UpdateSelection",
         "Update selection",
         "If this property is triggered, the 'SpoutSelection' options will be refreshed.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SpoutReceiver)]] ReceiverParameters {
@@ -312,15 +312,15 @@ void SpoutReceiver::releaseTexture() {
     _spoutTexture.release();
 }
 
-const Property::PropertyInfo& SpoutReceiverPropertyProxy::NameInfoProperty() {
+const PropertyInfo& SpoutReceiverPropertyProxy::NameInfoProperty() {
     return NameReceiverInfo;
 }
 
-const Property::PropertyInfo& SpoutReceiverPropertyProxy::SelectionInfoProperty() {
+const PropertyInfo& SpoutReceiverPropertyProxy::SelectionInfoProperty() {
     return SelectionInfo;
 }
 
-const Property::PropertyInfo& SpoutReceiverPropertyProxy::UpdateInfoProperty() {
+const PropertyInfo& SpoutReceiverPropertyProxy::UpdateInfoProperty() {
     return UpdateInfo;
 }
 
@@ -560,7 +560,7 @@ void SpoutSender::onReleaseSender(std::function<void()> callback) {
     _onReleaseSenderCallback = std::move(callback);
 }
 
-const Property::PropertyInfo& SpoutSenderPropertyProxy::NameInfoProperty() {
+const PropertyInfo& SpoutSenderPropertyProxy::NameInfoProperty() {
     return NameSenderInfo;
 }
 

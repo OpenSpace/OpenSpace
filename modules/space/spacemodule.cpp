@@ -59,12 +59,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SpiceExceptionInfo = {
+    constexpr PropertyInfo SpiceExceptionInfo = {
         "ShowExceptions",
         "Show exceptions",
         "If enabled, errors from SPICE will be thrown and show up in the log. If "
         "disabled, the errors will be ignored silently.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(SpaceModule)]] Parameters {

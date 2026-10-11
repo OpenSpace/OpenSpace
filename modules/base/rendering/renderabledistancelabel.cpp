@@ -39,37 +39,37 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableDistanceLabel";
 
-    constexpr Property::PropertyInfo NodeLineInfo = {
+    constexpr PropertyInfo NodeLineInfo = {
         "NodeLine",
         "Node line",
         "The identifier of a scene graph node with a RenderableNodeLine that this label "
         "should track. The label text will be updating based on the distance from the "
         "node line's start and end.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DistanceUnitInfo = {
+    constexpr PropertyInfo DistanceUnitInfo = {
         "DistanceUnit",
         "Display distance unit",
         "The unit in which the distance value should be displayed. Defaults to 'km' if "
         "not specified.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo CustomUnitDescriptorInfo = {
+    constexpr PropertyInfo CustomUnitDescriptorInfo = {
         "CustomUnitDescriptor",
         "Custom unit descriptor",
         "Property to define a custom unit descriptor to use to describe the distance "
         "value. Defaults to the selected unit's SI descriptor if not specified.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PrecisionInfo = {
+    constexpr PropertyInfo PrecisionInfo = {
         "Precision",
         "Precision",
         "The precision in which to to show the distance number, i.e. the number of "
         "digits after the decimal point.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Creates a label that shows the distance between two nodes, based on an existing

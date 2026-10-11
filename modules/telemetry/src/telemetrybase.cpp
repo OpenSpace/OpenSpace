@@ -29,11 +29,11 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this telemetry gathering is enabled or not.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 } // namespace
 

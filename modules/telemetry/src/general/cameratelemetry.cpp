@@ -53,13 +53,13 @@ namespace {
         "Telemetry that sends out camera information to the Open Sound Control receiver."
     };
 
-    constexpr Property::PropertyInfo CameraSpeedDistanceUnitInfo = {
+    constexpr PropertyInfo CameraSpeedDistanceUnitInfo = {
         "CameraSpeedDistanceUnit",
         "Camera speed unit (distance)",
         "Choose a distance unit that is used for the camera speed. "
         "For example, if the distance unit 'Kilometer' is chosen, then the unit used for "
         "the camera speed will be kilometers per second.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
@@ -68,28 +68,28 @@ namespace {
         "Settings for the precision of the camera telemetry information."
     };
 
-    constexpr Property::PropertyInfo PositionPrecisionInfo = {
+    constexpr PropertyInfo PositionPrecisionInfo = {
         "PositionPrecision",
         "Position precision",
         "The precision in meters used to determine when to send updated camera "
         "positional data to the Open Sound Control receiver.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RotationPrecisionInfo = {
+    constexpr PropertyInfo RotationPrecisionInfo = {
         "RotationPrecision",
         "Rotation precision",
         "The precision used to determine when to send updated camera rotational data to "
         "the Open Sound Control receiver.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SpeedPrecisionInfo = {
+    constexpr PropertyInfo SpeedPrecisionInfo = {
         "SpeedPrecision",
         "Speed precision",
         "The precision in meters per second used to determine when to send updated "
         "camera speed data to the Open Sound Control receiver.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 } // namespace
 

@@ -47,19 +47,19 @@ namespace {
         FPSAvg
     };
 
-    constexpr Property::PropertyInfo FrametimeInfo = {
+    constexpr PropertyInfo FrametimeInfo = {
         "FrametimeType",
         "Type of the frame time display",
         "This value determines the units in which the frame time is displayed.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ClearCacheInfo = {
+    constexpr PropertyInfo ClearCacheInfo = {
         "ClearCache",
         "Clear cache",
         "Clears the cache of this DashboardItemFramerate item. If the selected option "
         "does not use any caching, this trigger does not do anything.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     [[nodiscard]] char* formatDt(std::vector<char>& buffer) {

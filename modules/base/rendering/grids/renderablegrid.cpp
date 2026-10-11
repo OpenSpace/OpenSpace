@@ -39,56 +39,56 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ColorInfo = {
+    constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the grid lines.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo HighlightColorInfo = {
+    constexpr PropertyInfo HighlightColorInfo = {
         "HighlightColor",
         "Highlight color",
         "The color of the highlighted lines in the grid.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo SegmentsInfo = {
+    constexpr PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of segments",
         "The number of segments to split the grid into, in each direction (x and y).",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo HighlightRateInfo = {
+    constexpr PropertyInfo HighlightRateInfo = {
         "HighlightRate",
         "Highlight rate",
         "The rate that the columns and rows are highlighted, counted with respect to the "
         "center of the grid. If the number of segments in the grid is odd, the "
         "highlighting might be offset from the center.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo HighlightLineWidthInfo = {
+    constexpr PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
         "Highlight line width",
         "The width of the highlighted grid lines. The larger number, the thicker the "
         "lines.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
+    constexpr PropertyInfo SizeInfo = {
         "Size",
         "Grid size",
         "The size of the grid (in the x and y direction), given in meters.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {

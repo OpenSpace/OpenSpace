@@ -40,7 +40,7 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ScriptInfo = {
+    constexpr PropertyInfo ScriptInfo = {
         "Script",
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -50,7 +50,7 @@ namespace {
         "epoch of the last frame as the second argument, and the current wall time as "
         "milliseconds past the J2000 epoch the third argument and computes the three "
         "translation values returned as a table.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Generates the translation values used to offset the attached scene graph node's

@@ -55,82 +55,82 @@ namespace {
 
     constexpr float SecondsInOneDay = 60 * 60 * 24;
 
-    constexpr Property::PropertyInfo StepSizeInfo = {
+    constexpr PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step size",
         "Specifies how often to sample during raycasting. Lower step size leads to "
         "higher resolution.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GridTypeInfo = {
+    constexpr PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid type",
         "The grid type to use for the volume.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SecondsBeforeInfo = {
+    constexpr PropertyInfo SecondsBeforeInfo = {
         "SecondsBefore",
         "Seconds before",
         "The number of seconds to show the first timestep before its actual time.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SecondsAfterInfo = {
+    constexpr PropertyInfo SecondsAfterInfo = {
         "SecondsAfter",
         "Seconds after",
         "The number of seconds to show the the last timestep after its actual time.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SourceDirectoryInfo = {
+    constexpr PropertyInfo SourceDirectoryInfo = {
         "SourceDirectory",
         "Source directory",
         "A directory from where to load the data files for the different time steps.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TransferFunctionInfo = {
+    constexpr PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer function path",
         "The path to the transfer function file.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TriggerTimeJumpInfo = {
+    constexpr PropertyInfo TriggerTimeJumpInfo = {
         "TriggerTimeJump",
         "Jump",
         "Sets the time to be the first time of the volume sequence.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo JumpToTimestepInfo = {
+    constexpr PropertyInfo JumpToTimestepInfo = {
         "JumpToTimestep",
         "Jump to timestep",
         "Setting this value lets you scrub through the sequence's time steps.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo BrightnessInfo = {
+    constexpr PropertyInfo BrightnessInfo = {
         "Brightness",
         "Brightness",
         "A value that affects the general brightness of the volume rendering.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo rNormalizationInfo = {
+    constexpr PropertyInfo rNormalizationInfo = {
         "RNormalization",
         "Radius normalization",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo rUpperBoundInfo = {
+    constexpr PropertyInfo rUpperBoundInfo = {
         "RUpperBound",
         "Radius upper bound",
         "Limit the volume's radius.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {

@@ -40,23 +40,23 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
+    constexpr PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed. During stereo rendering, this texture is considered the left "
         "eye.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RightTextureInfo = {
+    constexpr PropertyInfo RightTextureInfo = {
         "RightTexture",
         "Right Eye Image URL",
         "Sets the URL of the texture that is displayed on this plane for the right eye "
         "during stereo rendering. If this value is changed, the image at the new path "
         "will automatically be loaded and displayed.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture image is loaded from the internet

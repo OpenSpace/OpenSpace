@@ -46,35 +46,35 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ScreenSpaceTimeVaryingImageOnline";
 
-    constexpr Property::PropertyInfo FileInfo = {
+    constexpr PropertyInfo FileInfo = {
         "FilePath",
         "File path",
         "The file path to the data containing information about when to display which "
         "image.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShowBeforeInfo = {
+    constexpr PropertyInfo ShowBeforeInfo = {
         "ShowBefore",
         "Show image before first time",
         "If enabled, the image with the earliest timestamp is shown when the simulation "
         "time is before the first timestamp specified in the data file.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShowAfterInfo = {
+    constexpr PropertyInfo ShowAfterInfo = {
         "ShowAfter",
         "Show image after last time",
         "If enabled, the image with the latest timestamp is shown when the simulation "
         "time is after the last timestamp specified in the data file.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo JumpToFirstTimeInfo = {
+    constexpr PropertyInfo JumpToFirstTimeInfo = {
         "JumpToFirstTime",
         "Jump to first time",
         "Performs a time jump to the first timestamp in the loaded file.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     // Displays an image based on the current in-game simulation time. The image shown is

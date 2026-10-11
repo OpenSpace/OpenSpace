@@ -49,61 +49,61 @@ namespace {
         glm::vec3 position;
     };
 
-    constexpr Property::PropertyInfo StartNodeInfo = {
+    constexpr PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start node",
         "The identifier of the node the line starts from. Defaults to 'Root' if not "
         "specified.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EndNodeInfo = {
+    constexpr PropertyInfo EndNodeInfo = {
         "EndNode",
         "End node",
         "The identifier of the node the line ends at. Defaults to 'Root' if not "
         "specified.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LineColorInfo = {
+    constexpr PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "The RGB color for the line.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the line. The larger number, the thicker the line.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo StartOffsetInfo = {
+    constexpr PropertyInfo StartOffsetInfo = {
         "StartOffset",
         "Offset to start node",
         "A distance from the start node at which the rendered line should begin. By "
         "default it takes a value in meters, but if 'UseRelativeOffsets' is set to true "
         "it is read as a multiplier times the bounding sphere of the node.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EndOffsetInfo = {
+    constexpr PropertyInfo EndOffsetInfo = {
         "EndOffset",
         "Offset to end node",
         "A distance to the end node at which the rendered line should end. By default it "
         "takes a value in meters, but if 'UseRelativeOffsets' is set to true it is read "
         "as a multiplier times the bounding sphere of the node.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RelativeOffsetsInfo = {
+    constexpr PropertyInfo RelativeOffsetsInfo = {
         "UseRelativeOffsets",
         "Use relative offsets",
         "If true, the offset values are interpreted as relative values to be multiplied "
         "with the bounding sphere of the start/end node. If false, the value is "
         "interpreted as a distance in meters.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     /**

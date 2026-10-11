@@ -518,11 +518,11 @@ namespace {
             global::sessionRecordingHandler->savePropertyEnabledBaseline(prop);
         }
 
-        prop.setIsEnabled(Property::IsEnabled(isEnabled));
+        prop.setIsEnabled(PropertyInfo::IsEnabled(isEnabled));
     }
 
     template <typename T>
-    void createCustomProperty(Property::PropertyInfo info,
+    void createCustomProperty(PropertyInfo info,
                               std::optional<std::string> onChange)
     {
         T* p = new T(info);
@@ -541,7 +541,7 @@ namespace {
     }
 
     template <>
-    void createCustomProperty<TriggerProperty>(Property::PropertyInfo info,
+    void createCustomProperty<TriggerProperty>(PropertyInfo info,
                                                std::optional<std::string> onChange)
     {
         TriggerProperty* p = new TriggerProperty(info);
@@ -1478,7 +1478,7 @@ enum class [[codegen::enum]] CustomPropertyType {
         guiName->c_str() :
         identifier.c_str();
 
-    Property::PropertyInfo info = {
+    PropertyInfo info = {
         identifier.c_str(),
         gui,
         description.has_value() ? description->c_str() : ""

@@ -55,77 +55,77 @@ namespace {
     constexpr int RenderOptionViewDirection = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
-    constexpr Property::PropertyInfo TextColorInfo = {
+    constexpr PropertyInfo TextColorInfo = {
         "TextColor",
         "Text color",
         "The text color for the astronomical object.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo TextOpacityInfo = {
+    constexpr PropertyInfo TextOpacityInfo = {
         "TextOpacity",
         "Text opacity",
         "Determines the transparency of the text label, where 1 is completely opaque and "
         "0 fully transparent.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo TextSizeInfo = {
+    constexpr PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text size",
         "The text size for the astronomical object labels.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LabelFileInfo = {
+    constexpr PropertyInfo LabelFileInfo = {
         "LabelFile",
         "Label file",
         "The path to the label file that contains information about the astronomical "
         "objects being rendered.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LabelMinMaxSizeInfo = {
+    constexpr PropertyInfo LabelMinMaxSizeInfo = {
         "TextMinMaxSize",
         "Text min/max size",
         "The minimum and maximum size (in pixels) of the text for the labels for the "
         "astronomical objects being rendered.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "If the DU mesh is of wire type, this value determines the width of the lines.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo DrawElementsInfo = {
+    constexpr PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw elements",
         "Enables/Disables the drawing of the astronomical objects.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo DrawLabelInfo = {
+    constexpr PropertyInfo DrawLabelInfo = {
         "DrawLabels",
         "Draw labels",
         "Determines whether labels should be drawn or hidden.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo MeshColorInfo = {
+    constexpr PropertyInfo MeshColorInfo = {
         "MeshColor",
         "Meshes colors",
         "The defined colors for the meshes to be rendered.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo RenderOptionInfo = {
+    constexpr PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render option",
         "Debug option for rendering of billboards and texts.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {

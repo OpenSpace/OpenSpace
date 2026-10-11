@@ -42,57 +42,57 @@ namespace {
 
     constexpr std::string_view _loggerCat = "GlobeRotation";
 
-    constexpr Property::PropertyInfo GlobeInfo = {
+    constexpr PropertyInfo GlobeInfo = {
         "Globe",
         "Attached globe",
         "The node on which the longitude/latitude is specified. If the node is a globe, "
         "the correct height information for the globe is used. Otherwise, the position "
         "is specified based on the longitude and latitude on the node's interaction "
         "sphere.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LatitudeInfo = {
+    constexpr PropertyInfo LatitudeInfo = {
         "Latitude",
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
         "globe.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LongitudeInfo = {
+    constexpr PropertyInfo LongitudeInfo = {
         "Longitude",
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
         "globe.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo AngleInfo = {
+    constexpr PropertyInfo AngleInfo = {
         "Angle",
         "Angle",
         "A rotation angle (in degrees) that can be used to rotate the object around its "
         "own y-axis, which will be pointing out of the globe's surface.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UseHeightmapInfo = {
+    constexpr PropertyInfo UseHeightmapInfo = {
         "UseHeightmap",
         "Use heightmap",
         "If set to true, the heightmap will be used when computing the surface normal. "
         "This means that the object will be rotated to lay flat on the surface at the "
         "given coordinate and follow the shape of the landscape.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo UseCameraInfo = {
+    constexpr PropertyInfo UseCameraInfo = {
         "UseCamera",
         "Use camera",
         "If this value is 'true', the latitude and longitude are updated each frame "
         "to match the location of the camera.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Orients the scene graph node in such a way that the y-axis points away from the

@@ -97,31 +97,31 @@ namespace {
 
     constexpr std::string_view _loggerCat = "GlobeBrowsingModule";
 
-    constexpr Property::PropertyInfo TileCacheSizeInfo = {
+    constexpr PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile cache size",
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DefaultGeoPointTextureInfo = {
+    constexpr PropertyInfo DefaultGeoPointTextureInfo = {
         "DefaultGeoPointTexture",
         "Default geo point texture",
         "A path to a texture to use as default for GeoJson points."
     };
 
-    constexpr Property::PropertyInfo MRFCacheEnabledInfo = {
+    constexpr PropertyInfo MRFCacheEnabledInfo = {
         "MRFCacheEnabled",
         "MRF cache enabled",
         "Determines whether automatic caching of globe browsing data is enabled.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MRFCacheLocationInfo = {
+    constexpr PropertyInfo MRFCacheLocationInfo = {
         "MRFCacheLocation",
         "MRF cache location",
         "The location of the root folder for the MRF cache of globe browsing data.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     GlobeBrowsingModule::Capabilities parseSubDatasets(char** subDatasets,

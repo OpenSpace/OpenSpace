@@ -45,13 +45,13 @@ namespace {
 
     constexpr std::string_view _loggerCat = "LayerGroup";
 
-    constexpr Property::PropertyInfo BlendTileInfo = {
+    constexpr PropertyInfo BlendTileInfo = {
         "BlendTileLevels",
         "Blend between levels",
         "If this value is enabled, images between different levels are interpolated, "
         "rather than switching between levels abruptly. This makes transitions smoother "
         "and more visually pleasing.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 } // namespace
 
@@ -114,7 +114,7 @@ Layer* LayerGroup::addLayer(const Dictionary& layerDict) {
     const std::string identifier = layerDict.value<std::string>("Identifier");
     if (hasPropertySubOwner(identifier)) {
         LINFO("Layer with identifier '" + identifier + "' already exists");
-        _levelBlendingEnabled.setVisibility(Property::Visibility::User);
+        _levelBlendingEnabled.setVisibility(PropertyInfo::Visibility::User);
         return nullptr;
     }
 
@@ -155,7 +155,7 @@ Layer* LayerGroup::addLayer(const Dictionary& layerDict) {
     };
     std::stable_sort(_subOwners.begin(), _subOwners.end(), compareZIndexSubOwners);
 
-    _levelBlendingEnabled.setVisibility(Property::Visibility::User);
+    _levelBlendingEnabled.setVisibility(PropertyInfo::Visibility::User);
     return ptr;
 }
 
@@ -184,7 +184,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
         LINFO(std::format("Deleted layer {}", lName));
 
         if (_layers.empty()) {
-            _levelBlendingEnabled.setVisibility(Property::Visibility::Hidden);
+            _levelBlendingEnabled.setVisibility(PropertyInfo::Visibility::Hidden);
         }
         return;
     }

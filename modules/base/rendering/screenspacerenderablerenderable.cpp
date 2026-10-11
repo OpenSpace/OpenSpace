@@ -40,21 +40,21 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TimeInfo = {
+    constexpr PropertyInfo TimeInfo = {
         "Time",
         "Time",
         "The time (in J2000 seconds) that is used to calculate transformations and the "
         "renderable's data."
     };
 
-    constexpr Property::PropertyInfo CameraPositionInfo = {
+    constexpr PropertyInfo CameraPositionInfo = {
         "CameraPosition",
         "Camera position",
         "Specifies the location of the virtual camera that is showing the renderable "
         "class. This position is provided in meters."
     };
 
-    constexpr Property::PropertyInfo CameraCenterInfo = {
+    constexpr PropertyInfo CameraCenterInfo = {
         "CameraCenter",
         "Camera center",
         "The location of the camera's focal point. The camera's view direction will "
@@ -62,14 +62,14 @@ namespace {
         "in meters."
     };
 
-    constexpr Property::PropertyInfo CameraUpInfo = {
+    constexpr PropertyInfo CameraUpInfo = {
         "CameraUp",
         "Camera up",
         "The direction that is 'up' for the provided camera. This value does not have "
         "any units."
     };
 
-    constexpr Property::PropertyInfo CameraFovInfo = {
+    constexpr PropertyInfo CameraFovInfo = {
         "CameraFov",
         "Camera field of view",
         "The camera's field of view in degrees."

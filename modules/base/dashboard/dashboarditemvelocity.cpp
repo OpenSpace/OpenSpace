@@ -40,21 +40,21 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SimplificationInfo = {
+    constexpr PropertyInfo SimplificationInfo = {
         "Simplification",
         "Simplification",
         "If this value is enabled, the velocity is displayed in nuanced units, such as "
         "m/s, AU/s, light years / s etc. If this value is disabled, the unit can be "
         "explicitly requested.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo RequestedUnitInfo = {
+    constexpr PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested unit",
         "If the simplification is disabled, this distance unit is used for the velocity "
         "display.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // This `DashboardItem` shows the velocity of the camera, that is how fast the camera
@@ -91,7 +91,7 @@ DashboardItemVelocity::DashboardItemVelocity(const Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
-            _doSimplification ? Property::Visibility::Hidden : Property::Visibility::User
+            _doSimplification ? PropertyInfo::Visibility::Hidden : PropertyInfo::Visibility::User
         );
     });
     _doSimplification = p.simplification.value_or(_doSimplification);

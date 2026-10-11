@@ -32,11 +32,11 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
+    constexpr PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The OpenGL name of the texture that is displayed on this plane.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Useful for debugging OpenGL textures. It renders the content of an existing

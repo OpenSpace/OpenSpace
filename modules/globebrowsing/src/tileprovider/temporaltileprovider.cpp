@@ -61,21 +61,21 @@ namespace {
 
     constexpr std::string_view TimePlaceholder = "${OpenSpaceTimeId}";
 
-    constexpr Property::PropertyInfo UseFixedTimeInfo = {
+    constexpr PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",
         "Use fixed time",
         "If this value is enabled, the time-varying timevarying dataset will always use "
         "the time that is specified in the 'FixedTime' property, rather than using the "
         "actual time from OpenSpace.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FixedTimeInfo = {
+    constexpr PropertyInfo FixedTimeInfo = {
         "FixedTime",
         "Fixed time",
         "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
         "time taken from OpenSpace for the displayed tiles.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     std::string_view timeStringify(const std::string& format, const Time& t) {

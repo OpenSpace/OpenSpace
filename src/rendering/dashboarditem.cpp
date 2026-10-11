@@ -36,7 +36,7 @@ namespace {
 
     constexpr std::string_view KeyType = "Type";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "If this value is set to 'true' this dashboard item is shown in the dashboard. "

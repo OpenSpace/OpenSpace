@@ -41,36 +41,36 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ColorInfo = {
+    constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the grid lines.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo LongSegmentsInfo = {
+    constexpr PropertyInfo LongSegmentsInfo = {
         "LongSegments",
         "Number of longitudinal segments",
         "The number of longitudinal segments the sphere is split into. Determines the "
         "resolution of the rendered sphere in a left/right direction when looking "
         "straight at the equator.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LatSegmentsInfo = {
+    constexpr PropertyInfo LatSegmentsInfo = {
         "LatSegments",
         "Number of latitudinal segments",
         "The number of latitudinal segments the sphere is split into. Determines the "
         "resolution of the rendered sphere in a up/down direction when looking "
         "straight at the equator.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
+    constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {

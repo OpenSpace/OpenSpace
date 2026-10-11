@@ -233,7 +233,7 @@ void SettingsDialog::createWidgets() {
             _propertyVisibility,
             &QComboBox::textActivated,
             [this](const QString& value) {
-                using Visibility = Property::Visibility;
+                using Visibility = PropertyInfo::Visibility;
                 if (value == "Novice User") {
                     _currentEdit.visibility = Visibility::NoviceUser;
                 }
@@ -428,7 +428,7 @@ void SettingsDialog::loadFromSettings(const Settings& settings) {
     }
 
     if (settings.visibility.has_value()) {
-        using Visibility = Property::Visibility;
+        using Visibility = PropertyInfo::Visibility;
         const Visibility vis = *settings.visibility;
         switch (vis) {
             case Visibility::NoviceUser:

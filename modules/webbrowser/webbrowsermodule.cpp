@@ -48,20 +48,20 @@ namespace {
 
     constexpr std::string_view _loggerCat = "WebBrowser";
 
-    constexpr Property::PropertyInfo UpdateBrowserBetweenRenderablesInfo = {
+    constexpr PropertyInfo UpdateBrowserBetweenRenderablesInfo = {
         "UpdateBrowserBetweenRenderables",
         "Update browser between renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs once per frame.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo BrowserUpdateIntervalInfo = {
+    constexpr PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
         "Browser update interval",
         "The time in microseconds between running the message loop of the browser. Only "
         "used if UpdateBrowserBetweenRenderables is true.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
     /**

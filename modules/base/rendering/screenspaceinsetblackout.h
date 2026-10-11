@@ -55,7 +55,7 @@ private:
 
             void updateData();
 
-            std::unique_ptr<Property::PropertyInfo> propInfo = nullptr;
+            std::unique_ptr<PropertyInfo> propInfo = nullptr;
             std::unique_ptr<Vec2Property> prop = nullptr;
             /// Pointer to data used when user modifies the point position
             glm::vec2* dataptr;

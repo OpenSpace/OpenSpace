@@ -64,93 +64,93 @@ namespace {
 
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Enables and disables labels' rendering.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo FontSizeInfo = {
+    constexpr PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "Font size for the rendering labels. This is different from the text size.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MinMaxSizeInfo = {
+    constexpr PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min/max text size",
         "Minimum and maximum label size, in pixels.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
+    constexpr PropertyInfo SizeInfo = {
         "LabelsSize",
         "Labels size",
         "This value affects the size scale of the labels.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo HeightOffsetInfo = {
+    constexpr PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
         "Height offset",
         "This value moves the label away from the globe surface by the specified "
         "distance (in meters).",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
+    constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The text color of the labels.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo FadeDistancesInfo = {
+    constexpr PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
         "Fade-in distances",
         "The distances above the globe's surface at which the labels start fading in or "
         "out, given in meters. The final distances are also adjusted by the specified "
         "height offset.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FadeInEnabledInfo = {
+    constexpr PropertyInfo FadeInEnabledInfo = {
         "FadeInEnabled",
         "Fade-in enabled",
         "Sets whether the labels fade in when approaching the globe from a distance. If "
         "false, no fading happens and the labels immediately has full opacity.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FadeOutEnabledInfo = {
+    constexpr PropertyInfo FadeOutEnabledInfo = {
         "FadeOutEnabled",
         "Fade-out enabled",
         "Sets whether the labels fade out when approaching the surface of the globe. If "
         "false, no fading happens and the labels stays in full opacity.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo DisableCullingInfo = {
+    constexpr PropertyInfo DisableCullingInfo = {
         "DisableCulling",
         "Culling disabled",
         "Labels culling disabled.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo DistanceEPSInfo = {
+    constexpr PropertyInfo DistanceEPSInfo = {
         "DistanceEPS",
         "Culling distance",
         "Labels culling distance from globe's center.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo AlignmentOptionInfo = {
+    constexpr PropertyInfo AlignmentOptionInfo = {
         "AlignmentOption",
         "Alignment option",
         "Labels are aligned horizontally or circularly related to the planet.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     bool isLabelInFrustum(const glm::dmat4& mvMatrix, const glm::dvec3& position) {

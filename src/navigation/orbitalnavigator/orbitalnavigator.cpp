@@ -58,151 +58,151 @@ namespace {
     constexpr double DistanceRatioAimThreshold = 1e-4;
     constexpr double CameraMovedEventIntervalTime = 5.0;
 
-    constexpr Property::PropertyInfo AnchorInfo = {
+    constexpr PropertyInfo AnchorInfo = {
         "Anchor",
         "Anchor",
         "The name of the scene graph node that is the origin of the camera interaction. "
         "The camera follows, orbits and dollies towards this node. Any scene graph node "
         "can be the anchor node.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo AimInfo = {
+    constexpr PropertyInfo AimInfo = {
         "Aim",
         "Aim",
         "The name of the scene graph node that is the aim of the camera. The camera "
         "direction is relative to the vector from the camera position to this node.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo RetargetAnchorInfo = {
+    constexpr PropertyInfo RetargetAnchorInfo = {
         "RetargetAnchor",
         "Retarget anchor",
         "When triggered, this property starts an interpolation to reset the camera "
         "direction to the anchor node.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo RetargetAimInfo = {
+    constexpr PropertyInfo RetargetAimInfo = {
         "RetargetAim",
         "Retarget aim",
         "When triggered, this property starts an interpolation to reset the camera "
         "direction to the aim node.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo RollFrictionInfo = {
+    constexpr PropertyInfo RollFrictionInfo = {
         "RollFriction",
         "Roll friction",
         "If this is enabled, a small friction is applied to the rolling part of the "
         "camera motion, thus slowing it down within a small time period. If this value "
         "is disabled, the camera will roll forever.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo RotationalFrictionInfo = {
+    constexpr PropertyInfo RotationalFrictionInfo = {
         "RotationalFriction",
         "Rotational friction",
         "If this is enabled, a small friction is applied to the rotational part of the "
         "camera motion, thus slowing it down within a small time period. If this value "
         "is disabled, the camera will rotate forever.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ZoomFrictionInfo = {
+    constexpr PropertyInfo ZoomFrictionInfo = {
         "ZoomFriction",
         "Zoom friction",
         "If this is enabled, a small friction is applied to the zoom part of the camera "
         "motion, thus slowing it down within a small time period. If this value is "
         "disabled, the camera will zoom in or out forever.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo FrictionInfo = {
+    constexpr PropertyInfo FrictionInfo = {
         "Friction",
         "Friction factor",
         "Determines the factor that is applied if the 'Roll Friction', 'Rotational "
         "Friction', and 'Zoom Friction' values are enabled. The lower this value is, the "
         "faster the camera movements will stop.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FollowAnchorNodeInfo = {
+    constexpr PropertyInfo FollowAnchorNodeInfo = {
         "FollowAnchorNodeRotation",
         "Follow anchor node rotation",
         "If true, the camera will rotate with the current anchor node if within a "
         "certain distance from it. When this happens, the object will appear fixed in "
         "relation to the camera. The distance at which the change happens is controlled "
         "through another property.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FollowAnchorNodeDistanceInfo = {
+    constexpr PropertyInfo FollowAnchorNodeDistanceInfo = {
         "FollowAnchorNodeRotationDistance",
         "Follow anchor node rotation distance",
         "A factor used to determine the distance at which the camera starts rotating "
         "with the anchor node. The actual distance will be computed by multiplying this "
         "factor with the approximate radius of the node.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StereoInterpolationTimeInfo = {
+    constexpr PropertyInfo StereoInterpolationTimeInfo = {
         "StereoInterpolationTime",
         "Stereo interpolation time",
         "The time to interpolate to a new stereoscopic depth when the anchor node is "
         "changed, in seconds.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RetargetInterpolationTimeInfo = {
+    constexpr PropertyInfo RetargetInterpolationTimeInfo = {
         "RetargetAnchorInterpolationTime",
         "Retarget interpolation time",
         "The time to interpolate the camera rotation when the anchor or aim node is "
         "changed, in seconds.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FollowRotationInterpTimeInfo = {
+    constexpr PropertyInfo FollowRotationInterpTimeInfo = {
         "FollowRotationInterpolationTime",
         "Follow rotation interpolation time",
         "The interpolation time when toggling following focus node rotation.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UseAdaptiveStereoscopicDepthInfo = {
+    constexpr PropertyInfo UseAdaptiveStereoscopicDepthInfo = {
         "UseAdaptiveStereoscopicDepth",
         "Adaptive steroscopic depth",
         "Dynamically adjust the view scaling based on the distance to the surface of "
         "the anchor and aim nodes. If enabled, view scale will be set to "
         "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). If "
         "disabled, view scale will be set to 10^StaticViewScaleExponent.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StaticViewScaleExponentInfo = {
+    constexpr PropertyInfo StaticViewScaleExponentInfo = {
         "StaticViewScaleExponent",
         "Static view scale exponent",
         "Statically scale the world by 10^StaticViewScaleExponent. Only used if "
         "UseAdaptiveStereoscopicDepthInfo is set to false.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StereoscopicDepthOfFocusSurfaceInfo = {
+    constexpr PropertyInfo StereoscopicDepthOfFocusSurfaceInfo = {
         "StereoscopicDepthOfFocusSurface",
         "Stereoscopic depth of the surface in focus",
         "Set the stereoscopically perceived distance (in meters) to the closest point "
         "out of the surface of the anchor and the center of the aim node. Only used if "
         "UseAdaptiveStereoscopicDepthInfo is set to true.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ConstantVelocityFlight = {
+    constexpr PropertyInfo ConstantVelocityFlight = {
         "ConstantVelocityFlight",
         "Constant velocity flight",
         "If this value is enabled, the camera motion will not be affected by the "
         "distance of the camera to the surface of a planet. When enabling this setting "
         "consider adjusting the mouse sensitivity to a lower value.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
@@ -212,73 +212,73 @@ namespace {
         "current focus."
     };
 
-    constexpr Property::PropertyInfo EnableMinimumAllowedDistanceInfo = {
+    constexpr PropertyInfo EnableMinimumAllowedDistanceInfo = {
         "EnableMinimumAllowedDistance",
         "Enable minimum allowed distance limit",
         "Enables or disables that the camera cannot go closer to an object than the set "
         "minimum allowed distance.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MinimumDistanceInfo = {
+    constexpr PropertyInfo MinimumDistanceInfo = {
         "MinimumAllowedDistance",
         "Minimum allowed distance",
         "The limit of how close the camera can get to an object. The distance is given "
         "in meters above the surface.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableMaximumDistanceInfo = {
+    constexpr PropertyInfo EnableMaximumDistanceInfo = {
         "EnableMaximumAllowedDistance",
         "Enable maximum allowed distance limit",
         "Enables or disables that the camera cannot go further away from an object than "
         "the set maximum allowed distance.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MaximumDistanceInfo = {
+    constexpr PropertyInfo MaximumDistanceInfo = {
         "MaximumAllowedDistance",
         "Maximum allowed distance",
         "The limit of how far away the camera can get from an object. The distance is "
         "given in meters above the surface.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DisableZoomInfo = {
+    constexpr PropertyInfo DisableZoomInfo = {
         "DisableZoom",
         "Disable zoom",
         "When set to true, disables all vertical navigation based on input. This means "
         "that the camera cannot be moved closer to or further away from the current "
         "anchor node.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DisableRollInfo = {
+    constexpr PropertyInfo DisableRollInfo = {
         "DisableRoll",
         "Disable roll",
         "When set to true, disables all rolling camera motions based on input. This "
         "means that the camera cannot be rotated to change the perceived up-direction of "
         "the current anchor node, or rotate the horizon on a planet, for example.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShouldRotateAroundUpInfo = {
+    constexpr PropertyInfo ShouldRotateAroundUpInfo = {
         "ShouldRotateAroundUp",
         "Should rotate around up",
         "When set to true, global rotation interactions in the X-direction will lead to "
         "a rotation around the specified up vector instead of just around the object. "
         "The up vector is the local coordinate axis, and can be set to either the X-, Y- "
         "or Z-axis through the 'UpToUseForRotation' property.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UpToUseForRotationInfo = {
+    constexpr PropertyInfo UpToUseForRotationInfo = {
         "UpToUseForRotation",
         "Up to use for rotation",
         "Specifies the local coordinate axis of the anchor node to use as up direction "
         "when the camera is set to orbit around up. In general, the Z-axis is a good "
         "choice for globes, and the Y-axis is a good choice for models.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     /**

@@ -87,11 +87,11 @@ void RenderableDataSphere::initializeGL() {
             // unregister backgroundvalues property
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(Property::Visibility::Hidden);
+                _backgroundValues.setVisibility(PropertyInfo::Visibility::Hidden);
             }
             else {
                 // If autofilter is turned off, register backgroundValues
-                _backgroundValues.setVisibility(Property::Visibility::Always);
+                _backgroundValues.setVisibility(PropertyInfo::Visibility::Always);
             }
         });
     }

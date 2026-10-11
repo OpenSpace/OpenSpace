@@ -47,87 +47,87 @@ namespace {
         float z = 0.f;
     };
 
-    constexpr Property::PropertyInfo NumberPointsInfo = {
+    constexpr PropertyInfo NumberPointsInfo = {
         "NumberOfPoints",
         "Points",
         "The number of control points used for constructing the shadow geometry. The "
         "higher this number, the more detailed the shadow is. However, it will have a "
         "negative impact on the performance. Also note that rendering errors will occur "
         "if this value is an even number.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShadowLengthInfo = {
+    constexpr PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
         "Shadow length",
         "A factor that controls the length of the rendered shadow cone. The total length "
         "will be the distance from the shadower to the shadowee multiplied by this "
         "value.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShowUmbralShadowInfo = {
+    constexpr PropertyInfo ShowUmbralShadowInfo = {
         "ShowUmbralShadow",
         "Show umbral shadow",
         "Decides whether the umbral portion of the shadow should be shown.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo UmbralShadowColorInfo = {
+    constexpr PropertyInfo UmbralShadowColorInfo = {
         "UmbralShadowColor",
         "Umbral shadow color",
         "The color for the shadow cylinder that represents the umbral shadow.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShowPenumbralShadowInfo = {
+    constexpr PropertyInfo ShowPenumbralShadowInfo = {
         "ShowPenumbralShadow",
         "Show penumbral shadow",
         "Decides whether the penumbral portion of the shadow should be shown.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo PenumbralShadowColorInfo = {
+    constexpr PropertyInfo PenumbralShadowColorInfo = {
         "PenumbralShadowColor",
         "Penumbral shadow color",
         "The color for the shadow cylinder that represents the penumbral shadow.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo LightSourceInfo = {
+    constexpr PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light source",
         "The SPICE name of the object that is used as the illuminator when computing the "
         "shadow cylinder.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LightSourceFrameInfo = {
+    constexpr PropertyInfo LightSourceFrameInfo = {
         "LightSourceFrame",
         "Light source frame",
         "The SPICE name of the body-fixed reference frame for the light source.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShadowerInfo = {
+    constexpr PropertyInfo ShadowerInfo = {
         "Shadower",
         "Shadower",
         "The SPICE name of the object that is casting the shadow on the shadowee.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShadowerFrameInfo = {
+    constexpr PropertyInfo ShadowerFrameInfo = {
         "ShadowerFrame",
         "Shadower frame",
         "The SPICE name of the body-fixed reference frame for the shadower.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShadoweeInfo = {
+    constexpr PropertyInfo ShadoweeInfo = {
         "Shadowee",
         "Shadowee",
         "The SPICE name of object that is receiving the shadow from the shadower.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     std::vector<VBOLayout> calculateShadowPoints(

@@ -35,35 +35,35 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo IndexInfo = {
+    constexpr PropertyInfo IndexInfo = {
         "Index",
         "Index",
         "The index into the list of images that is used to pick the currently displayed "
         "image.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo NumImagesInfo = {
+    constexpr PropertyInfo NumImagesInfo = {
         "NumberImages",
         "Number of images",
         "The number of images that can be shown. The 'Index' value must be between 0 and "
         "this value - 1.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo CurrentImageInfo = {
+    constexpr PropertyInfo CurrentImageInfo = {
         "CurrentImage",
         "Current image",
         "The read-only value of the currently selected image.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FolderPathInfo = {
+    constexpr PropertyInfo FolderPathInfo = {
         "FolderPath",
         "Folder path",
         "The path that is used to look for images for this image provider. The path must "
         "point to an existing folder that contains images.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ImageSequenceTileProvider)]] Parameters {

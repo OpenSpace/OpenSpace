@@ -92,42 +92,42 @@ namespace {
         return Time::convertTime(res);
     }
 
-    constexpr Property::PropertyInfo TextureSourceInfo = {
+    constexpr PropertyInfo TextureSourceInfo = {
         "TextureSource",
         "Texture source",
         "A directory on disk from which to load the texture files for the sphere.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FitsLayerInfo = {
+    constexpr PropertyInfo FitsLayerInfo = {
         "FitsLayer",
         "Texture layer",
         "The index, a whole positive number, of the layer in the FITS file to use as "
         "texture. If not specified, the first layer in the data will be used regardless. "
         "When specified, that data layer will be the option used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FitsLayerNameInfo = {
+    constexpr PropertyInfo FitsLayerNameInfo = {
         "LayerNames",
         "Texture layer options",
         "This value specifies which name of the fits layer to use as texture.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TextureFilterInfo = {
+    constexpr PropertyInfo TextureFilterInfo = {
         "TextureFilter",
         "Texture filter",
         "Option to choose nearest neighbor or linear filtering for the texture.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SaveDownloadsOnShutdown = {
+    constexpr PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
         "Save downloads on shutdown",
         "This is an option for if dynamically downloaded files should be saved for the "
         "next run or not.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Reads a data sequence from specifically FITS files, makes textures from them, and

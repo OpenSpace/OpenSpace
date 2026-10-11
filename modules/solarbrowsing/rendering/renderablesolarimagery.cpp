@@ -61,107 +61,107 @@ namespace {
         DoubleSided
     };
 
-    constexpr Property::PropertyInfo JumpToStartInfo = {
+    constexpr PropertyInfo JumpToStartInfo = {
         "JumpToStart",
         "Jump to start of sequence",
         "Performs a time jump to the start of the sequence.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ActiveInstrumentInfo = {
+    constexpr PropertyInfo ActiveInstrumentInfo = {
         "ActiveInstrument",
         "Active instrument",
         "The active instrument of the current spacecraft imagery.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableBorderInfo = {
+    constexpr PropertyInfo EnableBorderInfo = {
         "EnableBorder",
         "Enable border",
         "Enables border around the current spacecraft imagery.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableFrustumInfo = {
+    constexpr PropertyInfo EnableFrustumInfo = {
         "EnableFrustum",
         "Enable frustum",
         "Enables frustum around the current spacecraft imagery.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo FaceModeInfo = {
+    constexpr PropertyInfo FaceModeInfo = {
         "FaceMode",
         "Face Mode",
         "Specifies how the plane is rendered: front side only, with a solid backside, "
         "or textured on both sides.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MoveFactorInfo = {
+    constexpr PropertyInfo MoveFactorInfo = {
         "MoveFactor",
         "Move factor",
         "Controls how close to the Sun to render the imagery.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo DownsamplingLevelInfo = {
+    constexpr PropertyInfo DownsamplingLevelInfo = {
         "DownsamplingLevel",
         "Downsampling level",
         "Controls how much to downsample the original data (0 is original resolution).",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TimelineDataRangeInfo = {
+    constexpr PropertyInfo TimelineDataRangeInfo = {
         "TimelineDataRange",
         "Timeline data range",
         "Displays the earliest and latest available image data for the currently active "
         "instrument. Note that data may not be continuously available across the entire "
         "displayed time span.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo UseAdditiveBlendingInfo = {
+    constexpr PropertyInfo UseAdditiveBlendingInfo = {
         "UseAdditiveBlending",
         "Use additive blending",
         "If enabled, the plane is blended additively with the background. If disabled, "
         "the plane is rendered fully opaque. Note that this may lead to weird behaviors "
         "when the plane is rendered with transparency.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ContrastValueInfo = {
+    constexpr PropertyInfo ContrastValueInfo = {
         "ContrastValue",
         "Contrast",
         "Contrast of the current spacecraft imagery.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GammaValueInfo = {
+    constexpr PropertyInfo GammaValueInfo = {
         "GammaValue",
         "Gamma",
         "Gamma of the current spacecraft imagery.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo VerboseModeInfo = {
+    constexpr PropertyInfo VerboseModeInfo = {
         "VerboseMode",
         "Verbose mode",
         "Output information about image decoding.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo PredictFramesAfterInfo = {
+    constexpr PropertyInfo PredictFramesAfterInfo = {
         "PredictFramesAfter",
         "Predict frames after",
         "Determines how many images to pre-fetch after the current image frame.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PredictFramesBeforeInfo = {
+    constexpr PropertyInfo PredictFramesBeforeInfo = {
         "PredictFramesBefore",
         "Predict frames before",
         "Determines how many images to pre-fetch before the current image frame.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // A RenderableSolarImagery renders time-sequenced solar observations from spacecraft

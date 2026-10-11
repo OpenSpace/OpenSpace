@@ -54,90 +54,90 @@ namespace {
 
     constexpr std::string_view _loggerCat = "PathNavigator";
 
-    constexpr Property::PropertyInfo DefaultCurveOptionInfo = {
+    constexpr PropertyInfo DefaultCurveOptionInfo = {
         "DefaultPathType",
         "Default path type",
         "The default path type chosen when generating a path or flying to a target. See "
         "the documentation for alternatives. The shape of the generated path will be "
         "different depending on the path type.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo IncludeRollInfo = {
+    constexpr PropertyInfo IncludeRollInfo = {
         "IncludeRoll",
         "Include roll",
         "If disabled, roll is removed from the interpolation of camera orientation.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SpeedScaleInfo = {
+    constexpr PropertyInfo SpeedScaleInfo = {
         "SpeedScale",
         "Speed scale",
         "Scale factor that the speed will be multiplied with during path traversal. Can "
         "be used to speed up or slow down the camera motion, depending on if the value "
         "is larger than or smaller than one.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo IdleMotionOnFinishInfo = {
+    constexpr PropertyInfo IdleMotionOnFinishInfo = {
         "ApplyIdleMotionOnFinish",
         "Apply idle motion on finish",
         "If set to true, the chosen IdleMotion of the OrbitalNavigator will be triggered "
         "once the path has reached its target.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ArrivalDistanceFactorInfo = {
+    constexpr PropertyInfo ArrivalDistanceFactorInfo = {
         "ArrivalDistanceFactor",
         "Arrival distance factor",
         "A factor used to compute the default distance from a target scene graph node "
         "when creating a camera path. The factor will be multiplied with the node's "
         "bounding sphere to compute the target height from the bounding sphere of the "
         "object.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RotationSpeedFactorInfo = {
+    constexpr PropertyInfo RotationSpeedFactorInfo = {
         "RotationSpeedFactor",
         "Rotation speed factor (linear path)",
         "Affects how fast the camera rotates to the target rotation during a linear "
         "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
         "seconds. A value of 2 means twice that time, i.e. 10 seconds, and so on.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MinBoundingSphereInfo = {
+    constexpr PropertyInfo MinBoundingSphereInfo = {
         "MinimalValidBoundingSphere",
         "Minimal valid bounding sphere",
         "The minimal allowed value for a bounding sphere, in meters. Used for "
         "computation of target positions and path generation, to avoid issues when there "
         "is no bounding sphere.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RelevantNodeTagsInfo = {
+    constexpr PropertyInfo RelevantNodeTagsInfo = {
         "RelevantNodeTags",
         "Relevant node tags",
         "List of tags for the nodes that are relevant for path creation, for example "
         "when avoiding collisions.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UseCustomFlyToDurationInfo = {
+    constexpr PropertyInfo UseCustomFlyToDurationInfo = {
         "UseCustomFlyToDuration",
         "Use Custom Fly-To Duration",
         "If this value is set, the fly-to will always use the duration provided in the "
         "'CustomFlyToDuration' property.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo CustomFlyToDurationInfo = {
+    constexpr PropertyInfo CustomFlyToDurationInfo = {
         "CustomFlyToDuration",
         "Custom Fly-To Duration",
         "If the 'UseCustomFlyToDuration' value is set to 'true', any fly-to command will "
         "use this number of seconds instead. If 'UseCustomFlyToDuration' is 'false', the "
         "duration will be automatically calculated if nothing else is specified.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 } // namespace
 

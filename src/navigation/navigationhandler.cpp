@@ -64,22 +64,22 @@ namespace {
 
     constexpr std::string_view _loggerCat = "NavigationHandler";
 
-    constexpr Property::PropertyInfo FrameInfo = {
+    constexpr PropertyInfo FrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
         "than using the mouse interaction.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo JumpToFadeDurationInfo = {
+    constexpr PropertyInfo JumpToFadeDurationInfo = {
         "JumpToFadeDuration",
         "Jump to fade duration",
         "The number of seconds the fading of the rendering should take per default when "
         "navigating through a 'jump' transition. This is when the rendering is first "
         "faded to black, then the camera is moved, and then the rendering fades in "
         "again.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 } // namespace
 

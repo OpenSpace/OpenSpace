@@ -42,39 +42,39 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
+    constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether the browser should be enabled or not.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ReloadInfo = {
+    constexpr PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Trigger this property to reload the browser.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo VisibleInfo = {
+    constexpr PropertyInfo VisibleInfo = {
         "Visible",
         "Is visible",
         "This setting determines whether the browser should be visible or not.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo GuiUrlInfo = {
+    constexpr PropertyInfo GuiUrlInfo = {
         "GuiUrl",
         "Gui URL",
         "The URL of the webpage that is used to load the WebGUI from.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GuiScaleInfo = {
+    constexpr PropertyInfo GuiScaleInfo = {
         "GuiScale",
         "Gui scale",
         "GUI scale multiplier.",
-        Property::Visibility::Always
+        PropertyInfo::Visibility::Always
     };
 
     struct [[codegen::Dictionary(CefWebGuiModule)]] Parameters {

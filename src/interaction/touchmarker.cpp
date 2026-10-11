@@ -32,32 +32,32 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo VisibilityInfo = {
+    constexpr PropertyInfo VisibilityInfo = {
         "Enabled",
         "Show touch markers",
         "Decides whether to show circular markers on touch interaction.",
-        Property::Visibility::NoviceUser
+        PropertyInfo::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo RadiusInfo = {
+    constexpr PropertyInfo RadiusInfo = {
         "Size",
         "Marker size",
         "Controls the size of the touch input markers.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo OpacityInfo = {
+    constexpr PropertyInfo OpacityInfo = {
         "Opacity",
         "Marker opacity",
         "The opacity of the touch markers.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
+    constexpr PropertyInfo ColorInfo = {
         "MarkerColor",
         "Marker color",
         "The color of the touch markers.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 } // namespace
 

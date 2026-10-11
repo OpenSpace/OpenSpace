@@ -40,12 +40,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo UseMainInfo = {
+    constexpr PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
         "If true, this ScreenSpaceDashboard will use the main dashboard instead of "
         "creating an independent one.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
     // Displays dashboard content as a 2D overlay on top of the scene. Unlike world-space

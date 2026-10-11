@@ -48,100 +48,100 @@ namespace {
 
     constexpr std::string_view NoImageText = "No Image";
 
-    constexpr Property::PropertyInfo ColorTexturePathsInfo = {
+    constexpr PropertyInfo ColorTexturePathsInfo = {
         "ColorTexturePaths",
         "Color texture",
         "The texture path selected in this property is used as the base texture that is "
         "applied to the planet prior to any image projections. This menu always contains "
         "an empty option for not using a color map. If this value is specified in an "
         "asset, the last texture is used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AddColorTextureInfo = {
+    constexpr PropertyInfo AddColorTextureInfo = {
         "AddColorTexture",
         "Add color base texture",
         "Adds a new base color texture to the list of selectable base maps used prior to "
         "any image projection.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HeightTexturePathsInfo = {
+    constexpr PropertyInfo HeightTexturePathsInfo = {
         "HeightTexturePaths",
         "Heightmap texture",
         "The texture path selected in this property is used as the height map on the "
         "planet. This menu always contains an empty option for not using a heightmap. If "
         "this value is specified in an asset, the last texture is used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AddHeightTextureInfo = {
+    constexpr PropertyInfo AddHeightTextureInfo = {
         "AddHeightTexture",
         "Add heightmap texture",
         "Adds a new height map texture to the list of selectable height maps used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HeightExaggerationInfo = {
+    constexpr PropertyInfo HeightExaggerationInfo = {
         "HeightExaggeration",
         "Height exaggeration",
         "This value determines the level of height exaggeration that is applied to a "
         "potential height field. A value of '0' inhibits the height field, whereas a "
         "value of '1' uses the measured height field.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MeridianShiftInfo = {
+    constexpr PropertyInfo MeridianShiftInfo = {
         "MeridianShift",
         "Meridian shift",
         "If this value is enabled, a shift of the meridian by 180 degrees is performed. "
         "This is a fix especially for Pluto height maps, where the definition of the "
         "meridian has changed through the New Horizons mission and this requires this "
         "shift.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AmbientBrightnessInfo = {
+    constexpr PropertyInfo AmbientBrightnessInfo = {
         "AmbientBrightness",
         "Ambient brightness",
         "This value determines the ambient brightness of the dark side of the planet.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo MaxProjectionsPerFrameInfo = {
+    constexpr PropertyInfo MaxProjectionsPerFrameInfo = {
         "MaxProjectionsPerFrame",
         "Max projections per frame",
         "The maximum number of image projections to perform per frame. Useful to avoid "
         "freezing the system for large delta times.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ProjectionsInBufferInfo = {
+    constexpr PropertyInfo ProjectionsInBufferInfo = {
         "ProjectionsInBuffer",
         "Projections in buffer",
         "(Read only) The number of images that are currently waiting to be projected.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ClearProjectionBufferInfo = {
+    constexpr PropertyInfo ClearProjectionBufferInfo = {
         "ClearProjectionBuffer",
         "Clear projection buffer",
         "Remove all pending projections from the buffer.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RadiusInfo = {
+    constexpr PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
         "This value specifies the radius of this sphere in meters.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SegmentsInfo = {
+    constexpr PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
         "This value specifies the number of segments that this sphere is split into.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Serves as a potential target for images projected from a spacecraft's instrument,

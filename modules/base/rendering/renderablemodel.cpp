@@ -90,126 +90,129 @@ namespace {
         "Custom transformation for an internal model node."
     };
 
-    constexpr Property::PropertyInfo EnableAnimationInfo = {
+    constexpr PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
         "Enable animation",
         "Enable or disable the animation for the model if it has any.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo AmbientIntensityInfo = {
+    constexpr PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient intensity",
         "A multiplier for ambient lighting.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo DiffuseIntensityInfo = {
+    constexpr PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse intensity",
         "A multiplier for diffuse lighting.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SpecularIntensityInfo = {
+    constexpr PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular intensity",
         "A multiplier for specular lighting.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SpecularPowerInfo = {
+    constexpr PropertyInfo SpecularPowerInfo = {
         "SpecularPower",
         "Specular Power",
         "Power factor for specular component, higher value gives narrower specularity.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShadingInfo = {
+    constexpr PropertyInfo ShadingInfo = {
         "PerformShading",
         "Perform shading",
         "Determines whether shading should be applied to this model, based on the "
         "provided list of light sources. If false, the model will be fully illuminated.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableFaceCullingInfo = {
+    constexpr PropertyInfo EnableFaceCullingInfo = {
         "EnableFaceCulling",
         "Enable face culling",
         "Enable OpenGL automatic face culling optimization.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ModelTransformInfo = {
+    constexpr PropertyInfo ModelTransformInfo = {
         "ModelTransform",
         "Model transform",
         "An extra model transform matrix that is applied to the model before all other "
         "transformations are applied.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo PivotInfo = {
+    constexpr PropertyInfo PivotInfo = {
         "Pivot",
         "Pivot",
         "A vector that moves the place of origin for the model.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ModelScaleInfo = {
+    constexpr PropertyInfo ModelScaleInfo = {
         "ModelScale",
         "Model scale",
         "The scale of the model. If a numeric value is provided in the asset file, the "
         "scale will be that exact value. If instead a unit name is provided, this is the "
         "value that that name represents. For example 'Centimeter' becomes 0.01.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RotationVecInfo = {
+    constexpr PropertyInfo RotationVecInfo = {
         "RotationVector",
         "Rotation vector",
         "A rotation vector with Euler angles, specified in degrees.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LightSourcesInfo = {
+    constexpr PropertyInfo LightSourcesInfo = {
         "LightSources",
         "Light sources",
         "A list of light sources that this model should accept light from.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EnableDepthTestInfo = {
+    constexpr PropertyInfo EnableDepthTestInfo = {
         "EnableDepthTest",
         "Enable depth test",
         "If true, depth testing is enabled for the model. This means that parts of the "
         "model that are occluded by other parts will not be rendered. If disabled, the "
         "depth of the model part will not be taken into account in rendering and some "
         "parts that should be hidden behind a model might be rendered in front.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RenderWireframeInfo = {
+    constexpr PropertyInfo RenderWireframeInfo = {
         "RenderWireframe",
         "Enable Wireframe Rendering",
         "Enable Wireframe rendering for the Model.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BlendingOptionInfo = {
+    constexpr PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending options",
         "Controls the blending function used to calculate the colors of the model with "
         "respect to the opacity.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OverrideColorInfo = {
+    constexpr PropertyInfo OverrideColorInfo = {
         "OverrideColor",
         "Override color",
         "The single color to use for entire model (RGBA).",
-        Property::Visibility::AdvancedUser,
-        Property::IsEnablable::Yes,
-        Property::NeedsConfirmation::No
+        PropertyInfo::Visibility::AdvancedUser,
+        PropertyInfo::IsEnablable::Yes,
+        PropertyInfo::NeedsConfirmation::No,
+        {
+            PropertyInfo::IsEnabled::No
+        }
     };
 
     // Renders a 3D model. The provided model may contain textures and animations and is
@@ -404,13 +407,7 @@ RenderableModel::RenderableModel(const Dictionary& dictionary)
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(BlendingOptionInfo)
     , _renderWireframe(RenderWireframeInfo, false)
-    , _overrideColor(
-        OverrideColorInfo,
-        Property::IsEnabled::No,
-        glm::vec4(1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _overrideColor(OverrideColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _customNodeTransformsOwner(CustomNodeTransformsInfo)
 {

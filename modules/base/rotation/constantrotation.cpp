@@ -33,18 +33,18 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo RotationInfo = {
+    constexpr PropertyInfo RotationInfo = {
         "RotationAxis",
         "Rotation axis",
         "This value is the rotation axis around which the object will rotate.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RotationRateInfo = {
+    constexpr PropertyInfo RotationRateInfo = {
         "RotationRate",
         "Rotation rate",
         "This value determines the number of revolutions per in-game second.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     // Makes a scene graph node rotate about the provided axis at a fixed and constant

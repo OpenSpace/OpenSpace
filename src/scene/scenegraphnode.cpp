@@ -60,51 +60,51 @@ namespace {
 
     constexpr std::string_view _loggerCat = "SceneGraphNode";
 
-    constexpr Property::PropertyInfo ComputeScreenSpaceInfo = {
+    constexpr PropertyInfo ComputeScreenSpaceInfo = {
         "ComputeScreenSpaceData",
         "Compute screen space data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
         "at regular intervals. If these values are set to 'false', they are not updated.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo ScreenSpacePositionInfo = {
+    constexpr PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
         "ScreenSpace position",
         "The x,y position in screen space. Can be used for placing GUI elements.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo ScreenVisibilityInfo = {
+    constexpr PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "Screen visibility",
         "Determines if the node is currently visible on screen.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DistanceFromCamToNodeInfo = {
+    constexpr PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "Distance from camera to node",
         "The distance from the camera to the node surface.",
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo ScreenSizeRadiusInfo = {
+    constexpr PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "Screen size radius",
         "The screen size of the radius of the node.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo VisibilityDistanceInfo = {
+    constexpr PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
         "Visibility distance",
         "The distance in world coordinates between node and camera at which the "
         "screenspace object will become visible.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BoundingSphereInfo = {
+    constexpr PropertyInfo BoundingSphereInfo = {
         "BoundingSphere",
         "Bounding sphere",
         "The bounding sphere of the scene graph node meaning that everything that this "
@@ -112,123 +112,123 @@ namespace {
         "only used as an override to the bounding sphere calculated by the Renderable, "
         "if present. If this value is -1, the Renderable's computed bounding sphere is "
         "used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo InteractionSphereInfo = {
+    constexpr PropertyInfo InteractionSphereInfo = {
         "InteractionSphere",
         "Interaction sphere",
         "The minimum radius that the camera is allowed to get close to this scene graph "
         "node. This value is only used as an override to the bounding sphere calculated "
         "by the Renderable, if present. If this value is -1, the Renderable's computed "
         "interaction sphere is used.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EvalBoundingSphereInfo = {
+    constexpr PropertyInfo EvalBoundingSphereInfo = {
         "EvaluatedBoundingSphere",
         "Evaluated bounding sphere",
         "This read-only property contains the evaluated value for the bounding sphere. "
         "This is the actual value that is used internally within the software. If the "
         "BoundingSphere property is set to -1, it is the computed value, otherwise it "
         "matches the one set in the property.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EvalInteractionSphereInfo = {
+    constexpr PropertyInfo EvalInteractionSphereInfo = {
         "EvaluatedInteractionSphere",
         "Evaluated interaction sphere",
         "This read-only property contains the evaluated value for the interaction "
         "sphere. This is the actual value that is used internally within the software. "
         "If the InteractionSphere property is set to -1, it is the computed value, "
         "otherwise it matches the one set in the property.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ApproachFactorInfo = {
+    constexpr PropertyInfo ApproachFactorInfo = {
         "ApproachFactor",
         "Approach factor",
         "This value is a multiplication factor for the interaction sphere that "
         "determines when the camera is 'approaching' the scene graph node.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ReachFactorInfo = {
+    constexpr PropertyInfo ReachFactorInfo = {
         "ReachFactor",
         "Reach factor",
         "This value is a multiplication factor for the interaction sphere that "
         "determines when the camera has 'reached' the scene graph node.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GuiPathInfo = {
+    constexpr PropertyInfo GuiPathInfo = {
         "GuiPath",
         "GUI path",
         "This is the path for the scene graph node in the gui example: "
         "/Solar System/Planets/Earth.",
-        Property::Visibility::Hidden
+        PropertyInfo::Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo GuiNameInfo = {
+    constexpr PropertyInfo GuiNameInfo = {
         "GuiName",
         "GUI name",
         "This is the name for the scene graph node in the gui. Example: Earth.",
-        Property::Visibility::Hidden
+        PropertyInfo::Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo GuiDescriptionInfo = {
+    constexpr PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
         "GUI description",
         "This is the description for the scene graph node to be shown in the GUI. "
         "Example: Earth is a special place.",
-        Property::Visibility::Hidden
+        PropertyInfo::Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo GuiHiddenInfo = {
+    constexpr PropertyInfo GuiHiddenInfo = {
         "GuiHidden",
         "GUI hidden",
         "This represents if the scene graph node should be shown in the GUI. Example: "
         "false.",
-        Property::Visibility::Hidden
+        PropertyInfo::Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo GuiOrderInfo = {
+    constexpr PropertyInfo GuiOrderInfo = {
         "GuiOrderingNumber",
         "GUI ordering number",
         "This is an optional numerical value that will affect the sorting of this scene "
         "graph node in relation to its neighbors in the GUI. Nodes with the same value "
         "will be sorted alphabetically.",
-        Property::Visibility::Hidden
+        PropertyInfo::Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo UseGuiOrderInfo = {
+    constexpr PropertyInfo UseGuiOrderInfo = {
         "UseGuiOrdering",
         "Use GUI ordering",
         "If true, use the 'GuiOrderingNumber' to place this scene graph node in a sorted "
         "way in relation to its neighbors in the GUI.",
-        Property::Visibility::Hidden
+        PropertyInfo::Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo GuiFocusableInfo = {
+    constexpr PropertyInfo GuiFocusableInfo = {
         "Focusable",
         "Focusable Hint",
         "This value serves as a hint to determine if it makes sense to focus the camera "
         "on this scene graph node. It only serves as a hint and does not actually "
         "prevent the focussing. The default value is `true`.",
-        Property::Visibility::Hidden
+        PropertyInfo::Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo ShowDebugSphereInfo = {
+    constexpr PropertyInfo ShowDebugSphereInfo = {
         "ShowDebugSphere",
         "Show debug sphere",
         "If enabled the bounding sphere of this scene graph node is rendered as a debug "
         "method. The interaction sphere is rendered in cyan and the bounding sphere in "
         "purple. If only one is visible, this may be because the spheres have equal size "
         "and are overlapping.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SupportsDirectInteractionInfo = {
+    constexpr PropertyInfo SupportsDirectInteractionInfo = {
         "SupportsDirectInteraction",
         "Supports direct interaction",
         "Only relevant when using touch interaction. If true, the \'direct "
@@ -238,7 +238,7 @@ namespace {
         "for objects that have an interaction sphere of about the same size as the "
         "bounding sphere, and that are somewhat spherical. Note that using this feature "
         "might significalty reduce the performance.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SceneGraphNode)]] Parameters {

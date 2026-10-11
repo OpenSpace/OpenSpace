@@ -65,7 +65,7 @@ namespace {
         Additive
     };
 
-    constexpr Property::PropertyInfo OrientationRenderOptionInfo = {
+    constexpr PropertyInfo OrientationRenderOptionInfo = {
         "OrientationRenderOption",
         "Orientation render option",
         "Controls how the plane will be oriented. \"Camera View Direction\" rotates the "
@@ -76,77 +76,77 @@ namespace {
         "slightly different way. In contrast, \"Fixed Rotation\" does not rotate the "
         "plane at all based on the camera and should be used the plane should be "
         "oriented in a fixed way.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MirrorBacksideInfo = {
+    constexpr PropertyInfo MirrorBacksideInfo = {
         "MirrorBackside",
         "Mirror backside of image plane",
         "If false, the image plane will not be mirrored when viewed from the backside. "
         "This is usually desirable when the image shows data at a specific location, but "
         "not if it is displaying text for example.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
+    constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The size of the plane in meters.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AutoScaleInfo = {
+    constexpr PropertyInfo AutoScaleInfo = {
         "AutoScale",
         "Auto scale",
         "Decides whether the plane should automatically adjust in size to match the "
         "aspect ratio of the content. Otherwise it will remain in the given size."
     };
 
-    constexpr Property::PropertyInfo ScaleByDistanceInfo = {
+    constexpr PropertyInfo ScaleByDistanceInfo = {
         "ScaleByDistance",
         "Scale by distance",
         "Decides whether the plane should automatically adjust in size to based on the "
         "distance to the camera. Otherwise it will remain in the given size.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ApparentSizeMultiplierInfo = {
+    constexpr PropertyInfo ApparentSizeMultiplierInfo = {
         "ApparentSizeMultiplier",
         "Apparent size multiplier",
         "Value that controls the visual size of the object when using distance scaling."
         "A value of 1.0 results in a natural angular size based on camera distance and "
         "field of view. Smaller values (e.g., 0.01) make the object appear smaller, "
         "while larger values make it appear bigger.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScaleByDistanceMaxHeightInfo = {
+    constexpr PropertyInfo ScaleByDistanceMaxHeightInfo = {
         "ScaleByDistanceMaxHeight",
         "Scale by distance max height",
         "The maximum height in meters a plane can get when using distance scaling.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScaleByDistanceMinHeightInfo = {
+    constexpr PropertyInfo ScaleByDistanceMinHeightInfo = {
         "ScaleByDistanceMinHeight",
         "Scale by distance min height",
         "The minimum height in meters a plane can get when using distance scaling.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BlendModeInfo = {
+    constexpr PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending mode",
         "Determines the blending mode that is applied to this plane.",
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MultiplyColorInfo = {
+    constexpr PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply color",
         "An RGB color to multiply with the plane's texture. Useful for applying a color "
         "to grayscale images.",
-        Property::Visibility::User
+        PropertyInfo::Visibility::User
     };
 
     // Displays some form of content (usually an image) on a plane. Settable parameters

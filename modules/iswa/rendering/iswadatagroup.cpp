@@ -39,53 +39,53 @@ namespace {
 
     constexpr std::string_view _loggerCat = "IswaDataGroup";
 
-    constexpr Property::PropertyInfo UseLogInfo = {
+    constexpr PropertyInfo UseLogInfo = {
         "UseLog",
         "Use logarithm",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UseHistogramInfo = {
+    constexpr PropertyInfo UseHistogramInfo = {
         "UseHistogram",
         "Auto contrast",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AutoFilterInfo = {
+    constexpr PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto filter",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo NormalizeValues = {
+    constexpr PropertyInfo NormalizeValues = {
         "NormValues",
         "Normalize values",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo BackgroundInfo = {
+    constexpr PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background values",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo TransferFunctionInfo = {
+    constexpr PropertyInfo TransferFunctionInfo = {
         "Transferfunctions",
         "Transfer functions",
         "", // @TODO Missing documentation
-        Property::Visibility::Developer
+        PropertyInfo::Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo DataOptionsInfo = {
+    constexpr PropertyInfo DataOptionsInfo = {
         "DataOptions",
         "Data options",
         "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+        PropertyInfo::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -137,11 +137,11 @@ void IswaDataGroup::registerProperties() {
         // unregister backgroundvalues property
         if (_autoFilter) {
             _backgroundValues = _dataProcessor->filterValues();
-            _backgroundValues.setVisibility(Property::Visibility::Hidden);
+            _backgroundValues.setVisibility(PropertyInfo::Visibility::Hidden);
         }
         else {
             // If autofilter is turned off, register backgroundValues
-            _backgroundValues.setVisibility(Property::Visibility::Always);
+            _backgroundValues.setVisibility(PropertyInfo::Visibility::Always);
         }
         Dictionary d;
         d.setValue("autoFilter", _autoFilter.value());
