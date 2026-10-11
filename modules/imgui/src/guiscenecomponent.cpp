@@ -38,8 +38,6 @@
 namespace {
     using namespace openspace;
 
-    const ImVec2 Size = ImVec2(350, 500);
-
     void renderSceneGraphNode(const SceneGraphNode& node, const Time& time) {
         if (!ImGui::TreeNode(node.identifier().c_str())) {
             return;

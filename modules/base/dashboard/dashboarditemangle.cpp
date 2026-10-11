@@ -241,6 +241,7 @@ void DashboardItemAngle::update() {
             "items are placed in the same location",
             sourceInfo.second, destinationInfo.second, referenceInfo.second
         );
+        _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
     else {
         const double angle = glm::degrees(

@@ -37,8 +37,8 @@
        untracked files that are not ignored. The index and working tree are not touched.
     2. Builds the openspace-<platform> image for every *.Dockerfile that does not have an
        image yet (or every one of them with -Rebuild).
-    3. Configures and compiles the snapshot in each container, all at once by default or
-       one after another with -Sequential. The containers are removed afterwards.
+    3. Configures and compiles the snapshot in each container, one after another by
+       default or all at once with -Parallel. The containers are removed afterwards.
     4. Prints a summary with the errors of every platform that failed. The full logs are
        written to build/docker-logs/<timestamp>.
 
@@ -47,7 +47,7 @@
 
 .EXAMPLE
     .\support\build-on-docker.ps1
-    .\support\build-on-docker.ps1 -Sequential
+    .\support\build-on-docker.ps1 -Parallel
     .\support\build-on-docker.ps1 -Platform ubuntu-2404-gcc13, archlinux-clang
     .\support\build-on-docker.ps1 -DockerPath C:\src\docker\build -Rebuild
 #>
@@ -59,11 +59,14 @@ param(
   [Parameter(HelpMessage = "Dockerfile base names to build on, for example ubuntu-2404-gcc13. Default: all")]
   [string[]] $Platform = @(),
 
-  [Parameter(HelpMessage = "Build on one container after another instead of all at once")]
-  [switch] $Sequential,
+  [Parameter(HelpMessage = "Build on all containers at once instead of one after another")]
+  [switch] $Parallel,
 
   [Parameter(HelpMessage = "CMake configure and build preset to use")]
   [string] $Preset = "linux-ninja-debug",
+
+  [Parameter(HelpMessage = "Parallel jobs per container; 0 uses all cores")]
+  [int] $Jobs = 0,
 
   [Parameter(HelpMessage = "Rebuild the images even if they already exist")]
   [switch] $Rebuild,
@@ -204,6 +207,7 @@ try {
     'branch="$1"'
     'preset="$2"'
     'cache="$3"'
+    'jobs="$4"'
     'set -e'
     'mkdir -p "$cache"'
     'mkdir /OpenSpace'
@@ -219,7 +223,9 @@ try {
     "cmake --preset `"`$preset`" `"`${extra_cmake_args[@]}`" || exit $ExitConfigure"
     'echo "### Compiling"'
     '# Keep going after the first failure so that all compile errors are reported'
-    "cmake --build --preset `"`$preset`" -- -k 0 || exit $ExitCompile"
+    'build_args=()'
+    '[ "$jobs" -gt 0 ] && build_args=(--parallel "$jobs")'
+    "cmake --build --preset `"`$preset`" `"`${build_args[@]}`" -- -k 0 || exit $ExitCompile"
     'echo "### Done"'
   ) -join "`n"
   [IO.File]::WriteAllText((Join-Path $snapshotDir "run.sh"), "$runScript`n", (New-Object Text.UTF8Encoding $false))
@@ -269,7 +275,7 @@ try {
       "--volume", "${Volume}:${CacheMount}",
       "--env", "VCPKG_DEFAULT_BINARY_CACHE=$CacheMount/$Name",
       "openspace-$Name",
-      "bash", "/snapshot/run.sh", $branch, $Preset, "$CacheMount/$Name"
+      "bash", "/snapshot/run.sh", $branch, $Preset, "$CacheMount/$Name", $Jobs
     )
     # The paths are quoted as they might contain spaces; the rest never does
     $argumentLine = ($arguments | ForEach-Object { if ($_ -match '\s') { "`"$_`"" } else { $_ } }) -join " "
@@ -319,14 +325,14 @@ try {
     }
   }
 
-  $mode = if ($Sequential) { "one after another" } else { "in parallel" }
+  $mode = if ($Parallel) { "in parallel" } else { "one after another" }
   Write-Step "Compiling on $($platforms.Count) platform(s) $mode"
   Write-Host "    Logs are written to $LogDirectory" -ForegroundColor DarkGray
 
   $queue = [System.Collections.Generic.Queue[string]]::new([string[]] $platforms)
   $overall = Get-Date
   while ($queue.Count -gt 0 -or $running.Count -gt 0) {
-    while ($queue.Count -gt 0 -and (-not $Sequential -or $running.Count -eq 0)) {
+    while ($queue.Count -gt 0 -and ($Parallel -or $running.Count -eq 0)) {
       $name = $queue.Dequeue()
       $running[$name] = Start-Build -Name $name
     }
