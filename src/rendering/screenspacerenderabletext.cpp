@@ -35,19 +35,29 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used.",
-        Visibility::User
+    constexpr StringPropertyInfo FontNameInfo = {
+        .identifier = "FontName",
+        .name = "Font name",
+        .description = "This value is the name of the font that is used. It can either "
+            "refer to an internal name registered previously, or it can refer to a path "
+            "that is used.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = "Mono"
+        }
     };
 
-    constexpr PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font size",
-        "This value determines the size of the font that is used to render the distance.",
-        Visibility::User
+    constexpr FloatPropertyInfo FontSizeInfo = {
+        .identifier = "FontSize",
+        .name = "Font size",
+        .description = "This value determines the size of the font that is used to "
+            "render the distance.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 15.f,
+            .minMax = { 6.f, 144.f },
+            .stepSize = 1.f
+        }
     };
 
     struct [[codegen::Dictionary(ScreenSpaceRenderableText)]] Parameters {
@@ -71,8 +81,8 @@ Documentation ScreenSpaceRenderableText::Documentation() {
 
 ScreenSpaceRenderableText::ScreenSpaceRenderableText(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _fontName(FontNameInfo, "Mono")
-    , _fontSize(FontSizeInfo, 15.f, 6.f, 144.f, 1.f)
+    , _fontName(FontNameInfo)
+    , _fontSize(FontSizeInfo)
     , _fontRenderer(fontrendering::FontRenderer::createDefault())
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

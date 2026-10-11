@@ -36,11 +36,14 @@ namespace {
 
     constexpr std::string_view KeyType = "Type";
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "If this value is set to 'true' this dashboard item is shown in the dashboard. "
-        "Otherwise it will be hidden."
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "If this value is set to 'true' this dashboard item is shown in "
+            "the dashboard. Otherwise it will be hidden.",
+        .defaults = {
+            .value = true
+        }
     };
 
     // A `DashboardItem` is an item that is rendered in a dashboard. There are multiple
@@ -90,7 +93,7 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
 
 DashboardItem::DashboardItem(const Dictionary& dictionary)
     : PropertyOwner({ "", "" })
-    , _enabled(EnabledInfo, true)
+    , _enabled(EnabledInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

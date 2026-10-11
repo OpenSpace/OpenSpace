@@ -31,18 +31,24 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo NormalInfo = {
-        "Normal",
-        "Normal",
-        // @TODO Missing documentation
-        ""
+    constexpr Vec3PropertyInfo NormalInfo = {
+        .identifier = "Normal",
+        .name = "Normal", // @TODO Missing documentation
+        .description = "",
+        .defaults = {
+            .value = glm::vec3(1.f, 0.f, 0.f),
+            .minMax = { glm::vec3(-1.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo OffsetsInfo = {
-        "Offsets",
-        "Offsets",
-        // @TODO Missing documentation
-        ""
+    constexpr Vec2PropertyInfo OffsetsInfo = {
+        .identifier = "Offsets",
+        .name = "Offsets", // @TODO Missing documentation
+        .description = "",
+        .defaults = {
+            .value = glm::vec2(-2.f, 0.f),
+            .minMax = { glm::vec2(-2.f, 0.f), glm::vec2(2.f, 1.f) }
+        }
     };
 
     struct [[codegen::Dictionary(VolumeClipPlane)]] Parameters {
@@ -59,18 +65,8 @@ namespace openspace {
 
 VolumeClipPlane::VolumeClipPlane(const Dictionary& dictionary)
     : PropertyOwner({ "" }) // @TODO Missing name
-    , _normal(
-        NormalInfo,
-        glm::vec3(1.f, 0.f, 0.f),
-        glm::vec3(-1.f),
-        glm::vec3(1.f)
-    )
-    , _offsets(
-        OffsetsInfo,
-        glm::vec2(-2.f, 0.f),
-        glm::vec2(-2.f, 0.f),
-        glm::vec2(2.f, 1.f)
-    )
+    , _normal(NormalInfo)
+    , _offsets(OffsetsInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

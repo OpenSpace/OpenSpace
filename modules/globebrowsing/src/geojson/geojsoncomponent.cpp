@@ -68,120 +68,161 @@ namespace {
     constexpr std::string_view KeyName = "Name";
     constexpr std::string_view KeyDesc = "Description";
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "This setting determines whether this object will be visible or not.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "This setting determines whether this object will be visible or "
+            "not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo FileInfo = {
-        "File",
-        "File",
-        "Path to the GeoJSON file to base the rendering on.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo FileInfo = {
+        .identifier = "File",
+        .name = "File",
+        .description = "Path to the GeoJSON file to base the rendering on.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo HeightOffsetInfo = {
-        "HeightOffset",
-        "Height offset",
-        "A height offset value, in meters. Useful for moving a feature closer to or "
-        "farther away from the surface.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo HeightOffsetInfo = {
+        .identifier = "HeightOffset",
+        .name = "Height offset",
+        .description = "A height offset value, in meters. Useful for moving a feature "
+            "closer to or farther away from the surface.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 10.f,
+            .minMax = { -1e12f, 1e12f }
+        }
     };
 
-    constexpr PropertyInfo CoordinateOffsetInfo = {
-        "CoordinateOffset",
-        "Geographic coordinate offset",
-        "A latitude and longitude offset value, in decimal degrees. Can be used to move "
-        "the object on the surface and correct potential mismatches with other "
-        "renderings. Note that changing it during runtime leads to all positions being "
-        "recomputed.",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo CoordinateOffsetInfo = {
+        .identifier = "CoordinateOffset",
+        .name = "Geographic coordinate offset",
+        .description = "A latitude and longitude offset value, in decimal degrees. Can "
+            "be used to move the object on the surface and correct potential mismatches "
+            "with other renderings. Note that changing it during runtime leads to all "
+            "positions being recomputed.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(-90.0), glm::vec2(90.f) }
+        }
     };
 
-    constexpr PropertyInfo DrawWireframeInfo = {
-        "DrawWireframe",
-        "Wireframe",
-        "If true, draw the wire frame of the polygons. Used for testing and to "
-        "investigate tessellation results.",
-        Visibility::Developer
+    constexpr BoolPropertyInfo DrawWireframeInfo = {
+        .identifier = "DrawWireframe",
+        .name = "Wireframe",
+        .description = "If true, draw the wire frame of the polygons. Used for testing "
+            "and to investigate tessellation results.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo PreventHeightUpdateInfo = {
-        "PreventHeightUpdate",
-        "Prevent update from heightmap",
-        "If true, the polygon mesh will not be automatically updated based on the "
-        "heightmap, even if the 'RelativeToGround' altitude option is set and the "
-        "heightmap updates. The data can still be force updated.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo PreventHeightUpdateInfo = {
+        .identifier = "PreventHeightUpdate",
+        .name = "Prevent update from heightmap",
+        .description = "If true, the polygon mesh will not be automatically updated "
+            "based on the heightmap, even if the 'RelativeToGround' altitude option is "
+            "set and the heightmap updates. The data can still be force updated.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     constexpr PropertyInfo ForceUpdateHeightDataInfo = {
-        "ForceUpdateHeightData",
-        "Force update height data",
-        "Triggering this leads to a recomputation of the heights based on the globe "
-        "height map value at the geometry's positions.",
-        Visibility::AdvancedUser
+        .identifier = "ForceUpdateHeightData",
+        .name = "Force update height data",
+        .description = "Triggering this leads to a recomputation of the heights based on "
+            "the globe height map value at the geometry's positions.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PointRenderModeInfo = {
-        "PointRenderMode",
-        "Points aligned to",
-        "Decides how the billboards for the points should be rendered in terms of up "
-        "direction and whether the plane should face the camera. See details on the "
-        "different options in the wiki.",
-        Visibility::User
+        .identifier = "PointRenderMode",
+        .name = "Points aligned to",
+        .description = "Decides how the billboards for the points should be rendered in "
+            "terms of up direction and whether the plane should face the camera. See "
+            "details on the different options in the wiki.",
+        .visibility = Visibility::User
     };
 
     constexpr PropertyInfo FlyToFeatureInfo = {
-        "FlyToFeature",
-        "Fly to feature",
-        "Triggering this leads to the camera flying to a position that show the GeoJson "
-        "feature. The flight will account for any lat, long or height offset.",
-        Visibility::NoviceUser
+        .identifier = "FlyToFeature",
+        .name = "Fly to feature",
+        .description = "Triggering this leads to the camera flying to a position that "
+            "show the GeoJson feature. The flight will account for any lat, long or "
+            "height offset.",
+        .visibility = Visibility::NoviceUser
     };
 
-    constexpr PropertyInfo CentroidCoordinateInfo = {
-        "CentroidCoordinate",
-        "Centroid coordinate",
-        "The lat long coordinate of the centroid position of the read geometry. Note "
-        "that this value does not include the offset.",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo CentroidCoordinateInfo = {
+        .identifier = "CentroidCoordinate",
+        .name = "Centroid coordinate",
+        .description = "The lat long coordinate of the centroid position of the read "
+            "geometry. Note that this value does not include the offset.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(-90.f, -180.f), glm::vec2(90.f, 180.f) }
+        }
     };
 
-    constexpr PropertyInfo BoundingBoxInfo = {
-        "BoundingBox",
-        "Bounding box",
-        "The lat long coordinates of the lower and upper corner of the bounding box of "
-        "the read geometry. Note that this value does not include the offset.",
-        Visibility::AdvancedUser
+    constexpr Vec4PropertyInfo BoundingBoxInfo = {
+        .identifier = "BoundingBox",
+        .name = "Bounding box",
+        .description = "The lat long coordinates of the lower and upper corner of the "
+            "bounding box of the read geometry. Note that this value does not include "
+            "the offset.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec4(0.f),
+            .minMax = {
+                glm::vec4(-90.f, -180.f, -90.f, -180.f),
+                glm::vec4(90.f, 180.f, 90.f, 180.f)
+            }
+        }
     };
 
-    constexpr PropertyInfo PointSizeScaleInfo = {
-        "PointSizeScale",
-        "Point size scale",
-        "An extra scale value that can be used to increase or decrease the scale of any "
-        "rendered points in the component, even if a value is set from the GeoJson file.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo PointSizeScaleInfo = {
+        .identifier = "PointSizeScale",
+        .name = "Point size scale",
+        .description = "An extra scale value that can be used to increase or decrease "
+            "the scale of any rendered points in the component, even if a value is set "
+            "from the GeoJson file.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.01f, 100.f }
+        }
     };
 
-    constexpr PropertyInfo LineWidthScaleInfo = {
-        "LineWidthScale",
-        "Line width scale",
-        "An extra scale value that can be used to increase or decrease the width of any "
-        "rendered lines in the component, even if a value is set from the GeoJson file. "
-        "Note that there is a max limit for how wide lines can be.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo LineWidthScaleInfo = {
+        .identifier = "LineWidthScale",
+        .name = "Line width scale",
+        .description = "An extra scale value that can be used to increase or decrease "
+            "the width of any rendered lines in the component, even if a value is set "
+            "from the GeoJson file. Note that there is a max limit for how wide lines "
+            "can be.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.01f, 10.f }
+        }
     };
 
     constexpr PropertyInfo DeleteInfo = {
-        "Delete",
-        "Delete",
-        "Triggering this will remove this GeoJson component from its globe. Note that "
-        "the GUI may have to be reloaded for the change to be reflect in the user "
-        "interface.",
-        Visibility::User
+        .identifier = "Delete",
+        .name = "Delete",
+        .description = "Triggering this will remove this GeoJson component from its "
+            "globe. Note that the GUI may have to be reloaded for the change to be "
+            "reflect in the user interface.",
+        .visibility = Visibility::User
     };
 
     struct [[codegen::Dictionary(GeoJsonComponent)]] Parameters {
@@ -260,19 +301,9 @@ Documentation GeoJsonComponent::Documentation() {
 
 GeoJsonComponent::SubFeatureProps::SubFeatureProps(PropertyOwner::PropertyOwnerInfo info)
     : PropertyOwner(std::move(info))
-    , enabled(EnabledInfo, true)
-    , centroidLatLong(
-        CentroidCoordinateInfo,
-        glm::vec2(0.f),
-        glm::vec2(-90.f, -180.f),
-        glm::vec2(90.f, 180.f)
-    )
-    , boundingboxLatLong(
-        BoundingBoxInfo,
-        glm::vec4(0.f),
-        glm::vec4(-90.f, -180.f, -90.f, -180.f),
-        glm::vec4(90.f, 180.f, 90.f, 180.f)
-    )
+    , enabled(EnabledInfo)
+    , centroidLatLong(CentroidCoordinateInfo)
+    , boundingboxLatLong(BoundingBoxInfo)
     , flyToFeature(FlyToFeatureInfo)
 {
     _opacity.setVisibility(Visibility::AdvancedUser);
@@ -296,28 +327,18 @@ GeoJsonComponent::GeoJsonComponent(const Dictionary& dictionary, RenderableGlobe
         dictionary.hasKey(KeyName) ? dictionary.value<std::string>(KeyName) : "",
         dictionary.hasKey(KeyDesc) ? dictionary.value<std::string>(KeyDesc) : ""
     })
-    , _enabled(EnabledInfo, true)
+    , _enabled(EnabledInfo)
     , _geoJsonFile(FileInfo)
-    , _heightOffset(HeightOffsetInfo, 10.f, -1e12f, 1e12f)
-    , _latLongOffset(
-        CoordinateOffsetInfo,
-        glm::vec2(0.f),
-        glm::vec2(-90.0),
-        glm::vec2(90.f)
-    )
-    , _pointSizeScale(PointSizeScaleInfo, 1.f, 0.01f, 100.f)
-    , _lineWidthScale(LineWidthScaleInfo, 1.f, 0.01f, 10.f)
+    , _heightOffset(HeightOffsetInfo)
+    , _latLongOffset(CoordinateOffsetInfo)
+    , _pointSizeScale(PointSizeScaleInfo)
+    , _lineWidthScale(LineWidthScaleInfo)
     , _pointRenderModeOption(PointRenderModeInfo)
-    , _drawWireframe(DrawWireframeInfo, false)
-    , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
+    , _drawWireframe(DrawWireframeInfo)
+    , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo)
     , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
     , _globeNode(globe)
-    , _centerLatLong(
-        CentroidCoordinateInfo,
-        glm::vec2(0.f),
-        glm::vec2(-90.f, -180.f),
-        glm::vec2(90.f, 180.f)
-    )
+    , _centerLatLong(CentroidCoordinateInfo)
     , _flyToFeature(FlyToFeatureInfo)
     , _deletePropertyOwner({ "Deletion", "Deletion" })
     , _deleteThisComponent(DeleteInfo)

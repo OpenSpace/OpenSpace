@@ -33,11 +33,14 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Whether the light source is enabled or not.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Whether the light source is enabled or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     // This is the base class of all `LightSource` types, which are components that can be
@@ -92,7 +95,7 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
 
 LightSource::LightSource(const Dictionary& dictionary)
     : PropertyOwner({ "LightSource" })
-    , _enabled(EnabledInfo, true)
+    , _enabled(EnabledInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

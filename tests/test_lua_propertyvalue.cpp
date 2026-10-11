@@ -51,7 +51,14 @@ TEST_CASE("PropertyValue: Basic", "[propertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    FloatProperty p1 = FloatProperty(PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty({
+        .identifier = "p1",
+        .name = "a",
+        .description = "b",
+        .defaults = {
+            .value = 1.f
+        }
+    });
     owner.addProperty(p1);
 
     {
@@ -77,7 +84,14 @@ TEST_CASE("PropertyValue: Empty", "[propertyvalue]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    FloatProperty p1 = FloatProperty(PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty({
+        .identifier = "p1",
+        .name = "a",
+        .description = "b",
+        .defaults = {
+            .value = 1.f
+        }
+    });
     owner.addProperty(p1);
 
     {

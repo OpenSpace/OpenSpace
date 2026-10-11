@@ -32,32 +32,47 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo VisibilityInfo = {
+    constexpr BoolPropertyInfo VisibilityInfo = {
         .identifier = "Enabled",
-        .name =  "Show touch markers",
+        .name = "Show touch markers",
         .description = "Decides whether to show circular markers on touch interaction.",
-        .visibility = Visibility::NoviceUser
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo RadiusInfo = {
-        "Size",
-        "Marker size",
-        "Controls the size of the touch input markers.",
-        Visibility::User
+    constexpr FloatPropertyInfo RadiusInfo = {
+        .identifier = "Size",
+        .name = "Marker size",
+        .description = "Controls the size of the touch input markers.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 30.f,
+            .minMax = { 0.f, 100.f }
+        }
     };
 
-    constexpr PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Marker opacity",
-        "The opacity of the touch markers.",
-        Visibility::User
+    constexpr FloatPropertyInfo OpacityInfo = {
+        .identifier = "Opacity",
+        .name = "Marker opacity",
+        .description = "The opacity of the touch markers.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.6f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo ColorInfo = {
-        "MarkerColor",
-        "Marker color",
-        "The color of the touch markers.",
-        Visibility::User
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "MarkerColor",
+        .name = "Marker color",
+        .description = "The color of the touch markers.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 } // namespace
 
@@ -65,10 +80,10 @@ namespace openspace {
 
 TouchMarker::TouchMarker()
     : PropertyOwner({ "TouchMarkers", "Touch Markers" })
-    , _enabled(VisibilityInfo, true)
-    , _radiusSize(RadiusInfo, 30.f, 0.f, 100.f)
-    , _opacity(OpacityInfo, 0.6f, 0.f, 1.f)
-    , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _enabled(VisibilityInfo)
+    , _radiusSize(RadiusInfo)
+    , _opacity(OpacityInfo)
+    , _color(ColorInfo)
 {
     addProperty(_enabled);
     addProperty(_radiusSize);

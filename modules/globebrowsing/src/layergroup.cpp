@@ -45,13 +45,16 @@ namespace {
 
     constexpr std::string_view _loggerCat = "LayerGroup";
 
-    constexpr PropertyInfo BlendTileInfo = {
-        "BlendTileLevels",
-        "Blend between levels",
-        "If this value is enabled, images between different levels are interpolated, "
-        "rather than switching between levels abruptly. This makes transitions smoother "
-        "and more visually pleasing.",
-        Visibility::User
+    constexpr BoolPropertyInfo BlendTileInfo = {
+        .identifier = "BlendTileLevels",
+        .name = "Blend between levels",
+        .description = "If this value is enabled, images between different levels are "
+            "interpolated, rather than switching between levels abruptly. This makes "
+            "transitions smoother and more visually pleasing.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 } // namespace
 
@@ -60,7 +63,7 @@ namespace openspace {
 LayerGroup::LayerGroup(layers::Group group)
     : PropertyOwner({ std::string(group.identifier), std::string(group.name)})
     , _groupId(group.id)
-    , _levelBlendingEnabled(BlendTileInfo, true)
+    , _levelBlendingEnabled(BlendTileInfo)
 {
     addProperty(_levelBlendingEnabled);
 }

@@ -62,7 +62,7 @@ public:
      * \param value The default value of the Property
      *
      * \pre \p info.identifier must not be empty
-     * \pre \p info.guiName must not be empty
+     * \pre \p info.name must not be empty
      */
     TemplateProperty(PropertyInfo info, T value);
 

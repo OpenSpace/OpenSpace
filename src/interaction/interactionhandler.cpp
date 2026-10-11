@@ -33,49 +33,73 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo InvertMouseButtons = {
-        "InvertMouseButtons",
-        "Invert left and right mouse buttons",
-        "If this setting is enabled, the right mouse button is considered the primary "
-        "one, rather than the left. This means that behavior usually mapped to the left "
-        "mouse button will be mapped to the right mouse button, and vice versa.",
-        Visibility::NoviceUser
+    constexpr BoolPropertyInfo InvertMouseButtons = {
+        .identifier = "InvertMouseButtons",
+        .name = "Invert left and right mouse buttons",
+        .description = "If this setting is enabled, the right mouse button is considered "
+            "the primary one, rather than the left. This means that behavior usually "
+            "mapped to the left mouse button will be mapped to the right mouse button, "
+            "and vice versa.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo DisableKeybindingsInfo = {
-        "DisableKeybindings",
-        "Disable all keybindings",
-        "Disables all keybindings without removing them. Please note that this does not "
-        "apply to the key to open the console.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo DisableKeybindingsInfo = {
+        .identifier = "DisableKeybindings",
+        .name = "Disable all keybindings",
+        .description = "Disables all keybindings without removing them. Please note that "
+            "this does not apply to the key to open the console.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo DisableMouseInputInfo = {
-        "DisableMouseInput",
-        "Disable all mouse inputs",
-        "Disables all mouse inputs and prevents them from affecting the camera.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo DisableMouseInputInfo = {
+        .identifier = "DisableMouseInput",
+        .name = "Disable all mouse inputs",
+        .description = "Disables all mouse inputs and prevents them from affecting the "
+            "camera.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo DisableJoystickInputInfo = {
-        "DisableJoystickInput",
-        "Disable all joystick inputs",
-        "Disables all joystick inputs and prevents them from affecting the camera.",
-        Visibility::User
+    constexpr BoolPropertyInfo DisableJoystickInputInfo = {
+        .identifier = "DisableJoystickInput",
+        .name = "Disable all joystick inputs",
+        .description = "Disables all joystick inputs and prevents them from affecting "
+            "the camera.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo DisableTouchInputInfo = {
-        "DisableTouchInput",
-        "Disable all touch inputs",
-        "Disables all touch inputs and prevents them from affecting the camera.",
-        Visibility::User
+    constexpr BoolPropertyInfo DisableTouchInputInfo = {
+        .identifier = "DisableTouchInput",
+        .name = "Disable all touch inputs",
+        .description = "Disables all touch inputs and prevents them from affecting the "
+            "camera.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo MaxDoubleTapTimeInfo = {
-        "MaxDoubleTapTime",
-        "Max time for touch double tap detection (milliseconds)",
-        "Max tap delay (in ms) for double tap detection in touch interaction.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo MaxDoubleTapTimeInfo = {
+        .identifier = "MaxDoubleTapTime",
+        .name = "Max time for touch double tap detection (milliseconds)",
+        .description = "Max tap delay (in ms) for double tap detection in touch "
+            "interaction.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 300,
+            .minMax = { 10, 1000 }
+        }
     };
 
     const PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {
@@ -85,18 +109,25 @@ namespace {
         "since it was pressed down."
     };
 
-    constexpr PropertyInfo MouseVisualizerEnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "If this setting is enabled, the mouse interaction will be visualized on the "
-        "screen by showing the distance the mouse has been moved since it was pressed "
-        "down."
+    constexpr BoolPropertyInfo MouseVisualizerEnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "If this setting is enabled, the mouse interaction will be "
+            "visualized on the screen by showing the distance the mouse has been moved "
+            "since it was pressed down.",
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo MouseVisualizerColorInfo = {
-        "Color",
-        "Color",
-        "The color used to render the line showing the mouse visualizer."
+    constexpr Vec4PropertyInfo MouseVisualizerColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color used to render the line showing the mouse visualizer.",
+        .defaults = {
+            .value = glm::vec4(1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 } // namespace
 
@@ -104,21 +135,16 @@ namespace openspace {
 
 InteractionHandler::InteractionHandler()
     : PropertyOwner({ "InteractionHandler", "Interaction Handler" })
-    , _invertMouseButtons(InvertMouseButtons, false)
-    , _disableKeybindings(DisableKeybindingsInfo, false)
-    , _disableMouseInputs(DisableMouseInputInfo, false)
-    , _disableJoystickInputs(DisableJoystickInputInfo, false)
-    , _disableTouchInputs(DisableTouchInputInfo, false)
-    , _maxDoubleTapTime(MaxDoubleTapTimeInfo, 300, 10, 1000)
+    , _invertMouseButtons(InvertMouseButtons)
+    , _disableKeybindings(DisableKeybindingsInfo)
+    , _disableMouseInputs(DisableMouseInputInfo)
+    , _disableJoystickInputs(DisableJoystickInputInfo)
+    , _disableTouchInputs(DisableTouchInputInfo)
+    , _maxDoubleTapTime(MaxDoubleTapTimeInfo)
     , _mouseVisualizer({
         .owner = PropertyOwner(MouseVisualizerInfo),
-        .enable = BoolProperty(MouseVisualizerEnabledInfo, false),
-        .color = Vec4Property(
-            MouseVisualizerColorInfo,
-            glm::vec4(1.f),
-            glm::vec4(0.f),
-            glm::vec4(1.f)
-        )
+        .enable = BoolProperty(MouseVisualizerEnabledInfo),
+        .color = Vec4Property(MouseVisualizerColorInfo)
     })
 {
     addProperty(_invertMouseButtons);

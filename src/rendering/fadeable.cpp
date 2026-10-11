@@ -27,30 +27,38 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "This value determines the opacity of this object. A value of 0 means completely "
-        "transparent.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo OpacityInfo = {
+        .identifier = "Opacity",
+        .name = "Opacity",
+        .description = "This value determines the opacity of this object. A value of 0 "
+            "means completely transparent.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo FadeInfo = {
-        "Fade",
-        "Fade",
-        "This value is used by the system to be able to fade out objects independently "
-        "from the Opacity value selected by the user. This value should not be directly "
-        "manipulated through a user interface, but instead used by other components of "
-        "the system programmatically.",
-        Visibility::Developer
+    constexpr FloatPropertyInfo FadeInfo = {
+        .identifier = "Fade",
+        .name = "Fade",
+        .description = "This value is used by the system to be able to fade out objects "
+            "independently from the Opacity value selected by the user. This value "
+            "should not be directly manipulated through a user interface, but instead "
+            "used by other components of the system programmatically.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 } // namespace
 
 namespace openspace {
 
 Fadeable::Fadeable()
-    : _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _fade(FadeInfo, 1.f, 0.f, 1.f)
+    : _opacity(OpacityInfo)
+    , _fade(FadeInfo)
 {
     // Note that this is not a property owner. It's still up to the subclasses to
     // add the properties, assign values, etc

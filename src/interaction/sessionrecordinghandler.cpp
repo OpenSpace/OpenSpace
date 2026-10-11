@@ -80,29 +80,39 @@ namespace {
         {}
     };
 
-    constexpr PropertyInfo RenderPlaybackInfo = {
-        "RenderInfo",
-        "Render playback information",
-        "If enabled, information about a currently played back session recording is "
-        "rendering to screen.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo RenderPlaybackInfo = {
+        .identifier = "RenderInfo",
+        .name = "Render playback information",
+        .description = "If enabled, information about a currently played back session "
+            "recording is rendering to screen.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo IgnoreRecordedScaleInfo = {
-        "IgnoreRecordedScale",
-        "Ignore recorded scale",
-        "If this value is enabled, the scale value from a recording is ignored and the "
-        "computed values are used instead.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo IgnoreRecordedScaleInfo = {
+        .identifier = "IgnoreRecordedScale",
+        .name = "Ignore recorded scale",
+        .description = "If this value is enabled, the scale value from a recording is "
+            "ignored and the computed values are used instead.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo AddModelMatrixinAsciiInfo = {
-        "AddModelMatrixinAscii",
-        "Add model matrix in ASCII recording",
-        "If this is 'true', the model matrix is written into the ASCII recording format "
-        "in the line before each camera keyframe. The model matrix is the full matrix "
-        "that converts the position into a J2000+Galactic reference frame.",
-        Visibility::Developer
+    constexpr BoolPropertyInfo AddModelMatrixinAsciiInfo = {
+        .identifier = "AddModelMatrixinAscii",
+        .name = "Add model matrix in ASCII recording",
+        .description = "If this is 'true', the model matrix is written into the ASCII "
+            "recording format in the line before each camera keyframe. The model matrix "
+            "is the full matrix that converts the position into a J2000+Galactic "
+            "reference frame.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 } // namespace
 
@@ -110,9 +120,9 @@ namespace openspace {
 
 SessionRecordingHandler::SessionRecordingHandler()
     : PropertyOwner({ "SessionRecording", "Session Recording" })
-    , _renderPlaybackInformation(RenderPlaybackInfo, false)
-    , _ignoreRecordedScale(IgnoreRecordedScaleInfo, false)
-    , _addModelMatrixinAscii(AddModelMatrixinAsciiInfo, false)
+    , _renderPlaybackInformation(RenderPlaybackInfo)
+    , _ignoreRecordedScale(IgnoreRecordedScaleInfo)
+    , _addModelMatrixinAscii(AddModelMatrixinAsciiInfo)
 {
     addProperty(_renderPlaybackInformation);
     addProperty(_ignoreRecordedScale);

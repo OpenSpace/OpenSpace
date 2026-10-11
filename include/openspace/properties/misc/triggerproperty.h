@@ -42,7 +42,7 @@ public:
      * \param info The PropertyInfo structure that contains all the required static
      *        information for initializing this Property
      * \pre \p info.identifier must not be empty
-     * \pre \p info.guiName must not be empty
+     * \pre \p info.name must not be empty
      */
     explicit TriggerProperty(PropertyInfo info);
 

@@ -41,20 +41,26 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo FormatStringInfo = {
-        "FormatString",
-        "Format string",
-        "The format text describing how this dashboard item renders its text. This text "
-        "must contain exactly one {} which is a placeholder that will be replaced "
-        "with the values read from the file provided in `DataFile`.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo FormatStringInfo = {
+        .identifier = "FormatString",
+        .name = "Format string",
+        .description = "The format text describing how this dashboard item renders its "
+            "text. This text must contain exactly one {} which is a placeholder that "
+            "will be replaced with the values read from the file provided in `DataFile`.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "{}"
+        }
     };
 
-    constexpr PropertyInfo DataFileInfo = {
-        "DataFile",
-        "Data file path",
-        "The file path to the JSON data.",
-        Visibility::User
+    constexpr StringPropertyInfo DataFileInfo = {
+        .identifier = "DataFile",
+        .name = "Data file path",
+        .description = "The file path to the JSON data.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = ""
+        }
     };
 
     // This `DashboardItem` displays text based on the content of a provided data file.
@@ -83,8 +89,8 @@ Documentation DashboardItemTimeVaryingText::Documentation() {
 
 DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _formatString(FormatStringInfo, "{}")
-    , _dataFile(DataFileInfo, "")
+    , _formatString(FormatStringInfo)
+    , _dataFile(DataFileInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

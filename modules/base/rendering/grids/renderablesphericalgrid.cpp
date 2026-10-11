@@ -41,36 +41,53 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color of the grid lines.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color of the grid lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.5f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo LongSegmentsInfo = {
-        "LongSegments",
-        "Number of longitudinal segments",
-        "The number of longitudinal segments the sphere is split into. Determines the "
-        "resolution of the rendered sphere in a left/right direction when looking "
-        "straight at the equator.",
-        Visibility::User
+    constexpr IntPropertyInfo LongSegmentsInfo = {
+        .identifier = "LongSegments",
+        .name = "Number of longitudinal segments",
+        .description = "The number of longitudinal segments the sphere is split into. "
+            "Determines the resolution of the rendered sphere in a left/right direction "
+            "when looking straight at the equator.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 36,
+            .minMax = { 4, 200 }
+        }
     };
 
-    constexpr PropertyInfo LatSegmentsInfo = {
-        "LatSegments",
-        "Number of latitudinal segments",
-        "The number of latitudinal segments the sphere is split into. Determines the "
-        "resolution of the rendered sphere in a up/down direction when looking "
-        "straight at the equator.",
-        Visibility::User
+    constexpr IntPropertyInfo LatSegmentsInfo = {
+        .identifier = "LatSegments",
+        .name = "Number of latitudinal segments",
+        .description = "The number of latitudinal segments the sphere is split into. "
+            "Determines the resolution of the rendered sphere in a up/down direction "
+            "when looking straight at the equator.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 18,
+            .minMax = { 4, 200 }
+        }
     };
 
-    constexpr PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the grid lines. The larger number, the thicker the lines.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the grid lines. The larger number, the thicker the "
+            "lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
@@ -127,10 +144,10 @@ Documentation RenderableSphericalGrid::Documentation() {
 RenderableSphericalGrid::RenderableSphericalGrid(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridProgram(nullptr)
-    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _longSegments(LongSegmentsInfo, 36, 4, 200)
-    , _latSegments(LatSegmentsInfo, 18, 4, 200)
-    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
+    , _color(ColorInfo)
+    , _longSegments(LongSegmentsInfo)
+    , _latSegments(LatSegmentsInfo)
+    , _lineWidth(LineWidthInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

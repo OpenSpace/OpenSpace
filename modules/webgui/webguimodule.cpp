@@ -44,66 +44,77 @@ namespace {
 
     constexpr std::string_view _loggerCat = "WebGuiModule";
 
-    constexpr PropertyInfo ServerProcessEnabledInfo = {
-        "ServerProcessEnabled",
-        "Enable server process",
-        "Enable the node js based process used to serve the Web GUI.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ServerProcessEnabledInfo = {
+        .identifier = "ServerProcessEnabled",
+        .name = "Enable server process",
+        .description = "Enable the node js based process used to serve the Web GUI.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo AddressInfo = {
-        "Address",
-        "Address",
-        "The network address to use when connecting to OpenSpace from the Web GUI.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo AddressInfo = {
+        .identifier = "Address",
+        .name = "Address",
+        .description = "The network address to use when connecting to OpenSpace from the "
+            "Web GUI.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "localhost"
+        }
     };
 
-    constexpr PropertyInfo PortInfo = {
-        "Port",
-        "Port",
-        "The network port to use when serving the Web GUI over HTTP.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo PortInfo = {
+        .identifier = "Port",
+        .name = "Port",
+        .description = "The network port to use when serving the Web GUI over HTTP.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 4680
+        }
     };
 
-    constexpr PropertyInfo WebSocketInterfaceInfo = {
-        "WebSocketInterface",
-        "WebSocket interface",
-        "The identifier of the websocket interface to use when communicating.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo WebSocketInterfaceInfo = {
+        .identifier = "WebSocketInterface",
+        .name = "WebSocket interface",
+        .description = "The identifier of the websocket interface to use when "
+            "communicating.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ServerProcessEntryPointInfo = {
-        "ServerProcessEntryPoint",
-        "Server process entry point",
-        "The node js command to invoke.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo ServerProcessEntryPointInfo = {
+        .identifier = "ServerProcessEntryPoint",
+        .name = "Server process entry point",
+        .description = "The node js command to invoke.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DirectoriesInfo = {
-        "Directories",
-        "Directories",
-        "Directories from which to to serve static content, as a string list "
-        "with entries expressed as pairs, where every odd is the endpoint name and every "
-        "even is the directory.",
-        Visibility::AdvancedUser
+        .identifier = "Directories",
+        .name = "Directories",
+        .description = "Directories from which to to serve static content, as a string "
+            "list with entries expressed as pairs, where every odd is the endpoint name "
+            "and every even is the directory.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo DefaultEndpointInfo = {
-        "DefaultEndpoint",
-        "Default endpoint",
-        "The 'default' endpoint. The server will redirect http requests from / to "
-        "/<DefaultEndpoint>.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo DefaultEndpointInfo = {
+        .identifier = "DefaultEndpoint",
+        .name = "Default endpoint",
+        .description = "The 'default' endpoint. The server will redirect http requests "
+            "from / to /<DefaultEndpoint>.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ServedDirectoriesInfo = {
-        "ServedDirectories",
-        "Served directories",
-        "Directories that are currently served. This value is set by the server process, "
-        "as a verification of the actually served directories. For example, an onChange "
-        "callback can be registered to this, to reload browsers when the server is "
-        "ready. Manual changes to this property have no effect.",
-        Visibility::AdvancedUser
+        .identifier = "ServedDirectories",
+        .name = "Served directories",
+        .description = "Directories that are currently served. This value is set by the "
+            "server process, as a verification of the actually served directories. For "
+            "example, an onChange callback can be registered to this, to reload browsers "
+            "when the server is ready. Manual changes to this property have no effect.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(WebGuiModule)]] Parameters {
@@ -127,13 +138,13 @@ Documentation WebGuiModule::Documentation() {
 
 WebGuiModule::WebGuiModule()
     : OpenSpaceModule(WebGuiModule::Name)
-    , _enabled(ServerProcessEnabledInfo, true)
+    , _enabled(ServerProcessEnabledInfo)
     , _entryPoint(ServerProcessEntryPointInfo)
     , _directories(DirectoriesInfo)
     , _servedDirectories(ServedDirectoriesInfo)
     , _defaultEndpoint(DefaultEndpointInfo)
-    , _port(PortInfo, 4680)
-    , _address(AddressInfo, "localhost")
+    , _port(PortInfo)
+    , _address(AddressInfo)
     , _webSocketInterface(WebSocketInterfaceInfo)
 {
     addProperty(_enabled);

@@ -43,12 +43,12 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";
 
-    constexpr PropertyInfo SourceFolderInfo = {
-        "SourceFolder",
-        "Source folder",
-        "An image directory that is loaded from disk and contains the textures to use "
-        "for this plane.",
-       Visibility::AdvancedUser
+    constexpr StringPropertyInfo SourceFolderInfo = {
+        .identifier = "SourceFolder",
+        .name = "Source folder",
+        .description = "An image directory that is loaded from disk and contains the "
+            "textures to use for this plane.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {

@@ -54,19 +54,23 @@ namespace {
         return glm::radians(rightAscension * 15);
     }
 
-    constexpr PropertyInfo VertexInfo = {
-        "File",
-        "Vertex file path",
-        "A file that contains the vertex locations of the constellations bounds, as RA "
-        "Dec coordinates on the celestial sphere.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo VertexInfo = {
+        .identifier = "File",
+        .name = "Vertex file path",
+        .description = "A file that contains the vertex locations of the constellations "
+            "bounds, as RA Dec coordinates on the celestial sphere.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color of the lines.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color of the lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f, 0.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     // Can be used to draw bounding shapes on the night sky, where each shape encapsulates
@@ -116,7 +120,7 @@ Documentation RenderableConstellationBounds::Documentation() {
 RenderableConstellationBounds::RenderableConstellationBounds(const Dictionary& dictionary)
     : RenderableConstellationsBase(dictionary)
     , _vertexFilename(VertexInfo)
-    , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _color(ColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

@@ -43,115 +43,138 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo DataFolderInfo = {
-        "DataFolder",
-        "Data folder",
-        "The path to the folder containing the exoplanets data and lookup table.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo DataFolderInfo = {
+        .identifier = "DataFolder",
+        .name = "Data folder",
+        .description = "The path to the folder containing the exoplanets data and lookup "
+            "table.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo BvColorMapInfo = {
-        "BvColormap",
-        "B-V colormap",
-        "The path to a cmap file that maps a B-V color index to an RGB color.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo BvColorMapInfo = {
+        .identifier = "BvColormap",
+        .name = "B-V colormap",
+        .description = "The path to a cmap file that maps a B-V color index to an RGB "
+            "color.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo StarTextureInfo = {
-        "StarTexture",
-        "Star texture",
-        "The path to a grayscale image that is used for the host star surfaces.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo StarTextureInfo = {
+        .identifier = "StarTexture",
+        .name = "Star texture",
+        .description = "The path to a grayscale image that is used for the host star "
+            "surfaces.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo StarGlareTextureInfo = {
-        "StarGlareTexture",
-        "Star glare texture",
-        "The path to a grayscale image that is used for the glare effect of the host "
-        "stars.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo StarGlareTextureInfo = {
+        .identifier = "StarGlareTexture",
+        .name = "Star glare texture",
+        .description = "The path to a grayscale image that is used for the glare effect "
+            "of the host stars.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo NoDataTextureInfo = {
-        "NoDataTexture",
-        "No data star texture",
-        "A path to a texture that is used to represent that there is missing data about "
-        "the star. For example no color information.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo NoDataTextureInfo = {
+        .identifier = "NoDataTexture",
+        .name = "No data star texture",
+        .description = "A path to a texture that is used to represent that there is "
+            "missing data about the star. For example no color information.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo PlanetDefaultTextureInfo = {
-        "PlanetDefaultTexture",
-        "Planet default texture",
-        "The path to an image that should be used by default for the planets in all "
-        "added exoplanet systems. If not specified, the planets are rendered without a "
-        "texture when added.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo PlanetDefaultTextureInfo = {
+        .identifier = "PlanetDefaultTexture",
+        .name = "Planet default texture",
+        .description = "The path to an image that should be used by default for the "
+            "planets in all added exoplanet systems. If not specified, the planets are "
+            "rendered without a texture when added.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo OrbitDiscTextureInfo = {
-        "OrbitDiscTexture",
-        "Orbit disc texture",
-        "A path to a 1-dimensional image used as a transfer function for the exoplanets' "
-        "orbit uncertainty disc.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo OrbitDiscTextureInfo = {
+        .identifier = "OrbitDiscTexture",
+        .name = "Orbit disc texture",
+        .description = "A path to a 1-dimensional image used as a transfer function for "
+            "the exoplanets' orbit uncertainty disc.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo HabitableZoneTextureInfo = {
-        "HabitableZoneTexture",
-        "Habitable zone texture",
-        "A path to a 1-dimensional image used as a transfer function for the habitable "
-        "zone disc.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo HabitableZoneTextureInfo = {
+        .identifier = "HabitableZoneTexture",
+        .name = "Habitable zone texture",
+        .description = "A path to a 1-dimensional image used as a transfer function for "
+            "the habitable zone disc.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ComparisonCircleColorInfo = {
-        "ComparisonCircleColor",
-        "Comparison circle color",
-        "Decides the color of the 1 AU size comparison circles that are generated as "
-        "part of an exoplanet system. Changing the color will not modify already "
-        "existing circles.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ComparisonCircleColorInfo = {
+        .identifier = "ComparisonCircleColor",
+        .name = "Comparison circle color",
+        .description = "Decides the color of the 1 AU size comparison circles that are "
+            "generated as part of an exoplanet system. Changing the color will not "
+            "modify already existing circles.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 0.8f, 0.8f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo ShowComparisonCircleInfo = {
-        "ShowComparisonCircle",
-        "Show comparison circle",
-        "If true, the 1 AU size comparison circle is enabled per default when an "
-        "exoplanet system is created.",
-        Visibility::NoviceUser
+    constexpr BoolPropertyInfo ShowComparisonCircleInfo = {
+        .identifier = "ShowComparisonCircle",
+        .name = "Show comparison circle",
+        .description = "If true, the 1 AU size comparison circle is enabled per default "
+            "when an exoplanet system is created.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ShowOrbitUncertaintyInfo = {
-        "ShowOrbitUncertainty",
-        "Show orbit uncertainty",
-        "If true, a disc showing the uncertainty for each planetary orbit is enabled per "
-        "default when an exoplanet system is created.",
-        Visibility::User
+    constexpr BoolPropertyInfo ShowOrbitUncertaintyInfo = {
+        .identifier = "ShowOrbitUncertainty",
+        .name = "Show orbit uncertainty",
+        .description = "If true, a disc showing the uncertainty for each planetary orbit "
+            "is enabled per default when an exoplanet system is created.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo ShowHabitableZoneInfo = {
-        "ShowHabitableZone",
-        "Show habitable zone",
-        "If true, the habitable zone disc is enabled per default when an exoplanet "
-        "system is created.",
-        Visibility::User
+    constexpr BoolPropertyInfo ShowHabitableZoneInfo = {
+        .identifier = "ShowHabitableZone",
+        .name = "Show habitable zone",
+        .description = "If true, the habitable zone disc is enabled per default when an "
+            "exoplanet system is created.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo UseOptimisticZoneInfo = {
-        "UseOptimisticZone",
-        "Use optimistic zone boundaries",
-        "If true, the habitable zone is computed with optimistic boundaries per default "
-        "when an exoplanet system is created.",
-        Visibility::User
+    constexpr BoolPropertyInfo UseOptimisticZoneInfo = {
+        .identifier = "UseOptimisticZone",
+        .name = "Use optimistic zone boundaries",
+        .description = "If true, the habitable zone is computed with optimistic "
+            "boundaries per default when an exoplanet system is created.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo HabitableZoneOpacityInfo = {
-        "HabitableZoneOpacity",
-        "Habitable zone opacity",
-        "The opacity value used for the habitable zone renderable for a created "
-        "exoplanet system.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo HabitableZoneOpacityInfo = {
+        .identifier = "HabitableZoneOpacity",
+        .name = "Habitable zone opacity",
+        .description = "The opacity value used for the habitable zone renderable for a "
+            "created exoplanet system.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 0.1f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
     constexpr std::string_view ExoplanetsDataFileName = "exoplanets_data.bin";
@@ -220,17 +243,12 @@ ExoplanetsModule::ExoplanetsModule()
     , _planetDefaultTexturePath(PlanetDefaultTextureInfo)
     , _orbitDiscTexturePath(OrbitDiscTextureInfo)
     , _habitableZoneTexturePath(HabitableZoneTextureInfo)
-    , _comparisonCircleColor(
-        ComparisonCircleColorInfo,
-        glm::vec3(0.f, 0.8f, 0.8f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
-    , _showComparisonCircle(ShowComparisonCircleInfo, false)
-    , _showOrbitUncertainty(ShowOrbitUncertaintyInfo, true)
-    , _showHabitableZone(ShowHabitableZoneInfo, true)
-    , _useOptimisticZone(UseOptimisticZoneInfo, true)
-    , _habitableZoneOpacity(HabitableZoneOpacityInfo, 0.1f, 0.f, 1.f)
+    , _comparisonCircleColor(ComparisonCircleColorInfo)
+    , _showComparisonCircle(ShowComparisonCircleInfo)
+    , _showOrbitUncertainty(ShowOrbitUncertaintyInfo)
+    , _showHabitableZone(ShowHabitableZoneInfo)
+    , _useOptimisticZone(UseOptimisticZoneInfo)
+    , _habitableZoneOpacity(HabitableZoneOpacityInfo)
 {
     _exoplanetsDataFolder.setReadOnly(true);
 

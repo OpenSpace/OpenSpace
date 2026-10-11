@@ -64,71 +64,105 @@ namespace {
         return x2;
     }
 
-    constexpr PropertyInfo EccentricityInfo = {
-        "Eccentricity",
-        "Eccentricity",
-        "This value determines the eccentricity, that is the deviation from a perfect "
-        "sphere, for this orbit. Currently, hyperbolic orbits using Keplerian elements "
-        "are not supported.",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo EccentricityInfo = {
+        .identifier = "Eccentricity",
+        .name = "Eccentricity",
+        .description = "This value determines the eccentricity, that is the deviation "
+            "from a perfect sphere, for this orbit. Currently, hyperbolic orbits using "
+            "Keplerian elements are not supported.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { 0.0, 1.0 }
+        }
     };
 
-    constexpr PropertyInfo SemiMajorAxisInfo = {
-        "SemiMajorAxis",
-        "Semi-major axis",
-        "This value determines the semi-major axis, that is the distance of the object "
-        "from the central body in kilometers (semi-major axis = average of periapsis and "
-        "apoapsis).",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo SemiMajorAxisInfo = {
+        .identifier = "SemiMajorAxis",
+        .name = "Semi-major axis",
+        .description = "This value determines the semi-major axis, that is the distance "
+            "of the object from the central body in kilometers (semi-major axis = "
+            "average of periapsis and apoapsis).",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { 0.0, 1e6 }
+        }
     };
 
-    constexpr PropertyInfo InclinationInfo = {
-        "Inclination",
-        "Inclination",
-        "This value determines the degrees of inclination, or the angle of the orbital "
-        "plane, relative to the reference plane, on which the object orbits around the "
-        "central body.",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo InclinationInfo = {
+        .identifier = "Inclination",
+        .name = "Inclination",
+        .description = "This value determines the degrees of inclination, or the angle "
+            "of the orbital plane, relative to the reference plane, on which the object "
+            "orbits around the central body.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { 0.0, 360.0 }
+        }
     };
 
-    constexpr PropertyInfo AscendingNodeInfo = {
-        "AscendingNode",
-        "Right ascension of ascending node",
-        "This value determines the right ascension of the ascending node in degrees, "
-        "that is the location of position along the orbit where the inclined plane and "
-        "the horizontal reference plane intersect.",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo AscendingNodeInfo = {
+        .identifier = "AscendingNode",
+        .name = "Right ascension of ascending node",
+        .description = "This value determines the right ascension of the ascending node "
+            "in degrees, that is the location of position along the orbit where the "
+            "inclined plane and the horizontal reference plane intersect.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { 0.0, 360.0 }
+        }
     };
 
-    constexpr PropertyInfo ArgumentOfPeriapsisInfo = {
-        "ArgumentOfPeriapsis",
-        "Argument of periapsis",
-        "This value determines the argument of periapsis in degrees, that is the "
-        "position on the orbit that is closest to the orbiting body.",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo ArgumentOfPeriapsisInfo = {
+        .identifier = "ArgumentOfPeriapsis",
+        .name = "Argument of periapsis",
+        .description = "This value determines the argument of periapsis in degrees, that "
+            "is the position on the orbit that is closest to the orbiting body.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { 0.0, 360.0 }
+        }
     };
 
-    constexpr PropertyInfo MeanAnomalyAtEpochInfo = {
-        "MeanAnomaly",
-        "Mean anomaly at epoch",
-        "This value determines the mean anomaly at the epoch in degrees, which "
-        "determines the initial location of the object along the orbit at epoch.",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo MeanAnomalyAtEpochInfo = {
+        .identifier = "MeanAnomaly",
+        .name = "Mean anomaly at epoch",
+        .description = "This value determines the mean anomaly at the epoch in degrees, "
+            "which determines the initial location of the object along the orbit at "
+            "epoch.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { 0.0, 360.0 }
+        }
     };
 
-    constexpr PropertyInfo EpochInfo = {
-        "Epoch",
-        "Epoch",
-        "Specifies the epoch in which the first position of the Kepler arguments are "
-        "provided. The epoch is specified in numbers of seconds past the J2000 epoch.",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo EpochInfo = {
+        .identifier = "Epoch",
+        .name = "Epoch",
+        .description = "Specifies the epoch in which the first position of the Kepler "
+            "arguments are provided. The epoch is specified in numbers of seconds past "
+            "the J2000 epoch.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { 0.0, 1e9 }
+        }
     };
 
-    constexpr PropertyInfo PeriodInfo = {
-        "Period",
-        "Orbit period",
-        "Specifies the orbital period (in seconds).",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo PeriodInfo = {
+        .identifier = "Period",
+        .name = "Orbit period",
+        .description = "Specifies the orbital period (in seconds).",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { 0.0, 1e6 }
+        }
     };
 
     // Computes an object's position from classical Keplerian orbital elements. It is
@@ -197,14 +231,14 @@ Documentation KeplerTranslation::Documentation() {
 
 KeplerTranslation::KeplerTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
-    , _eccentricity(EccentricityInfo, 0.0, 0.0, 1.0)
-    , _semiMajorAxis(SemiMajorAxisInfo, 0.0, 0.0, 1e6)
-    , _inclination(InclinationInfo, 0.0, 0.0, 360.0)
-    , _ascendingNode(AscendingNodeInfo, 0.0, 0.0, 360.0)
-    , _argumentOfPeriapsis(ArgumentOfPeriapsisInfo, 0.0, 0.0, 360.0)
-    , _meanAnomalyAtEpoch(MeanAnomalyAtEpochInfo, 0.0, 0.0, 360.0)
-    , _epoch(EpochInfo, 0.0, 0.0, 1e9)
-    , _period(PeriodInfo, 0.0, 0.0, 1e6)
+    , _eccentricity(EccentricityInfo)
+    , _semiMajorAxis(SemiMajorAxisInfo)
+    , _inclination(InclinationInfo)
+    , _ascendingNode(AscendingNodeInfo)
+    , _argumentOfPeriapsis(ArgumentOfPeriapsisInfo)
+    , _meanAnomalyAtEpoch(MeanAnomalyAtEpochInfo)
+    , _epoch(EpochInfo)
+    , _period(PeriodInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

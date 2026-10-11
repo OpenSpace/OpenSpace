@@ -40,25 +40,37 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo XColorInfo = {
-        "XColor",
-        "X color",
-        "The color of the x-axis.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo XColorInfo = {
+        .identifier = "XColor",
+        .name = "X color",
+        .description = "The color of the x-axis.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f, 0.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo YColorInfo = {
-        "YColor",
-        "Y color",
-        "The color of the y-axis.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo YColorInfo = {
+        .identifier = "YColor",
+        .name = "Y color",
+        .description = "The color of the y-axis.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 1.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo ZColorInfo = {
-        "ZColor",
-        "Z color",
-        "The color of the z-axis.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ZColorInfo = {
+        .identifier = "ZColor",
+        .name = "Z color",
+        .description = "The color of the z-axis.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 0.f, 1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     // Can be used to render the local Cartesian coordinate system, or reference frame,
@@ -95,9 +107,9 @@ Documentation RenderableCartesianAxes::Documentation() {
 RenderableCartesianAxes::RenderableCartesianAxes(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _program(nullptr)
-    , _xColor(XColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _yColor(YColorInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _zColor(ZColorInfo, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _xColor(XColorInfo)
+    , _yColor(YColorInfo)
+    , _zColor(ZColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

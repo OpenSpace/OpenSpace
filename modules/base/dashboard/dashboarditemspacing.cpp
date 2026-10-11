@@ -31,12 +31,16 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo SpacingInfo = {
-        "Spacing",
-        "Spacing",
-        "This value determines the spacing (in pixels) that this item represents. The "
-        "default value is 15.",
-        Visibility::User
+    constexpr FloatPropertyInfo SpacingInfo = {
+        .identifier = "Spacing",
+        .name = "Spacing",
+        .description = "This value determines the spacing (in pixels) that this item "
+            "represents. The default value is 15.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 15.f,
+            .minMax = { 0.f, 2048.f }
+        }
     };
 
     // Adds a variable amount of spacing between two other `DashboardItem`s.
@@ -58,7 +62,7 @@ Documentation DashboardItemSpacing::Documentation() {
 
 DashboardItemSpacing::DashboardItemSpacing(const Dictionary& dictionary)
     : DashboardItem(dictionary)
-    , _spacing(SpacingInfo, 15.f, 0.f, 2048.f)
+    , _spacing(SpacingInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

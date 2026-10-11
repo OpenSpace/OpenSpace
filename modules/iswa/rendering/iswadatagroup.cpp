@@ -39,53 +39,73 @@ namespace {
 
     constexpr std::string_view _loggerCat = "IswaDataGroup";
 
-    constexpr PropertyInfo UseLogInfo = {
-        "UseLog",
-        "Use logarithm",
-        "", // @TODO Missing documentation
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseLogInfo = {
+        .identifier = "UseLog",
+        .name = "Use logarithm",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo UseHistogramInfo = {
-        "UseHistogram",
-        "Auto contrast",
-        "", // @TODO Missing documentation
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseHistogramInfo = {
+        .identifier = "UseHistogram",
+        .name = "Auto contrast",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo AutoFilterInfo = {
-        "AutoFilter",
-        "Auto filter",
-        "", // @TODO Missing documentation
-        Visibility::Developer
+    constexpr BoolPropertyInfo AutoFilterInfo = {
+        .identifier = "AutoFilter",
+        .name = "Auto filter",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo NormalizeValues = {
-        "NormValues",
-        "Normalize values",
-        "", // @TODO Missing documentation
-        Visibility::Developer
+    constexpr Vec2PropertyInfo NormalizeValues = {
+        .identifier = "NormValues",
+        .name = "Normalize values",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::vec2(1.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(5.f) }
+        }
     };
 
-    constexpr PropertyInfo BackgroundInfo = {
-        "BackgroundValues",
-        "Background values",
-        "", // @TODO Missing documentation
-        Visibility::Developer
+    constexpr Vec2PropertyInfo BackgroundInfo = {
+        .identifier = "BackgroundValues",
+        .name = "Background values",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(1.f) }
+        }
     };
 
-    constexpr PropertyInfo TransferFunctionInfo = {
-        "Transferfunctions",
-        "Transfer functions",
-        "", // @TODO Missing documentation
-        Visibility::Developer
+    constexpr StringPropertyInfo TransferFunctionInfo = {
+        .identifier = "Transferfunctions",
+        .name = "Transfer functions",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = "${SCENE}/iswa/tfs/default.tf"
+        }
     };
 
     constexpr PropertyInfo DataOptionsInfo = {
-        "DataOptions",
-        "Data options",
-        "", // @TODO Missing documentation
-        Visibility::AdvancedUser
+        .identifier = "DataOptions",
+        .name = "Data options",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 } // namespace
 
@@ -93,12 +113,12 @@ namespace openspace {
 
 IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     : IswaBaseGroup(name, type)
-    , _useLog(UseLogInfo, false)
-    , _useHistogram(UseHistogramInfo, false)
-    , _autoFilter(AutoFilterInfo, true)
-    , _normValues(NormalizeValues, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(5.f))
-    , _backgroundValues(BackgroundInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _transferFunctionsFile(TransferFunctionInfo, "${SCENE}/iswa/tfs/default.tf")
+    , _useLog(UseLogInfo)
+    , _useHistogram(UseHistogramInfo)
+    , _autoFilter(AutoFilterInfo)
+    , _normValues(NormalizeValues)
+    , _backgroundValues(BackgroundInfo)
+    , _transferFunctionsFile(TransferFunctionInfo)
     , _dataOptions(DataOptionsInfo)
 {
     addProperty(_useLog);

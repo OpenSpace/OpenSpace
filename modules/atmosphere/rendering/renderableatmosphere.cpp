@@ -48,136 +48,208 @@ namespace {
 
     constexpr float KilometerToMeter = 1000.f;
 
-    constexpr PropertyInfo AtmosphereHeightInfo = {
-        "AtmosphereHeight",
-        "Atmosphere height (km)",
-        "The thickness of the atmosphere in kilometers.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo AtmosphereHeightInfo = {
+        .identifier = "AtmosphereHeight",
+        .name = "Atmosphere height (km)",
+        .description = "The thickness of the atmosphere in kilometers.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 60.f,
+            .minMax = { 0.1f, 99.f }
+        }
     };
 
-    constexpr PropertyInfo AverageGroundReflectanceInfo = {
-        "AverageGroundReflectance",
-        "Average ground reflectance (%)",
-        "Average percentage of light reflected by the ground during the pre-calculation "
-        "phase.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo AverageGroundReflectanceInfo = {
+        .identifier = "AverageGroundReflectance",
+        .name = "Average ground reflectance (%)",
+        .description = "Average percentage of light reflected by the ground during the "
+            "pre-calculation phase.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo GroundRadianceEmissionInfo = {
-        "GroundRadianceEmission",
-        "Percentage of initial radiance emitted from ground",
-        "Multiplier of the ground radiance color during the rendering phase.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo GroundRadianceEmissionInfo = {
+        .identifier = "GroundRadianceEmission",
+        .name = "Percentage of initial radiance emitted from ground",
+        .description = "Multiplier of the ground radiance color during the rendering "
+            "phase.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo RayleighHeightScaleInfo = {
-        "RayleighHeightScale",
-        "Rayleigh scale height (KM)",
-        "The vertical distance over which the density and pressure falls by a constant "
-        "factor.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo RayleighHeightScaleInfo = {
+        .identifier = "RayleighHeightScale",
+        .name = "Rayleigh scale height (KM)",
+        .description = "The vertical distance over which the density and pressure falls "
+            "by a constant factor.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.1f, 50.f }
+        }
     };
 
-    constexpr PropertyInfo RayleighScatteringCoeffInfo = {
-        "RayleighScatteringCoeff",
-        "Rayleigh scattering coefficient",
-        "Rayleigh sea-level scattering coefficients in meters.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo RayleighScatteringCoeffInfo = {
+        .identifier = "RayleighScatteringCoeff",
+        .name = "Rayleigh scattering coefficient",
+        .description = "Rayleigh sea-level scattering coefficients in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(0.00001f), glm::vec3(0.1f) }
+        }
     };
 
-    constexpr PropertyInfo OzoneLayerInfo = {
-        "Ozone",
-        "Ozone layer enabled",
-        "Enables/Disable Ozone Layer during pre-calculation phase.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo OzoneLayerInfo = {
+        .identifier = "Ozone",
+        .name = "Ozone layer enabled",
+        .description = "Enables/Disable Ozone Layer during pre-calculation phase.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo OzoneHeightScaleInfo = {
-        "OzoneLayerHeightScale",
-        "Ozone scale height (km)",
-        "The vertical distance over which the density and pressure fall by a constant "
-        "factor, given in kilometers.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo OzoneHeightScaleInfo = {
+        .identifier = "OzoneLayerHeightScale",
+        .name = "Ozone scale height (km)",
+        .description = "The vertical distance over which the density and pressure fall "
+            "by a constant factor, given in kilometers.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.1f, 50.f }
+        }
     };
 
-    constexpr PropertyInfo OzoneLayerCoeffInfo = {
-        "OzoneLayerCoeff",
-        "Ozone layer extinction coefficient",
-        "Ozone scattering coefficients in meters.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo OzoneLayerCoeffInfo = {
+        .identifier = "OzoneLayerCoeff",
+        .name = "Ozone layer extinction coefficient",
+        .description = "Ozone scattering coefficients in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(0.00001f), glm::vec3(0.001f) }
+        }
     };
 
-    constexpr PropertyInfo MieHeightScaleInfo = {
-        "MieHeightScale",
-        "Mie scale height (km)",
-        "The vertical distance over which the density and pressure fall by a constant "
-        "factor, given in kilometers.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo MieHeightScaleInfo = {
+        .identifier = "MieHeightScale",
+        .name = "Mie scale height (km)",
+        .description = "The vertical distance over which the density and pressure fall "
+            "by a constant factor, given in kilometers.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.1f, 50.f }
+        }
     };
 
-    constexpr PropertyInfo MieScatteringCoeffInfo = {
-        "MieScatteringCoeff",
-        "Mie scattering coefficient",
-        "Mie sea-level scattering coefficients in meters.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo MieScatteringCoeffInfo = {
+        .identifier = "MieScatteringCoeff",
+        .name = "Mie scattering coefficient",
+        .description = "Mie sea-level scattering coefficients in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.004f),
+            .minMax = { glm::vec3(0.00001f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo MieAsymmetricFactorGInfo = {
-        "MieAsymmetricFactorG",
-        "Mie asymmetric factor G",
-        "Averaging of the scattering angle over a high number of scattering events.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo MieAsymmetricFactorGInfo = {
+        .identifier = "MieAsymmetricFactorG",
+        .name = "Mie asymmetric factor G",
+        .description = "Averaging of the scattering angle over a high number of "
+            "scattering events.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { -1.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo SunIntensityInfo = {
-        "SunIntensity",
-        "Sun intensity",
-        "A unitless value that controls the intensity/brightness of the Sun.",
-        Visibility::User
+    constexpr FloatPropertyInfo SunIntensityInfo = {
+        .identifier = "SunIntensity",
+        .name = "Sun intensity",
+        .description = "A unitless value that controls the intensity/brightness of the "
+            "Sun.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 5.f,
+            .minMax = { 0.1f, 1000.f }
+        }
     };
 
-    constexpr PropertyInfo EnableSunOnCameraPositionInfo = {
-        "SunFollowingCamera",
-        "Enable Sun on camera position",
-        "When selected the Sun is artificially positioned behind the observer all times.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableSunOnCameraPositionInfo = {
+        .identifier = "SunFollowingCamera",
+        .name = "Enable Sun on camera position",
+        .description = "When selected the Sun is artificially positioned behind the "
+            "observer all times.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EclipseHardShadowsInfo = {
-        "EclipseHardShadows",
-        "Enable hard shadows for eclipses",
-        "Enables/Disables hard shadows through the atmosphere.",
-        Visibility::User
+    constexpr BoolPropertyInfo EclipseHardShadowsInfo = {
+        .identifier = "EclipseHardShadows",
+        .name = "Enable hard shadows for eclipses",
+        .description = "Enables/Disables hard shadows through the atmosphere.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo AtmosphereDimmingHeightInfo = {
-        "AtmosphereDimmingHeight",
-        "Atmosphere dimming height",
-        "Percentage of the atmosphere where other objects, such as the stars, are faded.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo AtmosphereDimmingHeightInfo = {
+        .identifier = "AtmosphereDimmingHeight",
+        .name = "Atmosphere dimming height",
+        .description = "Percentage of the atmosphere where other objects, such as the "
+            "stars, are faded.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.7f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo SunsetAngleInfo = {
-        "AtmosphereDimmingSunsetAngle",
-        "Atmosphere dimming sunset angle",
-        "The angle (degrees) between the Camera and the Sun where the sunset starts, and "
-        "the atmosphere starts to fade in objects such as the stars.",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo SunsetAngleInfo = {
+        .identifier = "AtmosphereDimmingSunsetAngle",
+        .name = "Atmosphere dimming sunset angle",
+        .description = "The angle (degrees) between the Camera and the Sun where the "
+            "sunset starts, and the atmosphere starts to fade in objects such as the "
+            "stars.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(95.f, 100.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(180.f) }
+        }
     };
 
-    constexpr PropertyInfo SunAngularSize = {
-        "SunAngularSize",
-        "Angular size of the Sun",
-        "The angular size of the Sun in degrees.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo SunAngularSize = {
+        .identifier = "SunAngularSize",
+        .name = "Angular size of the Sun",
+        .description = "The angular size of the Sun in degrees.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.3f,
+            .minMax = { 0.f, 180.f }
+        }
     };
 
-    constexpr PropertyInfo LightSourceNodeInfo = {
-        "LightSourceNode",
-        "Light source",
-        "The name of a scene graph node to be used as the source of illumination for the "
-        "atmosphere. If not specified, the solar system's Sun is used.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo LightSourceNodeInfo = {
+        .identifier = "LightSourceNode",
+        .name = "Light source",
+        .description = "The name of a scene graph node to be used as the source of "
+            "illumination for the atmosphere. If not specified, the solar system's Sun "
+            "is used.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
@@ -283,44 +355,24 @@ Documentation RenderableAtmosphere::Documentation() {
 
 RenderableAtmosphere::RenderableAtmosphere(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 99.f)
-    , _groundAverageReflectance(AverageGroundReflectanceInfo, 0.f, 0.f, 1.f)
-    , _groundRadianceEmission(GroundRadianceEmissionInfo, 0.f, 0.f, 1.f)
-    , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 50.f)
-    , _rayleighScatteringCoeff(
-        RayleighScatteringCoeffInfo,
-        glm::vec3(0.f),
-        glm::vec3(0.00001f),
-        glm::vec3(0.1f)
-    )
-    , _ozoneEnabled(OzoneLayerInfo, false)
-    , _ozoneHeightScale(OzoneHeightScaleInfo, 0.f, 0.1f, 50.f)
-    , _ozoneCoeff(
-        OzoneLayerCoeffInfo,
-        glm::vec3(0.f),
-        glm::vec3(0.00001f),
-        glm::vec3(0.001f)
-    )
-    , _mieHeightScale(MieHeightScaleInfo, 0.f, 0.1f, 50.f)
-    , _mieScatteringCoeff(
-        MieScatteringCoeffInfo,
-        glm::vec3(0.004f),
-        glm::vec3(0.00001f),
-        glm::vec3(1.f)
-    )
-    , _miePhaseConstant(MieAsymmetricFactorGInfo, 0.f, -1.f, 1.f)
-    , _sunIntensity(SunIntensityInfo, 5.f, 0.1f, 1000.f)
-    , _sunFollowingCameraEnabled(EnableSunOnCameraPositionInfo, false)
-    , _hardShadowsEnabled(EclipseHardShadowsInfo, false)
-    , _sunAngularSize(SunAngularSize, 0.3f, 0.f, 180.f)
+    , _atmosphereHeight(AtmosphereHeightInfo)
+    , _groundAverageReflectance(AverageGroundReflectanceInfo)
+    , _groundRadianceEmission(GroundRadianceEmissionInfo)
+    , _rayleighHeightScale(RayleighHeightScaleInfo)
+    , _rayleighScatteringCoeff(RayleighScatteringCoeffInfo)
+    , _ozoneEnabled(OzoneLayerInfo)
+    , _ozoneHeightScale(OzoneHeightScaleInfo)
+    , _ozoneCoeff(OzoneLayerCoeffInfo)
+    , _mieHeightScale(MieHeightScaleInfo)
+    , _mieScatteringCoeff(MieScatteringCoeffInfo)
+    , _miePhaseConstant(MieAsymmetricFactorGInfo)
+    , _sunIntensity(SunIntensityInfo)
+    , _sunFollowingCameraEnabled(EnableSunOnCameraPositionInfo)
+    , _hardShadowsEnabled(EclipseHardShadowsInfo)
+    , _sunAngularSize(SunAngularSize)
     , _lightSourceNodeName(LightSourceNodeInfo)
-    , _atmosphereDimmingHeight(AtmosphereDimmingHeightInfo, 0.7f, 0.f, 1.f)
-    , _atmosphereDimmingSunsetAngle(
-        SunsetAngleInfo,
-        glm::vec2(95.f, 100.f),
-        glm::vec2(0.f),
-        glm::vec2(180.f)
-    )
+    , _atmosphereDimmingHeight(AtmosphereDimmingHeightInfo)
+    , _atmosphereDimmingSunsetAngle(SunsetAngleInfo)
  {
     auto updateWithCalculation = [this]() {
         _deferredCasterNeedsUpdate = true;

@@ -138,58 +138,76 @@ namespace {
         throw MissingCaseException();
     }
 
-    constexpr PropertyInfo PrintEventsInfo = {
-        "PrintEvents",
-        "Print events",
-        "If this is enabled, all events that are propagated through the system are "
-        "printed to the log.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo PrintEventsInfo = {
+        .identifier = "PrintEvents",
+        .name = "Print events",
+        .description = "If this is enabled, all events that are propagated through the "
+            "system are printed to the log.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     constexpr PropertyInfo VisibilityInfo = {
-        "PropertyVisibility",
-        "Property visibility",
-        "Hides or displays different settings in the GUI depending on how advanced they "
-        "are.",
-        Visibility::Always
+        .identifier = "PropertyVisibility",
+        .name = "Property visibility",
+        .description = "Hides or displays different settings in the GUI depending on how "
+            "advanced they are.",
+        .visibility = Visibility::Always
     };
 
-    constexpr PropertyInfo FadeDurationInfo = {
-        "FadeDuration",
-        "Fade duration (seconds)",
-        "Controls how long time the fading in/out takes when enabling/disabling an "
-        "object through a checkbox in the UI. Holding SHIFT while clicking the checkbox "
-        "will enable/disable the renderable without fading, as will setting this value "
-        "to zero.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FadeDurationInfo = {
+        .identifier = "FadeDuration",
+        .name = "Fade duration (seconds)",
+        .description = "Controls how long time the fading in/out takes when "
+            "enabling/disabling an object through a checkbox in the UI. Holding SHIFT "
+            "while clicking the checkbox will enable/disable the renderable without "
+            "fading, as will setting this value to zero.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr PropertyInfo DisableMouseInputInfo = {
-        "DisableMouseInputs",
-        "Disable all mouse inputs",
-        "Disables all mouse inputs. Useful when using touch interaction, to prevent "
-        "double inputs on touch (from both touch input and inserted mouse inputs).",
-        Visibility::User,
-        PropertyInfo::IsEnablable::No,
-        PropertyInfo::NeedsConfirmation::Yes
+    constexpr BoolPropertyInfo DisableMouseInputInfo = {
+        .identifier = "DisableMouseInputs",
+        .name = "Disable all mouse inputs",
+        .description = "Disables all mouse inputs. Useful when using touch interaction, "
+            "to prevent double inputs on touch (from both touch input and inserted mouse "
+            "inputs).",
+        .visibility = Visibility::User,
+        .isEnablable = IsEnablable::No,
+        .needsConfirmation = NeedsConfirmation::Yes,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo DefaultShutdownCountdownInfo = {
-        "DefaultShutdownCountdown",
-        "Default Shutdown Countdown",
-        "The default shutdown countdown timer (in seconds). Unless some other time is "
-        "specified in the 'toggleShutdown' function, this is the number of seconds the "
-        "application will wait before shutting down",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo DefaultShutdownCountdownInfo = {
+        .identifier = "DefaultShutdownCountdown",
+        .name = "Default Shutdown Countdown",
+        .description = "The default shutdown countdown timer (in seconds). Unless some "
+            "other time is specified in the 'toggleShutdown' function, this is the "
+            "number of seconds the application will wait before shutting down",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 3.f,
+            .minMax = { 0.f, 60.f }
+        }
     };
 
-    constexpr PropertyInfo ShowPropertyConfirmationDialogInfo = {
-        "ShowPropertyConfirmation",
-        "Show property confirmation",
-        "Controls whether confirmation dialogs are shown when making changes to certain "
-        "properties. If checked, the dialogs will be shown for properties that require "
-        "it. If unchecked, no dialogs will be shown.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShowPropertyConfirmationDialogInfo = {
+        .identifier = "ShowPropertyConfirmation",
+        .name = "Show property confirmation",
+        .description = "Controls whether confirmation dialogs are shown when making "
+            "changes to certain properties. If checked, the dialogs will be shown for "
+            "properties that require it. If unchecked, no dialogs will be shown.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     void viewportChanged() {
@@ -233,12 +251,12 @@ class Scene;
 
 OpenSpaceEngine::OpenSpaceEngine()
     : PropertyOwner({ "OpenSpaceEngine", "OpenSpace Engine" })
-    , _printEvents(PrintEventsInfo, false)
+    , _printEvents(PrintEventsInfo)
     , _visibility(VisibilityInfo)
-    , _showPropertyConfirmationDialog(ShowPropertyConfirmationDialogInfo, true)
-    , _fadeOnEnableDuration(FadeDurationInfo, 1.f, 0.f, 5.f)
-    , _disableAllMouseInputs(DisableMouseInputInfo, false)
-    , _defaultShutdownCountdown(DefaultShutdownCountdownInfo, 3.f, 0.f, 60.f)
+    , _showPropertyConfirmationDialog(ShowPropertyConfirmationDialogInfo)
+    , _fadeOnEnableDuration(FadeDurationInfo)
+    , _disableAllMouseInputs(DisableMouseInputInfo)
+    , _defaultShutdownCountdown(DefaultShutdownCountdownInfo)
 {
     FactoryManager::initialize();
     SpiceManager::initialize();

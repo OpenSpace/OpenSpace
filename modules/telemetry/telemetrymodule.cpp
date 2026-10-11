@@ -53,54 +53,69 @@ namespace {
     // The default Open Sound Control receiver is SuperCollider with these default values.
     // However, the user can define any receiver in the openspace.cfg file as the
     // ModuleConfiguration for the Telemetry module
-    constexpr std::string_view DefaultSuperColliderIp = "127.0.0.1";
+    constexpr const char* DefaultSuperColliderIp = "127.0.0.1";
     constexpr int DefaultSuperColliderPort = 57120;
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Enable or disable all gathering of telemetry information.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Enable or disable all gathering of telemetry information.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo IpAddressInfo = {
-        "IpAddress",
-        "IP address",
-        "The network IP address that the telemetry Open Sound Control messages is sent "
-        "to.",
-        Visibility::User
+    constexpr StringPropertyInfo IpAddressInfo = {
+        .identifier = "IpAddress",
+        .name = "IP address",
+        .description = "The network IP address that the telemetry Open Sound Control "
+            "messages is sent to.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = DefaultSuperColliderIp
+        }
     };
 
-    constexpr PropertyInfo PortInfo = {
-        "Port",
-        "Port",
-        "The network port that the telemetry Open Sound Control messages are sent to.",
-        Visibility::User
+    constexpr IntPropertyInfo PortInfo = {
+        .identifier = "Port",
+        .name = "Port",
+        .description = "The network port that the telemetry Open Sound Control messages "
+            "are sent to.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = DefaultSuperColliderPort,
+            .minMax = { 1025, 65536 }
+        }
     };
 
     constexpr PropertyInfo AngleCalculationModeInfo = {
-        "AngleCalculationMode",
-        "Angle calculation mode",
-        "This setting changes the method used to calculate any angles in the "
-        "telemetries. The Horizontal mode, generally works well for flat displays or "
-        "forward facing immersive environments. The Circular mode, generally works well "
-        "for centered fisheye displays or omnidirectional immersive environments. For "
-        "more information, see the pages \"Angle Calculations\" and \"Surround Sound "
-        "Configurations\"on the OpenSpace documentation page.",
-        Visibility::User
+        .identifier = "AngleCalculationMode",
+        .name = "Angle calculation mode",
+        .description = "This setting changes the method used to calculate any angles in "
+            "the telemetries. The Horizontal mode, generally works well for flat "
+            "displays or forward facing immersive environments. The Circular mode, "
+            "generally works well for centered fisheye displays or omnidirectional "
+            "immersive environments. For more information, see the pages \"Angle "
+            "Calculations\" and \"Surround Sound Configurations\"on the OpenSpace "
+            "documentation page.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo IncludeElevationAngleInfo = {
-        "IncludeElevationAngle",
-        "Include elevation angle",
-        "This setting determines if an additional elevation angle should be calculated "
-        "for the telemetries that calculate angles. This angle determines where the "
-        "object is placed within a vertical plane of reference in relation to the "
-        "camera, i.e the height in relation to the horizontal plane of reference. The "
-        "method used for this calculation also depends on the angle calculation mode. "
-        "For more information, see the page \"Angle Calculations\" on the OpenSpace "
-        "documentation page.",
-        Visibility::User
+    constexpr BoolPropertyInfo IncludeElevationAngleInfo = {
+        .identifier = "IncludeElevationAngle",
+        .name = "Include elevation angle",
+        .description = "This setting determines if an additional elevation angle should "
+            "be calculated for the telemetries that calculate angles. This angle "
+            "determines where the object is placed within a vertical plane of reference "
+            "in relation to the camera, i.e the height in relation to the horizontal "
+            "plane of reference. The method used for this calculation also depends on "
+            "the angle calculation mode. For more information, see the page \"Angle "
+            "Calculations\" on the OpenSpace documentation page.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
     struct [[codegen::Dictionary(TelemetryModule)]] Parameters {
@@ -130,11 +145,11 @@ namespace openspace {
 
 TelemetryModule::TelemetryModule()
     : OpenSpaceModule("Telemetry")
-    , _enabled(EnabledInfo, false)
-    , _ipAddress(IpAddressInfo, std::string(DefaultSuperColliderIp))
-    , _port(PortInfo, DefaultSuperColliderPort, 1025, 65536)
+    , _enabled(EnabledInfo)
+    , _ipAddress(IpAddressInfo)
+    , _port(PortInfo)
     , _modeOptions(AngleCalculationModeInfo)
-    , _includeElevationAngle(IncludeElevationAngleInfo, false)
+    , _includeElevationAngle(IncludeElevationAngleInfo)
 {
     addProperty(_enabled);
 

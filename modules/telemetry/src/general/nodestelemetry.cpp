@@ -58,10 +58,11 @@ namespace {
     };
 
     constexpr PropertyInfo DistanceUnitInfo = {
-        "DistanceUnit",
-        "Distance unit",
-        "The unit used for the distance part of the telemetry information.",
-        Visibility::User
+        .identifier = "DistanceUnit",
+        .name = "Distance unit",
+        .description = "The unit used for the distance part of the telemetry "
+            "information.",
+        .visibility = Visibility::User
     };
 
     static const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
@@ -70,44 +71,60 @@ namespace {
         "Settings for the precision of the nodes telemetry information."
     };
 
-    constexpr PropertyInfo LowDistancePrecisionInfo = {
-        "LowDistancePrecision",
-        "Distance precision (low)",
-        "The precision in meters used to determine when to send updated distance data to "
-        "the Open Sound Control receiver. This is the low precision value (low level of "
-        "detail) that is used for objects that are not the current focus, saving "
-        "performance.",
-        Visibility::User
+    constexpr DoublePropertyInfo LowDistancePrecisionInfo = {
+        .identifier = "LowDistancePrecision",
+        .name = "Distance precision (low)",
+        .description = "The precision in meters used to determine when to send updated "
+            "distance data to the Open Sound Control receiver. This is the low precision "
+            "value (low level of detail) that is used for objects that are not the "
+            "current focus, saving performance.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 10000.0,
+            .minMax = { 0.0, 1.0e+25 }
+        }
     };
 
-    constexpr PropertyInfo HighDistancePrecisionInfo = {
-        "HighDistancePrecision",
-        "Distance precision (high)",
-        "The precision in meters used to determine when to send updated distance data to "
-        "the Open Sound Control receiver. This is the high precision value (high level "
-        "of detail) that is used when the monitored object is the current focus, "
-        "providing more accurate data.",
-        Visibility::User
+    constexpr DoublePropertyInfo HighDistancePrecisionInfo = {
+        .identifier = "HighDistancePrecision",
+        .name = "Distance precision (high)",
+        .description = "The precision in meters used to determine when to send updated "
+            "distance data to the Open Sound Control receiver. This is the high "
+            "precision value (high level of detail) that is used when the monitored "
+            "object is the current focus, providing more accurate data.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1000.0,
+            .minMax = { 0.0, 1.0e+25 }
+        }
     };
 
-    constexpr PropertyInfo LowAnglePrecisionInfo = {
-        "LowAnglePrecision",
-        "Angle precision (low)",
-        "The precision in radians used to determine when to send updated angle data to "
-        "the Open Sound Control receiver. This is the low precision value (low level of "
-        "detail) that is used for objects that are not the current focus, saving "
-        "performance.",
-        Visibility::User
+    constexpr DoublePropertyInfo LowAnglePrecisionInfo = {
+        .identifier = "LowAnglePrecision",
+        .name = "Angle precision (low)",
+        .description = "The precision in radians used to determine when to send updated "
+            "angle data to the Open Sound Control receiver. This is the low precision "
+            "value (low level of detail) that is used for objects that are not the "
+            "current focus, saving performance.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.1,
+            .minMax = { 0.0, 10.0 }
+        }
     };
 
-    constexpr PropertyInfo HighAnglePrecisionInfo = {
-        "HighAnglePrecision",
-        "Angle precision (high)",
-        "The precision in radians used to determine when to send updated angle data to "
-        "the Open Sound Control receiver. This is the high precision value (high level "
-        "of detail) that is used when the monitored object is the current focus, "
-        "providing more accurate data.",
-        Visibility::User
+    constexpr DoublePropertyInfo HighAnglePrecisionInfo = {
+        .identifier = "HighAnglePrecision",
+        .name = "Angle precision (high)",
+        .description = "The precision in radians used to determine when to send updated "
+            "angle data to the Open Sound Control receiver. This is the high precision "
+            "value (high level of detail) that is used when the monitored object is the "
+            "current focus, providing more accurate data.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.05,
+            .minMax = { 0.0, 10.0 }
+        }
     };
 } // namespace
 
@@ -137,10 +154,10 @@ NodesTelemetry::TelemetryNode::TelemetryNode(std::string id)
 NodesTelemetry::PrecisionProperties::PrecisionProperties(
                                            PropertyOwner::PropertyOwnerInfo precisionInfo)
     : PropertyOwner(precisionInfo)
-    , lowDistancePrecision(LowDistancePrecisionInfo, 10000.0, 0.0, 1.0e+25)
-    , highDistancePrecision(HighDistancePrecisionInfo, 1000.0, 0.0, 1.0e+25)
-    , lowAnglePrecision(LowAnglePrecisionInfo, 0.1, 0.0, 10.0)
-    , highAnglePrecision(HighAnglePrecisionInfo, 0.05, 0.0, 10.0)
+    , lowDistancePrecision(LowDistancePrecisionInfo)
+    , highDistancePrecision(HighDistancePrecisionInfo)
+    , lowAnglePrecision(LowAnglePrecisionInfo)
+    , highAnglePrecision(HighAnglePrecisionInfo)
 {
     lowDistancePrecision.setExponent(20.f);
     addProperty(lowDistancePrecision);

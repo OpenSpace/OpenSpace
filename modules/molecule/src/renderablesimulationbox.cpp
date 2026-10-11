@@ -60,81 +60,107 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableSimulationBox";
 
     constexpr PropertyInfo RepresentationInfo = {
-        "Representation",
-        "Representation type",
-        "The visual representation type to use for the molecule."
+        .identifier = "Representation",
+        .name = "Representation type",
+        .description = "The visual representation type to use for the molecule."
     };
 
     constexpr PropertyInfo ColoringInfo = {
-        "Coloring",
-        "Coloring",
-        "The color mapping for the atoms."
+        .identifier = "Coloring",
+        .name = "Coloring",
+        .description = "The color mapping for the atoms."
     };
 
-    constexpr PropertyInfo RepScaleInfo = {
-        "RepScale",
-        "Representation scale",
-        "Thickness of the atoms when using the Space Fill or Licorice representations."
+    constexpr FloatPropertyInfo RepScaleInfo = {
+        .identifier = "RepScale",
+        .name = "Representation scale",
+        .description = "Thickness of the atoms when using the Space Fill or Licorice "
+            "representations.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.1f, 10.f }
+        }
     };
 
-    constexpr PropertyInfo AnimationSpeedInfo = {
-        "AnimationSpeed",
-        "Animation speed",
-        "Playback speed of the animation (in frames per second)."
+    constexpr FloatPropertyInfo AnimationSpeedInfo = {
+        .identifier = "AnimationSpeed",
+        .name = "Animation speed",
+        .description = "Playback speed of the animation (in frames per second).",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 100.f }
+        }
     };
 
-    constexpr PropertyInfo SimulationSpeedInfo = {
-        "SimulationSpeed",
-        "Simulation speed",
-        "Adjust the speed of the simulation (seconds per second)."
+    constexpr FloatPropertyInfo SimulationSpeedInfo = {
+        .identifier = "SimulationSpeed",
+        .name = "Simulation speed",
+        .description = "Adjust the speed of the simulation (seconds per second).",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1000.f }
+        }
     };
 
-    constexpr PropertyInfo LinearVelocityInfo = {
-        "LinearVelocity",
-        "Linear velocity",
-        "Average linear velocity at the start of the simulation (m/s)."
+    constexpr FloatPropertyInfo LinearVelocityInfo = {
+        .identifier = "LinearVelocity",
+        .name = "Linear velocity",
+        .description = "Average linear velocity at the start of the simulation (m/s)."
     };
 
-    constexpr PropertyInfo AngularVelocityInfo = {
-        "AngularVelocity",
-        "Angular velocity",
-        "Average angular velocity at the start of the simulation (radians/s)."
+    constexpr FloatPropertyInfo AngularVelocityInfo = {
+        .identifier = "AngularVelocity",
+        .name = "Angular velocity",
+        .description = "Average angular velocity at the start of the simulation "
+            "(radians/s)."
     };
 
-    constexpr PropertyInfo SimulationBoxInfo = {
-        "SimulationBox",
-        "Simulation box",
-        "Size of the periodic simulation box."
+    constexpr DVec3PropertyInfo SimulationBoxInfo = {
+        .identifier = "SimulationBox",
+        .name = "Simulation box",
+        .description = "Size of the periodic simulation box."
     };
 
-    constexpr PropertyInfo CollisionRadiusInfo = {
-        "CollisionRadius",
-        "Collision radius",
-        "Radius of the collision sphere around molecules."
+    constexpr FloatPropertyInfo CollisionRadiusInfo = {
+        .identifier = "CollisionRadius",
+        .name = "Collision radius",
+        .description = "Radius of the collision sphere around molecules."
     };
 
-    constexpr PropertyInfo FilterInfo = {
-        "Filter",
-        "Filter",
-        "The filter used to remove parts of the dataset."
+    constexpr StringPropertyInfo FilterInfo = {
+        .identifier = "Filter",
+        .name = "Filter",
+        .description = "The filter used to remove parts of the dataset."
     };
 
-    constexpr PropertyInfo CircleColorInfo = {
-        "CircleColor",
-        "Circle color",
-        "Color of the circle outlining the simulation."
+    constexpr Vec4PropertyInfo CircleColorInfo = {
+        .identifier = "CircleColor",
+        .name = "Circle color",
+        .description = "Color of the circle outlining the simulation.",
+        .defaults = {
+            .value = glm::vec4(1.f, 1.f, 1.f, 0.25f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr PropertyInfo CircleWidthInfo = {
-        "CircleWidth",
-        "Circle width",
-        "Width of the circle outlining the simulation."
+    constexpr FloatPropertyInfo CircleWidthInfo = {
+        .identifier = "CircleWidth",
+        .name = "Circle width",
+        .description = "Width of the circle outlining the simulation.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 
-    constexpr PropertyInfo CircleFalloffInfo = {
-        "CircleFalloff",
-        "Circle falloff",
-        "Falloff exponent of the circle outlining the simulation."
+    constexpr FloatPropertyInfo CircleFalloffInfo = {
+        .identifier = "CircleFalloff",
+        .name = "Circle falloff",
+        .description = "Falloff exponent of the circle outlining the simulation.",
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
 
@@ -238,22 +264,17 @@ RenderableSimulationBox::RenderableSimulationBox(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _representation(RepresentationInfo)
     , _coloring(ColoringInfo)
-    , _repScale(RepScaleInfo, 1.f, 0.1f, 10.f)
-    , _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 100.f)
-    , _simulationSpeed(SimulationSpeedInfo, 1.f, 0.f, 1000.f)
+    , _repScale(RepScaleInfo)
+    , _animationSpeed(AnimationSpeedInfo)
+    , _simulationSpeed(SimulationSpeedInfo)
     , _linearVelocity(LinearVelocityInfo)
     , _angularVelocity(AngularVelocityInfo)
     , _simulationBox(SimulationBoxInfo)
     , _collisionRadius(CollisionRadiusInfo)
     , _filter(FilterInfo)
-    , _circleColor(
-        CircleColorInfo,
-        glm::vec4(1.f, 1.f, 1.f, 0.25f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _circleWidth(CircleWidthInfo, 1.f, 0.f, 10.f)
-    , _circleFalloff(CircleFalloffInfo, 0.f, 0.f, 1.f)
+    , _circleColor(CircleColorInfo)
+    , _circleWidth(CircleWidthInfo)
+    , _circleFalloff(CircleFalloffInfo)
 {
     addProperty(Fadeable::_opacity);
 

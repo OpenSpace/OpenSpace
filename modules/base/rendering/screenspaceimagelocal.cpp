@@ -39,14 +39,14 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TexturePathInfo = {
-        "TexturePath",
-        "Texture path",
-        "Sets the path of the texture that is displayed on this screen space plane. If "
-        "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. The size of the image will also automatically set the default "
-        "size of this plane.",
-        Visibility::User
+    constexpr StringPropertyInfo TexturePathInfo = {
+        .identifier = "TexturePath",
+        .name = "Texture path",
+        .description = "Sets the path of the texture that is displayed on this screen "
+            "space plane. If this value is changed, the image at the new path will "
+            "automatically be loaded and displayed. The size of the image will also "
+            "automatically set the default size of this plane.",
+        .visibility = Visibility::User
     };
 
     // Displays an image from a local file on disk on a plane in screen space.

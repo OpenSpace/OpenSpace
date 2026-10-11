@@ -48,18 +48,20 @@ namespace {
     };
 
     constexpr PropertyInfo FrametimeInfo = {
-        "FrametimeType",
-        "Type of the frame time display",
-        "This value determines the units in which the frame time is displayed.",
-        Visibility::User
+        .identifier = "FrametimeType",
+        .name = "Type of the frame time display",
+        .description = "This value determines the units in which the frame time is "
+            "displayed.",
+        .visibility = Visibility::User
     };
 
     constexpr PropertyInfo ClearCacheInfo = {
-        "ClearCache",
-        "Clear cache",
-        "Clears the cache of this DashboardItemFramerate item. If the selected option "
-        "does not use any caching, this trigger does not do anything.",
-        Visibility::AdvancedUser
+        .identifier = "ClearCache",
+        .name = "Clear cache",
+        .description = "Clears the cache of this DashboardItemFramerate item. If the "
+            "selected option does not use any caching, this trigger does not do "
+            "anything.",
+        .visibility = Visibility::AdvancedUser
     };
 
     [[nodiscard]] char* formatDt(std::vector<char>& buffer) {

@@ -50,77 +50,97 @@ namespace {
     constexpr std::string_view _loggerCat = "VideoPlayer";
 
     constexpr PropertyInfo VideoInfo = {
-        "Video",
-        "Video",
-        "The video file that is played."
+        .identifier = "Video",
+        .name = "Video",
+        .description = "The video file that is played."
     };
 
     constexpr PropertyInfo PlayInfo = {
-        "Play",
-        "Play",
-        "Play video."
+        .identifier = "Play",
+        .name = "Play",
+        .description = "Play video."
     };
 
     constexpr PropertyInfo PauseInfo = {
-        "Pause",
-        "Pause",
-        "Pause video."
+        .identifier = "Pause",
+        .name = "Pause",
+        .description = "Pause video."
     };
 
     constexpr PropertyInfo GoToStartInfo = {
-        "GoToStart",
-        "Go To start",
-        "Sets the time to the beginning of the video and pauses it."
+        .identifier = "GoToStart",
+        .name = "Go To start",
+        .description = "Sets the time to the beginning of the video and pauses it."
     };
 
     constexpr PropertyInfo ReloadInfo = {
-        "Reload",
-        "Reload",
-        "Reloads the video and creates a new texture. This might be useful in case there "
-        "was an error loading the video."
+        .identifier = "Reload",
+        .name = "Reload",
+        .description = "Reloads the video and creates a new texture. This might be "
+            "useful in case there was an error loading the video."
     };
 
-    constexpr PropertyInfo AudioInfo = {
-        "PlayAudio",
-        "Play audio",
-        "Decides whether to play audio when playing back the video."
+    constexpr BoolPropertyInfo AudioInfo = {
+        .identifier = "PlayAudio",
+        .name = "Play audio",
+        .description = "Decides whether to play audio when playing back the video.",
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo StartTimeInfo = {
-        "StartTime",
-        "Start time",
-        "The date and time that the video should start in the format "
-        "'YYYY MM DD hh:mm:ss'."
+    constexpr StringPropertyInfo StartTimeInfo = {
+        .identifier = "StartTime",
+        .name = "Start time",
+        .description = "The date and time that the video should start in the format "
+            "'YYYY MM DD hh:mm:ss'.",
+        .defaults = {
+            .value = ""
+        }
     };
 
-    constexpr PropertyInfo EndTimeInfo = {
-        "EndTime",
-        "End time",
-        "The date and time that the video should end in the format "
-        "'YYYY MM DD hh:mm:ss'."
+    constexpr StringPropertyInfo EndTimeInfo = {
+        .identifier = "EndTime",
+        .name = "End time",
+        .description = "The date and time that the video should end in the format 'YYYY "
+            "MM DD hh:mm:ss'.",
+        .defaults = {
+            .value = ""
+        }
     };
 
-    constexpr PropertyInfo LoopVideoInfo = {
-        "LoopVideo",
-        "Loop video",
-        "If checked, the video is continues playing from the start when it reaches the "
-        "end of the video."
+    constexpr BoolPropertyInfo LoopVideoInfo = {
+        .identifier = "LoopVideo",
+        .name = "Loop video",
+        .description = "If checked, the video is continues playing from the start when "
+            "it reaches the end of the video.",
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo IsPlayingInfo = {
-        "IsPlaying",
-        "Is Playing",
-        "Indicates whether the video is currently playing.",
-        Visibility::Developer
+    constexpr BoolPropertyInfo IsPlayingInfo = {
+        .identifier = "IsPlaying",
+        .name = "Is Playing",
+        .description = "Indicates whether the video is currently playing.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo PlayDelayInfo = {
-        "PlayDelay",
-        "Play Delay",
-        "The delay, in milliseconds, that the system will wait before issuing the play "
-        "command. A higher value will increase the time it takes for the video to start "
-        "but may result in a more synchronized playback start.",
-        Visibility::Developer
+    constexpr IntPropertyInfo PlayDelayInfo = {
+        .identifier = "PlayDelay",
+        .name = "Play Delay",
+        .description = "The delay, in milliseconds, that the system will wait before "
+            "issuing the play command. A higher value will increase the time it takes "
+            "for the video to start but may result in a more synchronized playback "
+            "start.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 250,
+            .minMax = { 0, 1000 }
+        }
     };
 
     bool checkMpvError(int status) {
@@ -255,12 +275,12 @@ VideoPlayer::VideoPlayer(const Dictionary& dictionary)
     , _pause(PauseInfo)
     , _goToStart(GoToStartInfo)
     , _reload(ReloadInfo)
-    , _playAudio(AudioInfo, false)
-    , _loopVideo(LoopVideoInfo, true)
-    , _playDelay(PlayDelayInfo, 250, 0, 1000)
-    , _isPlaying(IsPlayingInfo, false)
-    , _startTime(StartTimeInfo, "")
-    , _endTime(EndTimeInfo, "")
+    , _playAudio(AudioInfo)
+    , _loopVideo(LoopVideoInfo)
+    , _playDelay(PlayDelayInfo)
+    , _isPlaying(IsPlayingInfo)
+    , _startTime(StartTimeInfo)
+    , _endTime(EndTimeInfo)
 {
     ZoneScoped;
 

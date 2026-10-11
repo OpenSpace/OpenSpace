@@ -66,87 +66,117 @@ namespace {
     };
 
     constexpr PropertyInfo OrientationRenderOptionInfo = {
-        "OrientationRenderOption",
-        "Orientation render option",
-        "Controls how the plane will be oriented. \"Camera View Direction\" rotates the "
-        "plane so that it is orthogonal to the viewing direction of the camera (useful "
-        "for planar displays), and \"Camera Position Normal\" rotates the plane towards "
-        "the position of the camera (useful for spherical displays, like dome theaters). "
-        "In both these cases the plane will be billboarded towards the camera but in a "
-        "slightly different way. In contrast, \"Fixed Rotation\" does not rotate the "
-        "plane at all based on the camera and should be used the plane should be "
-        "oriented in a fixed way.",
-        Visibility::AdvancedUser
+        .identifier = "OrientationRenderOption",
+        .name = "Orientation render option",
+        .description = "Controls how the plane will be oriented. \"Camera View "
+            "Direction\" rotates the plane so that it is orthogonal to the viewing "
+            "direction of the camera (useful for planar displays), and \"Camera Position "
+            "Normal\" rotates the plane towards the position of the camera (useful for "
+            "spherical displays, like dome theaters). In both these cases the plane will "
+            "be billboarded towards the camera but in a slightly different way. In "
+            "contrast, \"Fixed Rotation\" does not rotate the plane at all based on the "
+            "camera and should be used the plane should be oriented in a fixed way.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo MirrorBacksideInfo = {
-        "MirrorBackside",
-        "Mirror backside of image plane",
-        "If false, the image plane will not be mirrored when viewed from the backside. "
-        "This is usually desirable when the image shows data at a specific location, but "
-        "not if it is displaying text for example.",
-        Visibility::User
+    constexpr BoolPropertyInfo MirrorBacksideInfo = {
+        .identifier = "MirrorBackside",
+        .name = "Mirror backside of image plane",
+        .description = "If false, the image plane will not be mirrored when viewed from "
+            "the backside. This is usually desirable when the image shows data at a "
+            "specific location, but not if it is displaying text for example.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
-        "The size of the plane in meters.",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size",
+        .description = "The size of the plane in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(10.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(1e25f) }
+        }
     };
 
-    constexpr PropertyInfo AutoScaleInfo = {
-        "AutoScale",
-        "Auto scale",
-        "Decides whether the plane should automatically adjust in size to match the "
-        "aspect ratio of the content. Otherwise it will remain in the given size."
+    constexpr BoolPropertyInfo AutoScaleInfo = {
+        .identifier = "AutoScale",
+        .name = "Auto scale",
+        .description = "Decides whether the plane should automatically adjust in size to "
+            "match the aspect ratio of the content. Otherwise it will remain in the "
+            "given size.",
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ScaleByDistanceInfo = {
-        "ScaleByDistance",
-        "Scale by distance",
-        "Decides whether the plane should automatically adjust in size to based on the "
-        "distance to the camera. Otherwise it will remain in the given size.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ScaleByDistanceInfo = {
+        .identifier = "ScaleByDistance",
+        .name = "Scale by distance",
+        .description = "Decides whether the plane should automatically adjust in size to "
+            "based on the distance to the camera. Otherwise it will remain in the given "
+            "size.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ApparentSizeMultiplierInfo = {
-        "ApparentSizeMultiplier",
-        "Apparent size multiplier",
-        "Value that controls the visual size of the object when using distance scaling."
-        "A value of 1.0 results in a natural angular size based on camera distance and "
-        "field of view. Smaller values (e.g., 0.01) make the object appear smaller, "
-        "while larger values make it appear bigger.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ApparentSizeMultiplierInfo = {
+        .identifier = "ApparentSizeMultiplier",
+        .name = "Apparent size multiplier",
+        .description = "Value that controls the visual size of the object when using "
+            "distance scaling.A value of 1.0 results in a natural angular size based on "
+            "camera distance and field of view. Smaller values (e.g., 0.01) make the "
+            "object appear smaller, while larger values make it appear bigger.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f
+        }
     };
 
-    constexpr PropertyInfo ScaleByDistanceMaxHeightInfo = {
-        "ScaleByDistanceMaxHeight",
-        "Scale by distance max height",
-        "The maximum height in meters a plane can get when using distance scaling.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ScaleByDistanceMaxHeightInfo = {
+        .identifier = "ScaleByDistanceMaxHeight",
+        .name = "Scale by distance max height",
+        .description = "The maximum height in meters a plane can get when using distance "
+            "scaling.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 2000.f
+        }
     };
 
-    constexpr PropertyInfo ScaleByDistanceMinHeightInfo = {
-        "ScaleByDistanceMinHeight",
-        "Scale by distance min height",
-        "The minimum height in meters a plane can get when using distance scaling.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ScaleByDistanceMinHeightInfo = {
+        .identifier = "ScaleByDistanceMinHeight",
+        .name = "Scale by distance min height",
+        .description = "The minimum height in meters a plane can get when using distance "
+            "scaling.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 100.f
+        }
     };
 
     constexpr PropertyInfo BlendModeInfo = {
-        "BlendMode",
-        "Blending mode",
-        "Determines the blending mode that is applied to this plane.",
-        Visibility::AdvancedUser
+        .identifier = "BlendMode",
+        .name = "Blending mode",
+        .description = "Determines the blending mode that is applied to this plane.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo MultiplyColorInfo = {
-        "MultiplyColor",
-        "Multiply color",
-        "An RGB color to multiply with the plane's texture. Useful for applying a color "
-        "to grayscale images.",
-        Visibility::User
+    constexpr Vec3PropertyInfo MultiplyColorInfo = {
+        .identifier = "MultiplyColor",
+        .name = "Multiply color",
+        .description = "An RGB color to multiply with the plane's texture. Useful for "
+            "applying a color to grayscale images.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     // Displays some form of content (usually an image) on a plane. Settable parameters
@@ -224,10 +254,10 @@ Documentation RenderablePlane::Documentation() {
 RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
                                                              const Dictionary& dictionary)
     : PropertyOwner({ "DistanceScaling", "Distance Scaling", "" })
-    , scaleByDistance(ScaleByDistanceInfo, false)
-    , apparentSizeMultiplier(ApparentSizeMultiplierInfo, 1.f)
-    , scaleByDistanceMaxHeight(ScaleByDistanceMaxHeightInfo, 2000.f)
-    , scaleByDistanceMinHeight(ScaleByDistanceMinHeightInfo, 100.f)
+    , scaleByDistance(ScaleByDistanceInfo)
+    , apparentSizeMultiplier(ApparentSizeMultiplierInfo)
+    , scaleByDistanceMaxHeight(ScaleByDistanceMaxHeightInfo)
+    , scaleByDistanceMinHeight(ScaleByDistanceMinHeightInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -259,10 +289,10 @@ RenderablePlane::RenderablePlane(const Dictionary& dictionary,
     : Renderable(dictionary, defaultSettings(settings))
     , _blendMode(BlendModeInfo)
     , _renderOption(OrientationRenderOptionInfo)
-    , _mirrorBackside(MirrorBacksideInfo, false)
-    , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))
-    , _autoScale(AutoScaleInfo, false)
-    , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _mirrorBackside(MirrorBacksideInfo)
+    , _size(SizeInfo)
+    , _autoScale(AutoScaleInfo)
+    , _multiplyColor(MultiplyColorInfo)
     , _distanceScalingSettings(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

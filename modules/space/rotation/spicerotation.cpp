@@ -33,36 +33,37 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo SourceInfo = {
-        "SourceFrame",
-        "Source",
-        "This value specifies the source frame that is used as the basis for the "
-        "coordinate transformation. This has to be a valid SPICE name.",
-        Visibility::Developer
+    constexpr StringPropertyInfo SourceInfo = {
+        .identifier = "SourceFrame",
+        .name = "Source",
+        .description = "This value specifies the source frame that is used as the basis "
+            "for the coordinate transformation. This has to be a valid SPICE name.",
+        .visibility = Visibility::Developer
     };
 
-    constexpr PropertyInfo DestinationInfo = {
-        "DestinationFrame",
-        "Destination",
-        "This value specifies the destination frame that is used for the coordinate "
-        "transformation. This has to be a valid SPICE name.",
-        Visibility::Developer
+    constexpr StringPropertyInfo DestinationInfo = {
+        .identifier = "DestinationFrame",
+        .name = "Destination",
+        .description = "This value specifies the destination frame that is used for the "
+            "coordinate transformation. This has to be a valid SPICE name.",
+        .visibility = Visibility::Developer
     };
 
-    constexpr PropertyInfo FixedDateInfo = {
-        "FixedDate",
-        "Fixed date",
-        "A time to lock the rotation to. Setting this to an empty string will unlock the "
-        "time and return to rotation based on current simulation time.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo FixedDateInfo = {
+        .identifier = "FixedDate",
+        .name = "Fixed date",
+        .description = "A time to lock the rotation to. Setting this to an empty string "
+            "will unlock the time and return to rotation based on current simulation "
+            "time.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo TimeOffsetInfo = {
-        "TimeOffset",
-        "Time offset",
-        "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
-        "at which to compute the rotation.",
-        Visibility::User
+    constexpr FloatPropertyInfo TimeOffsetInfo = {
+        .identifier = "TimeOffset",
+        .name = "Time offset",
+        .description = "A time offset, in seconds, added to the simulation time (or "
+            "Fixed Date if any), at which to compute the rotation.",
+        .visibility = Visibility::User
     };
 
     // Uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to provide rotation

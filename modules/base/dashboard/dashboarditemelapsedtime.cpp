@@ -38,38 +38,44 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo FormatStringInfo = {
-        "FormatString",
-        "Format string",
-        "The format text describing how this dashboard item renders its text. This text "
-        "must contain exactly one {} which is a placeholder that will contain the value "
-        "of the elapsed time.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo FormatStringInfo = {
+        .identifier = "FormatString",
+        .name = "Format string",
+        .description = "The format text describing how this dashboard item renders its "
+            "text. This text must contain exactly one {} which is a placeholder that "
+            "will contain the value of the elapsed time.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "Elapsed time: {}"
+        }
     };
 
-    constexpr PropertyInfo ReferenceTimeInfo = {
-        "ReferenceTime",
-        "Reference time",
-        "The reference time relative to which the elapsed time is specified. The format "
-        "must be an ISO 8601-compliant date string.",
-        Visibility::User
+    constexpr StringPropertyInfo ReferenceTimeInfo = {
+        .identifier = "ReferenceTime",
+        .name = "Reference time",
+        .description = "The reference time relative to which the elapsed time is "
+            "specified. The format must be an ISO 8601-compliant date string.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo SimplifyTimeInfo = {
-        "SimplifyTime",
-        "Simplify time",
-        "If this value is enabled, the elapsed time will be simplified into seconds, "
-        "minutes, hours, etc. If the value is disabled, the elapsed time is always "
-        "presented in seconds. The default value for this is 'true'.",
-        Visibility::User
+    constexpr BoolPropertyInfo SimplifyTimeInfo = {
+        .identifier = "SimplifyTime",
+        .name = "Simplify time",
+        .description = "If this value is enabled, the elapsed time will be simplified "
+            "into seconds, minutes, hours, etc. If the value is disabled, the elapsed "
+            "time is always presented in seconds. The default value for this is 'true'.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
     constexpr PropertyInfo LowestTimeUnitInfo = {
-        "LowestTimeUnit",
-        "Lowest time unit when simplifying",
-        "If 'SimplifyTime' is enabled, this is the lowest time unit that will be shown. "
-        "All finer grained timesteps will be ignored.",
-        Visibility::User
+        .identifier = "LowestTimeUnit",
+        .name = "Lowest time unit when simplifying",
+        .description = "If 'SimplifyTime' is enabled, this is the lowest time unit that "
+            "will be shown. All finer grained timesteps will be ignored.",
+        .visibility = Visibility::User
     };
 
     // Displays the remaining time until a provided `ReferenceTime` or the elapsed time
@@ -114,9 +120,9 @@ Documentation DashboardItemElapsedTime::Documentation() {
 
 DashboardItemElapsedTime::DashboardItemElapsedTime(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _formatString(FormatStringInfo, "Elapsed time: {}")
+    , _formatString(FormatStringInfo)
     , _referenceTime(ReferenceTimeInfo)
-    , _simplifyTime(SimplifyTimeInfo, true)
+    , _simplifyTime(SimplifyTimeInfo)
     , _lowestTimeUnit(LowestTimeUnitInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

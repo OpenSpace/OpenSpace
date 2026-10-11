@@ -71,138 +71,193 @@ namespace {
     };
 
     constexpr PropertyInfo PathInfo = {
-        "Path",
-        "Path",
-        "The file path to the data file to read.",
-        Visibility::AdvancedUser
+        .identifier = "Path",
+        .name = "Path",
+        .description = "The file path to the data file to read.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PointRenderingModeInfo = {
-        "PointRenderingMode",
-        "Point Rendering Mode",
-        "Controls how the points will be oriented. \"Camera View Direction\" rotates the "
-        "points so that they are orthogonal to the viewing direction of the camera "
-        "(useful for planar displays), and \"Camera Position Normal\" rotates the points "
-        "towards the position of the camera (useful for spherical displays, like dome "
-        "theaters).",
-        Visibility::AdvancedUser
+        .identifier = "PointRenderingMode",
+        .name = "Point Rendering Mode",
+        .description = "Controls how the points will be oriented. \"Camera View "
+            "Direction\" rotates the points so that they are orthogonal to the viewing "
+            "direction of the camera (useful for planar displays), and \"Camera Position "
+            "Normal\" rotates the points towards the position of the camera (useful for "
+            "spherical displays, like dome theaters).",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo SegmentQualityInfo = {
-        "SegmentQuality",
-        "Segment quality",
-        "A segment quality value for the orbital trail. A value from 1 (lowest) to 10 "
-        "(highest) that controls the number of line segments in the rendering of the "
-        "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit.",
-        Visibility::User
+    constexpr UIntPropertyInfo SegmentQualityInfo = {
+        .identifier = "SegmentQuality",
+        .name = "Segment quality",
+        .description = "A segment quality value for the orbital trail. A value from 1 "
+            "(lowest) to 10 (highest) that controls the number of line segments in the "
+            "rendering of the orbital trail. This does not control the direct number of "
+            "segments because these automatically increase according to the eccentricity "
+            "of the orbit.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 2,
+            .minMax = { 1, 10 }
+        }
     };
 
-    constexpr PropertyInfo TrailWidthInfo = {
-        "TrailWidth",
-        "Trail width",
-        "The line width used for the trail, if the selected rendering method includes "
-        "lines. If the rendering mode is set to Points, this value is ignored.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo TrailWidthInfo = {
+        .identifier = "TrailWidth",
+        .name = "Trail width",
+        .description = "The line width used for the trail, if the selected rendering "
+            "method includes lines. If the rendering mode is set to Points, this value "
+            "is ignored.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr PropertyInfo PointSizeExponentInfo = {
-        "PointSizeExponent",
-        "Point size exponent",
-        "An exponential scale value to set the absolute size of the point.",
-        Visibility::User
+    constexpr FloatPropertyInfo PointSizeExponentInfo = {
+        .identifier = "PointSizeExponent",
+        .name = "Point size exponent",
+        .description = "An exponential scale value to set the absolute size of the "
+            "point.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 11.f }
+        }
     };
 
-    constexpr PropertyInfo EnableMaxSizeInfo = {
-        "EnableMaxSize",
-        "Enable max size",
-        "If true, the Max Size property will be used as an upper limit for the size of "
-        "the point. This reduces the size of the points when approaching them, so that "
-        "they stick to a maximum visual size depending on the Max Size value.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnableMaxSizeInfo = {
+        .identifier = "EnableMaxSize",
+        .name = "Enable max size",
+        .description = "If true, the Max Size property will be used as an upper limit "
+            "for the size of the point. This reduces the size of the points when "
+            "approaching them, so that they stick to a maximum visual size depending on "
+            "the Max Size value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo MaxSizeInfo = {
-        "MaxSize",
-        "Max size",
-        "Controls the maximum allowed size for the points, when the max size control "
-        "feature is enabled. This limits the visual size of the points based on the "
-        "distance to the camera. The larger the value, the larger the points are allowed "
-        "to be. In the background, the computations are made to limit the size of the "
-        "angle between the CameraToPointMid and CameraToPointEdge vectors.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo MaxSizeInfo = {
+        .identifier = "MaxSize",
+        .name = "Max size",
+        .description = "Controls the maximum allowed size for the points, when the max "
+            "size control feature is enabled. This limits the visual size of the points "
+            "based on the distance to the camera. The larger the value, the larger the "
+            "points are allowed to be. In the background, the computations are made to "
+            "limit the size of the angle between the CameraToPointMid and "
+            "CameraToPointEdge vectors.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 5.f,
+            .minMax = { 0.f, 45.f }
+        }
     };
 
     constexpr PropertyInfo RenderingModeInfo = {
-        "Rendering",
-        "Rendering mode",
-        "Determines how the trail should be rendered. If 'Trail' is selected, only the "
-        "line part is visible, if 'Point' is selected, only the current satellite/debris "
-        "point is visible.",
-        Visibility::AdvancedUser
+        .identifier = "Rendering",
+        .name = "Rendering mode",
+        .description = "Determines how the trail should be rendered. If 'Trail' is "
+            "selected, only the line part is visible, if 'Point' is selected, only the "
+            "current satellite/debris point is visible.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The RGB main color for the trails and points.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The RGB main color for the trails and points.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo TrailFadeInfo = {
-        "TrailFade",
-        "Trail fade",
-        "Determines how fast the trail fades out. A smaller number shows less of the "
-        "trail and a larger number shows more.",
-        Visibility::User
+    constexpr FloatPropertyInfo TrailFadeInfo = {
+        .identifier = "TrailFade",
+        .name = "Trail fade",
+        .description = "Determines how fast the trail fades out. A smaller number shows "
+            "less of the trail and a larger number shows more.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 20.f,
+            .minMax = { 0.f, 30.f }
+        }
     };
 
-    constexpr PropertyInfo EnableOutlineInfo = {
-        "EnableOutline",
-        "Enable point outline",
-        "Determines if the points should be rendered with an outline or not.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableOutlineInfo = {
+        .identifier = "EnableOutline",
+        .name = "Enable point outline",
+        .description = "Determines if the points should be rendered with an outline or "
+            "not.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo OutlineColorInfo = {
-        "OutlineColor",
-        "Outline color",
-        "The color of the outline.",
-        Visibility::User
+    constexpr Vec3PropertyInfo OutlineColorInfo = {
+        .identifier = "OutlineColor",
+        .name = "Outline color",
+        .description = "The color of the outline.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo OutlineWidthInfo = {
-        "OutlineWidth",
-        "Outline width",
-        "Determines the thickness of the outline. A value of 0 will not show any "
-        "outline, while a value of 1 will cover the whole point.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo OutlineWidthInfo = {
+        .identifier = "OutlineWidth",
+        .name = "Outline width",
+        .description = "Determines the thickness of the outline. A value of 0 will not "
+            "show any outline, while a value of 1 will cover the whole point.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.2f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo StartRenderIdxInfo = {
-        "StartRenderIdx",
-        "Contiguous starting index of render",
-        "Index of the first object in the block to render (all prior objects will be "
-        "ignored). The block of objects to render will be determined by StartRenderIdx "
-        "and RenderSize.",
-        Visibility::AdvancedUser
+    constexpr UIntPropertyInfo StartRenderIdxInfo = {
+        .identifier = "StartRenderIdx",
+        .name = "Contiguous starting index of render",
+        .description = "Index of the first object in the block to render (all prior "
+            "objects will be ignored). The block of objects to render will be determined "
+            "by StartRenderIdx and RenderSize.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 1 }
+        }
     };
 
-    constexpr PropertyInfo RenderSizeInfo = {
-        "RenderSize",
-        "Contiguous size of render block",
-        "Number of objects to render sequentially from StartRenderIdx.",
-        Visibility::AdvancedUser
+    constexpr UIntPropertyInfo RenderSizeInfo = {
+        .identifier = "RenderSize",
+        .name = "Contiguous size of render block",
+        .description = "Number of objects to render sequentially from StartRenderIdx.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1,
+            .minMax = { 1, 2 }
+        }
     };
 
-    constexpr PropertyInfo ContiguousModeInfo = {
-        "ContiguousMode",
-        "Contiguous mode",
-        "If enabled, the contiguous set of objects starting from StartRenderIdx of size "
-        "RenderSize will be rendered. If disabled, the number of objects defined by "
-        "UpperLimit will rendered from an evenly dispersed sample of the full length of "
-        "the data file.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ContiguousModeInfo = {
+        .identifier = "ContiguousMode",
+        .name = "Contiguous mode",
+        .description = "If enabled, the contiguous set of objects starting from "
+            "StartRenderIdx of size RenderSize will be rendered. If disabled, the number "
+            "of objects defined by UpperLimit will rendered from an evenly dispersed "
+            "sample of the full length of the data file.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {
@@ -297,17 +352,17 @@ RenderableOrbitalKepler::Appearance::Appearance()
         "Appearance",
         "Appearance of RenderableOrbitalKepler"
     })
-    , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , trailWidth(TrailWidthInfo, 2.f, 1.f, 20.f)
-    , pointSizeExponent(PointSizeExponentInfo, 1.f, 0.f, 11.f)
-    , enableMaxSize(EnableMaxSizeInfo, true)
-    , maxSize(MaxSizeInfo, 5.f, 0.f, 45.f)
+    , color(ColorInfo)
+    , trailWidth(TrailWidthInfo)
+    , pointSizeExponent(PointSizeExponentInfo)
+    , enableMaxSize(EnableMaxSizeInfo)
+    , maxSize(MaxSizeInfo)
     , renderingModes(RenderingModeInfo)
     , pointRenderOption(PointRenderingModeInfo)
-    , trailFade(TrailFadeInfo, 20.f, 0.f, 30.f)
-    , enableOutline(EnableOutlineInfo, true)
-    , outlineColor(OutlineColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , outlineWidth(OutlineWidthInfo, 0.2f, 0.f, 1.f)
+    , trailFade(TrailFadeInfo)
+    , enableOutline(EnableOutlineInfo)
+    , outlineColor(OutlineColorInfo)
+    , outlineWidth(OutlineWidthInfo)
 {
     renderingModes.addOptions({
         { static_cast<int>(RenderMode::RenderingModeTrail), "Trails" },
@@ -333,11 +388,11 @@ RenderableOrbitalKepler::Appearance::Appearance()
 RenderableOrbitalKepler::RenderableOrbitalKepler(const Dictionary& dict)
     : Renderable(dict)
     , _nThreads(std::max(1u, std::thread::hardware_concurrency() / 2u))
-    , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
-    , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
-    , _sizeRender(RenderSizeInfo, 1, 1, 2)
+    , _segmentQuality(SegmentQualityInfo)
+    , _startRenderIdx(StartRenderIdxInfo)
+    , _sizeRender(RenderSizeInfo)
     , _path(PathInfo)
-    , _contiguousMode(ContiguousModeInfo, false)
+    , _contiguousMode(ContiguousModeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dict);
 

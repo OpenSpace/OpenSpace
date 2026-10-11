@@ -36,39 +36,54 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo ShowWhenEnabledInfo = {
-        "ShowWhenEnabled",
-        "Show when enabled",
-        "Show text when the input is enabled.",
-        Visibility::User
+    constexpr BoolPropertyInfo ShowWhenEnabledInfo = {
+        .identifier = "ShowWhenEnabled",
+        .name = "Show when enabled",
+        .description = "Show text when the input is enabled.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo ShowWhenDisabledInfo = {
-        "ShowWhenDisabled",
-        "Show when disabled",
-        "Show text when the input is disabled.",
-        Visibility::User
+    constexpr BoolPropertyInfo ShowWhenDisabledInfo = {
+        .identifier = "ShowWhenDisabled",
+        .name = "Show when disabled",
+        .description = "Show text when the input is disabled.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo ShowKeyboardInfo = {
-        "ShowKeyboard",
-        "Show keyboard information",
-        "Display the state of the keyboard input.",
-        Visibility::User
+    constexpr BoolPropertyInfo ShowKeyboardInfo = {
+        .identifier = "ShowKeyboard",
+        .name = "Show keyboard information",
+        .description = "Display the state of the keyboard input.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo ShowMouseInfo = {
-        "ShowMouse",
-        "Show mouse information",
-        "Display the state of the mouse input.",
-        Visibility::User
+    constexpr BoolPropertyInfo ShowMouseInfo = {
+        .identifier = "ShowMouse",
+        .name = "Show mouse information",
+        .description = "Display the state of the mouse input.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo ShowJoystickInfo = {
-        "ShowJoystick",
-        "Show joystick information",
-        "Display the state of the joystick input.",
-        Visibility::User
+    constexpr BoolPropertyInfo ShowJoystickInfo = {
+        .identifier = "ShowJoystick",
+        .name = "Show joystick information",
+        .description = "Display the state of the joystick input.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
     // Shows the current state of the different methods to provide user input: keyboard,
@@ -106,11 +121,11 @@ Documentation DashboardItemInputState::Documentation() {
 
 DashboardItemInputState::DashboardItemInputState(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _showWhenEnabled(ShowWhenEnabledInfo, true)
-    , _showWhenDisabled(ShowWhenDisabledInfo, true)
-    , _showKeyboard(ShowKeyboardInfo, true)
-    , _showMouse(ShowMouseInfo, true)
-    , _showJoystick(ShowJoystickInfo, true)
+    , _showWhenEnabled(ShowWhenEnabledInfo)
+    , _showWhenDisabled(ShowWhenDisabledInfo)
+    , _showKeyboard(ShowKeyboardInfo)
+    , _showMouse(ShowMouseInfo)
+    , _showJoystick(ShowJoystickInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

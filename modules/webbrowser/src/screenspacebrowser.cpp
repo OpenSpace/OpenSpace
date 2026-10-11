@@ -42,41 +42,46 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ScreenSpaceBrowser";
 
-    constexpr PropertyInfo DimensionsInfo = {
-        "Dimensions",
-        "Browser dimensions",
-        "The dimensions of the web browser window in pixels.",
-        Visibility::User
+    constexpr UVec2PropertyInfo DimensionsInfo = {
+        .identifier = "Dimensions",
+        .name = "Browser dimensions",
+        .description = "The dimensions of the web browser window in pixels.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::uvec2(0),
+            .minMax = { glm::uvec2(0), glm::uvec2(3000) }
+        }
     };
 
-    constexpr PropertyInfo KeyInfo = {
-        "Key",
-        "Key",
-        "The string representation of a keyboard key. If a key is entered and the "
-        "`KeyTrigger` property is triggered, the entered key will be sent to the browser.",
-        Visibility::User
+    constexpr StringPropertyInfo KeyInfo = {
+        .identifier = "Key",
+        .name = "Key",
+        .description = "The string representation of a keyboard key. If a key is entered "
+            "and the `KeyTrigger` property is triggered, the entered key will be sent to "
+            "the browser.",
+        .visibility = Visibility::User
     };
 
     constexpr PropertyInfo TriggerKeyInfo = {
-        "TriggerKey",
-        "Trigger key",
-        "When this property is triggered, the text in the `Key` property will be used to "
-        "create a keyboard input that is then sent to the browser.",
-        Visibility::User
+        .identifier = "TriggerKey",
+        .name = "Trigger key",
+        .description = "When this property is triggered, the text in the `Key` property "
+            "will be used to create a keyboard input that is then sent to the browser.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo UrlInfo = {
-        "Url",
-        "URL",
-        "The URL to load.",
-        Visibility::NoviceUser
+    constexpr StringPropertyInfo UrlInfo = {
+        .identifier = "Url",
+        .name = "URL",
+        .description = "The URL to load.",
+        .visibility = Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ReloadInfo = {
-        "Reload",
-        "Reload",
-        "Reload the web browser.",
-        Visibility::NoviceUser
+        .identifier = "Reload",
+        .name = "Reload",
+        .description = "Reload the web browser.",
+        .visibility = Visibility::NoviceUser
     };
 
     // Can be used to render a webpage in front of the camera. This can be used to show
@@ -116,7 +121,7 @@ Documentation ScreenSpaceBrowser::Documentation() {
 
 ScreenSpaceBrowser::ScreenSpaceBrowser(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
+    , _dimensions(DimensionsInfo)
     , _reload(ReloadInfo)
     , _key(::KeyInfo)
     , _triggerKey(TriggerKeyInfo)

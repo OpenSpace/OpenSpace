@@ -35,35 +35,43 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo IndexInfo = {
-        "Index",
-        "Index",
-        "The index into the list of images that is used to pick the currently displayed "
-        "image.",
-        Visibility::User
+    constexpr IntPropertyInfo IndexInfo = {
+        .identifier = "Index",
+        .name = "Index",
+        .description = "The index into the list of images that is used to pick the "
+            "currently displayed image.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0,
+            .minMax = { .min = 0 }
+        }
     };
 
-    constexpr PropertyInfo NumImagesInfo = {
-        "NumberImages",
-        "Number of images",
-        "The number of images that can be shown. The 'Index' value must be between 0 and "
-        "this value - 1.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo NumImagesInfo = {
+        .identifier = "NumberImages",
+        .name = "Number of images",
+        .description = "The number of images that can be shown. The 'Index' value must "
+            "be between 0 and this value - 1.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0,
+            .minMax = { .min = 0 }
+        }
     };
 
-    constexpr PropertyInfo CurrentImageInfo = {
-        "CurrentImage",
-        "Current image",
-        "The read-only value of the currently selected image.",
-        Visibility::User
+    constexpr StringPropertyInfo CurrentImageInfo = {
+        .identifier = "CurrentImage",
+        .name = "Current image",
+        .description = "The read-only value of the currently selected image.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo FolderPathInfo = {
-        "FolderPath",
-        "Folder path",
-        "The path that is used to look for images for this image provider. The path must "
-        "point to an existing folder that contains images.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo FolderPathInfo = {
+        .identifier = "FolderPath",
+        .name = "Folder path",
+        .description = "The path that is used to look for images for this image "
+            "provider. The path must point to an existing folder that contains images.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ImageSequenceTileProvider)]] Parameters {
@@ -83,8 +91,8 @@ Documentation ImageSequenceTileProvider::Documentation() {
 }
 
 ImageSequenceTileProvider::ImageSequenceTileProvider(const Dictionary& dictionary)
-    : _index(IndexInfo, 0, 0)
-    , _nImages(NumImagesInfo, 0, 0)
+    : _index(IndexInfo)
+    , _nImages(NumImagesInfo)
     , _currentImage(CurrentImageInfo)
     , _folderPath(FolderPathInfo)
     , _initDict(dictionary)

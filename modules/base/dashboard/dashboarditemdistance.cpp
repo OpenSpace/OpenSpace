@@ -53,59 +53,70 @@ namespace {
     };
 
     constexpr PropertyInfo SourceTypeInfo = {
-        "SourceType",
-        "Source type",
-        "The type of position that is used as the source to calculate the distance.",
-        Visibility::User
+        .identifier = "SourceType",
+        .name = "Source type",
+        .description = "The type of position that is used as the source to calculate the "
+            "distance.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo SourceNodeIdentifierInfo = {
-        "SourceNodeIdentifier",
-        "Source node identifier",
-        "If a scene graph node is selected as type, this value specifies the identifier "
-        "of the node that is to be used as the source for computing the distance.",
-        Visibility::User
+    constexpr StringPropertyInfo SourceNodeIdentifierInfo = {
+        .identifier = "SourceNodeIdentifier",
+        .name = "Source node identifier",
+        .description = "If a scene graph node is selected as type, this value specifies "
+            "the identifier of the node that is to be used as the source for computing "
+            "the distance.",
+        .visibility = Visibility::User
     };
 
     constexpr PropertyInfo DestinationTypeInfo = {
-        "DestinationType",
-        "Destination type",
-        "The type of position that is used as the destination to calculate the distance.",
-        Visibility::User
+        .identifier = "DestinationType",
+        .name = "Destination type",
+        .description = "The type of position that is used as the destination to "
+            "calculate the distance.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo DestinationNodeIdentifierInfo = {
-        "DestinationNodeIdentifier",
-        "Destination node identifier",
-        "If a scene graph node is selected as type, this value specifies the identifier "
-        "of the node that is to be used as the destination for computing the distance.",
-        Visibility::User
+    constexpr StringPropertyInfo DestinationNodeIdentifierInfo = {
+        .identifier = "DestinationNodeIdentifier",
+        .name = "Destination node identifier",
+        .description = "If a scene graph node is selected as type, this value specifies "
+            "the identifier of the node that is to be used as the destination for "
+            "computing the distance.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo SimplificationInfo = {
-        "Simplification",
-        "Simplification",
-        "If this value is enabled, the distance is displayed in nuanced units, such as "
-        "km, AU, light years, parsecs, etc. If this value is disabled, the unit can be "
-        "explicitly requested.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo SimplificationInfo = {
+        .identifier = "Simplification",
+        .name = "Simplification",
+        .description = "If this value is enabled, the distance is displayed in nuanced "
+            "units, such as km, AU, light years, parsecs, etc. If this value is "
+            "disabled, the unit can be explicitly requested.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     constexpr PropertyInfo RequestedUnitInfo = {
-        "RequestedUnit",
-        "Requested unit",
-        "If the simplification is disabled, this distance unit is used as a destination "
-        "to convert the meters into.",
-        Visibility::AdvancedUser
+        .identifier = "RequestedUnit",
+        .name = "Requested unit",
+        .description = "If the simplification is disabled, this distance unit is used as "
+            "a destination to convert the meters into.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo FormatStringInfo = {
-        "FormatString",
-        "Format string",
-        "The format string that is used for formatting the distance string.  This format "
-        "receives four parameters:  The name of the source, the name of the destination "
-        "the value of the distance and the unit of the distance.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo FormatStringInfo = {
+        .identifier = "FormatString",
+        .name = "Format string",
+        .description = "The format string that is used for formatting the distance "
+            "string.  This format receives four parameters:  The name of the source, the "
+            "name of the destination the value of the distance and the unit of the "
+            "distance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "Distance from {} to {}: {:f} {}"
+        }
     };
 
     // Displays the distance between two points. The points can be defined either by the
@@ -160,9 +171,9 @@ Documentation DashboardItemDistance::Documentation() {
 
 DashboardItemDistance::DashboardItemDistance(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _doSimplification(SimplificationInfo, true)
+    , _doSimplification(SimplificationInfo)
     , _requestedUnit(RequestedUnitInfo)
-    , _formatString(FormatStringInfo, "Distance from {} to {}: {:f} {}")
+    , _formatString(FormatStringInfo)
     , _source{
         OptionProperty(SourceTypeInfo),
         StringProperty(SourceNodeIdentifierInfo),

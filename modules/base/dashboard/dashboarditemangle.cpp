@@ -52,55 +52,57 @@ namespace {
     };
 
     constexpr PropertyInfo SourceTypeInfo = {
-        "SourceType",
-        "Source type",
-        "The type of position that is used as the triangle apex used to calculate the "
-        "angle.",
-        Visibility::User
+        .identifier = "SourceType",
+        .name = "Source type",
+        .description = "The type of position that is used as the triangle apex used to "
+            "calculate the angle.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo SourceNodeIdentifierInfo = {
-        "SourceNodeIdentifier",
-        "Source node identifier",
-        "If a scene graph node is selected as type, this value specifies the identifier "
-        "of the node that is to be used as the apex of the triangle used to calculate "
-        "the angle. The computed angle is the incident angle to Source in the triangle ("
-        "Source, Reference, Destination).",
-        Visibility::User
+    constexpr StringPropertyInfo SourceNodeIdentifierInfo = {
+        .identifier = "SourceNodeIdentifier",
+        .name = "Source node identifier",
+        .description = "If a scene graph node is selected as type, this value specifies "
+            "the identifier of the node that is to be used as the apex of the triangle "
+            "used to calculate the angle. The computed angle is the incident angle to "
+            "Source in the triangle (Source, Reference, Destination).",
+        .visibility = Visibility::User
     };
 
     constexpr PropertyInfo ReferenceTypeInfo = {
-        "ReferenceType",
-        "Reference type",
-        "The type of position that is used as the destination of the reference line used "
-        "to calculate the angle. The computed angle is the incident angle to Source in "
-        "the triangle (Source, Reference, Destination).",
-        Visibility::User
+        .identifier = "ReferenceType",
+        .name = "Reference type",
+        .description = "The type of position that is used as the destination of the "
+            "reference line used to calculate the angle. The computed angle is the "
+            "incident angle to Source in the triangle (Source, Reference, Destination).",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo ReferenceNodeIdentifierInfo = {
-        "ReferenceNodeIdentifier",
-        "Reference node identifier",
-        "If a scene graph node is selected as type, this value specifies the identifier "
-        "of the node that is to be used as the reference direction to compute the angle.",
-        Visibility::User
+    constexpr StringPropertyInfo ReferenceNodeIdentifierInfo = {
+        .identifier = "ReferenceNodeIdentifier",
+        .name = "Reference node identifier",
+        .description = "If a scene graph node is selected as type, this value specifies "
+            "the identifier of the node that is to be used as the reference direction to "
+            "compute the angle.",
+        .visibility = Visibility::User
     };
 
     constexpr PropertyInfo DestinationTypeInfo = {
-        "DestinationType",
-        "Destination type",
-        "The type of position that is used as the destination to calculate the angle. "
-        "The computed angle is the incident angle to Source in the triangle (Source, "
-        "Reference, Destination).",
-        Visibility::User
+        .identifier = "DestinationType",
+        .name = "Destination type",
+        .description = "The type of position that is used as the destination to "
+            "calculate the angle. The computed angle is the incident angle to Source in "
+            "the triangle (Source, Reference, Destination).",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo DestinationNodeIdentifierInfo = {
-        "DestinationNodeIdentifier",
-        "Destination node identifier",
-        "If a scene graph node is selected as type, this value specifies the identifier "
-        "of the node that is to be used as the destination for computing the angle.",
-        Visibility::User
+    constexpr StringPropertyInfo DestinationNodeIdentifierInfo = {
+        .identifier = "DestinationNodeIdentifier",
+        .name = "Destination node identifier",
+        .description = "If a scene graph node is selected as type, this value specifies "
+            "the identifier of the node that is to be used as the destination for "
+            "computing the angle.",
+        .visibility = Visibility::User
     };
 
     // Shows the angle between the lines `Source`->`Reference` and

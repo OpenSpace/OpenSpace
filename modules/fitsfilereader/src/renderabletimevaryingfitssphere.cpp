@@ -92,42 +92,49 @@ namespace {
         return Time::convertTime(res);
     }
 
-    constexpr PropertyInfo TextureSourceInfo = {
-        "TextureSource",
-        "Texture source",
-        "A directory on disk from which to load the texture files for the sphere.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureSourceInfo = {
+        .identifier = "TextureSource",
+        .name = "Texture source",
+        .description = "A directory on disk from which to load the texture files for the "
+            "sphere.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FitsLayerInfo = {
-        "FitsLayer",
-        "Texture layer",
-        "The index, a whole positive number, of the layer in the FITS file to use as "
-        "texture. If not specified, the first layer in the data will be used regardless. "
-        "When specified, that data layer will be the option used.",
-        Visibility::AdvancedUser
+        .identifier = "FitsLayer",
+        .name = "Texture layer",
+        .description = "The index, a whole positive number, of the layer in the FITS "
+            "file to use as texture. If not specified, the first layer in the data will "
+            "be used regardless. When specified, that data layer will be the option "
+            "used.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FitsLayerNameInfo = {
-        "LayerNames",
-        "Texture layer options",
-        "This value specifies which name of the fits layer to use as texture.",
-        Visibility::AdvancedUser
+        .identifier = "LayerNames",
+        .name = "Texture layer options",
+        .description = "This value specifies which name of the fits layer to use as "
+            "texture.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TextureFilterInfo = {
-        "TextureFilter",
-        "Texture filter",
-        "Option to choose nearest neighbor or linear filtering for the texture.",
-        Visibility::AdvancedUser
+        .identifier = "TextureFilter",
+        .name = "Texture filter",
+        .description = "Option to choose nearest neighbor or linear filtering for the "
+            "texture.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo SaveDownloadsOnShutdown = {
-        "SaveDownloadsOnShutdown",
-        "Save downloads on shutdown",
-        "This is an option for if dynamically downloaded files should be saved for the "
-        "next run or not.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo SaveDownloadsOnShutdown = {
+        .identifier = "SaveDownloadsOnShutdown",
+        .name = "Save downloads on shutdown",
+        .description = "This is an option for if dynamically downloaded files should be "
+            "saved for the next run or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // Reads a data sequence from specifically FITS files, makes textures from them, and
@@ -221,7 +228,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                                                              const Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _fitsLayerName(FitsLayerNameInfo)
-    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
+    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown)
     , _textureFilterProperty(TextureFilterInfo)
     , _textureSource(TextureSourceInfo)
 {

@@ -92,15 +92,17 @@ namespace {
 
     constexpr BoolPropertyInfo EnableAnimationInfo = {
         .identifier = "EnableAnimation",
-        .guiName = "Enable animation",
+        .name = "Enable animation",
         .description = "Enable or disable the animation for the model if it has any.",
         .visibility = Visibility::User,
-        .defaults = { .value = false }
+        .defaults = {
+            .value = false
+        }
     };
 
     constexpr FloatPropertyInfo AmbientIntensityInfo = {
         .identifier = "AmbientIntensity",
-        .guiName = "Ambient intensity",
+        .name = "Ambient intensity",
         .description = "A multiplier for ambient lighting.",
         .visibility = Visibility::User,
         .defaults = {
@@ -111,7 +113,7 @@ namespace {
 
     constexpr FloatPropertyInfo DiffuseIntensityInfo = {
         .identifier = "DiffuseIntensity",
-        .guiName = "Diffuse intensity",
+        .name = "Diffuse intensity",
         .description = "A multiplier for diffuse lighting.",
         .visibility = Visibility::User,
         .defaults = {
@@ -122,7 +124,7 @@ namespace {
 
     constexpr FloatPropertyInfo SpecularIntensityInfo = {
         .identifier = "SpecularIntensity",
-        .guiName = "Specular intensity",
+        .name = "Specular intensity",
         .description = "A multiplier for specular lighting.",
         .visibility = Visibility::User,
         .defaults = {
@@ -133,7 +135,7 @@ namespace {
 
     constexpr FloatPropertyInfo SpecularPowerInfo = {
         .identifier = "SpecularPower",
-        .guiName = "Specular Power",
+        .name = "Specular Power",
         .description = "Power factor for specular component, higher value gives narrower "
             "specularity.",
         .visibility = Visibility::User,
@@ -145,25 +147,29 @@ namespace {
 
     constexpr BoolPropertyInfo ShadingInfo = {
         .identifier = "PerformShading",
-        .guiName = "Perform shading",
+        .name = "Perform shading",
         .description = "Determines whether shading should be applied to this model, "
             "based on the provided list of light sources. If false, the model will be "
             "fully illuminated.",
         .visibility = Visibility::User,
-        .defaults = { .value = true }
+        .defaults = {
+            .value = true
+        }
     };
 
     constexpr BoolPropertyInfo EnableFaceCullingInfo = {
         .identifier = "EnableFaceCulling",
-        .guiName = "Enable face culling",
+        .name = "Enable face culling",
         .description = "Enable OpenGL automatic face culling optimization.",
         .visibility = Visibility::AdvancedUser,
-        .defaults = { .value = true }
+        .defaults = {
+            .value = true
+        }
     };
 
     constexpr DMat4PropertyInfo ModelTransformInfo = {
         .identifier = "ModelTransform",
-        .guiName = "Model transform",
+        .name = "Model transform",
         .description = "An extra model transform matrix that is applied to the model "
             "before all other transformations are applied.",
         .visibility = Visibility::Developer,
@@ -175,14 +181,14 @@ namespace {
 
     constexpr Vec3PropertyInfo PivotInfo = {
         .identifier = "Pivot",
-        .guiName = "Pivot",
+        .name = "Pivot",
         .description = "A vector that moves the place of origin for the model.",
         .visibility = Visibility::AdvancedUser
     };
 
     constexpr DoublePropertyInfo ModelScaleInfo = {
         .identifier = "ModelScale",
-        .guiName = "Model scale",
+        .name = "Model scale",
         .description = "The scale of the model. If a numeric value is provided in the "
             "asset file, the scale will be that exact value. If instead a unit name is "
             "provided, this is the value that that name represents. For example "
@@ -197,7 +203,7 @@ namespace {
 
     constexpr Vec3PropertyInfo RotationVecInfo = {
         .identifier = "RotationVector",
-        .guiName = "Rotation vector",
+        .name = "Rotation vector",
         .description = "A rotation vector with Euler angles, specified in degrees.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
@@ -207,7 +213,7 @@ namespace {
 
     constexpr PropertyInfo LightSourcesInfo = {
         .identifier = "LightSources",
-        .guiName = "Light sources",
+        .name = "Light sources",
         .description = "A list of light sources that this model should accept light "
             "from.",
         .visibility = Visibility::AdvancedUser
@@ -215,27 +221,31 @@ namespace {
 
     constexpr BoolPropertyInfo EnableDepthTestInfo = {
         .identifier = "EnableDepthTest",
-        .guiName = "Enable depth test",
+        .name = "Enable depth test",
         .description = "If true, depth testing is enabled for the model. This means that "
             "parts of the model that are occluded by other parts will not be rendered. "
             "If disabled, the depth of the model part will not be taken into account in "
             "rendering and some parts that should be hidden behind a model might be "
             "rendered in front.",
         .visibility = Visibility::AdvancedUser,
-        .defaults = { .value = true }
+        .defaults = {
+            .value = true
+        }
     };
 
     constexpr BoolPropertyInfo RenderWireframeInfo = {
         .identifier = "RenderWireframe",
-        .guiName = "Enable Wireframe Rendering",
+        .name = "Enable Wireframe Rendering",
         .description = "Enable Wireframe rendering for the Model.",
         .visibility = Visibility::AdvancedUser,
-        .defaults = { .value = false }
+        .defaults = {
+            .value = false
+        }
     };
 
     constexpr PropertyInfo BlendingOptionInfo = {
         .identifier = "BlendingOption",
-        .guiName = "Blending options",
+        .name = "Blending options",
         .description = "Controls the blending function used to calculate the colors of "
             "the model with respect to the opacity.",
         .visibility = Visibility::AdvancedUser
@@ -243,14 +253,13 @@ namespace {
 
     constexpr Vec4PropertyInfo OverrideColorInfo = {
         .identifier = "OverrideColor",
-        .guiName = "Override color",
+        .name = "Override color",
         .description = "The single color to use for entire model (RGBA).",
         .visibility = Visibility::AdvancedUser,
-        .isEnablable = PropertyInfo::IsEnablable::Yes,
+        .isEnablable = IsEnablable::Yes,
         .defaults = {
             .value = glm::vec4(1.f),
-            .minMax = { glm::vec4(0.f), glm::vec4(1.f) },
-            .isEnabled = PropertyInfo::IsEnabled::No
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
         }
     };
 

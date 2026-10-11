@@ -47,12 +47,12 @@ namespace {
     };
 
     constexpr PropertyInfo TimeUnitOptionInfo = {
-        "TimeUnit",
-        "Time unit",
-        "The time unit that the telemetry should use for the time speed. For example, if "
-        "the unit is set to 'Hour' then the unit for the time speed is simulation hours "
-        "per real life second.",
-        Visibility::User
+        .identifier = "TimeUnit",
+        .name = "Time unit",
+        .description = "The time unit that the telemetry should use for the time speed. "
+            "For example, if the unit is set to 'Hour' then the unit for the time speed "
+            "is simulation hours per real life second.",
+        .visibility = Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
@@ -61,12 +61,16 @@ namespace {
         "Settings for the precision of the telemetry information."
     };
 
-    constexpr PropertyInfo TimePrecisionInfo = {
-        "TimePrecision",
-        "Time precision",
-        "The precision in seconds used to determine when to send updated time data to "
-        "the Open Sound Control receiver.",
-        Visibility::User
+    constexpr DoublePropertyInfo TimePrecisionInfo = {
+        .identifier = "TimePrecision",
+        .name = "Time precision",
+        .description = "The precision in seconds used to determine when to send updated "
+            "time data to the Open Sound Control receiver.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.0001,
+            .minMax = { 0.0, 1.0e8 }
+        }
     };
 } // namespace
 
@@ -90,7 +94,7 @@ TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
 TimeTelemetry::PrecisionProperties::PrecisionProperties(
                                            PropertyOwner::PropertyOwnerInfo precisionInfo)
     : PropertyOwner(precisionInfo)
-    , timePrecision(TimePrecisionInfo, 0.0001, 0.0, 1.0e8)
+    , timePrecision(TimePrecisionInfo)
 {
     timePrecision.setExponent(10.f);
     addProperty(timePrecision);

@@ -58,151 +58,199 @@ namespace {
     constexpr double DistanceRatioAimThreshold = 1e-4;
     constexpr double CameraMovedEventIntervalTime = 5.0;
 
-    constexpr PropertyInfo AnchorInfo = {
-        "Anchor",
-        "Anchor",
-        "The name of the scene graph node that is the origin of the camera interaction. "
-        "The camera follows, orbits and dollies towards this node. Any scene graph node "
-        "can be the anchor node.",
-        Visibility::NoviceUser
+    constexpr StringPropertyInfo AnchorInfo = {
+        .identifier = "Anchor",
+        .name = "Anchor",
+        .description = "The name of the scene graph node that is the origin of the "
+            "camera interaction. The camera follows, orbits and dollies towards this "
+            "node. Any scene graph node can be the anchor node.",
+        .visibility = Visibility::NoviceUser
     };
 
-    constexpr PropertyInfo AimInfo = {
-        "Aim",
-        "Aim",
-        "The name of the scene graph node that is the aim of the camera. The camera "
-        "direction is relative to the vector from the camera position to this node.",
-        Visibility::NoviceUser
+    constexpr StringPropertyInfo AimInfo = {
+        .identifier = "Aim",
+        .name = "Aim",
+        .description = "The name of the scene graph node that is the aim of the camera. "
+            "The camera direction is relative to the vector from the camera position to "
+            "this node.",
+        .visibility = Visibility::NoviceUser
     };
 
     constexpr PropertyInfo RetargetAnchorInfo = {
-        "RetargetAnchor",
-        "Retarget anchor",
-        "When triggered, this property starts an interpolation to reset the camera "
-        "direction to the anchor node.",
-        Visibility::NoviceUser
+        .identifier = "RetargetAnchor",
+        .name = "Retarget anchor",
+        .description = "When triggered, this property starts an interpolation to reset "
+            "the camera direction to the anchor node.",
+        .visibility = Visibility::NoviceUser
     };
 
     constexpr PropertyInfo RetargetAimInfo = {
-        "RetargetAim",
-        "Retarget aim",
-        "When triggered, this property starts an interpolation to reset the camera "
-        "direction to the aim node.",
-        Visibility::NoviceUser
+        .identifier = "RetargetAim",
+        .name = "Retarget aim",
+        .description = "When triggered, this property starts an interpolation to reset "
+            "the camera direction to the aim node.",
+        .visibility = Visibility::NoviceUser
     };
 
-    constexpr PropertyInfo RollFrictionInfo = {
-        "RollFriction",
-        "Roll friction",
-        "If this is enabled, a small friction is applied to the rolling part of the "
-        "camera motion, thus slowing it down within a small time period. If this value "
-        "is disabled, the camera will roll forever.",
-        Visibility::NoviceUser
+    constexpr BoolPropertyInfo RollFrictionInfo = {
+        .identifier = "RollFriction",
+        .name = "Roll friction",
+        .description = "If this is enabled, a small friction is applied to the rolling "
+            "part of the camera motion, thus slowing it down within a small time period. "
+            "If this value is disabled, the camera will roll forever.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo RotationalFrictionInfo = {
-        "RotationalFriction",
-        "Rotational friction",
-        "If this is enabled, a small friction is applied to the rotational part of the "
-        "camera motion, thus slowing it down within a small time period. If this value "
-        "is disabled, the camera will rotate forever.",
-        Visibility::NoviceUser
+    constexpr BoolPropertyInfo RotationalFrictionInfo = {
+        .identifier = "RotationalFriction",
+        .name = "Rotational friction",
+        .description = "If this is enabled, a small friction is applied to the "
+            "rotational part of the camera motion, thus slowing it down within a small "
+            "time period. If this value is disabled, the camera will rotate forever.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo ZoomFrictionInfo = {
-        "ZoomFriction",
-        "Zoom friction",
-        "If this is enabled, a small friction is applied to the zoom part of the camera "
-        "motion, thus slowing it down within a small time period. If this value is "
-        "disabled, the camera will zoom in or out forever.",
-        Visibility::NoviceUser
+    constexpr BoolPropertyInfo ZoomFrictionInfo = {
+        .identifier = "ZoomFriction",
+        .name = "Zoom friction",
+        .description = "If this is enabled, a small friction is applied to the zoom part "
+            "of the camera motion, thus slowing it down within a small time period. If "
+            "this value is disabled, the camera will zoom in or out forever.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo FrictionInfo = {
-        "Friction",
-        "Friction factor",
-        "Determines the factor that is applied if the 'Roll Friction', 'Rotational "
-        "Friction', and 'Zoom Friction' values are enabled. The lower this value is, the "
-        "faster the camera movements will stop.",
-        Visibility::User
+    constexpr FloatPropertyInfo FrictionInfo = {
+        .identifier = "Friction",
+        .name = "Friction factor",
+        .description = "Determines the factor that is applied if the 'Roll Friction', "
+            "'Rotational Friction', and 'Zoom Friction' values are enabled. The lower "
+            "this value is, the faster the camera movements will stop.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo FollowAnchorNodeInfo = {
-        "FollowAnchorNodeRotation",
-        "Follow anchor node rotation",
-        "If true, the camera will rotate with the current anchor node if within a "
-        "certain distance from it. When this happens, the object will appear fixed in "
-        "relation to the camera. The distance at which the change happens is controlled "
-        "through another property.",
-        Visibility::User
+    constexpr BoolPropertyInfo FollowAnchorNodeInfo = {
+        .identifier = "FollowAnchorNodeRotation",
+        .name = "Follow anchor node rotation",
+        .description = "If true, the camera will rotate with the current anchor node if "
+            "within a certain distance from it. When this happens, the object will "
+            "appear fixed in relation to the camera. The distance at which the change "
+            "happens is controlled through another property.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo FollowAnchorNodeDistanceInfo = {
-        "FollowAnchorNodeRotationDistance",
-        "Follow anchor node rotation distance",
-        "A factor used to determine the distance at which the camera starts rotating "
-        "with the anchor node. The actual distance will be computed by multiplying this "
-        "factor with the approximate radius of the node.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FollowAnchorNodeDistanceInfo = {
+        .identifier = "FollowAnchorNodeRotationDistance",
+        .name = "Follow anchor node rotation distance",
+        .description = "A factor used to determine the distance at which the camera "
+            "starts rotating with the anchor node. The actual distance will be computed "
+            "by multiplying this factor with the approximate radius of the node.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 5.f,
+            .minMax = { 0.f, 20.f }
+        }
     };
 
-    constexpr PropertyInfo StereoInterpolationTimeInfo = {
-        "StereoInterpolationTime",
-        "Stereo interpolation time",
-        "The time to interpolate to a new stereoscopic depth when the anchor node is "
-        "changed, in seconds.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo StereoInterpolationTimeInfo = {
+        .identifier = "StereoInterpolationTime",
+        .name = "Stereo interpolation time",
+        .description = "The time to interpolate to a new stereoscopic depth when the "
+            "anchor node is changed, in seconds.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 8.0,
+            .minMax = { 0.0, 10.0 }
+        }
     };
 
-    constexpr PropertyInfo RetargetInterpolationTimeInfo = {
-        "RetargetAnchorInterpolationTime",
-        "Retarget interpolation time",
-        "The time to interpolate the camera rotation when the anchor or aim node is "
-        "changed, in seconds.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo RetargetInterpolationTimeInfo = {
+        .identifier = "RetargetAnchorInterpolationTime",
+        .name = "Retarget interpolation time",
+        .description = "The time to interpolate the camera rotation when the anchor or "
+            "aim node is changed, in seconds.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 2.0,
+            .minMax = { 0.0, 10.0 }
+        }
     };
 
-    constexpr PropertyInfo FollowRotationInterpTimeInfo = {
-        "FollowRotationInterpolationTime",
-        "Follow rotation interpolation time",
-        "The interpolation time when toggling following focus node rotation.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FollowRotationInterpTimeInfo = {
+        .identifier = "FollowRotationInterpolationTime",
+        .name = "Follow rotation interpolation time",
+        .description = "The interpolation time when toggling following focus node "
+            "rotation.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.0,
+            .minMax = { 0.0, 10.0 }
+        }
     };
 
-    constexpr PropertyInfo UseAdaptiveStereoscopicDepthInfo = {
-        "UseAdaptiveStereoscopicDepth",
-        "Adaptive steroscopic depth",
-        "Dynamically adjust the view scaling based on the distance to the surface of "
-        "the anchor and aim nodes. If enabled, view scale will be set to "
-        "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). If "
-        "disabled, view scale will be set to 10^StaticViewScaleExponent.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseAdaptiveStereoscopicDepthInfo = {
+        .identifier = "UseAdaptiveStereoscopicDepth",
+        .name = "Adaptive steroscopic depth",
+        .description = "Dynamically adjust the view scaling based on the distance to the "
+            "surface of the anchor and aim nodes. If enabled, view scale will be set to "
+            "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). If "
+            "disabled, view scale will be set to 10^StaticViewScaleExponent.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo StaticViewScaleExponentInfo = {
-        "StaticViewScaleExponent",
-        "Static view scale exponent",
-        "Statically scale the world by 10^StaticViewScaleExponent. Only used if "
-        "UseAdaptiveStereoscopicDepthInfo is set to false.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo StaticViewScaleExponentInfo = {
+        .identifier = "StaticViewScaleExponent",
+        .name = "Static view scale exponent",
+        .description = "Statically scale the world by 10^StaticViewScaleExponent. Only "
+            "used if UseAdaptiveStereoscopicDepthInfo is set to false.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { -30, 10 }
+        }
     };
 
-    constexpr PropertyInfo StereoscopicDepthOfFocusSurfaceInfo = {
-        "StereoscopicDepthOfFocusSurface",
-        "Stereoscopic depth of the surface in focus",
-        "Set the stereoscopically perceived distance (in meters) to the closest point "
-        "out of the surface of the anchor and the center of the aim node. Only used if "
-        "UseAdaptiveStereoscopicDepthInfo is set to true.",
-        Visibility::User
+    constexpr FloatPropertyInfo StereoscopicDepthOfFocusSurfaceInfo = {
+        .identifier = "StereoscopicDepthOfFocusSurface",
+        .name = "Stereoscopic depth of the surface in focus",
+        .description = "Set the stereoscopically perceived distance (in meters) to the "
+            "closest point out of the surface of the anchor and the center of the aim "
+            "node. Only used if UseAdaptiveStereoscopicDepthInfo is set to true.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 40.f,
+            .minMax = { 0.25f, 500000.f }
+        }
     };
 
-    constexpr PropertyInfo ConstantVelocityFlight = {
-        "ConstantVelocityFlight",
-        "Constant velocity flight",
-        "If this value is enabled, the camera motion will not be affected by the "
-        "distance of the camera to the surface of a planet. When enabling this setting "
-        "consider adjusting the mouse sensitivity to a lower value.",
-        Visibility::User
+    constexpr BoolPropertyInfo ConstantVelocityFlight = {
+        .identifier = "ConstantVelocityFlight",
+        .name = "Constant velocity flight",
+        .description = "If this value is enabled, the camera motion will not be affected "
+            "by the distance of the camera to the surface of a planet. When enabling "
+            "this setting consider adjusting the mouse sensitivity to a lower value.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
     const PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
@@ -212,73 +260,99 @@ namespace {
         "current focus."
     };
 
-    constexpr PropertyInfo EnableMinimumAllowedDistanceInfo = {
-        "EnableMinimumAllowedDistance",
-        "Enable minimum allowed distance limit",
-        "Enables or disables that the camera cannot go closer to an object than the set "
-        "minimum allowed distance.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableMinimumAllowedDistanceInfo = {
+        .identifier = "EnableMinimumAllowedDistance",
+        .name = "Enable minimum allowed distance limit",
+        .description = "Enables or disables that the camera cannot go closer to an "
+            "object than the set minimum allowed distance.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo MinimumDistanceInfo = {
-        "MinimumAllowedDistance",
-        "Minimum allowed distance",
-        "The limit of how close the camera can get to an object. The distance is given "
-        "in meters above the surface.",
-        Visibility::User
+    constexpr FloatPropertyInfo MinimumDistanceInfo = {
+        .identifier = "MinimumAllowedDistance",
+        .name = "Minimum allowed distance",
+        .description = "The limit of how close the camera can get to an object. The "
+            "distance is given in meters above the surface.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 10.f,
+            .minMax = { 0.f, 10000.f }
+        }
     };
 
-    constexpr PropertyInfo EnableMaximumDistanceInfo = {
-        "EnableMaximumAllowedDistance",
-        "Enable maximum allowed distance limit",
-        "Enables or disables that the camera cannot go further away from an object than "
-        "the set maximum allowed distance.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnableMaximumDistanceInfo = {
+        .identifier = "EnableMaximumAllowedDistance",
+        .name = "Enable maximum allowed distance limit",
+        .description = "Enables or disables that the camera cannot go further away from "
+            "an object than the set maximum allowed distance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo MaximumDistanceInfo = {
-        "MaximumAllowedDistance",
-        "Maximum allowed distance",
-        "The limit of how far away the camera can get from an object. The distance is "
-        "given in meters above the surface.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo MaximumDistanceInfo = {
+        .identifier = "MaximumAllowedDistance",
+        .name = "Maximum allowed distance",
+        .description = "The limit of how far away the camera can get from an object. The "
+            "distance is given in meters above the surface.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 4e+27f,
+            .minMax = { 50.f, 4e+27f }
+        }
     };
 
-    constexpr PropertyInfo DisableZoomInfo = {
-        "DisableZoom",
-        "Disable zoom",
-        "When set to true, disables all vertical navigation based on input. This means "
-        "that the camera cannot be moved closer to or further away from the current "
-        "anchor node.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo DisableZoomInfo = {
+        .identifier = "DisableZoom",
+        .name = "Disable zoom",
+        .description = "When set to true, disables all vertical navigation based on "
+            "input. This means that the camera cannot be moved closer to or further away "
+            "from the current anchor node.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo DisableRollInfo = {
-        "DisableRoll",
-        "Disable roll",
-        "When set to true, disables all rolling camera motions based on input. This "
-        "means that the camera cannot be rotated to change the perceived up-direction of "
-        "the current anchor node, or rotate the horizon on a planet, for example.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo DisableRollInfo = {
+        .identifier = "DisableRoll",
+        .name = "Disable roll",
+        .description = "When set to true, disables all rolling camera motions based on "
+            "input. This means that the camera cannot be rotated to change the perceived "
+            "up-direction of the current anchor node, or rotate the horizon on a planet, "
+            "for example.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ShouldRotateAroundUpInfo = {
-        "ShouldRotateAroundUp",
-        "Should rotate around up",
-        "When set to true, global rotation interactions in the X-direction will lead to "
-        "a rotation around the specified up vector instead of just around the object. "
-        "The up vector is the local coordinate axis, and can be set to either the X-, Y- "
-        "or Z-axis through the 'UpToUseForRotation' property.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShouldRotateAroundUpInfo = {
+        .identifier = "ShouldRotateAroundUp",
+        .name = "Should rotate around up",
+        .description = "When set to true, global rotation interactions in the "
+            "X-direction will lead to a rotation around the specified up vector instead "
+            "of just around the object. The up vector is the local coordinate axis, and "
+            "can be set to either the X-, Y- or Z-axis through the 'UpToUseForRotation' "
+            "property.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo UpToUseForRotationInfo = {
-        "UpToUseForRotation",
-        "Up to use for rotation",
-        "Specifies the local coordinate axis of the anchor node to use as up direction "
-        "when the camera is set to orbit around up. In general, the Z-axis is a good "
-        "choice for globes, and the Y-axis is a good choice for models.",
-        Visibility::AdvancedUser
+    constexpr OptionPropertyInfo UpToUseForRotationInfo = {
+        .identifier = "UpToUseForRotation",
+        .name = "Up to use for rotation",
+        .description = "Specifies the local coordinate axis of the anchor node to use as "
+            "up direction when the camera is set to orbit around up. In general, the "
+            "Z-axis is a good choice for globes, and the Y-axis is a good choice for "
+            "models.",
+        .visibility = Visibility::AdvancedUser
     };
 
     /**
@@ -317,10 +391,10 @@ namespace openspace {
 
 OrbitalNavigator::Friction::Friction()
     : PropertyOwner({ "Friction" })
-    , roll(RollFrictionInfo, true)
-    , rotational(RotationalFrictionInfo, true)
-    , zoom(ZoomFrictionInfo, true)
-    , friction(FrictionInfo, 0.5f, 0.f, 1.f)
+    , roll(RollFrictionInfo)
+    , rotational(RotationalFrictionInfo)
+    , zoom(ZoomFrictionInfo)
+    , friction(FrictionInfo)
 {
     addProperty(roll);
     addProperty(rotational);
@@ -330,10 +404,10 @@ OrbitalNavigator::Friction::Friction()
 
 OrbitalNavigator::LimitZoom::LimitZoom()
     : PropertyOwner(LimitZoomInfo)
-    , enableZoomInLimit(EnableMinimumAllowedDistanceInfo, true)
-    , minimumAllowedDistance(MinimumDistanceInfo, 10.f, 0.f, 10000.f)
-    , enableZoomOutLimit(EnableMaximumDistanceInfo, false)
-    , maximumAllowedDistance(MaximumDistanceInfo, 4e+27f, 50.f, 4e+27f)
+    , enableZoomInLimit(EnableMinimumAllowedDistanceInfo)
+    , minimumAllowedDistance(MinimumDistanceInfo)
+    , enableZoomOutLimit(EnableMaximumDistanceInfo)
+    , maximumAllowedDistance(MaximumDistanceInfo)
 {
     // Min
     addProperty(enableZoomInLimit);
@@ -357,23 +431,18 @@ OrbitalNavigator::OrbitalNavigator()
     , _aim(AimInfo)
     , _retargetAnchor(RetargetAnchorInfo)
     , _retargetAim(RetargetAimInfo)
-    , _followAnchorNodeRotation(FollowAnchorNodeInfo, true)
-    , _followAnchorNodeRotationDistance(FollowAnchorNodeDistanceInfo, 5.f, 0.f, 20.f)
-    , _disableZoom(DisableZoomInfo, false)
-    , _disableRoll(DisableRollInfo, false)
-    , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
-    , _stereoscopicDepthOfFocusSurface(
-        StereoscopicDepthOfFocusSurfaceInfo,
-        40.f,
-        0.25f,
-        500000.f
-    )
-    , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
-    , _constantVelocityFlight(ConstantVelocityFlight, false)
-    , _retargetInterpolationTime(RetargetInterpolationTimeInfo, 2.0, 0.0, 10.0)
-    , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
-    , _followRotationInterpolationTime(FollowRotationInterpTimeInfo, 1.0, 0.0, 10.0)
-    , _shouldRotateAroundUp(ShouldRotateAroundUpInfo, false)
+    , _followAnchorNodeRotation(FollowAnchorNodeInfo)
+    , _followAnchorNodeRotationDistance(FollowAnchorNodeDistanceInfo)
+    , _disableZoom(DisableZoomInfo)
+    , _disableRoll(DisableRollInfo)
+    , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo)
+    , _stereoscopicDepthOfFocusSurface(StereoscopicDepthOfFocusSurfaceInfo)
+    , _staticViewScaleExponent(StaticViewScaleExponentInfo)
+    , _constantVelocityFlight(ConstantVelocityFlight)
+    , _retargetInterpolationTime(RetargetInterpolationTimeInfo)
+    , _stereoInterpolationTime(StereoInterpolationTimeInfo)
+    , _followRotationInterpolationTime(FollowRotationInterpTimeInfo)
+    , _shouldRotateAroundUp(ShouldRotateAroundUpInfo)
     , _upToUseForRotation(UpToUseForRotationInfo)
     , _inputHandler(_friction.friction)
 {

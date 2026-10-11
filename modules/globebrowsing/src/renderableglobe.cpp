@@ -103,170 +103,241 @@ namespace {
     const TileIndex LeftHemisphereIndex = TileIndex(0, 0, 1);
     const TileIndex RightHemisphereIndex = TileIndex(1, 0, 1);
 
-    constexpr PropertyInfo ShowChunkEdgeInfo = {
-        "ShowChunkEdges",
-        "Show chunk edges",
-        "Shows the borders between chunks in a red highlight.",
-        Visibility::Developer
+    constexpr BoolPropertyInfo ShowChunkEdgeInfo = {
+        .identifier = "ShowChunkEdges",
+        .name = "Show chunk edges",
+        .description = "Shows the borders between chunks in a red highlight.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo LevelProjectedAreaInfo = {
-        "LevelByProjectedAreaElseDistance",
-        "Level by projected area (else distance)",
-        "If true, the tile level is determined by the area projected on screen. If "
-        "false, the distance to the center of the tile is used instead.",
-        Visibility::Developer
+    constexpr BoolPropertyInfo LevelProjectedAreaInfo = {
+        .identifier = "LevelByProjectedAreaElseDistance",
+        .name = "Level by projected area (else distance)",
+        .description = "If true, the tile level is determined by the area projected on "
+            "screen. If false, the distance to the center of the tile is used instead.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo PerformFrustumCullingInfo = {
-        "PerformFrustumCulling",
-        "Perform frustum culling",
-        "If this value is set to true, frustum culling will be performed.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo PerformFrustumCullingInfo = {
+        .identifier = "PerformFrustumCulling",
+        .name = "Perform frustum culling",
+        .description = "If this value is set to true, frustum culling will be performed.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo PerformHorizonCullingInfo = {
-        "PerformHorizonCulling",
-        "Perform horizon culling",
-        "If this value is set to 'true', tiles below the horizon will be culled away.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo PerformHorizonCullingInfo = {
+        .identifier = "PerformHorizonCulling",
+        .name = "Perform horizon culling",
+        .description = "If this value is set to 'true', tiles below the horizon will be "
+            "culled away.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     constexpr PropertyInfo ResetTileProviderInfo = {
-        "ResetTileProviders",
-        "Reset tile providers",
-        "Reset all tile provides for the globe and reload the data.",
-        Visibility::Developer
+        .identifier = "ResetTileProviders",
+        .name = "Reset tile providers",
+        .description = "Reset all tile provides for the globe and reload the data.",
+        .visibility = Visibility::Developer
     };
 
-    constexpr PropertyInfo ModelSpaceRenderingInfo = {
-        "ModelSpaceRenderingCutoffLevel",
-        "Model space rendering cutoff level",
-        "The tile level that is used as the cut off between rendering tiles using the "
-        "globe model rendering vs the flat in-game rendering method. The value is a "
-        "trade-off between not having precision errors in the rendering and representing "
-        "a tile as flat or curved.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo ModelSpaceRenderingInfo = {
+        .identifier = "ModelSpaceRenderingCutoffLevel",
+        .name = "Model space rendering cutoff level",
+        .description = "The tile level that is used as the cut off between rendering "
+            "tiles using the globe model rendering vs the flat in-game rendering method. "
+            "The value is a trade-off between not having precision errors in the "
+            "rendering and representing a tile as flat or curved.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 14,
+            .minMax = { 1, 22 }
+        }
     };
 
-    constexpr PropertyInfo DynamicLodIterationCountInfo = {
-        "DynamicLodIterationCount",
-        "Data availability checks before LOD factor impact",
-        "The number of checks that have to fail/succeed in a row before the dynamic "
-        "level-of-detail adjusts the actual level-of-detail up or down during a session "
-        "recording.",
-        Visibility::Developer
+    constexpr IntPropertyInfo DynamicLodIterationCountInfo = {
+        .identifier = "DynamicLodIterationCount",
+        .name = "Data availability checks before LOD factor impact",
+        .description = "The number of checks that have to fail/succeed in a row before "
+            "the dynamic level-of-detail adjusts the actual level-of-detail up or down "
+            "during a session recording.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 16,
+            .minMax = { 4, 128 }
+        }
     };
 
-    constexpr PropertyInfo PerformShadingInfo = {
-        "PerformShading",
-        "Perform shading",
-        "Specifies whether the planet should be shaded by the primary light source or "
-        "not. If disabled, all parts of the planet are illuminated. Note that if the "
-        "globe has a corresponding atmosphere, there is a separate setting to control "
-        "the shadowing induced by the atmosphere.",
-        Visibility::NoviceUser
+    constexpr BoolPropertyInfo PerformShadingInfo = {
+        .identifier = "PerformShading",
+        .name = "Perform shading",
+        .description = "Specifies whether the planet should be shaded by the primary "
+            "light source or not. If disabled, all parts of the planet are illuminated. "
+            "Note that if the globe has a corresponding atmosphere, there is a separate "
+            "setting to control the shadowing induced by the atmosphere.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo AccurateNormalsInfo = {
-        "UseAccurateNormals",
-        "Use accurate normals",
-        "Determines whether higher-accuracy normals should be used in the rendering. "
-        "These normals are calculated based on the height field information and are thus "
-        "only available if the planet has a height map layer.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo AccurateNormalsInfo = {
+        .identifier = "UseAccurateNormals",
+        .name = "Use accurate normals",
+        .description = "Determines whether higher-accuracy normals should be used in the "
+            "rendering. These normals are calculated based on the height field "
+            "information and are thus only available if the planet has a height map "
+            "layer.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo AmbientIntensityInfo = {
-        "AmbientIntensity",
-        "Ambient intensity",
-        "The intensity factor for the ambient light used for light shading.",
-        Visibility::User
+    constexpr FloatPropertyInfo AmbientIntensityInfo = {
+        .identifier = "AmbientIntensity",
+        .name = "Ambient intensity",
+        .description = "The intensity factor for the ambient light used for light "
+            "shading.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.05f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo LightSourceNodeInfo = {
-        "LightSourceNode",
-        "Light source",
-        "The identifier of a scene graph node that should be used as the source of "
-        "illumination for the globe. If not specified, the solar system's Sun is used.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo LightSourceNodeInfo = {
+        .identifier = "LightSourceNode",
+        .name = "Light source",
+        .description = "The identifier of a scene graph node that should be used as the "
+            "source of illumination for the globe. If not specified, the solar system's "
+            "Sun is used.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo EclipseInfo = {
-        "Eclipse",
-        "Eclipse",
-        "Enables/Disables Eclipse shadows on this globe.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EclipseInfo = {
+        .identifier = "Eclipse",
+        .name = "Eclipse",
+        .description = "Enables/Disables Eclipse shadows on this globe.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EclipseHardShadowsInfo = {
-        "EclipseHardShadows",
-        "Eclipse hard shadows",
-        "Enables the rendering of eclipse shadows using hard shadows.",
-        Visibility::User
+    constexpr BoolPropertyInfo EclipseHardShadowsInfo = {
+        .identifier = "EclipseHardShadows",
+        .name = "Eclipse hard shadows",
+        .description = "Enables the rendering of eclipse shadows using hard shadows.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ShadowMappingInfo = {
-        "ShadowMapping",
-        "Shadow mapping",
-        "Enables shadow mapping algorithm. Used by renderable rings, too.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShadowMappingInfo = {
+        .identifier = "ShadowMapping",
+        .name = "Shadow mapping",
+        .description = "Enables shadow mapping algorithm. Used by renderable rings, too.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo RenderAtDistanceInfo = {
-        "RenderAtDistance",
-        "Render at distance",
-        "Tells the rendering engine not to perform distance based performance culling "
-        "for this globe. Turning this property on will let the globe to be seen at far "
-        "away distances when normally it would be hidden.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo RenderAtDistanceInfo = {
+        .identifier = "RenderAtDistance",
+        .name = "Render at distance",
+        .description = "Tells the rendering engine not to perform distance based "
+            "performance culling for this globe. Turning this property on will let the "
+            "globe to be seen at far away distances when normally it would be hidden.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ZFightingPercentageInfo = {
-        "ZFightingPercentage",
-        "Z-fighting percentage",
-        "The percentage of the correct distance to the surface being shadowed.",
-        Visibility::Developer
+    constexpr FloatPropertyInfo ZFightingPercentageInfo = {
+        .identifier = "ZFightingPercentage",
+        .name = "Z-fighting percentage",
+        .description = "The percentage of the correct distance to the surface being "
+            "shadowed.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 0.995f,
+            .minMax = { 0.000001f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo NumberShadowSamplesInfo = {
-        "NumberShadowSamples",
-        "Number of shadow samples",
-        "The number of samples used during shadow mapping calculation (Percentage Closer "
-        "Filtering).",
-        Visibility::Developer
+    constexpr IntPropertyInfo NumberShadowSamplesInfo = {
+        .identifier = "NumberShadowSamples",
+        .name = "Number of shadow samples",
+        .description = "The number of samples used during shadow mapping calculation "
+            "(Percentage Closer Filtering).",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 5,
+            .minMax = { 1, 7 }
+        }
     };
 
-    constexpr PropertyInfo TargetLodScaleFactorInfo = {
-        "TargetLodScaleFactor",
-        "Target level of detail scale factor",
-        "Determines the targeted level-of-detail of the tiles for this globe. A higher "
-        "value means that the tiles rendered are a higher resolution for the same "
-        "distance of the camera to the planet.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo TargetLodScaleFactorInfo = {
+        .identifier = "TargetLodScaleFactor",
+        .name = "Target level of detail scale factor",
+        .description = "Determines the targeted level-of-detail of the tiles for this "
+            "globe. A higher value means that the tiles rendered are a higher resolution "
+            "for the same distance of the camera to the planet.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 15.f,
+            .minMax = { 1.f, 50.f }
+        }
     };
 
-    constexpr PropertyInfo CurrentLodScaleFactorInfo = {
-        "CurrentLodScaleFactor",
-        "Current level of detail scale factor (read only)",
-        "The currently used scale factor whose target value is determined by "
-        "'TargetLodScaleFactor'.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo CurrentLodScaleFactorInfo = {
+        .identifier = "CurrentLodScaleFactor",
+        .name = "Current level of detail scale factor (read only)",
+        .description = "The currently used scale factor whose target value is determined "
+            "by 'TargetLodScaleFactor'.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 15.f,
+            .minMax = { 1.f, 50.f }
+        }
     };
 
-    constexpr PropertyInfo OrenNayarRoughnessInfo = {
-        "OrenNayarRoughness",
-        "Oren-Nayar roughness",
-        "The roughness factor that is used for the Oren-Nayar lighting mode.",
-        Visibility::Developer
+    constexpr FloatPropertyInfo OrenNayarRoughnessInfo = {
+        .identifier = "OrenNayarRoughness",
+        .name = "Oren-Nayar roughness",
+        .description = "The roughness factor that is used for the Oren-Nayar lighting "
+            "mode.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo NActiveLayersInfo = {
-        "NActiveLayers",
-        "Number of active layers",
-        "The number of currently active layers. If this value reaches the maximum, bad "
-        "things will happen.",
-        Visibility::User
+    constexpr IntPropertyInfo NActiveLayersInfo = {
+        .identifier = "NActiveLayers",
+        .name = "Number of active layers",
+        .description = "The number of currently active layers. If this value reaches the "
+            "maximum, bad things will happen.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .minMax = { .min = 0 }
+        }
     };
 
     bool isLeaf(const Chunk& cn) {
@@ -625,31 +696,31 @@ Documentation RenderableGlobe::Documentation() {
 
 RenderableGlobe::RenderableGlobe(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _performShading(PerformShadingInfo, true)
-    , _useAccurateNormals(AccurateNormalsInfo, false)
-    , _ambientIntensity(AmbientIntensityInfo, 0.05f, 0.f, 1.f)
+    , _performShading(PerformShadingInfo)
+    , _useAccurateNormals(AccurateNormalsInfo)
+    , _ambientIntensity(AmbientIntensityInfo)
     , _lightSourceNodeName(LightSourceNodeInfo)
-    , _renderAtDistance(RenderAtDistanceInfo, false)
-    , _eclipseShadowsEnabled(EclipseInfo, false)
-    , _eclipseHardShadows(EclipseHardShadowsInfo, false)
-    , _targetLodScaleFactor(TargetLodScaleFactorInfo, 15.f, 1.f, 50.f)
-    , _currentLodScaleFactor(CurrentLodScaleFactorInfo, 15.f, 1.f, 50.f)
-    , _orenNayarRoughness(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
-    , _nActiveLayers(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
+    , _renderAtDistance(RenderAtDistanceInfo)
+    , _eclipseShadowsEnabled(EclipseInfo)
+    , _eclipseHardShadows(EclipseHardShadowsInfo)
+    , _targetLodScaleFactor(TargetLodScaleFactorInfo)
+    , _currentLodScaleFactor(CurrentLodScaleFactorInfo)
+    , _orenNayarRoughness(OrenNayarRoughnessInfo)
+    , _nActiveLayers(NActiveLayersInfo)
     , _debugProperties({
-        .showChunkEdges = BoolProperty(ShowChunkEdgeInfo, false),
-        .levelByProjectedAreaElseDistance = BoolProperty(LevelProjectedAreaInfo, true),
+        .showChunkEdges = BoolProperty(ShowChunkEdgeInfo),
+        .levelByProjectedAreaElseDistance = BoolProperty(LevelProjectedAreaInfo),
         .resetTileProviders = TriggerProperty(ResetTileProviderInfo),
-        .performFrustumCulling = BoolProperty(PerformFrustumCullingInfo, true),
-        .performHorizonCulling = BoolProperty(PerformHorizonCullingInfo, false),
-        .modelSpaceRenderingCutoffLevel = IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
-        .dynamicLodIterationCount = IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
+        .performFrustumCulling = BoolProperty(PerformFrustumCullingInfo),
+        .performHorizonCulling = BoolProperty(PerformHorizonCullingInfo),
+        .modelSpaceRenderingCutoffLevel = IntProperty(ModelSpaceRenderingInfo),
+        .dynamicLodIterationCount = IntProperty(DynamicLodIterationCountInfo)
     })
     , _debugPropertyOwner({ "Debug" })
     , _shadowMappingProperties({
-        BoolProperty(ShadowMappingInfo, false),
-        FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
-        IntProperty(NumberShadowSamplesInfo, 5, 1, 7)
+        BoolProperty(ShadowMappingInfo),
+        FloatProperty(ZFightingPercentageInfo),
+        IntProperty(NumberShadowSamplesInfo)
     })
     , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
@@ -756,6 +827,7 @@ RenderableGlobe::RenderableGlobe(const Dictionary& dictionary)
     _orenNayarRoughness = p.orenNayarRoughness.value_or(_orenNayarRoughness);
     addProperty(_orenNayarRoughness);
 
+    _nActiveLayers.setMaxValue(OpenGLCap.maxTextureUnits() / 3);
     _nActiveLayers.setReadOnly(true);
     addProperty(_nActiveLayers);
 

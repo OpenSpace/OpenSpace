@@ -46,35 +46,45 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ScreenSpaceTimeVaryingImageOnline";
 
-    constexpr PropertyInfo FileInfo = {
-        "FilePath",
-        "File path",
-        "The file path to the data containing information about when to display which "
-        "image.",
-        Visibility::User
+    constexpr StringPropertyInfo FileInfo = {
+        .identifier = "FilePath",
+        .name = "File path",
+        .description = "The file path to the data containing information about when to "
+            "display which image.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = ""
+        }
     };
 
-    constexpr PropertyInfo ShowBeforeInfo = {
-        "ShowBefore",
-        "Show image before first time",
-        "If enabled, the image with the earliest timestamp is shown when the simulation "
-        "time is before the first timestamp specified in the data file.",
-        Visibility::User
+    constexpr BoolPropertyInfo ShowBeforeInfo = {
+        .identifier = "ShowBefore",
+        .name = "Show image before first time",
+        .description = "If enabled, the image with the earliest timestamp is shown when "
+            "the simulation time is before the first timestamp specified in the data "
+            "file.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ShowAfterInfo = {
-        "ShowAfter",
-        "Show image after last time",
-        "If enabled, the image with the latest timestamp is shown when the simulation "
-        "time is after the last timestamp specified in the data file.",
-        Visibility::User
+    constexpr BoolPropertyInfo ShowAfterInfo = {
+        .identifier = "ShowAfter",
+        .name = "Show image after last time",
+        .description = "If enabled, the image with the latest timestamp is shown when "
+            "the simulation time is after the last timestamp specified in the data file.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
     constexpr PropertyInfo JumpToFirstTimeInfo = {
-        "JumpToFirstTime",
-        "Jump to first time",
-        "Performs a time jump to the first timestamp in the loaded file.",
-        Visibility::NoviceUser
+        .identifier = "JumpToFirstTime",
+        .name = "Jump to first time",
+        .description = "Performs a time jump to the first timestamp in the loaded file.",
+        .visibility = Visibility::NoviceUser
     };
 
     // Displays an image based on the current in-game simulation time. The image shown is
@@ -113,9 +123,9 @@ Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
 ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
                                                              const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _jsonFilePath(FileInfo, "")
-    , _showBefore(ShowBeforeInfo, false)
-    , _showAfter(ShowAfterInfo, false)
+    , _jsonFilePath(FileInfo)
+    , _showBefore(ShowBeforeInfo)
+    , _showAfter(ShowAfterInfo)
     , _jumpToFirstTime(JumpToFirstTimeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

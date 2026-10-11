@@ -39,25 +39,38 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color used for the grid lines.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color used for the grid lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.5f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the grid lines. The larger number, the thicker the lines.",
-        Visibility::User
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the grid lines. The larger number, the thicker the "
+            "lines.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr PropertyInfo SizeInfo = {
-        "Size",
-        "Grid size",
-        "The size of each dimension of the box, in meters.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Grid size",
+        .description = "The size of each dimension of the box, in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.0001f), glm::vec3(100.f) }
+        }
     };
 
     // Creates a 3D box that is rendered using grid lines.
@@ -88,9 +101,9 @@ Documentation RenderableBoxGrid::Documentation() {
 
 RenderableBoxGrid::RenderableBoxGrid(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
-    , _size(SizeInfo, glm::vec3(1.f), glm::vec3(0.0001f), glm::vec3(100.f))
+    , _color(ColorInfo)
+    , _lineWidth(LineWidthInfo)
+    , _size(SizeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

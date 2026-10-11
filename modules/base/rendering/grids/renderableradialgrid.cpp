@@ -41,42 +41,64 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color used for the grid lines.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color used for the grid lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.5f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo GridSegmentsInfo = {
-        "GridSegments",
-        "Number of grid segments",
-        "Specifies the number of segments for the grid, in the radial and angular "
-        "direction respectively.",
-        Visibility::User
+    constexpr IVec2PropertyInfo GridSegmentsInfo = {
+        .identifier = "GridSegments",
+        .name = "Number of grid segments",
+        .description = "Specifies the number of segments for the grid, in the radial and "
+            "angular direction respectively.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::ivec2(10),
+            .minMax = { glm::ivec2(1), glm::ivec2(200) }
+        }
     };
 
-    constexpr PropertyInfo CircleSegmentsInfo = {
-        "CircleSegments",
-        "Number of circle segments",
-        "The number of segments that is used to render each circle in the grid.",
-        Visibility::User
+    constexpr IntPropertyInfo CircleSegmentsInfo = {
+        .identifier = "CircleSegments",
+        .name = "Number of circle segments",
+        .description = "The number of segments that is used to render each circle in the "
+            "grid.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 36,
+            .minMax = { 4, 200 }
+        }
     };
 
-    constexpr PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the grid lines. The larger number, the thicker the lines.",
-        Visibility::User
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the grid lines. The larger number, the thicker the "
+            "lines.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr PropertyInfo RadiiInfo = {
-        "Radii",
-        "Inner and outer radius",
-        "The radii values that determine the size of the circular grid. The first value "
-        "is the radius of the inmost ring and the second is the radius of the outmost "
-        "ring.",
-        Visibility::User
+    constexpr Vec2PropertyInfo RadiiInfo = {
+        .identifier = "Radii",
+        .name = "Inner and outer radius",
+        .description = "The radii values that determine the size of the circular grid. "
+            "The first value is the radius of the inmost ring and the second is the "
+            "radius of the outmost ring.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec2(0.f, 1.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(20.f) }
+        }
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
@@ -124,11 +146,11 @@ Documentation RenderableRadialGrid::Documentation() {
 
 RenderableRadialGrid::RenderableRadialGrid(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _gridSegments(GridSegmentsInfo, glm::ivec2(10), glm::ivec2(1), glm::ivec2(200))
-    , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
-    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
-    , _radii(RadiiInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(20.f))
+    , _color(ColorInfo)
+    , _gridSegments(GridSegmentsInfo)
+    , _circleSegments(CircleSegmentsInfo)
+    , _lineWidth(LineWidthInfo)
+    , _radii(RadiiInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

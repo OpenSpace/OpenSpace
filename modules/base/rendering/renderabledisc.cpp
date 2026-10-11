@@ -40,29 +40,37 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "The path to a file with a one-dimensional texture to be used for the disc "
-        "color. The leftmost color will be innermost color when rendering the disc, and "
-        "the rightmost color will be the outermost color.",
-        Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "The path to a file with a one-dimensional texture to be used for "
+            "the disc color. The leftmost color will be innermost color when rendering "
+            "the disc, and the rightmost color will be the outermost color.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
-        "The outer radius of the disc, in meters.",
-        Visibility::User
+    constexpr FloatPropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size",
+        .description = "The outer radius of the disc, in meters.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.001f, 1e13f }
+        }
     };
 
-    constexpr PropertyInfo WidthInfo = {
-        "Width",
-        "Width",
-        "The disc width, given as a ratio of the full disc radius. For example, a value "
-        "of 1 results in a full circle, while 0.5 results in a disc where the inner "
-        "radius is half of the full radius.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo WidthInfo = {
+        .identifier = "Width",
+        .name = "Width",
+        .description = "The disc width, given as a ratio of the full disc radius. For "
+            "example, a value of 1 results in a full circle, while 0.5 results in a disc "
+            "where the inner radius is half of the full radius.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.001f, 1.f }
+        }
     };
 
     // Renders a circular disc that is colored based on a one-dimensional texture.
@@ -94,8 +102,8 @@ Documentation RenderableDisc::Documentation() {
 RenderableDisc::RenderableDisc(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
-    , _size(SizeInfo, 1.f, 0.001f, 1e13f)
-    , _width(WidthInfo, 1.f, 0.001f, 1.f)
+    , _size(SizeInfo)
+    , _width(WidthInfo)
     , _plane(glm::vec2(_size))
     , _planeIsDirty(true)
 {

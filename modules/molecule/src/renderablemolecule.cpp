@@ -95,92 +95,117 @@ namespace {
         return frame;
     }
 
-    constexpr PropertyInfo MoleculeFileInfo = {
-        "MoleculeFile",
-        "Molecule file",
-        "The path to the file from which the molecular structure is read."
+    constexpr StringPropertyInfo MoleculeFileInfo = {
+        .identifier = "MoleculeFile",
+        .name = "Molecule file",
+        .description = "The path to the file from which the molecular structure is read."
     };
 
-    constexpr PropertyInfo TrajectoryFileInfo = {
-        "TrajectoryFile",
-        "Trajectory file",
-        "The path to the file from which the trajectory information is read."
+    constexpr StringPropertyInfo TrajectoryFileInfo = {
+        .identifier = "TrajectoryFile",
+        .name = "Trajectory file",
+        .description = "The path to the file from which the trajectory information is "
+            "read."
     };
 
-    constexpr PropertyInfo CoarseGrainedInfo = {
-        "CoarseGrained",
-        "Coarse grained",
-        "Enable if the dataset should be interpreted as coarse grained."
+    constexpr BoolPropertyInfo CoarseGrainedInfo = {
+        .identifier = "CoarseGrained",
+        .name = "Coarse grained",
+        .description = "Enable if the dataset should be interpreted as coarse grained.",
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ApplyPbcOnLoadInfo = {
-        "ApplyPbcOnLoad",
-        "Apply PBC on load",
-        "Applies Periodic Boundary Constraints upon loading trajectory frames."
+    constexpr BoolPropertyInfo ApplyPbcOnLoadInfo = {
+        .identifier = "ApplyPbcOnLoad",
+        .name = "Apply PBC on load",
+        .description = "Applies Periodic Boundary Constraints upon loading trajectory "
+            "frames.",
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo ApplyPbcPerFrameInfo = {
-        "ApplyPbcPerFrame",
-        "Apply PBC per frame",
-        "Applies Periodic Boundary Constraints for each interpolated frame (can be "
-        "CPU-intensive)."
+    constexpr BoolPropertyInfo ApplyPbcPerFrameInfo = {
+        .identifier = "ApplyPbcPerFrame",
+        .name = "Apply PBC per frame",
+        .description = "Applies Periodic Boundary Constraints for each interpolated "
+            "frame (can be CPU-intensive).",
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Enables the representation."
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Enables the representation."
     };
 
     constexpr PropertyInfo TypeInfo = {
-        "Type",
-        "Type",
-        "The visual representation type to use for the molecule."
+        .identifier = "Type",
+        .name = "Type",
+        .description = "The visual representation type to use for the molecule."
     };
 
     constexpr PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color mapping for the atoms."
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color mapping for the atoms."
     };
 
-    constexpr PropertyInfo UniformColorInfo = {
-        "UniformColor",
-        "Uniform color",
-        "The uniform color to apply for the representation if that color mode is "
-        "selected."
+    constexpr Vec4PropertyInfo UniformColorInfo = {
+        .identifier = "UniformColor",
+        .name = "Uniform color",
+        .description = "The uniform color to apply for the representation if that color "
+            "mode is selected.",
+        .defaults = {
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr PropertyInfo FilterInfo = {
-        "Filter",
-        "Filter",
-        "The filter used to remove parts of the dataset."
+    constexpr StringPropertyInfo FilterInfo = {
+        .identifier = "Filter",
+        .name = "Filter",
+        .description = "The filter used to remove parts of the dataset."
     };
 
-    constexpr PropertyInfo ScaleInfo = {
-        "Scale",
-        "Scale",
-        "Scale for the geometric representation of atoms."
+    constexpr FloatPropertyInfo ScaleInfo = {
+        .identifier = "Scale",
+        .name = "Scale",
+        .description = "Scale for the geometric representation of atoms.",
+        .defaults = {
+            .minMax = { 0.f, 10.f }
+        }
     };
 
-    constexpr PropertyInfo AnimationBaseScaleInfo = {
-        "AnimationBaseScale",
-        "Animation base scale",
-        "Base scale for the animation. Tune this to sync up its animation with other "
-        "trajectories."
+    constexpr DoublePropertyInfo AnimationBaseScaleInfo = {
+        .identifier = "AnimationBaseScale",
+        .name = "Animation base scale",
+        .description = "Base scale for the animation. Tune this to sync up its animation "
+            "with other trajectories.",
+        .defaults = {
+            .value = 1.0,
+            .minMax = { 0.0, 1e20 }
+        }
     };
 
-    constexpr PropertyInfo AnimationSpeedInfo = {
-        "AnimationSpeed",
-        "Animation speed",
-        "Playback speed of the animation (in frames per second)."
+    constexpr DoublePropertyInfo AnimationSpeedInfo = {
+        .identifier = "AnimationSpeed",
+        .name = "Animation speed",
+        .description = "Playback speed of the animation (in frames per second).",
+        .defaults = {
+            .value = 1.0,
+            .minMax = { -100.0, 100.0 }
+        }
     };
 
     constexpr PropertyInfo AnimationRepeatModeInfo = {
-        "AnimationRepeatMode",
-        "Animation repeat mode",
-        "Controls how the animation should be repeated when the end of the animation is "
-        "reached."
+        .identifier = "AnimationRepeatMode",
+        .name = "Animation repeat mode",
+        .description = "Controls how the animation should be repeated when the end of "
+            "the animation is reached."
     };
 
     // Used to render a single molecular system, which can be either static or dynamic.
@@ -297,11 +322,11 @@ RenderableMolecule::RenderableMolecule(const Dictionary& dictionary)
     , _repProps({ "Representations" })
     , _moleculeFile(MoleculeFileInfo)
     , _trajectoryFile(TrajectoryFileInfo)
-    , _coarseGrained(CoarseGrainedInfo, false)
-    , _applyPbcOnLoad(ApplyPbcOnLoadInfo, true)
-    , _applyPbcPerFrame(ApplyPbcPerFrameInfo, false)
-    , _animationBaseScale(AnimationBaseScaleInfo, 1.0, 0.0, 1e20)
-    , _animationSpeed(AnimationSpeedInfo, 1.0, -100.0, 100.0)
+    , _coarseGrained(CoarseGrainedInfo)
+    , _applyPbcOnLoad(ApplyPbcOnLoadInfo)
+    , _applyPbcPerFrame(ApplyPbcPerFrameInfo)
+    , _animationBaseScale(AnimationBaseScaleInfo)
+    , _animationSpeed(AnimationSpeedInfo)
     , _animationRepeatMode(AnimationRepeatModeInfo)
 {
     addProperty(Fadeable::_opacity);
@@ -702,13 +727,18 @@ RenderableMolecule::Representation::Representation(size_t number,
     })
     , mask(md_bitfield_create(default_allocator))
     , molecule(molecule_)
-    , enabled(EnabledInfo, enabled_)
+    , enabled(EnabledInfo)
     , type(TypeInfo)
     , color(ColorInfo)
-    , filter(FilterInfo, filter_)
-    , scale(ScaleInfo, scale_, 0.f, 10.f)
-    , uniformColor(UniformColorInfo, uniformColor_, glm::vec4(0.f), glm::vec4(1.f))
+    , filter(FilterInfo)
+    , scale(ScaleInfo)
+    , uniformColor(UniformColorInfo)
 {
+    enabled = enabled_;
+    filter = std::move(filter_);
+    scale = scale_;
+    uniformColor = uniformColor_;
+
     addProperty(enabled);
 
     type.addOptions({

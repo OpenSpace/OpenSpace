@@ -40,39 +40,58 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TimeInfo = {
-        "Time",
-        "Time",
-        "The time (in J2000 seconds) that is used to calculate transformations and the "
-        "renderable's data."
+    constexpr DoublePropertyInfo TimeInfo = {
+        .identifier = "Time",
+        .name = "Time",
+        .description = "The time (in J2000 seconds) that is used to calculate "
+            "transformations and the renderable's data.",
+        .defaults = {
+            .value = 0.0
+        }
     };
 
-    constexpr PropertyInfo CameraPositionInfo = {
-        "CameraPosition",
-        "Camera position",
-        "Specifies the location of the virtual camera that is showing the renderable "
-        "class. This position is provided in meters."
+    constexpr Vec3PropertyInfo CameraPositionInfo = {
+        .identifier = "CameraPosition",
+        .name = "Camera position",
+        .description = "Specifies the location of the virtual camera that is showing the "
+            "renderable class. This position is provided in meters.",
+        .defaults = {
+            .value = glm::vec3(0.f, 2.f, 2.f),
+            .minMax = { glm::vec3(-10.f, -10.f, -10.f), glm::vec3(10.f, 10.f, 10.f) }
+        }
     };
 
-    constexpr PropertyInfo CameraCenterInfo = {
-        "CameraCenter",
-        "Camera center",
-        "The location of the camera's focal point. The camera's view direction will "
-        "always be pointing at the provided center location. This position is provided "
-        "in meters."
+    constexpr Vec3PropertyInfo CameraCenterInfo = {
+        .identifier = "CameraCenter",
+        .name = "Camera center",
+        .description = "The location of the camera's focal point. The camera's view "
+            "direction will always be pointing at the provided center location. This "
+            "position is provided in meters.",
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(-1.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo CameraUpInfo = {
-        "CameraUp",
-        "Camera up",
-        "The direction that is 'up' for the provided camera. This value does not have "
-        "any units."
+    constexpr Vec3PropertyInfo CameraUpInfo = {
+        .identifier = "CameraUp",
+        .name = "Camera up",
+        .description = "The direction that is 'up' for the provided camera. This value "
+            "does not have any units.",
+        .defaults = {
+            .value = glm::vec3(0.f, 1.f, 0.f),
+            .minMax = { glm::vec3(-1.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo CameraFovInfo = {
-        "CameraFov",
-        "Camera field of view",
-        "The camera's field of view in degrees."
+    constexpr FloatPropertyInfo CameraFovInfo = {
+        .identifier = "CameraFov",
+        .name = "Camera field of view",
+        .description = "The camera's field of view in degrees.",
+        .defaults = {
+            .value = 45.f,
+            .minMax = { 5.f, 90.f }
+        }
     };
 
     const PropertyOwner::PropertyOwnerInfo TransformInfo = {
@@ -156,21 +175,11 @@ Documentation ScreenSpaceRenderableRenderable::Documentation() {
 ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
                                                              const Dictionary& dictionary)
     : ScreenSpaceRenderableFramebuffer(dictionary)
-    , _time(
-        TimeInfo,
-        0.0,
-        -std::numeric_limits<double>::max(),
-        std::numeric_limits<double>::max()
-    )
-    , _cameraPosition(
-        CameraPositionInfo,
-        glm::vec3(0.f, 2.f, 2.f),
-        glm::vec3(-10.f, -10.f, -10.f),
-        glm::vec3(10.f, 10.f, 10.f)
-    )
-    , _cameraCenter(CameraCenterInfo, glm::vec3(0.f), glm::vec3(-1.f), glm::vec3(1.f))
-    , _cameraUp(CameraUpInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(-1.f), glm::vec3(1.f))
-    , _cameraFov(CameraFovInfo, 45.f, 5.f, 90.f)
+    , _time(TimeInfo)
+    , _cameraPosition(CameraPositionInfo)
+    , _cameraCenter(CameraCenterInfo)
+    , _cameraUp(CameraUpInfo)
+    , _cameraFov(CameraFovInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

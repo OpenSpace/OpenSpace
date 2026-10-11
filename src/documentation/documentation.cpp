@@ -112,7 +112,7 @@ DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> 
     , verifier(std::move(v))
     , optional(opt)
     , isPrivate(priv)
-    , documentation(std::move(doc))
+    , documentation(doc)
 {
     assert_msg(!key.empty(), "Key must not be empty");
     assert_msg(verifier, "Verifier must not be nullptr");
@@ -125,7 +125,7 @@ DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
         std::shared_ptr<Verifier>(v),
         opt,
         priv,
-        std::move(doc)
+        doc
     )
 {}
 

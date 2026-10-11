@@ -54,12 +54,13 @@ namespace {
         return openspace::Time::convertTime(timeString);
     }
 
-    constexpr PropertyInfo TextureSourceInfo = {
-        "TextureSource",
-        "Texture source",
-        "A directory containing images that are loaded from disk and used for texturing "
-        "the sphere. The images are expected to be equirectangular projections.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureSourceInfo = {
+        .identifier = "TextureSource",
+        .name = "Texture source",
+        .description = "A directory containing images that are loaded from disk and used "
+            "for texturing the sphere. The images are expected to be equirectangular "
+            "projections.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {

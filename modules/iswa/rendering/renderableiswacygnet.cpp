@@ -49,16 +49,20 @@ namespace {
     constexpr std::string_view _loggerCat = "IswaCygnet";
 
     constexpr PropertyInfo DeleteInfo = {
-        "Delete",
-        "Delete",
-        "", // @TODO Missing documentation
-        Visibility::Developer
+        .identifier = "Delete",
+        .name = "Delete",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer
     };
-    constexpr PropertyInfo AlphaInfo = {
-        "Alpha",
-        "Alpha",
-        "", // @TODO Missing documentation
-        Visibility::User
+    constexpr FloatPropertyInfo AlphaInfo = {
+        .identifier = "Alpha",
+        .name = "Alpha",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.9f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableIswaCygnet)]] Parameters {
@@ -87,7 +91,7 @@ Documentation RenderableIswaCygnet::Documentation() {
 
 RenderableIswaCygnet::RenderableIswaCygnet(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
+    , _alpha(AlphaInfo)
     , _delete(DeleteInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

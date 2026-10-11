@@ -42,18 +42,22 @@ namespace {
     using namespace openspace;
 
     constexpr PropertyInfo DisplayFormatInfo = {
-        "DisplayFormat",
-        "Display format",
-        "Choosing the format in which the camera location is displayed.",
-        Visibility::AdvancedUser
+        .identifier = "DisplayFormat",
+        .name = "Display format",
+        .description = "Choosing the format in which the camera location is displayed.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo SignificantDigitsInfo = {
-        "SignificantDigits",
-        "Significant digits",
-        "Determines the number of significant digits that are shown in the location "
-        "text.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo SignificantDigitsInfo = {
+        .identifier = "SignificantDigits",
+        .name = "Significant digits",
+        .description = "Determines the number of significant digits that are shown in "
+            "the location text.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 4,
+            .minMax = { 1, 12 }
+        }
     };
 
     // Shows the longitude/latitude location of the camera and its distance to the current
@@ -88,7 +92,7 @@ Documentation DashboardItemGlobeLocation::Documentation() {
 DashboardItemGlobeLocation::DashboardItemGlobeLocation(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _displayFormat(DisplayFormatInfo)
-    , _significantDigits(SignificantDigitsInfo, 4, 1, 12)
+    , _significantDigits(SignificantDigitsInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

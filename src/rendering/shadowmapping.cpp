@@ -34,18 +34,24 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo CastShadowInfo = {
-        "CastShadow",
-        "Cast shadow",
-        "Enable model to cast shadow on its parent renderable.",
+    constexpr BoolPropertyInfo CastShadowInfo = {
+        .identifier = "CastShadow",
+        .name = "Cast shadow",
+        .description = "Enable model to cast shadow on its parent renderable.",
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo FrustumSizeInfo = {
-        "FrustumSize",
-        "Size of the depth-pass view frustum",
-        "Sets the width & height (effectively left/right & top/bottom) of the depth-pass "
-        "view frustum, z-near & z-far are calculated.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FrustumSizeInfo = {
+        .identifier = "FrustumSize",
+        .name = "Size of the depth-pass view frustum",
+        .description = "Sets the width & height (effectively left/right & top/bottom) of "
+            "the depth-pass view frustum, z-near & z-far are calculated.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f
+        }
     };
 
     struct [[codegen::Dictionary(Shadower)]] Parameters {
@@ -65,8 +71,8 @@ Documentation Shadower::Documentation() {
 }
 
 Shadower::Shadower(const Dictionary& dictionary)
-    : _castShadow(CastShadowInfo, false)
-    , _frustumSize(FrustumSizeInfo, 1.f)
+    : _castShadow(CastShadowInfo)
+    , _frustumSize(FrustumSizeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

@@ -39,45 +39,63 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "The path to a file with a one-dimensional texture to be used for the disc "
-        "color. The leftmost color will be innermost color when rendering the disc, and "
-        "the rightmost color will be the outermost color.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "The path to a file with a one-dimensional texture to be used for "
+            "the disc color. The leftmost color will be innermost color when rendering "
+            "the disc, and the rightmost color will be the outermost color.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
-        "The size of the semi-major axis of the orbit in meters.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size",
+        .description = "The size of the semi-major axis of the orbit in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 3.0e12f }
+        }
     };
 
-    constexpr PropertyInfo EccentricityInfo = {
-        "Eccentricity",
-        "Eccentricity",
-        "The eccentricity of the orbit, which is the deviation from a perfect circle.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo EccentricityInfo = {
+        .identifier = "Eccentricity",
+        .name = "Eccentricity",
+        .description = "The eccentricity of the orbit, which is the deviation from a "
+            "perfect circle.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo OffsetInfo = {
-        "Offset",
-        "Offset",
-        "The width of the disc, given as two values that specify the lower and upper "
-        "deviation from the semi-major axis, respectively. The values are relative to "
-        "the size of the semi-major axis. That is, 0 means no deviation from the "
-        "semi-major axis and 1 is a whole semi-major axis's worth of deviation.",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo OffsetInfo = {
+        .identifier = "Offset",
+        .name = "Offset",
+        .description = "The width of the disc, given as two values that specify the "
+            "lower and upper deviation from the semi-major axis, respectively. The "
+            "values are relative to the size of the semi-major axis. That is, 0 means no "
+            "deviation from the semi-major axis and 1 is a whole semi-major axis's worth "
+            "of deviation.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(1.f) }
+        }
     };
 
-    constexpr PropertyInfo MultiplyColorInfo = {
-        "MultiplyColor",
-        "Multiply color",
-        "If set, the disc's texture is multiplied with this color. Useful for applying a "
-        "color grayscale images.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo MultiplyColorInfo = {
+        .identifier = "MultiplyColor",
+        .name = "Multiply color",
+        .description = "If set, the disc's texture is multiplied with this color. Useful "
+            "for applying a color grayscale images.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     // Renders a disc around a planetary orbit to visualize properties such as positional
@@ -114,10 +132,10 @@ Documentation RenderableOrbitDisc::Documentation() {
 RenderableOrbitDisc::RenderableOrbitDisc(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
-    , _size(SizeInfo, 1.f, 0.f, 3.0e12f)
-    , _eccentricity(EccentricityInfo, 0.f, 0.f, 1.f)
-    , _offset(OffsetInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _size(SizeInfo)
+    , _eccentricity(EccentricityInfo)
+    , _offset(OffsetInfo)
+    , _multiplyColor(MultiplyColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

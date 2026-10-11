@@ -34,14 +34,17 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo IsInTimeFrameInfo = {
-        "IsInTimeFrame",
-        "Is in time frame",
-        "This property indicates the current state of the TimeFrame time testing. If the "
-        "current simulation time is determined to be a valid time, this property is set "
-        "to true. Otherwise it will be false, meaning that the scene graph node this "
-        "TimeFrame is attached to would not be shown",
-        Visibility::Developer
+    constexpr BoolPropertyInfo IsInTimeFrameInfo = {
+        .identifier = "IsInTimeFrame",
+        .name = "Is in time frame",
+        .description = "This property indicates the current state of the TimeFrame time "
+            "testing. If the current simulation time is determined to be a valid time, "
+            "this property is set to true. Otherwise it will be false, meaning that the "
+            "scene graph node this TimeFrame is attached to would not be shown",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
     // A `TimeFrame` object determines the time frame during which a scene graph node is
@@ -80,7 +83,7 @@ mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(const Dictionary& dict)
 
 TimeFrame::TimeFrame()
     : PropertyOwner({ "TimeFrame", "Time Frame" })
-    , _isInTimeFrame(IsInTimeFrameInfo, false)
+    , _isInTimeFrame(IsInTimeFrameInfo)
 {
     _isInTimeFrame.setReadOnly(true);
     addProperty(_isInTimeFrame);

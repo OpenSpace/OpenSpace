@@ -50,18 +50,26 @@ using namespace TUIO;
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TuioPortInfo = {
-        "TuioPort",
-        "TUIO Port",
-        "TUIO UDP port, by default 3333. The port cannot be changed after startup.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo TuioPortInfo = {
+        .identifier = "TuioPort",
+        .name = "TUIO Port",
+        .description = "TUIO UDP port, by default 3333. The port cannot be changed after "
+            "startup.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 3333,
+            .minMax = { 1, 65535 }
+        }
     };
 
-    constexpr PropertyInfo EventsInfo = {
-        "DetectedTouchEvent",
-        "Detected touch event",
-        "True when there is an active touch TUIO event.",
-        Visibility::Hidden
+    constexpr BoolPropertyInfo EventsInfo = {
+        .identifier = "DetectedTouchEvent",
+        .name = "Detected touch event",
+        .description = "True when there is an active touch TUIO event.",
+        .visibility = Visibility::Hidden,
+        .defaults = {
+            .value = false
+        }
     };
 
     struct [[codegen::Dictionary(TouchModule)]] Parameters {
@@ -75,8 +83,8 @@ namespace openspace {
 
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
-    , _tuioPort(TuioPortInfo, 3333, 1, 65535)
-    , _hasActiveTouchEvent(EventsInfo, false)
+    , _tuioPort(TuioPortInfo)
+    , _hasActiveTouchEvent(EventsInfo)
 {
     _tuioPort.setReadOnly(true);
     addProperty(_tuioPort);

@@ -33,12 +33,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "The path to an image on disk to use as a texture for this sphere. The image is "
-        "expected to be an equirectangular projection.",
-        Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "The path to an image on disk to use as a texture for this "
+            "sphere. The image is expected to be an equirectangular projection.",
+        .visibility = Visibility::User
     };
 
     // Shows a sphere with an image provided by a local file on disk. To show a sphere

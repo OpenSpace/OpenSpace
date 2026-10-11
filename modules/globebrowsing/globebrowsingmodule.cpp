@@ -97,31 +97,43 @@ namespace {
 
     constexpr std::string_view _loggerCat = "GlobeBrowsingModule";
 
-    constexpr PropertyInfo TileCacheSizeInfo = {
-        "TileCacheSize",
-        "Tile cache size",
-        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU.",
-        Visibility::AdvancedUser
+    constexpr UIntPropertyInfo TileCacheSizeInfo = {
+        .identifier = "TileCacheSize",
+        .name = "Tile cache size",
+        .description = "The maximum size of the MemoryAwareTileCache, on the CPU and "
+            "GPU.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1024
+        }
     };
 
-    constexpr PropertyInfo DefaultGeoPointTextureInfo = {
-        "DefaultGeoPointTexture",
-        "Default geo point texture",
-        "A path to a texture to use as default for GeoJson points."
+    constexpr StringPropertyInfo DefaultGeoPointTextureInfo = {
+        .identifier = "DefaultGeoPointTexture",
+        .name = "Default geo point texture",
+        .description = "A path to a texture to use as default for GeoJson points."
     };
 
-    constexpr PropertyInfo MRFCacheEnabledInfo = {
-        "MRFCacheEnabled",
-        "MRF cache enabled",
-        "Determines whether automatic caching of globe browsing data is enabled.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo MRFCacheEnabledInfo = {
+        .identifier = "MRFCacheEnabled",
+        .name = "MRF cache enabled",
+        .description = "Determines whether automatic caching of globe browsing data is "
+            "enabled.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo MRFCacheLocationInfo = {
-        "MRFCacheLocation",
-        "MRF cache location",
-        "The location of the root folder for the MRF cache of globe browsing data.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo MRFCacheLocationInfo = {
+        .identifier = "MRFCacheLocation",
+        .name = "MRF cache location",
+        .description = "The location of the root folder for the MRF cache of globe "
+            "browsing data.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "${BASE}/cache_mrf"
+        }
     };
 
     GlobeBrowsingModule::Capabilities parseSubDatasets(char** subDatasets,
@@ -203,10 +215,10 @@ Documentation GlobeBrowsingModule::Documentation() {
 
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(Name)
-    , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
+    , _tileCacheSizeMB(TileCacheSizeInfo)
     , _defaultGeoPointTexturePath(DefaultGeoPointTextureInfo)
-    , _mrfCacheEnabled(MRFCacheEnabledInfo, false)
-    , _mrfCacheLocation(MRFCacheLocationInfo, "${BASE}/cache_mrf")
+    , _mrfCacheEnabled(MRFCacheEnabledInfo)
+    , _mrfCacheLocation(MRFCacheLocationInfo)
 {
     addProperty(_tileCacheSizeMB);
 

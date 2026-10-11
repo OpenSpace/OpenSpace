@@ -69,171 +69,223 @@ namespace {
     }
 
     constexpr PropertyInfo ColorMethodInfo = {
-        "ColorMethod",
-        "Color method",
-        "Color lines uniformly or using color tables based on extra quantities like, for "
-        "examples, temperature or particle density.",
-        Visibility::User
+        .identifier = "ColorMethod",
+        .name = "Color method",
+        .description = "Color lines uniformly or using color tables based on extra "
+            "quantities like, for examples, temperature or particle density.",
+        .visibility = Visibility::User
     };
 
     constexpr PropertyInfo ColorQuantityInfo = {
-        "ColorQuantity",
-        "Quantity to color by",
-        "Quantity used to color lines if the 'By Quantity' color method is selected.",
-        Visibility::User
+        .identifier = "ColorQuantity",
+        .name = "Quantity to color by",
+        .description = "Quantity used to color lines if the 'By Quantity' color method "
+            "is selected.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo ColorMinMaxInfo = {
-        "ColorMinMaxRange",
-        "Color min max range",
-        "A min-max range for what the lowest and highest values of the color table can "
-        "be set to.",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo ColorMinMaxInfo = {
+        .identifier = "ColorMinMaxRange",
+        .name = "Color min max range",
+        .description = "A min-max range for what the lowest and highest values of the "
+            "color table can be set to.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f, 100.f),
+            .minMax = { glm::vec2(-5000.f), glm::vec2(5000.f) }
+        }
     };
 
-    constexpr PropertyInfo ColorTablePathInfo = {
-        "ColorTablePath",
-        "Path to color table",
-        "Color Table/Transfer Function to use for 'By Quantity' coloring.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo ColorTablePathInfo = {
+        .identifier = "ColorTablePath",
+        .name = "Path to color table",
+        .description = "Color Table/Transfer Function to use for 'By Quantity' coloring.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ColorUniformInfo = {
-        "Color",
-        "Uniform line color",
-        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'.",
-        Visibility::NoviceUser
+    constexpr Vec4PropertyInfo ColorUniformInfo = {
+        .identifier = "Color",
+        .name = "Uniform line color",
+        .description = "The uniform color of lines shown when 'Color Method' is set to "
+            "'Uniform'.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec4(0.3f, 0.57f, 0.75f, 0.5f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr PropertyInfo ColorUseABlendingInfo = {
-        "ABlendingEnabled",
-        "Additive blending",
-        "Activate/deactivate additive blending.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ColorUseABlendingInfo = {
+        .identifier = "ABlendingEnabled",
+        .name = "Additive blending",
+        .description = "Activate/deactivate additive blending.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo DomainEnabledInfo = {
-        "DomainEnabled",
-        "Domain limits",
-        "Enable/Disable domain limits.",
-        Visibility::User
+    constexpr BoolPropertyInfo DomainEnabledInfo = {
+        .identifier = "DomainEnabled",
+        .name = "Domain limits",
+        .description = "Enable/Disable domain limits.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo DomainXInfo = {
-        "LimitsX",
-        "X-limits",
-        "Valid range along the X-axis. [Min, Max].",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo DomainXInfo = {
+        .identifier = "LimitsX",
+        .name = "X-limits",
+        .description = "Valid range along the X-axis. [Min, Max].",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo DomainYInfo = {
-        "LimitsY",
-        "Y-limits",
-        "Valid range along the Y-axis. [Min, Max].",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo DomainYInfo = {
+        .identifier = "LimitsY",
+        .name = "Y-limits",
+        .description = "Valid range along the Y-axis. [Min, Max].",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo DomainZInfo = {
-        "LimitsZ",
-        "Z-limits",
-        "Valid range along the Z-axis. [Min, Max].",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo DomainZInfo = {
+        .identifier = "LimitsZ",
+        .name = "Z-limits",
+        .description = "Valid range along the Z-axis. [Min, Max].",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo DomainRInfo = {
-        "LimitsR",
-        "Radial limits",
-        "Valid radial range. [Min, Max].",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo DomainRInfo = {
+        .identifier = "LimitsR",
+        .name = "Radial limits",
+        .description = "Valid radial range. [Min, Max].",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo FlowEnabledInfo = {
-        "FlowEnabled",
-        "Flow enabled",
-        "Toggles the rendering of moving particles along the lines. Can, for example, "
-        "illustrate magnetic flow.",
-        Visibility::NoviceUser
+    constexpr BoolPropertyInfo FlowEnabledInfo = {
+        .identifier = "FlowEnabled",
+        .name = "Flow enabled",
+        .description = "Toggles the rendering of moving particles along the lines. Can, "
+            "for example, illustrate magnetic flow.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo FlowColorInfo = {
-        "FlowColor",
-        "Flow color",
-        "Color of particles flow direction indication.",
-        Visibility::NoviceUser
+    constexpr Vec4PropertyInfo FlowColorInfo = {
+        .identifier = "FlowColor",
+        .name = "Flow color",
+        .description = "Color of particles flow direction indication.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr PropertyInfo FlowReversedInfo = {
-        "ReversedFlow",
-        "Reversed flow",
-        "Toggle to make the flow move in the opposite direction.",
-        Visibility::User
+    constexpr BoolPropertyInfo FlowReversedInfo = {
+        .identifier = "ReversedFlow",
+        .name = "Reversed flow",
+        .description = "Toggle to make the flow move in the opposite direction.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo FlowParticleSizeInfo = {
-        "ParticleSize",
-        "Particle size",
-        "Size of the particles.",
-        Visibility::User
+    constexpr IntPropertyInfo FlowParticleSizeInfo = {
+        .identifier = "ParticleSize",
+        .name = "Particle size",
+        .description = "Size of the particles.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 5,
+            .minMax = { 0, 500 }
+        }
     };
 
-    constexpr PropertyInfo FlowParticleSpacingInfo = {
-        "ParticleSpacing",
-        "Particle spacing",
-        "Spacing in between particles.",
-        Visibility::User
+    constexpr IntPropertyInfo FlowParticleSpacingInfo = {
+        .identifier = "ParticleSpacing",
+        .name = "Particle spacing",
+        .description = "Spacing in between particles.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 60,
+            .minMax = { 0, 500 }
+        }
     };
 
-    constexpr PropertyInfo FlowSpeedInfo = {
-        "FlowSpeed",
-        "Speed",
-        "Speed of the flow.",
-        Visibility::User
+    constexpr IntPropertyInfo FlowSpeedInfo = {
+        .identifier = "FlowSpeed",
+        .name = "Speed",
+        .description = "Speed of the flow.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 20,
+            .minMax = { 0, 1000 }
+        }
     };
 
-    constexpr PropertyInfo MaskingEnabledInfo = {
-        "MaskingEnabled",
-        "Masking enabled",
-        "Enable/disable masking. Use masking to show lines where a given quantity is "
-        "within a given range, for example, if you only want to see where the "
-        "temperature is between 10 and 20 degrees. Also used for masking out line "
-        "topologies like solar wind & closed lines.",
-        Visibility::User
+    constexpr BoolPropertyInfo MaskingEnabledInfo = {
+        .identifier = "MaskingEnabled",
+        .name = "Masking enabled",
+        .description = "Enable/disable masking. Use masking to show lines where a given "
+            "quantity is within a given range, for example, if you only want to see "
+            "where the temperature is between 10 and 20 degrees. Also used for masking "
+            "out line topologies like solar wind & closed lines.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo MaskingMinMaxInfo = {
-        "MaskingMinLimit",
-        "Lower limit",
-        "Lower and upper limit of the valid masking range.",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo MaskingMinMaxInfo = {
+        .identifier = "MaskingMinLimit",
+        .name = "Lower limit",
+        .description = "Lower and upper limit of the valid masking range.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f, 100.f),
+            .minMax = { glm::vec2(-5000.f), glm::vec2(5000.f) }
+        }
     };
 
     constexpr PropertyInfo MaskingQuantityInfo = {
-        "MaskingQuantity",
-        "Quantity used for masking",
-        "Quantity used for masking.",
-        Visibility::AdvancedUser
+        .identifier = "MaskingQuantity",
+        .name = "Quantity used for masking",
+        .description = "Quantity used for masking.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "This value specifies the line width of the fieldlines.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "This value specifies the line width of the fieldlines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
     constexpr PropertyInfo TimeJumpButtonInfo = {
-        "TimeJumpToStart",
-        "Jump to start of sequence",
-        "Performs a time jump to the start of the sequence.",
-        Visibility::NoviceUser
+        .identifier = "TimeJumpToStart",
+        .name = "Jump to start of sequence",
+        .description = "Performs a time jump to the start of the sequence.",
+        .visibility = Visibility::NoviceUser
     };
 
-    constexpr PropertyInfo SaveDownloadsOnShutdown = {
-        "SaveDownloadsOnShutdown",
-        "Save downloads on shutdown",
-        "This is an option for if dynamically downloaded should be saved between runs or "
-        "not.",
-        Visibility::User
+    constexpr BoolPropertyInfo SaveDownloadsOnShutdown = {
+        .identifier = "SaveDownloadsOnShutdown",
+        .name = "Save downloads on shutdown",
+        .description = "This is an option for if dynamically downloaded should be saved "
+            "between runs or not.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
     // Visualizes field lines, typically across a sequence of time steps, but also
@@ -426,50 +478,30 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const Dictionary& dic
     , _colorGroup({ "Color" })
     , _colorMethod(ColorMethodInfo)
     , _colorQuantity(ColorQuantityInfo)
-    , _selectedColorRange(
-        ColorMinMaxInfo,
-        glm::vec2(0.f, 100.f),
-        glm::vec2(-5000.f),
-        glm::vec2(5000.f)
-    )
+    , _selectedColorRange(ColorMinMaxInfo)
     , _colorTablePath(ColorTablePathInfo)
-    , _colorUniform(
-        ColorUniformInfo,
-        glm::vec4(0.3f, 0.57f, 0.75f, 0.5f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _colorABlendEnabled(ColorUseABlendingInfo, true)
-    , _domainEnabled(DomainEnabledInfo, false)
+    , _colorUniform(ColorUniformInfo)
+    , _colorABlendEnabled(ColorUseABlendingInfo)
+    , _domainEnabled(DomainEnabledInfo)
     , _domainGroup({ "Domain" })
     , _domainX(DomainXInfo)
     , _domainY(DomainYInfo)
     , _domainZ(DomainZInfo)
     , _domainR(DomainRInfo)
-    , _flowEnabled(FlowEnabledInfo, false)
+    , _flowEnabled(FlowEnabledInfo)
     , _flowGroup({ "Flow" })
-    , _flowColor(
-        FlowColorInfo,
-        glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _flowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
-    , _flowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
-    , _flowReversed(FlowReversedInfo, false)
-    , _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
-    , _maskingEnabled(MaskingEnabledInfo, false)
+    , _flowColor(FlowColorInfo)
+    , _flowParticleSize(FlowParticleSizeInfo)
+    , _flowParticleSpacing(FlowParticleSpacingInfo)
+    , _flowReversed(FlowReversedInfo)
+    , _flowSpeed(FlowSpeedInfo)
+    , _maskingEnabled(MaskingEnabledInfo)
     , _maskingGroup({ "Masking" })
-    , _selectedMaskingRange(
-        MaskingMinMaxInfo,
-        glm::vec2(0.f, 100.f),
-        glm::vec2(-5000.f),
-        glm::vec2(5000.f)
-    )
+    , _selectedMaskingRange(MaskingMinMaxInfo)
     , _maskingQuantity(MaskingQuantityInfo)
-    , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
+    , _lineWidth(LineWidthInfo)
     , _jumpToStart(TimeJumpButtonInfo)
-    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
+    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

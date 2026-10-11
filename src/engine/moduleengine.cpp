@@ -47,11 +47,11 @@ namespace {
     constexpr std::string_view _loggerCat = "ModuleEngine";
 
     constexpr PropertyInfo AllModulesInfo = {
-        "AllModules",
-        "All modules",
-        "The list of all modules that were compiled for this version of OpenSpace in the "
-        "same order in which they were initialized.",
-        Visibility::AdvancedUser
+        .identifier = "AllModules",
+        .name = "All modules",
+        .description = "The list of all modules that were compiled for this version of "
+            "OpenSpace in the same order in which they were initialized.",
+        .visibility = Visibility::AdvancedUser
     };
 } // namespace
 

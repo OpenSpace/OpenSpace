@@ -30,12 +30,16 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo ScaleInfo = {
-        "Scale",
-        "Scale",
-        "These values are used as scaling factors for the scene graph node that this "
-        "transformation is attached to relative to its parent.",
-        Visibility::NoviceUser
+    constexpr DVec3PropertyInfo ScaleInfo = {
+        .identifier = "Scale",
+        .name = "Scale",
+        .description = "These values are used as scaling factors for the scene graph "
+            "node that this transformation is attached to relative to its parent.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::dvec3(1.0),
+            .minMax = { glm::dvec3(0.1), glm::dvec3(100.0) }
+        }
     };
 
     // Scales the scene graph node that it is attached to by a fixed amount that does not
@@ -66,7 +70,7 @@ Documentation NonUniformStaticScale::Documentation() {
 
 NonUniformStaticScale::NonUniformStaticScale(const Dictionary& dictionary)
     : Scale(dictionary)
-    , _scaleValue(ScaleInfo, glm::dvec3(1.0), glm::dvec3(0.1), glm::dvec3(100.0))
+    , _scaleValue(ScaleInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

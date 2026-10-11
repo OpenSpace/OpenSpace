@@ -43,13 +43,14 @@ namespace {
 
     const ImVec2 Size = ImVec2(350, 500);
 
-    constexpr PropertyInfo UseTreeInfo = {
-        "TreeLayout",
-        "Use tree layout",
-        "If this value is checked, this component will display the properties using a "
-        "tree layout, rather than using a flat map. This value should only be set on "
-        "property windows that display SceneGraphNodes, or the application might crash.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseTreeInfo = {
+        .identifier = "TreeLayout",
+        .name = "Use tree layout",
+        .description = "If this value is checked, this component will display the "
+            "properties using a tree layout, rather than using a flat map. This value "
+            "should only be set on property windows that display SceneGraphNodes, or the "
+            "application might crash.",
+        .visibility = Visibility::AdvancedUser
     };
 
     int nVisibleProperties(const std::vector<Property*>& props) {
@@ -176,8 +177,9 @@ namespace openspace {
 GuiPropertyComponent::GuiPropertyComponent(std::string identifier, std::string guiName,
                                            UseTreeLayout useTree)
     : GuiComponent(std::move(identifier), std::move(guiName))
-    , _useTreeLayout(UseTreeInfo, useTree)
+    , _useTreeLayout(UseTreeInfo)
 {
+    _useTreeLayout = useTree;
     addProperty(_useTreeLayout);
 }
 

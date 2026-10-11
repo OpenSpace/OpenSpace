@@ -49,7 +49,7 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderableFieldlines";
 
     constexpr float DefaultFieldlineStepSize = 0.5f;
-    const glm::vec4 DefaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
+    constexpr glm::vec4 DefaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
     constexpr std::string_view VectorFieldKameleonVariableLorentz = "Lorentz";
 
@@ -58,39 +58,50 @@ namespace {
         Table = 1
     };
 
-    constexpr PropertyInfo StepSizeInfo = {
-        "Stepsize",
-        "Fieldline step size.",
-        "", // @TODO Missing documentation
-        Visibility::User
+    constexpr FloatPropertyInfo StepSizeInfo = {
+        .identifier = "Stepsize",
+        .name = "Fieldline step size.",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = DefaultFieldlineStepSize,
+            .minMax = { 0.f, 10.f }
+        }
     };
 
-    constexpr PropertyInfo Classification = {
-        "Classification",
-        "Fieldline classification",
-        "", // @TODO Missing documentation
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo Classification = {
+        .identifier = "Classification",
+        .name = "Fieldline classification",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo FieldlineColorInfo = {
-        "FieldlineColor",
-        "Fieldline color",
-        "", // @TODO Missing documentation
-        Visibility::AdvancedUser
+    constexpr Vec4PropertyInfo FieldlineColorInfo = {
+        .identifier = "FieldlineColor",
+        .name = "Fieldline color",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = DefaultFieldlineColor,
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
     constexpr PropertyInfo SeedPointSourceInfo = {
-        "Source",
-        "SeedPoint source",
-        "", // @TODO Missing documentation
-        Visibility::AdvancedUser
+        .identifier = "Source",
+        .name = "SeedPoint source",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo SeedPointFileInfo = {
-        "SourceFile",
-        "SeedPoint file",
-        "", // @TODO Missing documentation
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo SeedPointFileInfo = {
+        .identifier = "SourceFile",
+        .name = "SeedPoint file",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableFieldlines)]] Parameters {
@@ -144,14 +155,9 @@ Documentation RenderableFieldlines::Documentation() {
 
 RenderableFieldlines::RenderableFieldlines(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _stepSize(StepSizeInfo, DefaultFieldlineStepSize, 0.f, 10.f)
-    , _classification(Classification, true)
-    , _fieldlineColor(
-        FieldlineColorInfo,
-        DefaultFieldlineColor,
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _stepSize(StepSizeInfo)
+    , _classification(Classification)
+    , _fieldlineColor(FieldlineColorInfo)
     , _seedPointSource(SeedPointSourceInfo)
     , _seedPointSourceFile(SeedPointFileInfo)
 {

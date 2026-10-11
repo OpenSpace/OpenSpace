@@ -43,21 +43,29 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo ActiveColorInfo = {
-        "ActiveColor",
-        "Active color",
-        "This value determines the color that the active instrument is rendered in. "
-        "Shortly after activation, the used color is mixture of this and the flash "
-        "color. The default value is (0.6, 1.0, 0.0).",
-        Visibility::User
+    constexpr Vec3PropertyInfo ActiveColorInfo = {
+        .identifier = "ActiveColor",
+        .name = "Active color",
+        .description = "This value determines the color that the active instrument is "
+            "rendered in. Shortly after activation, the used color is mixture of this "
+            "and the flash color. The default value is (0.6, 1.0, 0.0).",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(0.6f, 1.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo FlashColorInfo = {
-        "FlashColor",
-        "Flash color",
-        "This value determines the color that is used shortly after an instrument "
-        "activation. The default value is (0.9, 1.0, 0.75).",
-        Visibility::User
+    constexpr Vec3PropertyInfo FlashColorInfo = {
+        .identifier = "FlashColor",
+        .name = "Flash color",
+        .description = "This value determines the color that is used shortly after an "
+            "instrument activation. The default value is (0.9, 1.0, 0.75).",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(0.9f, 1.f, 0.75f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     // Shows information about the status of individual instruments onboard a spacecraft
@@ -86,17 +94,8 @@ Documentation DashboardItemInstruments::Documentation() {
 
 DashboardItemInstruments::DashboardItemInstruments(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _activeColor(
-        ActiveColorInfo,
-        glm::vec3(0.6f, 1.f, 0.f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
-    , _activeFlash(FlashColorInfo,
-        glm::vec3(0.9f, 1.f, 0.75f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
+    , _activeColor(ActiveColorInfo)
+    , _activeFlash(FlashColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

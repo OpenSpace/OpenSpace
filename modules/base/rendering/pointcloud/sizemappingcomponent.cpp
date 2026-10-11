@@ -37,47 +37,63 @@ namespace {
 
     constexpr std::string_view _loggerCat = "SizeMapping";
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Size mapping enabled",
-        "If this value is set to 'true' and at least one column was loaded as an option "
-        "for size mapping, the chosen data column will be used to scale the size of the "
-        "points. The first option in the list is selected per default.",
-        Visibility::NoviceUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Size mapping enabled",
+        .description = "If this value is set to 'true' and at least one column was "
+            "loaded as an option for size mapping, the chosen data column will be used "
+            "to scale the size of the points. The first option in the list is selected "
+            "per default.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     constexpr PropertyInfo OptionInfo = {
-        "Parameter",
-        "Parameter option",
-        "This value determines which parameter is used for scaling of the point. The "
-        "parameter value will be used as a multiplicative factor to scale the size of "
-        "the points. Note that they may however still be scaled by max size adjustment "
-        "effects.",
-        Visibility::AdvancedUser
+        .identifier = "Parameter",
+        .name = "Parameter option",
+        .description = "This value determines which parameter is used for scaling of the "
+            "point. The parameter value will be used as a multiplicative factor to scale "
+            "the size of the points. Note that they may however still be scaled by max "
+            "size adjustment effects.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ScaleFactorInfo = {
-        "ScaleFactor",
-        "Scale factor",
-        "This value is a multiplicative factor that is applied to the data values that "
-        "are used to scale the points, when size mapping is applied.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ScaleFactorInfo = {
+        .identifier = "ScaleFactor",
+        .name = "Scale factor",
+        .description = "This value is a multiplicative factor that is applied to the "
+            "data values that are used to scale the points, when size mapping is "
+            "applied.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1000.f }
+        }
     };
 
-    constexpr PropertyInfo IsRadiusInfo = {
-        "IsRadius",
-        "Size is radius",
-        "If true, the size value in the data is interpreted as the radius of the points. "
-        "Otherwise, it is interpreted as the diameter.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo IsRadiusInfo = {
+        .identifier = "IsRadius",
+        .name = "Size is radius",
+        .description = "If true, the size value in the data is interpreted as the radius "
+            "of the points. Otherwise, it is interpreted as the diameter.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo InvertScaleInfo = {
-        "InvertScale",
-        "Invert scale",
-        "If true, the points will be scaled based on the inverse of the data value "
-        "(1/value), so that larger values result in a smaller scale, and vice versa.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo InvertScaleInfo = {
+        .identifier = "InvertScale",
+        .name = "Invert scale",
+        .description = "If true, the points will be scaled based on the inverse of the "
+            "data value (1/value), so that larger values result in a smaller scale, and "
+            "vice versa.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // A reusable component for point-cloud rendering that controls how per-point data
@@ -160,11 +176,11 @@ Documentation SizeMappingComponent::Documentation() {
 
 SizeMappingComponent::SizeMappingComponent()
     : PropertyOwner({ "SizeMapping", "Size Mapping", "" })
-    , enabled(EnabledInfo, true)
+    , enabled(EnabledInfo)
     , parameterOption(OptionInfo)
-    , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)
-    , isRadius(IsRadiusInfo, false)
-    , invertScale(InvertScaleInfo, false)
+    , scaleFactor(ScaleFactorInfo)
+    , isRadius(IsRadiusInfo)
+    , invertScale(InvertScaleInfo)
 {
     addProperty(enabled);
     addProperty(parameterOption);

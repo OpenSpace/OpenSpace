@@ -220,7 +220,7 @@ struct DocumentationEntry {
     /// Determines if the entry should be visible to the user
     Private isPrivate;
     /// The textual description of this DocumentationEntry
-    std::string_view documentation;
+    std::string documentation;
 };
 
 /**

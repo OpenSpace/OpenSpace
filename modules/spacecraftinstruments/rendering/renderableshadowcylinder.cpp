@@ -40,75 +40,89 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo NumberPointsInfo = {
-        "NumberOfPoints",
-        "Points",
-        "The number of control points used for constructing the shadow geometry. The "
-        "higher this number, the more detailed the shadow is, but it will have a "
-        "negative impact on the performance.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo NumberPointsInfo = {
+        .identifier = "NumberOfPoints",
+        .name = "Points",
+        .description = "The number of control points used for constructing the shadow "
+            "geometry. The higher this number, the more detailed the shadow is, but it "
+            "will have a negative impact on the performance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 190,
+            .minMax = { 1, 300 }
+        }
     };
 
-    constexpr PropertyInfo ShadowLengthInfo = {
-        "ShadowLength",
-        "Shadow length",
-        "A factor that controls the length of the shadow that is cast by the target "
-        "object. The total length of the shadow is equal to the distance from the target "
-        "to the light source multiplied with this value.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ShadowLengthInfo = {
+        .identifier = "ShadowLength",
+        .name = "Shadow length",
+        .description = "A factor that controls the length of the shadow that is cast by "
+            "the target object. The total length of the shadow is equal to the distance "
+            "from the target to the light source multiplied with this value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.1f,
+            .minMax = { 0.f, 0.5f }
+        }
     };
 
-    constexpr PropertyInfo ShadowColorInfo = {
-        "ShadowColor",
-        "Shadow color",
-        "The color used for the shadow cylinder.",
-        Visibility::User
+    constexpr Vec3PropertyInfo ShadowColorInfo = {
+        .identifier = "ShadowColor",
+        .name = "Shadow color",
+        .description = "The color used for the shadow cylinder.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     constexpr PropertyInfo TerminatorTypeInfo = {
-        "TerminatorType",
-        "Terminator type",
-        "Determines the type of terminator to use for calculating the shadow eclipse.",
-        Visibility::AdvancedUser
+        .identifier = "TerminatorType",
+        .name = "Terminator type",
+        .description = "Determines the type of terminator to use for calculating the "
+            "shadow eclipse.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo LightSourceInfo = {
-        "LightSource",
-        "Light source",
-        "The SPICE name of the object that is used as the illuminator for computing the "
-        "shadow cylinder.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo LightSourceInfo = {
+        .identifier = "LightSource",
+        .name = "Light source",
+        .description = "The SPICE name of the object that is used as the illuminator for "
+            "computing the shadow cylinder.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ObserverInfo = {
-        "Observer",
-        "Observer",
-        "The SPICE name of the object that is the observer.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo ObserverInfo = {
+        .identifier = "Observer",
+        .name = "Observer",
+        .description = "The SPICE name of the object that is the observer.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo BodyInfo = {
-        "Body",
-        "Target body",
-        "The SPICE name of target body that is used as the shadow caster.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo BodyInfo = {
+        .identifier = "Body",
+        .name = "Target body",
+        .description = "The SPICE name of target body that is used as the shadow caster.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo BodyFrameInfo = {
-        "BodyFrame",
-        "Body frame",
-        "The SPICE name of the reference frame in which the shadow cylinder is "
-        "expressed.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo BodyFrameInfo = {
+        .identifier = "BodyFrame",
+        .name = "Body frame",
+        .description = "The SPICE name of the reference frame in which the shadow "
+            "cylinder is expressed.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AberrationInfo = {
-        "Aberration",
-        "Aberration",
-        "The aberration method that is used for computing the shadow cylinder. The "
-        "options are \"NONE\", \"LT\" (Light Time), \"LT + S\" (Light Time Stellar), "
-        "\"CN\" (Converged Newtonian), and \"CN + S\" (Converged Newtonian Stellar).",
-        Visibility::AdvancedUser
+        .identifier = "Aberration",
+        .name = "Aberration",
+        .description = "The aberration method that is used for computing the shadow "
+            "cylinder. The options are \"NONE\", \"LT\" (Light Time), \"LT + S\" (Light "
+            "Time Stellar), \"CN\" (Converged Newtonian), and \"CN + S\" (Converged "
+            "Newtonian Stellar).",
+        .visibility = Visibility::AdvancedUser
     };
 
     // Displays a shadow cylinder behind a planetary body. Given the SPICE name of a
@@ -162,9 +176,9 @@ Documentation RenderableShadowCylinder::Documentation() {
 
 RenderableShadowCylinder::RenderableShadowCylinder(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _numberOfPoints(NumberPointsInfo, 190, 1, 300)
-    , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 0.5f)
-    , _shadowColor(ShadowColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _numberOfPoints(NumberPointsInfo)
+    , _shadowLength(ShadowLengthInfo)
+    , _shadowColor(ShadowColorInfo)
     , _terminatorType(TerminatorTypeInfo)
     , _lightSource(LightSourceInfo)
     , _observer(ObserverInfo)

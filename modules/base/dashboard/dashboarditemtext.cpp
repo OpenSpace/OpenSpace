@@ -31,11 +31,14 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TextInfo = {
-        "Text",
-        "Text",
-        "The text to be displayed.",
-        Visibility::User
+    constexpr StringPropertyInfo TextInfo = {
+        .identifier = "Text",
+        .name = "Text",
+        .description = "The text to be displayed.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = ""
+        }
     };
 
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
@@ -56,7 +59,7 @@ Documentation DashboardItemText::Documentation() {
 
 DashboardItemText::DashboardItemText(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _text(TextInfo, "")
+    , _text(TextInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _text = p.text.value_or(_text);

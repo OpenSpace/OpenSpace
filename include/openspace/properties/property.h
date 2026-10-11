@@ -96,8 +96,8 @@ public:
     /**
      * The constructor for the property. The \p info (see PropertyInfo) contains
      * necessary information for this Property. PropertyInfo::identifier needs to be
-     * unique for each PropertyOwner. The PropertyInfo::guiName will be stored in the
-     * metaData to be accessed by the GUI elements using the PropertyInfo::guiName key.
+     * unique for each PropertyOwner. The PropertyInfo::name will be stored in the
+     * metaData to be accessed by the GUI elements using the PropertyInfo::name key.
      * The default visibility settings is Visibility::Always, whereas the default
      * read-only state is `false`.
      *
@@ -107,7 +107,7 @@ public:
      *        if the Property is also enablable
      *
      * \pre \p info.identifier must not be empty
-     * \pre \p info.guiName must not be empty
+     * \pre \p info.name must not be empty
      */
     explicit Property(PropertyInfo info);
 

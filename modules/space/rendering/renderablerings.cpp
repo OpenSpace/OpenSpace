@@ -53,45 +53,64 @@ namespace {
         GLfloat t;
     };
 
-    constexpr PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "The path to a texture on disk that contains a one-dimensional texture to use "
-        "for these rings.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "The path to a texture on disk that contains a one-dimensional "
+            "texture to use for these rings.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
-        "The radius of the rings in meters.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size",
+        .description = "The radius of the rings in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1e25f }
+        }
     };
 
-    constexpr PropertyInfo OffsetInfo = {
-        "Offset",
-        "Offset",
-        "A value that is used to limit the width of the rings. Each of the two values is "
-        "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
-        "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
-        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo OffsetInfo = {
+        .identifier = "Offset",
+        .name = "Offset",
+        .description = "A value that is used to limit the width of the rings. Each of "
+            "the two values is a value between 0 and 1, where 0 is the center of the "
+            "ring and 1 is the maximum extent at the radius. For example, if the value "
+            "is {0.5, 1.0}, the ring is only shown between radius/2 and radius. It "
+            "defaults to {0.0, 1.0}.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f, 1.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(1.f) }
+        }
     };
 
-    constexpr PropertyInfo NightFactorInfo = {
-        "NightFactor",
-        "Night factor",
-        "A multiplicative factor that is applied to the side of the rings that is facing "
-        "away from the Sun. If it is 1, no darkening of the night side occurs.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo NightFactorInfo = {
+        .identifier = "NightFactor",
+        .name = "Night factor",
+        .description = "A multiplicative factor that is applied to the side of the rings "
+            "that is facing away from the Sun. If it is 1, no darkening of the night "
+            "side occurs.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.33f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo ColorFilterInfo = {
-        "ColorFilter",
-        "Color filter",
-        "A value that affects the filtering out of part of the rings depending on the "
-        "color values of the texture. The higher value, the more rings are filtered out.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ColorFilterInfo = {
+        .identifier = "ColorFilter",
+        .name = "Color filter",
+        .description = "A value that affects the filtering out of part of the rings "
+            "depending on the color values of the texture. The higher value, the more "
+            "rings are filtered out.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.15f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableRings)]] Parameters {
@@ -126,10 +145,10 @@ Documentation RenderableRings::Documentation() {
 RenderableRings::RenderableRings(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
-    , _size(SizeInfo, 1.f, 0.f, 1e25f)
-    , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
-    , _colorFilter(ColorFilterInfo, 0.15f, 0.f, 1.f)
+    , _size(SizeInfo)
+    , _offset(OffsetInfo)
+    , _nightFactor(NightFactorInfo)
+    , _colorFilter(ColorFilterInfo)
 {
     using filesystem::File;
 

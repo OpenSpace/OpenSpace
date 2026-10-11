@@ -43,62 +43,85 @@ namespace {
     constexpr int RenderOptionFaceCamera = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "This setting determines whether the labels will be visible or not. They are "
-        "disabled per default.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "This setting determines whether the labels will be visible or "
+            "not. They are disabled per default.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     constexpr PropertyInfo FileInfo = {
-        "File",
-        "File",
-        "The speck label file with the data for the labels.",
-        Visibility::AdvancedUser
+        .identifier = "File",
+        .name = "File",
+        .description = "The speck label file with the data for the labels.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color of the labels.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color of the labels.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
-        "The size of the labels in pixels.",
-        Visibility::User
+    constexpr FloatPropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size",
+        .description = "The size of the labels in pixels.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 8.f,
+            .minMax = { 0.5f, 24.f }
+        }
     };
 
-    constexpr PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font size",
-        "Font size for the labels. This is different from the text size.",
-        Visibility::User
+    constexpr FloatPropertyInfo FontSizeInfo = {
+        .identifier = "FontSize",
+        .name = "Font size",
+        .description = "Font size for the labels. This is different from the text size.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 50.f,
+            .minMax = { 1.f, 300.f }
+        }
     };
 
-    constexpr PropertyInfo MinMaxInfo = {
-        "MinMaxSize",
-        "Min/max size",
-        "The minimum and maximum size (in pixels) of the labels.",
-        Visibility::AdvancedUser
+    constexpr IVec2PropertyInfo MinMaxInfo = {
+        .identifier = "MinMaxSize",
+        .name = "Min/max size",
+        .description = "The minimum and maximum size (in pixels) of the labels.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::ivec2(8, 500),
+            .minMax = { glm::ivec2(0), glm::ivec2(1000) }
+        }
     };
 
-    constexpr PropertyInfo FaceCameraInfo = {
-        "FaceCamera",
-        "Face camera",
-        "If enabled, the labels will be rotated to face the camera. For non-linear "
-        "display rendering (for example fisheye) this should be set to false.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo FaceCameraInfo = {
+        .identifier = "FaceCamera",
+        .name = "Face camera",
+        .description = "If enabled, the labels will be rotated to face the camera. For "
+            "non-linear display rendering (for example fisheye) this should be set to "
+            "false.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     constexpr PropertyInfo TransformationMatrixInfo = {
-        "TransformationMatrix",
-        "Transformation matrix",
-        "Transformation matrix to be applied to the labels.",
-        Visibility::Developer
+        .identifier = "TransformationMatrix",
+        .name = "Transformation matrix",
+        .description = "Transformation matrix to be applied to the labels.",
+        .visibility = Visibility::Developer
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {
@@ -157,17 +180,12 @@ Documentation LabelsComponent::Documentation() {
 
 LabelsComponent::LabelsComponent(const Dictionary& dictionary)
     : PropertyOwner({ "Labels" })
-    , _enabled(EnabledInfo, false)
-    , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _size(SizeInfo, 8.f, 0.5f, 24.f)
-    , _fontSize(FontSizeInfo, 50.f, 1.f, 300.f)
-    , _minMaxSize(
-        MinMaxInfo,
-        glm::ivec2(8, 500),
-        glm::ivec2(0),
-        glm::ivec2(1000)
-    )
-    , _faceCamera(FaceCameraInfo, true)
+    , _enabled(EnabledInfo)
+    , _color(ColorInfo)
+    , _size(SizeInfo)
+    , _fontSize(FontSizeInfo)
+    , _minMaxSize(MinMaxInfo)
+    , _faceCamera(FaceCameraInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

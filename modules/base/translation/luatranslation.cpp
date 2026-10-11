@@ -40,17 +40,17 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo ScriptInfo = {
-        "Script",
-        "Script",
-        "This value is the path to the Lua script that will be executed to compute the "
-        "translation for this transformation. The script needs to define a function "
-        "'translation' that takes the current simulation time in seconds past the J2000 "
-        "epoch as the first argument, the simulation time in seconds past the J2000 "
-        "epoch of the last frame as the second argument, and the current wall time as "
-        "milliseconds past the J2000 epoch the third argument and computes the three "
-        "translation values returned as a table.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo ScriptInfo = {
+        .identifier = "Script",
+        .name = "Script",
+        .description = "This value is the path to the Lua script that will be executed "
+            "to compute the translation for this transformation. The script needs to "
+            "define a function 'translation' that takes the current simulation time in "
+            "seconds past the J2000 epoch as the first argument, the simulation time in "
+            "seconds past the J2000 epoch of the last frame as the second argument, and "
+            "the current wall time as milliseconds past the J2000 epoch the third "
+            "argument and computes the three translation values returned as a table.",
+        .visibility = Visibility::AdvancedUser
     };
 
     // Generates the translation values used to offset the attached scene graph node's

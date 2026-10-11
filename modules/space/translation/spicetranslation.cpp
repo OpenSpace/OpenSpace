@@ -35,51 +35,54 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TargetInfo = {
-        "Target",
-        "Target",
-        "This is the SPICE name for the body whose translation is to be computed by the "
-        "SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') or "
-        "a NAIF integer id code (such as '399'). The resulting translation will be a "
-        "vector leading from the `Target` to the `Observer`.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo TargetInfo = {
+        .identifier = "Target",
+        .name = "Target",
+        .description = "This is the SPICE name for the body whose translation is to be "
+            "computed by the SpiceTranslation. It can either be a fully qualified name "
+            "(such as 'EARTH') or a NAIF integer id code (such as '399'). The resulting "
+            "translation will be a vector leading from the `Target` to the `Observer`.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ObserverInfo = {
-        "Observer",
-        "Observer",
-        "This is the SPICE name for the parent of the body whose translation is to be "
-        "computed by the SpiceTranslation. It can either be a fully qualified name (such "
-        "as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0'). The "
-        "resulting translation will be a vector leading from the `Target` to the "
-        "`Observer`.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo ObserverInfo = {
+        .identifier = "Observer",
+        .name = "Observer",
+        .description = "This is the SPICE name for the parent of the body whose "
+            "translation is to be computed by the SpiceTranslation. It can either be a "
+            "fully qualified name (such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer "
+            "id code (such as '0'). The resulting translation will be a vector leading "
+            "from the `Target` to the `Observer`.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo FrameInfo = {
-        "Frame",
-        "Reference frame",
-        "This is the SPICE name of the reference frame in which the position should be "
-        "calculated. The default value is GALACTIC.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo FrameInfo = {
+        .identifier = "Frame",
+        .name = "Reference frame",
+        .description = "This is the SPICE name of the reference frame in which the "
+            "position should be calculated. The default value is GALACTIC.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "GALACTIC"
+        }
     };
 
-    constexpr PropertyInfo FixedDateInfo = {
-        "FixedDate",
-        "Fixed date",
-        "If this value is specified, the position will be locked to a specific time "
-        "rather than following the in-game in the system. Setting this to an empty "
-        "string will unlock the time and return to position based on current simulation "
-        "time.",
-        Visibility::User
+    constexpr StringPropertyInfo FixedDateInfo = {
+        .identifier = "FixedDate",
+        .name = "Fixed date",
+        .description = "If this value is specified, the position will be locked to a "
+            "specific time rather than following the in-game in the system. Setting this "
+            "to an empty string will unlock the time and return to position based on "
+            "current simulation time.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo TimeOffsetInfo = {
-        "TimeOffset",
-        "Time offset",
-        "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
-        "at which to compute the rotation.",
-        Visibility::User
+    constexpr FloatPropertyInfo TimeOffsetInfo = {
+        .identifier = "TimeOffset",
+        .name = "Time offset",
+        .description = "A time offset, in seconds, added to the simulation time (or "
+            "Fixed Date if any), at which to compute the rotation.",
+        .visibility = Visibility::User
     };
 
     // Uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to provide translational
@@ -124,7 +127,7 @@ SpiceTranslation::SpiceTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
     , _target(TargetInfo)
     , _observer(ObserverInfo)
-    , _frame(FrameInfo, "GALACTIC")
+    , _frame(FrameInfo)
     , _fixedDate(FixedDateInfo)
     , _timeOffset(TimeOffsetInfo)
     , _cachedFrame("GALACTIC")

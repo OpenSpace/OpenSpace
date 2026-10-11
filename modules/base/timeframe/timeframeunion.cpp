@@ -36,12 +36,12 @@ namespace {
     using namespace openspace;
 
     constexpr PropertyInfo TimeFramesInfo = {
-        "TimeFrames",
-        "Time frames",
-        "A vector of time frames to combine into one. The time frame is active when any "
-        "of the contained time frames are, but not in gaps between contained time "
-        "frames.",
-        Visibility::AdvancedUser
+        .identifier = "TimeFrames",
+        .name = "Time frames",
+        .description = "A vector of time frames to combine into one. The time frame is "
+            "active when any of the contained time frames are, but not in gaps between "
+            "contained time frames.",
+        .visibility = Visibility::AdvancedUser
     };
 
     // This `TimeFrame` class will accept the union of all passed-in TimeFrames. This

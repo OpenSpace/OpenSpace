@@ -32,8 +32,14 @@ namespace openspace {
 
 VolumeClipPlanes::VolumeClipPlanes(const Dictionary& dictionary)
     : PropertyOwner({ "" }) // @TODO Missing name
-    // @TODO Missing documentation
-    , _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10)
+    , _nClipPlanes({
+        .identifier = "nClipPlanes",
+        .name = "Number of clip planes",
+        .description = "", // @TODO Missing documentation
+        .defaults = {
+            .minMax = { 0, 10 }
+        }
+    })
 {
     for (const std::string_view key : dictionary.keys()) {
         const Dictionary cutplane = dictionary.value<Dictionary>(key);

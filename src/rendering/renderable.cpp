@@ -46,34 +46,44 @@ namespace {
 
     constexpr std::string_view KeyType = "Type";
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Determines whether this object will be visible or not.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Determines whether this object will be visible or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo RenderableTypeInfo = {
-        "Type",
-        "Renderable type",
-        "The type of the renderable.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo RenderableTypeInfo = {
+        .identifier = "Type",
+        .name = "Renderable type",
+        .description = "The type of the renderable.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "Renderable"
+        }
     };
 
     constexpr PropertyInfo RenderableRenderBinModeInfo = {
-        "RenderBinMode",
-        "Render bin mode",
-        "A value that specifies if the renderable should be rendered in the Background, "
-        "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
-        Visibility::AdvancedUser
+        .identifier = "RenderBinMode",
+        .name = "Render bin mode",
+        .description = "A value that specifies if the renderable should be rendered in "
+            "the Background, Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker "
+            "rendering step.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo DimInAtmosphereInfo = {
-        "DimInAtmosphere",
-        "Dim in atmosphere",
-        "Decides if the object should be dimmed (i.e. faded out) when the camera is in "
-        "the sunny part of an atmosphere.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo DimInAtmosphereInfo = {
+        .identifier = "DimInAtmosphere",
+        .name = "Dim in atmosphere",
+        .description = "Decides if the object should be dimmed (i.e. faded out) when the "
+            "camera is in the sunny part of an atmosphere.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // This is the base class for all `Renderable` types. These objects are responsible
@@ -152,9 +162,9 @@ mm_unique_ptr<Renderable> Renderable::createFromDictionary(const Dictionary& dic
 
 Renderable::Renderable(const Dictionary& dictionary, RenderableSettings settings)
     : PropertyOwner({ "Renderable" })
-    , _enabled(EnabledInfo, true)
-    , _renderableType(RenderableTypeInfo, "Renderable")
-    , _dimInAtmosphere(DimInAtmosphereInfo, false)
+    , _enabled(EnabledInfo)
+    , _renderableType(RenderableTypeInfo)
+    , _dimInAtmosphere(DimInAtmosphereInfo)
     , _shouldUpdateIfDisabled(settings.shouldUpdateIfDisabled)
     , _automaticallyUpdateRenderBin(settings.automaticallyUpdateRenderBin)
 {

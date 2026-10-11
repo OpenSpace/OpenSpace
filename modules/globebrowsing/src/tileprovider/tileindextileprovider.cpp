@@ -35,11 +35,15 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo UniqueBackgroundColors = {
-        "UniqueBackgroundColor",
-        "Unique background color",
-        "If 'true' each index tile will have a unique background color assigned to it.",
-        Visibility::Developer
+    constexpr BoolPropertyInfo UniqueBackgroundColors = {
+        .identifier = "UniqueBackgroundColor",
+        .name = "Unique background color",
+        .description = "If 'true' each index tile will have a unique background color "
+            "assigned to it.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
     struct [[codegen::Dictionary(TileIndexTileProvider)]] Parameters {
@@ -57,7 +61,7 @@ Documentation TileIndexTileProvider::Documentation() {
 
 TileIndexTileProvider::TileIndexTileProvider(const Dictionary& dictionary)
     : TextTileProvider(tileTextureInitData(layers::Group::ID::ColorLayers, false))
-    , _uniqueBackgroundColors(UniqueBackgroundColors, false)
+    , _uniqueBackgroundColors(UniqueBackgroundColors)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

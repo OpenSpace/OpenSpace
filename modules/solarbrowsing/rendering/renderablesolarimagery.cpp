@@ -62,106 +62,145 @@ namespace {
     };
 
     constexpr PropertyInfo JumpToStartInfo = {
-        "JumpToStart",
-        "Jump to start of sequence",
-        "Performs a time jump to the start of the sequence.",
-        Visibility::NoviceUser
+        .identifier = "JumpToStart",
+        .name = "Jump to start of sequence",
+        .description = "Performs a time jump to the start of the sequence.",
+        .visibility = Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ActiveInstrumentInfo = {
-        "ActiveInstrument",
-        "Active instrument",
-        "The active instrument of the current spacecraft imagery.",
-        Visibility::User
+        .identifier = "ActiveInstrument",
+        .name = "Active instrument",
+        .description = "The active instrument of the current spacecraft imagery.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo EnableBorderInfo = {
-        "EnableBorder",
-        "Enable border",
-        "Enables border around the current spacecraft imagery.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableBorderInfo = {
+        .identifier = "EnableBorder",
+        .name = "Enable border",
+        .description = "Enables border around the current spacecraft imagery.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EnableFrustumInfo = {
-        "EnableFrustum",
-        "Enable frustum",
-        "Enables frustum around the current spacecraft imagery.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableFrustumInfo = {
+        .identifier = "EnableFrustum",
+        .name = "Enable frustum",
+        .description = "Enables frustum around the current spacecraft imagery.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
     constexpr PropertyInfo FaceModeInfo = {
-        "FaceMode",
-        "Face Mode",
-        "Specifies how the plane is rendered: front side only, with a solid backside, "
-        "or textured on both sides.",
-        Visibility::AdvancedUser
+        .identifier = "FaceMode",
+        .name = "Face Mode",
+        .description = "Specifies how the plane is rendered: front side only, with a "
+            "solid backside, or textured on both sides.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo MoveFactorInfo = {
-        "MoveFactor",
-        "Move factor",
-        "Controls how close to the Sun to render the imagery.",
-        Visibility::User
+    constexpr DoublePropertyInfo MoveFactorInfo = {
+        .identifier = "MoveFactor",
+        .name = "Move factor",
+        .description = "Controls how close to the Sun to render the imagery.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.0,
+            .minMax = { 0.0, 1.0 }
+        }
     };
 
-    constexpr PropertyInfo DownsamplingLevelInfo = {
-        "DownsamplingLevel",
-        "Downsampling level",
-        "Controls how much to downsample the original data (0 is original resolution).",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo DownsamplingLevelInfo = {
+        .identifier = "DownsamplingLevel",
+        .name = "Downsampling level",
+        .description = "Controls how much to downsample the original data (0 is original "
+            "resolution).",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 2,
+            .minMax = { 0, 5 }
+        }
     };
 
-    constexpr PropertyInfo TimelineDataRangeInfo = {
-        "TimelineDataRange",
-        "Timeline data range",
-        "Displays the earliest and latest available image data for the currently active "
-        "instrument. Note that data may not be continuously available across the entire "
-        "displayed time span.",
-        Visibility::User
+    constexpr StringPropertyInfo TimelineDataRangeInfo = {
+        .identifier = "TimelineDataRange",
+        .name = "Timeline data range",
+        .description = "Displays the earliest and latest available image data for the "
+            "currently active instrument. Note that data may not be continuously "
+            "available across the entire displayed time span.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo UseAdditiveBlendingInfo = {
-        "UseAdditiveBlending",
-        "Use additive blending",
-        "If enabled, the plane is blended additively with the background. If disabled, "
-        "the plane is rendered fully opaque. Note that this may lead to weird behaviors "
-        "when the plane is rendered with transparency.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseAdditiveBlendingInfo = {
+        .identifier = "UseAdditiveBlending",
+        .name = "Use additive blending",
+        .description = "If enabled, the plane is blended additively with the background. "
+            "If disabled, the plane is rendered fully opaque. Note that this may lead to "
+            "weird behaviors when the plane is rendered with transparency.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ContrastValueInfo = {
-        "ContrastValue",
-        "Contrast",
-        "Contrast of the current spacecraft imagery.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ContrastValueInfo = {
+        .identifier = "ContrastValue",
+        .name = "Contrast",
+        .description = "Contrast of the current spacecraft imagery.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { -15.f, 15.f }
+        }
     };
 
-    constexpr PropertyInfo GammaValueInfo = {
-        "GammaValue",
-        "Gamma",
-        "Gamma of the current spacecraft imagery.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo GammaValueInfo = {
+        .identifier = "GammaValue",
+        .name = "Gamma",
+        .description = "Gamma of the current spacecraft imagery.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.9f,
+            .minMax = { 0.1f, 10.f }
+        }
     };
 
-    constexpr PropertyInfo VerboseModeInfo = {
-        "VerboseMode",
-        "Verbose mode",
-        "Output information about image decoding.",
-        Visibility::Developer
+    constexpr BoolPropertyInfo VerboseModeInfo = {
+        .identifier = "VerboseMode",
+        .name = "Verbose mode",
+        .description = "Output information about image decoding.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo PredictFramesAfterInfo = {
-        "PredictFramesAfter",
-        "Predict frames after",
-        "Determines how many images to pre-fetch after the current image frame.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo PredictFramesAfterInfo = {
+        .identifier = "PredictFramesAfter",
+        .name = "Predict frames after",
+        .description = "Determines how many images to pre-fetch after the current image "
+            "frame.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 10,
+            .minMax = { 0, 20 }
+        }
     };
 
-    constexpr PropertyInfo PredictFramesBeforeInfo = {
-        "PredictFramesBefore",
-        "Predict frames before",
-        "Determines how many images to pre-fetch before the current image frame.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo PredictFramesBeforeInfo = {
+        .identifier = "PredictFramesBefore",
+        .name = "Predict frames before",
+        .description = "Determines how many images to pre-fetch before the current image "
+            "frame.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 2,
+            .minMax = { 0, 20 }
+        }
     };
 
     // A RenderableSolarImagery renders time-sequenced solar observations from spacecraft
@@ -247,18 +286,18 @@ RenderableSolarImagery::RenderableSolarImagery(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _jumpToStart(JumpToStartInfo)
     , _activeInstruments(ActiveInstrumentInfo)
-    , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
-    , _enableBorder(EnableBorderInfo, false)
-    , _enableFrustum(EnableFrustumInfo, false)
+    , _contrastValue(ContrastValueInfo)
+    , _enableBorder(EnableBorderInfo)
+    , _enableFrustum(EnableFrustumInfo)
     , _faceMode(FaceModeInfo)
-    , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
-    , _gammaValue(GammaValueInfo, 0.9f, 0.1f, 10.f)
-    , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
-    , _downsamplingLevel(DownsamplingLevelInfo, 2, 0, 5)
+    , _useAdditiveBlending(UseAdditiveBlendingInfo)
+    , _gammaValue(GammaValueInfo)
+    , _moveFactor(MoveFactorInfo)
+    , _downsamplingLevel(DownsamplingLevelInfo)
     , _timelineDataRangeInfo(TimelineDataRangeInfo)
-    , _verboseMode(VerboseModeInfo, false)
-    , _predictFramesAfter(PredictFramesAfterInfo, 10, 0, 20)
-    , _predictFramesBefore(PredictFramesBeforeInfo, 2, 0, 20)
+    , _verboseMode(VerboseModeInfo)
+    , _predictFramesAfter(PredictFramesAfterInfo)
+    , _predictFramesBefore(PredictFramesBeforeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

@@ -40,38 +40,53 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo EffectiveTemperatureInfo = {
-        "EffectiveTemperature",
-        "Effective temperature",
-        "The effective temperature of the corresponding star, in Kelvin. Used to compute "
-        "the width and size of the disc.",
-        Visibility::User
+    constexpr FloatPropertyInfo EffectiveTemperatureInfo = {
+        .identifier = "EffectiveTemperature",
+        .name = "Effective temperature",
+        .description = "The effective temperature of the corresponding star, in Kelvin. "
+            "Used to compute the width and size of the disc.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 5780.f,
+            .minMax = { 0.f, 7.5e4f }
+        }
     };
 
-    constexpr PropertyInfo LuminosityInfo = {
-        "Luminosity",
-        "Luminosity",
-        "The luminosity of the corresponding star, in units of solar luminosities. Used "
-        "to compute the width and size of the disc.",
-        Visibility::User
+    constexpr FloatPropertyInfo LuminosityInfo = {
+        .identifier = "Luminosity",
+        .name = "Luminosity",
+        .description = "The luminosity of the corresponding star, in units of solar "
+            "luminosities. Used to compute the width and size of the disc.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1e8f }
+        }
     };
 
-    constexpr PropertyInfo OptimisticInfo = {
-        "Optimistic",
-        "Optimistic" ,
-        "If true, the habitable zone disc is rendered with the optimistic boundaries "
-        "rather than the conservative ones.",
-        Visibility::User
+    constexpr BoolPropertyInfo OptimisticInfo = {
+        .identifier = "Optimistic",
+        .name = "Optimistic",
+        .description = "If true, the habitable zone disc is rendered with the optimistic "
+            "boundaries rather than the conservative ones.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo KopparapuTeffIntervalInfo = {
-        "KopparapuTeffInterval",
-        "Kopparapu TEFF",
-        "The effective temperature interval for which Kopparapu's formula is used for "
-        "the habitable zone computation. For stars with temperatures outside the range, "
-        "a simpler method by Tom E. Harris is used. This method only uses the star "
-        "luminosity and does not include computation of the optimistic boundaries.",
-        Visibility::User
+    constexpr Vec2PropertyInfo KopparapuTeffIntervalInfo = {
+        .identifier = "KopparapuTeffInterval",
+        .name = "Kopparapu TEFF",
+        .description = "The effective temperature interval for which Kopparapu's formula "
+            "is used for the habitable zone computation. For stars with temperatures "
+            "outside the range, a simpler method by Tom E. Harris is used. This method "
+            "only uses the star luminosity and does not include computation of the "
+            "optimistic boundaries.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec2(1000.f, 10000.f)
+        }
     };
 
     // Represents a star's habitable zone, with boundaries computed from its effective
@@ -120,10 +135,10 @@ Documentation RenderableHabitableZone::Documentation() {
 
 RenderableHabitableZone::RenderableHabitableZone(const Dictionary& dictionary)
     : RenderableDisc(dictionary)
-    , _teff(EffectiveTemperatureInfo, 5780.f, 0.f, 7.5e4f)
-    , _luminosity(LuminosityInfo, 1.f, 0.f, 1e8f)
-    , _showOptimistic(OptimisticInfo, false)
-    , _kopparapuTeffInterval(KopparapuTeffIntervalInfo, glm::vec2(1000.f, 10000.f))
+    , _teff(EffectiveTemperatureInfo)
+    , _luminosity(LuminosityInfo)
+    , _showOptimistic(OptimisticInfo)
+    , _kopparapuTeffInterval(KopparapuTeffIntervalInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

@@ -44,7 +44,7 @@ uint64_t Property::Identifier = 0;
 
 Property::Property(PropertyInfo info)
     : _identifier(info.identifier)
-    , _guiName(info.guiName)
+    , _guiName(info.name)
     , _description(info.description)
     , _isEnabled(info.defaults.isEnabled)
 #ifdef _DEBUG
@@ -143,18 +143,18 @@ bool Property::viewOption(const std::string& option, bool defaultValue) const {
     return it != _metaData.viewOptions.end() ? it->second : defaultValue;
 }
 
-PropertyInfo::IsEnablable Property::isEnablable() const {
-    return PropertyInfo::IsEnablable(_metaData.isEnablable);
+IsEnablable Property::isEnablable() const {
+    return IsEnablable(_metaData.isEnablable);
 }
 
-PropertyInfo::IsEnabled Property::isEnabled() const {
+IsEnabled Property::isEnabled() const {
     if (!_metaData.isEnablable) {
         throw RuntimeError("Tried to get enabled on a property that is not enablable");
     }
     return _isEnabled;
 }
 
-void Property::setIsEnabled(PropertyInfo::IsEnabled isEnabled) {
+void Property::setIsEnabled(IsEnabled isEnabled) {
     if (!_metaData.isEnablable) {
         throw RuntimeError("Tried to set enabled on a property that is not enablable");
     }
@@ -318,7 +318,6 @@ void Property::updateUriCache() {
 }
 
 nlohmann::json Property::generateJsonDescription() const {
-    using Visibility = Visibility;
     static const std::unordered_map<Visibility, std::string> VisibilityConverter = {
        { Visibility::Always, "Always" },
        { Visibility::NoviceUser, "NoviceUser" },

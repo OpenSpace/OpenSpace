@@ -32,34 +32,47 @@ namespace {
     using namespace openspace;
 
     constexpr PropertyInfo SetDefaultInfo = {
-        "SetDefault",
-        "Set default",
-        "If this value is triggered it will reset all of these values to their default "
-        "values.",
-        Visibility::User
+        .identifier = "SetDefault",
+        .name = "Set default",
+        .description = "If this value is triggered it will reset all of these values to "
+            "their default values.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo GammaInfo = {
-        "Gamma",
-        "Gamma",
-        "This value is used as an exponent to adjust the color for each tile.",
-        Visibility::User
+    constexpr FloatPropertyInfo GammaInfo = {
+        .identifier = "Gamma",
+        .name = "Gamma",
+        .description = "This value is used as an exponent to adjust the color for each "
+            "tile.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr PropertyInfo MultiplierInfo = {
-        "Multiplier",
-        "Multiplier",
-        "This value is used as a multiplier to adjust the color applied after taking the "
-        "gamma value as an exponent.",
-        Visibility::User
+    constexpr FloatPropertyInfo MultiplierInfo = {
+        .identifier = "Multiplier",
+        .name = "Multiplier",
+        .description = "This value is used as a multiplier to adjust the color applied "
+            "after taking the gamma value as an exponent.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 20.f }
+        }
     };
 
-    constexpr PropertyInfo OffsetInfo = {
-        "Offset",
-        "Offset",
-        "This value is used as an additive modifier to adjust the color applied after "
-        "the gamma exponent and the multiplier has been performed.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo OffsetInfo = {
+        .identifier = "Offset",
+        .name = "Offset",
+        .description = "This value is used as an additive modifier to adjust the color "
+            "applied after the gamma exponent and the multiplier has been performed.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { -10000.f, 10000.f }
+        }
     };
 } // namespace
 
@@ -67,9 +80,9 @@ namespace openspace {
 
 LayerRenderSettings::LayerRenderSettings()
     : PropertyOwner({ "Settings" })
-    , gamma(GammaInfo, 1.f, 0.f, 5.f)
-    , multiplier(MultiplierInfo, 1.f, 0.f, 20.f)
-    , offset(OffsetInfo, 0.f, -10000.f, 10000.f)
+    , gamma(GammaInfo)
+    , multiplier(MultiplierInfo)
+    , offset(OffsetInfo)
     , setDefault(SetDefaultInfo)
 {
     addProperty(gamma);

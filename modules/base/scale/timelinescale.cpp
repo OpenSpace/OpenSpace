@@ -35,12 +35,16 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo ShouldInterpolateInfo = {
-        "ShouldInterpolate",
-        "Should interpolate",
-        "If this value is set to 'true', an interpolation is applied between the given "
-        "keyframes. If this value is set to 'false', the interpolation is not applied.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShouldInterpolateInfo = {
+        .identifier = "ShouldInterpolate",
+        .name = "Should interpolate",
+        .description = "If this value is set to 'true', an interpolation is applied "
+            "between the given keyframes. If this value is set to 'false', the "
+            "interpolation is not applied.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     // Uses a timeline of other `Scale` classes to calculate the final scale factor for
@@ -69,7 +73,7 @@ Documentation TimelineScale::Documentation() {
 
 TimelineScale::TimelineScale(const Dictionary& dictionary)
     : Scale(dictionary)
-    , _shouldInterpolate(ShouldInterpolateInfo, true)
+    , _shouldInterpolate(ShouldInterpolateInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

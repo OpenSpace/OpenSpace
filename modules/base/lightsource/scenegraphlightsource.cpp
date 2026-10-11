@@ -39,18 +39,25 @@ namespace {
 
     using namespace openspace;
 
-    constexpr PropertyInfo IntensityInfo = {
-        "Intensity",
-        "Intensity",
-        "The intensity of this light source.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo IntensityInfo = {
+        .identifier = "Intensity",
+        .name = "Intensity",
+        .description = "The intensity of this light source.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo NodeInfo = {
-        "Node",
-        "Node",
-        "The identifier of the scene graph node to follow.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo NodeInfo = {
+        .identifier = "Node",
+        .name = "Node",
+        .description = "The identifier of the scene graph node to follow.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = ""
+        }
     };
 
     // Represents a light source placed at the position of a scene graph node. That is,
@@ -81,8 +88,8 @@ Documentation SceneGraphLightSource::Documentation() {
 
 SceneGraphLightSource::SceneGraphLightSource(const Dictionary& dictionary)
     : LightSource(dictionary)
-    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-    , _nodeIdentifier(NodeInfo, "")
+    , _intensity(IntensityInfo)
+    , _nodeIdentifier(NodeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

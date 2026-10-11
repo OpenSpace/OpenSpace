@@ -47,87 +47,117 @@ namespace {
         float z = 0.f;
     };
 
-    constexpr PropertyInfo NumberPointsInfo = {
-        "NumberOfPoints",
-        "Points",
-        "The number of control points used for constructing the shadow geometry. The "
-        "higher this number, the more detailed the shadow is. However, it will have a "
-        "negative impact on the performance. Also note that rendering errors will occur "
-        "if this value is an even number.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo NumberPointsInfo = {
+        .identifier = "NumberOfPoints",
+        .name = "Points",
+        .description = "The number of control points used for constructing the shadow "
+            "geometry. The higher this number, the more detailed the shadow is. However, "
+            "it will have a negative impact on the performance. Also note that rendering "
+            "errors will occur if this value is an even number.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 191,
+            .minMax = { 1, 300 }
+        }
     };
 
-    constexpr PropertyInfo ShadowLengthInfo = {
-        "ShadowLength",
-        "Shadow length",
-        "A factor that controls the length of the rendered shadow cone. The total length "
-        "will be the distance from the shadower to the shadowee multiplied by this "
-        "value.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ShadowLengthInfo = {
+        .identifier = "ShadowLength",
+        .name = "Shadow length",
+        .description = "A factor that controls the length of the rendered shadow cone. "
+            "The total length will be the distance from the shadower to the shadowee "
+            "multiplied by this value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.1f,
+            .minMax = { 0.f, 2.f }
+        }
     };
 
-    constexpr PropertyInfo ShowUmbralShadowInfo = {
-        "ShowUmbralShadow",
-        "Show umbral shadow",
-        "Decides whether the umbral portion of the shadow should be shown.",
-        Visibility::User
+    constexpr BoolPropertyInfo ShowUmbralShadowInfo = {
+        .identifier = "ShowUmbralShadow",
+        .name = "Show umbral shadow",
+        .description = "Decides whether the umbral portion of the shadow should be "
+            "shown.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo UmbralShadowColorInfo = {
-        "UmbralShadowColor",
-        "Umbral shadow color",
-        "The color for the shadow cylinder that represents the umbral shadow.",
-        Visibility::User
+    constexpr Vec4PropertyInfo UmbralShadowColorInfo = {
+        .identifier = "UmbralShadowColor",
+        .name = "Umbral shadow color",
+        .description = "The color for the shadow cylinder that represents the umbral "
+            "shadow.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec4(1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr PropertyInfo ShowPenumbralShadowInfo = {
-        "ShowPenumbralShadow",
-        "Show penumbral shadow",
-        "Decides whether the penumbral portion of the shadow should be shown.",
-        Visibility::User
+    constexpr BoolPropertyInfo ShowPenumbralShadowInfo = {
+        .identifier = "ShowPenumbralShadow",
+        .name = "Show penumbral shadow",
+        .description = "Decides whether the penumbral portion of the shadow should be "
+            "shown.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo PenumbralShadowColorInfo = {
-        "PenumbralShadowColor",
-        "Penumbral shadow color",
-        "The color for the shadow cylinder that represents the penumbral shadow.",
-        Visibility::User
+    constexpr Vec4PropertyInfo PenumbralShadowColorInfo = {
+        .identifier = "PenumbralShadowColor",
+        .name = "Penumbral shadow color",
+        .description = "The color for the shadow cylinder that represents the penumbral "
+            "shadow.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec4(1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr PropertyInfo LightSourceInfo = {
-        "LightSource",
-        "Light source",
-        "The SPICE name of the object that is used as the illuminator when computing the "
-        "shadow cylinder.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo LightSourceInfo = {
+        .identifier = "LightSource",
+        .name = "Light source",
+        .description = "The SPICE name of the object that is used as the illuminator "
+            "when computing the shadow cylinder.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo LightSourceFrameInfo = {
-        "LightSourceFrame",
-        "Light source frame",
-        "The SPICE name of the body-fixed reference frame for the light source.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo LightSourceFrameInfo = {
+        .identifier = "LightSourceFrame",
+        .name = "Light source frame",
+        .description = "The SPICE name of the body-fixed reference frame for the light "
+            "source.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ShadowerInfo = {
-        "Shadower",
-        "Shadower",
-        "The SPICE name of the object that is casting the shadow on the shadowee.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo ShadowerInfo = {
+        .identifier = "Shadower",
+        .name = "Shadower",
+        .description = "The SPICE name of the object that is casting the shadow on the "
+            "shadowee.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ShadowerFrameInfo = {
-        "ShadowerFrame",
-        "Shadower frame",
-        "The SPICE name of the body-fixed reference frame for the shadower.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo ShadowerFrameInfo = {
+        .identifier = "ShadowerFrame",
+        .name = "Shadower frame",
+        .description = "The SPICE name of the body-fixed reference frame for the "
+            "shadower.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ShadoweeInfo = {
-        "Shadowee",
-        "Shadowee",
-        "The SPICE name of object that is receiving the shadow from the shadower.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo ShadoweeInfo = {
+        .identifier = "Shadowee",
+        .name = "Shadowee",
+        .description = "The SPICE name of object that is receiving the shadow from the "
+            "shadower.",
+        .visibility = Visibility::AdvancedUser
     };
 
     std::vector<VBOLayout> calculateShadowPoints(
@@ -212,22 +242,12 @@ Documentation RenderableEclipseCone::Documentation() {
 
 RenderableEclipseCone::RenderableEclipseCone(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _numberOfPoints(NumberPointsInfo, 191, 1, 300)
-    , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 2.f)
-    , _showUmbralShadow(ShowUmbralShadowInfo, true)
-    , _umbralShadowColor(
-        UmbralShadowColorInfo,
-        glm::vec4(1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _showPenumbralShadow(ShowPenumbralShadowInfo, true)
-    , _penumbralShadowColor(
-        PenumbralShadowColorInfo,
-        glm::vec4(1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _numberOfPoints(NumberPointsInfo)
+    , _shadowLength(ShadowLengthInfo)
+    , _showUmbralShadow(ShowUmbralShadowInfo)
+    , _umbralShadowColor(UmbralShadowColorInfo)
+    , _showPenumbralShadow(ShowPenumbralShadowInfo)
+    , _penumbralShadowColor(PenumbralShadowColorInfo)
     , _lightSource(LightSourceInfo)
     , _lightSourceFrame(LightSourceFrameInfo)
     , _shadower(ShadowerInfo)

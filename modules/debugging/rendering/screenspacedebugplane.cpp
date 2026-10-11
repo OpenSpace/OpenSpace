@@ -32,11 +32,15 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "The OpenGL name of the texture that is displayed on this plane.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "The OpenGL name of the texture that is displayed on this plane.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = -1,
+            .minMax = { -1, 4096 }
+        }
     };
 
     // Useful for debugging OpenGL textures. It renders the content of an existing
@@ -59,7 +63,7 @@ Documentation ScreenSpaceDebugPlane::Documentation() {
 
 ScreenSpaceDebugPlane::ScreenSpaceDebugPlane(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _texture(TextureInfo, -1, -1, 4096)
+    , _texture(TextureInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

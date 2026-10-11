@@ -55,89 +55,121 @@ namespace {
     constexpr std::string_view _loggerCat = "PathNavigator";
 
     constexpr PropertyInfo DefaultCurveOptionInfo = {
-        "DefaultPathType",
-        "Default path type",
-        "The default path type chosen when generating a path or flying to a target. See "
-        "the documentation for alternatives. The shape of the generated path will be "
-        "different depending on the path type.",
-        Visibility::AdvancedUser
+        .identifier = "DefaultPathType",
+        .name = "Default path type",
+        .description = "The default path type chosen when generating a path or flying to "
+            "a target. See the documentation for alternatives. The shape of the "
+            "generated path will be different depending on the path type.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo IncludeRollInfo = {
-        "IncludeRoll",
-        "Include roll",
-        "If disabled, roll is removed from the interpolation of camera orientation.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo IncludeRollInfo = {
+        .identifier = "IncludeRoll",
+        .name = "Include roll",
+        .description = "If disabled, roll is removed from the interpolation of camera "
+            "orientation.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo SpeedScaleInfo = {
-        "SpeedScale",
-        "Speed scale",
-        "Scale factor that the speed will be multiplied with during path traversal. Can "
-        "be used to speed up or slow down the camera motion, depending on if the value "
-        "is larger than or smaller than one.",
-        Visibility::User
+    constexpr FloatPropertyInfo SpeedScaleInfo = {
+        .identifier = "SpeedScale",
+        .name = "Speed scale",
+        .description = "Scale factor that the speed will be multiplied with during path "
+            "traversal. Can be used to speed up or slow down the camera motion, "
+            "depending on if the value is larger than or smaller than one.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.01f, 2.f }
+        }
     };
 
-    constexpr PropertyInfo IdleMotionOnFinishInfo = {
-        "ApplyIdleMotionOnFinish",
-        "Apply idle motion on finish",
-        "If set to true, the chosen IdleMotion of the OrbitalNavigator will be triggered "
-        "once the path has reached its target.",
-        Visibility::User
+    constexpr BoolPropertyInfo IdleMotionOnFinishInfo = {
+        .identifier = "ApplyIdleMotionOnFinish",
+        .name = "Apply idle motion on finish",
+        .description = "If set to true, the chosen IdleMotion of the OrbitalNavigator "
+            "will be triggered once the path has reached its target.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ArrivalDistanceFactorInfo = {
-        "ArrivalDistanceFactor",
-        "Arrival distance factor",
-        "A factor used to compute the default distance from a target scene graph node "
-        "when creating a camera path. The factor will be multiplied with the node's "
-        "bounding sphere to compute the target height from the bounding sphere of the "
-        "object.",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo ArrivalDistanceFactorInfo = {
+        .identifier = "ArrivalDistanceFactor",
+        .name = "Arrival distance factor",
+        .description = "A factor used to compute the default distance from a target "
+            "scene graph node when creating a camera path. The factor will be multiplied "
+            "with the node's bounding sphere to compute the target height from the "
+            "bounding sphere of the object.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 2.0,
+            .minMax = { 0.1, 20.0 }
+        }
     };
 
-    constexpr PropertyInfo RotationSpeedFactorInfo = {
-        "RotationSpeedFactor",
-        "Rotation speed factor (linear path)",
-        "Affects how fast the camera rotates to the target rotation during a linear "
-        "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
-        "seconds. A value of 2 means twice that time, i.e. 10 seconds, and so on.",
-        Visibility::User
+    constexpr FloatPropertyInfo RotationSpeedFactorInfo = {
+        .identifier = "RotationSpeedFactor",
+        .name = "Rotation speed factor (linear path)",
+        .description = "Affects how fast the camera rotates to the target rotation "
+            "during a linear path. A value of 1 means that the camera will rotate 90 "
+            "degrees in about 5 seconds. A value of 2 means twice that time, i.e. 10 "
+            "seconds, and so on.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 0.1f, 3.f }
+        }
     };
 
-    constexpr PropertyInfo MinBoundingSphereInfo = {
-        "MinimalValidBoundingSphere",
-        "Minimal valid bounding sphere",
-        "The minimal allowed value for a bounding sphere, in meters. Used for "
-        "computation of target positions and path generation, to avoid issues when there "
-        "is no bounding sphere.",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo MinBoundingSphereInfo = {
+        .identifier = "MinimalValidBoundingSphere",
+        .name = "Minimal valid bounding sphere",
+        .description = "The minimal allowed value for a bounding sphere, in meters. Used "
+            "for computation of target positions and path generation, to avoid issues "
+            "when there is no bounding sphere.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 10.0,
+            .minMax = { 1.0, 3e10 }
+        }
     };
 
     constexpr PropertyInfo RelevantNodeTagsInfo = {
-        "RelevantNodeTags",
-        "Relevant node tags",
-        "List of tags for the nodes that are relevant for path creation, for example "
-        "when avoiding collisions.",
-        Visibility::AdvancedUser
+        .identifier = "RelevantNodeTags",
+        .name = "Relevant node tags",
+        .description = "List of tags for the nodes that are relevant for path creation, "
+            "for example when avoiding collisions.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo UseCustomFlyToDurationInfo = {
-        "UseCustomFlyToDuration",
-        "Use Custom Fly-To Duration",
-        "If this value is set, the fly-to will always use the duration provided in the "
-        "'CustomFlyToDuration' property.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseCustomFlyToDurationInfo = {
+        .identifier = "UseCustomFlyToDuration",
+        .name = "Use Custom Fly-To Duration",
+        .description = "If this value is set, the fly-to will always use the duration "
+            "provided in the 'CustomFlyToDuration' property.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo CustomFlyToDurationInfo = {
-        "CustomFlyToDuration",
-        "Custom Fly-To Duration",
-        "If the 'UseCustomFlyToDuration' value is set to 'true', any fly-to command will "
-        "use this number of seconds instead. If 'UseCustomFlyToDuration' is 'false', the "
-        "duration will be automatically calculated if nothing else is specified.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo CustomFlyToDurationInfo = {
+        .identifier = "CustomFlyToDuration",
+        .name = "Custom Fly-To Duration",
+        .description = "If the 'UseCustomFlyToDuration' value is set to 'true', any "
+            "fly-to command will use this number of seconds instead. If "
+            "'UseCustomFlyToDuration' is 'false', the duration will be automatically "
+            "calculated if nothing else is specified.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 5.f,
+            .minMax = { 0.f, 120.f }
+        }
     };
 } // namespace
 
@@ -146,15 +178,15 @@ namespace openspace {
 PathNavigator::PathNavigator()
     : PropertyOwner({ "PathNavigator", "Path Navigator" })
     , _defaultPathType(DefaultCurveOptionInfo)
-    , _includeRoll(IncludeRollInfo, false)
-    , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
-    , _applyIdleMotionOnFinish(IdleMotionOnFinishInfo, false)
-    , _arrivalDistanceFactor(ArrivalDistanceFactorInfo, 2.0, 0.1, 20.0)
-    , _linearRotationSpeedFactor(RotationSpeedFactorInfo, 2.f, 0.1f, 3.f)
-    , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
+    , _includeRoll(IncludeRollInfo)
+    , _speedScale(SpeedScaleInfo)
+    , _applyIdleMotionOnFinish(IdleMotionOnFinishInfo)
+    , _arrivalDistanceFactor(ArrivalDistanceFactorInfo)
+    , _linearRotationSpeedFactor(RotationSpeedFactorInfo)
+    , _minValidBoundingSphere(MinBoundingSphereInfo)
     , _relevantNodeTags(RelevantNodeTagsInfo)
-    , _useCustomFlyToDuration(UseCustomFlyToDurationInfo, false)
-    , _customFlyToDuration(CustomFlyToDurationInfo, 5.f, 0.f, 120.f)
+    , _useCustomFlyToDuration(UseCustomFlyToDurationInfo)
+    , _customFlyToDuration(CustomFlyToDurationInfo)
 {
     _defaultPathType.addOptions({
         { static_cast<int>(Path::Type::AvoidCollision), "AvoidCollision" },

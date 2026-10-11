@@ -39,56 +39,87 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color of the grid lines.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color of the grid lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.5f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo HighlightColorInfo = {
-        "HighlightColor",
-        "Highlight color",
-        "The color of the highlighted lines in the grid.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo HighlightColorInfo = {
+        .identifier = "HighlightColor",
+        .name = "Highlight color",
+        .description = "The color of the highlighted lines in the grid.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.8f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Number of segments",
-        "The number of segments to split the grid into, in each direction (x and y).",
-        Visibility::User
+    constexpr IVec2PropertyInfo SegmentsInfo = {
+        .identifier = "Segments",
+        .name = "Number of segments",
+        .description = "The number of segments to split the grid into, in each direction "
+            "(x and y).",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::uvec2(10),
+            .minMax = { glm::uvec2(1), glm::uvec2(200) }
+        }
     };
 
-    constexpr PropertyInfo HighlightRateInfo = {
-        "HighlightRate",
-        "Highlight rate",
-        "The rate that the columns and rows are highlighted, counted with respect to the "
-        "center of the grid. If the number of segments in the grid is odd, the "
-        "highlighting might be offset from the center.",
-        Visibility::User
+    constexpr IVec2PropertyInfo HighlightRateInfo = {
+        .identifier = "HighlightRate",
+        .name = "Highlight rate",
+        .description = "The rate that the columns and rows are highlighted, counted with "
+            "respect to the center of the grid. If the number of segments in the grid is "
+            "odd, the highlighting might be offset from the center.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::uvec2(0),
+            .minMax = { glm::uvec2(0), glm::uvec2(200) }
+        }
     };
 
-    constexpr PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the grid lines. The larger number, the thicker the lines.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the grid lines. The larger number, the thicker the "
+            "lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr PropertyInfo HighlightLineWidthInfo = {
-        "HighlightLineWidth",
-        "Highlight line width",
-        "The width of the highlighted grid lines. The larger number, the thicker the "
-        "lines.",
-        Visibility::User
+    constexpr FloatPropertyInfo HighlightLineWidthInfo = {
+        .identifier = "HighlightLineWidth",
+        .name = "Highlight line width",
+        .description = "The width of the highlighted grid lines. The larger number, the "
+            "thicker the lines.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr PropertyInfo SizeInfo = {
-        "Size",
-        "Grid size",
-        "The size of the grid (in the x and y direction), given in meters.",
-        Visibility::User
+    constexpr Vec2PropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Grid size",
+        .description = "The size of the grid (in the x and y direction), given in "
+            "meters.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec2(1.f),
+            .minMax = { glm::vec2(1.f), glm::vec2(1e11f) }
+        }
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
@@ -142,13 +173,13 @@ Documentation RenderableGrid::Documentation() {
 
 RenderableGrid::RenderableGrid(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _highlightColor(HighlightColorInfo, glm::vec3(0.8f), glm::vec3(0.f), glm::vec3(1.f))
-    , _segments(SegmentsInfo, glm::uvec2(10), glm::uvec2(1), glm::uvec2(200))
-    , _highlightRate(HighlightRateInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(200))
-    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
-    , _highlightLineWidth(HighlightLineWidthInfo, 0.5f, 1.f, 20.f)
-    , _size(SizeInfo, glm::vec2(1.f), glm::vec2(1.f), glm::vec2(1e11f))
+    , _color(ColorInfo)
+    , _highlightColor(HighlightColorInfo)
+    , _segments(SegmentsInfo)
+    , _highlightRate(HighlightRateInfo)
+    , _lineWidth(LineWidthInfo)
+    , _highlightLineWidth(HighlightLineWidthInfo)
+    , _size(SizeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

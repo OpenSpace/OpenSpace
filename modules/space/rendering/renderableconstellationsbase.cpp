@@ -43,27 +43,32 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableConstellationsBase";
 
-    constexpr PropertyInfo NamesFileInfo = {
-        "NamesFile",
-        "Constellation names file path",
-        "Specifies the file that contains the mapping between constellation "
-        "abbreviations and full names of the constellations. If this value is empty, the "
-        "abbreviations are used as the full names.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo NamesFileInfo = {
+        .identifier = "NamesFile",
+        .name = "Constellation names file path",
+        .description = "Specifies the file that contains the mapping between "
+            "constellation abbreviations and full names of the constellations. If this "
+            "value is empty, the abbreviations are used as the full names.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The line width used for the constellation shape.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The line width used for the constellation shape.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 1.f, 16.f }
+        }
     };
 
     constexpr PropertyInfo SelectionInfo = {
-        "ConstellationSelection",
-        "Constellation selection",
-        "The selected constellations are displayed on the celestial sphere.",
-        Visibility::NoviceUser
+        .identifier = "ConstellationSelection",
+        .name = "Constellation selection",
+        .description = "The selected constellations are displayed on the celestial "
+            "sphere.",
+        .visibility = Visibility::NoviceUser
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
@@ -100,7 +105,7 @@ Documentation RenderableConstellationsBase::Documentation() {
 
 RenderableConstellationsBase::RenderableConstellationsBase(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
+    , _lineWidth(LineWidthInfo)
     , _selection(SelectionInfo)
     , _namesFilename(NamesFileInfo)
 {

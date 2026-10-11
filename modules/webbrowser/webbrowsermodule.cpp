@@ -48,20 +48,28 @@ namespace {
 
     constexpr std::string_view _loggerCat = "WebBrowser";
 
-    constexpr PropertyInfo UpdateBrowserBetweenRenderablesInfo = {
-        "UpdateBrowserBetweenRenderables",
-        "Update browser between renderables",
-        "Run the message loop of the browser between calls to render individual "
-        "renderables. When disabled, the browser message loop only runs once per frame.",
-        Visibility::Developer
+    constexpr BoolPropertyInfo UpdateBrowserBetweenRenderablesInfo = {
+        .identifier = "UpdateBrowserBetweenRenderables",
+        .name = "Update browser between renderables",
+        .description = "Run the message loop of the browser between calls to render "
+            "individual renderables. When disabled, the browser message loop only runs "
+            "once per frame.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo BrowserUpdateIntervalInfo = {
-        "BrowserUpdateInterval",
-        "Browser update interval",
-        "The time in microseconds between running the message loop of the browser. Only "
-        "used if UpdateBrowserBetweenRenderables is true.",
-        Visibility::Developer
+    constexpr FloatPropertyInfo BrowserUpdateIntervalInfo = {
+        .identifier = "BrowserUpdateInterval",
+        .name = "Browser update interval",
+        .description = "The time in microseconds between running the message loop of the "
+            "browser. Only used if UpdateBrowserBetweenRenderables is true.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 1000.f }
+        }
     };
 
     /**
@@ -123,8 +131,8 @@ Documentation WebBrowserModule::Documentation() {
 
 WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
-    , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
-    , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.f, 1000.f)
+    , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo)
+    , _browserUpdateInterval(BrowserUpdateIntervalInfo)
     , _eventHandler(std::make_unique<EventHandler>())
 {
     global::callback::deinitialize->emplace_back([this]() {

@@ -50,77 +50,107 @@ namespace {
         Direction
     };
 
-    constexpr PropertyInfo StrideInfo = {
-        "Stride",
-        "Stride",
-        "Controls how densely vectors are sampled from the volume. A stride of 1 renders "
-        "every vector.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo StrideInfo = {
+        .identifier = "Stride",
+        .name = "Stride",
+        .description = "Controls how densely vectors are sampled from the volume. A "
+            "stride of 1 renders every vector.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1,
+            .minMax = { 1, 16 }
+        }
     };
 
-    constexpr PropertyInfo FixedColorInfo = {
-        "FixedColor",
-        "Fixed color",
-        "The color of the vectors, when no color map is used.",
-        Visibility::NoviceUser
+    constexpr Vec4PropertyInfo FixedColorInfo = {
+        .identifier = "FixedColor",
+        .name = "Fixed color",
+        .description = "The color of the vectors, when no color map is used.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec4(1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
     constexpr PropertyInfo ColorModeInfo = {
-        "ColorMode",
-        "Color mode",
-        "Controls how the vectors are colored. \"Fixed\" color all vectors with the same "
-        "static color. \"Magnitude\" color the vector field based on the min and max "
-        "magnitudes defined in the volume. \"Direction\" colors the vector based on "
-        "their direction, as follows: +X -> Red, -X -> Cyan, +Y -> Green, -Y -> Magenta, "
-        "+Z -> Blue, -Z -> Yellow.",
-        Visibility::User
+        .identifier = "ColorMode",
+        .name = "Color mode",
+        .description = "Controls how the vectors are colored. \"Fixed\" color all "
+            "vectors with the same static color. \"Magnitude\" color the vector field "
+            "based on the min and max magnitudes defined in the volume. \"Direction\" "
+            "colors the vector based on their direction, as follows: +X -> Red, -X -> "
+            "Cyan, +Y -> Green, -Y -> Magenta, +Z -> Blue, -Z -> Yellow.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo VectorFieldScaleInfo = {
-        "VectorFieldScale",
-        "Vector field scale",
-        "Scales the vector field lines using an exponential scale.",
-        Visibility::User
+    constexpr FloatPropertyInfo VectorFieldScaleInfo = {
+        .identifier = "VectorFieldScale",
+        .name = "Vector field scale",
+        .description = "Scales the vector field lines using an exponential scale.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 100.f }
+        }
     };
 
-    constexpr PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the vector lines.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the vector lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 10.f }
+        }
     };
 
-    constexpr PropertyInfo ColorMapInfo = {
-        "ColorMap",
-        "Color map",
-        "The path to the color map file used for coloring the vector field.",
-        Visibility::User
+    constexpr StringPropertyInfo ColorMapInfo = {
+        .identifier = "ColorMap",
+        .name = "Color map",
+        .description = "The path to the color map file used for coloring the vector "
+            "field.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo ColorMappingDataRangeInfo = {
-        "ColorMappingDataRange",
-        "Color mapping data range",
-        "The magnitude data range used to normalize the magnitude value for color "
-        "lookup. Computed from the volume data if unspecified.",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo ColorMappingDataRangeInfo = {
+        .identifier = "ColorMappingDataRange",
+        .name = "Color mapping data range",
+        .description = "The magnitude data range used to normalize the magnitude value "
+            "for color lookup. Computed from the volume data if unspecified.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(
+                std::numeric_limits<float>::max(),
+                std::numeric_limits<float>::lowest()
+            ),
+            .minMax = { glm::vec2(0.f), glm::vec2(1500.f) },
+            .stepSize = glm::vec2(1.f)
+        }
     };
 
-    constexpr PropertyInfo FilterByLuaInfo = {
-        "FilterByLua",
-        "Filter by Lua script",
-        "If enabled, the vector field is filtered by the provided custom Lua script.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo FilterByLuaInfo = {
+        .identifier = "FilterByLua",
+        .name = "Filter by Lua script",
+        .description = "If enabled, the vector field is filtered by the provided custom "
+            "Lua script.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo FilterScriptInfo = {
-        "FilterScript",
-        "Filter script",
-        "This value is the path to the Lua script that will be executed to compute the "
-        "filtering. The script needs to define a function 'filter' that takes the "
-        "current voxel position (x, y, z) given in galactic coordinates, and the "
-        "velocity vector (vx, vy, vz). The function should return true/false if "
-        "the voxel should be visualized or discarded, respectively.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo FilterScriptInfo = {
+        .identifier = "FilterScript",
+        .name = "Filter script",
+        .description = "This value is the path to the Lua script that will be executed "
+            "to compute the filtering. The script needs to define a function 'filter' "
+            "that takes the current voxel position (x, y, z) given in galactic "
+            "coordinates, and the velocity vector (vx, vy, vz). The function should "
+            "return true/false if the voxel should be visualized or discarded, "
+            "respectively.",
+        .visibility = Visibility::AdvancedUser
     };
 
     // Renders vectors from a given 3D volumetric dataset or a sparse point-like dataset,
@@ -253,17 +283,8 @@ RenderableVectorField::ColorSettings::ColorSettings(const Dictionary& dictionary
     : PropertyOwner({ "Coloring", "Coloring" })
     , colorModeOption(ColorModeInfo)
     , colorMap(ColorMapInfo)
-    , colorMagnitudeDomain(
-        ColorMappingDataRangeInfo,
-        glm::vec2(
-            std::numeric_limits<float>::max(),
-            std::numeric_limits<float>::lowest()
-        ),
-        glm::vec2(0.f),
-        glm::vec2(1500.f),
-        glm::vec2(1.f)
-    )
-    , fixedColor(FixedColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , colorMagnitudeDomain(ColorMappingDataRangeInfo)
+    , fixedColor(FixedColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -305,10 +326,10 @@ RenderableVectorField::ColorSettings::ColorSettings(const Dictionary& dictionary
 RenderableVectorField::RenderableVectorField(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorSettings(dictionary)
-    , _stride(StrideInfo, 1, 1, 16)
-    , _vectorFieldScale(VectorFieldScaleInfo, 1.f, 1.f, 100.f)
-    , _lineWidth(LineWidthInfo, 1.f, 1.f, 10.f)
-    , _filterByLua(FilterByLuaInfo, false)
+    , _stride(StrideInfo)
+    , _vectorFieldScale(VectorFieldScaleInfo)
+    , _lineWidth(LineWidthInfo)
+    , _filterByLua(FilterByLuaInfo)
     , _luaScriptFile(FilterScriptInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

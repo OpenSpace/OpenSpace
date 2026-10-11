@@ -55,82 +55,115 @@ namespace {
 
     constexpr float SecondsInOneDay = 60 * 60 * 24;
 
-    constexpr PropertyInfo StepSizeInfo = {
-        "StepSize",
-        "Step size",
-        "Specifies how often to sample during raycasting. Lower step size leads to "
-        "higher resolution.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo StepSizeInfo = {
+        .identifier = "StepSize",
+        .name = "Step size",
+        .description = "Specifies how often to sample during raycasting. Lower step size "
+            "leads to higher resolution.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.02f,
+            .minMax = { 0.001f, 0.1f }
+        }
     };
 
     constexpr PropertyInfo GridTypeInfo = {
-        "GridType",
-        "Grid type",
-        "The grid type to use for the volume.",
-        Visibility::AdvancedUser
+        .identifier = "GridType",
+        .name = "Grid type",
+        .description = "The grid type to use for the volume.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo SecondsBeforeInfo = {
-        "SecondsBefore",
-        "Seconds before",
-        "The number of seconds to show the first timestep before its actual time.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo SecondsBeforeInfo = {
+        .identifier = "SecondsBefore",
+        .name = "Seconds before",
+        .description = "The number of seconds to show the first timestep before its "
+            "actual time.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.01f, SecondsInOneDay }
+        }
     };
 
-    constexpr PropertyInfo SecondsAfterInfo = {
-        "SecondsAfter",
-        "Seconds after",
-        "The number of seconds to show the the last timestep after its actual time.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo SecondsAfterInfo = {
+        .identifier = "SecondsAfter",
+        .name = "Seconds after",
+        .description = "The number of seconds to show the the last timestep after its "
+            "actual time.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.01f, SecondsInOneDay }
+        }
     };
 
-    constexpr PropertyInfo SourceDirectoryInfo = {
-        "SourceDirectory",
-        "Source directory",
-        "A directory from where to load the data files for the different time steps.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo SourceDirectoryInfo = {
+        .identifier = "SourceDirectory",
+        .name = "Source directory",
+        .description = "A directory from where to load the data files for the different "
+            "time steps.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo TransferFunctionInfo = {
-        "TransferFunctionPath",
-        "Transfer function path",
-        "The path to the transfer function file.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo TransferFunctionInfo = {
+        .identifier = "TransferFunctionPath",
+        .name = "Transfer function path",
+        .description = "The path to the transfer function file.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TriggerTimeJumpInfo = {
-        "TriggerTimeJump",
-        "Jump",
-        "Sets the time to be the first time of the volume sequence.",
-        Visibility::User
+        .identifier = "TriggerTimeJump",
+        .name = "Jump",
+        .description = "Sets the time to be the first time of the volume sequence.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo JumpToTimestepInfo = {
-        "JumpToTimestep",
-        "Jump to timestep",
-        "Setting this value lets you scrub through the sequence's time steps.",
-        Visibility::User
+    constexpr IntPropertyInfo JumpToTimestepInfo = {
+        .identifier = "JumpToTimestep",
+        .name = "Jump to timestep",
+        .description = "Setting this value lets you scrub through the sequence's time "
+            "steps.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 256 }
+        }
     };
 
-    constexpr PropertyInfo BrightnessInfo = {
-        "Brightness",
-        "Brightness",
-        "A value that affects the general brightness of the volume rendering.",
-        Visibility::User
+    constexpr FloatPropertyInfo BrightnessInfo = {
+        .identifier = "Brightness",
+        .name = "Brightness",
+        .description = "A value that affects the general brightness of the volume "
+            "rendering.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.33f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo rNormalizationInfo = {
-        "RNormalization",
-        "Radius normalization",
-        "", // @TODO Missing documentation
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo rNormalizationInfo = {
+        .identifier = "RNormalization",
+        .name = "Radius normalization",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 2.f }
+        }
     };
 
-    constexpr PropertyInfo rUpperBoundInfo = {
-        "RUpperBound",
-        "Radius upper bound",
-        "Limit the volume's radius.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo rUpperBoundInfo = {
+        .identifier = "RUpperBound",
+        .name = "Radius upper bound",
+        .description = "Limit the volume's radius.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 2.f }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
@@ -176,16 +209,16 @@ Documentation RenderableTimeVaryingVolume::Documentation() {
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridType(GridTypeInfo)
-    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
-    , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
-    , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
-    , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
-    , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
-    , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
+    , _stepSize(StepSizeInfo)
+    , _brightness(BrightnessInfo)
+    , _rNormalization(rNormalizationInfo)
+    , _rUpperBound(rUpperBoundInfo)
+    , _secondsBefore(SecondsBeforeInfo)
+    , _secondsAfter(SecondsAfterInfo)
     , _sourceDirectory(SourceDirectoryInfo)
     , _transferFunctionPath(TransferFunctionInfo)
     , _triggerTimeJump(TriggerTimeJumpInfo)
-    , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
+    , _jumpToTimestep(JumpToTimestepInfo)
     , _invertDataAtZ(false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

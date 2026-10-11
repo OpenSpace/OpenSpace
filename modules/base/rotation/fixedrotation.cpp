@@ -40,157 +40,203 @@ namespace {
 
     constexpr std::string_view _loggerCat = "FixedRotation";
 
-    constexpr PropertyInfo EnableInfo = {
-        "Enable",
-        "Enabled",
-        "If this value is 'true', all the machinery of this rotation is used, of it is "
-        "'false', it provides the ability to change its attributes without risking some "
-        "undefined behavior.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableInfo = {
+        .identifier = "Enable",
+        .name = "Enabled",
+        .description = "If this value is 'true', all the machinery of this rotation is "
+            "used, of it is 'false', it provides the ability to change its attributes "
+            "without risking some undefined behavior.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
     constexpr PropertyInfo XAxisTypeInfo = {
-        "xAxisType",
-        "xAxis: Specification type",
-        "This value specifies how this axis is being specified, that is whether it is "
-        "referencing another object, specifying an absolute vector, or whether it is "
-        "using the right handed coordinate system completion based off the other two "
-        "vectors.",
-        Visibility::AdvancedUser
+        .identifier = "xAxisType",
+        .name = "xAxis: Specification type",
+        .description = "This value specifies how this axis is being specified, that is "
+            "whether it is referencing another object, specifying an absolute vector, or "
+            "whether it is using the right handed coordinate system completion based off "
+            "the other two vectors.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo YAxisTypeInfo = {
-        "yAxisType",
-        "yAxis: Specification type",
-        "This value specifies how this axis is being specified, that is whether it is "
-        "referencing another object, specifying an absolute vector, or whether it is "
-        "using the right handed coordinate system completion based off the other two "
-        "vectors.",
-        Visibility::AdvancedUser
+        .identifier = "yAxisType",
+        .name = "yAxis: Specification type",
+        .description = "This value specifies how this axis is being specified, that is "
+            "whether it is referencing another object, specifying an absolute vector, or "
+            "whether it is using the right handed coordinate system completion based off "
+            "the other two vectors.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ZAxisTypeInfo = {
-        "zAxisType",
-        "zAxis: Specification type",
-        "This value specifies how this axis is being specified, that is whether it is "
-        "referencing another object, specifying an absolute vector, or whether it is "
-        "using the right handed coordinate system completion based off the other two "
-        "vectors.",
-        Visibility::AdvancedUser
+        .identifier = "zAxisType",
+        .name = "zAxis: Specification type",
+        .description = "This value specifies how this axis is being specified, that is "
+            "whether it is referencing another object, specifying an absolute vector, or "
+            "whether it is using the right handed coordinate system completion based off "
+            "the other two vectors.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo XAxisObjectInfo = {
-        "xAxisObject",
-        "xAxis: Focus object",
-        "This is the object that the axis will focus on. This object must name an "
-        "existing scene graph node in the currently loaded scene and the rotation will "
-        "stay fixed to the current position of that object.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo XAxisObjectInfo = {
+        .identifier = "xAxisObject",
+        .name = "xAxis: Focus object",
+        .description = "This is the object that the axis will focus on. This object must "
+            "name an existing scene graph node in the currently loaded scene and the "
+            "rotation will stay fixed to the current position of that object.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = ""
+        }
     };
 
-    constexpr PropertyInfo YAxisObjectInfo = {
-        "yAxisObject",
-        "yAxis: Focus object",
-        "This is the object that the axis will focus on. This object must name an "
-        "existing scene graph node in the currently loaded scene and the rotation will "
-        "stay fixed to the current position of that object.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo YAxisObjectInfo = {
+        .identifier = "yAxisObject",
+        .name = "yAxis: Focus object",
+        .description = "This is the object that the axis will focus on. This object must "
+            "name an existing scene graph node in the currently loaded scene and the "
+            "rotation will stay fixed to the current position of that object.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = ""
+        }
     };
 
-    constexpr PropertyInfo ZAxisObjectInfo = {
-        "zAxisObject",
-        "zAxis: Focus object",
-        "This is the object that the axis will focus on. This object must name an "
-        "existing scene graph node in the currently loaded scene and the rotation will "
-        "stay fixed to the current position of that object.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo ZAxisObjectInfo = {
+        .identifier = "zAxisObject",
+        .name = "zAxis: Focus object",
+        .description = "This is the object that the axis will focus on. This object must "
+            "name an existing scene graph node in the currently loaded scene and the "
+            "rotation will stay fixed to the current position of that object.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = ""
+        }
     };
 
-    constexpr PropertyInfo XAxisInvertObjectInfo = {
-        "xAxisInvertObject",
-        "xAxis: Invert object point direction",
-        "If this value is set to 'true', and the type is set to 'Object', the inverse of "
-        "the pointing direction is used, causing the object to point away from the "
-        "referenced object.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo XAxisInvertObjectInfo = {
+        .identifier = "xAxisInvertObject",
+        .name = "xAxis: Invert object point direction",
+        .description = "If this value is set to 'true', and the type is set to 'Object', "
+            "the inverse of the pointing direction is used, causing the object to point "
+            "away from the referenced object.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo YAxisInvertObjectInfo = {
-        "yAxisInvertObject",
-        "yAxis: Invert object point direction",
-        "If this value is set to 'true', and the type is set to 'Object', the inverse of "
-        "the pointing direction is used, causing the object to point away from the "
-        "referenced object.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo YAxisInvertObjectInfo = {
+        .identifier = "yAxisInvertObject",
+        .name = "yAxis: Invert object point direction",
+        .description = "If this value is set to 'true', and the type is set to 'Object', "
+            "the inverse of the pointing direction is used, causing the object to point "
+            "away from the referenced object.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ZAxisInvertObjectInfo = {
-        "zAxisInvertObject",
-        "zAxis: Invert object point direction",
-        "If this value is set to 'true', and the type is set to 'Object', the inverse of "
-        "the pointing direction is used, causing the object to point away from the "
-        "referenced object.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ZAxisInvertObjectInfo = {
+        .identifier = "zAxisInvertObject",
+        .name = "zAxis: Invert object point direction",
+        .description = "If this value is set to 'true', and the type is set to 'Object', "
+            "the inverse of the pointing direction is used, causing the object to point "
+            "away from the referenced object.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo XAxisVectorInfo = {
-        "xAxisVector",
-        "xAxis: Direction vector",
-        "This value specifies a static direction vector that is used for a fixed "
-        "rotation.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo XAxisVectorInfo = {
+        .identifier = "xAxisVector",
+        .name = "xAxis: Direction vector",
+        .description = "This value specifies a static direction vector that is used for "
+            "a fixed rotation.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(1.f, 0.f, 0.f),
+            .minMax = { glm::vec3(-1.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo YAxisVectorInfo = {
-        "yAxisVector",
-        "yAxis: Direction vector",
-        "This value specifies a static direction vector that is used for a fixed "
-        "rotation.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo YAxisVectorInfo = {
+        .identifier = "yAxisVector",
+        .name = "yAxis: Direction vector",
+        .description = "This value specifies a static direction vector that is used for "
+            "a fixed rotation.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 1.f, 0.f),
+            .minMax = { glm::vec3(-1.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo ZAxisVectorInfo = {
-        "zAxisVector",
-        "zAxis: Direction vector",
-        "This value specifies a static direction vector that is used for a fixed "
-        "rotation.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ZAxisVectorInfo = {
+        .identifier = "zAxisVector",
+        .name = "zAxis: Direction vector",
+        .description = "This value specifies a static direction vector that is used for "
+            "a fixed rotation.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 0.f, 1.f),
+            .minMax = { glm::vec3(-1.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo XAxisOrthogonalVectorInfo = {
-        "xAxisOrthogonal",
-        "xAxis: Vector is orthogonal",
-        "This value determines whether the vector specified is used directly, or whether "
-        "it is used together with another non-coordinate system completion vector to "
-        "construct an orthogonal vector instead.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo XAxisOrthogonalVectorInfo = {
+        .identifier = "xAxisOrthogonal",
+        .name = "xAxis: Vector is orthogonal",
+        .description = "This value determines whether the vector specified is used "
+            "directly, or whether it is used together with another non-coordinate system "
+            "completion vector to construct an orthogonal vector instead.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo YAxisOrthogonalVectorInfo = {
-        "yAxisOrthogonal",
-        "yAxis: Vector is orthogonal",
-        "This value determines whether the vector specified is used directly, or whether "
-        "it is used together with another non-coordinate system completion vector to "
-        "construct an orthogonal vector instead.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo YAxisOrthogonalVectorInfo = {
+        .identifier = "yAxisOrthogonal",
+        .name = "yAxis: Vector is orthogonal",
+        .description = "This value determines whether the vector specified is used "
+            "directly, or whether it is used together with another non-coordinate system "
+            "completion vector to construct an orthogonal vector instead.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ZAxisOrthogonalVectorInfo = {
-        "zAxisOrthogonal",
-        "zAxis: Vector is orthogonal",
-        "This value determines whether the vector specified is used directly, or whether "
-        "it is used together with another non-coordinate system completion vector to "
-        "construct an orthogonal vector instead.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ZAxisOrthogonalVectorInfo = {
+        .identifier = "zAxisOrthogonal",
+        .name = "zAxis: Vector is orthogonal",
+        .description = "This value determines whether the vector specified is used "
+            "directly, or whether it is used together with another non-coordinate system "
+            "completion vector to construct an orthogonal vector instead.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo AttachedInfo = {
-        "Attached",
-        "Attached node",
-        "This is the name of the node that this rotation is attached to, this value is "
-        "only needed if any of the three axis uses the Object type. In this case, the "
-        "location of the attached node is required to compute the relative direction.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo AttachedInfo = {
+        .identifier = "Attached",
+        .name = "Attached node",
+        .description = "This is the name of the node that this rotation is attached to, "
+            "this value is only needed if any of the three axis uses the Object type. In "
+            "this case, the location of the attached node is required to compute the "
+            "relative direction.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = ""
+        }
     };
 
     // Calculates the rotation in such a way that the attached scene graph node will
@@ -285,44 +331,29 @@ Documentation FixedRotation::Documentation() {
 
 FixedRotation::FixedRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
-    , _enabled(EnableInfo, true)
+    , _enabled(EnableInfo)
     , _xAxis {
         .type = OptionProperty(XAxisTypeInfo),
-        .object = StringProperty(XAxisObjectInfo, ""),
-        .invertObject = BoolProperty(XAxisInvertObjectInfo, false),
-        .vector = Vec3Property(
-            XAxisVectorInfo,
-            glm::vec3(1.f, 0.f, 0.f),
-            glm::vec3(-1.f),
-            glm::vec3(1.f)
-        ),
-        .isOrthogonal = BoolProperty(XAxisOrthogonalVectorInfo, false)
+        .object = StringProperty(XAxisObjectInfo),
+        .invertObject = BoolProperty(XAxisInvertObjectInfo),
+        .vector = Vec3Property(XAxisVectorInfo),
+        .isOrthogonal = BoolProperty(XAxisOrthogonalVectorInfo)
     }
     , _yAxis{
         .type = OptionProperty(YAxisTypeInfo),
-        .object = StringProperty(YAxisObjectInfo, ""),
-        .invertObject = BoolProperty(YAxisInvertObjectInfo, false),
-        .vector = Vec3Property(
-            YAxisVectorInfo,
-            glm::vec3(0.f, 1.f, 0.f),
-            glm::vec3(-1.f),
-            glm::vec3(1.f)
-        ),
-        .isOrthogonal = BoolProperty(YAxisOrthogonalVectorInfo, false)
+        .object = StringProperty(YAxisObjectInfo),
+        .invertObject = BoolProperty(YAxisInvertObjectInfo),
+        .vector = Vec3Property(YAxisVectorInfo),
+        .isOrthogonal = BoolProperty(YAxisOrthogonalVectorInfo)
     }
     , _zAxis{
         .type = OptionProperty(ZAxisTypeInfo),
-        .object = StringProperty(ZAxisObjectInfo, ""),
-        .invertObject = BoolProperty(ZAxisInvertObjectInfo, false),
-        .vector = Vec3Property(
-            ZAxisVectorInfo,
-            glm::vec3(0.f, 0.f, 1.f),
-            glm::vec3(-1.f),
-            glm::vec3(1.f)
-        ),
-        .isOrthogonal = BoolProperty(ZAxisOrthogonalVectorInfo, false)
+        .object = StringProperty(ZAxisObjectInfo),
+        .invertObject = BoolProperty(ZAxisInvertObjectInfo),
+        .vector = Vec3Property(ZAxisVectorInfo),
+        .isOrthogonal = BoolProperty(ZAxisOrthogonalVectorInfo)
     }
-    , _attachedObject(AttachedInfo, "")
+    , _attachedObject(AttachedInfo)
     , _constructorDictionary(dictionary)
 {
     // We check the Dictionary here in order to detect the errors early

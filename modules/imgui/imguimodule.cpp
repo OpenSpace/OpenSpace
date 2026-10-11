@@ -64,33 +64,48 @@ namespace {
 
     ImFont* captionFont = nullptr;
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "This setting determines whether this object will be visible or not.",
-        Visibility::Developer
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "This setting determines whether this object will be visible or "
+            "not.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo CollapsedInfo = {
-        "Collapsed",
-        "Is collapsed",
-        "This setting determines whether this window is collapsed or not.",
-        Visibility::Developer
+    constexpr BoolPropertyInfo CollapsedInfo = {
+        .identifier = "Collapsed",
+        .name = "Is collapsed",
+        .description = "This setting determines whether this window is collapsed or not.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo ShowHelpInfo = {
-        "ShowHelpText",
-        "Show tooltip help",
-        "If this value is enabled these kinds of tooltips are shown for most properties "
-        "explaining what impact they have on the visuals.",
-        Visibility::Developer
+    constexpr BoolPropertyInfo ShowHelpInfo = {
+        .identifier = "ShowHelpText",
+        .name = "Show tooltip help",
+        .description = "If this value is enabled these kinds of tooltips are shown for "
+            "most properties explaining what impact they have on the visuals.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo HelpTextDelayInfo = {
-        "HelpTextDelay",
-        "Tooltip delay (in s)",
-        "This value determines the delay in seconds after which the tooltip is shown.",
-        Visibility::Developer
+    constexpr FloatPropertyInfo HelpTextDelayInfo = {
+        .identifier = "HelpTextDelay",
+        .name = "Tooltip delay (in s)",
+        .description = "This value determines the delay in seconds after which the "
+            "tooltip is shown.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 
     ImGuiKey toImGuiKey(openspace::Key key) {
@@ -128,12 +143,12 @@ void CaptionText(const char* text) {
 
 ImGUIModule::ImGUIModule()
     : OpenSpaceModule(Name)
-    , _isEnabled(EnabledInfo, false)
-    , _isCollapsed(CollapsedInfo, false)
+    , _isEnabled(EnabledInfo)
+    , _isCollapsed(CollapsedInfo)
     , _sceneProperty("Scene", "Scene", GuiPropertyComponent::UseTreeLayout::Yes)
     , _property("Settings", "Settings")
-    , _showHelpText(ShowHelpInfo, true)
-    , _helpTextDelay(HelpTextDelayInfo, 1.f, 0.f, 10.f)
+    , _showHelpText(ShowHelpInfo)
+    , _helpTextDelay(HelpTextDelayInfo)
 {
     addProperty(_isEnabled);
     addProperty(_isCollapsed);

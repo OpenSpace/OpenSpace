@@ -37,23 +37,29 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo FormatStringInfo = {
-        "FormatString",
-        "Format string",
-        "The format text describing how this dashboard item renders its text. This text "
-        "must contain exactly one {} which is a placeholder that will contain the date "
-        "in the format as specified by `TimeFormat`.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo FormatStringInfo = {
+        .identifier = "FormatString",
+        .name = "Format string",
+        .description = "The format text describing how this dashboard item renders its "
+            "text. This text must contain exactly one {} which is a placeholder that "
+            "will contain the date in the format as specified by `TimeFormat`.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "Date: {}"
+        }
     };
 
-    constexpr PropertyInfo TimeFormatInfo = {
-        "TimeFormat",
-        "Time format",
-        "The format string used for formatting the date/time before being passed to the "
-        "string in FormatString. See "
-        "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html for full "
-        "information about how to structure this format.",
-        Visibility::User
+    constexpr StringPropertyInfo TimeFormatInfo = {
+        .identifier = "TimeFormat",
+        .name = "Time format",
+        .description = "The format string used for formatting the date/time before being "
+            "passed to the string in FormatString. See "
+            "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html for "
+            "full information about how to structure this format.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = "YYYY MON DD HR:MN:SC.### UTC ::RND"
+        }
     };
 
     // Shows the current in-game simulation time. The `FormatString` and the `TimeFormat`
@@ -80,8 +86,8 @@ Documentation ScreenSpaceDate::Documentation() {
 
 ScreenSpaceDate::ScreenSpaceDate(const Dictionary& dictionary)
     : ScreenSpaceRenderableText(dictionary)
-    , _formatString(FormatStringInfo, "Date: {}")
-    , _timeFormat(TimeFormatInfo, "YYYY MON DD HR:MN:SC.### UTC ::RND")
+    , _formatString(FormatStringInfo)
+    , _timeFormat(TimeFormatInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

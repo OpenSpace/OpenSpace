@@ -40,21 +40,24 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo SimplificationInfo = {
-        "Simplification",
-        "Simplification",
-        "If this value is enabled, the velocity is displayed in nuanced units, such as "
-        "m/s, AU/s, light years / s etc. If this value is disabled, the unit can be "
-        "explicitly requested.",
-        Visibility::User
+    constexpr BoolPropertyInfo SimplificationInfo = {
+        .identifier = "Simplification",
+        .name = "Simplification",
+        .description = "If this value is enabled, the velocity is displayed in nuanced "
+            "units, such as m/s, AU/s, light years / s etc. If this value is disabled, "
+            "the unit can be explicitly requested.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
     constexpr PropertyInfo RequestedUnitInfo = {
-        "RequestedUnit",
-        "Requested unit",
-        "If the simplification is disabled, this distance unit is used for the velocity "
-        "display.",
-        Visibility::User
+        .identifier = "RequestedUnit",
+        .name = "Requested unit",
+        .description = "If the simplification is disabled, this distance unit is used "
+            "for the velocity display.",
+        .visibility = Visibility::User
     };
 
     // This `DashboardItem` shows the velocity of the camera, that is how fast the camera
@@ -85,7 +88,7 @@ Documentation DashboardItemVelocity::Documentation() {
 
 DashboardItemVelocity::DashboardItemVelocity(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _doSimplification(SimplificationInfo, true)
+    , _doSimplification(SimplificationInfo)
     , _requestedUnit(RequestedUnitInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

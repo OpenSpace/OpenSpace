@@ -47,71 +47,80 @@ namespace {
     constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
 
     constexpr PropertyInfo TypeInfo = {
-        "Type",
-        "Type",
-        "The type of this Layer. This value is a read-only property and thus cannot be "
-        "changed.",
-        Visibility::Developer
+        .identifier = "Type",
+        .name = "Type",
+        .description = "The type of this Layer. This value is a read-only property and "
+            "thus cannot be changed.",
+        .visibility = Visibility::Developer
     };
 
     constexpr PropertyInfo BlendModeInfo = {
-        "BlendMode",
-        "Blend mode",
-        "This value specifies the blend mode that is applied to this layer. The blend "
-        "mode determines how this layer is added to the underlying layers beneath.",
-        Visibility::AdvancedUser
+        .identifier = "BlendMode",
+        .name = "Blend mode",
+        .description = "This value specifies the blend mode that is applied to this "
+            "layer. The blend mode determines how this layer is added to the underlying "
+            "layers beneath.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "If this value is enabled, the layer will be used for the final composition of "
-        "the planet. If this value is disabled, the layer will be ignored in the "
-        "composition.",
-        Visibility::NoviceUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "If this value is enabled, the layer will be used for the final "
+            "composition of the planet. If this value is disabled, the layer will be "
+            "ignored in the composition.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     constexpr PropertyInfo ResetInfo = {
-        "Reset",
-        "Reset",
-        "If this value is triggered, this layer will be reset. This will delete the "
-        "local cache for this layer and will trigger a fresh load of all tiles.",
-        Visibility::User
+        .identifier = "Reset",
+        .name = "Reset",
+        .description = "If this value is triggered, this layer will be reset. This will "
+            "delete the local cache for this layer and will trigger a fresh load of all "
+            "tiles.",
+        .visibility = Visibility::User
     };
 
     constexpr PropertyInfo RemoveInfo = {
-        "Remove",
-        "Remove",
-        "If this value is triggered, a script will be executed that will remove this "
-        "layer before the next frame.",
-        Visibility::User,
-        PropertyInfo::IsEnablable::No,
-        PropertyInfo::NeedsConfirmation::Yes
+        .identifier = "Remove",
+        .name = "Remove",
+        .description = "If this value is triggered, a script will be executed that will "
+            "remove this layer before the next frame.",
+        .visibility = Visibility::User,
+        .isEnablable = IsEnablable::No,
+        .needsConfirmation = NeedsConfirmation::Yes
     };
 
-    constexpr PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "If the 'Type' of this layer is a solid color, this value determines what this "
-        "solid color is.",
-        Visibility::User
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "If the 'Type' of this layer is a solid color, this value "
+            "determines what this solid color is.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     constexpr PropertyInfo ZIndexInfo = {
-        "ZIndex",
-        "Z-Index",
-        "Determines where the layer is placed in the list of available layers. Layers "
-        "are applied in the order of their Z indices, with higher indices obscuring "
-        "layers with lower values.",
-        Visibility::AdvancedUser
+        .identifier = "ZIndex",
+        .name = "Z-Index",
+        .description = "Determines where the layer is placed in the list of available "
+            "layers. Layers are applied in the order of their Z indices, with higher "
+            "indices obscuring layers with lower values.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo GuiDescriptionInfo = {
-        "GuiDescription",
-        "Gui description",
-        "This is the description for the scene graph node to be shown in the GUI. "
-        "Example: Earth is a special place.",
-        Visibility::Hidden
+    constexpr StringPropertyInfo GuiDescriptionInfo = {
+        .identifier = "GuiDescription",
+        .name = "Gui description",
+        .description = "This is the description for the scene graph node to be shown in "
+            "the GUI. Example: Earth is a special place.",
+        .visibility = Visibility::Hidden
     };
 
     struct [[codegen::Dictionary(Layer), codegen::noexhaustive()]] Parameters {
@@ -194,11 +203,11 @@ Layer::Layer(layers::Group::ID id, const Dictionary& layerDict, LayerGroup& pare
     , _parent(parent)
     , _typeOption(TypeInfo)
     , _blendModeOption(BlendModeInfo)
-    , _enabled(EnabledInfo, false)
+    , _enabled(EnabledInfo)
     , _reset(ResetInfo)
     , _remove(RemoveInfo)
     , _guiDescription(GuiDescriptionInfo)
-    , _solidColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _solidColor(ColorInfo)
     , _layerGroupId(id)
 {
     const Parameters p = codegen::bake<Parameters>(layerDict);

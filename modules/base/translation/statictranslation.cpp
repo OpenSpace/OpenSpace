@@ -30,12 +30,17 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo PositionInfo = {
-        "Position",
-        "Position",
-        "This value is used as a static offset (in meters) that is applied to the scene "
-        "graph node that this transformation is attached to relative to its parent.",
-        Visibility::User
+    constexpr DVec3PropertyInfo PositionInfo = {
+        .identifier = "Position",
+        .name = "Position",
+        .description = "This value is used as a static offset (in meters) that is "
+            "applied to the scene graph node that this transformation is attached to "
+            "relative to its parent.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::dvec3(0.0),
+            .minMax = { glm::dvec3(-1e35), glm::dvec3(1e35) }
+        }
     };
 
     // Provides a fixed translation to the attached scene graph node that does not change
@@ -58,7 +63,7 @@ Documentation StaticTranslation::Documentation() {
 
 StaticTranslation::StaticTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
-    , _position(PositionInfo, glm::dvec3(0.0), glm::dvec3(-1e35), glm::dvec3(1e35))
+    , _position(PositionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

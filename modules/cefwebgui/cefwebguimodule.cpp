@@ -42,39 +42,54 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "This setting determines whether the browser should be enabled or not.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "This setting determines whether the browser should be enabled or "
+            "not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     constexpr PropertyInfo ReloadInfo = {
-        "Reload",
-        "Reload",
-        "Trigger this property to reload the browser.",
-        Visibility::User
+        .identifier = "Reload",
+        .name = "Reload",
+        .description = "Trigger this property to reload the browser.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo VisibleInfo = {
-        "Visible",
-        "Is visible",
-        "This setting determines whether the browser should be visible or not.",
-        Visibility::User
+    constexpr BoolPropertyInfo VisibleInfo = {
+        .identifier = "Visible",
+        .name = "Is visible",
+        .description = "This setting determines whether the browser should be visible or "
+            "not.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo GuiUrlInfo = {
-        "GuiUrl",
-        "Gui URL",
-        "The URL of the webpage that is used to load the WebGUI from.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo GuiUrlInfo = {
+        .identifier = "GuiUrl",
+        .name = "Gui URL",
+        .description = "The URL of the webpage that is used to load the WebGUI from.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = ""
+        }
     };
 
-    constexpr PropertyInfo GuiScaleInfo = {
-        "GuiScale",
-        "Gui scale",
-        "GUI scale multiplier.",
-        Visibility::Always
+    constexpr FloatPropertyInfo GuiScaleInfo = {
+        .identifier = "GuiScale",
+        .name = "Gui scale",
+        .description = "GUI scale multiplier.",
+        .visibility = Visibility::Always,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.1f, 3.f }
+        }
     };
 
     struct [[codegen::Dictionary(CefWebGuiModule)]] Parameters {
@@ -98,11 +113,11 @@ Documentation CefWebGuiModule::Documentation() {
 
 CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
-    , _enabled(EnabledInfo, true)
-    , _visible(VisibleInfo, true)
+    , _enabled(EnabledInfo)
+    , _visible(VisibleInfo)
     , _reload(ReloadInfo)
-    , _url(GuiUrlInfo, "")
-    , _guiScale(GuiScaleInfo, 1.f, 0.1f, 3.f)
+    , _url(GuiUrlInfo)
+    , _guiScale(GuiScaleInfo)
 {
     addProperty(_enabled);
     addProperty(_visible);

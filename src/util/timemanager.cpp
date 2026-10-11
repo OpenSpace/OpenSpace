@@ -56,30 +56,46 @@ namespace {
     // These are used when setting the time from Lua time interpolation functions when
     // called without arguments
 
-    constexpr PropertyInfo DefaultTimeInterpolationDurationInfo = {
-        "DefaultTimeInterpolationDuration",
-        "Default time interpolation duration",
-        "The default duration taken to interpolate between times."
+    constexpr FloatPropertyInfo DefaultTimeInterpolationDurationInfo = {
+        .identifier = "DefaultTimeInterpolationDuration",
+        .name = "Default time interpolation duration",
+        .description = "The default duration taken to interpolate between times.",
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr PropertyInfo DefaultDeltaTimeInterpolationDurationInfo = {
-        "DefaultDeltaTimeInterpolationDuration",
-        "Default delta time interpolation duration",
-        "The default duration taken to interpolate between delta times."
+    constexpr FloatPropertyInfo DefaultDeltaTimeInterpolationDurationInfo = {
+        .identifier = "DefaultDeltaTimeInterpolationDuration",
+        .name = "Default delta time interpolation duration",
+        .description = "The default duration taken to interpolate between delta times.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr PropertyInfo DefaultPauseInterpolationDurationInfo = {
-        "DefaultPauseInterpolationDuration",
-        "Default pause interpolation duration",
-        "The default duration taken to transition to the paused state, when "
-        "interpolating."
+    constexpr FloatPropertyInfo DefaultPauseInterpolationDurationInfo = {
+        .identifier = "DefaultPauseInterpolationDuration",
+        .name = "Default pause interpolation duration",
+        .description = "The default duration taken to transition to the paused state, "
+            "when interpolating.",
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr PropertyInfo DefaultUnpauseInterpolationDurationInfo = {
-        "DefaultUnpauseInterpolationDuration",
-        "Default unpause interpolation duration",
-        "The default duration taken to transition to the unpaused state, when "
-        "interpolating."
+    constexpr FloatPropertyInfo DefaultUnpauseInterpolationDurationInfo = {
+        .identifier = "DefaultUnpauseInterpolationDuration",
+        .name = "Default unpause interpolation duration",
+        .description = "The default duration taken to transition to the unpaused state, "
+            "when interpolating.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
     constexpr std::string_view DeltaTimeStepsGuiPath = "/Time/Simulation Speed/Steps";
@@ -104,30 +120,10 @@ namespace openspace {
 
 TimeManager::TimeManager()
     : PropertyOwner({ "TimeManager", "Time Manager" })
-    , _defaultTimeInterpolationDuration(
-        DefaultTimeInterpolationDurationInfo,
-        2.f,
-        0.f,
-        5.f
-    )
-    , _defaultDeltaTimeInterpolationDuration(
-        DefaultDeltaTimeInterpolationDurationInfo,
-        1.f,
-        0.f,
-        5.f
-    )
-    , _defaultPauseInterpolationDuration(
-        DefaultPauseInterpolationDurationInfo,
-        0.5f,
-        0.f,
-        5.f
-    )
-    , _defaultUnpauseInterpolationDuration(
-        DefaultUnpauseInterpolationDurationInfo,
-        1.f,
-        0.f,
-        5.f
-    )
+    , _defaultTimeInterpolationDuration(DefaultTimeInterpolationDurationInfo)
+    , _defaultDeltaTimeInterpolationDuration(DefaultDeltaTimeInterpolationDurationInfo)
+    , _defaultPauseInterpolationDuration(DefaultPauseInterpolationDurationInfo)
+    , _defaultUnpauseInterpolationDuration(DefaultUnpauseInterpolationDurationInfo)
 {
     addProperty(_defaultTimeInterpolationDuration);
     addProperty(_defaultDeltaTimeInterpolationDuration);

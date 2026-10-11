@@ -52,35 +52,39 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableConstellationLines";
 
-    constexpr PropertyInfo FileInfo = {
-        "File",
-        "Constellation data file path",
-        "The path to a SPECK file that contains the data for the constellation lines.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo FileInfo = {
+        .identifier = "File",
+        .name = "Constellation data file path",
+        .description = "The path to a SPECK file that contains the data for the "
+            "constellation lines.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo DrawElementsInfo = {
-        "DrawElements",
-        "Draw elements",
-        "Enables/Disables the drawing of the constellations.",
-        Visibility::NoviceUser
+    constexpr BoolPropertyInfo DrawElementsInfo = {
+        .identifier = "DrawElements",
+        .name = "Draw elements",
+        .description = "Enables/Disables the drawing of the constellations.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     constexpr PropertyInfo UnitInfo = {
-        "Unit",
-        "Unit",
-        "The distance unit used for the constellation lines data.",
-        Visibility::AdvancedUser
+        .identifier = "Unit",
+        .name = "Unit",
+        .description = "The distance unit used for the constellation lines data.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorsInfo = {
-        "Colors",
-        "Constellation colors",
-        "A list of colors to use for the constellations. A data file may include several "
-        "groups of constellations, where each group can have a distinct color. The index "
-        "for the color parameter for each constellation in the data file corresponds to "
-        "the order of the colors in this list.",
-        Visibility::User
+        .identifier = "Colors",
+        .name = "Constellation colors",
+        .description = "A list of colors to use for the constellations. A data file may "
+            "include several groups of constellations, where each group can have a "
+            "distinct color. The index for the color parameter for each constellation in "
+            "the data file corresponds to the order of the colors in this list.",
+        .visibility = Visibility::User
     };
 
     // @TODO (2025-01-07, emmbr) I did not add any description of the file format below,
@@ -140,7 +144,7 @@ Documentation RenderableConstellationLines::Documentation() {
 RenderableConstellationLines::RenderableConstellationLines(const Dictionary& dictionary)
     : RenderableConstellationsBase(dictionary)
     , _speckFile(FileInfo)
-    , _drawElements(DrawElementsInfo, true)
+    , _drawElements(DrawElementsInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

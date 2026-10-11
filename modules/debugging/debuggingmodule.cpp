@@ -49,37 +49,53 @@ namespace {
 
     constexpr std::string_view KeyFontMono = "Mono";
 
-    constexpr PropertyInfo ShowStatisticsInfo = {
-        "ShowStatistics",
-        "Show statistics",
-        "Show updating, rendering, and network statistics on all rendering nodes.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShowStatisticsInfo = {
+        .identifier = "ShowStatistics",
+        .name = "Show statistics",
+        .description = "Show updating, rendering, and network statistics on all "
+            "rendering nodes.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo StatisticsScaleInfo = {
-        "StatisticsScale",
-        "Statistics scale",
-        "This value is scaling the statistics window by the provided amount. For flat "
-        "projections this is rarely necessary, but it is important when using a setup "
-        "where the corners of the image are masked out.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo StatisticsScaleInfo = {
+        .identifier = "StatisticsScale",
+        .name = "Statistics scale",
+        .description = "This value is scaling the statistics window by the provided "
+            "amount. For flat projections this is rarely necessary, but it is important "
+            "when using a setup where the corners of the image are masked out.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo StatisticsOffsetInfo = {
-        "StatisticsOffset",
-        "Statistics offset",
-        "This value is offsetting the center of the statistics window by the provided "
-        "amount. For flat projections this is rarely necessary, but it is important when "
-        "using a setup the center of the image is distorted in some form.",
-        Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo StatisticsOffsetInfo = {
+        .identifier = "StatisticsOffset",
+        .name = "Statistics offset",
+        .description = "This value is offsetting the center of the statistics window by "
+            "the provided amount. For flat projections this is rarely necessary, but it "
+            "is important when using a setup the center of the image is distorted in "
+            "some form.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(-2.f), glm::vec2(2.f) }
+        }
     };
 
-    constexpr PropertyInfo ShowFrameNumberInfo = {
-        "ShowFrameInformation",
-        "Show frame information",
-        "If this value is enabled, the current frame number and frame times are rendered "
-        "into the window.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShowFrameNumberInfo = {
+        .identifier = "ShowFrameInformation",
+        .name = "Show frame information",
+        .description = "If this value is enabled, the current frame number and frame "
+            "times are rendered into the window.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 } // namespace
 
@@ -87,15 +103,10 @@ namespace openspace {
 
 DebuggingModule::DebuggingModule()
     : OpenSpaceModule(Name)
-    , _showStatistics(ShowStatisticsInfo, false)
-    , _statisticsScale(StatisticsScaleInfo, 1.f, 0.f, 1.f)
-    , _statisticsOffset(
-        StatisticsOffsetInfo,
-        glm::vec2(0.f),
-        glm::vec2(-2.f),
-        glm::vec2(2.f)
-    )
-    , _showFrameInformation(ShowFrameNumberInfo, false)
+    , _showStatistics(ShowStatisticsInfo)
+    , _statisticsScale(StatisticsScaleInfo)
+    , _statisticsOffset(StatisticsOffsetInfo)
+    , _showFrameInformation(ShowFrameNumberInfo)
 {
     _showStatistics.onChange([this]() {
         global::windowDelegate->showStatistics(_showStatistics);

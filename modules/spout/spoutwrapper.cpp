@@ -50,35 +50,36 @@ namespace {
 
     constexpr std::string_view _loggerCat = "Spout";
 
-    constexpr PropertyInfo NameSenderInfo = {
-        "SpoutName",
-        "Spout sender name",
-        "This value sets the Spout sender to use a specific name.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo NameSenderInfo = {
+        .identifier = "SpoutName",
+        .name = "Spout sender name",
+        .description = "This value sets the Spout sender to use a specific name.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo NameReceiverInfo = {
-        "SpoutName",
-        "Spout receiver name",
-        "This value explicitly sets the Spout receiver to use a specific name. If this "
-        "is not a valid name, the first Spout image is used instead.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo NameReceiverInfo = {
+        .identifier = "SpoutName",
+        .name = "Spout receiver name",
+        .description = "This value explicitly sets the Spout receiver to use a specific "
+            "name. If this is not a valid name, the first Spout image is used instead.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SelectionInfo = {
-        "SpoutSelection",
-        "Spout selection",
-        "This property displays all available Spout sender on the system. If one them is "
-        "selected, its value is stored in the 'SpoutName' property, overwriting its "
-        "previous value.",
-        Visibility::AdvancedUser
+        .identifier = "SpoutSelection",
+        .name = "Spout selection",
+        .description = "This property displays all available Spout sender on the system. "
+            "If one them is selected, its value is stored in the 'SpoutName' property, "
+            "overwriting its previous value.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UpdateInfo = {
-        "UpdateSelection",
-        "Update selection",
-        "If this property is triggered, the 'SpoutSelection' options will be refreshed.",
-        Visibility::AdvancedUser
+        .identifier = "UpdateSelection",
+        .name = "Update selection",
+        .description = "If this property is triggered, the 'SpoutSelection' options will "
+            "be refreshed.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SpoutReceiver)]] ReceiverParameters {
@@ -312,7 +313,7 @@ void SpoutReceiver::releaseTexture() {
     _spoutTexture.release();
 }
 
-const PropertyInfo& SpoutReceiverPropertyProxy::NameInfoProperty() {
+const StringPropertyInfo& SpoutReceiverPropertyProxy::NameInfoProperty() {
     return NameReceiverInfo;
 }
 
@@ -560,7 +561,7 @@ void SpoutSender::onReleaseSender(std::function<void()> callback) {
     _onReleaseSenderCallback = std::move(callback);
 }
 
-const PropertyInfo& SpoutSenderPropertyProxy::NameInfoProperty() {
+const StringPropertyInfo& SpoutSenderPropertyProxy::NameInfoProperty() {
     return NameSenderInfo;
 }
 

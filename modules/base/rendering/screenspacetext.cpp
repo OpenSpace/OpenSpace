@@ -31,11 +31,14 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TextInfo = {
-        "Text",
-        "Text",
-        "The text to be displayed.",
-        Visibility::User
+    constexpr StringPropertyInfo TextInfo = {
+        .identifier = "Text",
+        .name = "Text",
+        .description = "The text to be displayed.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = ""
+        }
     };
 
     // Shows a static text that can be changed via a property.
@@ -57,7 +60,7 @@ Documentation ScreenSpaceText::Documentation() {
 
 ScreenSpaceText::ScreenSpaceText(const Dictionary& dictionary)
     : ScreenSpaceRenderableText(dictionary)
-    , _text(TextInfo, "")
+    , _text(TextInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _text = p.text.value_or(_text);

@@ -135,137 +135,184 @@ namespace {
         return color;
     }
 
-    constexpr PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "This value determines the opacity of this object. A value of 0 means completely "
-        "transparent.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo OpacityInfo = {
+        .identifier = "Opacity",
+        .name = "Opacity",
+        .description = "This value determines the opacity of this object. A value of 0 "
+            "means completely transparent.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color of the rendered geometry. For points it will be used as a multiply "
-        "color for any provided texture.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color of the rendered geometry. For points it will be used "
+            "as a multiply color for any provided texture.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo FillOpacityInfo = {
-        "FillOpacity",
-        "Fill opacity",
-        "This value determines the opacity of the filled portion of a polygon. Will also "
-        "be used for extruded features.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo FillOpacityInfo = {
+        .identifier = "FillOpacity",
+        .name = "Fill opacity",
+        .description = "This value determines the opacity of the filled portion of a "
+            "polygon. Will also be used for extruded features.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 0.7f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo FillColorInfo = {
-        "FillColor",
-        "Fill color",
-        "The color of the filled portion of a rendered polygon. Will also be used for "
-        "extruded features.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo FillColorInfo = {
+        .identifier = "FillColor",
+        .name = "Fill color",
+        .description = "The color of the filled portion of a rendered polygon. Will also "
+            "be used for extruded features.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.5f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of any rendered lines.",
-        Visibility::User
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of any rendered lines.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 0.01f, 10.f }
+        }
     };
 
-    constexpr PropertyInfo PointSizeInfo = {
-        "PointSize",
-        "Point size",
-        "The size of any rendered points. The size will be scaled based on the bounding "
-        "sphere of the globe.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo PointSizeInfo = {
+        .identifier = "PointSize",
+        .name = "Point size",
+        .description = "The size of any rendered points. The size will be scaled based "
+            "on the bounding sphere of the globe.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 10.f,
+            .minMax = { 0.01f, 100.f }
+        }
     };
 
-    constexpr PropertyInfo PointTextureInfo = {
-        "PointTexture",
-        "Point texture",
-        "A texture to be used for rendering points. No value means to use the default "
-        "texture provided by the GlobeBrowsing module. If no texture is provided there "
-        "either, the point will be rendered as a plane and colored by the color value.",
-        Visibility::User
+    constexpr StringPropertyInfo PointTextureInfo = {
+        .identifier = "PointTexture",
+        .name = "Point texture",
+        .description = "A texture to be used for rendering points. No value means to use "
+            "the default texture provided by the GlobeBrowsing module. If no texture is "
+            "provided there either, the point will be rendered as a plane and colored by "
+            "the color value.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo ExtrudeInfo = {
-        "Extrude",
-        "Extrude",
-        "If true, extrude the geometry to intersect the globe.Lines/polygons will be "
-        "extruded with polygons,and points with lines.",
-        Visibility::User
+    constexpr BoolPropertyInfo ExtrudeInfo = {
+        .identifier = "Extrude",
+        .name = "Extrude",
+        .description = "If true, extrude the geometry to intersect the "
+            "globe.Lines/polygons will be extruded with polygons,and points with lines.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo PerformShadingInfo = {
-        "PerformShading",
-        "Perform shading",
-        "If true, perform shading on any create meshes, either from polygons or "
-        "extruded lines. The shading will be computed based on any light sources of the "
-        "GeoJson component.",
-        Visibility::User
+    constexpr BoolPropertyInfo PerformShadingInfo = {
+        .identifier = "PerformShading",
+        .name = "Perform shading",
+        .description = "If true, perform shading on any create meshes, either from "
+            "polygons or extruded lines. The shading will be computed based on any light "
+            "sources of the GeoJson component.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
     constexpr PropertyInfo AltitudeModeInfo = {
-        "AltitudeMode",
-        "Altitude mode",
-        "The altitude mode decides how any height values of the geo coordinates should "
-        "be interpreted. Absolute means that the height is interpreted as the height "
-        "above the reference ellipsoid, while RelativeToGround takes the height map "
-        "into account. For coordinates with only two values (latitude and longitude), "
-        "the height is considered to be equal to zero.",
-        Visibility::User
+        .identifier = "AltitudeMode",
+        .name = "Altitude mode",
+        .description = "The altitude mode decides how any height values of the geo "
+            "coordinates should be interpreted. Absolute means that the height is "
+            "interpreted as the height above the reference ellipsoid, while "
+            "RelativeToGround takes the height map into account. For coordinates with "
+            "only two values (latitude and longitude), the height is considered to be "
+            "equal to zero.",
+        .visibility = Visibility::User
     };
 
     constexpr PropertyInfo PointAnchorOptionInfo = {
-        "PointTextureAnchor",
-        "Point texture anchor",
-        "Decides the placement of the point texture in relation to the position. Default "
-        "is a the bottom of the texture, but it can also be put at the center.",
-        Visibility::User
+        .identifier = "PointTextureAnchor",
+        .name = "Point texture anchor",
+        .description = "Decides the placement of the point texture in relation to the "
+            "position. Default is a the bottom of the texture, but it can also be put at "
+            "the center.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo TessellationEnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "If false, no tessellation to bend the geometry based on the curvature of the "
-        "planet is performed. This leads to increased performance, but tessellation is "
-        "necessary for large geometry that spans a big portion of the globe. Otherwise "
-        "it may intersect the surface.",
-        Visibility::User
+    constexpr BoolPropertyInfo TessellationEnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "If false, no tessellation to bend the geometry based on the "
+            "curvature of the planet is performed. This leads to increased performance, "
+            "but tessellation is necessary for large geometry that spans a big portion "
+            "of the globe. Otherwise it may intersect the surface.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo UseTessellationLevelInfo = {
-        "UseTessellationLevel",
-        "Use tessellation level",
-        "If true, use the 'Tessellation Level' to control the level of detail for the "
-        "tessellation. The distance used will be the 'Tessellation Distance' divided by "
-        "the 'Tessellation Level', so the higher the level value, the smaller each "
-        "segment in the geometry will be.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseTessellationLevelInfo = {
+        .identifier = "UseTessellationLevel",
+        .name = "Use tessellation level",
+        .description = "If true, use the 'Tessellation Level' to control the level of "
+            "detail for the tessellation. The distance used will be the 'Tessellation "
+            "Distance' divided by the 'Tessellation Level', so the higher the level "
+            "value, the smaller each segment in the geometry will be.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo TessellationLevelInfo = {
-        "TessellationLevel",
-        "Tessellation level",
-        "When manual tessellation is enabled, this value will be used to determine how "
-        "much tessellation to apply. The resulting distance used for subdividing the "
-        "geometry will be the 'Tessellation Distance' divided by this value. Zero means "
-        "to use the 'Tessellation Distance' as is.",
-        Visibility::AdvancedUser
+    constexpr IntPropertyInfo TessellationLevelInfo = {
+        .identifier = "TessellationLevel",
+        .name = "Tessellation level",
+        .description = "When manual tessellation is enabled, this value will be used to "
+            "determine how much tessellation to apply. The resulting distance used for "
+            "subdividing the geometry will be the 'Tessellation Distance' divided by "
+            "this value. Zero means to use the 'Tessellation Distance' as is.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 10,
+            .minMax = { 0, 100 }
+        }
     };
 
-    constexpr PropertyInfo TessellationDistanceInfo = {
-        "TessellationDistance",
-        "Tessellation distance",
-        "Default distance to use for tessellation of line and polygon geometry. Anything "
-        "larger than this distance will be automatically subdivided into smaller pieces "
-        "matching this distance, while anything smaller will not be subdivided. Per "
-        "default this will be set to a distance corresponding to about 1 degree "
-        "longitude on the globe.",
-        Visibility::AdvancedUser
+    constexpr FloatPropertyInfo TessellationDistanceInfo = {
+        .identifier = "TessellationDistance",
+        .name = "Tessellation distance",
+        .description = "Default distance to use for tessellation of line and polygon "
+            "geometry. Anything larger than this distance will be automatically "
+            "subdivided into smaller pieces matching this distance, while anything "
+            "smaller will not be subdivided. Per default this will be set to a distance "
+            "corresponding to about 1 degree longitude on the globe.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 100000.f,
+            .minMax = { 0.f, 1e12f }
+        }
     };
 
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {
@@ -378,10 +425,10 @@ Documentation GeoJsonProperties::Documentation() {
 
 GeoJsonProperties::Tessellation::Tessellation()
     : PropertyOwner({ "Tessellation" })
-    , enabled(TessellationEnabledInfo, true)
-    , useLevel(UseTessellationLevelInfo, false)
-    , level(TessellationLevelInfo, 10, 0, 100)
-    , distance(TessellationDistanceInfo, 100000.f, 0.f, 1e12f)
+    , enabled(TessellationEnabledInfo)
+    , useLevel(UseTessellationLevelInfo)
+    , level(TessellationLevelInfo)
+    , distance(TessellationDistanceInfo)
 {
     addProperty(enabled);
     addProperty(distance);
@@ -391,16 +438,16 @@ GeoJsonProperties::Tessellation::Tessellation()
 
 GeoJsonProperties::GeoJsonProperties()
     : PropertyOwner({ "DefaultProperties", "Default Properties" })
-    , opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , fillOpacity(FillOpacityInfo, 0.7f, 0.f, 1.f)
-    , fillColor(FillColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , lineWidth(LineWidthInfo, 2.f, 0.01f, 10.f)
-    , pointSize(PointSizeInfo, 10.f, 0.01f, 100.f)
+    , opacity(OpacityInfo)
+    , color(ColorInfo)
+    , fillOpacity(FillOpacityInfo)
+    , fillColor(FillColorInfo)
+    , lineWidth(LineWidthInfo)
+    , pointSize(PointSizeInfo)
     , pointTexture(PointTextureInfo)
     , pointAnchorOption(PointAnchorOptionInfo)
-    , extrude(ExtrudeInfo, false)
-    , performShading(PerformShadingInfo, false)
+    , extrude(ExtrudeInfo)
+    , performShading(PerformShadingInfo)
     , altitudeModeOption(AltitudeModeInfo)
 {
     addProperty(opacity);

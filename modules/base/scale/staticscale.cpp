@@ -30,12 +30,16 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo ScaleInfo = {
-        "Scale",
-        "Scale",
-        "This value is used as a scaling factor for the scene graph node that this "
-        "transformation is attached to relative to its parent.",
-        Visibility::NoviceUser
+    constexpr DoublePropertyInfo ScaleInfo = {
+        .identifier = "Scale",
+        .name = "Scale",
+        .description = "This value is used as a scaling factor for the scene graph node "
+            "that this transformation is attached to relative to its parent.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.0,
+            .minMax = { 0.1, 100.0 }
+        }
     };
 
     // Scales the scene graph node that it is attached to by a fixed amount that does not
@@ -61,7 +65,7 @@ Documentation StaticScale::Documentation() {
 
 StaticScale::StaticScale(const Dictionary& dictionary)
     : Scale(dictionary)
-    , _scaleValue(ScaleInfo, 1.0, 0.1, 100.0)
+    , _scaleValue(ScaleInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

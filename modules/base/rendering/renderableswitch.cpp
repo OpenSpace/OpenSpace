@@ -34,11 +34,16 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo DistanceThresholdInfo = {
-        "DistanceThreshold",
-        "Distance threshold",
-        "Threshold in meters for when the switch happens between the two renderables.",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo DistanceThresholdInfo = {
+        .identifier = "DistanceThreshold",
+        .name = "Distance threshold",
+        .description = "Threshold in meters for when the switch happens between the two "
+            "renderables.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1e25f }
+        }
     };
 
     // Can be used to render one of two renderables depending on the distance between the
@@ -76,7 +81,7 @@ Documentation RenderableSwitch::Documentation() {
 
 RenderableSwitch::RenderableSwitch(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _distanceThreshold(DistanceThresholdInfo, 1.f, 0.f, 1e25f)
+    , _distanceThreshold(DistanceThresholdInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

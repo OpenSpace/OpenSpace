@@ -30,36 +30,56 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo MouseSensitivityInfo = {
-        "MouseSensitivity",
-        "Mouse sensitivity",
-        "Determines the sensitivity of the camera motion through the mouse. The lower "
-        "the sensitivity is the less impact a mouse motion will have.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo MouseSensitivityInfo = {
+        .identifier = "MouseSensitivity",
+        .name = "Mouse sensitivity",
+        .description = "Determines the sensitivity of the camera motion through the "
+            "mouse. The lower the sensitivity is the less impact a mouse motion will "
+            "have.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 15.f,
+            .minMax = { 1.f, 50.f }
+        }
     };
 
-    constexpr PropertyInfo JoystickSensitivityInfo = {
-        "JoystickSensitivity",
-        "Joystick sensitivity",
-        "Determines the sensitivity of the camera motion through a joystick. The lower "
-        "the sensitivity is the less impact a joystick motion will have.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo JoystickSensitivityInfo = {
+        .identifier = "JoystickSensitivity",
+        .name = "Joystick sensitivity",
+        .description = "Determines the sensitivity of the camera motion through a "
+            "joystick. The lower the sensitivity is the less impact a joystick motion "
+            "will have.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 10.f,
+            .minMax = { 1.f, 50.f }
+        }
     };
 
-    constexpr PropertyInfo WebsocketSensitivityInfo = {
-        "WebsocketSensitivity",
-        "Websocket sensitivity",
-        "Determines the sensitivity of the camera motion through a websocket. The lower "
-        "the sensitivity is the less impact a webstick motion will have.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo WebsocketSensitivityInfo = {
+        .identifier = "WebsocketSensitivity",
+        .name = "Websocket sensitivity",
+        .description = "Determines the sensitivity of the camera motion through a "
+            "websocket. The lower the sensitivity is the less impact a webstick motion "
+            "will have.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 5.f,
+            .minMax = { 1.f, 50.f }
+        }
     };
 
-    constexpr PropertyInfo TouchSensitivityInfo = {
-        "TouchSensitivity",
-        "Touch sensitivity",
-        "Determines the sensitivity of the camera motion through touch interaction. The "
-        "lower the sensitivity is the less the impact from touch motion will be.",
-        Visibility::NoviceUser
+    constexpr FloatPropertyInfo TouchSensitivityInfo = {
+        .identifier = "TouchSensitivity",
+        .name = "Touch sensitivity",
+        .description = "Determines the sensitivity of the camera motion through touch "
+            "interaction. The lower the sensitivity is the less the impact from touch "
+            "motion will be.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 50.f }
+        }
     };
 
     double velocityScaleFromFriction(double friction) {
@@ -71,10 +91,10 @@ namespace openspace {
 
 OrbitalInputHandler::OrbitalInputHandler(double friction)
     : PropertyOwner({"Input", "Input"})
-    , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
-    , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.f, 50.f)
-    , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.f, 50.f)
-    , _touchSensitivity(TouchSensitivityInfo, 1.f, 1.f, 50.f)
+    , _mouseSensitivity(MouseSensitivityInfo)
+    , _joystickSensitivity(JoystickSensitivityInfo)
+    , _websocketSensitivity(WebsocketSensitivityInfo)
+    , _touchSensitivity(TouchSensitivityInfo)
     , _mouseStates(_mouseSensitivity * 0.0001, velocityScaleFromFriction(friction))
     , _joystickStates(_joystickSensitivity * 0.1, velocityScaleFromFriction(friction))
     , _websocketStates(_websocketSensitivity, velocityScaleFromFriction(friction))

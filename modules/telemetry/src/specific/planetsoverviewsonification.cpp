@@ -56,67 +56,94 @@ namespace {
         "sonification."
     };
 
-    constexpr PropertyInfo ToggleAllInfo = {
-        "ToggleAll",
-        "Toggle all",
-        "Toggle the sonification for all planets.",
-        Visibility::User
+    constexpr BoolPropertyInfo ToggleAllInfo = {
+        .identifier = "ToggleAll",
+        .name = "Toggle all",
+        .description = "Toggle the sonification for all planets.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EnableMercuryInfo = {
-        "Mercury",
-        "Mercury",
-        "Toggle sonification for Mercury.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableMercuryInfo = {
+        .identifier = "Mercury",
+        .name = "Mercury",
+        .description = "Toggle sonification for Mercury.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EnableVenusInfo = {
-        "Venus",
-        "Venus",
-        "Toggle sonification for Venus.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableVenusInfo = {
+        .identifier = "Venus",
+        .name = "Venus",
+        .description = "Toggle sonification for Venus.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EnableEarthInfo = {
-        "Earth",
-        "Earth",
-        "Toggle sonification for Earth.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableEarthInfo = {
+        .identifier = "Earth",
+        .name = "Earth",
+        .description = "Toggle sonification for Earth.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EnableMarsInfo = {
-        "Mars",
-        "Mars",
-        "Toggle sonification for Mars.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableMarsInfo = {
+        .identifier = "Mars",
+        .name = "Mars",
+        .description = "Toggle sonification for Mars.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EnableJupiterInfo = {
-        "Jupiter",
-        "Jupiter",
-        "Toggle sonification for Jupiter.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableJupiterInfo = {
+        .identifier = "Jupiter",
+        .name = "Jupiter",
+        .description = "Toggle sonification for Jupiter.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EnableSaturnInfo = {
-        "Saturn",
-        "Saturn",
-        "Toggle sonification for Saturn.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableSaturnInfo = {
+        .identifier = "Saturn",
+        .name = "Saturn",
+        .description = "Toggle sonification for Saturn.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EnableUranusInfo = {
-        "Uranus",
-        "Uranus",
-        "Toggle sonification for Uranus.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableUranusInfo = {
+        .identifier = "Uranus",
+        .name = "Uranus",
+        .description = "Toggle sonification for Uranus.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo EnableNeptuneInfo = {
-        "Neptune",
-        "Neptune",
-        "Toggle sonification for Neptune.",
-        Visibility::User
+    constexpr BoolPropertyInfo EnableNeptuneInfo = {
+        .identifier = "Neptune",
+        .name = "Neptune",
+        .description = "Toggle sonification for Neptune.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 } // namespace
 
@@ -124,15 +151,15 @@ namespace openspace {
 
 PlanetsOverviewSonification::PlanetsOverviewSonification(const std::string& ip, int port)
     : TelemetryBase(PlanetsOverviewSonificationInfo, ip, port)
-    , _toggleAll(ToggleAllInfo, false)
-    , _mercuryEnabled(EnableMercuryInfo, false)
-    , _venusEnabled(EnableVenusInfo, false)
-    , _earthEnabled(EnableEarthInfo, false)
-    , _marsEnabled(EnableMarsInfo, false)
-    , _jupiterEnabled(EnableJupiterInfo, false)
-    , _saturnEnabled(EnableSaturnInfo, false)
-    , _uranusEnabled(EnableUranusInfo, false)
-    , _neptuneEnabled(EnableNeptuneInfo, false)
+    , _toggleAll(ToggleAllInfo)
+    , _mercuryEnabled(EnableMercuryInfo)
+    , _venusEnabled(EnableVenusInfo)
+    , _earthEnabled(EnableEarthInfo)
+    , _marsEnabled(EnableMarsInfo)
+    , _jupiterEnabled(EnableJupiterInfo)
+    , _saturnEnabled(EnableSaturnInfo)
+    , _uranusEnabled(EnableUranusInfo)
+    , _neptuneEnabled(EnableNeptuneInfo)
 {
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
     addProperty(_toggleAll);

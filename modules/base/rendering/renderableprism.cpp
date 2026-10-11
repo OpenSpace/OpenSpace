@@ -41,55 +41,85 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Segments",
-        "The number of segments the shape of the prism should have.",
-        Visibility::User
+    constexpr IntPropertyInfo SegmentsInfo = {
+        .identifier = "Segments",
+        .name = "Segments",
+        .description = "The number of segments the shape of the prism should have.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 6,
+            .minMax = { 3, 32 }
+        }
     };
 
-    constexpr PropertyInfo LinesInfo = {
-        "NumLines",
-        "Number of lines",
-        "The number of lines connecting the two shapes of the prism. They will be evenly "
-        "distributed around the bounding circle that makes up the shape of the prism.",
-        Visibility::User
+    constexpr IntPropertyInfo LinesInfo = {
+        .identifier = "NumLines",
+        .name = "Number of lines",
+        .description = "The number of lines connecting the two shapes of the prism. They "
+            "will be evenly distributed around the bounding circle that makes up the "
+            "shape of the prism.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 6,
+            .minMax = { 0, 32 }
+        }
     };
 
-    constexpr PropertyInfo RadiusInfo = {
-        "Radius",
-        "Radius",
-        "The radius of the prism's shape in meters.",
-        Visibility::User
+    constexpr FloatPropertyInfo RadiusInfo = {
+        .identifier = "Radius",
+        .name = "Radius",
+        .description = "The radius of the prism's shape in meters.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 10.f,
+            .minMax = { 0.f, 3e20f }
+        }
     };
 
-    constexpr PropertyInfo BaseRadiusInfo = {
-        "BaseRadius",
-        "Base radius",
-        "The radius of the base of the prism's shape, in meters. By default it is given "
-        "the same radius as the outer shape.",
-        Visibility::User
+    constexpr FloatPropertyInfo BaseRadiusInfo = {
+        .identifier = "BaseRadius",
+        .name = "Base radius",
+        .description = "The radius of the base of the prism's shape, in meters. By "
+            "default it is given the same radius as the outer shape.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 10.f,
+            .minMax = { 0.f, 3e20f }
+        }
     };
 
-    constexpr PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the lines. The larger number, the thicker the lines.",
-        Visibility::User
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the lines. The larger number, the thicker the "
+            "lines.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
-        "The RGB color of the line.",
-        Visibility::NoviceUser
+    constexpr Vec3PropertyInfo LineColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The RGB color of the line.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo LengthInfo = {
-        "Length",
-        "Length",
-        "The length of the prism in meters.",
-        Visibility::User
+    constexpr FloatPropertyInfo LengthInfo = {
+        .identifier = "Length",
+        .name = "Length",
+        .description = "The length of the prism in meters.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 20.f,
+            .minMax = { 1.f, 3e20f }
+        }
     };
 
     // Renders a prism shape defined by two polygonal shapes (base and top) connected by
@@ -131,13 +161,13 @@ Documentation RenderablePrism::Documentation() {
 
 RenderablePrism::RenderablePrism(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _nShapeSegments(SegmentsInfo, 6, 3, 32)
-    , _nLines(LinesInfo, 6, 0, 32)
-    , _radius(RadiusInfo, 10.f, 0.f, 3e20f)
-    , _baseRadius(BaseRadiusInfo, 10.f, 0.f, 3e20f)
-    , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _length(LengthInfo, 20.f, 1.f, 3e20f)
+    , _nShapeSegments(SegmentsInfo)
+    , _nLines(LinesInfo)
+    , _radius(RadiusInfo)
+    , _baseRadius(BaseRadiusInfo)
+    , _lineWidth(LineWidthInfo)
+    , _lineColor(LineColorInfo)
+    , _length(LengthInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

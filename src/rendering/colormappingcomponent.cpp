@@ -37,118 +37,154 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ColorMapping";
 
-    constexpr PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Color map enabled",
-        "Decides if the color mapping should be used or not.",
-        Visibility::NoviceUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Color map enabled",
+        .description = "Decides if the color mapping should be used or not.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr PropertyInfo FileInfo = {
-        "File",
-        "Color map file",
-        "The path to the color map file to use. Should be a .cmap file.",
-        Visibility::AdvancedUser
+    constexpr StringPropertyInfo FileInfo = {
+        .identifier = "File",
+        .name = "Color map file",
+        .description = "The path to the color map file to use. Should be a .cmap file.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ParameterInfo = {
-        "Parameter",
-        "Parameter",
-        "The parameter in the dataset to use for the color mapping. On change, the "
-        "value range to used for the mapping will also be changed.",
-        Visibility::User
+    constexpr OptionPropertyInfo ParameterInfo = {
+        .identifier = "Parameter",
+        .name = "Parameter",
+        .description = "The parameter in the dataset to use for the color mapping. On "
+            "change, the value range to used for the mapping will also be changed.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo RangeInfo = {
-        "ValueRange",
-        "Value range",
-        "The range of values to use in the color mapping. The lowest value will be "
-        "mapped to the first color in the color map.",
-        Visibility::User
+    constexpr Vec2PropertyInfo RangeInfo = {
+        .identifier = "ValueRange",
+        .name = "Value range",
+        .description = "The range of values to use in the color mapping. The lowest "
+            "value will be mapped to the first color in the color map.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec2(0.f)
+        }
     };
 
     constexpr PropertyInfo SetRangeFromDataInfo = {
-        "SetRangeFromData",
-        "Set data range from data",
-        "Set the data range for the color mapping based on the available data for the "
-        "currently selected data column.",
-        Visibility::User
+        .identifier = "SetRangeFromData",
+        .name = "Set data range from data",
+        .description = "Set the data range for the color mapping based on the available "
+            "data for the currently selected data column.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo HideOutsideInfo = {
-        "HideValuesOutsideRange",
-        "Hide values outside range",
-        "If true, points with values outside the provided range for the coloring will be "
-        "hidden, i.e. not rendered at all.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo HideOutsideInfo = {
+        .identifier = "HideValuesOutsideRange",
+        .name = "Hide values outside range",
+        .description = "If true, points with values outside the provided range for the "
+            "coloring will be hidden, i.e. not rendered at all.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo UseNoDataColorInfo = {
-        "ShowMissingData",
-        "Show missing data",
-        "If true, use a separate color (see NoDataColor) for items with values "
-        "corresponding to missing data values.",
-        Visibility::User
+    constexpr BoolPropertyInfo UseNoDataColorInfo = {
+        .identifier = "ShowMissingData",
+        .name = "Show missing data",
+        .description = "If true, use a separate color (see NoDataColor) for items with "
+            "values corresponding to missing data values.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo NoDataColorInfo = {
-        "NoDataColor",
-        "No data color",
-        "The color to use for items with values corresponding to missing data values, "
-        "if enabled. This color can also be read from the color map, but setting this "
-        "value overrides any value in the color map. If a color value for the below "
-        "range values is provided, the ShowMissingData property will automatically be "
-        "set to true.",
-        Visibility::User
+    constexpr Vec4PropertyInfo NoDataColorInfo = {
+        .identifier = "NoDataColor",
+        .name = "No data color",
+        .description = "The color to use for items with values corresponding to missing "
+            "data values, if enabled. This color can also be read from the color map, "
+            "but setting this value overrides any value in the color map. If a color "
+            "value for the below range values is provided, the ShowMissingData property "
+            "will automatically be set to true.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec4(0.5f, 0.5f, 0.5f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr PropertyInfo UseAboveRangeColorInfo = {
-        "UseAboveRangeColor",
-        "Use above range color",
-        "If true, use a separate color (see AboveRangeColor) for items with values "
-        "larger than the one in the provided data range. Otherwise, the values will "
-        "be clamped to use the color at the upper limit of the color map. If a color is "
-        "provided in the color map, this value will automatically be set to true.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseAboveRangeColorInfo = {
+        .identifier = "UseAboveRangeColor",
+        .name = "Use above range color",
+        .description = "If true, use a separate color (see AboveRangeColor) for items "
+            "with values larger than the one in the provided data range. Otherwise, the "
+            "values will be clamped to use the color at the upper limit of the color "
+            "map. If a color is provided in the color map, this value will automatically "
+            "be set to true.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo AboveRangeColorInfo = {
-        "AboveRangeColor",
-        "Above range color",
-        "The color to use for items with values larger than the one in the provided "
-        "data range, if enabled. This color can also be read from the color map, but "
-        "setting this value overrides any value in the color map. If a color value for "
-        "the above range values is provided, the UseAboveRangeColor property will "
-        "automatically be set to true.",
-        Visibility::AdvancedUser
+    constexpr Vec4PropertyInfo AboveRangeColorInfo = {
+        .identifier = "AboveRangeColor",
+        .name = "Above range color",
+        .description = "The color to use for items with values larger than the one in "
+            "the provided data range, if enabled. This color can also be read from the "
+            "color map, but setting this value overrides any value in the color map. If "
+            "a color value for the above range values is provided, the "
+            "UseAboveRangeColor property will automatically be set to true.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec4(1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr PropertyInfo UseBelowRangeColorInfo = {
-        "UseBelowRangeColor",
-        "Use below range color",
-        "If true, use a separate color (see BelowRangeColor) for items with values "
-        "smaller than the one in the provided data range. Otherwise, the values will "
-        "be clamped to use the color at the lower limit of the color map. If a color is "
-        "provided in the color map, this value will automatically be set to true.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseBelowRangeColorInfo = {
+        .identifier = "UseBelowRangeColor",
+        .name = "Use below range color",
+        .description = "If true, use a separate color (see BelowRangeColor) for items "
+            "with values smaller than the one in the provided data range. Otherwise, the "
+            "values will be clamped to use the color at the lower limit of the color "
+            "map. If a color is provided in the color map, this value will automatically "
+            "be set to true.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo BelowRangeColorInfo = {
-        "BelowRangeColor",
-        "Below range color",
-        "The color to use for items with values smaller than the one in the provided "
-        "data range, if enabled. This color can also be read from the color map, but "
-        "setting this value overrides any value in the color map. If a color value for "
-        "the below range values is provided, the UseBelowRangeColor property will "
-        "automatically be set to true.",
-        Visibility::AdvancedUser
+    constexpr Vec4PropertyInfo BelowRangeColorInfo = {
+        .identifier = "BelowRangeColor",
+        .name = "Below range color",
+        .description = "The color to use for items with values smaller than the one in "
+            "the provided data range, if enabled. This color can also be read from the "
+            "color map, but setting this value overrides any value in the color map. If "
+            "a color value for the below range values is provided, the "
+            "UseBelowRangeColor property will automatically be set to true.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec4(1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr PropertyInfo InvertColorMapInfo = {
-        "Invert",
-        "Invert color map",
-        "If true, the colors of the color map will be read in the inverse order.",
-        Visibility::AdvancedUser
+    constexpr BoolPropertyInfo InvertColorMapInfo = {
+        .identifier = "Invert",
+        .name = "Invert color map",
+        .description = "If true, the colors of the color map will be read in the inverse "
+            "order.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // This component handles settings for dynamic color mapping of data points based on
@@ -237,24 +273,19 @@ Documentation ColorMappingComponent::Documentation() {
 
 ColorMappingComponent::ColorMappingComponent()
     : PropertyOwner({ "ColorMapping", "Color Mapping", "" })
-    , enabled(EnabledInfo, true)
-    , invert(InvertColorMapInfo, false)
+    , enabled(EnabledInfo)
+    , invert(InvertColorMapInfo)
     , dataColumn(ParameterInfo)
     , colorMapFile(FileInfo)
-    , valueRange(RangeInfo, glm::vec2(0.f))
+    , valueRange(RangeInfo)
     , setRangeFromData(SetRangeFromDataInfo)
-    , hideOutsideRange(HideOutsideInfo, false)
-    , useNanColor(UseNoDataColorInfo, false)
-    , nanColor(
-        NoDataColorInfo,
-        glm::vec4(0.5f, 0.5f, 0.5f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , useAboveRangeColor(UseAboveRangeColorInfo, false)
-    , aboveRangeColor(AboveRangeColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
-    , useBelowRangeColor(UseBelowRangeColorInfo, false)
-    , belowRangeColor(BelowRangeColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , hideOutsideRange(HideOutsideInfo)
+    , useNanColor(UseNoDataColorInfo)
+    , nanColor(NoDataColorInfo)
+    , useAboveRangeColor(UseAboveRangeColorInfo)
+    , aboveRangeColor(AboveRangeColorInfo)
+    , useBelowRangeColor(UseBelowRangeColorInfo)
+    , belowRangeColor(BelowRangeColorInfo)
 {
     addProperty(enabled);
     addProperty(dataColumn);

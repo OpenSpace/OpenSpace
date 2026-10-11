@@ -44,20 +44,20 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "A path to an image file to use as a texture for the plane. During stereo "
-        "rendering, this texture is considered the left eye.",
-        Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "A path to an image file to use as a texture for the plane. "
+            "During stereo rendering, this texture is considered the left eye.",
+        .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo RightTextureInfo = {
-        "RightTexture",
-        "Right Eye Texture",
-        "Sets the path of the texture that is displayed on this plane for the right eye "
-        "during stereo rendering.",
-        Visibility::User
+    constexpr StringPropertyInfo RightTextureInfo = {
+        .identifier = "RightTexture",
+        .name = "Right Eye Texture",
+        .description = "Sets the path of the texture that is displayed on this plane for "
+            "the right eye during stereo rendering.",
+        .visibility = Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture is provided by a local file on disk.

@@ -52,87 +52,131 @@ namespace {
     constexpr int InterpolationSteps = 5;
     constexpr double Epsilon = 1e-4;
 
-    constexpr PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the lines that connect the instrument to the corners of the field "
-        "of view.",
-        Visibility::User
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the lines that connect the instrument to the "
+            "corners of the field of view.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr PropertyInfo StandoffDistanceInfo = {
-        "StandOffDistance",
-        "Standoff distance factor",
-        "A standoff distance factor which influences the distance of the plane to the "
-        "focus object. If the value is 1, the field of view will be rendered exactly on "
-        "the surface of, for example, a planet. With a value of smaller than 1, the "
-        "field of view will hover of the surface, thus making it more visible.",
-        Visibility::AdvancedUser
+    constexpr DoublePropertyInfo StandoffDistanceInfo = {
+        .identifier = "StandOffDistance",
+        .name = "Standoff distance factor",
+        .description = "A standoff distance factor which influences the distance of the "
+            "plane to the focus object. If the value is 1, the field of view will be "
+            "rendered exactly on the surface of, for example, a planet. With a value of "
+            "smaller than 1, the field of view will hover of the surface, thus making it "
+            "more visible.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.9999,
+            .minMax = { 0.99, 1.0 },
+            .stepSize = 0.000001
+        }
     };
 
-    constexpr PropertyInfo AlwaysDrawFovInfo = {
-        "AlwaysDrawFov",
-        "Always draw FOV",
-        "If enabled, the field of view will always be drawn, regardless of whether image "
-        "information is currently available or not.",
-        Visibility::User
+    constexpr BoolPropertyInfo AlwaysDrawFovInfo = {
+        .identifier = "AlwaysDrawFov",
+        .name = "Always draw FOV",
+        .description = "If enabled, the field of view will always be drawn, regardless "
+            "of whether image information is currently available or not.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr PropertyInfo DefaultStartColorInfo = {
-        "DefaultStart",
-        "Default start",
-        "The color that is used for the field of view frustum close to the instrument. "
-        "The final colors are interpolated between this value and the end color.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo DefaultStartColorInfo = {
+        .identifier = "DefaultStart",
+        .name = "Default start",
+        .description = "The color that is used for the field of view frustum close to "
+            "the instrument. The final colors are interpolated between this value and "
+            "the end color.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.4f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo ColorDefaultEndInfo = {
-        "DefaultEnd",
-        "Default end",
-        "The color that is used for the field of view frustum close to the target. The "
-        "final colors are interpolated between this value and the start color.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ColorDefaultEndInfo = {
+        .identifier = "DefaultEnd",
+        .name = "Default end",
+        .description = "The color that is used for the field of view frustum close to "
+            "the target. The final colors are interpolated between this value and the "
+            "start color.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.85f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo ColorActiveInfo = {
-        "Active",
-        "Active",
-        "The color that is used when the instrument's field of view is active.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ColorActiveInfo = {
+        .identifier = "Active",
+        .name = "Active",
+        .description = "The color that is used when the instrument's field of view is "
+            "active.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 1.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo ColorTargetInFovInfo = {
-        "TargetInFieldOfView",
-        "Target in field of view",
-        "The color that is used if the target is inside the field of view of the "
-        "instrument but the instrument is not yet active.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ColorTargetInFovInfo = {
+        .identifier = "TargetInFieldOfView",
+        .name = "Target in field of view",
+        .description = "The color that is used if the target is inside the field of view "
+            "of the instrument but the instrument is not yet active.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 0.5f, 0.7f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo ColorIntersectionStartInfo = {
-        "IntersectionStart",
-        "Intersection start",
-        "The color that is used close to the instrument if one of the field of view "
-        "corners are intersecting the target object. The final color is an interpolation "
-        "of this color and the intersection end color.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ColorIntersectionStartInfo = {
+        .identifier = "IntersectionStart",
+        .name = "Intersection start",
+        .description = "The color that is used close to the instrument if one of the "
+            "field of view corners are intersecting the target object. The final color "
+            "is an interpolation of this color and the intersection end color.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(1.f, 0.89f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo ColorIntersectionEndInfo = {
-        "IntersectionEnd",
-        "Intersection end",
-        "The color that is used close to the target if one of the field of view corners "
-        "is intersecting the target object. The final color is an interpolation of this "
-        "color and the intersection begin color.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ColorIntersectionEndInfo = {
+        .identifier = "IntersectionEnd",
+        .name = "Intersection end",
+        .description = "The color that is used close to the target if one of the field "
+            "of view corners is intersecting the target object. The final color is an "
+            "interpolation of this color and the intersection begin color.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(1.f, 0.29f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr PropertyInfo SquareColorInfo = {
-        "Square",
-        "Orthogonal square",
-        "The color that is used for the field of view square when there is no "
-        "intersection and that the instrument is not currently active.",
-        Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo SquareColorInfo = {
+        .identifier = "Square",
+        .name = "Orthogonal square",
+        .description = "The color that is used for the field of view square when there "
+            "is no intersection and that the instrument is not currently active.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.85f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     template <typename Func>
@@ -214,53 +258,18 @@ Documentation RenderableFov::Documentation() {
 
 RenderableFov::RenderableFov(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
-    , _standOffDistance(StandoffDistanceInfo, 0.9999, 0.99, 1.0, 0.000001)
-    , _alwaysDrawFov(AlwaysDrawFovInfo, false)
+    , _lineWidth(LineWidthInfo)
+    , _standOffDistance(StandoffDistanceInfo)
+    , _alwaysDrawFov(AlwaysDrawFovInfo)
     , _colors({
         .container = PropertyOwner({"Colors", "Colors"}),
-        .defaultStart = Vec3Property(
-            DefaultStartColorInfo,
-            glm::vec3(0.4f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .defaultEnd = Vec3Property(
-            ColorDefaultEndInfo,
-            glm::vec3(0.85f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .active = Vec3Property(
-            ColorActiveInfo,
-            glm::vec3(0.f, 1.f, 0.f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .targetInFieldOfView = Vec3Property(
-            ColorTargetInFovInfo,
-            glm::vec3(0.f, 0.5f, 0.7f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .intersectionStart = Vec3Property(
-            ColorIntersectionStartInfo,
-            glm::vec3(1.f, 0.89f, 0.f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .intersectionEnd = Vec3Property(
-            ColorIntersectionEndInfo,
-            glm::vec3(1.f, 0.29f, 0.f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .square = Vec3Property(
-            SquareColorInfo,
-            glm::vec3(0.85f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        )
+        .defaultStart = Vec3Property(DefaultStartColorInfo),
+        .defaultEnd = Vec3Property(ColorDefaultEndInfo),
+        .active = Vec3Property(ColorActiveInfo),
+        .targetInFieldOfView = Vec3Property(ColorTargetInFovInfo),
+        .intersectionStart = Vec3Property(ColorIntersectionStartInfo),
+        .intersectionEnd = Vec3Property(ColorIntersectionEndInfo),
+        .square = Vec3Property(SquareColorInfo)
     })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
