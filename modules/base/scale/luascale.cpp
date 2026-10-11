@@ -50,7 +50,7 @@ namespace {
         "the last frame as the second argument, and the current wall time as "
         "milliseconds past the J2000 epoch the third argument and computes the three "
         "scaling factors returned as a table.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Generates the scale values for the attached scene graph node by calling the

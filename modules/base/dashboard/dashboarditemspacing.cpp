@@ -36,7 +36,7 @@ namespace {
         "Spacing",
         "This value determines the spacing (in pixels) that this item represents. The "
         "default value is 15.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Adds a variable amount of spacing between two other `DashboardItem`s.

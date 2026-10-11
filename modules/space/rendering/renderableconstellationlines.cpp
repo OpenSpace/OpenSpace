@@ -56,21 +56,21 @@ namespace {
         "File",
         "Constellation data file path",
         "The path to a SPECK file that contains the data for the constellation lines.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw elements",
         "Enables/Disables the drawing of the constellations.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo UnitInfo = {
         "Unit",
         "Unit",
         "The distance unit used for the constellation lines data.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorsInfo = {
@@ -80,7 +80,7 @@ namespace {
         "groups of constellations, where each group can have a distinct color. The index "
         "for the color parameter for each constellation in the data file corresponds to "
         "the order of the colors in this list.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // @TODO (2025-01-07, emmbr) I did not add any description of the file format below,

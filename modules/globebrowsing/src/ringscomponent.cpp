@@ -62,7 +62,7 @@ namespace {
         "Enabled",
         "Enabled",
         "Enable/Disable Rings.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo TextureInfo = {
@@ -70,7 +70,7 @@ namespace {
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for these rings.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TextureFwrdInfo = {
@@ -78,7 +78,7 @@ namespace {
         "Texture forward",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for forward scattering light in these rings.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TextureBckwrdInfo = {
@@ -86,7 +86,7 @@ namespace {
         "Texture backward",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for backward scattering light in these rings.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TextureUnlitInfo = {
@@ -94,7 +94,7 @@ namespace {
         "Texture unlit",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for unlit part in these rings.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TextureColorInfo = {
@@ -102,7 +102,7 @@ namespace {
         "Texture color",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture color which is used for unlit part in these rings.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TextureTransparencyInfo = {
@@ -110,14 +110,14 @@ namespace {
         "Texture transparency",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture transparency which is used for unlit part in these rings.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "This value specifies the radius of the rings in meters.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo OffsetInfo = {
@@ -127,7 +127,7 @@ namespace {
         "a value between 0 and 1, where 0 is the center of the ring and 1 is the maximum "
         "extent at the radius. For example, if the value is {0.5, 1.0}, the ring is only "
         "shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo NightFactorInfo = {
@@ -136,7 +136,7 @@ namespace {
         "This value is a multiplicative factor that is applied to the side of the rings "
         "that is facing away from the Sun. If this value is equal to '1', no darkening "
         "of the night side occurs.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorFilterInfo = {
@@ -144,7 +144,7 @@ namespace {
         "Color filter",
         "This value affects the filtering out of part of the rings depending on the "
         "color values of the texture. The higher value, the more rings are filtered out.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ZFightingPercentageInfo = {
@@ -152,7 +152,7 @@ namespace {
         "Z-fighting percentage",
         "The percentage of the correct distance to the surface being shadowed. Possible "
         "values: [0.0, 1.0].",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo NumberShadowSamplesInfo = {
@@ -160,7 +160,7 @@ namespace {
         "Number of shadow samples",
         "The number of samples used during shadow mapping calculation (Percentage Closer "
         "Filtering).",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RingsComponent)]] Parameters {

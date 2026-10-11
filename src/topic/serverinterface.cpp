@@ -36,42 +36,42 @@ namespace {
         "Identifier",
         "Identifier",
         "The identifier for this interface.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this server interface is enabled or not.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "Whether the interface is using a Socket or a WebSocket.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The network port to use for this server interface.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DefaultAccessInfo = {
         "DefaultAccess",
         "Default access",
         "Sets the default access policy.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AllowAddressesInfo = {
         "AllowAddresses",
         "Allow addresses",
         "IP addresses or domains that should always be allowed access to this interface.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RequirePasswordAddressesInfo = {
@@ -79,21 +79,21 @@ namespace {
         "Require password addresses",
         "IP addresses or domains that should be allowed access if they provide a "
         "password.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DenyAddressesInfo = {
         "DenyAddresses",
         "Deny addresses",
         "IP addresses or domains that should never be allowed access to this interface.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PasswordInfo = {
         "Password",
         "Password",
         "Password for connecting to this interface.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ServerInterface)]] Parameters {

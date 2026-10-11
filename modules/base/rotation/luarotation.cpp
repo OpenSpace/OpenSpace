@@ -51,7 +51,7 @@ namespace {
         "milliseconds past the J2000 epoch as the third argument. It computes the "
         "rotation value factors returned as a table containing the 9 values that make up "
         "the resulting rotation matrix.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Generates the rotation for the attached scene graph node by calling the provided

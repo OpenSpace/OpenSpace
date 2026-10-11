@@ -74,7 +74,7 @@ namespace {
         "Path",
         "Path",
         "The file path to the data file to read.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PointRenderingModeInfo = {
@@ -85,7 +85,7 @@ namespace {
         "(useful for planar displays), and \"Camera Position Normal\" rotates the points "
         "towards the position of the camera (useful for spherical displays, like dome "
         "theaters).",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SegmentQualityInfo = {
@@ -95,7 +95,7 @@ namespace {
         "(highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
         "these automatically increase according to the eccentricity of the orbit.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo TrailWidthInfo = {
@@ -103,14 +103,14 @@ namespace {
         "Trail width",
         "The line width used for the trail, if the selected rendering method includes "
         "lines. If the rendering mode is set to Points, this value is ignored.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo PointSizeExponentInfo = {
         "PointSizeExponent",
         "Point size exponent",
         "An exponential scale value to set the absolute size of the point.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableMaxSizeInfo = {
@@ -119,7 +119,7 @@ namespace {
         "If true, the Max Size property will be used as an upper limit for the size of "
         "the point. This reduces the size of the points when approaching them, so that "
         "they stick to a maximum visual size depending on the Max Size value.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MaxSizeInfo = {
@@ -130,7 +130,7 @@ namespace {
         "distance to the camera. The larger the value, the larger the points are allowed "
         "to be. In the background, the computations are made to limit the size of the "
         "angle between the CameraToPointMid and CameraToPointEdge vectors.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RenderingModeInfo = {
@@ -139,14 +139,14 @@ namespace {
         "Determines how the trail should be rendered. If 'Trail' is selected, only the "
         "line part is visible, if 'Point' is selected, only the current satellite/debris "
         "point is visible.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The RGB main color for the trails and points.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo TrailFadeInfo = {
@@ -154,21 +154,21 @@ namespace {
         "Trail fade",
         "Determines how fast the trail fades out. A smaller number shows less of the "
         "trail and a larger number shows more.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable point outline",
         "Determines if the points should be rendered with an outline or not.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo OutlineColorInfo = {
         "OutlineColor",
         "Outline color",
         "The color of the outline.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo OutlineWidthInfo = {
@@ -176,7 +176,7 @@ namespace {
         "Outline width",
         "Determines the thickness of the outline. A value of 0 will not show any "
         "outline, while a value of 1 will cover the whole point.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo StartRenderIdxInfo = {
@@ -185,14 +185,14 @@ namespace {
         "Index of the first object in the block to render (all prior objects will be "
         "ignored). The block of objects to render will be determined by StartRenderIdx "
         "and RenderSize.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RenderSizeInfo = {
         "RenderSize",
         "Contiguous size of render block",
         "Number of objects to render sequentially from StartRenderIdx.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ContiguousModeInfo = {
@@ -202,7 +202,7 @@ namespace {
         "RenderSize will be rendered. If disabled, the number of objects defined by "
         "UpperLimit will rendered from an evenly dispersed sample of the full length of "
         "the data file.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {

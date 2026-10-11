@@ -43,49 +43,49 @@ namespace {
         "UseLog",
         "Use logarithm",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UseHistogramInfo = {
         "UseHistogram",
         "Auto contrast",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto filter",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo NormalizeValues = {
         "NormValues",
         "Normalize values",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background values",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo TransferFunctionInfo = {
         "Transferfunctions",
         "Transfer functions",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo DataOptionsInfo = {
         "DataOptions",
         "Data options",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 } // namespace
 
@@ -137,11 +137,11 @@ void IswaDataGroup::registerProperties() {
         // unregister backgroundvalues property
         if (_autoFilter) {
             _backgroundValues = _dataProcessor->filterValues();
-            _backgroundValues.setVisibility(PropertyInfo::Visibility::Hidden);
+            _backgroundValues.setVisibility(Visibility::Hidden);
         }
         else {
             // If autofilter is turned off, register backgroundValues
-            _backgroundValues.setVisibility(PropertyInfo::Visibility::Always);
+            _backgroundValues.setVisibility(Visibility::Always);
         }
         Dictionary d;
         d.setValue("autoFilter", _autoFilter.value());

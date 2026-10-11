@@ -36,7 +36,7 @@ namespace {
         "Texture",
         "Texture",
         "The OpenGL name of the texture that is displayed on this plane.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Useful for debugging OpenGL textures. It renders the content of an existing

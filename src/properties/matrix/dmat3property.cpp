@@ -28,15 +28,8 @@
 
 namespace openspace {
 
-DMat3Property::DMat3Property(PropertyInfo info, glm::dmat3x3 value, glm::dmat3x3 minValue,
-                             glm::dmat3x3 maxValue, glm::dmat3x3 stepValue)
-    : NumericalProperty<glm::dmat3x3>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+DMat3Property::DMat3Property(DMat3PropertyInfo info)
+    : NumericalProperty<glm::dmat3x3>(std::move(info))
 {}
 
 std::string_view DMat3Property::className() const {

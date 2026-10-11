@@ -45,7 +45,7 @@ namespace {
         "Use main dashboard",
         "If true, this ScreenSpaceDashboard will use the main dashboard instead of "
         "creating an independent one.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     // Displays dashboard content as a 2D overlay on top of the scene. Unlike world-space

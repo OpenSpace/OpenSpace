@@ -244,14 +244,14 @@ namespace {
         "Enabled",
         "Enable direct manipulation",
         "Decides whether the direct manipulation mode should be enabled or not.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo IsActiveInfo = {
         "IsActive",
         "Is active",
         "True if the direct manipulation interaction scheme is currently being applied.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AllowMouseInputInfo = {
@@ -259,7 +259,7 @@ namespace {
         "Allow mouse input",
         "Decides whether direct manipulation should be applied when using mouse input."
         "Otherwise, it is only applied for touch input.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DistanceThresholdInfo = {
@@ -268,7 +268,7 @@ namespace {
         "This threshold affects the distance from the interaction sphere at which the "
         "direct manipulation interaction mode starts being active. The value is given as "
         "a factor times the interaction sphere.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DefaultRenderableTypesInfo = {
@@ -278,7 +278,7 @@ namespace {
         "scheme when interacted with, keeping the finger on a static position on the "
         "interaction sphere of the object when touching. Good for relatively spherical "
         "objects. Per default, it's set to RenderableGlobes.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr std::string_view Description =

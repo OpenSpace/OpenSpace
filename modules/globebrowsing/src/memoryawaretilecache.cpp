@@ -47,7 +47,7 @@ namespace {
         "CPU allocated tile data (MB)",
         "This value denotes the amount of RAM memory (in MB) that this tile cache is "
         "utilizing.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo GpuAllocatedDataInfo = {
@@ -55,28 +55,28 @@ namespace {
         "GPU allocated tile data (MB)",
         "This value denotes the amount of GPU memory (in MB) that this tile cache is "
         "utilizing.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile cache size",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ApplyTileCacheInfo = {
         "ApplyTileCacheSize",
         "Apply tile cache size",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ClearTileCacheInfo = {
         "ClearTileCache",
         "Clear tile cache",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     GLenum toGlTextureFormat(GLenum glType, opengl::Texture::Format format) {

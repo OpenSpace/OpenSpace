@@ -48,35 +48,35 @@ namespace {
         "ServerProcessEnabled",
         "Enable server process",
         "Enable the node js based process used to serve the Web GUI.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AddressInfo = {
         "Address",
         "Address",
         "The network address to use when connecting to OpenSpace from the Web GUI.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The network port to use when serving the Web GUI over HTTP.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo WebSocketInterfaceInfo = {
         "WebSocketInterface",
         "WebSocket interface",
         "The identifier of the websocket interface to use when communicating.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ServerProcessEntryPointInfo = {
         "ServerProcessEntryPoint",
         "Server process entry point",
         "The node js command to invoke.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DirectoriesInfo = {
@@ -85,7 +85,7 @@ namespace {
         "Directories from which to to serve static content, as a string list "
         "with entries expressed as pairs, where every odd is the endpoint name and every "
         "even is the directory.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DefaultEndpointInfo = {
@@ -93,7 +93,7 @@ namespace {
         "Default endpoint",
         "The 'default' endpoint. The server will redirect http requests from / to "
         "/<DefaultEndpoint>.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ServedDirectoriesInfo = {
@@ -103,7 +103,7 @@ namespace {
         "as a verification of the actually served directories. For example, an onChange "
         "callback can be registered to this, to reload browsers when the server is "
         "ready. Manual changes to this property have no effect.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(WebGuiModule)]] Parameters {

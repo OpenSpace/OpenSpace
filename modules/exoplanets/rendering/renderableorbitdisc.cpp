@@ -45,21 +45,21 @@ namespace {
         "The path to a file with a one-dimensional texture to be used for the disc "
         "color. The leftmost color will be innermost color when rendering the disc, and "
         "the rightmost color will be the outermost color.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The size of the semi-major axis of the orbit in meters.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
         "The eccentricity of the orbit, which is the deviation from a perfect circle.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo OffsetInfo = {
@@ -69,7 +69,7 @@ namespace {
         "deviation from the semi-major axis, respectively. The values are relative to "
         "the size of the semi-major axis. That is, 0 means no deviation from the "
         "semi-major axis and 1 is a whole semi-major axis's worth of deviation.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MultiplyColorInfo = {
@@ -77,7 +77,7 @@ namespace {
         "Multiply color",
         "If set, the disc's texture is multiplied with this color. Useful for applying a "
         "color grayscale images.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     // Renders a disc around a planetary orbit to visualize properties such as positional

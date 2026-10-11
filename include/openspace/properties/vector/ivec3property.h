@@ -32,12 +32,18 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::ivec3> {
+    static constexpr glm::ivec3 Min = glm::ivec3(std::numeric_limits<int>::lowest());
+    static constexpr glm::ivec3 Max = glm::ivec3(std::numeric_limits<int>::max());
+    static constexpr glm::ivec3 Step = glm::ivec3(1);
+};
+
+using IVec3PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::ivec3>>;
+
 class IVec3Property : public NumericalProperty<glm::ivec3> {
 public:
-    explicit IVec3Property(PropertyInfo info, glm::ivec3 value = glm::ivec3(0),
-        glm::ivec3 minValue = glm::ivec3(std::numeric_limits<int>::lowest()),
-        glm::ivec3 maxValue = glm::ivec3(std::numeric_limits<int>::max()),
-        glm::ivec3 stepValue = glm::ivec3(1));
+    explicit IVec3Property(IVec3PropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

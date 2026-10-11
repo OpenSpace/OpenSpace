@@ -29,9 +29,11 @@
 
 namespace openspace {
 
+using StringPropertyInfo = BasicPropertyInfo<ValueDefaults<std::string_view>>;
+
 class StringProperty : public TemplateProperty<std::string> {
 public:
-    explicit StringProperty(PropertyInfo info, std::string value = "");
+    explicit StringProperty(StringPropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

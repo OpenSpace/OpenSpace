@@ -84,21 +84,21 @@ namespace {
         "BlendMode",
         "Blending mode",
         "This determines the blending mode that is applied to the renderable.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The label text color.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "The font size (in points) for the label.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SizeInfo = {
@@ -106,42 +106,42 @@ namespace {
         "Size",
         "Scales the size of the label, exponentially. The value is used as the exponent "
         "in a 10^x computation to scale the label size.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo TextInfo = {
         "Text",
         "Text",
         "The text that will be displayed on screen.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min and max size",
         "The minimum and maximum size (in pixels) of the label.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation matrix",
         "Transformation matrix to be applied to the label.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo OrientationOptionInfo = {
         "OrientationOption",
         "Orientation option",
         "Label orientation rendering mode.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableFadingEffectInfo = {
         "EnableFading",
         "Enable/disable fade-in effect",
         "Enable/Disable the Fade-in effect.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FadeWidthsInfo = {
@@ -152,7 +152,7 @@ namespace {
         "one after the furthest distance. For example, with the unit Parsec (pc), a "
         "value of {1, 2} will make the label being fully faded out 1 Parsec before the "
         "closest distance and 2 Parsec away from the furthest distance.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FadeDistancesInfo = {
@@ -160,14 +160,14 @@ namespace {
         "Fade distances",
         "The distance range in which the labels should be fully opaque, specified in the "
         "chosen unit. The distance from the position of the label to the camera.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FadeUnitOptionInfo = {
         "FadeUnit",
         "Fade distance Unit",
         "Distance unit for fade-in/-out distance calculations. Defaults to \"au\".",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Renders a single text label in 3D space. The label is rendered as a billboard,

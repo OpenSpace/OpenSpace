@@ -51,7 +51,7 @@ namespace {
         "All modules",
         "The list of all modules that were compiled for this version of OpenSpace in the "
         "same order in which they were initialized.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 } // namespace
 

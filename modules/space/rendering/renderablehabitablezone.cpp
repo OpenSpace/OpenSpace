@@ -45,7 +45,7 @@ namespace {
         "Effective temperature",
         "The effective temperature of the corresponding star, in Kelvin. Used to compute "
         "the width and size of the disc.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LuminosityInfo = {
@@ -53,7 +53,7 @@ namespace {
         "Luminosity",
         "The luminosity of the corresponding star, in units of solar luminosities. Used "
         "to compute the width and size of the disc.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo OptimisticInfo = {
@@ -61,7 +61,7 @@ namespace {
         "Optimistic" ,
         "If true, the habitable zone disc is rendered with the optimistic boundaries "
         "rather than the conservative ones.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo KopparapuTeffIntervalInfo = {
@@ -71,7 +71,7 @@ namespace {
         "the habitable zone computation. For stars with temperatures outside the range, "
         "a simpler method by Tom E. Harris is used. This method only uses the star "
         "luminosity and does not include computation of the optimistic boundaries.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Represents a star's habitable zone, with boundaries computed from its effective

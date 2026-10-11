@@ -46,14 +46,14 @@ namespace {
         "Resolution",
         "Resolution",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FieldlineSeedInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline seedpoints",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 } // namespace
 

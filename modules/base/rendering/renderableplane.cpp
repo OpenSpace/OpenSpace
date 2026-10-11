@@ -76,7 +76,7 @@ namespace {
         "slightly different way. In contrast, \"Fixed Rotation\" does not rotate the "
         "plane at all based on the camera and should be used the plane should be "
         "oriented in a fixed way.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MirrorBacksideInfo = {
@@ -85,14 +85,14 @@ namespace {
         "If false, the image plane will not be mirrored when viewed from the backside. "
         "This is usually desirable when the image shows data at a specific location, but "
         "not if it is displaying text for example.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The size of the plane in meters.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AutoScaleInfo = {
@@ -107,7 +107,7 @@ namespace {
         "Scale by distance",
         "Decides whether the plane should automatically adjust in size to based on the "
         "distance to the camera. Otherwise it will remain in the given size.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ApparentSizeMultiplierInfo = {
@@ -117,28 +117,28 @@ namespace {
         "A value of 1.0 results in a natural angular size based on camera distance and "
         "field of view. Smaller values (e.g., 0.01) make the object appear smaller, "
         "while larger values make it appear bigger.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ScaleByDistanceMaxHeightInfo = {
         "ScaleByDistanceMaxHeight",
         "Scale by distance max height",
         "The maximum height in meters a plane can get when using distance scaling.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ScaleByDistanceMinHeightInfo = {
         "ScaleByDistanceMinHeight",
         "Scale by distance min height",
         "The minimum height in meters a plane can get when using distance scaling.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending mode",
         "Determines the blending mode that is applied to this plane.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MultiplyColorInfo = {
@@ -146,7 +146,7 @@ namespace {
         "Multiply color",
         "An RGB color to multiply with the plane's texture. Useful for applying a color "
         "to grayscale images.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Displays some form of content (usually an image) on a plane. Settable parameters

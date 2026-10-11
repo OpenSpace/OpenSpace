@@ -36,7 +36,7 @@ namespace {
         "Intensity",
         "Intensity",
         "The intensity of this light source.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     // Represents a light source placed at the position of the camera. An object with

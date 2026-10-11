@@ -43,14 +43,14 @@ namespace {
         "HasStart",
         "Has start",
         "If enabled, this TimeFrame will be inactive before the Start time.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo StartInfo = {
         "Start",
         "Start",
         "Specifies the time when this TimeFrame becomes active.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo JumpToStartInfo = {
@@ -58,21 +58,21 @@ namespace {
         "Jump to start",
         "Performs a time jump to the start of the interval. Disabled if no start time is "
         "specified.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo HasEndInfo = {
         "HasEnd",
         "Has end",
         "If enabled, this TimeFrame will be inactive after the End time.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EndInfo = {
         "End",
         "End",
         "Specifies the time when this TimeFrame becomes inactive.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo JumpToEndInfo = {
@@ -80,7 +80,7 @@ namespace {
         "Jump to end",
         "Performs a time jump to the end of the interval. Disabled if no end time is "
         "specified.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     // This `TimeFrame`'s validity is determined by a single start and end time in between

@@ -42,7 +42,7 @@ namespace {
         "Image URL",
         "A URL to an image to use as a texture for this sphere. The image is expected to "
         "be an equirectangular projection.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(const std::string& url)

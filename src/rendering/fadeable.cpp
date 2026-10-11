@@ -32,7 +32,7 @@ namespace {
         "Opacity",
         "This value determines the opacity of this object. A value of 0 means completely "
         "transparent.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo FadeInfo = {
@@ -42,7 +42,7 @@ namespace {
         "from the Opacity value selected by the user. This value should not be directly "
         "manipulated through a user interface, but instead used by other components of "
         "the system programmatically.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 } // namespace
 

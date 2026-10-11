@@ -36,14 +36,14 @@ namespace {
         "Set default",
         "If this value is triggered it will reset all of these values to their default "
         "values.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma",
         "This value is used as an exponent to adjust the color for each tile.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo MultiplierInfo = {
@@ -51,7 +51,7 @@ namespace {
         "Multiplier",
         "This value is used as a multiplier to adjust the color applied after taking the "
         "gamma value as an exponent.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo OffsetInfo = {
@@ -59,7 +59,7 @@ namespace {
         "Offset",
         "This value is used as an additive modifier to adjust the color applied after "
         "the gamma exponent and the multiplier has been performed.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 } // namespace
 

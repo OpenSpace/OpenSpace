@@ -38,7 +38,7 @@ namespace {
         "Source",
         "This value specifies the source frame that is used as the basis for the "
         "coordinate transformation. This has to be a valid SPICE name.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo DestinationInfo = {
@@ -46,7 +46,7 @@ namespace {
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
         "transformation. This has to be a valid SPICE name.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo FixedDateInfo = {
@@ -54,7 +54,7 @@ namespace {
         "Fixed date",
         "A time to lock the rotation to. Setting this to an empty string will unlock the "
         "time and return to rotation based on current simulation time.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TimeOffsetInfo = {
@@ -62,7 +62,7 @@ namespace {
         "Time offset",
         "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
         "at which to compute the rotation.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to provide rotation

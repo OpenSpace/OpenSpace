@@ -64,14 +64,14 @@ namespace {
         "The value used for interpolation. The max value is set from the number of steps "
         "in the dataset, so a step of one corresponds to one step in the dataset and "
         "values in-between will be determined using interpolation.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo StepsInfo = {
         "NumberOfSteps",
         "Number of steps",
         "The number of steps available in the dataset, including the initial positions.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo JumpToNextInfo = {
@@ -79,7 +79,7 @@ namespace {
         "Jump to next",
         "Immediately set the interpolation value to correspond to the next set of point "
         "positions compared to the current.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo JumpToPrevInfo = {
@@ -87,7 +87,7 @@ namespace {
         "Jump to previous",
         "Immediately set the interpolation value to correspond to the previous set of "
         "point positions compared to the current.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo InterpolateToNextInfo = {
@@ -95,7 +95,7 @@ namespace {
         "Interpolate to next",
         "Trigger an interpolation to the next set of point positions. The duration of "
         "the interpolation is set based on the Interpolation Speed property.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo InterpolateToPrevInfo = {
@@ -103,7 +103,7 @@ namespace {
         "Interpolate to previous",
         "Trigger an interpolation to the previous set of point positions. The duration "
         "of the interpolation is set based on the Interpolation Speed property.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo InterpolateToEndInfo = {
@@ -111,7 +111,7 @@ namespace {
         "Interpolate to end",
         "Trigger an interpolation all the way to the final set of positions. The "
         "duration of the interpolation is set based on the Interpolation Speed property.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo InterpolateToStartInfo = {
@@ -119,7 +119,7 @@ namespace {
         "Interpolate to start",
         "Trigger an inverted interpolation to the initial set of positions. The duration "
         "of the interpolation is set based on the Interpolation Speed property.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo InterpolationSpeedInfo = {
@@ -127,7 +127,7 @@ namespace {
         "Interpolation speed",
         "Affects how long the interpolation takes when triggered using one of the "
         "trigger properties. A value of 1 means that a step takes 1 second.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo UseSplineInfo = {
@@ -136,7 +136,7 @@ namespace {
         "If true, the points will be interpolated using a Catmull-Rom spline instead of "
         "linearly. This leads to a smoother transition at the breakpoints, i.e. between "
         "each step.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // This is a version of the [RenderablePointCloud](#base_renderable_pointcloud) where

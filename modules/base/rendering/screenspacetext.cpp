@@ -35,7 +35,7 @@ namespace {
         "Text",
         "Text",
         "The text to be displayed.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Shows a static text that can be changed via a property.

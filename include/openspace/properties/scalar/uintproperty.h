@@ -31,16 +31,22 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<unsigned int> {
+    static constexpr unsigned int Min = std::numeric_limits<unsigned int>::lowest();
+    static constexpr unsigned int Max = std::numeric_limits<unsigned int>::max();
+    static constexpr unsigned int Step = 1;
+};
+
+using UIntPropertyInfo = BasicPropertyInfo<NumericalDefaults<unsigned int>>;
+
 /**
  * This class is a concrete implementation of TemplateProperty with the type
  * `unsigned int`.
  */
 class UIntProperty : public NumericalProperty<unsigned int> {
 public:
-    explicit UIntProperty(PropertyInfo info, unsigned int value = 0,
-        unsigned int minValue = std::numeric_limits<unsigned int>::lowest(),
-        unsigned int maxValue = std::numeric_limits<unsigned int>::max(),
-        unsigned int stepValue = 1);
+    explicit UIntProperty(UIntPropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

@@ -96,7 +96,7 @@ namespace {
         "TextureSource",
         "Texture source",
         "A directory on disk from which to load the texture files for the sphere.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FitsLayerInfo = {
@@ -105,21 +105,21 @@ namespace {
         "The index, a whole positive number, of the layer in the FITS file to use as "
         "texture. If not specified, the first layer in the data will be used regardless. "
         "When specified, that data layer will be the option used.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FitsLayerNameInfo = {
         "LayerNames",
         "Texture layer options",
         "This value specifies which name of the fits layer to use as texture.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TextureFilterInfo = {
         "TextureFilter",
         "Texture filter",
         "Option to choose nearest neighbor or linear filtering for the texture.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SaveDownloadsOnShutdown = {
@@ -127,7 +127,7 @@ namespace {
         "Save downloads on shutdown",
         "This is an option for if dynamically downloaded files should be saved for the "
         "next run or not.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Reads a data sequence from specifically FITS files, makes textures from them, and

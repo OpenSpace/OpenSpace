@@ -57,7 +57,7 @@ struct Configuration {
     };
     Profile profile;
 
-    PropertyInfo::Visibility propertyVisibility = PropertyInfo::Visibility::User;
+    Visibility propertyVisibility = Visibility::User;
 
     bool showPropertyConfirmation = true;
 

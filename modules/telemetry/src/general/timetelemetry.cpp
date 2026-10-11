@@ -52,7 +52,7 @@ namespace {
         "The time unit that the telemetry should use for the time speed. For example, if "
         "the unit is set to 'Hour' then the unit for the time speed is simulation hours "
         "per real life second.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
@@ -66,7 +66,7 @@ namespace {
         "Time precision",
         "The precision in seconds used to determine when to send updated time data to "
         "the Open Sound Control receiver.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 } // namespace
 

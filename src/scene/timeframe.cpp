@@ -41,7 +41,7 @@ namespace {
         "current simulation time is determined to be a valid time, this property is set "
         "to true. Otherwise it will be false, meaning that the scene graph node this "
         "TimeFrame is attached to would not be shown",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     // A `TimeFrame` object determines the time frame during which a scene graph node is

@@ -40,7 +40,7 @@ namespace {
         "Index",
         "The index into the list of images that is used to pick the currently displayed "
         "image.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo NumImagesInfo = {
@@ -48,14 +48,14 @@ namespace {
         "Number of images",
         "The number of images that can be shown. The 'Index' value must be between 0 and "
         "this value - 1.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo CurrentImageInfo = {
         "CurrentImage",
         "Current image",
         "The read-only value of the currently selected image.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FolderPathInfo = {
@@ -63,7 +63,7 @@ namespace {
         "Folder path",
         "The path that is used to look for images for this image provider. The path must "
         "point to an existing folder that contains images.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ImageSequenceTileProvider)]] Parameters {

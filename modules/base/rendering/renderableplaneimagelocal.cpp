@@ -49,7 +49,7 @@ namespace {
         "Texture",
         "A path to an image file to use as a texture for the plane. During stereo "
         "rendering, this texture is considered the left eye.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RightTextureInfo = {
@@ -57,7 +57,7 @@ namespace {
         "Right Eye Texture",
         "Sets the path of the texture that is displayed on this plane for the right eye "
         "during stereo rendering.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture is provided by a local file on disk.

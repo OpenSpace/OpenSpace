@@ -47,14 +47,14 @@ namespace {
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will be replaced "
         "with the values read from the file provided in `DataFile`.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DataFileInfo = {
         "DataFile",
         "Data file path",
         "The file path to the JSON data.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // This `DashboardItem` displays text based on the content of a provided data file.

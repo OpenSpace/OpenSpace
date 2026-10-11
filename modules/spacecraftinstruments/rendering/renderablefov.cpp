@@ -57,7 +57,7 @@ namespace {
         "Line width",
         "The width of the lines that connect the instrument to the corners of the field "
         "of view.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo StandoffDistanceInfo = {
@@ -67,7 +67,7 @@ namespace {
         "focus object. If the value is 1, the field of view will be rendered exactly on "
         "the surface of, for example, a planet. With a value of smaller than 1, the "
         "field of view will hover of the surface, thus making it more visible.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AlwaysDrawFovInfo = {
@@ -75,7 +75,7 @@ namespace {
         "Always draw FOV",
         "If enabled, the field of view will always be drawn, regardless of whether image "
         "information is currently available or not.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DefaultStartColorInfo = {
@@ -83,7 +83,7 @@ namespace {
         "Default start",
         "The color that is used for the field of view frustum close to the instrument. "
         "The final colors are interpolated between this value and the end color.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorDefaultEndInfo = {
@@ -91,14 +91,14 @@ namespace {
         "Default end",
         "The color that is used for the field of view frustum close to the target. The "
         "final colors are interpolated between this value and the start color.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorActiveInfo = {
         "Active",
         "Active",
         "The color that is used when the instrument's field of view is active.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorTargetInFovInfo = {
@@ -106,7 +106,7 @@ namespace {
         "Target in field of view",
         "The color that is used if the target is inside the field of view of the "
         "instrument but the instrument is not yet active.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorIntersectionStartInfo = {
@@ -115,7 +115,7 @@ namespace {
         "The color that is used close to the instrument if one of the field of view "
         "corners are intersecting the target object. The final color is an interpolation "
         "of this color and the intersection end color.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorIntersectionEndInfo = {
@@ -124,7 +124,7 @@ namespace {
         "The color that is used close to the target if one of the field of view corners "
         "is intersecting the target object. The final color is an interpolation of this "
         "color and the intersection begin color.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SquareColorInfo = {
@@ -132,7 +132,7 @@ namespace {
         "Orthogonal square",
         "The color that is used for the field of view square when there is no "
         "intersection and that the instrument is not currently active.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     template <typename Func>

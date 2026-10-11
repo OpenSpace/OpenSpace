@@ -129,47 +129,47 @@ inline glm::dvec3 viewDirection(const glm::dquat& q) {
 }
 
 template <typename valType>
-glm::tmat2x2<valType> createFillMat2x2(valType v) {
+constexpr glm::tmat2x2<valType> createFillMat2x2(valType v) {
     return glm::tmat2x2<valType>(v, v, v, v);
 }
 
 template <typename valType>
-glm::tmat2x3<valType> createFillMat2x3(valType v) {
+constexpr glm::tmat2x3<valType> createFillMat2x3(valType v) {
     return glm::tmat2x3<valType>(v, v, v, v, v, v);
 }
 
 template <typename valType>
-glm::tmat2x4<valType> createFillMat2x4(valType v) {
+constexpr glm::tmat2x4<valType> createFillMat2x4(valType v) {
     return glm::tmat2x4<valType>(v, v, v, v, v, v, v, v);
 }
 
 template <typename valType>
-glm::tmat3x3<valType> createFillMat3x3(valType v) {
+constexpr glm::tmat3x3<valType> createFillMat3x3(valType v) {
     return glm::tmat3x3<valType>(v, v, v, v, v, v, v, v, v);
 }
 
 template <typename valType>
-glm::tmat3x2<valType> createFillMat3x2(valType v) {
+constexpr glm::tmat3x2<valType> createFillMat3x2(valType v) {
     return glm::tmat3x2<valType>(v, v, v, v, v, v);
 }
 
 template <typename valType>
-glm::tmat3x4<valType> createFillMat3x4(valType v) {
+constexpr glm::tmat3x4<valType> createFillMat3x4(valType v) {
     return glm::tmat3x4<valType>(v, v, v, v, v, v, v, v, v, v, v, v);
 }
 
 template <typename valType>
-glm::tmat4x4<valType> createFillMat4x4(valType v) {
+constexpr glm::tmat4x4<valType> createFillMat4x4(valType v) {
     return glm::tmat4x4<valType>(v, v, v, v, v, v, v, v, v, v, v, v, v, v, v, v);
 }
 
 template <typename valType>
-glm::tmat4x2<valType> createFillMat4x2(valType v) {
+constexpr glm::tmat4x2<valType> createFillMat4x2(valType v) {
     return glm::tmat4x2<valType>(v, v, v, v, v, v, v, v);
 }
 
 template <typename valType>
-glm::tmat4x3<valType> createFillMat4x3(valType v) {
+constexpr glm::tmat4x3<valType> createFillMat4x3(valType v) {
     return glm::tmat4x3<valType>(v, v, v, v, v, v, v, v, v, v, v, v);
 }
 

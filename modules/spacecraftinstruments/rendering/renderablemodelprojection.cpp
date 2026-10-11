@@ -54,7 +54,7 @@ namespace {
         "Perform shading",
         "If true, the model will be shaded based on the location of the Sun. If false, "
         "shading is disabled and the model is fully illuminated.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     // A 3D model that acts as a projection target for spacecraft instrument images,

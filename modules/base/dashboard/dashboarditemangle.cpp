@@ -56,7 +56,7 @@ namespace {
         "Source type",
         "The type of position that is used as the triangle apex used to calculate the "
         "angle.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SourceNodeIdentifierInfo = {
@@ -66,7 +66,7 @@ namespace {
         "of the node that is to be used as the apex of the triangle used to calculate "
         "the angle. The computed angle is the incident angle to Source in the triangle ("
         "Source, Reference, Destination).",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ReferenceTypeInfo = {
@@ -75,7 +75,7 @@ namespace {
         "The type of position that is used as the destination of the reference line used "
         "to calculate the angle. The computed angle is the incident angle to Source in "
         "the triangle (Source, Reference, Destination).",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ReferenceNodeIdentifierInfo = {
@@ -83,7 +83,7 @@ namespace {
         "Reference node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the reference direction to compute the angle.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DestinationTypeInfo = {
@@ -92,7 +92,7 @@ namespace {
         "The type of position that is used as the destination to calculate the angle. "
         "The computed angle is the incident angle to Source in the triangle (Source, "
         "Reference, Destination).",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DestinationNodeIdentifierInfo = {
@@ -100,7 +100,7 @@ namespace {
         "Destination node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the destination for computing the angle.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Shows the angle between the lines `Source`->`Reference` and

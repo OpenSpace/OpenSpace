@@ -50,7 +50,7 @@ namespace {
         "epoch of the last frame as the second argument, and the current wall time as "
         "milliseconds past the J2000 epoch the third argument and computes the three "
         "translation values returned as a table.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Generates the translation values used to offset the attached scene graph node's

@@ -33,14 +33,14 @@ namespace {
         "Enabled",
         "Enabled",
         "This setting determines whether this object will be visible or not.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is collapsed",
         "This setting determines whether this window is collapsed or not.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 } // namespace
 

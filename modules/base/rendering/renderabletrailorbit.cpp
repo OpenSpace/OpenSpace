@@ -50,7 +50,7 @@ namespace {
         "compared to the current OpenSpace time. If the current time in OpenSpace has "
         "passed the end date, the last full period of the trail will be shown. Only "
         "works if there exist a Start Time and End Time for the orbit data.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LimitToTimeRangeInfo = {
@@ -58,21 +58,21 @@ namespace {
         "Limit to time range",
         "Only forces full trail orbit trail between start time and one orbital period "
         "after the end time.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start Time",
         "The start time for the range of this orbit. The date must be in ISO 8601.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EndTimeInfo = {
         "EndTime",
         "End Time",
         "The end time for the range of this orbit. The date must be in ISO 8601.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PeriodInfo = {
@@ -82,7 +82,7 @@ namespace {
         "in (Earth) days. In the case of Earth, this would be a sidereal year "
         "(=365.242 days). If this values is specified as multiples of the period, it is "
         "possible to show the effects of precession.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ResolutionInfo = {
@@ -92,7 +92,7 @@ namespace {
         "trail; the tradeoff being that a higher resolution is able to resolve more "
         "detail, but will take more resources while rendering, too. The higher, the "
         "smoother the trail, but also more memory will be used.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {

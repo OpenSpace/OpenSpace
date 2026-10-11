@@ -46,14 +46,14 @@ namespace {
         "The path to a file with a one-dimensional texture to be used for the disc "
         "color. The leftmost color will be innermost color when rendering the disc, and "
         "the rightmost color will be the outermost color.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The outer radius of the disc, in meters.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo WidthInfo = {
@@ -62,7 +62,7 @@ namespace {
         "The disc width, given as a ratio of the full disc radius. For example, a value "
         "of 1 results in a full circle, while 0.5 results in a disc where the inner "
         "radius is half of the full radius.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Renders a circular disc that is colored based on a one-dimensional texture.

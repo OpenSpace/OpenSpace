@@ -87,7 +87,7 @@ namespace {
         "ToggleAll",
         "Toggle all",
         "Toggle all sonifications for all planets.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     static const PropertyOwner::PropertyOwnerInfo MercuryInfo = {
@@ -142,49 +142,49 @@ namespace {
         "ToggleAll",
         "Toggle All",
         "Toggle all sonifications for the planet.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SizeDayInfo = {
         "SizeDay",
         "Size/Day",
         "Toggle the size/day sonification for the planet.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo GravityInfo = {
         "Gravity",
         "Gravity",
         "Toggle the gravity sonification for the planet.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo TemperatureInfo = {
         "Temperature",
         "Temperature",
         "Toggle the temperature sonification for the planet.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo AtmosphereInfo = {
         "Atmosphere",
         "Atmosphere",
         "Toggle the atmosphere sonification for the planet.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo MoonsInfo = {
         "Moons",
         "Moons",
         "Toggle the moons sonification for the planet.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RingsInfo = {
         "Rings",
         "Rings",
         "Toggle the rings sonification for the planet.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
@@ -200,7 +200,7 @@ namespace {
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
         "performance.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo HighDistancePrecisionInfo = {
@@ -210,7 +210,7 @@ namespace {
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "
         "providing more accurate data.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LowAnglePrecisionInfo = {
@@ -220,7 +220,7 @@ namespace {
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
         "performance.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo HighAnglePrecisionInfo = {
@@ -230,7 +230,7 @@ namespace {
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "
         "providing more accurate data.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     struct [[codegen::Dictionary(PlanetsSonification)]] Parameters {

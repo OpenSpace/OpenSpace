@@ -147,7 +147,7 @@ namespace {
         "Copy to clipboard",
         "Copies the current configuration to the clipboard so that it can be pasted "
         "into the asset file.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo CalibrationPatternInfo = {
@@ -155,56 +155,56 @@ namespace {
         "Enable calibration pattern",
         "Enables the calibration pattern. The calibration can be used to find which "
         "values to use when setting up the blackout shape.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo CalibrationColorInfo = {
         "EnableCalibrationColor",
         "Enable calibration color",
         "Set Blackout Shape to a bright color for easier calibration.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo AddControlPointInfo = {
         "AddControlPoint",
         "Add control point",
         "Adds a new control point to the spline.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RemoveControlPointInfo = {
         "RemoveControlPoint",
         "Remove control point",
         "Removes the selected control point from the spline.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RemoveSelectorInfo = {
         "RemoveSelector",
         "Select point to remove",
         "Removes the selected control point.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo AddSelectorInfo = {
         "AddSelector",
         "Select where to add",
         "Select where to add a new point.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo NewPointPositionInfo = {
         "NewPointPosition",
         "Point position",
         "X and Y coordinates for where to add the new control point.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo CalibrationTextureInfo = {
         "CalibrationTexture",
         "Calibration texture",
         "Texture used as calibration pattern.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     // Renders a screen-space shape used to black out part of the rendering. This can be

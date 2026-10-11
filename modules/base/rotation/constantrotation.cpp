@@ -37,14 +37,14 @@ namespace {
         "RotationAxis",
         "Rotation axis",
         "This value is the rotation axis around which the object will rotate.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RotationRateInfo = {
         "RotationRate",
         "Rotation rate",
         "This value determines the number of revolutions per in-game second.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Makes a scene graph node rotate about the provided axis at a fixed and constant

@@ -42,7 +42,7 @@ namespace {
         "SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') or "
         "a NAIF integer id code (such as '399'). The resulting translation will be a "
         "vector leading from the `Target` to the `Observer`.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ObserverInfo = {
@@ -53,7 +53,7 @@ namespace {
         "as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0'). The "
         "resulting translation will be a vector leading from the `Target` to the "
         "`Observer`.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FrameInfo = {
@@ -61,7 +61,7 @@ namespace {
         "Reference frame",
         "This is the SPICE name of the reference frame in which the position should be "
         "calculated. The default value is GALACTIC.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FixedDateInfo = {
@@ -71,7 +71,7 @@ namespace {
         "rather than following the in-game in the system. Setting this to an empty "
         "string will unlock the time and return to position based on current simulation "
         "time.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo TimeOffsetInfo = {
@@ -79,7 +79,7 @@ namespace {
         "Time offset",
         "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
         "at which to compute the rotation.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to provide translational

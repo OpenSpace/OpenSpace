@@ -49,7 +49,7 @@ namespace {
         "This value determines the color that the active instrument is rendered in. "
         "Shortly after activation, the used color is mixture of this and the flash "
         "color. The default value is (0.6, 1.0, 0.0).",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FlashColorInfo = {
@@ -57,7 +57,7 @@ namespace {
         "Flash color",
         "This value determines the color that is used shortly after an instrument "
         "activation. The default value is (0.9, 1.0, 0.75).",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Shows information about the status of individual instruments onboard a spacecraft

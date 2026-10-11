@@ -43,14 +43,14 @@ namespace {
         "Intensity",
         "Intensity",
         "The intensity of this light source.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo NodeInfo = {
         "Node",
         "Node",
         "The identifier of the scene graph node to follow.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Represents a light source placed at the position of a scene graph node. That is,

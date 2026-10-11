@@ -49,7 +49,7 @@ namespace {
         "If this value is checked, this component will display the properties using a "
         "tree layout, rather than using a flat map. This value should only be set on "
         "property windows that display SceneGraphNodes, or the application might crash.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     int nVisibleProperties(const std::vector<Property*>& props) {
@@ -57,7 +57,7 @@ namespace {
             props.begin(),
             props.end(),
             [](Property* p) {
-                using V = PropertyInfo::Visibility;
+                using V = Visibility;
                 const V visFilter = global::openSpaceEngine->visibility();
                 return static_cast<std::underlying_type_t<V>>(visFilter) >=
                        static_cast<std::underlying_type_t<V>>(p->visibility());
@@ -410,7 +410,7 @@ void GuiPropertyComponent::renderProperty(Property* prop, PropertyOwner* owner) 
     };
 
     // Check if the visibility of the property is high enough to be displayed
-    using Vis = PropertyInfo::Visibility;
+    using Vis = Visibility;
     const Vis visibilityFilter = global::openSpaceEngine->visibility();
     const auto v = static_cast<std::underlying_type_t<Vis>>(visibilityFilter);
     const auto propV = static_cast<std::underlying_type_t<Vis>>(prop->visibility());

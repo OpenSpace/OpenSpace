@@ -40,35 +40,35 @@ namespace {
         "ShowWhenEnabled",
         "Show when enabled",
         "Show text when the input is enabled.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ShowWhenDisabledInfo = {
         "ShowWhenDisabled",
         "Show when disabled",
         "Show text when the input is disabled.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ShowKeyboardInfo = {
         "ShowKeyboard",
         "Show keyboard information",
         "Display the state of the keyboard input.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ShowMouseInfo = {
         "ShowMouse",
         "Show mouse information",
         "Display the state of the mouse input.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ShowJoystickInfo = {
         "ShowJoystick",
         "Show joystick information",
         "Display the state of the joystick input.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Shows the current state of the different methods to provide user input: keyboard,

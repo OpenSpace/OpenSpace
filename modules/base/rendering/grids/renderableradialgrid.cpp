@@ -45,7 +45,7 @@ namespace {
         "Color",
         "Color",
         "The color used for the grid lines.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo GridSegmentsInfo = {
@@ -53,21 +53,21 @@ namespace {
         "Number of grid segments",
         "Specifies the number of segments for the grid, in the radial and angular "
         "direction respectively.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo CircleSegmentsInfo = {
         "CircleSegments",
         "Number of circle segments",
         "The number of segments that is used to render each circle in the grid.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RadiiInfo = {
@@ -76,7 +76,7 @@ namespace {
         "The radii values that determine the size of the circular grid. The first value "
         "is the radius of the inmost ring and the second is the radius of the outmost "
         "ring.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {

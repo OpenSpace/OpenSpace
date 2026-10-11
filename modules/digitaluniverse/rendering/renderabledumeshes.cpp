@@ -59,7 +59,7 @@ namespace {
         "TextColor",
         "Text color",
         "The text color for the astronomical object.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo TextOpacityInfo = {
@@ -67,14 +67,14 @@ namespace {
         "Text opacity",
         "Determines the transparency of the text label, where 1 is completely opaque and "
         "0 fully transparent.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text size",
         "The text size for the astronomical object labels.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LabelFileInfo = {
@@ -82,7 +82,7 @@ namespace {
         "Label file",
         "The path to the label file that contains information about the astronomical "
         "objects being rendered.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo LabelMinMaxSizeInfo = {
@@ -90,42 +90,42 @@ namespace {
         "Text min/max size",
         "The minimum and maximum size (in pixels) of the text for the labels for the "
         "astronomical objects being rendered.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "If the DU mesh is of wire type, this value determines the width of the lines.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw elements",
         "Enables/Disables the drawing of the astronomical objects.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo DrawLabelInfo = {
         "DrawLabels",
         "Draw labels",
         "Determines whether labels should be drawn or hidden.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo MeshColorInfo = {
         "MeshColor",
         "Meshes colors",
         "The defined colors for the meshes to be rendered.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render option",
         "Debug option for rendering of billboards and texts.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {

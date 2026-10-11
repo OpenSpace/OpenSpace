@@ -43,7 +43,7 @@ namespace {
         "If this value is set to 'true' and at least one column was loaded as an option "
         "for size mapping, the chosen data column will be used to scale the size of the "
         "points. The first option in the list is selected per default.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo OptionInfo = {
@@ -53,7 +53,7 @@ namespace {
         "parameter value will be used as a multiplicative factor to scale the size of "
         "the points. Note that they may however still be scaled by max size adjustment "
         "effects.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ScaleFactorInfo = {
@@ -61,7 +61,7 @@ namespace {
         "Scale factor",
         "This value is a multiplicative factor that is applied to the data values that "
         "are used to scale the points, when size mapping is applied.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo IsRadiusInfo = {
@@ -69,7 +69,7 @@ namespace {
         "Size is radius",
         "If true, the size value in the data is interpreted as the radius of the points. "
         "Otherwise, it is interpreted as the diameter.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo InvertScaleInfo = {
@@ -77,7 +77,7 @@ namespace {
         "Invert scale",
         "If true, the points will be scaled based on the inverse of the data value "
         "(1/value), so that larger values result in a smaller scale, and vice versa.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // A reusable component for point-cloud rendering that controls how per-point data

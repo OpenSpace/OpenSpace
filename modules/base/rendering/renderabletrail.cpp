@@ -65,7 +65,7 @@ namespace {
         "Color",
         "Color",
         "This value determines the RGB main color for the lines and points of the trail.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo EnableFadeInfo = {
@@ -74,7 +74,7 @@ namespace {
         "Toggles whether the trail should fade older points out. If this value is true, "
         "the 'Fade' parameter determines the speed of fading. If this value is false, "
         "the entire trail is rendered at full opacity and color.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo LineLengthInfo = {
@@ -84,7 +84,7 @@ namespace {
         "value of 1 will result in a trail that covers the entire extent. The setting "
         "only applies if 'EnableFade' is true. If it is false, this setting has no "
         "effect.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LineFadeAmountInfo = {
@@ -98,7 +98,7 @@ namespace {
         "trail that starts fading immediately, becoming fully transparent by the end of "
         "the trail.This setting only applies if the 'EnableFade' value is true. If it is "
         "false, this setting has no effect.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LineWidthInfo = {
@@ -106,7 +106,7 @@ namespace {
         "Line width",
         "Specifies the line width of the trail lines, if the selected rendering method "
         "includes lines. If the rendering mode is Points, this value is ignored.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo PointSizeInfo = {
@@ -116,7 +116,7 @@ namespace {
         "method includes points. If the rendering mode is Lines, this value is ignored. "
         "If a subsampling of the values is performed, the subsampled values are half "
         "this size.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RenderingModeInfo = {
@@ -125,7 +125,7 @@ namespace {
         "Determines how the trail should be rendered. If 'Lines' is selected, only the "
         "line part is visible, if 'Points' is selected, only the corresponding points "
         "(and subpoints) are shown. 'Lines+Points' shows both parts.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {

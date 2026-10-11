@@ -60,7 +60,7 @@ namespace {
         "Enabled",
         "Enabled",
         "Enable or disable all gathering of telemetry information.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo IpAddressInfo = {
@@ -68,14 +68,14 @@ namespace {
         "IP address",
         "The network IP address that the telemetry Open Sound Control messages is sent "
         "to.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The network port that the telemetry Open Sound Control messages are sent to.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo AngleCalculationModeInfo = {
@@ -87,7 +87,7 @@ namespace {
         "for centered fisheye displays or omnidirectional immersive environments. For "
         "more information, see the pages \"Angle Calculations\" and \"Surround Sound "
         "Configurations\"on the OpenSpace documentation page.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo IncludeElevationAngleInfo = {
@@ -100,7 +100,7 @@ namespace {
         "method used for this calculation also depends on the angle calculation mode. "
         "For more information, see the page \"Angle Calculations\" on the OpenSpace "
         "documentation page.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     struct [[codegen::Dictionary(TelemetryModule)]] Parameters {

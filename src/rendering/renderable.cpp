@@ -50,14 +50,14 @@ namespace {
         "Enabled",
         "Enabled",
         "Determines whether this object will be visible or not.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable type",
         "The type of the renderable.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RenderableRenderBinModeInfo = {
@@ -65,7 +65,7 @@ namespace {
         "Render bin mode",
         "A value that specifies if the renderable should be rendered in the Background, "
         "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DimInAtmosphereInfo = {
@@ -73,7 +73,7 @@ namespace {
         "Dim in atmosphere",
         "Decides if the object should be dimmed (i.e. faded out) when the camera is in "
         "the sunny part of an atmosphere.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // This is the base class for all `Renderable` types. These objects are responsible

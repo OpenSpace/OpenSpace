@@ -46,7 +46,7 @@ namespace {
         "The number of control points used for constructing the shadow geometry. The "
         "higher this number, the more detailed the shadow is, but it will have a "
         "negative impact on the performance.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ShadowLengthInfo = {
@@ -55,21 +55,21 @@ namespace {
         "A factor that controls the length of the shadow that is cast by the target "
         "object. The total length of the shadow is equal to the distance from the target "
         "to the light source multiplied with this value.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ShadowColorInfo = {
         "ShadowColor",
         "Shadow color",
         "The color used for the shadow cylinder.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
         "Terminator type",
         "Determines the type of terminator to use for calculating the shadow eclipse.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo LightSourceInfo = {
@@ -77,21 +77,21 @@ namespace {
         "Light source",
         "The SPICE name of the object that is used as the illuminator for computing the "
         "shadow cylinder.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
         "The SPICE name of the object that is the observer.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo BodyInfo = {
         "Body",
         "Target body",
         "The SPICE name of target body that is used as the shadow caster.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo BodyFrameInfo = {
@@ -99,7 +99,7 @@ namespace {
         "Body frame",
         "The SPICE name of the reference frame in which the shadow cylinder is "
         "expressed.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AberrationInfo = {
@@ -108,7 +108,7 @@ namespace {
         "The aberration method that is used for computing the shadow cylinder. The "
         "options are \"NONE\", \"LT\" (Light Time), \"LT + S\" (Light Time Stellar), "
         "\"CN\" (Converged Newtonian), and \"CN + S\" (Converged Newtonian Stellar).",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Displays a shadow cylinder behind a planetary body. Given the SPICE name of a

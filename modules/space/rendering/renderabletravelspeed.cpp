@@ -58,7 +58,7 @@ namespace {
         "Speed of travel",
         "A value for how fast the speed indicator should travel, in meters per second. "
         "The default value is the speed of light.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo TargetInfo = {
@@ -66,14 +66,14 @@ namespace {
         "Target object",
         "The identifier of the scene graph node to target with the speed indicator. The "
         "speed indicator will travel from the parent node to this scene graph node.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ResetLineInfo = {
         "ResetLine",
         "Reset Line",
         "When triggered, the line will start again from the beginning.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EpochInfo = {
@@ -84,21 +84,21 @@ namespace {
         "calculated, this value will stay the same even as the indicator finishes each "
         "trip. So for a trip duration of 1s the epochs of 2.5, 3.5, 6.5, 10.5 are all "
         "equivalent.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "An RGB color for the line.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "This value specifies the line width.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo IndicatorLengthInfo = {
@@ -108,7 +108,7 @@ namespace {
         "computed as the speed times this value. For example, a value of 1 will make it "
         "as long as the distance it would travel over one second with the specified "
         "speed.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FadeLengthInfo = {
@@ -118,7 +118,7 @@ namespace {
         "length of the tail will be computed as the speed times this value. For example, "
         "a value of 1 will make it as long as the distance it would travel over one "
         "second. A linear fade will be applied over this distance to create the tail.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Visualizes a certain travel speed using a line that moves at the provided speed

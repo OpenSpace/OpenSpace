@@ -32,12 +32,18 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::dvec4> {
+    static constexpr glm::dvec4 Min = glm::dvec4(std::numeric_limits<double>::lowest());
+    static constexpr glm::dvec4 Max = glm::dvec4(std::numeric_limits<double>::max());
+    static constexpr glm::dvec4 Step = glm::dvec4(0.01);
+};
+
+using DVec4PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::dvec4>>;
+
 class DVec4Property : public NumericalProperty<glm::dvec4> {
 public:
-    explicit DVec4Property(PropertyInfo info, glm::dvec4 value = glm::dvec4(0.0),
-        glm::dvec4 minValue = glm::dvec4(std::numeric_limits<double>::lowest()),
-        glm::dvec4 maxValue = glm::dvec4(std::numeric_limits<double>::max()),
-        glm::dvec4 stepValue = glm::dvec4(0.01));
+    explicit DVec4Property(DVec4PropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

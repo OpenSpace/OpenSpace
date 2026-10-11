@@ -48,7 +48,7 @@ namespace {
         "File path",
         "The path of the GDAL file or the image file that is to be used in this tile "
         "provider.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TilePixelSizeInfo = {
@@ -58,7 +58,7 @@ namespace {
         "value is a tradeoff between more efficiency (larger images) and better quality "
         "(smaller images). The tile pixel size has to be smaller than the size of the "
         "complete image if a single image is used.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     enum class [[codegen::stringify()]] Compression {

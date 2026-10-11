@@ -65,28 +65,28 @@ namespace {
         "JumpToStart",
         "Jump to start of sequence",
         "Performs a time jump to the start of the sequence.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ActiveInstrumentInfo = {
         "ActiveInstrument",
         "Active instrument",
         "The active instrument of the current spacecraft imagery.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableBorderInfo = {
         "EnableBorder",
         "Enable border",
         "Enables border around the current spacecraft imagery.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableFrustumInfo = {
         "EnableFrustum",
         "Enable frustum",
         "Enables frustum around the current spacecraft imagery.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FaceModeInfo = {
@@ -94,21 +94,21 @@ namespace {
         "Face Mode",
         "Specifies how the plane is rendered: front side only, with a solid backside, "
         "or textured on both sides.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MoveFactorInfo = {
         "MoveFactor",
         "Move factor",
         "Controls how close to the Sun to render the imagery.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DownsamplingLevelInfo = {
         "DownsamplingLevel",
         "Downsampling level",
         "Controls how much to downsample the original data (0 is original resolution).",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TimelineDataRangeInfo = {
@@ -117,7 +117,7 @@ namespace {
         "Displays the earliest and latest available image data for the currently active "
         "instrument. Note that data may not be continuously available across the entire "
         "displayed time span.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo UseAdditiveBlendingInfo = {
@@ -126,42 +126,42 @@ namespace {
         "If enabled, the plane is blended additively with the background. If disabled, "
         "the plane is rendered fully opaque. Note that this may lead to weird behaviors "
         "when the plane is rendered with transparency.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ContrastValueInfo = {
         "ContrastValue",
         "Contrast",
         "Contrast of the current spacecraft imagery.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo GammaValueInfo = {
         "GammaValue",
         "Gamma",
         "Gamma of the current spacecraft imagery.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo VerboseModeInfo = {
         "VerboseMode",
         "Verbose mode",
         "Output information about image decoding.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo PredictFramesAfterInfo = {
         "PredictFramesAfter",
         "Predict frames after",
         "Determines how many images to pre-fetch after the current image frame.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PredictFramesBeforeInfo = {
         "PredictFramesBefore",
         "Predict frames before",
         "Determines how many images to pre-fetch before the current image frame.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // A RenderableSolarImagery renders time-sequenced solar observations from spacecraft

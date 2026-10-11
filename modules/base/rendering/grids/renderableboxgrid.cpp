@@ -43,21 +43,21 @@ namespace {
         "Color",
         "Color",
         "The color used for the grid lines.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SizeInfo = {
         "Size",
         "Grid size",
         "The size of each dimension of the box, in meters.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Creates a 3D box that is rendered using grid lines.

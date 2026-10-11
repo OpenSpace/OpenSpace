@@ -33,7 +33,7 @@ namespace {
         "Enabled",
         "Enabled",
         "This setting determines whether this telemetry gathering is enabled or not.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 } // namespace
 

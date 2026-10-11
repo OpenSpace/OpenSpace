@@ -58,21 +58,21 @@ namespace {
         "FieldlineSeedsIndexFile",
         "Fieldline seedpoints",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution%",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SliceInfo = {
         "Slice",
         "Slice",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableKameleonPlane)]] Parameters {
@@ -182,11 +182,11 @@ void RenderableKameleonPlane::initializeGL() {
             // unregister backgroundvalues property
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(PropertyInfo::Visibility::Hidden);
+                _backgroundValues.setVisibility(Visibility::Hidden);
             }
             else {
                 // Else if autofilter is turned off, register backgroundValues
-                _backgroundValues.setVisibility(PropertyInfo::Visibility::Always);
+                _backgroundValues.setVisibility(Visibility::Always);
             }
         });
     }

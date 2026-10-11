@@ -58,14 +58,14 @@ namespace {
         "Texture",
         "The path to a texture on disk that contains a one-dimensional texture to use "
         "for these rings.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The radius of the rings in meters.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo OffsetInfo = {
@@ -75,7 +75,7 @@ namespace {
         "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
         "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
         "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo NightFactorInfo = {
@@ -83,7 +83,7 @@ namespace {
         "Night factor",
         "A multiplicative factor that is applied to the side of the rings that is facing "
         "away from the Sun. If it is 1, no darkening of the night side occurs.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorFilterInfo = {
@@ -91,7 +91,7 @@ namespace {
         "Color filter",
         "A value that affects the filtering out of part of the rings depending on the "
         "color values of the texture. The higher value, the more rings are filtered out.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableRings)]] Parameters {

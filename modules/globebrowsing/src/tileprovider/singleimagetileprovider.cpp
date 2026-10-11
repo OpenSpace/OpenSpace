@@ -41,7 +41,7 @@ namespace {
         "File path",
         "The file path that is used for this image provider. The file must point to an "
         "image that is then loaded and used for all tiles.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     struct [[codegen::Dictionary(SingleImageProvider)]] Parameters {

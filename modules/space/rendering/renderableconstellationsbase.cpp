@@ -49,21 +49,21 @@ namespace {
         "Specifies the file that contains the mapping between constellation "
         "abbreviations and full names of the constellations. If this value is empty, the "
         "abbreviations are used as the full names.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The line width used for the constellation shape.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation selection",
         "The selected constellations are displayed on the celestial sphere.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {

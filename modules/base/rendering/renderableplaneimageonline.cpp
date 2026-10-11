@@ -47,7 +47,7 @@ namespace {
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed. During stereo rendering, this texture is considered the left "
         "eye.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RightTextureInfo = {
@@ -56,7 +56,7 @@ namespace {
         "Sets the URL of the texture that is displayed on this plane for the right eye "
         "during stereo rendering. If this value is changed, the image at the new path "
         "will automatically be loaded and displayed.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture image is loaded from the internet

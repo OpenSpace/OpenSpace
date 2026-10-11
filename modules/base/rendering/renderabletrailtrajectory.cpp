@@ -44,7 +44,7 @@ namespace {
         "Start time",
         "The start time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EndTimeInfo = {
@@ -52,7 +52,7 @@ namespace {
         "End time",
         "The end time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SampleIntervalInfo = {
@@ -61,7 +61,7 @@ namespace {
         "The interval between samples of the trajectory. This value (together with "
         "'TimeStampSubsampleFactor') determines how far apart (in seconds) the samples "
         "are spaced along the trajectory.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TimeSubSampleInfo = {
@@ -72,7 +72,7 @@ namespace {
         "samples are spaced along the trajectory. Subsamples are rendered as smaller "
         "points compared to normal samples (from 'SampleInterval') when rendering the "
         "trail as points.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RenderFullPathInfo = {
@@ -80,7 +80,7 @@ namespace {
         "Render full trail",
         "If true, the entire trail will be rendered. If false, only the trail until the "
         "current time in the application will be shown.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo AccurateTrailInfo = {
@@ -88,7 +88,7 @@ namespace {
         "Use accurate trail",
         "If true, the trail around the spacecraft will be recalculated to present a "
         "smoother trail. If false, the original trail will be used.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AccurateTrailPositionsInfo = {
@@ -96,7 +96,7 @@ namespace {
         "Number of accurate trail points",
         "The number of vertices, each side of the object, that will be recalculated for "
         "greater accuracy. This also ensures that the object connects with the trail.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {

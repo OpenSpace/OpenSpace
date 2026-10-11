@@ -49,7 +49,7 @@ namespace {
         "A parameter to set the resolution of the texture. 1 is full resolution and "
         "slower frame rate. Lower value means lower resolution of texture and faster "
         "frame rate.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DisplayCopyInfo = {
@@ -59,14 +59,14 @@ namespace {
         "not be interactive. The position is in RAE (Radius, Azimuth, Elevation) "
         "coordinates or Cartesian, depending on if the browser uses RAE or Cartesian "
         "coordinates.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DisplayCopyShowInfo = {
         "ShowDisplayCopy",
         "Show display copy",
         "Show the display copy.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo IsHiddenInfo = {
@@ -74,7 +74,7 @@ namespace {
         "Is hidden",
         "If checked, the browser will be not be displayed. If it is not checked, it will "
         "be.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PointSpacecraftInfo = {
@@ -82,7 +82,7 @@ namespace {
         "Point spacecraft",
         "If checked, spacecrafts will point towards the coordinate of an image upon "
         "selection.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo UpdateDuringAnimationInfo = {
@@ -90,14 +90,14 @@ namespace {
         "Update during target animation",
         "If checked, the sky browser display copy will update its coordinates while the "
         "target is animating.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo VerticalFovInfo = {
         "VerticalFov",
         "Vertical field of view",
         "The vertical field of view of the target.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     /**

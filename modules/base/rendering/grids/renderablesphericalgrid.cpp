@@ -45,7 +45,7 @@ namespace {
         "Color",
         "Color",
         "The color of the grid lines.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo LongSegmentsInfo = {
@@ -54,7 +54,7 @@ namespace {
         "The number of longitudinal segments the sphere is split into. Determines the "
         "resolution of the rendered sphere in a left/right direction when looking "
         "straight at the equator.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LatSegmentsInfo = {
@@ -63,14 +63,14 @@ namespace {
         "The number of latitudinal segments the sphere is split into. Determines the "
         "resolution of the rendered sphere in a up/down direction when looking "
         "straight at the equator.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {

@@ -34,14 +34,12 @@ namespace {
 namespace openspace {
 
 template <typename T>
-NumericalProperty<T>::NumericalProperty(PropertyInfo info, T value,
-                                        T minimumValue, T maximumValue, T steppingValue,
-                                        float exponent)
-    : TemplateProperty<T>(std::move(info), std::move(value))
-    , _minimumValue(std::move(minimumValue))
-    , _maximumValue(std::move(maximumValue))
-    , _stepping(std::move(steppingValue))
-    , _exponent(exponent)
+NumericalProperty<T>::NumericalProperty(BasicPropertyInfo<NumericalDefaults<T>> info)
+    : TemplateProperty<T>(info, std::move(info.defaults.value))
+    , _minimumValue(std::move(info.defaults.minMax.min))
+    , _maximumValue(std::move(info.defaults.minMax.max))
+    , _stepping(std::move(info.defaults.stepSize))
+    , _exponent(info.defaults.exponent)
 {}
 
 template <typename T>

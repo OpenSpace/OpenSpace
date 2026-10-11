@@ -61,91 +61,91 @@ namespace {
         "StepSizeCoefficient",
         "Stepsize coefficient",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo CurrentTimeInfo = {
         "CurrentTime",
         "Current time",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo MemoryBudgetInfo = {
         "MemoryBudget",
         "Memory budget",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo StreamingBudgetInfo = {
         "StreamingBudget",
         "Streaming budget",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UseGlobalTimeInfo = {
         "UseGlobalTime",
         "Global time",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LoopInfo = {
         "Loop",
         "Loop",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SelectorNameInfo = {
         "Selector",
         "Brick selector",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print stats",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo StatsToFileNameInfo = {
         "PrintStatsFileName",
         "Stats filename",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ScalingInfo = {
         "Scaling",
         "Scaling",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RenderableMultiresVolume)]] Parameters {

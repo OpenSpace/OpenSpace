@@ -46,35 +46,35 @@ namespace {
         "Enabled",
         "Enabled",
         "This setting determines whether the browser should be enabled or not.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Trigger this property to reload the browser.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo VisibleInfo = {
         "Visible",
         "Is visible",
         "This setting determines whether the browser should be visible or not.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo GuiUrlInfo = {
         "GuiUrl",
         "Gui URL",
         "The URL of the webpage that is used to load the WebGUI from.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo GuiScaleInfo = {
         "GuiScale",
         "Gui scale",
         "GUI scale multiplier.",
-        PropertyInfo::Visibility::Always
+        Visibility::Always
     };
 
     struct [[codegen::Dictionary(CefWebGuiModule)]] Parameters {

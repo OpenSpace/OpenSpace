@@ -73,7 +73,7 @@ namespace {
         "Volume rendering",
         "Decides whether the volume rendering component of the galaxy rendering should "
         "be enabled or not. If disabled, the volume rendering is skipped.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo StarRenderingEnabledInfo = {
@@ -82,7 +82,7 @@ namespace {
         "Decides whether the point-based star rendering component of the galaxy "
         "rendering should be enabled or not. If disabled, the point-based star rendering "
         "is skipped.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo StepSizeInfo = {
@@ -91,7 +91,7 @@ namespace {
         "Determines the distance between steps taken in the volume rendering. The lower "
         "the number is, the better the rendering looks, but also takes more "
         "computational resources to render.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AbsorptionMultiplyInfo = {
@@ -100,7 +100,7 @@ namespace {
         "A unit-less scale factor for the probability of dust absorbing a light "
         "particle. The amount of absorption determines the spectrum of the light that is "
         "emitted from the galaxy.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EmissionMultiplyInfo = {
@@ -108,21 +108,21 @@ namespace {
         "Emission multiplier",
         "A unit-less scale factor for the amount of light being emitted by dust in the "
         "galaxy.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "The internal rotation of the volume rendering in Euler angles.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo StarRenderingMethodInfo = {
         "StarRenderingMethod",
         "Star rendering method",
         "The rendering method used for visualizing the stars.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EnabledPointsRatioInfo = {
@@ -132,21 +132,21 @@ namespace {
         "image. At a value of 0, no stars are rendered, at a value of 1 all points "
         "contained in the dataset are rendered. The specific value chosen is a "
         "compromise between image fidelity and rendering performance.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DownscaleVolumeRenderingInfo = {
         "Downscale",
         "Downscale factor volume rendering",
         "The downscaling factor used when rendering the volume.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo NumberOfRayCastingStepsInfo = {
         "Steps",
         "Number of raycasting steps",
         "The number of integration steps used during the raycasting procedure.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     void saveCachedFile(const std::filesystem::path& file,
@@ -319,7 +319,7 @@ RenderableGalaxy::RenderableGalaxy(const Dictionary& dictionary)
     addProperty(_starRenderingMethod);
     addProperty(_enabledPointsRatio);
     addProperty(_rotation);
-    _downScaleVolumeRendering.setVisibility(PropertyInfo::Visibility::Developer);
+    _downScaleVolumeRendering.setVisibility(Visibility::Developer);
     addProperty(_downScaleVolumeRendering);
     addProperty(_numberOfRayCastingSteps);
 

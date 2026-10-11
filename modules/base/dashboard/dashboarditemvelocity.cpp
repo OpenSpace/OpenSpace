@@ -46,7 +46,7 @@ namespace {
         "If this value is enabled, the velocity is displayed in nuanced units, such as "
         "m/s, AU/s, light years / s etc. If this value is disabled, the unit can be "
         "explicitly requested.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RequestedUnitInfo = {
@@ -54,7 +54,7 @@ namespace {
         "Requested unit",
         "If the simplification is disabled, this distance unit is used for the velocity "
         "display.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // This `DashboardItem` shows the velocity of the camera, that is how fast the camera
@@ -91,7 +91,7 @@ DashboardItemVelocity::DashboardItemVelocity(const Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
-            _doSimplification ? PropertyInfo::Visibility::Hidden : PropertyInfo::Visibility::User
+            _doSimplification ? Visibility::Hidden : Visibility::User
         );
     });
     _doSimplification = p.simplification.value_or(_doSimplification);

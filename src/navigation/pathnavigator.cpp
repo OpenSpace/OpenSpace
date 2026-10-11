@@ -60,14 +60,14 @@ namespace {
         "The default path type chosen when generating a path or flying to a target. See "
         "the documentation for alternatives. The shape of the generated path will be "
         "different depending on the path type.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo IncludeRollInfo = {
         "IncludeRoll",
         "Include roll",
         "If disabled, roll is removed from the interpolation of camera orientation.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SpeedScaleInfo = {
@@ -76,7 +76,7 @@ namespace {
         "Scale factor that the speed will be multiplied with during path traversal. Can "
         "be used to speed up or slow down the camera motion, depending on if the value "
         "is larger than or smaller than one.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo IdleMotionOnFinishInfo = {
@@ -84,7 +84,7 @@ namespace {
         "Apply idle motion on finish",
         "If set to true, the chosen IdleMotion of the OrbitalNavigator will be triggered "
         "once the path has reached its target.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ArrivalDistanceFactorInfo = {
@@ -94,7 +94,7 @@ namespace {
         "when creating a camera path. The factor will be multiplied with the node's "
         "bounding sphere to compute the target height from the bounding sphere of the "
         "object.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RotationSpeedFactorInfo = {
@@ -103,7 +103,7 @@ namespace {
         "Affects how fast the camera rotates to the target rotation during a linear "
         "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
         "seconds. A value of 2 means twice that time, i.e. 10 seconds, and so on.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo MinBoundingSphereInfo = {
@@ -112,7 +112,7 @@ namespace {
         "The minimal allowed value for a bounding sphere, in meters. Used for "
         "computation of target positions and path generation, to avoid issues when there "
         "is no bounding sphere.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RelevantNodeTagsInfo = {
@@ -120,7 +120,7 @@ namespace {
         "Relevant node tags",
         "List of tags for the nodes that are relevant for path creation, for example "
         "when avoiding collisions.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UseCustomFlyToDurationInfo = {
@@ -128,7 +128,7 @@ namespace {
         "Use Custom Fly-To Duration",
         "If this value is set, the fly-to will always use the duration provided in the "
         "'CustomFlyToDuration' property.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo CustomFlyToDurationInfo = {
@@ -137,7 +137,7 @@ namespace {
         "If the 'UseCustomFlyToDuration' value is set to 'true', any fly-to command will "
         "use this number of seconds instead. If 'UseCustomFlyToDuration' is 'false', the "
         "duration will be automatically calculated if nothing else is specified.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 } // namespace
 

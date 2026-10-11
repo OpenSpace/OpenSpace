@@ -58,7 +58,7 @@ namespace {
         "Perform projections",
         "If this value is enabled, this ProjectionComponent will perform projections. If "
         "it is disabled, projections will be ignored.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ClearProjectionInfo = {
@@ -66,7 +66,7 @@ namespace {
         "Clear projections",
         "If this property is triggered, it will remove all the projections that have "
         "already been applied.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FadingInfo = {
@@ -75,7 +75,7 @@ namespace {
         "This value fades the previously performed projections in or out. If this value "
         "is equal to '1', the projections are fully visible, if the value is equal to "
         "'0', the performed projections are completely invisible.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo TextureSizeInfo = {
@@ -85,7 +85,7 @@ namespace {
         "projected and thus provides the limit to the resolution of projections that can "
         "be applied. Changing this value will not cause the texture to be automatically "
         "updated, but triggering the 'ApplyTextureSize' property is required.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ApplyTextureSizeInfo = {
@@ -93,7 +93,7 @@ namespace {
         "Apply texture size",
         "Triggering this property applies a new size to the underlying projection "
         "texture. The old texture is resized and interpolated to fit the new size.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ProjectionComponent)]] Parameters {

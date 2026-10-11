@@ -64,7 +64,7 @@ namespace {
         "Show exceptions",
         "If enabled, errors from SPICE will be thrown and show up in the log. If "
         "disabled, the errors will be ignored silently.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     struct [[codegen::Dictionary(SpaceModule)]] Parameters {

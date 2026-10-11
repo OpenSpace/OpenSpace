@@ -111,7 +111,7 @@ namespace {
         "IsPlaying",
         "Is Playing",
         "Indicates whether the video is currently playing.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo PlayDelayInfo = {
@@ -120,7 +120,7 @@ namespace {
         "The delay, in milliseconds, that the system will wait before issuing the play "
         "command. A higher value will increase the time it takes for the video to start "
         "but may result in a more synchronized playback start.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     bool checkMpvError(int status) {

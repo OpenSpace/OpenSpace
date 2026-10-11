@@ -120,7 +120,7 @@ public:
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
-    PropertyInfo::Visibility visibility() const;
+    Visibility visibility() const;
     void toggleShutdownMode(std::optional<float> timer = std::nullopt);
 
     Mode currentMode() const;

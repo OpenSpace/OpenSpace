@@ -37,7 +37,7 @@ namespace {
         "Enabled",
         "Enabled",
         "Whether the light source is enabled or not.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // This is the base class of all `LightSource` types, which are components that can be

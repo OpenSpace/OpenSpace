@@ -46,7 +46,7 @@ namespace {
         "If this value is 'true', all the machinery of this rotation is used, of it is "
         "'false', it provides the ability to change its attributes without risking some "
         "undefined behavior.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo XAxisTypeInfo = {
@@ -56,7 +56,7 @@ namespace {
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
         "vectors.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo YAxisTypeInfo = {
@@ -66,7 +66,7 @@ namespace {
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
         "vectors.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ZAxisTypeInfo = {
@@ -76,7 +76,7 @@ namespace {
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
         "vectors.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo XAxisObjectInfo = {
@@ -85,7 +85,7 @@ namespace {
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
         "stay fixed to the current position of that object.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo YAxisObjectInfo = {
@@ -94,7 +94,7 @@ namespace {
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
         "stay fixed to the current position of that object.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ZAxisObjectInfo = {
@@ -103,7 +103,7 @@ namespace {
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
         "stay fixed to the current position of that object.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo XAxisInvertObjectInfo = {
@@ -112,7 +112,7 @@ namespace {
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
         "referenced object.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo YAxisInvertObjectInfo = {
@@ -121,7 +121,7 @@ namespace {
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
         "referenced object.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ZAxisInvertObjectInfo = {
@@ -130,7 +130,7 @@ namespace {
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
         "referenced object.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo XAxisVectorInfo = {
@@ -138,7 +138,7 @@ namespace {
         "xAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo YAxisVectorInfo = {
@@ -146,7 +146,7 @@ namespace {
         "yAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ZAxisVectorInfo = {
@@ -154,7 +154,7 @@ namespace {
         "zAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo XAxisOrthogonalVectorInfo = {
@@ -163,7 +163,7 @@ namespace {
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
         "construct an orthogonal vector instead.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo YAxisOrthogonalVectorInfo = {
@@ -172,7 +172,7 @@ namespace {
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
         "construct an orthogonal vector instead.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ZAxisOrthogonalVectorInfo = {
@@ -181,7 +181,7 @@ namespace {
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
         "construct an orthogonal vector instead.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AttachedInfo = {
@@ -190,7 +190,7 @@ namespace {
         "This is the name of the node that this rotation is attached to, this value is "
         "only needed if any of the three axis uses the Object type. In this case, the "
         "location of the attached node is required to compute the relative direction.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Calculates the rotation in such a way that the attached scene graph node will
@@ -349,7 +349,7 @@ FixedRotation::FixedRotation(const Dictionary& dictionary)
     });
 
     auto setPropertyVisibility = [](Axis& axis) {
-        using Visibility = PropertyInfo::Visibility;
+        using Visibility = Visibility;
         switch (axis.type) {
             case Axis::Type::Object:
                 axis.object.setVisibility(Visibility::User);

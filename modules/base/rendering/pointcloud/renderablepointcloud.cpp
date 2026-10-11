@@ -69,7 +69,7 @@ namespace {
         "Enabled",
         "If true, use a provided sprite texture to render the point. If false, draw the "
         "points using the default point shape.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AllowTextureCompressionInfo = {
@@ -79,7 +79,7 @@ namespace {
         "is enabled per default, but may lead to visible artefacts for certain images, "
         "especially up close. Set this to false to disable any hardware compression of "
         "the textures, and represent each color channel with 8 bits.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UseAlphaInfo = {
@@ -91,7 +91,7 @@ namespace {
         "transparency information. This may be the case when using additive blending, "
         "for example. Converting the files to RGB on load may then reduce the memory "
         "footprint and/or lead to some optimization in terms of rendering speed.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SpriteTextureInfo = {
@@ -100,7 +100,7 @@ namespace {
         "The path to the texture of the point sprite. Note that if multiple textures "
         "option is set in the asset, by providing a texture folder, this value will be "
         "ignored.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TextureModeInfo = {
@@ -112,21 +112,21 @@ namespace {
         "in the dataset, and 3) Other, which is used for specific subtypes where the "
         "texture is internally controlled by the renderable and can't be set from a file "
         "(such as the RenderablePolygonCloud).",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PointColorInfo = {
         "FixedColor",
         "Fixed color",
         "The color of the points, when no color map is used.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw elements",
         "Enables/Disables the drawing of the points.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
@@ -148,7 +148,7 @@ namespace {
         "range and fully invisible when inside the range. With inverted fading the case "
         "is the opposite: the points are visible inside when closer than the min value "
         "of the range and invisible when further away.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EnableDistanceFadeInfo = {
@@ -156,7 +156,7 @@ namespace {
         "Enable distance-based fading",
         "Enables/disables the Fade-in effect based on camera distance. Automatically set "
         "to true if FadeInDistances are specified in the asset.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo InvertFadeInfo = {
@@ -165,7 +165,7 @@ namespace {
         "If true, inverts the fading so that the points are invisible when the camera is "
         "further away than the max fade distance and fully visible when it is closer "
         "than the minimum distance.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UseAdditiveBlendingInfo = {
@@ -176,7 +176,7 @@ namespace {
         "such blending will take place and the color of the point will not be modified "
         "by blending. Note that this may lead to weird behaviors when the points are "
         "rendered with transparency.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UseOrientationDataInfo = {
@@ -185,7 +185,7 @@ namespace {
         "If true, the orientation data in the dataset is included when rendering the "
         "points, if there is any. To see the rotation, you also need to set the "
         "\"Orientation Render Option\" to \"Fixed Rotation\".",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo OrientationRenderOptionInfo = {
@@ -199,21 +199,21 @@ namespace {
         "billboarded towards the camera. In contrast, \"Fixed Rotation\" does not rotate "
         "the points at all based on the camera and should be used when the dataset "
         "contains orientation information for the points.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo NumShownDataPointsInfo = {
         "NumberOfDataPoints",
         "Number of shown data points",
         "Information about how many points are being rendered.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo HasOrientationDataInfo = {
         "HasOrientationData",
         "Has orientation data",
         "Set to true if orientation data was read from the dataset.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ScaleExponentInfo = {
@@ -226,7 +226,7 @@ namespace {
         "likely want to change it to something that looks good. Note that a scale "
         "exponent of 0 leads to the points having a diameter of 1 meter, i.e. no "
         "exponential scaling.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ScaleFactorInfo = {
@@ -235,7 +235,7 @@ namespace {
         "A multiplicative factor used to adjust the size of the points, after the "
         "exponential scaling and any max size control effects. Simply just increases "
         "or decreases the visual size of the points.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo UseMaxSizeControlInfo = {
@@ -244,7 +244,7 @@ namespace {
         "If true, the Max Size property will be used as an upper limit for the size of "
         "the point. This reduces the size of the points when approaching them, so that "
         "they stick to a maximum visual size depending on the Max Size value.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MaxSizeInfo = {
@@ -256,14 +256,14 @@ namespace {
         "the background, the computations are made by limiting the size to a certain "
         "angle based on the field of view of the camera. So a value of 1 limits the "
         "point size to take up a maximum of one degree of the view space.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable point outline",
         "Determines whether each point should have an outline or not.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo OutlineColorInfo = {
@@ -271,7 +271,7 @@ namespace {
         "Outline color",
         "The color of the outline. Darker colors will be less visible if \"Additive "
         "Blending\" is enabled.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo OutlineWidthInfo = {
@@ -280,7 +280,7 @@ namespace {
         "The thickness of the outline, given as a value relative to the size of the "
         "point. A value of 0 will not show any outline, while a value of 1 will cover "
         "the whole point.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo OutlineStyleInfo = {
@@ -288,7 +288,7 @@ namespace {
         "Outline style",
         "Decides the style of the outline (round, square, or a line at the bottom). "
         "The style also affects the shape of the points.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ApplyColorMapToOutlineInfo = {
@@ -296,7 +296,7 @@ namespace {
         "Apply color map to outline",
         "If true and the outline is enabled, the color map will be applied to the "
         "outline rather than the point body. Only works if color mapping is enabled.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Can be used to render point-based datasets in 3D space, optionally including color

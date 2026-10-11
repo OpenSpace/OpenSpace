@@ -43,7 +43,7 @@ namespace {
         "Apply idle motion",
         "When set to true, the chosen idle motion will be applied to the camera, moving "
         "the camera accordingly.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo MotionInfo = {
@@ -51,7 +51,7 @@ namespace {
         "Motion",
         "The chosen camera motion that will be triggered when the idle motion is applied. "
         "Each option represents a predefined camera motion.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ShouldTriggerWhenIdleInfo = {
@@ -59,7 +59,7 @@ namespace {
         "Should trigger when idle",
         "If true, the chosen idle motion will trigger automatically after a certain time "
         "(see 'IdleWaitTime' property).",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo IdleWaitTimeInfo = {
@@ -67,7 +67,7 @@ namespace {
         "Idle wait time",
         "The time (seconds) until idle motion starts, if no camera interaction has been "
         "performed. Note that friction counts as camera interaction.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SpeedFactorInfo = {
@@ -76,7 +76,7 @@ namespace {
         "A factor that can be used to increase or slow down the speed of an applied idle "
         "motion. A negative value will invert the direction. Note that a speed of exactly "
         "0 leads to no movement at all.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo InvertInfo = {
@@ -85,7 +85,7 @@ namespace {
         "If true, the direction of the idle motion motion will be inverted compared to "
         "the default. For example, the 'Orbit' option rotates to the right per default, "
         "and will rotate to the left when inverted.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AbortOnCameraInteractionInfo = {
@@ -95,7 +95,7 @@ namespace {
         "motion will be reapplied after the interaction. Examples of camera interaction "
         "are: changing the anchor node, starting a camera path or session recording "
         "playback, or navigating manually using an input device.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DampenInterpolationTimeInfo = {
@@ -103,7 +103,7 @@ namespace {
         "Start/end dampen interpolation time",
         "The time to interpolate to/from full speed when an idle motion is triggered or "
         "canceled, in seconds.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 } // namespace
 

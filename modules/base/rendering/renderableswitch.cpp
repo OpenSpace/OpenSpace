@@ -38,7 +38,7 @@ namespace {
         "DistanceThreshold",
         "Distance threshold",
         "Threshold in meters for when the switch happens between the two renderables.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Can be used to render one of two renderables depending on the distance between the

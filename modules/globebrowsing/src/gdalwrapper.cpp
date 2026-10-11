@@ -47,7 +47,7 @@ namespace {
         "Log GDAL errors",
         "If this value is enabled, any error that is raised by GDAL will be logged using "
         "the logmanager. If this value is disabled, any error will be ignored.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo GdalMaximumCacheInfo = {
@@ -55,7 +55,7 @@ namespace {
         "GDAL maximum cache size",
         "This function sets the maximum amount of RAM memory in MB that GDAL is "
         "permitted to use for caching.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {

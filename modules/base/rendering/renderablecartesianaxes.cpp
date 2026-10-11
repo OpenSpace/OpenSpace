@@ -44,21 +44,21 @@ namespace {
         "XColor",
         "X color",
         "The color of the x-axis.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo YColorInfo = {
         "YColor",
         "Y color",
         "The color of the y-axis.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ZColorInfo = {
         "ZColor",
         "Z color",
         "The color of the z-axis.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     // Can be used to render the local Cartesian coordinate system, or reference frame,

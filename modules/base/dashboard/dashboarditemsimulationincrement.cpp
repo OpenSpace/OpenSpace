@@ -45,7 +45,7 @@ namespace {
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
         "displayed in seconds.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RequestedUnitInfo = {
@@ -53,7 +53,7 @@ namespace {
         "Requested unit",
         "If the simplification is disabled, this time unit is used as a destination to "
         "convert the seconds into.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo TransitionFormatInfo = {
@@ -67,7 +67,7 @@ namespace {
         "current delta time unit. More information about how to make use of the format "
         "string, see the documentation at "
         "https://en.cppreference.com/w/cpp/utility/format/spec",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RegularFormatInfo = {
@@ -79,7 +79,7 @@ namespace {
         "time is paused or the empty string otherwise. More information about how to "
         "make use of the format string, see the documentation at "
         "https://en.cppreference.com/w/cpp/utility/format/spec",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     std::vector<std::string> unitList() {
@@ -138,7 +138,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
-            _doSimplification ? PropertyInfo::Visibility::Hidden : PropertyInfo::Visibility::User
+            _doSimplification ? Visibility::Hidden : Visibility::User
         );
     });
     addProperty(_doSimplification);
@@ -153,7 +153,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _doSimplification = false;
     }
     _requestedUnit.setVisibility(
-        _doSimplification ? PropertyInfo::Visibility::Hidden : PropertyInfo::Visibility::User
+        _doSimplification ? Visibility::Hidden : Visibility::User
     );
     addProperty(_requestedUnit);
 

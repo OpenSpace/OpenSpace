@@ -35,7 +35,7 @@ namespace {
         "Position",
         "This value is used as a static offset (in meters) that is applied to the scene "
         "graph node that this transformation is attached to relative to its parent.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Provides a fixed translation to the attached scene graph node that does not change

@@ -140,7 +140,7 @@ namespace {
         "Opacity",
         "This value determines the opacity of this object. A value of 0 means completely "
         "transparent.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ColorInfo = {
@@ -148,7 +148,7 @@ namespace {
         "Color",
         "The color of the rendered geometry. For points it will be used as a multiply "
         "color for any provided texture.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo FillOpacityInfo = {
@@ -156,7 +156,7 @@ namespace {
         "Fill opacity",
         "This value determines the opacity of the filled portion of a polygon. Will also "
         "be used for extruded features.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo FillColorInfo = {
@@ -164,14 +164,14 @@ namespace {
         "Fill color",
         "The color of the filled portion of a rendered polygon. Will also be used for "
         "extruded features.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of any rendered lines.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo PointSizeInfo = {
@@ -179,7 +179,7 @@ namespace {
         "Point size",
         "The size of any rendered points. The size will be scaled based on the bounding "
         "sphere of the globe.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo PointTextureInfo = {
@@ -188,7 +188,7 @@ namespace {
         "A texture to be used for rendering points. No value means to use the default "
         "texture provided by the GlobeBrowsing module. If no texture is provided there "
         "either, the point will be rendered as a plane and colored by the color value.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ExtrudeInfo = {
@@ -196,7 +196,7 @@ namespace {
         "Extrude",
         "If true, extrude the geometry to intersect the globe.Lines/polygons will be "
         "extruded with polygons,and points with lines.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo PerformShadingInfo = {
@@ -205,7 +205,7 @@ namespace {
         "If true, perform shading on any create meshes, either from polygons or "
         "extruded lines. The shading will be computed based on any light sources of the "
         "GeoJson component.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo AltitudeModeInfo = {
@@ -216,7 +216,7 @@ namespace {
         "above the reference ellipsoid, while RelativeToGround takes the height map "
         "into account. For coordinates with only two values (latitude and longitude), "
         "the height is considered to be equal to zero.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo PointAnchorOptionInfo = {
@@ -224,7 +224,7 @@ namespace {
         "Point texture anchor",
         "Decides the placement of the point texture in relation to the position. Default "
         "is a the bottom of the texture, but it can also be put at the center.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo TessellationEnabledInfo = {
@@ -234,7 +234,7 @@ namespace {
         "planet is performed. This leads to increased performance, but tessellation is "
         "necessary for large geometry that spans a big portion of the globe. Otherwise "
         "it may intersect the surface.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo UseTessellationLevelInfo = {
@@ -244,7 +244,7 @@ namespace {
         "tessellation. The distance used will be the 'Tessellation Distance' divided by "
         "the 'Tessellation Level', so the higher the level value, the smaller each "
         "segment in the geometry will be.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TessellationLevelInfo = {
@@ -254,7 +254,7 @@ namespace {
         "much tessellation to apply. The resulting distance used for subdividing the "
         "geometry will be the 'Tessellation Distance' divided by this value. Zero means "
         "to use the 'Tessellation Distance' as is.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TessellationDistanceInfo = {
@@ -265,7 +265,7 @@ namespace {
         "matching this distance, while anything smaller will not be subdivided. Per "
         "default this will be set to a distance corresponding to about 1 degree "
         "longitude on the globe.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {

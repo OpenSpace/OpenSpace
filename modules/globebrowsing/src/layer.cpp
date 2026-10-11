@@ -51,7 +51,7 @@ namespace {
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
         "changed.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo BlendModeInfo = {
@@ -59,7 +59,7 @@ namespace {
         "Blend mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
         "mode determines how this layer is added to the underlying layers beneath.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EnabledInfo = {
@@ -68,7 +68,7 @@ namespace {
         "If this value is enabled, the layer will be used for the final composition of "
         "the planet. If this value is disabled, the layer will be ignored in the "
         "composition.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ResetInfo = {
@@ -76,7 +76,7 @@ namespace {
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
         "local cache for this layer and will trigger a fresh load of all tiles.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RemoveInfo = {
@@ -84,7 +84,7 @@ namespace {
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
         "layer before the next frame.",
-        PropertyInfo::Visibility::User,
+        Visibility::User,
         PropertyInfo::IsEnablable::No,
         PropertyInfo::NeedsConfirmation::Yes
     };
@@ -94,7 +94,7 @@ namespace {
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "
         "solid color is.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ZIndexInfo = {
@@ -103,7 +103,7 @@ namespace {
         "Determines where the layer is placed in the list of available layers. Layers "
         "are applied in the order of their Z indices, with higher indices obscuring "
         "layers with lower values.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo GuiDescriptionInfo = {
@@ -111,7 +111,7 @@ namespace {
         "Gui description",
         "This is the description for the scene graph node to be shown in the GUI. "
         "Example: Earth is a special place.",
-        PropertyInfo::Visibility::Hidden
+        Visibility::Hidden
     };
 
     struct [[codegen::Dictionary(Layer), codegen::noexhaustive()]] Parameters {

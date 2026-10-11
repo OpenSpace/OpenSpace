@@ -37,21 +37,21 @@ namespace {
         "Enabled",
         "Enabled",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 } // namespace
 

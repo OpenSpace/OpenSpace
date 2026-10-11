@@ -50,7 +50,7 @@ namespace {
         "CrosshairSize",
         "Crosshair size",
         "The size of the crosshair given as a field of view (in degrees).",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RectangleThresholdInfo = {
@@ -60,21 +60,21 @@ namespace {
         "a rectangle will be used to visualize the target in addition to the crosshair. "
         "When the field of view is smaller than this value, only the crosshair will be "
         "shown.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The thickness of the line of the target. The larger number, the thicker line.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo VerticalFovInfo = {
         "VerticalFov",
         "Vertical field of view",
         "The vertical field of view of the target.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ApplyRollInfo = {
@@ -82,7 +82,7 @@ namespace {
        "Apply roll",
        "If true, always rotate the target to have its up direction aligned with the up "
        "direction of the camera.",
-       PropertyInfo::Visibility::User
+       Visibility::User
     };
 
     // This is a utility renderable used by the SkyBrowser module to visualize a

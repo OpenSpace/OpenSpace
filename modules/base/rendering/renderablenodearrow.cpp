@@ -51,21 +51,21 @@ namespace {
         "StartNode",
         "Start node",
         "The identifier of the node the arrow starts from.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo EndNodeInfo = {
         "EndNode",
         "End node",
         "The identifier of the node the arrow should point towards.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The RGB color for the arrow.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo SegmentsInfo = {
@@ -73,7 +73,7 @@ namespace {
         "Number of segments",
         "The number of segments that the shapes of the arrow are divided into. A higher "
         "number leads to a higher resolution and smoother shape.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo InvertInfo = {
@@ -81,7 +81,7 @@ namespace {
         "Invert direction",
         "If true, the arrow direction is inverted so that it points to the start node "
         "instead of the end node.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ArrowHeadSizeInfo = {
@@ -90,7 +90,7 @@ namespace {
         "The length of the arrow head, given in relative value of the entire length of "
         "the arrow. For example, 0.1 makes the arrow head length be 10% of the full "
         "arrow length.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ArrowHeadWidthInfo = {
@@ -98,7 +98,7 @@ namespace {
         "Arrow head width factor",
         "A factor that is multiplied with the width, or the arrow itself, to determine "
         "the width of the base of the arrow head.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo OffsetDistanceInfo = {
@@ -108,7 +108,7 @@ namespace {
         "'UseRelativeOffset' is true, the value should be given as a factor to multiply "
         "with the bounding sphere of the node. Otherwise, the value is specified in "
         "meters.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RelativeOffsetInfo = {
@@ -117,7 +117,7 @@ namespace {
         "Decides whether to use relative distances for the offset distance. This means "
         "that the offset distance will be computed as the provided 'Offset' value times "
         "the bounding sphere of the start node. If false, meters is used.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo LengthInfo = {
@@ -125,7 +125,7 @@ namespace {
         "Length",
         "The length of the arrow, given either in meters or as a factor to be multiplied "
         "with the bounding sphere of the start node (if 'UseRelativeLength' is true).",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RelativeLengthInfo = {
@@ -134,42 +134,42 @@ namespace {
         "Decides whether to use relative size for the length of the arrow. This means "
         "that the arrow length will be computed as the provided 'Length' value times the "
         "bounding sphere of the start node. If false, meters is used.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo WidthInfo = {
         "Width",
         "Width",
         "The width of the arrow, in meters.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient intensity",
         "A multiplier for ambient lighting for the shading of the arrow.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse intensity",
         "A multiplier for diffuse lighting for the shading of the arrow.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular intensity",
         "A multiplier for specular lighting for the shading of the arrow.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ShadingEnabledInfo = {
         "PerformShading",
         "Perform shading",
         "Determines whether shading should be applied to the arrow model.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     void updateDistanceBasedOnRelativeValues(const std::string& nodeName,

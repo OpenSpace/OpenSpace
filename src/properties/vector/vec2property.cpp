@@ -28,15 +28,8 @@
 
 namespace openspace {
 
-Vec2Property::Vec2Property(PropertyInfo info, glm::vec2 value, glm::vec2 minValue,
-                           glm::vec2 maxValue, glm::vec2 stepValue)
-    : NumericalProperty<glm::vec2>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+Vec2Property::Vec2Property(Vec2PropertyInfo info)
+    : NumericalProperty<glm::vec2>(std::move(info))
 {}
 
 std::string_view Vec2Property::className() const {

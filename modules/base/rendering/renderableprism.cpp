@@ -45,7 +45,7 @@ namespace {
         "Segments",
         "Segments",
         "The number of segments the shape of the prism should have.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LinesInfo = {
@@ -53,14 +53,14 @@ namespace {
         "Number of lines",
         "The number of lines connecting the two shapes of the prism. They will be evenly "
         "distributed around the bounding circle that makes up the shape of the prism.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
         "The radius of the prism's shape in meters.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo BaseRadiusInfo = {
@@ -68,28 +68,28 @@ namespace {
         "Base radius",
         "The radius of the base of the prism's shape, in meters. By default it is given "
         "the same radius as the outer shape.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the lines. The larger number, the thicker the lines.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "The RGB color of the line.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo LengthInfo = {
         "Length",
         "Length",
         "The length of the prism in meters.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Renders a prism shape defined by two polygonal shapes (base and top) connected by

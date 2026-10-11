@@ -30,20 +30,28 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo IdleTimeInfo = {
-        "IdleTime",
-        "Idle time",
-        "Time in seconds that has passed from latest registered interaction until the "
-        "application goes idle.",
-        PropertyInfo::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo IdleTimeInfo = {
+        .identifier = "IdleTime",
+        .name = "Idle time",
+        .description = "Time in seconds that has passed from latest registered "
+            "interaction until the application goes idle.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 120.f,
+            .minMax = { 0.f, 300.f }
+        }
     };
 
-    constexpr PropertyInfo IsInActiveStateInfo = {
-        "IsInActiveState",
-        "Is state active",
-        "Keeps track whether the interaction session is in active state or not. False if "
-        "application is in idle state, true if it is in active state.",
-        PropertyInfo::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo IsInActiveStateInfo = {
+        .identifier = "IsInActiveState",
+        .name = "Is state active",
+        .description = "Keeps track whether the interaction session is in active state "
+            "or not. False if application is in idle state, true if it is in active "
+            "state.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 } // namespace
 
@@ -57,8 +65,8 @@ InteractionMonitor::InteractionMonitor()
         "whether the software is in an active state. It stays in active state for a "
         "certain time after the last interaction happened."
     })
-    , _isInActiveState(IsInActiveStateInfo, false)
-    , _idleTime(IdleTimeInfo, 120.f, 0.f, 300.f)
+    , _isInActiveState(IsInActiveStateInfo)
+    , _idleTime(IdleTimeInfo)
 {
     addProperty(_isInActiveState);
     addProperty(_idleTime);

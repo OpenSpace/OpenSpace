@@ -43,21 +43,21 @@ namespace {
         "Color",
         "Color",
         "The color of the grid lines.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo HighlightColorInfo = {
         "HighlightColor",
         "Highlight color",
         "The color of the highlighted lines in the grid.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of segments",
         "The number of segments to split the grid into, in each direction (x and y).",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo HighlightRateInfo = {
@@ -66,14 +66,14 @@ namespace {
         "The rate that the columns and rows are highlighted, counted with respect to the "
         "center of the grid. If the number of segments in the grid is odd, the "
         "highlighting might be offset from the center.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo HighlightLineWidthInfo = {
@@ -81,14 +81,14 @@ namespace {
         "Highlight line width",
         "The width of the highlighted grid lines. The larger number, the thicker the "
         "lines.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SizeInfo = {
         "Size",
         "Grid size",
         "The size of the grid (in the x and y direction), given in meters.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo LabelsInfo = {

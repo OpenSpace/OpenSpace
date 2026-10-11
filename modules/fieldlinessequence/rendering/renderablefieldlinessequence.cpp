@@ -73,14 +73,14 @@ namespace {
         "Color method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
         "examples, temperature or particle density.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
         "Quantity to color by",
         "Quantity used to color lines if the 'By Quantity' color method is selected.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ColorMinMaxInfo = {
@@ -88,63 +88,63 @@ namespace {
         "Color min max range",
         "A min-max range for what the lowest and highest values of the color table can "
         "be set to.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to color table",
         "Color Table/Transfer Function to use for 'By Quantity' coloring.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorUniformInfo = {
         "Color",
         "Uniform line color",
         "The uniform color of lines shown when 'Color Method' is set to 'Uniform'.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
         "Additive blending",
         "Activate/deactivate additive blending.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
         "Domain limits",
         "Enable/Disable domain limits.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DomainXInfo = {
         "LimitsX",
         "X-limits",
         "Valid range along the X-axis. [Min, Max].",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DomainYInfo = {
         "LimitsY",
         "Y-limits",
         "Valid range along the Y-axis. [Min, Max].",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DomainZInfo = {
         "LimitsZ",
         "Z-limits",
         "Valid range along the Z-axis. [Min, Max].",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DomainRInfo = {
         "LimitsR",
         "Radial limits",
         "Valid radial range. [Min, Max].",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FlowEnabledInfo = {
@@ -152,42 +152,42 @@ namespace {
         "Flow enabled",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo FlowColorInfo = {
         "FlowColor",
         "Flow color",
         "Color of particles flow direction indication.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo FlowReversedInfo = {
         "ReversedFlow",
         "Reversed flow",
         "Toggle to make the flow move in the opposite direction.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
         "Particle size",
         "Size of the particles.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
         "Particle spacing",
         "Spacing in between particles.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FlowSpeedInfo = {
         "FlowSpeed",
         "Speed",
         "Speed of the flow.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo MaskingEnabledInfo = {
@@ -197,35 +197,35 @@ namespace {
         "within a given range, for example, if you only want to see where the "
         "temperature is between 10 and 20 degrees. Also used for masking out line "
         "topologies like solar wind & closed lines.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
         "Lower limit",
         "Lower and upper limit of the valid masking range.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
         "Quantity used for masking",
         "Quantity used for masking.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "This value specifies the line width of the fieldlines.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",
         "Jump to start of sequence",
         "Performs a time jump to the start of the sequence.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo SaveDownloadsOnShutdown = {
@@ -233,7 +233,7 @@ namespace {
         "Save downloads on shutdown",
         "This is an option for if dynamically downloaded should be saved between runs or "
         "not.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Visualizes field lines, typically across a sequence of time steps, but also

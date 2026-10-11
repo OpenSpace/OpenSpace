@@ -75,7 +75,7 @@ namespace {
         // global rebinding of keys from the default.
         std::optional<std::vector<std::string>> globalCustomizationScripts;
 
-        enum class [[codegen::map(PropertyInfo::Visibility)]] Visibility {
+        enum class [[codegen::map(Visibility)]] Visibility {
             NoviceUser = 0,
             User,
             AdvancedUser,
@@ -552,7 +552,7 @@ void parseLuaState(Configuration& configuration) {
 
     if (p.propertyVisibility.has_value()) {
         c.propertyVisibility =
-            codegen::map<PropertyInfo::Visibility>(*p.propertyVisibility);
+            codegen::map<Visibility>(*p.propertyVisibility);
     }
 
     c.showPropertyConfirmation = p.showPropertyConfirmation.value_or(true);

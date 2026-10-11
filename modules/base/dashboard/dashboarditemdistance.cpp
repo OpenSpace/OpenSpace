@@ -56,7 +56,7 @@ namespace {
         "SourceType",
         "Source type",
         "The type of position that is used as the source to calculate the distance.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SourceNodeIdentifierInfo = {
@@ -64,14 +64,14 @@ namespace {
         "Source node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the source for computing the distance.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination type",
         "The type of position that is used as the destination to calculate the distance.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DestinationNodeIdentifierInfo = {
@@ -79,7 +79,7 @@ namespace {
         "Destination node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the destination for computing the distance.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SimplificationInfo = {
@@ -88,7 +88,7 @@ namespace {
         "If this value is enabled, the distance is displayed in nuanced units, such as "
         "km, AU, light years, parsecs, etc. If this value is disabled, the unit can be "
         "explicitly requested.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RequestedUnitInfo = {
@@ -96,7 +96,7 @@ namespace {
         "Requested unit",
         "If the simplification is disabled, this distance unit is used as a destination "
         "to convert the meters into.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FormatStringInfo = {
@@ -105,7 +105,7 @@ namespace {
         "The format string that is used for formatting the distance string.  This format "
         "receives four parameters:  The name of the source, the name of the destination "
         "the value of the distance and the unit of the distance.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Displays the distance between two points. The points can be defined either by the
@@ -184,7 +184,7 @@ DashboardItemDistance::DashboardItemDistance(const Dictionary& dictionary)
     });
     _source.type.onChange([this]() {
         _source.nodeIdentifier.setVisibility(
-            PropertyInfo::Visibility(
+            Visibility(
                 _source.type == Type::Node || _source.type == Type::NodeSurface
             )
         );
@@ -211,7 +211,7 @@ DashboardItemDistance::DashboardItemDistance(const Dictionary& dictionary)
     });
     _destination.type.onChange([this]() {
         _destination.nodeIdentifier.setVisibility(
-            PropertyInfo::Visibility(
+            Visibility(
                 _source.type == Type::Node || _source.type == Type::NodeSurface
             )
         );

@@ -35,7 +35,7 @@ namespace {
         "Scale",
         "These values are used as scaling factors for the scene graph node that this "
         "transformation is attached to relative to its parent.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     // Scales the scene graph node that it is attached to by a fixed amount that does not

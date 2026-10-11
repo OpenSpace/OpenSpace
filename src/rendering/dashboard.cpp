@@ -41,7 +41,7 @@ namespace {
         "Enabled",
         "If this value is 'false', this dashboard will be invisible, regardless of the "
         "state of the individual components.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo StartPositionOffsetInfo = {
@@ -49,7 +49,7 @@ namespace {
         "Start position offset",
         "A 2D vector controlling where the dashboard rendering starts. Adding an offset "
         "in x and y-direction on screen.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RefreshRateInfo = {
@@ -57,7 +57,7 @@ namespace {
         "Refresh rate (in ms)",
         "The number of milliseconds between refreshes of the dashboard items. If the "
         "value is 0 the dashboard is refreshed at the same rate as the main rendering.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 } // namespace
 

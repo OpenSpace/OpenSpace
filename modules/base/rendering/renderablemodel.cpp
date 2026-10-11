@@ -90,128 +90,167 @@ namespace {
         "Custom transformation for an internal model node."
     };
 
-    constexpr PropertyInfo EnableAnimationInfo = {
-        "EnableAnimation",
-        "Enable animation",
-        "Enable or disable the animation for the model if it has any.",
-        PropertyInfo::Visibility::User
+    constexpr BoolPropertyInfo EnableAnimationInfo = {
+        .identifier = "EnableAnimation",
+        .guiName = "Enable animation",
+        .description = "Enable or disable the animation for the model if it has any.",
+        .visibility = Visibility::User,
+        .defaults = { .value = false }
     };
 
-    constexpr PropertyInfo AmbientIntensityInfo = {
-        "AmbientIntensity",
-        "Ambient intensity",
-        "A multiplier for ambient lighting.",
-        PropertyInfo::Visibility::User
+    constexpr FloatPropertyInfo AmbientIntensityInfo = {
+        .identifier = "AmbientIntensity",
+        .guiName = "Ambient intensity",
+        .description = "A multiplier for ambient lighting.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.2f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo DiffuseIntensityInfo = {
-        "DiffuseIntensity",
-        "Diffuse intensity",
-        "A multiplier for diffuse lighting.",
-        PropertyInfo::Visibility::User
+    constexpr FloatPropertyInfo DiffuseIntensityInfo = {
+        .identifier = "DiffuseIntensity",
+        .guiName = "Diffuse intensity",
+        .description = "A multiplier for diffuse lighting.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo SpecularIntensityInfo = {
-        "SpecularIntensity",
-        "Specular intensity",
-        "A multiplier for specular lighting.",
-        PropertyInfo::Visibility::User
+    constexpr FloatPropertyInfo SpecularIntensityInfo = {
+        .identifier = "SpecularIntensity",
+        .guiName = "Specular intensity",
+        .description = "A multiplier for specular lighting.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr PropertyInfo SpecularPowerInfo = {
-        "SpecularPower",
-        "Specular Power",
-        "Power factor for specular component, higher value gives narrower specularity.",
-        PropertyInfo::Visibility::User
+    constexpr FloatPropertyInfo SpecularPowerInfo = {
+        .identifier = "SpecularPower",
+        .guiName = "Specular Power",
+        .description = "Power factor for specular component, higher value gives narrower "
+            "specularity.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 100.f,
+            .minMax = { 0.5f, 1000.f }
+        }
     };
 
-    constexpr PropertyInfo ShadingInfo = {
-        "PerformShading",
-        "Perform shading",
-        "Determines whether shading should be applied to this model, based on the "
-        "provided list of light sources. If false, the model will be fully illuminated.",
-        PropertyInfo::Visibility::User
+    constexpr BoolPropertyInfo ShadingInfo = {
+        .identifier = "PerformShading",
+        .guiName = "Perform shading",
+        .description = "Determines whether shading should be applied to this model, "
+            "based on the provided list of light sources. If false, the model will be "
+            "fully illuminated.",
+        .visibility = Visibility::User,
+        .defaults = { .value = true }
     };
 
-    constexpr PropertyInfo EnableFaceCullingInfo = {
-        "EnableFaceCulling",
-        "Enable face culling",
-        "Enable OpenGL automatic face culling optimization.",
-        PropertyInfo::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnableFaceCullingInfo = {
+        .identifier = "EnableFaceCulling",
+        .guiName = "Enable face culling",
+        .description = "Enable OpenGL automatic face culling optimization.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = { .value = true }
     };
 
-    constexpr PropertyInfo ModelTransformInfo = {
-        "ModelTransform",
-        "Model transform",
-        "An extra model transform matrix that is applied to the model before all other "
-        "transformations are applied.",
-        PropertyInfo::Visibility::Developer
+    constexpr DMat4PropertyInfo ModelTransformInfo = {
+        .identifier = "ModelTransform",
+        .guiName = "Model transform",
+        .description = "An extra model transform matrix that is applied to the model "
+            "before all other transformations are applied.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::dmat4(1.0),
+            .minMax = { createFillMat4x4(-1.0), createFillMat4x4(1.0) }
+        }
     };
 
-    constexpr PropertyInfo PivotInfo = {
-        "Pivot",
-        "Pivot",
-        "A vector that moves the place of origin for the model.",
-        PropertyInfo::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo PivotInfo = {
+        .identifier = "Pivot",
+        .guiName = "Pivot",
+        .description = "A vector that moves the place of origin for the model.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ModelScaleInfo = {
-        "ModelScale",
-        "Model scale",
-        "The scale of the model. If a numeric value is provided in the asset file, the "
-        "scale will be that exact value. If instead a unit name is provided, this is the "
-        "value that that name represents. For example 'Centimeter' becomes 0.01.",
-        PropertyInfo::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo ModelScaleInfo = {
+        .identifier = "ModelScale",
+        .guiName = "Model scale",
+        .description = "The scale of the model. If a numeric value is provided in the "
+            "asset file, the scale will be that exact value. If instead a unit name is "
+            "provided, this is the value that that name represents. For example "
+            "'Centimeter' becomes 0.01.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.0,
+            .minMax = { std::numeric_limits<double>::epsilon(), 4e+27 },
+            .exponent = 20.f
+        }
     };
 
-    constexpr PropertyInfo RotationVecInfo = {
-        "RotationVector",
-        "Rotation vector",
-        "A rotation vector with Euler angles, specified in degrees.",
-        PropertyInfo::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo RotationVecInfo = {
+        .identifier = "RotationVector",
+        .guiName = "Rotation vector",
+        .description = "A rotation vector with Euler angles, specified in degrees.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .minMax = { glm::vec3(0.f), glm::vec3(360.f) }
+        }
     };
 
     constexpr PropertyInfo LightSourcesInfo = {
-        "LightSources",
-        "Light sources",
-        "A list of light sources that this model should accept light from.",
-        PropertyInfo::Visibility::AdvancedUser
+        .identifier = "LightSources",
+        .guiName = "Light sources",
+        .description = "A list of light sources that this model should accept light "
+            "from.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo EnableDepthTestInfo = {
-        "EnableDepthTest",
-        "Enable depth test",
-        "If true, depth testing is enabled for the model. This means that parts of the "
-        "model that are occluded by other parts will not be rendered. If disabled, the "
-        "depth of the model part will not be taken into account in rendering and some "
-        "parts that should be hidden behind a model might be rendered in front.",
-        PropertyInfo::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnableDepthTestInfo = {
+        .identifier = "EnableDepthTest",
+        .guiName = "Enable depth test",
+        .description = "If true, depth testing is enabled for the model. This means that "
+            "parts of the model that are occluded by other parts will not be rendered. "
+            "If disabled, the depth of the model part will not be taken into account in "
+            "rendering and some parts that should be hidden behind a model might be "
+            "rendered in front.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = { .value = true }
     };
 
-    constexpr PropertyInfo RenderWireframeInfo = {
-        "RenderWireframe",
-        "Enable Wireframe Rendering",
-        "Enable Wireframe rendering for the Model.",
-        PropertyInfo::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo RenderWireframeInfo = {
+        .identifier = "RenderWireframe",
+        .guiName = "Enable Wireframe Rendering",
+        .description = "Enable Wireframe rendering for the Model.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = { .value = false }
     };
 
     constexpr PropertyInfo BlendingOptionInfo = {
-        "BlendingOption",
-        "Blending options",
-        "Controls the blending function used to calculate the colors of the model with "
-        "respect to the opacity.",
-        PropertyInfo::Visibility::AdvancedUser
+        .identifier = "BlendingOption",
+        .guiName = "Blending options",
+        .description = "Controls the blending function used to calculate the colors of "
+            "the model with respect to the opacity.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo OverrideColorInfo = {
-        "OverrideColor",
-        "Override color",
-        "The single color to use for entire model (RGBA).",
-        PropertyInfo::Visibility::AdvancedUser,
-        PropertyInfo::IsEnablable::Yes,
-        PropertyInfo::NeedsConfirmation::No,
-        {
-            PropertyInfo::IsEnabled::No
+    constexpr Vec4PropertyInfo OverrideColorInfo = {
+        .identifier = "OverrideColor",
+        .guiName = "Override color",
+        .description = "The single color to use for entire model (RGBA).",
+        .visibility = Visibility::AdvancedUser,
+        .isEnablable = PropertyInfo::IsEnablable::Yes,
+        .defaults = {
+            .value = glm::vec4(1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) },
+            .isEnabled = PropertyInfo::IsEnabled::No
         }
     };
 
@@ -373,41 +412,21 @@ Documentation RenderableModel::Documentation() {
 RenderableModel::RenderableModel(const Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , Shadower(dictionary)
-    , _enableAnimation(EnableAnimationInfo, false)
-    , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
-    , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
-    , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
-    , _specularPower(SpecularPowerInfo, 100.f, 0.5f, 1000.f)
-    , _performShading(ShadingInfo, true)
-    , _enableFaceCulling(EnableFaceCullingInfo, true)
-    , _modelTransform(
-        ModelTransformInfo,
-        glm::dmat4(1.0),
-        glm::dmat4(
-            -1.0, -1.0, -1.0, -1.0,
-            -1.0, -1.0, -1.0, -1.0,
-            -1.0, -1.0, -1.0, -1.0,
-            -1.0, -1.0, -1.0, -1.0
-        ),
-        glm::dmat4(
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0
-        )
-    )
-    , _pivot(
-        PivotInfo,
-        glm::vec3(0.f),
-        glm::vec3(-std::numeric_limits<float>::max()),
-        glm::vec3(std::numeric_limits<float>::max())
-    )
-    , _modelScale(ModelScaleInfo, 1.0, std::numeric_limits<double>::epsilon(), 4e+27)
-    , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
-    , _enableDepthTest(EnableDepthTestInfo, true)
+    , _enableAnimation(EnableAnimationInfo)
+    , _ambientIntensity(AmbientIntensityInfo)
+    , _diffuseIntensity(DiffuseIntensityInfo)
+    , _specularIntensity(SpecularIntensityInfo)
+    , _specularPower(SpecularPowerInfo)
+    , _performShading(ShadingInfo)
+    , _enableFaceCulling(EnableFaceCullingInfo)
+    , _modelTransform(ModelTransformInfo)
+    , _pivot(PivotInfo)
+    , _modelScale(ModelScaleInfo)
+    , _rotationVec(RotationVecInfo)
+    , _enableDepthTest(EnableDepthTestInfo)
     , _blendingFuncOption(BlendingOptionInfo)
-    , _renderWireframe(RenderWireframeInfo, false)
-    , _overrideColor(OverrideColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _renderWireframe(RenderWireframeInfo)
+    , _overrideColor(OverrideColorInfo)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _customNodeTransformsOwner(CustomNodeTransformsInfo)
 {
@@ -551,7 +570,6 @@ RenderableModel::RenderableModel(const Dictionary& dictionary)
     addProperty(_overrideColor);
 
     addProperty(_modelScale);
-    _modelScale.setExponent(20.f);
 
     _modelScale.onChange([this]() {
         if (!_geometry) {

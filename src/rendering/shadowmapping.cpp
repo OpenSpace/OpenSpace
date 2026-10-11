@@ -45,7 +45,7 @@ namespace {
         "Size of the depth-pass view frustum",
         "Sets the width & height (effectively left/right & top/bottom) of the depth-pass "
         "view frustum, z-near & z-far are calculated.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(Shadower)]] Parameters {

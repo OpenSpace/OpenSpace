@@ -68,14 +68,14 @@ namespace {
         "Enabled",
         "Enabled",
         "This setting determines whether this object will be visible or not.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is collapsed",
         "This setting determines whether this window is collapsed or not.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo ShowHelpInfo = {
@@ -83,14 +83,14 @@ namespace {
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
         "explaining what impact they have on the visuals.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
         "Tooltip delay (in s)",
         "This value determines the delay in seconds after which the tooltip is shown.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     ImGuiKey toImGuiKey(openspace::Key key) {

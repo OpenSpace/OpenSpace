@@ -47,7 +47,7 @@ namespace {
         "the correct height information for the globe is used. Otherwise, the position "
         "is specified based on the longitude and latitude on the node's interaction "
         "sphere",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LatitudeInfo = {
@@ -56,7 +56,7 @@ namespace {
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
         "globe. The default value is 0.0.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LongitudeInfo = {
@@ -65,7 +65,7 @@ namespace {
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
         "globe. The default value is 0.0.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo AltitudeInfo = {
@@ -74,7 +74,7 @@ namespace {
         "The altitude in meters. If the 'UseHeightmap' property is 'true', this is an "
         "offset from the actual surface of the globe. If not, this is an offset from the "
         "reference ellipsoid. The default value is 0.0.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo UseHeightmapInfo = {
@@ -83,21 +83,21 @@ namespace {
         "If this value is 'true', the altitude specified in 'Altitude' will be treated "
         "as an offset from the heightmap. Otherwise, it will be an offset from the "
         "globe's reference ellipsoid. The default value is 'false'.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo UseCameraInfo = {
         "UseCamera",
         "Use camera",
         "If this value is 'true', the lat and lon are updated to match the camera.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UseCameraAltitudeInfo = {
         "UseCameraAltitude",
         "Use camera altitude",
         "If this value is 'true', the altitude is updated to match the camera.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Places the scene graph node at a specific location relative to another scene graph

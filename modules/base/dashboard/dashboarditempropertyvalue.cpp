@@ -59,7 +59,7 @@ namespace {
         "URI",
         "Property URI",
         "The URI of the property that is displayed in this dashboard item.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DisplayStringInfo = {
@@ -73,7 +73,7 @@ namespace {
         "vector, for example two {} for vec2 types, three for vec3 types, etc. For more "
         "information on how to structure the formatting string, see the documentation at "
         "https://en.cppreference.com/w/cpp/utility/format/spec",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Shows the value of the provided property. Depending on the type of the property,

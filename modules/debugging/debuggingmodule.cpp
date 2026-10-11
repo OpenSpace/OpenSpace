@@ -53,7 +53,7 @@ namespace {
         "ShowStatistics",
         "Show statistics",
         "Show updating, rendering, and network statistics on all rendering nodes.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo StatisticsScaleInfo = {
@@ -62,7 +62,7 @@ namespace {
         "This value is scaling the statistics window by the provided amount. For flat "
         "projections this is rarely necessary, but it is important when using a setup "
         "where the corners of the image are masked out.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo StatisticsOffsetInfo = {
@@ -71,7 +71,7 @@ namespace {
         "This value is offsetting the center of the statistics window by the provided "
         "amount. For flat projections this is rarely necessary, but it is important when "
         "using a setup the center of the image is distorted in some form.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ShowFrameNumberInfo = {
@@ -79,7 +79,7 @@ namespace {
         "Show frame information",
         "If this value is enabled, the current frame number and frame times are rendered "
         "into the window.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 } // namespace
 

@@ -64,7 +64,7 @@ namespace {
         "Allow camera rotation",
         "Toggles if the camera should rotate to look at the sky target if it is going "
         "outside of the current field of view.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo CameraRotSpeedInfo = {
@@ -72,21 +72,21 @@ namespace {
         "Camera rotation speed",
         "The speed of the rotation of the camera when the camera rotates to look at a "
         "coordinate which is outside of the field of view.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo TargetSpeedInfo = {
         "TargetAnimationSpeed",
         "Target animation speed",
         "This determines the speed of the animation of the sky target.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo BrowserSpeedInfo = {
         "BrowserAnimationSpeed",
         "Field of view animation speed",
         "This determines the speed of the animation of the field of view in the browser.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo HideWithGuiInfo = {
@@ -94,7 +94,7 @@ namespace {
         "Hide targets and browsers with GUI",
         "If checked, the targets and browsers will be disabled when the sky browser "
         "panel is minimized.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo InverseZoomInfo = {
@@ -102,14 +102,14 @@ namespace {
         "Inverse zoom direction",
         "If checked, the zoom direction of the scroll over the AAS WWT browser will be "
         "inversed.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo SynchronizeAimInfo = {
         "SynchronizeAim",
         "Synchronize aim",
         "If checked, the target and the browser will have synchronized aim.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SpaceCraftTimeInfo = {
@@ -117,14 +117,14 @@ namespace {
         "Spacecraft animation time",
         "Sets the duration (in seconds) of the animation of the spacecraft when it is "
         "pointed to where the target is aiming.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ImageCollectionInfo = {
        "WwtImageCollectionUrl",
        "AAS worldwide telescope image collection URL",
        "The url of the image collection which is loaded into AAS WorldWide Telescope.",
-       PropertyInfo::Visibility::AdvancedUser
+       Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {

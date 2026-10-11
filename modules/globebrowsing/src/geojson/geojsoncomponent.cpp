@@ -72,14 +72,14 @@ namespace {
         "Enabled",
         "Enabled",
         "This setting determines whether this object will be visible or not.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FileInfo = {
         "File",
         "File",
         "Path to the GeoJSON file to base the rendering on.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo HeightOffsetInfo = {
@@ -87,7 +87,7 @@ namespace {
         "Height offset",
         "A height offset value, in meters. Useful for moving a feature closer to or "
         "farther away from the surface.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo CoordinateOffsetInfo = {
@@ -97,7 +97,7 @@ namespace {
         "the object on the surface and correct potential mismatches with other "
         "renderings. Note that changing it during runtime leads to all positions being "
         "recomputed.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DrawWireframeInfo = {
@@ -105,7 +105,7 @@ namespace {
         "Wireframe",
         "If true, draw the wire frame of the polygons. Used for testing and to "
         "investigate tessellation results.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo PreventHeightUpdateInfo = {
@@ -114,7 +114,7 @@ namespace {
         "If true, the polygon mesh will not be automatically updated based on the "
         "heightmap, even if the 'RelativeToGround' altitude option is set and the "
         "heightmap updates. The data can still be force updated.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ForceUpdateHeightDataInfo = {
@@ -122,7 +122,7 @@ namespace {
         "Force update height data",
         "Triggering this leads to a recomputation of the heights based on the globe "
         "height map value at the geometry's positions.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PointRenderModeInfo = {
@@ -131,7 +131,7 @@ namespace {
         "Decides how the billboards for the points should be rendered in terms of up "
         "direction and whether the plane should face the camera. See details on the "
         "different options in the wiki.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FlyToFeatureInfo = {
@@ -139,7 +139,7 @@ namespace {
         "Fly to feature",
         "Triggering this leads to the camera flying to a position that show the GeoJson "
         "feature. The flight will account for any lat, long or height offset.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo CentroidCoordinateInfo = {
@@ -147,7 +147,7 @@ namespace {
         "Centroid coordinate",
         "The lat long coordinate of the centroid position of the read geometry. Note "
         "that this value does not include the offset.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo BoundingBoxInfo = {
@@ -155,7 +155,7 @@ namespace {
         "Bounding box",
         "The lat long coordinates of the lower and upper corner of the bounding box of "
         "the read geometry. Note that this value does not include the offset.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PointSizeScaleInfo = {
@@ -163,7 +163,7 @@ namespace {
         "Point size scale",
         "An extra scale value that can be used to increase or decrease the scale of any "
         "rendered points in the component, even if a value is set from the GeoJson file.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo LineWidthScaleInfo = {
@@ -172,7 +172,7 @@ namespace {
         "An extra scale value that can be used to increase or decrease the width of any "
         "rendered lines in the component, even if a value is set from the GeoJson file. "
         "Note that there is a max limit for how wide lines can be.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo DeleteInfo = {
@@ -181,7 +181,7 @@ namespace {
         "Triggering this will remove this GeoJson component from its globe. Note that "
         "the GUI may have to be reloaded for the change to be reflect in the user "
         "interface.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     struct [[codegen::Dictionary(GeoJsonComponent)]] Parameters {
@@ -275,7 +275,7 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(PropertyOwner::PropertyOwnerI
     )
     , flyToFeature(FlyToFeatureInfo)
 {
-    _opacity.setVisibility(PropertyInfo::Visibility::AdvancedUser);
+    _opacity.setVisibility(Visibility::AdvancedUser);
     addProperty(Fadeable::_opacity);
     addProperty(Fadeable::_fade);
 

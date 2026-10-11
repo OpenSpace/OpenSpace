@@ -219,7 +219,7 @@ namespace {
         "Password",
         "The general password that allows this OpenSpace instance access to the Wormhole "
         "server.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo HostPasswordInfo = {
@@ -227,7 +227,7 @@ namespace {
         "Host password",
         "The password that is required to take control of the joint session and thus "
         "send all commands to connected clients.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PortInfo = {
@@ -235,14 +235,14 @@ namespace {
         "Port",
         "The port on which the Wormhole server is listening to connections from "
         "OpenSpace.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AddressInfo = {
         "Address",
         "Address",
         "The address of the Wormhole server either as a DNS name or an IP address.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo NameInfo = {
@@ -250,14 +250,14 @@ namespace {
         "Connection name",
         "The name of this OpenSpace instance that will be potentially broadcast to other "
         "connected instances.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ServerNameInfo = {
         "ServerName",
         "Server name",
         "The name of the server instance to join.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo BufferTimeInfo = {
@@ -267,7 +267,7 @@ namespace {
         "get applied to the rendering. A higher value leads to smoother rendering, "
         "particularly when the internet connection is unstable, but also leads to higher "
         "delay.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TimeKeyFrameInfo = {
@@ -276,7 +276,7 @@ namespace {
         "Determines how often the information about the simulation time is sent (in "
         "seconds). Lower values mean more accurate representation of the time, but also "
         "require higher internet bandwidth.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo CameraKeyFrameInfo = {
@@ -285,7 +285,7 @@ namespace {
         "Determines how often the information about the camera position and orientation "
         "is sent (in seconds). Lower values mean more accurate representation of the "
         "time, but also more internet traffic.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 } // namespace
 

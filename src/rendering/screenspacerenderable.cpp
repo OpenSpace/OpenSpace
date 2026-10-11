@@ -56,14 +56,14 @@ namespace {
         "Enabled",
         "Enabled",
         "Determines whether this screen space object will be rendered or not.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The type of the screenspace renderable.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     const PropertyOwner::PropertyOwnerInfo PlacementInfo = {
@@ -81,7 +81,7 @@ namespace {
         "The Cartesian coordinate system is useful if a regular rendering is applied, "
         "whereas the radius azimuth elevation are most useful in a planetarium "
         "environment.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo CartesianPositionInfo = {
@@ -89,7 +89,7 @@ namespace {
         "Cartesian coordinates",
         "Determines the position of this screen space plane in Cartesian "
         "three-dimensional coordinates (meters).",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo RadiusAzimuthElevationInfo = {
@@ -97,7 +97,7 @@ namespace {
         "Radius azimuth elevation",
         "Determines the position of this screen space plane in a coordinate system based "
         "on radius (meters), azimuth (radians), and elevation (radians).",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     const PropertyOwner::PropertyOwnerInfo BorderInfo = {
@@ -111,14 +111,14 @@ namespace {
         "Width",
         "Border width",
         "The width of the border.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo BorderColorInfo = {
         "Color",
         "Border color",
         "The color of the border.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo BorderFeatherInfo = {
@@ -140,7 +140,7 @@ namespace {
         "Multiply color",
         "If set, the plane's texture is multiplied with this color. Useful for applying "
         "a color to grayscale images.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo BackgroundColorInfo = {
@@ -149,7 +149,7 @@ namespace {
         "A fixed color that is combined with the screen space renderable to create the "
         "final color. The actual color of the screen space renderable is alpha-blended "
         "with the background color to produce the final result.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo GammaOffsetInfo = {
@@ -157,7 +157,7 @@ namespace {
         "Gamma correction offset",
         "Sets the gamma correction of the texture that is applied in addition to the "
         "global gamma value.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RenderDuringBlackoutInfo = {
@@ -166,7 +166,7 @@ namespace {
         "If true, this screen space renderable is going to ignore the global blackout "
         "factor from the Render Engine and will always render at full opacity. If false, "
         "it will adhere to the factor and fade out like the rest of the 3D rendering.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ScaleInfo = {
@@ -176,14 +176,14 @@ namespace {
         "visual size. The default size is determined separately for each screen space "
         "renderable type and may for example be affected by the size of an image being "
         "displayed.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo LocalRotationInfo = {
         "Rotation",
         "Local rotation",
         "An Euler rotation (roll, pitch, yaw) to apply to the screen space object.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FaceCameraInfo = {
@@ -191,7 +191,7 @@ namespace {
         "Face camera",
         "If enabled, the object will be rotated to face the camera position. Any local "
         "rotation is then applied after this rotation.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo GuiIsHiddenInfo = {
@@ -199,7 +199,7 @@ namespace {
         "GUI Hidden",
         "If this value is set to `true`, this ScreenSpaceRenderable will indicate to the "
         "user interface that it should not be shown.",
-        PropertyInfo::Visibility::Hidden
+        Visibility::Hidden
     };
 
     float wrap(float value, float min, float max) {

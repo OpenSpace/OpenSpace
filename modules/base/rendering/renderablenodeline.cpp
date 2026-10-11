@@ -54,7 +54,7 @@ namespace {
         "Start node",
         "The identifier of the node the line starts from. Defaults to 'Root' if not "
         "specified.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EndNodeInfo = {
@@ -62,21 +62,21 @@ namespace {
         "End node",
         "The identifier of the node the line ends at. Defaults to 'Root' if not "
         "specified.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "The RGB color for the line.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the line. The larger number, the thicker the line.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo StartOffsetInfo = {
@@ -85,7 +85,7 @@ namespace {
         "A distance from the start node at which the rendered line should begin. By "
         "default it takes a value in meters, but if 'UseRelativeOffsets' is set to true "
         "it is read as a multiplier times the bounding sphere of the node.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EndOffsetInfo = {
@@ -94,7 +94,7 @@ namespace {
         "A distance to the end node at which the rendered line should end. By default it "
         "takes a value in meters, but if 'UseRelativeOffsets' is set to true it is read "
         "as a multiplier times the bounding sphere of the node.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RelativeOffsetsInfo = {
@@ -103,7 +103,7 @@ namespace {
         "If true, the offset values are interpreted as relative values to be multiplied "
         "with the bounding sphere of the start/end node. If false, the value is "
         "interpreted as a distance in meters.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     /**

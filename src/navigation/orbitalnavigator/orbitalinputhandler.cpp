@@ -35,7 +35,7 @@ namespace {
         "Mouse sensitivity",
         "Determines the sensitivity of the camera motion through the mouse. The lower "
         "the sensitivity is the less impact a mouse motion will have.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo JoystickSensitivityInfo = {
@@ -43,7 +43,7 @@ namespace {
         "Joystick sensitivity",
         "Determines the sensitivity of the camera motion through a joystick. The lower "
         "the sensitivity is the less impact a joystick motion will have.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo WebsocketSensitivityInfo = {
@@ -51,7 +51,7 @@ namespace {
         "Websocket sensitivity",
         "Determines the sensitivity of the camera motion through a websocket. The lower "
         "the sensitivity is the less impact a webstick motion will have.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo TouchSensitivityInfo = {
@@ -59,7 +59,7 @@ namespace {
         "Touch sensitivity",
         "Determines the sensitivity of the camera motion through touch interaction. The "
         "lower the sensitivity is the less the impact from touch motion will be.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     double velocityScaleFromFriction(double friction) {

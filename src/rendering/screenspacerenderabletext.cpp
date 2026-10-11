@@ -40,14 +40,14 @@ namespace {
         "Font name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "This value determines the size of the font that is used to render the distance.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     struct [[codegen::Dictionary(ScreenSpaceRenderableText)]] Parameters {

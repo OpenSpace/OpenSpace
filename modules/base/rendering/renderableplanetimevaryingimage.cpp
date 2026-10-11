@@ -48,7 +48,7 @@ namespace {
         "Source folder",
         "An image directory that is loaded from disk and contains the textures to use "
         "for this plane.",
-       PropertyInfo::Visibility::AdvancedUser
+       Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {

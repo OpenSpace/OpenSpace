@@ -39,7 +39,7 @@ namespace {
         "If this setting is enabled, the right mouse button is considered the primary "
         "one, rather than the left. This means that behavior usually mapped to the left "
         "mouse button will be mapped to the right mouse button, and vice versa.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo DisableKeybindingsInfo = {
@@ -47,35 +47,35 @@ namespace {
         "Disable all keybindings",
         "Disables all keybindings without removing them. Please note that this does not "
         "apply to the key to open the console.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInput",
         "Disable all mouse inputs",
         "Disables all mouse inputs and prevents them from affecting the camera.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DisableJoystickInputInfo = {
         "DisableJoystickInput",
         "Disable all joystick inputs",
         "Disables all joystick inputs and prevents them from affecting the camera.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DisableTouchInputInfo = {
         "DisableTouchInput",
         "Disable all touch inputs",
         "Disables all touch inputs and prevents them from affecting the camera.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo MaxDoubleTapTimeInfo = {
         "MaxDoubleTapTime",
         "Max time for touch double tap detection (milliseconds)",
         "Max tap delay (in ms) for double tap detection in touch interaction.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     const PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {

@@ -59,7 +59,7 @@ namespace {
         "Choose a distance unit that is used for the camera speed. "
         "For example, if the distance unit 'Kilometer' is chosen, then the unit used for "
         "the camera speed will be kilometers per second.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
@@ -73,7 +73,7 @@ namespace {
         "Position precision",
         "The precision in meters used to determine when to send updated camera "
         "positional data to the Open Sound Control receiver.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo RotationPrecisionInfo = {
@@ -81,7 +81,7 @@ namespace {
         "Rotation precision",
         "The precision used to determine when to send updated camera rotational data to "
         "the Open Sound Control receiver.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SpeedPrecisionInfo = {
@@ -89,7 +89,7 @@ namespace {
         "Speed precision",
         "The precision in meters per second used to determine when to send updated "
         "camera speed data to the Open Sound Control receiver.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 } // namespace
 

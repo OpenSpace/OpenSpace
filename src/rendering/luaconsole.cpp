@@ -78,7 +78,7 @@ namespace {
         "Is visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
         "will fade the console in and out.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ShouldBeSynchronizedInfo = {
@@ -87,7 +87,7 @@ namespace {
        "Determines whether the entered commands will only be executed locally (if this "
        "is disabled), or whether they will be send to other connected nodes, for "
        "example in a cluster environment.",
-       PropertyInfo::Visibility::AdvancedUser
+       Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ShouldSendToRemoteInfo = {
@@ -96,35 +96,35 @@ namespace {
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remote instances (other "
         "peers through an astrocast connection).",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background color",
         "Sets the background color of the console.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
         "Entry text color",
         "Sets the text color of the entry area of the console.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
         "History text color",
         "Sets the text color of the history area of the console.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
         "History length",
         "Determines the length of the history in number of lines.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     std::string sanitizeInput(std::string str) {

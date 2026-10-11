@@ -48,42 +48,42 @@ namespace {
         "Enabled",
         "This setting determines whether the labels will be visible or not. They are "
         "disabled per default.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FileInfo = {
         "File",
         "File",
         "The speck label file with the data for the labels.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the labels.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The size of the labels in pixels.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "Font size for the labels. This is different from the text size.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo MinMaxInfo = {
         "MinMaxSize",
         "Min/max size",
         "The minimum and maximum size (in pixels) of the labels.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FaceCameraInfo = {
@@ -91,14 +91,14 @@ namespace {
         "Face camera",
         "If enabled, the labels will be rotated to face the camera. For non-linear "
         "display rendering (for example fisheye) this should be set to false.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation matrix",
         "Transformation matrix to be applied to the labels.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {

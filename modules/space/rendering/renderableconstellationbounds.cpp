@@ -59,14 +59,14 @@ namespace {
         "Vertex file path",
         "A file that contains the vertex locations of the constellations bounds, as RA "
         "Dec coordinates on the celestial sphere.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the lines.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     // Can be used to draw bounding shapes on the night sky, where each shape encapsulates

@@ -39,7 +39,7 @@ namespace {
         "UniqueBackgroundColor",
         "Unique background color",
         "If 'true' each index tile will have a unique background color assigned to it.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     struct [[codegen::Dictionary(TileIndexTileProvider)]] Parameters {

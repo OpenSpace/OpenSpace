@@ -59,7 +59,7 @@ namespace {
         "Select which energy bin you want to show. GOES = Geostationary Operational "
         "Environmental Satellites. Emin01 is values > 10 MeV, Default is Emin03 where "
         "values > 100 MeV.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorModeInfo = {
@@ -67,84 +67,84 @@ namespace {
         "Color mode",
         "Color lines uniformly or using color tables based on specific values on nodes, "
         "for examples flux values.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to color table",
         "Color Table/Transfer Function to use for 'By Flux Value' coloring.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo StreamColorInfo = {
         "Color",
         "Color",
         "Color of particles.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo NodeSizeInfo = {
        "NodeSize",
        "Size of nodes",
        "Change the size of the rendered points of the nodes.",
-       PropertyInfo::Visibility::User
+       Visibility::User
     };
 
     constexpr PropertyInfo ThresholdFluxInfo = {
        "ThresholdFlux",
        "Threshold flux value",
        "This value specifies the threshold that will be changed with the flux value.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FilteringInfo = {
         "FilterLower",
         "Filtering lower value in AU",
         "Use filtering to show nodes within a given range.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FilteringUpperInfo = {
         "FilterUpper",
         "Filtering upper value in AU",
         "Use filtering to show nodes within a given range.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo AmountofNodesInfo = {
         "AmountOfNodes",
         "Every nth node to render in",
         "Show only every nth node.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DefaultNodeSkipInfo = {
         "NodeSkip",
         "Every nth node to render default",
         "Show only every nth node outside of skippingmethod.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EarthNodeSkipInfo = {
         "NodeSkipEarth",
         "Every nth node to render close to Earth",
         "Show only every nth node outside of skippingmethod.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ScalingmethodInfo = {
         "ScalingFlux",
         "Scale the flux value with color table",
         "Use scaling to color nodes with a given method.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo NodeskipMethodInfo = {
         "SkippingNodes",
         "How to select nodes to skip",
         "Methods to select nodes to skip.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorTableRangeInfo = {
@@ -152,56 +152,56 @@ namespace {
         "Color table range",
         "Valid range for the color table as the exponent, with base 10, of flux values. "
         "[Min, Max].",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DomainZInfo = {
         "ZLimit",
         "Z-limits",
         "Valid range along the Z-axis. [Min, Max].",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FluxColorAlphaInfo = {
         "FluxColorAlpha",
         "Flux color alpha",
         "The value of alpha for the flux color mode.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FluxNodeskipThresholdInfo = {
         "SkippingNodesByFlux",
         "Skipping nodes by flux",
         "Select nodes to skip depending on flux value.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RadiusNodeSkipThresholdInfo = {
         "SkippingNodesByRadius",
         "Skipping nodes by radius",
         "Select nodes to skip depending on Radius.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DistanceThresholdInfo = {
         "DistancePlanetThreshold",
         "Threshold for distance between planet",
         "Changes threshold distance for highlighting nodes close to Earth.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ProximityNodesSizeInfo = {
         "ProximityNodesSize",
         "Earths proximity nodes size",
         "Changes size of nodes only close to Earth.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MaxNodeDistanceSizeInfo = {
         "MaxNodeDistanceSize",
         "Max node distance size",
         "The maximum size of the nodes at a certain distance.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo CameraPerspectiveEnabledInfo = {
@@ -209,28 +209,28 @@ namespace {
         "Use camera perspective",
         "Camera perspective changes the size of the nodes dependent on the distance from "
         "camera.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DrawingCirclesInfo = {
         "RenderingCircles",
         "Render as circles",
         "Using fragment shader to draw nodes as circles instead of squares.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DrawingHollowInfo = {
         "RenderingHollowCircles",
         "Render as hollow circles",
         "Using fragment shader to draw nodes as hollow circles.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo GaussiandAlphaFilterInfo = {
         "RenderingGaussianAlphaFilter",
         "Alpha by gaussian",
         "Using fragment shader to draw nodes with Gaussian filter for alpha value.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo PerspectiveDistanceFactorInfo = {
@@ -238,28 +238,28 @@ namespace {
         "Perspective distance factor",
         "This value decides how far away the camera must be to start impacting the node "
         "size.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MinMaxNodeSizeInfo = {
         "MinMaxNodeSize",
         "Min & max node size",
         "The minimum and maximum node size.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo pulseEnabledInfo = {
         "PulseEnabled",
         "Nodes close to Earth pulsate",
         "Toggles the pulse for nodes close to Earth.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo gaussianPulseEnabledInfo = {
         "GaussianPulseEnabled",
         "Nodes close to Earth pulsate with alpha by gaussian",
         "Toggles the pulse with alpha by gaussian for nodes close to Earth.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {

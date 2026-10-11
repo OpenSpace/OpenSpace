@@ -60,63 +60,63 @@ namespace {
         "ToggleAll",
         "Toggle all",
         "Toggle the sonification for all planets.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableMercuryInfo = {
         "Mercury",
         "Mercury",
         "Toggle sonification for Mercury.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableVenusInfo = {
         "Venus",
         "Venus",
         "Toggle sonification for Venus.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableEarthInfo = {
         "Earth",
         "Earth",
         "Toggle sonification for Earth.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableMarsInfo = {
         "Mars",
         "Mars",
         "Toggle sonification for Mars.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableJupiterInfo = {
         "Jupiter",
         "Jupiter",
         "Toggle sonification for Jupiter.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableSaturnInfo = {
         "Saturn",
         "Saturn",
         "Toggle sonification for Saturn.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableUranusInfo = {
         "Uranus",
         "Uranus",
         "Toggle sonification for Uranus.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo EnableNeptuneInfo = {
         "Neptune",
         "Neptune",
         "Toggle sonification for Neptune.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 } // namespace
 

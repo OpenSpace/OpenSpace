@@ -333,14 +333,14 @@ public:
      *
      * \param visibility The new visibility of the Property
      */
-    void setVisibility(PropertyInfo::Visibility visibility);
+    void setVisibility(Visibility visibility);
 
     /**
      * Returns this Property%'s visibility setting.
      *
      * \return This Property%'s visibility setting
      */
-    PropertyInfo::Visibility visibility() const;
+    Visibility visibility() const;
 
     /**
      * This method determines if this Property should be read-only in external
@@ -412,7 +412,7 @@ public:
      *
      * \return `IsEnablable::Yes` if the Property is enablable, else `IsEnablable::No`
      */
-    PropertyInfo::IsEnablable isEnablable() const;
+    IsEnablable isEnablable() const;
 
     /**
      * Returns whether this Property is currently enabled. The result is only meaningful
@@ -420,7 +420,7 @@ public:
      *
      * \return `IsEnabled::Yes` if the Property is enabled, else `IsEnabled::No`
      */
-    PropertyInfo::IsEnabled isEnabled() const;
+    IsEnabled isEnabled() const;
 
     /**
      * Sets the enabled state of this Property and notifies the change listeners. This
@@ -430,7 +430,7 @@ public:
      *
      * \throw RuntimeError If the Property is not enablable
      */
-    void setIsEnabled(PropertyInfo::IsEnabled isEnabled);
+    void setIsEnabled(IsEnabled isEnabled);
 
     /**
      * Get a valid JSON formatted representation of the Property's value.
@@ -516,14 +516,14 @@ protected:
     std::string _description;
 
     /// If this property is enablable, this will tell if it is enabled or not
-    PropertyInfo::IsEnabled _isEnabled = PropertyInfo::IsEnabled::No;
+    IsEnabled _isEnabled = IsEnabled::No;
 
     /**
      * The meta data necessary for external applications.
      */
     struct {
         std::optional<std::string> group;
-        PropertyInfo::Visibility visibility = PropertyInfo::Visibility::Default;
+        Visibility visibility = Visibility::Always;
         std::optional<bool> readOnly;
         bool needsConfirmation = false;
         bool isEnablable = false;

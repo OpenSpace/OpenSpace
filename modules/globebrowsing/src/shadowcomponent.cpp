@@ -49,14 +49,14 @@ namespace {
         "Enabled",
         "Enabled",
         "Enable/Disable Shadows.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
         "Save depth texture",
         "Debug.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DistanceFractionInfo = {
@@ -64,14 +64,14 @@ namespace {
         "Distance fraction",
         "Distance fraction of original distance from light source to the globe to be "
         "considered as the new light source distance.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DepthMapSizeInfo = {
         "DepthMapSize",
         "Depth map size",
         "The depth map size in pixels. You must entry the width and height values.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ShadowComponent)]] Parameters {

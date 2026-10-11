@@ -87,7 +87,7 @@ namespace {
         "SpeckFile",
         "SPECK file",
         "The path to the SPECK file containing the data for rendering these stars.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorTextureInfo = {
@@ -95,7 +95,7 @@ namespace {
         "ColorBV texture",
         "The path to the texture that is used to convert from the B-V value of the star "
         "to its color. The texture is used as a one dimensional lookup function.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MappingBvInfo = {
@@ -103,7 +103,7 @@ namespace {
         "Mapping (bv-color)",
         "The name of the variable in the SPECK file that is used as the b-v color "
         "variable.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MappingLuminanceInfo = {
@@ -111,7 +111,7 @@ namespace {
         "Mapping (luminance)",
         "The name of the variable in the SPECK file that is used as the luminance "
         "variable.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MappingAbsMagnitudeInfo = {
@@ -119,7 +119,7 @@ namespace {
         "Mapping (absolute magnitude)",
         "The name of the variable in the SPECK file that is used as the absolute "
         "magnitude variable.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MappingVxInfo = {
@@ -127,7 +127,7 @@ namespace {
         "Mapping (vx)",
         "The name of the variable in the SPECK file that is used as the star velocity "
         "along the x-axis.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MappingVyInfo = {
@@ -135,7 +135,7 @@ namespace {
         "Mapping (vy)",
         "The name of the variable in the SPECK file that is used as the star velocity "
         "along the y-axis.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MappingVzInfo = {
@@ -143,14 +143,14 @@ namespace {
         "Mapping (vz)",
         "The name of the variable in the SPECK file that is used as the star velocity "
         "along the z-axis.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MappingSpeedInfo = {
         "MappingSpeed",
         "Mapping (speed)",
         "The name of the variable in the SPECK file that is used as the speed.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorOptionInfo = {
@@ -158,14 +158,14 @@ namespace {
         "Color option",
         "This value determines which quantity is used for determining the color of the "
         "stars.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo OtherDataOptionInfo = {
         "OtherData",
         "Other data column",
         "The index of the SPECK file data column that is used as the color input.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo OtherDataValueRangeInfo = {
@@ -173,21 +173,21 @@ namespace {
         "Range of the other data values",
         "This value is the min/max value range that is used to normalize the other data "
         "values so they can be used by the specified color map.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FixedColorInfo = {
         "FixedColorValue",
         "Color used for fixed star colors",
         "The color that should be used if the 'Fixed Color' value is used.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo OtherDataColorMapInfo = {
         "OtherDataColorMap",
         "Other data color map",
         "The color map that is used if the 'Other Data' rendering method is selected.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FilterOutOfRangeInfo = {
@@ -195,7 +195,7 @@ namespace {
         "Filter out of range",
         "Determines whether other data values outside the value range should be visible "
         "or filtered away.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     const PropertyOwner::PropertyOwnerInfo CoreOwnerInfo = {
@@ -214,7 +214,7 @@ namespace {
         "Texture",
         "Texture path",
         "The path to the texture that should be used.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MultiplierInfo = {
@@ -224,7 +224,7 @@ namespace {
         "multiplier and gamma values for both components, it is possible to fine tune "
         "the look of the stars or disable the contributions altogether by setting it to "
         "0.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo GammaInfo = {
@@ -241,7 +241,7 @@ namespace {
         "Adjust star magnitude by 10^MagnitudeExponent. Stars closer than this distance "
         "are given full opacity. Farther away, stars dim proportionally to the "
         "logarithm of their distance.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ScaleInfo = {
@@ -250,7 +250,7 @@ namespace {
         "A uniform scale factor that determines how much of the total size of the star "
         "this component is using. If it is 0, it will be hidden. If it is 1, it will "
         "take the entire size.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     const PropertyOwner::PropertyOwnerInfo SizeCompositionInfo = {
@@ -263,21 +263,21 @@ namespace {
         "Method",
         "Method",
         "Method to determine the size for the stars.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo LumPercentInfo = {
         "LumPercent",
         "Luminosity contribution",
         "Luminosity Contribution.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo RadiusPercentInfo = {
         "RadiusPercent",
         "Radius contribution",
         "Radius Contribution.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FadeInDistancesInfo = {
@@ -285,7 +285,7 @@ namespace {
         "Fade-in start and end distances",
         "These values determine the initial and final distances from the center of our "
         "galaxy from which the astronomical object will start and end fading-in.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UseProperMotionInfo = {
@@ -312,7 +312,7 @@ namespace {
         "EnableFadeIn",
         "Enable fade-in effect",
         "Enables/Disables the Fade-in effect.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Renders large star catalogs as a point-based star field using data loaded from a

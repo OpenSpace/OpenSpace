@@ -60,77 +60,77 @@ namespace {
         "Step size",
         "Specifies how often to sample during raycasting. Lower step size leads to "
         "higher resolution.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid type",
         "The grid type to use for the volume.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SecondsBeforeInfo = {
         "SecondsBefore",
         "Seconds before",
         "The number of seconds to show the first timestep before its actual time.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SecondsAfterInfo = {
         "SecondsAfter",
         "Seconds after",
         "The number of seconds to show the the last timestep after its actual time.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SourceDirectoryInfo = {
         "SourceDirectory",
         "Source directory",
         "A directory from where to load the data files for the different time steps.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer function path",
         "The path to the transfer function file.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TriggerTimeJumpInfo = {
         "TriggerTimeJump",
         "Jump",
         "Sets the time to be the first time of the volume sequence.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo JumpToTimestepInfo = {
         "JumpToTimestep",
         "Jump to timestep",
         "Setting this value lets you scrub through the sequence's time steps.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo BrightnessInfo = {
         "Brightness",
         "Brightness",
         "A value that affects the general brightness of the volume rendering.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo rNormalizationInfo = {
         "RNormalization",
         "Radius normalization",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo rUpperBoundInfo = {
         "RUpperBound",
         "Radius upper bound",
         "Limit the volume's radius.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {

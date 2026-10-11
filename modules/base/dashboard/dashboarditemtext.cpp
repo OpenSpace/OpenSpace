@@ -35,7 +35,7 @@ namespace {
         "Text",
         "Text",
         "The text to be displayed.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {

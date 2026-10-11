@@ -45,7 +45,7 @@ namespace {
         "DisplayFormat",
         "Display format",
         "Choosing the format in which the camera location is displayed.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SignificantDigitsInfo = {
@@ -53,7 +53,7 @@ namespace {
         "Significant digits",
         "Determines the number of significant digits that are shown in the location "
         "text.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Shows the longitude/latitude location of the camera and its distance to the current

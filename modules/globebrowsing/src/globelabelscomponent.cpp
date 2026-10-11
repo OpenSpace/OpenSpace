@@ -68,28 +68,28 @@ namespace {
         "Enabled",
         "Enabled",
         "Enables and disables labels' rendering.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "Font size for the rendering labels. This is different from the text size.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min/max text size",
         "Minimum and maximum label size, in pixels.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SizeInfo = {
         "LabelsSize",
         "Labels size",
         "This value affects the size scale of the labels.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo HeightOffsetInfo = {
@@ -97,14 +97,14 @@ namespace {
         "Height offset",
         "This value moves the label away from the globe surface by the specified "
         "distance (in meters).",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The text color of the labels.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo FadeDistancesInfo = {
@@ -113,7 +113,7 @@ namespace {
         "The distances above the globe's surface at which the labels start fading in or "
         "out, given in meters. The final distances are also adjusted by the specified "
         "height offset.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FadeInEnabledInfo = {
@@ -121,7 +121,7 @@ namespace {
         "Fade-in enabled",
         "Sets whether the labels fade in when approaching the globe from a distance. If "
         "false, no fading happens and the labels immediately has full opacity.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FadeOutEnabledInfo = {
@@ -129,28 +129,28 @@ namespace {
         "Fade-out enabled",
         "Sets whether the labels fade out when approaching the surface of the globe. If "
         "false, no fading happens and the labels stays in full opacity.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo DisableCullingInfo = {
         "DisableCulling",
         "Culling disabled",
         "Labels culling disabled.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo DistanceEPSInfo = {
         "DistanceEPS",
         "Culling distance",
         "Labels culling distance from globe's center.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo AlignmentOptionInfo = {
         "AlignmentOption",
         "Alignment option",
         "Labels are aligned horizontally or circularly related to the planet.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     bool isLabelInFrustum(const glm::dmat4& mvMatrix, const glm::dvec3& position) {

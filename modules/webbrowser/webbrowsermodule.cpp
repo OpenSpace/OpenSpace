@@ -53,7 +53,7 @@ namespace {
         "Update browser between renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs once per frame.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo BrowserUpdateIntervalInfo = {
@@ -61,7 +61,7 @@ namespace {
         "Browser update interval",
         "The time in microseconds between running the message loop of the browser. Only "
         "used if UpdateBrowserBetweenRenderables is true.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     /**

@@ -41,7 +41,7 @@ namespace {
         "computed by taking the difference between the current time and the reference "
         "date and multiplying it by the speed. This field must be formatted as: "
         "YYYY-MM-DDThh:mm:ss.uuu  where h is a 24h clock and u microseconds.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SpeedInfo = {
@@ -49,7 +49,7 @@ namespace {
         "Speed",
         "The speed at which the value grows or shrinks. The units for this are meters "
         "per second. The default value is 1 m/s.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ClampToPositiveInfo = {
@@ -59,7 +59,7 @@ namespace {
         "value if the current simulation time is before the `ReferenceDate`. This is "
         "useful for instantaneous events that only propagate forwards in time. The "
         "default value is 'true'.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Provides the ability to scale an object dynamically as time in the simulation

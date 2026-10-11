@@ -101,7 +101,7 @@ namespace {
         "TileCacheSize",
         "Tile cache size",
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DefaultGeoPointTextureInfo = {
@@ -114,14 +114,14 @@ namespace {
         "MRFCacheEnabled",
         "MRF cache enabled",
         "Determines whether automatic caching of globe browsing data is enabled.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MRFCacheLocationInfo = {
         "MRFCacheLocation",
         "MRF cache location",
         "The location of the root folder for the MRF cache of globe browsing data.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     GlobeBrowsingModule::Capabilities parseSubDatasets(char** subDatasets,

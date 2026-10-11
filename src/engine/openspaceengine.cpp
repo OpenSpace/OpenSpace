@@ -143,7 +143,7 @@ namespace {
         "Print events",
         "If this is enabled, all events that are propagated through the system are "
         "printed to the log.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo VisibilityInfo = {
@@ -151,7 +151,7 @@ namespace {
         "Property visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
         "are.",
-        PropertyInfo::Visibility::Always
+        Visibility::Always
     };
 
     constexpr PropertyInfo FadeDurationInfo = {
@@ -161,7 +161,7 @@ namespace {
         "object through a checkbox in the UI. Holding SHIFT while clicking the checkbox "
         "will enable/disable the renderable without fading, as will setting this value "
         "to zero.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DisableMouseInputInfo = {
@@ -169,7 +169,7 @@ namespace {
         "Disable all mouse inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
         "double inputs on touch (from both touch input and inserted mouse inputs).",
-        PropertyInfo::Visibility::User,
+        Visibility::User,
         PropertyInfo::IsEnablable::No,
         PropertyInfo::NeedsConfirmation::Yes
     };
@@ -180,7 +180,7 @@ namespace {
         "The default shutdown countdown timer (in seconds). Unless some other time is "
         "specified in the 'toggleShutdown' function, this is the number of seconds the "
         "application will wait before shutting down",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ShowPropertyConfirmationDialogInfo = {
@@ -189,7 +189,7 @@ namespace {
         "Controls whether confirmation dialogs are shown when making changes to certain "
         "properties. If checked, the dialogs will be shown for properties that require "
         "it. If unchecked, no dialogs will be shown.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     void viewportChanged() {
@@ -247,11 +247,11 @@ OpenSpaceEngine::OpenSpaceEngine()
     addProperty(_printEvents);
 
     _visibility.addOptions({
-        { static_cast<int>(PropertyInfo::Visibility::NoviceUser), "Novice User" },
-        { static_cast<int>(PropertyInfo::Visibility::User), "User" },
-        { static_cast<int>(PropertyInfo::Visibility::AdvancedUser), "Advanced User" },
-        { static_cast<int>(PropertyInfo::Visibility::Developer), "Developer" },
-        { static_cast<int>(PropertyInfo::Visibility::Hidden), "Everything" }
+        { static_cast<int>(Visibility::NoviceUser), "Novice User" },
+        { static_cast<int>(Visibility::User), "User" },
+        { static_cast<int>(Visibility::AdvancedUser), "Advanced User" },
+        { static_cast<int>(Visibility::Developer), "Developer" },
+        { static_cast<int>(Visibility::Hidden), "Everything" }
     });
     addProperty(_visibility);
 
@@ -1728,8 +1728,8 @@ void OpenSpaceEngine::decode(std::vector<std::byte> data) {
     global::syncEngine->decodeSyncables(std::move(data));
 }
 
-PropertyInfo::Visibility OpenSpaceEngine::visibility() const {
-    return static_cast<PropertyInfo::Visibility>(_visibility.value());
+Visibility OpenSpaceEngine::visibility() const {
+    return static_cast<Visibility>(_visibility.value());
 }
 
 void OpenSpaceEngine::toggleShutdownMode(std::optional<float> timer) {

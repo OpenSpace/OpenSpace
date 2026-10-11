@@ -46,7 +46,7 @@ namespace {
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed. The size of the image will also automatically set the default "
         "size of this plane.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Displays an image from a local file on disk on a plane in screen space.

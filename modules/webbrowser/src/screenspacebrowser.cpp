@@ -46,7 +46,7 @@ namespace {
         "Dimensions",
         "Browser dimensions",
         "The dimensions of the web browser window in pixels.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo KeyInfo = {
@@ -54,7 +54,7 @@ namespace {
         "Key",
         "The string representation of a keyboard key. If a key is entered and the "
         "`KeyTrigger` property is triggered, the entered key will be sent to the browser.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo TriggerKeyInfo = {
@@ -62,21 +62,21 @@ namespace {
         "Trigger key",
         "When this property is triggered, the text in the `Key` property will be used to "
         "create a keyboard input that is then sent to the browser.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo UrlInfo = {
         "Url",
         "URL",
         "The URL to load.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Reload the web browser.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     // Can be used to render a webpage in front of the camera. This can be used to show

@@ -103,7 +103,7 @@ std::string Property::groupIdentifier() const {
     return _metaData.group.value_or("");
 }
 
-void Property::setVisibility(PropertyInfo::Visibility visibility) {
+void Property::setVisibility(Visibility visibility) {
     _metaData.visibility = visibility;
     notifyMetaDataChangeListeners();
 
@@ -115,7 +115,7 @@ void Property::setVisibility(PropertyInfo::Visibility visibility) {
     }
 }
 
-PropertyInfo::Visibility Property::visibility() const {
+Visibility Property::visibility() const {
     return _metaData.visibility;
 }
 
@@ -318,7 +318,7 @@ void Property::updateUriCache() {
 }
 
 nlohmann::json Property::generateJsonDescription() const {
-    using Visibility = PropertyInfo::Visibility;
+    using Visibility = Visibility;
     static const std::unordered_map<Visibility, std::string> VisibilityConverter = {
        { Visibility::Always, "Always" },
        { Visibility::NoviceUser, "NoviceUser" },

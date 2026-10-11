@@ -54,14 +54,14 @@ namespace {
         "TuioPort",
         "TUIO Port",
         "TUIO UDP port, by default 3333. The port cannot be changed after startup.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo EventsInfo = {
         "DetectedTouchEvent",
         "Detected touch event",
         "True when there is an active touch TUIO event.",
-        PropertyInfo::Visibility::Hidden
+        Visibility::Hidden
     };
 
     struct [[codegen::Dictionary(TouchModule)]] Parameters {

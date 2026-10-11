@@ -55,14 +55,14 @@ namespace {
         "Stride",
         "Controls how densely vectors are sampled from the volume. A stride of 1 renders "
         "every vector.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FixedColorInfo = {
         "FixedColor",
         "Fixed color",
         "The color of the vectors, when no color map is used.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ColorModeInfo = {
@@ -73,28 +73,28 @@ namespace {
         "magnitudes defined in the volume. \"Direction\" colors the vector based on "
         "their direction, as follows: +X -> Red, -X -> Cyan, +Y -> Green, -Y -> Magenta, "
         "+Z -> Blue, -Z -> Yellow.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo VectorFieldScaleInfo = {
         "VectorFieldScale",
         "Vector field scale",
         "Scales the vector field lines using an exponential scale.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the vector lines.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     constexpr PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color map",
         "The path to the color map file used for coloring the vector field.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ColorMappingDataRangeInfo = {
@@ -102,14 +102,14 @@ namespace {
         "Color mapping data range",
         "The magnitude data range used to normalize the magnitude value for color "
         "lookup. Computed from the volume data if unspecified.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FilterByLuaInfo = {
         "FilterByLua",
         "Filter by Lua script",
         "If enabled, the vector field is filtered by the provided custom Lua script.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FilterScriptInfo = {
@@ -120,7 +120,7 @@ namespace {
         "current voxel position (x, y, z) given in galactic coordinates, and the "
         "velocity vector (vx, vy, vz). The function should return true/false if "
         "the voxel should be visualized or discarded, respectively.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Renders vectors from a given 3D volumetric dataset or a sparse point-like dataset,

@@ -54,7 +54,7 @@ namespace {
         "SpoutName",
         "Spout sender name",
         "This value sets the Spout sender to use a specific name.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo NameReceiverInfo = {
@@ -62,7 +62,7 @@ namespace {
         "Spout receiver name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
         "is not a valid name, the first Spout image is used instead.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SelectionInfo = {
@@ -71,14 +71,14 @@ namespace {
         "This property displays all available Spout sender on the system. If one them is "
         "selected, its value is stored in the 'SpoutName' property, overwriting its "
         "previous value.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UpdateInfo = {
         "UpdateSelection",
         "Update selection",
         "If this property is triggered, the 'SpoutSelection' options will be refreshed.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SpoutReceiver)]] ReceiverParameters {

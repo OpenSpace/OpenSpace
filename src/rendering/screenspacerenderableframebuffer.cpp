@@ -39,7 +39,7 @@ namespace {
         "Size",
         "Size",
         "This value explicitly specifies the size of the screen space plane.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ScreenSpaceRenderableFramebuffer)]] Parameters {};

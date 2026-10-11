@@ -41,7 +41,7 @@ namespace {
         "A vector of time frames to combine into one. The time frame is active when any "
         "of the contained time frames are, but not in gaps between contained time "
         "frames.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // This `TimeFrame` class will accept the union of all passed-in TimeFrames. This

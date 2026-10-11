@@ -54,84 +54,84 @@ namespace {
         "Dimensions",
         "Dimensions",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo VariableInfo = {
         "Variable",
         "Variable",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LowerDomainBoundInfo = {
         "LowerDomainBound",
         "Lower domain bound",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UpperDomainBoundInfo = {
         "UpperDomainBound",
         "Upper domain bound",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DomainScaleInfo = {
         "DomainScale",
         "Domain scale",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LowerValueBoundInfo = {
         "LowerValueBound",
         "Lower value bound",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UpperValueBoundInfo = {
         "UpperValueBound",
         "Upper value bound",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid type",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SourcePathInfo = {
         "SourcePath",
         "Source path",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer function path",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo CacheInfo = {
         "Cache",
         "Cache",
         "", // @TODO Missing documentation
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RenderableKameleonVolume)]] Parameters {

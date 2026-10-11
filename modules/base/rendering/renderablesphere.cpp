@@ -68,14 +68,14 @@ namespace {
         "Size",
         "Size (in meters)",
         "The radius of the sphere in meters.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of segments",
         "The number of segments that the sphere is split into.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo OrientationInfo = {
@@ -83,14 +83,14 @@ namespace {
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
         "outside of the sphere, or both.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
         "Mirror texture",
         "If true, mirror the texture along the x-axis.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo TextureProjectionInfo = {
@@ -99,14 +99,14 @@ namespace {
         "Specifies the projection mapping to use for any texture loaded onto the sphere "
         "(assumes Equirectangular per default). Note that for \"Angular Fisheye\" only "
         "half the sphere will be textured - the hemisphere centered around the z-axis.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
         "Disable fade-in/fade-out effects",
         "Enables/Disables the fade in and out effects.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo FadeInThresholdInfo = {
@@ -115,7 +115,7 @@ namespace {
         "The distance from the center of the Milky Way at which the sphere should start "
         "to fade in, given as a percentage of the size of the object. A value of zero "
         "means that no fading in will happen.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo FadeOutThresholdInfo = {
@@ -124,7 +124,7 @@ namespace {
         "A threshold for when the sphere should start fading out, given as a percentage "
         "of how much of the sphere that is visible before the fading should start. A "
         "value of zero means that no fading out will happen.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo UseColorMapInfo = {
@@ -132,14 +132,14 @@ namespace {
         "Use color map",
         "Used to toggle color map on or off for the sphere. Mainly used to transform "
         "grayscale textures from data into color images.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Transfer function (color map) path",
         "Color map / Transfer function to use if `UseColorMap` is enabled.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo BlendingOptionInfo = {
@@ -147,7 +147,7 @@ namespace {
         "Blending options",
         "Controls the blending function used to calculate the colors of the sphere with "
         "respect to the opacity.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo DisableDepthInfo = {
@@ -156,7 +156,7 @@ namespace {
         "If disabled, no depth values are taken into account for this sphere, meaning "
         "that depth values are neither written or tested against during the rendering. "
         "This can be useful for spheres that represent a background image.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Creates a simple sphere textured with an image. Per default, the sphere uses an

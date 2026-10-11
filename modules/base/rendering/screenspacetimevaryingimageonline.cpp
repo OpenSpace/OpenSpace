@@ -51,7 +51,7 @@ namespace {
         "File path",
         "The file path to the data containing information about when to display which "
         "image.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ShowBeforeInfo = {
@@ -59,7 +59,7 @@ namespace {
         "Show image before first time",
         "If enabled, the image with the earliest timestamp is shown when the simulation "
         "time is before the first timestamp specified in the data file.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo ShowAfterInfo = {
@@ -67,14 +67,14 @@ namespace {
         "Show image after last time",
         "If enabled, the image with the latest timestamp is shown when the simulation "
         "time is after the last timestamp specified in the data file.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo JumpToFirstTimeInfo = {
         "JumpToFirstTime",
         "Jump to first time",
         "Performs a time jump to the first timestamp in the loaded file.",
-        PropertyInfo::Visibility::NoviceUser
+        Visibility::NoviceUser
     };
 
     // Displays an image based on the current in-game simulation time. The image shown is

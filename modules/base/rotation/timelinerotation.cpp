@@ -40,7 +40,7 @@ namespace {
         "Should interpolate",
         "If this value is set to 'true', an interpolation is applied between the given "
         "keyframes. If this value is set to 'false', the interpolation is not applied.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     // Uses a timeline of other `Rotation` classes to calculate the final rotation for the

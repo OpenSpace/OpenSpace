@@ -69,7 +69,7 @@ namespace {
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
         "than using the mouse interaction.",
-        PropertyInfo::Visibility::Developer
+        Visibility::Developer
     };
 
     constexpr PropertyInfo JumpToFadeDurationInfo = {
@@ -79,7 +79,7 @@ namespace {
         "navigating through a 'jump' transition. This is when the rendering is first "
         "faded to black, then the camera is moved, and then the rendering fades in "
         "again.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 } // namespace
 

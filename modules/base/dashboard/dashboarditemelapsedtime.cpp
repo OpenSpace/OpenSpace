@@ -44,7 +44,7 @@ namespace {
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the value "
         "of the elapsed time.",
-        PropertyInfo::Visibility::AdvancedUser
+        Visibility::AdvancedUser
     };
 
     constexpr PropertyInfo ReferenceTimeInfo = {
@@ -52,7 +52,7 @@ namespace {
         "Reference time",
         "The reference time relative to which the elapsed time is specified. The format "
         "must be an ISO 8601-compliant date string.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo SimplifyTimeInfo = {
@@ -61,7 +61,7 @@ namespace {
         "If this value is enabled, the elapsed time will be simplified into seconds, "
         "minutes, hours, etc. If the value is disabled, the elapsed time is always "
         "presented in seconds. The default value for this is 'true'.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     constexpr PropertyInfo LowestTimeUnitInfo = {
@@ -69,7 +69,7 @@ namespace {
         "Lowest time unit when simplifying",
         "If 'SimplifyTime' is enabled, this is the lowest time unit that will be shown. "
         "All finer grained timesteps will be ignored.",
-        PropertyInfo::Visibility::User
+        Visibility::User
     };
 
     // Displays the remaining time until a provided `ReferenceTime` or the elapsed time
