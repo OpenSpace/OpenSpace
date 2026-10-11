@@ -65,7 +65,7 @@ namespace {
         Additive
     };
 
-    constexpr PropertyInfo OrientationRenderOptionInfo = {
+    constexpr OptionPropertyInfo OrientationRenderOptionInfo = {
         .identifier = "OrientationRenderOption",
         .name = "Orientation render option",
         .description = "Controls how the plane will be oriented. \"Camera View "
@@ -160,7 +160,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo BlendModeInfo = {
+    constexpr OptionPropertyInfo BlendModeInfo = {
         .identifier = "BlendMode",
         .name = "Blending mode",
         .description = "Determines the blending mode that is applied to this plane.",

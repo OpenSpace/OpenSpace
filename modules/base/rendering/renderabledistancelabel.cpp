@@ -48,7 +48,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo DistanceUnitInfo = {
+    constexpr OptionPropertyInfo DistanceUnitInfo = {
         .identifier = "DistanceUnit",
         .name = "Display distance unit",
         .description = "The unit in which the distance value should be displayed. "

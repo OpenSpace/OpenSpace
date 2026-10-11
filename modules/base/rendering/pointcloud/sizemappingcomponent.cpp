@@ -50,7 +50,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo OptionInfo = {
+    constexpr OptionPropertyInfo OptionInfo = {
         .identifier = "Parameter",
         .name = "Parameter option",
         .description = "This value determines which parameter is used for scaling of the "

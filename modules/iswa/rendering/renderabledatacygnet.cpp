@@ -51,7 +51,7 @@ namespace {
     constexpr std::string_view _loggerCat = "DataCygnet";
     constexpr int MaxTextures = 6;
 
-    constexpr PropertyInfo DataOptionsInfo = {
+    constexpr SelectionPropertyInfo DataOptionsInfo = {
         .identifier = "DataOptions",
         .name = "Data options",
         .description = "", // @TODO Missing documentation

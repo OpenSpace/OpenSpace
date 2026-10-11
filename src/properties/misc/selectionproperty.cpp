@@ -36,8 +36,8 @@ namespace {
 
 namespace openspace {
 
-SelectionProperty::SelectionProperty(PropertyInfo info)
-    : TemplateProperty(std::move(info), std::set<std::string>())
+SelectionProperty::SelectionProperty(SelectionPropertyInfo info)
+    : TemplateProperty(std::move(info), std::move(info.defaults.value))
 {}
 
 std::string_view SelectionProperty::className() const {

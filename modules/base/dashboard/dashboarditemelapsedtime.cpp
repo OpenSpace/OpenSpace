@@ -70,7 +70,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo LowestTimeUnitInfo = {
+    constexpr OptionPropertyInfo LowestTimeUnitInfo = {
         .identifier = "LowestTimeUnit",
         .name = "Lowest time unit when simplifying",
         .description = "If 'SimplifyTime' is enabled, this is the lowest time unit that "

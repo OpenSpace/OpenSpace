@@ -54,7 +54,7 @@ namespace {
 
     constexpr std::string_view _loggerCat = "PathNavigator";
 
-    constexpr PropertyInfo DefaultCurveOptionInfo = {
+    constexpr OptionPropertyInfo DefaultCurveOptionInfo = {
         .identifier = "DefaultPathType",
         .name = "Default path type",
         .description = "The default path type chosen when generating a path or flying to "
@@ -139,7 +139,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo RelevantNodeTagsInfo = {
+    constexpr StringListPropertyInfo RelevantNodeTagsInfo = {
         .identifier = "RelevantNodeTags",
         .name = "Relevant node tags",
         .description = "List of tags for the nodes that are relevant for path creation, "

@@ -57,7 +57,7 @@ namespace {
         "Telemetry of a list of nodes that has been added by the user."
     };
 
-    constexpr PropertyInfo DistanceUnitInfo = {
+    constexpr OptionPropertyInfo DistanceUnitInfo = {
         .identifier = "DistanceUnit",
         .name = "Distance unit",
         .description = "The unit used for the distance part of the telemetry "

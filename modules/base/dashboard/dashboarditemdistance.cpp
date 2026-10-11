@@ -52,7 +52,7 @@ namespace {
         Camera
     };
 
-    constexpr PropertyInfo SourceTypeInfo = {
+    constexpr OptionPropertyInfo SourceTypeInfo = {
         .identifier = "SourceType",
         .name = "Source type",
         .description = "The type of position that is used as the source to calculate the "
@@ -69,7 +69,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo DestinationTypeInfo = {
+    constexpr OptionPropertyInfo DestinationTypeInfo = {
         .identifier = "DestinationType",
         .name = "Destination type",
         .description = "The type of position that is used as the destination to "
@@ -98,7 +98,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo RequestedUnitInfo = {
+    constexpr OptionPropertyInfo RequestedUnitInfo = {
         .identifier = "RequestedUnit",
         .name = "Requested unit",
         .description = "If the simplification is disabled, this distance unit is used as "

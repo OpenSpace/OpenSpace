@@ -223,7 +223,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo OrientationRenderOptionInfo = {
+    constexpr OptionPropertyInfo OrientationRenderOptionInfo = {
         .identifier = "OrientationRenderOption",
         .name = "Orientation render option",
         .description = "Controls how the planes for the points will be oriented. "
@@ -353,7 +353,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo OutlineStyleInfo = {
+    constexpr OptionPropertyInfo OutlineStyleInfo = {
         .identifier = "OutlineStyle",
         .name = "Outline style",
         .description = "Decides the style of the outline (round, square, or a line at "

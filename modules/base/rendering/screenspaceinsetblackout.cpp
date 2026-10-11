@@ -142,7 +142,7 @@ namespace {
         setClipboardText(strCorners + strTop + strRight + strBottom + strLeft);
     }
 
-    constexpr PropertyInfo CopyToClipboardInfo = {
+    constexpr TriggerPropertyInfo CopyToClipboardInfo = {
         .identifier = "CopyToClipboard",
         .name = "Copy to clipboard",
         .description = "Copies the current configuration to the clipboard so that it can "
@@ -171,28 +171,28 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo AddControlPointInfo = {
+    constexpr TriggerPropertyInfo AddControlPointInfo = {
         .identifier = "AddControlPoint",
         .name = "Add control point",
         .description = "Adds a new control point to the spline.",
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo RemoveControlPointInfo = {
+    constexpr TriggerPropertyInfo RemoveControlPointInfo = {
         .identifier = "RemoveControlPoint",
         .name = "Remove control point",
         .description = "Removes the selected control point from the spline.",
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo RemoveSelectorInfo = {
+    constexpr OptionPropertyInfo RemoveSelectorInfo = {
         .identifier = "RemoveSelector",
         .name = "Select point to remove",
         .description = "Removes the selected control point.",
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo AddSelectorInfo = {
+    constexpr OptionPropertyInfo AddSelectorInfo = {
         .identifier = "AddSelector",
         .name = "Select where to add",
         .description = "Select where to add a new point.",

@@ -52,7 +52,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo XAxisTypeInfo = {
+    constexpr OptionPropertyInfo XAxisTypeInfo = {
         .identifier = "xAxisType",
         .name = "xAxis: Specification type",
         .description = "This value specifies how this axis is being specified, that is "
@@ -62,7 +62,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo YAxisTypeInfo = {
+    constexpr OptionPropertyInfo YAxisTypeInfo = {
         .identifier = "yAxisType",
         .name = "yAxis: Specification type",
         .description = "This value specifies how this axis is being specified, that is "
@@ -72,7 +72,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ZAxisTypeInfo = {
+    constexpr OptionPropertyInfo ZAxisTypeInfo = {
         .identifier = "zAxisType",
         .name = "zAxis: Specification type",
         .description = "This value specifies how this axis is being specified, that is "

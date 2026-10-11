@@ -53,7 +53,7 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableFluxNodes";
 
-    constexpr PropertyInfo GoesEnergyBinsInfo = {
+    constexpr OptionPropertyInfo GoesEnergyBinsInfo = {
         .identifier = "GoesEnergy",
         .name = "GOES energy",
         .description = "Select which energy bin you want to show. GOES = Geostationary "
@@ -62,7 +62,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ColorModeInfo = {
+    constexpr OptionPropertyInfo ColorModeInfo = {
         .identifier = "ColorMode",
         .name = "Color mode",
         .description = "Color lines uniformly or using color tables based on specific "
@@ -167,14 +167,14 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo ScalingmethodInfo = {
+    constexpr OptionPropertyInfo ScalingMethodInfo = {
         .identifier = "ScalingFlux",
         .name = "Scale the flux value with color table",
         .description = "Use scaling to color nodes with a given method.",
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo NodeskipMethodInfo = {
+    constexpr OptionPropertyInfo NodeskipMethodInfo = {
         .identifier = "SkippingNodes",
         .name = "How to select nodes to skip",
         .description = "Methods to select nodes to skip.",
@@ -394,7 +394,7 @@ RenderableFluxNodes::RenderableFluxNodes(const Dictionary& dictionary)
     , _colorTableRange(ColorTableRangeInfo)
     , _fluxColorAlpha(FluxColorAlphaInfo)
     , _streamGroup({ "Streams" })
-    , _scalingMethod(ScalingmethodInfo)
+    , _scalingMethod(ScalingMethodInfo)
     , _nodesAmountGroup({ "NodeGroup" })
     , _nodeSize(NodeSizeInfo)
     , _distanceThreshold(DistanceThresholdInfo)

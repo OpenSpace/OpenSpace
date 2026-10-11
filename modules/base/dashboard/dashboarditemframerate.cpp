@@ -47,7 +47,7 @@ namespace {
         FPSAvg
     };
 
-    constexpr PropertyInfo FrametimeInfo = {
+    constexpr OptionPropertyInfo FrametimeInfo = {
         .identifier = "FrametimeType",
         .name = "Type of the frame time display",
         .description = "This value determines the units in which the frame time is "
@@ -55,7 +55,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo ClearCacheInfo = {
+    constexpr TriggerPropertyInfo ClearCacheInfo = {
         .identifier = "ClearCache",
         .name = "Clear cache",
         .description = "Clears the cache of this DashboardItemFramerate item. If the "

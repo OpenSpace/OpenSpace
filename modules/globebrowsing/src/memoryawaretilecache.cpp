@@ -74,14 +74,14 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo ApplyTileCacheInfo = {
+    constexpr TriggerPropertyInfo ApplyTileCacheInfo = {
         .identifier = "ApplyTileCacheSize",
         .name = "Apply tile cache size",
         .description = "", // @TODO Missing documentation
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ClearTileCacheInfo = {
+    constexpr TriggerPropertyInfo ClearTileCacheInfo = {
         .identifier = "ClearTileCache",
         .name = "Clear tile cache",
         .description = "", // @TODO Missing documentation

@@ -54,7 +54,7 @@ namespace {
 
     constexpr std::string_view _loggerCat = "KameleonPlane";
 
-    constexpr PropertyInfo FieldLineSeedsInfo = {
+    constexpr SelectionPropertyInfo FieldLineSeedsInfo = {
         .identifier = "FieldlineSeedsIndexFile",
         .name = "Fieldline seedpoints",
         .description = "", // @TODO Missing documentation

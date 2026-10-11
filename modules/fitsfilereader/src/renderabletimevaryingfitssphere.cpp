@@ -100,17 +100,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo FitsLayerInfo = {
-        .identifier = "FitsLayer",
-        .name = "Texture layer",
-        .description = "The index, a whole positive number, of the layer in the FITS "
-            "file to use as texture. If not specified, the first layer in the data will "
-            "be used regardless. When specified, that data layer will be the option "
-            "used.",
-        .visibility = Visibility::AdvancedUser
-    };
-
-    constexpr PropertyInfo FitsLayerNameInfo = {
+    constexpr OptionPropertyInfo FitsLayerNameInfo = {
         .identifier = "LayerNames",
         .name = "Texture layer options",
         .description = "This value specifies which name of the fits layer to use as "
@@ -118,7 +108,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo TextureFilterInfo = {
+    constexpr OptionPropertyInfo TextureFilterInfo = {
         .identifier = "TextureFilter",
         .name = "Texture filter",
         .description = "Option to choose nearest neighbor or linear filtering for the "
@@ -191,7 +181,9 @@ namespace {
         // A URL that returns a JSON formatted page with a list of each available file.
         std::optional<std::string> dataURL;
 
-        // [[codegen::verbatim(FitsLayerInfo.description)]]
+        // The index, a whole positive number, of the layer in the FITS file to use as
+        // texture. If not specified, the first layer in the data will be used regardless.
+        // When specified, that data layer will be the option used.
         std::optional<int> fitsLayer;
 
         // [[codegen::verbatim(FitsLayerNameInfo.description)]]

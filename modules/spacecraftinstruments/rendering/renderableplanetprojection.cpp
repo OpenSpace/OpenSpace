@@ -48,7 +48,7 @@ namespace {
 
     constexpr std::string_view NoImageText = "No Image";
 
-    constexpr PropertyInfo ColorTexturePathsInfo = {
+    constexpr OptionPropertyInfo ColorTexturePathsInfo = {
         .identifier = "ColorTexturePaths",
         .name = "Color texture",
         .description = "The texture path selected in this property is used as the base "
@@ -66,7 +66,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo HeightTexturePathsInfo = {
+    constexpr OptionPropertyInfo HeightTexturePathsInfo = {
         .identifier = "HeightTexturePaths",
         .name = "Heightmap texture",
         .description = "The texture path selected in this property is used as the height "
@@ -147,7 +147,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo ClearProjectionBufferInfo = {
+    constexpr TriggerPropertyInfo ClearProjectionBufferInfo = {
         .identifier = "ClearProjectionBuffer",
         .name = "Clear projection buffer",
         .description = "Remove all pending projections from the buffer.",

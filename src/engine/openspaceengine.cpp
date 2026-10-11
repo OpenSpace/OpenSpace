@@ -149,7 +149,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo VisibilityInfo = {
+    constexpr OptionPropertyInfo VisibilityInfo = {
         .identifier = "PropertyVisibility",
         .name = "Property visibility",
         .description = "Hides or displays different settings in the GUI depending on how "

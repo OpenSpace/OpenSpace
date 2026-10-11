@@ -46,7 +46,7 @@ namespace {
         "Telemetry that sends out time information to the Open Sound Control receiver."
     };
 
-    constexpr PropertyInfo TimeUnitOptionInfo = {
+    constexpr OptionPropertyInfo TimeUnitOptionInfo = {
         .identifier = "TimeUnit",
         .name = "Time unit",
         .description = "The time unit that the telemetry should use for the time speed. "

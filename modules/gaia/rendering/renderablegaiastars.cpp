@@ -68,7 +68,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo FileReaderOptionInfo = {
+    constexpr OptionPropertyInfo FileReaderOptionInfo = {
         .identifier = "FileReaderOption",
         .name = "File reader option",
         .description = "This value tells the renderable what format the input data file "
@@ -82,7 +82,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo RenderModeInfo = {
+    constexpr OptionPropertyInfo RenderModeInfo = {
         .identifier = "RenderMode",
         .name = "Render mode",
         .description = "This value determines which predefined columns to use in "

@@ -41,7 +41,7 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo DisplayFormatInfo = {
+    constexpr OptionPropertyInfo DisplayFormatInfo = {
         .identifier = "DisplayFormat",
         .name = "Display format",
         .description = "Choosing the format in which the camera location is displayed.",

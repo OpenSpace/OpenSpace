@@ -64,7 +64,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo ClearProjectionInfo = {
+    constexpr TriggerPropertyInfo ClearProjectionInfo = {
         .identifier = "ClearAllProjections",
         .name = "Clear projections",
         .description = "If this property is triggered, it will remove all the "
@@ -100,7 +100,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo ApplyTextureSizeInfo = {
+    constexpr TriggerPropertyInfo ApplyTextureSizeInfo = {
         .identifier = "ApplyTextureSize",
         .name = "Apply texture size",
         .description = "Triggering this property applies a new size to the underlying "

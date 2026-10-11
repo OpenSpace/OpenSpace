@@ -61,7 +61,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo JumpToStartInfo = {
+    constexpr TriggerPropertyInfo JumpToStartInfo = {
         .identifier = "JumpToStart",
         .name = "Jump to start",
         .description = "Performs a time jump to the start of the interval. Disabled if "
@@ -90,7 +90,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo JumpToEndInfo = {
+    constexpr TriggerPropertyInfo JumpToEndInfo = {
         .identifier = "JumpToEnd",
         .name = "Jump to end",
         .description = "Performs a time jump to the end of the interval. Disabled if no "

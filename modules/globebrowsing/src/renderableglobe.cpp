@@ -145,7 +145,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo ResetTileProviderInfo = {
+    constexpr TriggerPropertyInfo ResetTileProviderInfo = {
         .identifier = "ResetTileProviders",
         .name = "Reset tile providers",
         .description = "Reset all tile provides for the globe and reload the data.",

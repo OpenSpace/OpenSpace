@@ -89,7 +89,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo AngleCalculationModeInfo = {
+    constexpr OptionPropertyInfo AngleCalculationModeInfo = {
         .identifier = "AngleCalculationMode",
         .name = "Angle calculation mode",
         .description = "This setting changes the method used to calculate any angles in "

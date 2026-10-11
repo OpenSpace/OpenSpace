@@ -156,7 +156,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ColorOptionInfo = {
+    constexpr OptionPropertyInfo ColorOptionInfo = {
         .identifier = "ColorOption",
         .name = "Color option",
         .description = "This value determines which quantity is used for determining the "
@@ -164,7 +164,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo OtherDataOptionInfo = {
+    constexpr OptionPropertyInfo OtherDataOptionInfo = {
         .identifier = "OtherData",
         .name = "Other data column",
         .description = "The index of the SPECK file data column that is used as the "
@@ -292,7 +292,7 @@ namespace {
         ""
     };
 
-    constexpr PropertyInfo SizeCompositionMethodInfo = {
+    constexpr OptionPropertyInfo SizeCompositionMethodInfo = {
         .identifier = "Method",
         .name = "Method",
         .description = "Method to determine the size for the stars.",

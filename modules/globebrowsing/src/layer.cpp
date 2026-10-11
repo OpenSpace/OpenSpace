@@ -46,7 +46,7 @@ namespace {
     constexpr std::string_view KeyDesc = "Description";
     constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
 
-    constexpr PropertyInfo TypeInfo = {
+    constexpr OptionPropertyInfo TypeInfo = {
         .identifier = "Type",
         .name = "Type",
         .description = "The type of this Layer. This value is a read-only property and "
@@ -54,7 +54,7 @@ namespace {
         .visibility = Visibility::Developer
     };
 
-    constexpr PropertyInfo BlendModeInfo = {
+    constexpr OptionPropertyInfo BlendModeInfo = {
         .identifier = "BlendMode",
         .name = "Blend mode",
         .description = "This value specifies the blend mode that is applied to this "
@@ -75,7 +75,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo ResetInfo = {
+    constexpr TriggerPropertyInfo ResetInfo = {
         .identifier = "Reset",
         .name = "Reset",
         .description = "If this value is triggered, this layer will be reset. This will "
@@ -84,7 +84,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo RemoveInfo = {
+    constexpr TriggerPropertyInfo RemoveInfo = {
         .identifier = "Remove",
         .name = "Remove",
         .description = "If this value is triggered, a script will be executed that will "
@@ -104,15 +104,6 @@ namespace {
             .value = glm::vec3(1.f),
             .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
         }
-    };
-
-    constexpr PropertyInfo ZIndexInfo = {
-        .identifier = "ZIndex",
-        .name = "Z-Index",
-        .description = "Determines where the layer is placed in the list of available "
-            "layers. Layers are applied in the order of their Z indices, with higher "
-            "indices obscuring layers with lower values.",
-        .visibility = Visibility::AdvancedUser
     };
 
     constexpr StringPropertyInfo GuiDescriptionInfo = {
@@ -150,7 +141,9 @@ namespace {
         // the layer is disabled.
         std::optional<bool> enabled;
 
-        // [[codegen::verbatim(ZIndexInfo.description)]]
+        // Determines where the layer is placed in the list of available layers. Layers
+        // are applied in the order of their Z indices, with higher indices obscuring
+        // layers with lower values.
         std::optional<int> zIndex [[codegen::greater(0)]];
 
         // The opacity value of the layer.

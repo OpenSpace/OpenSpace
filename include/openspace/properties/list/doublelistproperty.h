@@ -29,10 +29,11 @@
 
 namespace openspace {
 
+using DoubleListPropertyInfo = BasicPropertyInfo<ValueDefaults<std::vector<double>>>;
+
 class DoubleListProperty : public ListProperty<double> {
 public:
-    explicit DoubleListProperty(PropertyInfo info,
-        std::vector<double> values = std::vector<double>());
+    explicit DoubleListProperty(DoubleListPropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

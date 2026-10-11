@@ -73,7 +73,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo ColorModeInfo = {
+    constexpr OptionPropertyInfo ColorModeInfo = {
         .identifier = "ColorMode",
         .name = "Color mode",
         .description = "Controls how the vectors are colored. \"Fixed\" color all "

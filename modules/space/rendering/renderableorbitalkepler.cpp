@@ -70,14 +70,14 @@ namespace {
         PositionNormal
     };
 
-    constexpr PropertyInfo PathInfo = {
+    constexpr StringListPropertyInfo PathInfo = {
         .identifier = "Path",
         .name = "Path",
         .description = "The file path to the data file to read.",
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo PointRenderingModeInfo = {
+    constexpr OptionPropertyInfo PointRenderingModeInfo = {
         .identifier = "PointRenderingMode",
         .name = "Point Rendering Mode",
         .description = "Controls how the points will be oriented. \"Camera View "
@@ -157,7 +157,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo RenderingModeInfo = {
+    constexpr OptionPropertyInfo RenderingModeInfo = {
         .identifier = "Rendering",
         .name = "Rendering mode",
         .description = "Determines how the trail should be rendered. If 'Trail' is "

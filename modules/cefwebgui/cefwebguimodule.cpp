@@ -53,7 +53,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo ReloadInfo = {
+    constexpr TriggerPropertyInfo ReloadInfo = {
         .identifier = "Reload",
         .name = "Reload",
         .description = "Trigger this property to reload the browser.",

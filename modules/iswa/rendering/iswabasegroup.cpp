@@ -54,7 +54,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo DeleteInfo = {
+    constexpr TriggerPropertyInfo DeleteInfo = {
         .identifier = "Delete",
         .name = "Delete",
         .description = "", // @TODO Missing documentation

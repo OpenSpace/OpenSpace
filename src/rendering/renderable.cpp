@@ -66,15 +66,6 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo RenderableRenderBinModeInfo = {
-        .identifier = "RenderBinMode",
-        .name = "Render bin mode",
-        .description = "A value that specifies if the renderable should be rendered in "
-            "the Background, Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker "
-            "rendering step.",
-        .visibility = Visibility::AdvancedUser
-    };
-
     constexpr BoolPropertyInfo DimInAtmosphereInfo = {
         .identifier = "DimInAtmosphere",
         .name = "Dim in atmosphere",
@@ -122,7 +113,8 @@ namespace {
             Sticker
         };
 
-        // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
+        // A value that specifies if the renderable should be rendered in the Background,
+        // Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.
         std::optional<RenderBinMode> renderBinMode;
 
         // [[codegen::verbatim(DimInAtmosphereInfo.description)]]

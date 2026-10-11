@@ -211,14 +211,6 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo LightSourcesInfo = {
-        .identifier = "LightSources",
-        .name = "Light sources",
-        .description = "A list of light sources that this model should accept light "
-            "from.",
-        .visibility = Visibility::AdvancedUser
-    };
-
     constexpr BoolPropertyInfo EnableDepthTestInfo = {
         .identifier = "EnableDepthTest",
         .name = "Enable depth test",
@@ -243,7 +235,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo BlendingOptionInfo = {
+    constexpr OptionPropertyInfo BlendingOptionInfo = {
         .identifier = "BlendingOption",
         .name = "Blending options",
         .description = "Controls the blending function used to calculate the colors of "
@@ -345,7 +337,7 @@ namespace {
         std::optional<glm::dvec3> rotationVector
             [[codegen::inrange(glm::dvec3(-360.0), glm::dvec3(360.0))]];
 
-        // [[codegen::verbatim(LightSourcesInfo.description)]]
+        // A list of light sources that this model should accept light from.
         std::optional<std::vector<Dictionary>> lightSources
             [[codegen::reference("core_lightsource")]];
 

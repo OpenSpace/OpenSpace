@@ -31,7 +31,7 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo SetDefaultInfo = {
+    constexpr TriggerPropertyInfo SetDefaultInfo = {
         .identifier = "SetDefault",
         .name = "Set default",
         .description = "If this value is triggered it will reset all of these values to "

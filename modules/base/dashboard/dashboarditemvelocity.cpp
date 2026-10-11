@@ -52,7 +52,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo RequestedUnitInfo = {
+    constexpr OptionPropertyInfo RequestedUnitInfo = {
         .identifier = "RequestedUnit",
         .name = "Requested unit",
         .description = "If the simplification is disabled, this distance unit is used "

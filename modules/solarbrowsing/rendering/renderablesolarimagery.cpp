@@ -61,14 +61,14 @@ namespace {
         DoubleSided
     };
 
-    constexpr PropertyInfo JumpToStartInfo = {
+    constexpr TriggerPropertyInfo JumpToStartInfo = {
         .identifier = "JumpToStart",
         .name = "Jump to start of sequence",
         .description = "Performs a time jump to the start of the sequence.",
         .visibility = Visibility::NoviceUser
     };
 
-    constexpr PropertyInfo ActiveInstrumentInfo = {
+    constexpr OptionPropertyInfo ActiveInstrumentInfo = {
         .identifier = "ActiveInstrument",
         .name = "Active instrument",
         .description = "The active instrument of the current spacecraft imagery.",
@@ -95,7 +95,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo FaceModeInfo = {
+    constexpr OptionPropertyInfo FaceModeInfo = {
         .identifier = "FaceMode",
         .name = "Face Mode",
         .description = "Specifies how the plane is rendered: front side only, with a "

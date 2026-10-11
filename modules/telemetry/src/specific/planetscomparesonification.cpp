@@ -96,7 +96,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo FirstOptionInfo = {
+    constexpr OptionPropertyInfo FirstOptionInfo = {
         .identifier = "FirstOption",
         .name = "Choose a planet to compare",
         .description = "Choose a planet in the list to compare to the other selected "
@@ -104,7 +104,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo SecondOptionInfo = {
+    constexpr OptionPropertyInfo SecondOptionInfo = {
         .identifier = "SecondOption",
         .name = "Choose another planet to compare",
         .description = "Choose another planet in the list to compare to the other "

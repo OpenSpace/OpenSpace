@@ -29,8 +29,8 @@
 
 namespace openspace {
 
-StringListProperty::StringListProperty(PropertyInfo info, std::vector<std::string> values)
-    : ListProperty(std::move(info), std::move(values))
+StringListProperty::StringListProperty(StringListPropertyInfo info)
+    : ListProperty(std::move(info))
 {}
 
 std::string_view StringListProperty::className() const {

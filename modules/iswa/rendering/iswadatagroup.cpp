@@ -101,7 +101,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo DataOptionsInfo = {
+    constexpr SelectionPropertyInfo DataOptionsInfo = {
         .identifier = "DataOptions",
         .name = "Data options",
         .description = "", // @TODO Missing documentation

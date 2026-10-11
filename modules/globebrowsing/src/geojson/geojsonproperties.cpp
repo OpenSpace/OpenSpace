@@ -239,7 +239,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo AltitudeModeInfo = {
+    constexpr OptionPropertyInfo AltitudeModeInfo = {
         .identifier = "AltitudeMode",
         .name = "Altitude mode",
         .description = "The altitude mode decides how any height values of the geo "
@@ -251,7 +251,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo PointAnchorOptionInfo = {
+    constexpr OptionPropertyInfo PointAnchorOptionInfo = {
         .identifier = "PointTextureAnchor",
         .name = "Point texture anchor",
         .description = "Decides the placement of the point texture in relation to the "

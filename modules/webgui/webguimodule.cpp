@@ -90,7 +90,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo DirectoriesInfo = {
+    constexpr StringListPropertyInfo DirectoriesInfo = {
         .identifier = "Directories",
         .name = "Directories",
         .description = "Directories from which to to serve static content, as a string "
@@ -107,7 +107,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ServedDirectoriesInfo = {
+    constexpr StringListPropertyInfo ServedDirectoriesInfo = {
         .identifier = "ServedDirectories",
         .name = "Served directories",
         .description = "Directories that are currently served. This value is set by the "

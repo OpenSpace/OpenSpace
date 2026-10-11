@@ -286,7 +286,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo DefaultRenderableTypesInfo = {
+    constexpr StringListPropertyInfo DefaultRenderableTypesInfo = {
         .identifier = "DefaultRenderableTypes",
         .name = "Default renderable types",
         .description = "A list of renderable types that will automatically use the "

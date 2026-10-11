@@ -32,13 +32,6 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo IdentifierInfo = {
-        .identifier = "Identifier",
-        .name = "Identifier",
-        .description = "The identifier for this interface.",
-        .visibility = Visibility::AdvancedUser
-    };
-
     constexpr BoolPropertyInfo EnabledInfo = {
         .identifier = "Enabled",
         .name = "Enabled",
@@ -71,7 +64,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo AllowAddressesInfo = {
+    constexpr StringListPropertyInfo AllowAddressesInfo = {
         .identifier = "AllowAddresses",
         .name = "Allow addresses",
         .description = "IP addresses or domains that should always be allowed access to "
@@ -79,7 +72,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo RequirePasswordAddressesInfo = {
+    constexpr StringListPropertyInfo RequirePasswordAddressesInfo = {
         .identifier = "RequirePasswordAddresses",
         .name = "Require password addresses",
         .description = "IP addresses or domains that should be allowed access if they "
@@ -87,7 +80,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo DenyAddressesInfo = {
+    constexpr StringListPropertyInfo DenyAddressesInfo = {
         .identifier = "DenyAddresses",
         .name = "Deny addresses",
         .description = "IP addresses or domains that should never be allowed access to "
@@ -112,7 +105,7 @@ namespace {
         // [[codegen::verbatim(DefaultAccessInfo.description)]]
         std::optional<Access> defaultAccess;
 
-        // [[codegen::verbatim(IdentifierInfo.description)]]
+        // The identifier for this interface.
         std::string identifier;
 
         // [[codegen::verbatim(AllowAddressesInfo.description)]]

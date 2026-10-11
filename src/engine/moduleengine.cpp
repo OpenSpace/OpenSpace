@@ -46,7 +46,7 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ModuleEngine";
 
-    constexpr PropertyInfo AllModulesInfo = {
+    constexpr StringListPropertyInfo AllModulesInfo = {
         .identifier = "AllModules",
         .name = "All modules",
         .description = "The list of all modules that were compiled for this version of "

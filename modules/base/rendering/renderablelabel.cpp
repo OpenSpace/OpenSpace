@@ -80,7 +80,7 @@ namespace {
         GigaLightyear
     };
 
-    constexpr PropertyInfo BlendModeInfo = {
+    constexpr OptionPropertyInfo BlendModeInfo = {
         .identifier = "BlendMode",
         .name = "Blending mode",
         .description = "This determines the blending mode that is applied to the "
@@ -143,14 +143,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo TransformationMatrixInfo = {
-        .identifier = "TransformationMatrix",
-        .name = "Transformation matrix",
-        .description = "Transformation matrix to be applied to the label.",
-        .visibility = Visibility::AdvancedUser
-    };
-
-    constexpr PropertyInfo OrientationOptionInfo = {
+    constexpr OptionPropertyInfo OrientationOptionInfo = {
         .identifier = "OrientationOption",
         .name = "Orientation option",
         .description = "Label orientation rendering mode.",
@@ -196,7 +189,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo FadeUnitOptionInfo = {
+    constexpr OptionPropertyInfo FadeUnitOptionInfo = {
         .identifier = "FadeUnit",
         .name = "Fade distance Unit",
         .description = "Distance unit for fade-in/-out distance calculations. Defaults "
@@ -244,7 +237,7 @@ namespace {
         // [[codegen::verbatim(EnableFadingEffectInfo.description)]]
         std::optional<bool> enableFading;
 
-        // [[codegen::verbatim(TransformationMatrixInfo.description)]]
+        // Transformation matrix to be applied to the label.
         std::optional<glm::dmat4x4> transformationMatrix;
 
         enum class [[codegen::map(Unit)]] Unit {

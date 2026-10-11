@@ -74,7 +74,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo ResetLineInfo = {
+    constexpr TriggerPropertyInfo ResetLineInfo = {
         .identifier = "ResetLine",
         .name = "Reset Line",
         .description = "When triggered, the line will start again from the beginning.",

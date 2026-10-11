@@ -142,7 +142,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo StarRenderingMethodInfo = {
+    constexpr OptionPropertyInfo StarRenderingMethodInfo = {
         .identifier = "StarRenderingMethod",
         .name = "Star rendering method",
         .description = "The rendering method used for visualizing the stars.",

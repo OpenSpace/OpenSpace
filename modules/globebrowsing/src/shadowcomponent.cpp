@@ -55,7 +55,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo SaveDepthTextureInfo = {
+    constexpr TriggerPropertyInfo SaveDepthTextureInfo = {
         .identifier = "SaveDepthTextureInfo",
         .name = "Save depth texture",
         .description = "Debug.",
@@ -74,7 +74,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo DepthMapSizeInfo = {
+    constexpr TriggerPropertyInfo DepthMapSizeInfo = {
         .identifier = "DepthMapSize",
         .name = "Depth map size",
         .description = "The depth map size in pixels. You must entry the width and "

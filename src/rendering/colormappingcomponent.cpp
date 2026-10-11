@@ -73,7 +73,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo SetRangeFromDataInfo = {
+    constexpr TriggerPropertyInfo SetRangeFromDataInfo = {
         .identifier = "SetRangeFromData",
         .name = "Set data range from data",
         .description = "Set the data range for the color mapping based on the available "

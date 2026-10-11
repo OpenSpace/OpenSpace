@@ -54,13 +54,6 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo FileInfo = {
-        .identifier = "File",
-        .name = "File",
-        .description = "The speck label file with the data for the labels.",
-        .visibility = Visibility::AdvancedUser
-    };
-
     constexpr Vec3PropertyInfo ColorInfo = {
         .identifier = "Color",
         .name = "Color",
@@ -117,18 +110,11 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo TransformationMatrixInfo = {
-        .identifier = "TransformationMatrix",
-        .name = "Transformation matrix",
-        .description = "Transformation matrix to be applied to the labels.",
-        .visibility = Visibility::Developer
-    };
-
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
-        // [[codegen::verbatim(FileInfo.description)]]
+        // The speck label file with the data for the labels.
         std::optional<std::filesystem::path> file;
 
         // If true (default), the loaded labels file will be cached so that it can be
@@ -166,7 +152,7 @@ namespace {
         // [[codegen::verbatim(FaceCameraInfo.description)]]
         std::optional<bool> faceCamera;
 
-        // [[codegen::verbatim(TransformationMatrixInfo.description)]]
+        // Transformation matrix to be applied to the labels.
         std::optional<glm::dmat4x4> transformationMatrix;
     };
 } // namespace

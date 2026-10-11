@@ -110,8 +110,8 @@ private:
 class SpoutReceiverPropertyProxy : public SpoutReceiver {
 public:
     static const StringPropertyInfo& NameInfoProperty();
-    static const PropertyInfo& SelectionInfoProperty();
-    static const PropertyInfo& UpdateInfoProperty();
+    static const OptionPropertyInfo& SelectionInfoProperty();
+    static const TriggerPropertyInfo& UpdateInfoProperty();
 
     SpoutReceiverPropertyProxy(PropertyOwner& owner, const Dictionary& dictionary);
     virtual ~SpoutReceiverPropertyProxy();

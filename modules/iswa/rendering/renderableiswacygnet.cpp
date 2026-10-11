@@ -48,7 +48,7 @@ namespace {
 
     constexpr std::string_view _loggerCat = "IswaCygnet";
 
-    constexpr PropertyInfo DeleteInfo = {
+    constexpr TriggerPropertyInfo DeleteInfo = {
         .identifier = "Delete",
         .name = "Delete",
         .description = "", // @TODO Missing documentation

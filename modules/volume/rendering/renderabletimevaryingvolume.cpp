@@ -67,7 +67,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo GridTypeInfo = {
+    constexpr OptionPropertyInfo GridTypeInfo = {
         .identifier = "GridType",
         .name = "Grid type",
         .description = "The grid type to use for the volume.",
@@ -113,7 +113,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo TriggerTimeJumpInfo = {
+    constexpr TriggerPropertyInfo TriggerTimeJumpInfo = {
         .identifier = "TriggerTimeJump",
         .name = "Jump",
         .description = "Sets the time to be the first time of the volume sequence.",

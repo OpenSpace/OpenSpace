@@ -53,7 +53,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo FieldlineSeedInfo = {
+    constexpr SelectionPropertyInfo FieldlineSeedInfo = {
         .identifier = "FieldlineSeedsIndexFile",
         .name = "Fieldline seedpoints",
         .description = "", // @TODO Missing documentation

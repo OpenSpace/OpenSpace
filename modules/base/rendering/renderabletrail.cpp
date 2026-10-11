@@ -144,7 +144,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo RenderingModeInfo = {
+    constexpr OptionPropertyInfo RenderingModeInfo = {
         .identifier = "Rendering",
         .name = "Rendering mode",
         .description = "Determines how the trail should be rendered. If 'Lines' is "

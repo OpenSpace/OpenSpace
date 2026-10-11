@@ -51,7 +51,7 @@ namespace {
         Camera
     };
 
-    constexpr PropertyInfo SourceTypeInfo = {
+    constexpr OptionPropertyInfo SourceTypeInfo = {
         .identifier = "SourceType",
         .name = "Source type",
         .description = "The type of position that is used as the triangle apex used to "
@@ -69,7 +69,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo ReferenceTypeInfo = {
+    constexpr OptionPropertyInfo ReferenceTypeInfo = {
         .identifier = "ReferenceType",
         .name = "Reference type",
         .description = "The type of position that is used as the destination of the "
@@ -87,7 +87,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo DestinationTypeInfo = {
+    constexpr OptionPropertyInfo DestinationTypeInfo = {
         .identifier = "DestinationType",
         .name = "Destination type",
         .description = "The type of position that is used as the destination to "

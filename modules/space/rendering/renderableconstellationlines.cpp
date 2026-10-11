@@ -70,23 +70,6 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo UnitInfo = {
-        .identifier = "Unit",
-        .name = "Unit",
-        .description = "The distance unit used for the constellation lines data.",
-        .visibility = Visibility::AdvancedUser
-    };
-
-    constexpr PropertyInfo ColorsInfo = {
-        .identifier = "Colors",
-        .name = "Constellation colors",
-        .description = "A list of colors to use for the constellations. A data file may "
-            "include several groups of constellations, where each group can have a "
-            "distinct color. The index for the color parameter for each constellation in "
-            "the data file corresponds to the order of the colors in this list.",
-        .visibility = Visibility::User
-    };
-
     // @TODO (2025-01-07, emmbr) I did not add any description of the file format below,
     // since we intend for this to be changed in a relatively near future. When that is
     // done, update the description.
@@ -123,10 +106,13 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             Gigalightyear [[codegen::key("Gly")]]
         };
-        // [[codegen::verbatim(UnitInfo.description)]]
+        // The distance unit used for the constellation lines data.
         std::optional<Unit> unit;
 
-        // [[codegen::verbatim(ColorsInfo.description)]]
+        // A list of colors to use for the constellations. A data file may include several
+        // groups of constellations, where each group can have a distinct color. The index
+        // for the color parameter for each constellation in the data file corresponds to
+        // the order of the colors in this list.
         std::optional<std::vector<glm::vec3>> colors [[codegen::color()]];
     };
 } // namespace

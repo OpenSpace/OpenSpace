@@ -77,7 +77,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo TerminatorTypeInfo = {
+    constexpr OptionPropertyInfo TerminatorTypeInfo = {
         .identifier = "TerminatorType",
         .name = "Terminator type",
         .description = "Determines the type of terminator to use for calculating the "
@@ -115,7 +115,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo AberrationInfo = {
+    constexpr OptionPropertyInfo AberrationInfo = {
         .identifier = "Aberration",
         .name = "Aberration",
         .description = "The aberration method that is used for computing the shadow "

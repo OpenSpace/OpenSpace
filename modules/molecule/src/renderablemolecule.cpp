@@ -143,13 +143,13 @@ namespace {
         .description = "Enables the representation."
     };
 
-    constexpr PropertyInfo TypeInfo = {
+    constexpr OptionPropertyInfo TypeInfo = {
         .identifier = "Type",
         .name = "Type",
         .description = "The visual representation type to use for the molecule."
     };
 
-    constexpr PropertyInfo ColorInfo = {
+    constexpr OptionPropertyInfo ColorInfo = {
         .identifier = "Color",
         .name = "Color",
         .description = "The color mapping for the atoms."
@@ -201,7 +201,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo AnimationRepeatModeInfo = {
+    constexpr OptionPropertyInfo AnimationRepeatModeInfo = {
         .identifier = "AnimationRepeatMode",
         .name = "Animation repeat mode",
         .description = "Controls how the animation should be repeated when the end of "

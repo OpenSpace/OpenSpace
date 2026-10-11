@@ -86,7 +86,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo OrientationInfo = {
+    constexpr OptionPropertyInfo OrientationInfo = {
         .identifier = "Orientation",
         .name = "Orientation",
         .description = "Specifies whether the texture is applied to the inside of the "
@@ -104,7 +104,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo TextureProjectionInfo = {
+    constexpr OptionPropertyInfo TextureProjectionInfo = {
         .identifier = "TextureProjection",
         .name = "Texture Projection",
         .description = "Specifies the projection mapping to use for any texture loaded "
@@ -171,7 +171,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo BlendingOptionInfo = {
+    constexpr OptionPropertyInfo BlendingOptionInfo = {
         .identifier = "BlendingOption",
         .name = "Blending options",
         .description = "Controls the blending function used to calculate the colors of "

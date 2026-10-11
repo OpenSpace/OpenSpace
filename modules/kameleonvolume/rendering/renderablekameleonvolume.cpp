@@ -110,7 +110,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo GridTypeInfo = {
+    constexpr OptionPropertyInfo GridTypeInfo = {
         .identifier = "GridType",
         .name = "Grid type",
         .description = "", // @TODO Missing documentation

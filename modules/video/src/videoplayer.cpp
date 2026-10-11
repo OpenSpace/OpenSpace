@@ -49,31 +49,25 @@ namespace {
 
     constexpr std::string_view _loggerCat = "VideoPlayer";
 
-    constexpr PropertyInfo VideoInfo = {
-        .identifier = "Video",
-        .name = "Video",
-        .description = "The video file that is played."
-    };
-
-    constexpr PropertyInfo PlayInfo = {
+    constexpr TriggerPropertyInfo PlayInfo = {
         .identifier = "Play",
         .name = "Play",
         .description = "Play video."
     };
 
-    constexpr PropertyInfo PauseInfo = {
+    constexpr TriggerPropertyInfo PauseInfo = {
         .identifier = "Pause",
         .name = "Pause",
         .description = "Pause video."
     };
 
-    constexpr PropertyInfo GoToStartInfo = {
+    constexpr TriggerPropertyInfo GoToStartInfo = {
         .identifier = "GoToStart",
         .name = "Go To start",
         .description = "Sets the time to the beginning of the video and pauses it."
     };
 
-    constexpr PropertyInfo ReloadInfo = {
+    constexpr TriggerPropertyInfo ReloadInfo = {
         .identifier = "Reload",
         .name = "Reload",
         .description = "Reloads the video and creates a new texture. This might be "
@@ -152,7 +146,7 @@ namespace {
     }
 
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
-        // [[codegen::verbatim(VideoInfo.description)]]
+        // The video file that is played.
         std::filesystem::path video;
 
         // [[codegen::verbatim(AudioInfo.description)]]

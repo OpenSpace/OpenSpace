@@ -143,7 +143,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo ScreenshotWindowIdsInfo = {
+    constexpr IntListPropertyInfo ScreenshotWindowIdsInfo = {
         .identifier = "ScreenshotWindowId",
         .name = "Screenshow window ids",
         .description = "The list of window identifiers whose screenshot will be taken "
@@ -166,7 +166,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo UseNewScreenshotFolderInfo = {
+    constexpr TriggerPropertyInfo UseNewScreenshotFolderInfo = {
         .identifier = "UseNewScreenshotFolder",
         .name = "Use New Screenshot Folder",
         .description = "If this property is triggered, a new screenshot folder is "

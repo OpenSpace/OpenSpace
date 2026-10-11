@@ -63,7 +63,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo SelectionInfo = {
+    constexpr SelectionPropertyInfo SelectionInfo = {
         .identifier = "ConstellationSelection",
         .name = "Constellation selection",
         .description = "The selected constellations are displayed on the celestial "

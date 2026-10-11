@@ -59,13 +59,13 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableSimulationBox";
 
-    constexpr PropertyInfo RepresentationInfo = {
+    constexpr OptionPropertyInfo RepresentationInfo = {
         .identifier = "Representation",
         .name = "Representation type",
         .description = "The visual representation type to use for the molecule."
     };
 
-    constexpr PropertyInfo ColoringInfo = {
+    constexpr OptionPropertyInfo ColoringInfo = {
         .identifier = "Coloring",
         .name = "Coloring",
         .description = "The color mapping for the atoms."

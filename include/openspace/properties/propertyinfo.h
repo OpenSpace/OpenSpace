@@ -145,26 +145,6 @@ struct BasicPropertyInfo {
     Defaults defaults = {};
 
     /**
-     * Creates a BasicPropertyInfo from the provided untyped PropertyInfo. All
-     * type-specific default values are left at their defaults and can be changed in the
-     * returned object. This is used when the information about a property is only known
-     * at runtime and can thus not be written as a designated initializer.
-     */
-    //static constexpr BasicPropertyInfo from(const BasicPropertyInfo<BasicDefaults>& info)
-    //{
-    //    BasicPropertyInfo result = {
-    //        .identifier = info.identifier,
-    //        .name = info.name,
-    //        .description = info.description,
-    //        .visibility = info.visibility,
-    //        .isEnablable = info.isEnablable,
-    //        .needsConfirmation = info.needsConfirmation
-    //    };
-    //    result.defaults.isEnabled = info.defaults.isEnabled;
-    //    return result;
-    //}
-
-    /**
      * Returns a copy of this BasicPropertyInfo without the type-specific default values.
      * This is used to pass the information to the Property base class, which does not
      * know about the type of the value.

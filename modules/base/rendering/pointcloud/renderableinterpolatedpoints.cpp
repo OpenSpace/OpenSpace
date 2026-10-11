@@ -82,7 +82,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo JumpToNextInfo = {
+    constexpr TriggerPropertyInfo JumpToNextInfo = {
         .identifier = "JumpToNext",
         .name = "Jump to next",
         .description = "Immediately set the interpolation value to correspond to the "
@@ -90,7 +90,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo JumpToPrevInfo = {
+    constexpr TriggerPropertyInfo JumpToPrevInfo = {
         .identifier = "JumpToPrevious",
         .name = "Jump to previous",
         .description = "Immediately set the interpolation value to correspond to the "
@@ -98,7 +98,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo InterpolateToNextInfo = {
+    constexpr TriggerPropertyInfo InterpolateToNextInfo = {
         .identifier = "InterpolateToNext",
         .name = "Interpolate to next",
         .description = "Trigger an interpolation to the next set of point positions. The "
@@ -107,7 +107,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo InterpolateToPrevInfo = {
+    constexpr TriggerPropertyInfo InterpolateToPrevInfo = {
         .identifier = "InterpolateToPrevious",
         .name = "Interpolate to previous",
         .description = "Trigger an interpolation to the previous set of point positions. "
@@ -116,7 +116,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo InterpolateToEndInfo = {
+    constexpr TriggerPropertyInfo InterpolateToEndInfo = {
         .identifier = "InterpolateToEnd",
         .name = "Interpolate to end",
         .description = "Trigger an interpolation all the way to the final set of "
@@ -125,7 +125,7 @@ namespace {
         .visibility = Visibility::NoviceUser
     };
 
-    constexpr PropertyInfo InterpolateToStartInfo = {
+    constexpr TriggerPropertyInfo InterpolateToStartInfo = {
         .identifier = "InterpolateToStart",
         .name = "Interpolate to start",
         .description = "Trigger an inverted interpolation to the initial set of "

@@ -62,7 +62,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo TriggerKeyInfo = {
+    constexpr TriggerPropertyInfo TriggerKeyInfo = {
         .identifier = "TriggerKey",
         .name = "Trigger key",
         .description = "When this property is triggered, the text in the `Key` property "
@@ -77,7 +77,7 @@ namespace {
         .visibility = Visibility::NoviceUser
     };
 
-    constexpr PropertyInfo ReloadInfo = {
+    constexpr TriggerPropertyInfo ReloadInfo = {
         .identifier = "Reload",
         .name = "Reload",
         .description = "Reload the web browser.",

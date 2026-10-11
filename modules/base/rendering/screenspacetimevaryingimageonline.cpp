@@ -80,7 +80,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo JumpToFirstTimeInfo = {
+    constexpr TriggerPropertyInfo JumpToFirstTimeInfo = {
         .identifier = "JumpToFirstTime",
         .name = "Jump to first time",
         .description = "Performs a time jump to the first timestamp in the loaded file.",

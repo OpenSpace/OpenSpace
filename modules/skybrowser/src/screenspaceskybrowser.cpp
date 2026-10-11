@@ -43,15 +43,6 @@
 namespace {
     using namespace openspace;
 
-    constexpr PropertyInfo TextureQualityInfo = {
-        .identifier = "TextureQuality",
-        .name = "Quality of texture",
-        .description = "A parameter to set the resolution of the texture. 1 is full "
-            "resolution and slower frame rate. Lower value means lower resolution of "
-            "texture and faster frame rate.",
-        .visibility = Visibility::AdvancedUser
-    };
-
     constexpr Vec3PropertyInfo DisplayCopyInfo = {
         .identifier = "DisplayCopy",
         .name = "Display copy position",
@@ -146,7 +137,9 @@ namespace {
     // created from interacting with the SkyBrowser user interface panel. If created in
     // an asset, it requires some extra scripting to work with the SkyBrowser feature.
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
-        // [[codegen::verbatim(TextureQualityInfo.description)]]
+        // A parameter to set the resolution of the texture. 1 is full resolution and
+        // slower frame rate. Lower value means lower resolution of texture and faster
+        // frame rate.
         std::optional<float> textureQuality [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(IsHiddenInfo.description)]]

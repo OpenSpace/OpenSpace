@@ -135,7 +135,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo ForceUpdateHeightDataInfo = {
+    constexpr TriggerPropertyInfo ForceUpdateHeightDataInfo = {
         .identifier = "ForceUpdateHeightData",
         .name = "Force update height data",
         .description = "Triggering this leads to a recomputation of the heights based on "
@@ -143,7 +143,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo PointRenderModeInfo = {
+    constexpr OptionPropertyInfo PointRenderModeInfo = {
         .identifier = "PointRenderMode",
         .name = "Points aligned to",
         .description = "Decides how the billboards for the points should be rendered in "
@@ -152,7 +152,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo FlyToFeatureInfo = {
+    constexpr TriggerPropertyInfo FlyToFeatureInfo = {
         .identifier = "FlyToFeature",
         .name = "Fly to feature",
         .description = "Triggering this leads to the camera flying to a position that "
@@ -216,7 +216,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo DeleteInfo = {
+    constexpr TriggerPropertyInfo DeleteInfo = {
         .identifier = "Delete",
         .name = "Delete",
         .description = "Triggering this will remove this GeoJson component from its "

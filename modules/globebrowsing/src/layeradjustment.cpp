@@ -56,7 +56,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo TypeInfo = {
+    constexpr OptionPropertyInfo TypeInfo = {
         .identifier = "Type",
         .name = "Type",
         .description = "The type of layer adjustment that is applied to the underlying "

@@ -29,6 +29,8 @@
 
 namespace openspace {
 
+using TriggerPropertyInfo = BasicPropertyInfo<BasicDefaults>;
+
 /**
  * TriggerProperty that can be used to fire events into your code using the callback
  * method #onChange.
@@ -44,7 +46,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.name must not be empty
      */
-    explicit TriggerProperty(PropertyInfo info);
+    explicit TriggerProperty(TriggerPropertyInfo info);
 
     /**
      * Returns the class name `TriggerProperty`.

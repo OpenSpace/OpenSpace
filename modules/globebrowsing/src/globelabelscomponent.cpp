@@ -189,7 +189,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo AlignmentOptionInfo = {
+    constexpr OptionPropertyInfo AlignmentOptionInfo = {
         .identifier = "AlignmentOption",
         .name = "Alignment option",
         .description = "Labels are aligned horizontally or circularly related to the "

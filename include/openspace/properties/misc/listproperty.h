@@ -32,7 +32,7 @@ namespace openspace {
 template <typename T>
 class ListProperty : public TemplateProperty<std::vector<T>> {
 public:
-    ListProperty(PropertyInfo info, std::vector<T> values);
+    explicit ListProperty(BasicPropertyInfo<ValueDefaults<std::vector<T>>> info);
 
     ~ListProperty() override = 0;
 };

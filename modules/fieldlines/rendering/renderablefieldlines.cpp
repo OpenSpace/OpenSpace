@@ -90,7 +90,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo SeedPointSourceInfo = {
+    constexpr OptionPropertyInfo SeedPointSourceInfo = {
         .identifier = "Source",
         .name = "SeedPoint source",
         .description = "", // @TODO Missing documentation

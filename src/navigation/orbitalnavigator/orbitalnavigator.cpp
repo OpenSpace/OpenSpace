@@ -76,7 +76,7 @@ namespace {
         .visibility = Visibility::NoviceUser
     };
 
-    constexpr PropertyInfo RetargetAnchorInfo = {
+    constexpr TriggerPropertyInfo RetargetAnchorInfo = {
         .identifier = "RetargetAnchor",
         .name = "Retarget anchor",
         .description = "When triggered, this property starts an interpolation to reset "
@@ -84,7 +84,7 @@ namespace {
         .visibility = Visibility::NoviceUser
     };
 
-    constexpr PropertyInfo RetargetAimInfo = {
+    constexpr TriggerPropertyInfo RetargetAimInfo = {
         .identifier = "RetargetAim",
         .name = "Retarget aim",
         .description = "When triggered, this property starts an interpolation to reset "

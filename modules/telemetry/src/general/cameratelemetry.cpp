@@ -53,7 +53,7 @@ namespace {
         "Telemetry that sends out camera information to the Open Sound Control receiver."
     };
 
-    constexpr PropertyInfo CameraSpeedDistanceUnitInfo = {
+    constexpr OptionPropertyInfo CameraSpeedDistanceUnitInfo = {
         .identifier = "CameraSpeedDistanceUnit",
         .name = "Camera speed unit (distance)",
         .description = "Choose a distance unit that is used for the camera speed. For "

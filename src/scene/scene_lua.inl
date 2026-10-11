@@ -522,10 +522,8 @@ namespace {
     }
 
     template <typename T, typename Info>
-    void createCustomProperty(PropertyInfo info,
-                              std::optional<std::string> onChange)
-    {
-        T* p = new T(Info::from(info));
+    void createCustomProperty(Info info, std::optional<std::string> onChange) {
+        T* p = new T(std::move(info));
         if (onChange.has_value() && !onChange->empty()) {
             p->onChange(
                 [p, script = *onChange]() {
@@ -1478,6 +1476,19 @@ enum class [[codegen::enum]] CustomPropertyType {
         guiName->c_str() :
         identifier.c_str();
 
+    
+    auto toType = []<typename T>(PropertyInfo info) -> T {
+        return {
+            .identifier = info.identifier,
+            .name = info.name,
+            .description = info.description,
+            .visibility = info.visibility,
+            .isEnablable = info.isEnablable,
+            .needsConfirmation = info.needsConfirmation,
+            .defaults = { .isEnabled = info.defaults.isEnabled }
+        };
+    };
+
     PropertyInfo info = {
         .identifier = identifier.c_str(),
         .name = gui,
@@ -1485,182 +1496,182 @@ enum class [[codegen::enum]] CustomPropertyType {
     };
     switch (type) {
         case CustomPropertyType::BoolProperty:
-            createCustomProperty<BoolProperty, BoolPropertyInfo>(
-                info,
+            createCustomProperty<BoolProperty>(
+                toType.template operator()<BoolPropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::DMat2Property:
-            createCustomProperty<DMat2Property, DMat2PropertyInfo>(
-                info,
+            createCustomProperty<DMat2Property>(
+                toType.template operator()<DMat2PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::DMat3Property:
-            createCustomProperty<DMat3Property, DMat3PropertyInfo>(
-                info,
+            createCustomProperty<DMat3Property>(
+                toType.template operator()<DMat3PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::DMat4Property:
-            createCustomProperty<DMat4Property, DMat4PropertyInfo>(
-                info,
+            createCustomProperty<DMat4Property>(
+                toType.template operator()<DMat4PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::DoubleProperty:
-            createCustomProperty<DoubleProperty, DoublePropertyInfo>(
-                info,
+            createCustomProperty<DoubleProperty>(
+                toType.template operator()<DoublePropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::DVec2Property:
-            createCustomProperty<DVec2Property, DVec2PropertyInfo>(
-                info,
+            createCustomProperty<DVec2Property>(
+                toType.template operator()<DVec2PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::DVec3Property:
-            createCustomProperty<DVec3Property, DVec3PropertyInfo>(
-                info,
+            createCustomProperty<DVec3Property>(
+                toType.template operator()<DVec3PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::DVec4Property:
-            createCustomProperty<DVec4Property, DVec4PropertyInfo>(
-                info,
+            createCustomProperty<DVec4Property>(
+                toType.template operator()<DVec4PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::FloatProperty:
-            createCustomProperty<FloatProperty, FloatPropertyInfo>(
-                info,
+            createCustomProperty<FloatProperty>(
+                toType.template operator()<FloatPropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::IntProperty:
-            createCustomProperty<IntProperty, IntPropertyInfo>(
-                info,
+            createCustomProperty<IntProperty>(
+                toType.template operator()<IntPropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::IVec2Property:
-            createCustomProperty<IVec2Property, IVec2PropertyInfo>(
-                info,
+            createCustomProperty<IVec2Property>(
+                toType.template operator()<IVec2PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::IVec3Property:
-            createCustomProperty<IVec3Property, IVec3PropertyInfo>(
-                info,
+            createCustomProperty<IVec3Property>(
+                toType.template operator()<IVec3PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::IVec4Property:
-            createCustomProperty<IVec4Property, IVec4PropertyInfo>(
-                info,
+            createCustomProperty<IVec4Property>(
+                toType.template operator()<IVec4PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::LongProperty:
-            createCustomProperty<LongProperty, LongPropertyInfo>(
-                info,
+            createCustomProperty<LongProperty>(
+                toType.template operator()<LongPropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::Mat2Property:
-            createCustomProperty<Mat2Property, Mat2PropertyInfo>(
-                info,
+            createCustomProperty<Mat2Property>(
+                toType.template operator()<Mat2PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::Mat3Property:
-            createCustomProperty<Mat3Property, Mat3PropertyInfo>(
-                info,
+            createCustomProperty<Mat3Property>(
+                toType.template operator()<Mat3PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::Mat4Property:
-            createCustomProperty<Mat4Property, Mat4PropertyInfo>(
-                info,
+            createCustomProperty<Mat4Property>(
+                toType.template operator()<Mat4PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::ShortProperty:
-            createCustomProperty<ShortProperty, ShortPropertyInfo>(
-                info,
+            createCustomProperty<ShortProperty>(
+                toType.template operator()<ShortPropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::StringProperty:
-            createCustomProperty<StringProperty, StringPropertyInfo>(
-                info,
+            createCustomProperty<StringProperty>(
+                toType.template operator()<StringPropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::StringListProperty:
-            createCustomProperty<StringListProperty, PropertyInfo>(
-                info,
+            createCustomProperty<StringListProperty>(
+                toType.template operator()<StringListPropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::TriggerProperty:
-            createCustomProperty<TriggerProperty, PropertyInfo>(
-                info,
+            createCustomProperty<TriggerProperty>(
+                toType.template operator()<TriggerPropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::UIntProperty:
-            createCustomProperty<UIntProperty, UIntPropertyInfo>(
-                info,
+            createCustomProperty<UIntProperty>(
+                toType.template operator()<UIntPropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::ULongProperty:
-            createCustomProperty<ULongProperty, ULongPropertyInfo>(
-                info,
+            createCustomProperty<ULongProperty>(
+                toType.template operator()<ULongPropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::UShortProperty:
-            createCustomProperty<UShortProperty, UShortPropertyInfo>(
-                info,
+            createCustomProperty<UShortProperty>(
+                toType.template operator()<UShortPropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::UVec2Property:
-            createCustomProperty<UVec2Property, UVec2PropertyInfo>(
-                info,
+            createCustomProperty<UVec2Property>(
+                toType.template operator()<UVec2PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::UVec3Property:
-            createCustomProperty<UVec3Property, UVec3PropertyInfo>(
-                info,
+            createCustomProperty<UVec3Property>(
+                toType.template operator()<UVec3PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::UVec4Property:
-            createCustomProperty<UVec4Property, UVec4PropertyInfo>(
-                info,
+            createCustomProperty<UVec4Property>(
+                toType.template operator()<UVec4PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::Vec2Property:
-            createCustomProperty<Vec2Property, Vec2PropertyInfo>(
-                info,
+            createCustomProperty<Vec2Property>(
+                toType.template operator()<Vec2PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::Vec3Property:
-            createCustomProperty<Vec3Property, Vec3PropertyInfo>(
-                info,
+            createCustomProperty<Vec3Property>(
+                toType.template operator()<Vec3PropertyInfo>(info),
                 std::move(onChange)
             );
             return;
         case CustomPropertyType::Vec4Property:
-            createCustomProperty<Vec4Property, Vec4PropertyInfo>(
-                info,
+            createCustomProperty<Vec4Property>(
+                toType.template operator()<Vec4PropertyInfo>(info),
                 std::move(onChange)
             );
             return;

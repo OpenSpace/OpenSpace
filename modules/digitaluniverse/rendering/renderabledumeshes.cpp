@@ -89,14 +89,6 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo LabelFileInfo = {
-        .identifier = "LabelFile",
-        .name = "Label file",
-        .description = "The path to the label file that contains information about the "
-            "astronomical objects being rendered.",
-        .visibility = Visibility::AdvancedUser
-    };
-
     constexpr IVec2PropertyInfo LabelMinMaxSizeInfo = {
         .identifier = "TextMinMaxSize",
         .name = "Text min/max size",
@@ -141,14 +133,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo MeshColorInfo = {
-        .identifier = "MeshColor",
-        .name = "Meshes colors",
-        .description = "The defined colors for the meshes to be rendered.",
-        .visibility = Visibility::NoviceUser
-    };
-
-    constexpr PropertyInfo RenderOptionInfo = {
+    constexpr OptionPropertyInfo RenderOptionInfo = {
         .identifier = "RenderOption",
         .name = "Render option",
         .description = "Debug option for rendering of billboards and texts.",
@@ -184,7 +169,8 @@ namespace {
         // [[codegen::verbatim(TextSizeInfo.description)]]
         std::optional<float> textSize;
 
-        // [[codegen::verbatim(LabelFileInfo.description)]]
+        // The path to the label file that contains information about the astronomical
+        // objects being rendered.
         std::optional<std::string> labelFile;
 
         // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
@@ -193,7 +179,7 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(MeshColorInfo.description)]]
+        // The defined colors for the meshes to be rendered.
         std::optional<std::vector<glm::vec3>> meshColor;
     };
 } // namespace

@@ -68,7 +68,7 @@ namespace {
         return Time::convertTime(fileName);
     }
 
-    constexpr PropertyInfo ColorMethodInfo = {
+    constexpr OptionPropertyInfo ColorMethodInfo = {
         .identifier = "ColorMethod",
         .name = "Color method",
         .description = "Color lines uniformly or using color tables based on extra "
@@ -76,7 +76,7 @@ namespace {
         .visibility = Visibility::User
     };
 
-    constexpr PropertyInfo ColorQuantityInfo = {
+    constexpr OptionPropertyInfo ColorQuantityInfo = {
         .identifier = "ColorQuantity",
         .name = "Quantity to color by",
         .description = "Quantity used to color lines if the 'By Quantity' color method "
@@ -252,7 +252,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo MaskingQuantityInfo = {
+    constexpr OptionPropertyInfo MaskingQuantityInfo = {
         .identifier = "MaskingQuantity",
         .name = "Quantity used for masking",
         .description = "Quantity used for masking.",
@@ -270,7 +270,7 @@ namespace {
         }
     };
 
-    constexpr PropertyInfo TimeJumpButtonInfo = {
+    constexpr TriggerPropertyInfo TimeJumpButtonInfo = {
         .identifier = "TimeJumpToStart",
         .name = "Jump to start of sequence",
         .description = "Performs a time jump to the start of the sequence.",

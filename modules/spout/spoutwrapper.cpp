@@ -65,7 +65,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo SelectionInfo = {
+    constexpr OptionPropertyInfo SelectionInfo = {
         .identifier = "SpoutSelection",
         .name = "Spout selection",
         .description = "This property displays all available Spout sender on the system. "
@@ -74,7 +74,7 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr PropertyInfo UpdateInfo = {
+    constexpr TriggerPropertyInfo UpdateInfo = {
         .identifier = "UpdateSelection",
         .name = "Update selection",
         .description = "If this property is triggered, the 'SpoutSelection' options will "
@@ -317,11 +317,11 @@ const StringPropertyInfo& SpoutReceiverPropertyProxy::NameInfoProperty() {
     return NameReceiverInfo;
 }
 
-const PropertyInfo& SpoutReceiverPropertyProxy::SelectionInfoProperty() {
+const OptionPropertyInfo& SpoutReceiverPropertyProxy::SelectionInfoProperty() {
     return SelectionInfo;
 }
 
-const PropertyInfo& SpoutReceiverPropertyProxy::UpdateInfoProperty() {
+const TriggerPropertyInfo& SpoutReceiverPropertyProxy::UpdateInfoProperty() {
     return UpdateInfo;
 }
 
