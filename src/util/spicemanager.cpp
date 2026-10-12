@@ -296,6 +296,17 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
             const std::string p = it->path.string();
             unload_c(p.c_str());
             _loadedKernels.erase(it);
+
+            // Reset the coverage
+            _ckCoverageTimes.clear();
+            _ckIntervals.clear();
+            _spkCoverageTimes.clear();
+            _spkIntervals.clear();
+
+            for (const KernelInformation& i : _loadedKernels) {
+                findCkCoverage(i.path);
+                findSpkCoverage(i.path);
+            }
         }
         // Otherwise, we hold on to it, but reduce the reference counter by 1
         else {
@@ -331,6 +342,17 @@ void SpiceManager::unloadKernel(std::filesystem::path filePath) {
         const std::string p = filePath.string();
         unload_c(p.c_str());
         _loadedKernels.erase(it);
+
+        // Reset the coverage
+        _ckCoverageTimes.clear();
+        _ckIntervals.clear();
+        _spkCoverageTimes.clear();
+        _spkIntervals.clear();
+
+        for (const KernelInformation& i : _loadedKernels) {
+            findCkCoverage(i.path);
+            findSpkCoverage(i.path);
+        }
     }
     else {
         // Otherwise, we hold on to it, but reduce the reference counter by 1

@@ -1,0 +1,51 @@
+asset.require("./core")
+
+local spk = asset.resource({
+  Name = "Extended SPK Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "extended_spk",
+  Version = 1
+})
+
+
+-- The following IDs are defined in the de430 kernel provided by the `generic_spk` package
+local ID = {
+  Earth = "EARTH",
+  EarthBarycenter = "EARTH BARYCENTER",
+  MarsBarycenter = "MARS BARYCENTER",
+  Mercury = "MERCURY",
+  MercuryBarycenter = "MERCURY BARYCENTER",
+  Moon = "MOON",
+  NeptuneBarycenter = "NEPTUNE BARYCENTER",
+  JupiterBarycenter = "JUPITER BARYCENTER",
+  PlutoBarycenter = "PLUTO BARYCENTER",
+  SaturnBarycenter = "SATURN BARYCENTER",
+  SolarSystemBarycenter = "SOLAR SYSTEM BARYCENTER",
+  Sun = "SUN",
+  UranusBarycenter = "URANUS BARYCENTER",
+  Venus = "VENUS",
+  VenusBarycenter = "VENUS BARYCENTER",
+}
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(spk .. "de441_part-1.bsp")
+  openspace.spice.loadKernel(spk .. "de441_part-2.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(spk .. "de441_part-2.bsp")
+  openspace.spice.unloadKernel(spk .. "de441_part-1.bsp")
+end)
+
+asset.export("ID", ID)
+
+
+
+asset.meta = {
+  Name = "SPICE Extended",
+  Description = [[This asset includes the SPICE kernels de441 which provided planetary
+    position information for an extended time period from 13200 BC to 17191 CE.]],
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/naif/data_generic.html",
+  License = "NASA"
+}
