@@ -75,6 +75,9 @@ public:
      */
     std::optional<glm::dmat4> modelToClipTransform() const;
 
+    /// The scale from volume coordinates to meters
+    double unitToMeter() const;
+
     static openspace::Documentation Documentation();
 
 private:

@@ -471,6 +471,10 @@ std::optional<glm::dmat4> RenderableDensityPointCloud::modelToClipTransform() co
     return _modelToClip;
 }
 
+double RenderableDensityPointCloud::unitToMeter() const {
+    return _unitToMeter;
+}
+
 void RenderableDensityPointCloud::uploadPointData() {
     const std::vector<glm::vec3>& positions = _volume->particlePositions();
     const std::vector<float>& densities = _volume->particleDensities();

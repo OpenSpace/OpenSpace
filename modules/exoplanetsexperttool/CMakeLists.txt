@@ -38,6 +38,7 @@ set(HEADER_FILES
     expressionparser.h
     glyphhandler.h
     gui.h
+    isosurface.h
     rendering/renderabledensitypointcloud.h
     rendering/renderableexoplanetglyphcloud.h
     rendering/renderablehostcloud.h
@@ -68,6 +69,7 @@ set(SOURCE_FILES
     expressionparser.cpp
     glyphhandler.cpp
     gui.cpp
+    isosurface.cpp
     rendering/renderabledensitypointcloud.cpp
     rendering/renderableexoplanetglyphcloud.cpp
     rendering/renderablehostcloud.cpp

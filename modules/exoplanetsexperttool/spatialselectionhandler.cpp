@@ -24,11 +24,18 @@
 
 #include <modules/exoplanetsexperttool/spatialselectionhandler.h>
 
+#include <modules/exoplanetsexperttool/castselection/castselection.h>
+#include <modules/exoplanetsexperttool/densityvolume.h>
+#include <modules/exoplanetsexperttool/rendering/renderablespatialselectionvolume.h>
+#include <modules/exoplanetsexperttool/rendering/selectionvolumemesh.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/misc/dictionary.h>
 #include <openspace/misc/dictionaryluaformatter.h>
+#include <openspace/query/query.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/distanceconstants.h>
 #include <algorithm>
 #include <cmath>
 #include <format>
@@ -195,6 +202,115 @@ std::vector<size_t> SpatialSelectionHandler::selectDensity(
     return {};
 }
 
+std::vector<size_t> SpatialSelectionHandler::selectMeshVolume(
+                                            const std::vector<ExoplanetItem>& data,
+                                            const std::vector<size_t>& candidates,
+                                            const MeshVolume& volume) const
+{
+    std::vector<size_t> result;
+    if (!volume.grid) {
+        return result;
+    }
+    result.reserve(candidates.size());
+
+    for (size_t idx : candidates) {
+        if (idx >= data.size()) {
+            continue;
+        }
+        const ExoplanetItem& item = data[idx];
+        if (!item.position.has_value()) {
+            continue;
+        }
+        const glm::dvec3 gridPos =
+            glm::dvec3(volume.parsecToGrid * glm::dvec4(*item.position, 1.0));
+        if (volume.grid->interpolate(gridPos) >= volume.isoValue) {
+            result.push_back(idx);
+        }
+    }
+
+    return result;
+}
+
+std::optional<MeshVolume> SpatialSelectionHandler::createMeshVolume(
+                                                       const DensityVolume& volume,
+                                                       const CastResult& result,
+                                                       const glm::dmat4& volumeToWorld)
+{
+    const glm::uvec3 dims = volume.dimensions();
+    const std::vector<float>& density = volume.data();
+    const std::vector<uint8_t>& mask = result.nodeMask;
+    // The interpolated field is 0 outside the mask, so a zero threshold would select all
+    if (mask.size() != density.size() || !(result.threshold > 0.f)) {
+        return std::nullopt;
+    }
+
+    glm::ivec3 low = glm::ivec3(dims);
+    glm::ivec3 high = glm::ivec3(-1);
+    for (unsigned int z = 0; z < dims.z; z++) {
+        for (unsigned int y = 0; y < dims.y; y++) {
+            for (unsigned int x = 0; x < dims.x; x++) {
+                if (mask[volume.nodeIndex(glm::uvec3(x, y, z))]) {
+                    const glm::ivec3 node = glm::ivec3(x, y, z);
+                    low = glm::min(low, node);
+                    high = glm::max(high, node);
+                }
+            }
+        }
+    }
+    if (high.x < 0) {
+        return std::nullopt;
+    }
+
+    // Crop to the selected nodes with one layer of zeros around them to close the surface
+    const glm::ivec3 origin = low - glm::ivec3(1);
+    auto grid = std::make_shared<VolumeGrid>();
+    grid->dimensions = glm::uvec3(high - low + glm::ivec3(3));
+    grid->values.resize(
+        static_cast<size_t>(grid->dimensions.x) * grid->dimensions.y *
+        grid->dimensions.z,
+        0.f
+    );
+    for (unsigned int z = 0; z < grid->dimensions.z; z++) {
+        for (unsigned int y = 0; y < grid->dimensions.y; y++) {
+            for (unsigned int x = 0; x < grid->dimensions.x; x++) {
+                const glm::ivec3 node = origin + glm::ivec3(x, y, z);
+                const bool isInVolume =
+                    glm::all(glm::greaterThanEqual(node, glm::ivec3(0))) &&
+                    glm::all(glm::lessThan(node, glm::ivec3(dims)));
+                if (!isInVolume) {
+                    continue;
+                }
+                const size_t src = volume.nodeIndex(glm::uvec3(node));
+                if (mask[src]) {
+                    grid->values[x + static_cast<size_t>(grid->dimensions.x) *
+                        (y + static_cast<size_t>(grid->dimensions.y) * z)] =
+                        density[src];
+                }
+            }
+        }
+    }
+
+    const glm::dvec3 spacing = glm::dvec3(volume.spacing());
+    const glm::dmat4 gridToVolume =
+        glm::translate(
+            glm::dmat4(1.0),
+            glm::dvec3(volume.boundsMin()) + glm::dvec3(origin) * spacing
+        ) *
+        glm::scale(glm::dmat4(1.0), spacing);
+    const glm::dmat4 gridToParsec =
+        glm::scale(glm::dmat4(1.0), glm::dvec3(1.0 / distanceconstants::Parsec)) *
+        volumeToWorld * gridToVolume;
+
+    return MeshVolume{
+        .id = _nextMeshVolumeId++,
+        .grid = std::move(grid),
+        .isoValue = result.threshold,
+        .gridToParsec = gridToParsec,
+        .parsecToGrid = glm::inverse(gridToParsec),
+        .nComponents = result.nComponents
+    };
+}
+
 std::vector<size_t> SpatialSelectionHandler::select(
                                       const std::vector<ExoplanetItem>& data,
                                       const std::vector<size_t>& candidates,
@@ -209,6 +325,9 @@ std::vector<size_t> SpatialSelectionHandler::select(
     }
     if (const SkyMapRect* rect = std::get_if<SkyMapRect>(&query)) {
         return selectSkyRect(data, candidates, *rect, mapping);
+    }
+    if (const MeshVolume* volume = std::get_if<MeshVolume>(&query)) {
+        return selectMeshVolume(data, candidates, *volume);
     }
     return selectDensity(
         data,
@@ -333,6 +452,9 @@ void SpatialSelectionHandler::updateSelectionVolume(const SpatialSelectionQuery*
                 sky->useDistanceFilter ? sky->distMin : 0.0, sky->distMax
             };
         }
+        else if (const MeshVolume* volume = std::get_if<MeshVolume>(query)) {
+            parameters = { 3.0, static_cast<double>(volume->id) };
+        }
     }
     for (double value : parameters) {
         if (!std::isfinite(value)) {
@@ -353,6 +475,17 @@ void SpatialSelectionHandler::updateSelectionVolume(const SpatialSelectionQuery*
         "Scene.{}.Renderable", SelectionVolumeIdentifier
     );
     if (isVisible && parameters != _selectionVolumeParameters) {
+        // The mesh is too large to pass through a property, so hand it over directly
+        if (const MeshVolume* volume = std::get_if<MeshVolume>(query)) {
+            SceneGraphNode* node = sceneGraphNode(SelectionVolumeIdentifier);
+            auto* renderable = node ?
+                dynamic_cast<RenderableSpatialSelectionVolume*>(node->renderable()) :
+                nullptr;
+            if (renderable) {
+                renderable->setCustomMesh(selectionVolumeMesh(*volume));
+            }
+        }
+
         std::string values;
         for (double value : parameters) {
             if (!values.empty()) {

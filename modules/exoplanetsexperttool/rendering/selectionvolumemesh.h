@@ -277,6 +277,25 @@ inline SelectionVolumeMesh sky(const SkyMapRect& volume) {
     return mesh;
 }
 
+inline SelectionVolumeMesh meshVolume(const MeshVolume& volume) {
+    SelectionVolumeMesh mesh;
+    if (!volume.grid) {
+        return mesh;
+    }
+    mesh.triangles = extractIsosurface(*volume.grid, volume.isoValue);
+    const bool isMirrored = glm::determinant(glm::dmat3(volume.gridToParsec)) < 0.0;
+    for (size_t i = 0; i < mesh.triangles.size(); i += 3) {
+        for (size_t j = i; j < i + 3; j++) {
+            mesh.triangles[j] =
+                glm::dvec3(volume.gridToParsec * glm::dvec4(mesh.triangles[j], 1.0));
+        }
+        if (isMirrored) {
+            std::swap(mesh.triangles[i + 1], mesh.triangles[i + 2]);
+        }
+    }
+    return mesh;
+}
+
 } // namespace selectionvolume
 
 inline SelectionVolumeMesh selectionVolumeMesh(const SpatialSelectionQuery& query) {
@@ -290,6 +309,9 @@ inline SelectionVolumeMesh selectionVolumeMesh(const SpatialSelectionQuery& quer
         }
         else if constexpr (std::is_same_v<Volume, SkyMapRect>) {
             return selectionvolume::sky(volume);
+        }
+        else if constexpr (std::is_same_v<Volume, MeshVolume>) {
+            return selectionvolume::meshVolume(volume);
         }
         else {
             return {};

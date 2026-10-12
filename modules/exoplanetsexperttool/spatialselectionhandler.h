@@ -26,13 +26,19 @@
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SPATIALSELECTIONHANDLER___H__
 
 #include <modules/exoplanetsexperttool/datastructures.h>
+#include <modules/exoplanetsexperttool/isosurface.h>
 
 #include <openspace/glm.h>
+#include <memory>
+#include <optional>
 #include <string>
 #include <variant>
 #include <vector>
 
 namespace openspace::exoplanets {
+
+class DensityVolume;
+struct CastResult;
 
 /**
  * Geometric parameters for a 3D spherical selection volume.
@@ -93,11 +99,35 @@ struct DensitySelectionSettings {
     int minNeighbors = 5;
 };
 
+/**
+ * Arbitrarily shaped selection volume, defined as the region where a scalar field is at
+ * least #isoValue. Its surface is extracted with extractIsosurface for rendering.
+ */
+struct MeshVolume {
+    /// Session-local identity, used to detect when the rendered mesh must be replaced
+    size_t id = 0;
+
+    /// Shared so that copying the query, which happens every frame, stays cheap
+    std::shared_ptr<const VolumeGrid> grid;
+
+    float isoValue = 0.f;
+
+    /// Transform from grid index coordinates to Parsecs
+    glm::dmat4 gridToParsec = glm::dmat4(1.0);
+
+    /// Transform from Parsecs to grid index coordinates
+    glm::dmat4 parsecToGrid = glm::dmat4(1.0);
+
+    /// Number of disjoint regions in the volume
+    size_t nComponents = 0;
+};
+
 using SpatialSelectionQuery = std::variant<
     SphereVolume,
     BoxVolume,
     SkyMapRect,
-    DensitySelectionSettings
+    DensitySelectionSettings,
+    MeshVolume
 >;
 
 /**
@@ -178,6 +208,29 @@ public:
         const DensitySelectionSettings& settings) const;
 
     /**
+     * Selects candidate exoplanets whose 3D position falls within the given volume.
+     *
+     * \param data The full dataset of exoplanet items
+     * \param candidates Candidate item indices to test
+     * \param volume The selection volume
+     * \return Indices of exoplanets located inside the volume
+     */
+    std::vector<size_t> selectMeshVolume(const std::vector<ExoplanetItem>& data,
+        const std::vector<size_t>& candidates, const MeshVolume& volume) const;
+
+    /**
+     * Creates a selection volume from the grid nodes selected by a cast selection,
+     * bounded by the density threshold of \p result.
+     *
+     * \param volume The density volume that \p result was computed from
+     * \param result The cast selection result
+     * \param volumeToWorld Transform from \p volume coordinates to world meters
+     * \return The selection volume, or std::nullopt if \p result selects nothing
+     */
+    std::optional<MeshVolume> createMeshVolume(const DensityVolume& volume,
+        const CastResult& result, const glm::dmat4& volumeToWorld);
+
+    /**
      * Evaluates a spatial query against the provided candidate rows.
      */
     std::vector<size_t> select(const std::vector<ExoplanetItem>& data,
@@ -218,6 +271,7 @@ public:
 private:
     std::vector<SavedSelection> _savedSelections;
     size_t _nextSavedSelectionId = 0;
+    size_t _nextMeshVolumeId = 0;
 
     std::vector<double> _selectionVolumeParameters;
     bool _selectionVolumeIsVisible = false;

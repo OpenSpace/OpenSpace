@@ -3,6 +3,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/exoplanetsexperttool/rendering/selectionvolumemesh.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -24,6 +25,11 @@ public:
 
     static openspace::Documentation Documentation();
 
+    /**
+     * Sets the mesh that is shown while the shape parameters are [3, id].
+     */
+    void setCustomMesh(SelectionVolumeMesh mesh);
+
 private:
     void updateMesh();
 
@@ -37,6 +43,7 @@ private:
     GLsizei _nTriangleVertices = 0;
     GLsizei _nLineVertices = 0;
     bool _meshIsDirty = true;
+    SelectionVolumeMesh _customMesh;
 };
 
 } // namespace openspace::exoplanets

@@ -20,7 +20,8 @@ namespace {
         "Shape parameters",
         "Selection geometry in parsecs: sphere [0, x, y, z, radius], box "
         "[1, x, y, z, width, height, depth], sky rectangle "
-        "[2, raMin, raMax, decMin, decMax, useDistanceFilter, distMin, distMax]. "
+        "[2, raMin, raMax, decMin, decMax, useDistanceFilter, distMin, distMax], "
+        "custom mesh [3, id]. "
         "The straight-sided sky cone approximates the angular selection; wide "
         "ranges use tessellated angular boundaries.",
         Property::Visibility::Hidden
@@ -104,6 +105,11 @@ void RenderableSpatialSelectionVolume::deinitializeGL() {
     }
 }
 
+void RenderableSpatialSelectionVolume::setCustomMesh(SelectionVolumeMesh mesh) {
+    _customMesh = std::move(mesh);
+    _meshIsDirty = true;
+}
+
 void RenderableSpatialSelectionVolume::updateMesh() {
     SelectionVolumeMesh mesh;
     const std::vector<double>& parameters = _shapeParameters.value();
@@ -129,6 +135,9 @@ void RenderableSpatialSelectionVolume::updateMesh() {
             .distMin = parameters[6],
             .distMax = parameters[7]
         });
+    }
+    else if (parameters.size() == 2 && parameters[0] == 3.0) {
+        mesh = _customMesh;
     }
     _nTriangleVertices = static_cast<GLsizei>(mesh.triangles.size());
     _nLineVertices = static_cast<GLsizei>(mesh.lines.size());

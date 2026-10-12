@@ -1021,6 +1021,12 @@ void DataViewer::render() {
         const SpatialSelectionQuery query = _spatialSelectionView->currentSpatialQuery();
         _spatialSelectionHandler.updateSelectionVolume(&query);
     }
+    else if (_showSpatialSelectionWindow && _spatialSelectionView &&
+             _spatialSelectionView->generatedVolume().has_value())
+    {
+        const SpatialSelectionQuery query = *_spatialSelectionView->generatedVolume();
+        _spatialSelectionHandler.updateSelectionVolume(&query);
+    }
     else {
         _spatialSelectionHandler.updateSelectionVolume(nullptr);
     }

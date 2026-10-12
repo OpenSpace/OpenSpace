@@ -769,6 +769,10 @@ bool SpatialSelectionView::isDrawingLasso() const {
     return _isDrawingLasso;
 }
 
+const std::optional<MeshVolume>& SpatialSelectionView::generatedVolume() const {
+    return _generatedVolume;
+}
+
 bool SpatialSelectionView::lassoMouseButton(MouseButton button, MouseAction action,
                                             KeyModifier modifier,
                                             const glm::vec2& mousePos)
@@ -1433,6 +1437,7 @@ void SpatialSelectionView::renderLassoTab() {
     if (volumeChanged) {
         _castSelection = nullptr;
         _castResult = CastResult();
+        _generatedVolume = std::nullopt;
     }
 
     if (_lassoPending) {
@@ -1484,6 +1489,22 @@ void SpatialSelectionView::renderLassoTab() {
 
     if (ImGui::Button("Clear selection")) {
         clearLassoSelection();
+    }
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_castResult.nComponents == 0);
+    if (ImGui::Button("Generate Volume")) {
+        generateLassoVolume(target);
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    view::helper::renderHelpMarker(
+        "Creates a closed volume around the selected regions of the point cloud and "
+        "saves it as a spatial selection that selects the exoplanets inside it."
+    );
+
+    if (_generatedVolume.has_value()) {
+        ImGui::Text("Generated volume contains %zu items", _nItemsInGeneratedVolume);
     }
 
     if (!hasSelection) {
@@ -1575,9 +1596,44 @@ void SpatialSelectionView::applyLassoSelection() const {
 void SpatialSelectionView::clearLassoSelection() {
     _castSelection = nullptr;
     _castResult = CastResult();
+    _generatedVolume = std::nullopt;
     _lassoStroke.clear();
     _lassoStatus.clear();
     applyLassoSelection();
+}
+
+void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* target) {
+    SceneGraphNode* node = sceneGraphNode(_lassoTargetNode);
+    if (!target || !node || !_castSelection) {
+        return;
+    }
+
+    const glm::dmat4 volumeToWorld = node->modelTransform() *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(target->unitToMeter()));
+    _generatedVolume = handler().createMeshVolume(
+        _castSelection->volume(),
+        _castResult,
+        volumeToWorld
+    );
+    if (!_generatedVolume.has_value()) {
+        _lassoStatus = "The selection does not contain a volume";
+        return;
+    }
+
+    const std::vector<size_t> inside = handler().selectMeshVolume(
+        _dataViewer.data(),
+        _dataViewer.currentFiltering(),
+        *_generatedVolume
+    );
+    _nItemsInGeneratedVolume = inside.size();
+
+    const std::string summary = std::format(
+        "Lasso volume ({} region(s), density >= {:.3g})",
+        _generatedVolume->nComponents,
+        _generatedVolume->isoValue
+    );
+    handler().addSavedSelection("", summary, *_generatedVolume);
+    _dataViewer.setSelection(inside);
 }
 
 void SpatialSelectionView::drawLasso() const {
