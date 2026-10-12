@@ -499,14 +499,15 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
                 };
             }
 
-            // See how many points we need to drop
-            const uint64_t nNewPoints = static_cast<uint64_t>(
-                floor(delta / secondsPerPoint)
-            );
+            // See how many new points needs to be generated and check if we require
+            // fullsweep or not
+            const bool needsFullSweep =
+                static_cast<long long>(floor(delta / secondsPerPoint))
+                >= static_cast<long long>(_resolution);
 
             // If we would need to generate more new points than there are total points in
             // the array, it is faster to regenerate the entire array
-            if (nNewPoints >= static_cast<uint64_t>(_resolution)) {
+            if (needsFullSweep) {
                 fullSweep(time);
                 return {
                     .floatingPointNeedsUpdate = false,
@@ -515,7 +516,11 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
                 };
             }
 
-            for (uint64_t i = 0; i < nNewPoints; i++) {
+            // Casting to int here is fine since needsFullSweep is false, thus the number
+            // of new points fits within an integer
+            const int nNewPoints = static_cast<int>(floor(delta / secondsPerPoint));
+
+            for (int i = 0; i < nNewPoints; i++) {
                 _lastPointTime += secondsPerPoint;
 
                 // Get the new permanent point and write it into the (previously) floating
@@ -539,18 +544,19 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             return {
                 .floatingPointNeedsUpdate = false,
                 .permanentPointsNeedUpdate = true,
-                .nUpdated = static_cast<int>(nNewPoints)
+                .nUpdated = nNewPoints
             };
         }
         else {
-            // See how many new points needs to be generated. Delta is negative, so we
-            // need to invert the ratio
-            const int nNewPoints =
-                -(static_cast<int>(floor(delta / secondsPerPoint)));
+            // See how many new points needs to be generated and check if we require
+            // fullsweep or not. Delta is negative, so we need to invert the ratio
+            const bool needsFullSweep = 
+                std::abs(static_cast<long long>(floor(delta / secondsPerPoint)))
+                >= static_cast<long long>(_resolution);
 
             // If we would need to generate more new points than there are total points in
             // the array, it is faster to regenerate the entire array
-            if (nNewPoints >= _resolution) {
+            if (needsFullSweep) {
                 fullSweep(time);
                 return {
                     .floatingPointNeedsUpdate = false,
@@ -558,6 +564,11 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
                     .nUpdated = UpdateReport::All
                 };
             }
+
+            // Casting to int here is fine since needsFullSweep is false, thus the number
+            // of new points fits within an integer
+            const int nNewPoints =
+                std::abs(static_cast<int>(floor(delta / secondsPerPoint)));
 
             for (int i = 0; i < nNewPoints; i++) {
                 _firstPointTime -= secondsPerPoint;
@@ -587,7 +598,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             return {
                 .floatingPointNeedsUpdate = false,
                 .permanentPointsNeedUpdate = true,
-                .nUpdated = static_cast<int>(-nNewPoints)
+                .nUpdated = -nNewPoints
             };
         }
     }
