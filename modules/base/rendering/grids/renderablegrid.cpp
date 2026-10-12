@@ -122,10 +122,10 @@ namespace {
         }
     };
 
-    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
-        "Labels",
-        "Labels",
-        "The labels for the grid."
+    constexpr PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        .identifier = "Labels",
+        .name = "Labels",
+        .description = "The labels for the grid."
     };
 
     // Creates a planar grid, that can be useful to for example illustrate distances in 3D

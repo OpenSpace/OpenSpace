@@ -90,10 +90,10 @@ namespace {
         }
     };
 
-    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
-        "Labels",
-        "Labels",
-        "The labels for the grid."
+    constexpr PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        .identifier = "Labels",
+        .name = "Labels",
+        .description = "The labels for the grid."
     };
 
     // Creates a grid with a spherical shape, given a number of segments in the latitude

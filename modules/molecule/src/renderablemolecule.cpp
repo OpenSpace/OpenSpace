@@ -722,7 +722,7 @@ RenderableMolecule::Representation::Representation(size_t number,
                                                    glm::vec4 uniformColor_)
     : PropertyOwner({
         .identifier = std::format("rep{}", number),
-        .guiName = std::format("Representation {}", number),
+        .name = std::format("Representation {}", number),
         .description = std::format("Visual representation of molecule {}", number),
     })
     , mask(md_bitfield_create(default_allocator))

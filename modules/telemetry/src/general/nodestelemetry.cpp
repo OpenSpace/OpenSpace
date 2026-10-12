@@ -51,10 +51,10 @@ namespace {
     constexpr int VerticalAngleIndex = 2;
     constexpr int DistanceUnitIndex = 3;
 
-    static const PropertyOwner::PropertyOwnerInfo NodesTelemetryInfo = {
-        "NodesTelemetry",
-        "Nodes Telemetry",
-        "Telemetry of a list of nodes that has been added by the user."
+    constexpr PropertyOwner::PropertyOwnerInfo NodesTelemetryInfo = {
+        .identifier = "NodesTelemetry",
+        .name = "Nodes Telemetry",
+        .description = "Telemetry of a list of nodes that has been added by the user."
     };
 
     constexpr OptionPropertyInfo DistanceUnitInfo = {
@@ -65,10 +65,10 @@ namespace {
         .visibility = Visibility::User
     };
 
-    static const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
-        "Precision",
-        "Precision",
-        "Settings for the precision of the nodes telemetry information."
+    constexpr PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+        .identifier = "Precision",
+        .name = "Precision",
+        .description = "Settings for the precision of the nodes telemetry information."
     };
 
     constexpr DoublePropertyInfo LowDistancePrecisionInfo = {

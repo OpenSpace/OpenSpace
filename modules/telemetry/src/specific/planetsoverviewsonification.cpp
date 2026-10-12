@@ -48,12 +48,12 @@ namespace {
     constexpr int UranusIndex = 6;
     constexpr int NeptuneIndex = 7;
 
-    static const PropertyOwner::PropertyOwnerInfo PlanetsOverviewSonificationInfo = {
-        "PlanetsOverviewSonification",
-        "Planets Overview Sonification",
-        "Sonification that gives an overview of the planets in the Solar System with "
-        "fewer audible features for each planet compared to the full planets "
-        "sonification."
+    constexpr PropertyOwner::PropertyOwnerInfo PlanetsOverviewSonificationInfo = {
+        .identifier = "PlanetsOverviewSonification",
+        .name = "Planets Overview Sonification",
+        .description = "Sonification that gives an overview of the planets in the Solar "
+            "System with fewer audible features for each planet compared to the full "
+            "planets sonification."
     };
 
     constexpr BoolPropertyInfo ToggleAllInfo = {

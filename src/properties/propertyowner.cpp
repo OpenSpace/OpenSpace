@@ -67,9 +67,9 @@ namespace {
 namespace openspace {
 
 PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
-    : _identifier(std::move(info.identifier))
-    , _guiName(std::move(info.guiName))
-    , _description(std::move(info.description))
+    : _identifier(std::string(info.identifier))
+    , _name(std::string(info.name))
+    , _description(std::string(info.description))
 {
     precondition(
         _identifier.find_first_of("\t\n ") == std::string::npos,
@@ -425,12 +425,12 @@ const std::string& PropertyOwner::type() const {
     return _type;
 }
 
-void PropertyOwner::setGuiName(std::string guiName) {
-    _guiName = std::move(guiName);
+void PropertyOwner::setGuiName(std::string name) {
+    _name = std::move(name);
 }
 
 const std::string& PropertyOwner::guiName() const {
-    return _guiName.empty() ? _identifier : _guiName;
+    return _name.empty() ? _identifier : _name;
 }
 
 void PropertyOwner::setDescription(std::string description) {

@@ -71,10 +71,10 @@ namespace {
         .visibility = Visibility::NoviceUser
     };
 
-    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
-        "Labels",
-        "Labels",
-        "The labels for the constellations."
+    constexpr PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        .identifier = "Labels",
+        .name = "Labels",
+        .description = "The labels for the constellations."
     };
 
     struct [[codegen::Dictionary(RenderableConstellationsBase)]] Parameters {

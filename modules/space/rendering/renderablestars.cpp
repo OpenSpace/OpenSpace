@@ -215,16 +215,16 @@ namespace {
         }
     };
 
-    const PropertyOwner::PropertyOwnerInfo CoreOwnerInfo = {
-        "Core",
-        "Core",
-        "Settings for the central core portion of the star."
+    constexpr PropertyOwner::PropertyOwnerInfo CoreOwnerInfo = {
+        .identifier = "Core",
+        .name = "Core",
+        .description = "Settings for the central core portion of the star."
     };
 
-    const PropertyOwner::PropertyOwnerInfo GlareOwnerInfo = {
-        "Glare",
-        "Glare",
-        "Settings for the glare portion of the star."
+    constexpr PropertyOwner::PropertyOwnerInfo GlareOwnerInfo = {
+        .identifier = "Glare",
+        .name = "Glare",
+        .description = "Settings for the glare portion of the star."
     };
 
     constexpr StringPropertyInfo TextureInfo = {
@@ -286,10 +286,10 @@ namespace {
         }
     };
 
-    const PropertyOwner::PropertyOwnerInfo SizeCompositionInfo = {
-        "SizeComposition",
-        "Size Composition",
-        ""
+    constexpr PropertyOwner::PropertyOwnerInfo SizeCompositionInfo = {
+        .identifier = "SizeComposition",
+        .name = "Size Composition",
+        .description = ""
     };
 
     constexpr OptionPropertyInfo SizeCompositionMethodInfo = {

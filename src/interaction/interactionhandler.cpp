@@ -102,11 +102,11 @@ namespace {
         }
     };
 
-    const PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {
-        "MouseInteractionVisualizer",
-        "Mouse Interaction Visualizer",
-        "The mouse interaction visualizer shows the distance the mouse has been moved "
-        "since it was pressed down."
+    constexpr PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {
+        .identifier = "MouseInteractionVisualizer",
+        .name = "Mouse Interaction Visualizer",
+        .description = "The mouse interaction visualizer shows the distance the mouse "
+            "has been moved since it was pressed down."
     };
 
     constexpr BoolPropertyInfo MouseVisualizerEnabledInfo = {

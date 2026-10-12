@@ -70,11 +70,11 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    const PropertyOwner::PropertyOwnerInfo PlacementInfo = {
-        "Placement",
-        "Placement",
-        "Properties to determine where the screen space object will be placed on the "
-        "screen."
+    constexpr PropertyOwner::PropertyOwnerInfo PlacementInfo = {
+        .identifier = "Placement",
+        .name = "Placement",
+        .description = "Properties to determine where the screen space object will be "
+            "placed on the screen."
     };
 
     constexpr BoolPropertyInfo UseRadiusAzimuthElevationInfo = {
@@ -119,11 +119,11 @@ namespace {
         }
     };
 
-    const PropertyOwner::PropertyOwnerInfo BorderInfo = {
-        "Border",
-        "Border",
-        "Properties to control the look of the border surrounding the screen space "
-        "object."
+    constexpr PropertyOwner::PropertyOwnerInfo BorderInfo = {
+        .identifier = "Border",
+        .name = "Border",
+        .description = "Properties to control the look of the border surrounding the "
+            "screen space object."
     };
 
     constexpr FloatPropertyInfo BorderWidthInfo = {
@@ -158,11 +158,11 @@ namespace {
         }
     };
 
-    const PropertyOwner::PropertyOwnerInfo StyleInfo = {
-        "Style",
-        "Style",
-        "Properties to control the visual style of the screen space object, such as "
-        "gamma settings, borders, and background colors."
+    constexpr PropertyOwner::PropertyOwnerInfo StyleInfo = {
+        .identifier = "Style",
+        .name = "Style",
+        .description = "Properties to control the visual style of the screen space "
+            "object, such as gamma settings, borders, and background colors."
     };
 
     constexpr Vec3PropertyInfo MultiplyColorInfo = {

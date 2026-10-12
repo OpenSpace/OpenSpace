@@ -104,7 +104,7 @@ LightSource::LightSource(const Dictionary& dictionary)
 
     _type = p.type;
     _identifier = p.identifier;
-    _guiName = p.name.value_or(_identifier);
+    _name = p.name.value_or(_identifier);
 }
 
 bool LightSource::initialize() {

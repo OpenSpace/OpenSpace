@@ -94,11 +94,11 @@ namespace {
         }
     };
 
-    const PropertyOwner::PropertyOwnerInfo TransformInfo = {
-        "Transform",
-        "Transform",
-        "The Translation, Rotation, and Scale that are applied to the rendered "
-        "Renderable."
+    constexpr PropertyOwner::PropertyOwnerInfo TransformInfo = {
+        .identifier = "Transform",
+        .name = "Transform",
+        .description = "The Translation, Rotation, and Scale that are applied to the "
+            "rendered Renderable."
     };
 
     // Renders any [Renderable](#core_renderable) type into an image that is shown in

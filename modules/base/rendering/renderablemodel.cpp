@@ -78,16 +78,16 @@ namespace {
 
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
-    static const PropertyOwner::PropertyOwnerInfo CustomNodeTransformsInfo = {
-        "CustomNodeTransforms",
-        "Custom Node Transforms",
-        "Custom transformations for internal model nodes."
+    constexpr PropertyOwner::PropertyOwnerInfo CustomNodeTransformsInfo = {
+        .identifier = "CustomNodeTransforms",
+        .name = "Custom Node Transforms",
+        .description = "Custom transformations for internal model nodes."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo CustomNodeTransformInfo = {
-        "CustomNodeTransform",
-        "Custom Node Transform",
-        "Custom transformation for an internal model node."
+    constexpr PropertyOwner::PropertyOwnerInfo CustomNodeTransformInfo = {
+        .identifier = "CustomNodeTransform",
+        .name = "Custom Node Transform",
+        .description = "Custom transformation for an internal model node."
     };
 
     constexpr BoolPropertyInfo EnableAnimationInfo = {

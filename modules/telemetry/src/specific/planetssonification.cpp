@@ -77,10 +77,10 @@ namespace {
     constexpr int MoonsIndex = 4;
     constexpr int RingsIndex = 5;
 
-    static const PropertyOwner::PropertyOwnerInfo PlanetsSonificationInfo = {
-        "PlanetsSonification",
-        "Planets Sonification",
-        "Sonification of the planets in the solar system."
+    constexpr PropertyOwner::PropertyOwnerInfo PlanetsSonificationInfo = {
+        .identifier = "PlanetsSonification",
+        .name = "Planets Sonification",
+        .description = "Sonification of the planets in the solar system."
     };
 
     constexpr BoolPropertyInfo ToggleAllInfo = {
@@ -93,52 +93,52 @@ namespace {
         }
     };
 
-    static const PropertyOwner::PropertyOwnerInfo MercuryInfo = {
-        "Mercury",
-        "Mercury",
-        "Settings for the sonification of Mercury."
+    constexpr PropertyOwner::PropertyOwnerInfo MercuryInfo = {
+        .identifier = "Mercury",
+        .name = "Mercury",
+        .description = "Settings for the sonification of Mercury."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo VenusInfo = {
-        "Venus",
-        "Venus",
-        "Settings for the sonification of Venus."
+    constexpr PropertyOwner::PropertyOwnerInfo VenusInfo = {
+        .identifier = "Venus",
+        .name = "Venus",
+        .description = "Settings for the sonification of Venus."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo EarthInfo = {
-        "Earth",
-        "Earth",
-        "Settings for the sonification of Earth."
+    constexpr PropertyOwner::PropertyOwnerInfo EarthInfo = {
+        .identifier = "Earth",
+        .name = "Earth",
+        .description = "Settings for the sonification of Earth."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo MarsInfo = {
-        "Mars",
-        "Mars",
-        "Settings for the sonification of Mars."
+    constexpr PropertyOwner::PropertyOwnerInfo MarsInfo = {
+        .identifier = "Mars",
+        .name = "Mars",
+        .description = "Settings for the sonification of Mars."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo JupiterInfo = {
-        "Jupiter",
-        "Jupiter",
-        "Settings for the sonification of Jupiter."
+    constexpr PropertyOwner::PropertyOwnerInfo JupiterInfo = {
+        .identifier = "Jupiter",
+        .name = "Jupiter",
+        .description = "Settings for the sonification of Jupiter."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo SaturnInfo = {
-        "Saturn",
-        "Saturn",
-        "Settings for the sonification of Saturn."
+    constexpr PropertyOwner::PropertyOwnerInfo SaturnInfo = {
+        .identifier = "Saturn",
+        .name = "Saturn",
+        .description = "Settings for the sonification of Saturn."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo UranusInfo = {
-        "Uranus",
-        "Uranus",
-        "Settings for the sonification of Uranus."
+    constexpr PropertyOwner::PropertyOwnerInfo UranusInfo = {
+        .identifier = "Uranus",
+        .name = "Uranus",
+        .description = "Settings for the sonification of Uranus."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo NeptuneInfo = {
-        "Neptune",
-        "Neptune",
-        "Settings for the sonification of Neptune."
+    constexpr PropertyOwner::PropertyOwnerInfo NeptuneInfo = {
+        .identifier = "Neptune",
+        .name = "Neptune",
+        .description = "Settings for the sonification of Neptune."
     };
 
     constexpr BoolPropertyInfo PlanetToggleAllInfo = {
@@ -211,10 +211,11 @@ namespace {
         }
     };
 
-    const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
-        "Precision",
-        "Precision",
-        "Settings for the distance and angle precision of the planets sonification."
+    constexpr PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+        .identifier = "Precision",
+        .name = "Precision",
+        .description = "Settings for the distance and angle precision of the planets "
+            "sonification."
     };
 
     constexpr DoublePropertyInfo LowDistancePrecisionInfo = {
@@ -412,15 +413,15 @@ PlanetsSonification::PlanetProperties::PlanetProperties(
 
     // Not all planets have all features, set them as read only if they do not exist
     // Mercury is the only planet that does not have any form of atmosphere
-    if (planetInfo.guiName == "Mercury") {
+    if (planetInfo.name == "Mercury") {
         atmosphereEnabled.setReadOnly(true);
     }
     // Mercury and Venus are the only planets that does not have any moon
-    if (planetInfo.guiName == "Mercury" || planetInfo.guiName == "Venus") {
+    if (planetInfo.name == "Mercury" || planetInfo.name == "Venus") {
         moonsEnabled.setReadOnly(true);
     }
     // Saturn is the only planet with rings (visible in OpenSpace)
-    if (planetInfo.guiName != "Saturn") {
+    if (planetInfo.name != "Saturn") {
         ringsEnabled.setReadOnly(true);
     }
 }

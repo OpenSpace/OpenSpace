@@ -53,9 +53,9 @@ public:
     static constexpr char URISeparator = '.';
 
     struct PropertyOwnerInfo {
-        std::string identifier = "";
-        std::string guiName = "";
-        std::string description = "";
+        std::string_view identifier;
+        std::string_view name;
+        std::string_view description;
     };
 
     /**
@@ -109,9 +109,9 @@ public:
      * Sets the user-facing name of this PropertyOwner. This name does not have to be
      * unique, but it is recommended to be.
      *
-     * \param guiName The new user-facing name for this PropertyOwner
+     * \param name The new user-facing name for this PropertyOwner
      */
-    void setGuiName(std::string guiName);
+    void setGuiName(std::string name);
 
     /**
      * Returns the current user-facing name for this PropertyOwner.
@@ -339,7 +339,7 @@ protected:
     /// The unique identifier of this PropertyOwner
     std::string _identifier;
     /// The user-facing GUI name for this PropertyOwner
-    std::string _guiName;
+    std::string _name;
     /// The description for this PropertyOwner
     std::string _description;
     /// The type for this PropertyOwner

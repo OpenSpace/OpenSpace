@@ -427,12 +427,12 @@ namespace {
         }
     };
 
-    const PropertyOwner::PropertyOwnerInfo WindowingInfo = {
-        "Windowing",
-        "Windowing",
-        "Contains properties that concern the specific rendering settings of individual "
-        "windows. Note that the number of properties in this owner are determined by the "
-        "configuration file and might be different from run to run."
+    constexpr PropertyOwner::PropertyOwnerInfo WindowingInfo = {
+        .identifier = "Windowing",
+        .name = "Windowing",
+        .description = "Contains properties that concern the specific rendering settings "
+            "of individual windows. Note that the number of properties in this owner are "
+            "determined by the configuration file and might be different from run to run."
     };
 } // namespace
 
@@ -644,7 +644,7 @@ void RenderEngine::initializeGL() {
         std::string name = global::windowDelegate->nameForWindow(i);
         PropertyOwner::PropertyOwnerInfo info = {
             .identifier = std::format("Window_{}", i),
-            .guiName = name.empty() ? std::format("Window {}", i) : name
+            .name = name.empty() ? std::format("Window {}", i) : name
         };
         auto w = std::make_unique<Window>(info, i);
         _windowing.addPropertySubOwner(w.get());

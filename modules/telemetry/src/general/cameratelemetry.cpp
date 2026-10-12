@@ -47,10 +47,11 @@ namespace {
     constexpr int CameraSpeedIndex = 7;
     constexpr int CameraSpeedUnitIndex = 8;
 
-    static const PropertyOwner::PropertyOwnerInfo CameraTelemetryInfo = {
-        "CameraTelemetryInfo",
-        "Camera Telemetry",
-        "Telemetry that sends out camera information to the Open Sound Control receiver."
+    constexpr PropertyOwner::PropertyOwnerInfo CameraTelemetryInfo = {
+        .identifier = "CameraTelemetryInfo",
+        .name = "Camera Telemetry",
+        .description = "Telemetry that sends out camera information to the Open Sound "
+            "Control receiver."
     };
 
     constexpr OptionPropertyInfo CameraSpeedDistanceUnitInfo = {
@@ -62,10 +63,10 @@ namespace {
         .visibility = Visibility::User
     };
 
-    const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
-        "Precision",
-        "Precision",
-        "Settings for the precision of the camera telemetry information."
+    constexpr PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+        .identifier = "Precision",
+        .name = "Precision",
+        .description = "Settings for the precision of the camera telemetry information."
     };
 
     constexpr DoublePropertyInfo PositionPrecisionInfo = {

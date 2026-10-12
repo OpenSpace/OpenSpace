@@ -253,11 +253,11 @@ namespace {
         }
     };
 
-    const PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
-        "LimitZoom",
-        "Limit Zoom",
-        "Settings to limit the camera from going to close to or too far away from the "
-        "current focus."
+    constexpr PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
+        .identifier = "LimitZoom",
+        .name = "Limit Zoom",
+        .description = "Settings to limit the camera from going to close to or too far "
+            "away from the current focus."
     };
 
     constexpr BoolPropertyInfo EnableMinimumAllowedDistanceInfo = {

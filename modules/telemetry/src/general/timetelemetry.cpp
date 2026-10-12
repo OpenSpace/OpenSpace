@@ -40,10 +40,11 @@ namespace {
     constexpr int TimeSpeedUnitIndex = 1;
     constexpr int CurrentTimeIndex = 2;
 
-    static const PropertyOwner::PropertyOwnerInfo TimeTelemetryInfo = {
-        "TimeTelemetry",
-        "Time Telemetry",
-        "Telemetry that sends out time information to the Open Sound Control receiver."
+    constexpr PropertyOwner::PropertyOwnerInfo TimeTelemetryInfo = {
+        .identifier = "TimeTelemetry",
+        .name = "Time Telemetry",
+        .description = "Telemetry that sends out time information to the Open Sound "
+            "Control receiver."
     };
 
     constexpr OptionPropertyInfo TimeUnitOptionInfo = {
@@ -55,10 +56,10 @@ namespace {
         .visibility = Visibility::User
     };
 
-    const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
-        "Precision",
-        "Precision",
-        "Settings for the precision of the telemetry information."
+    constexpr PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+        .identifier = "Precision",
+        .name = "Precision",
+        .description = "Settings for the precision of the telemetry information."
     };
 
     constexpr DoublePropertyInfo TimePrecisionInfo = {

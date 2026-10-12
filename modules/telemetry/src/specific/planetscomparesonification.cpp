@@ -61,11 +61,11 @@ namespace {
         "Uranus", "Neptune"
     };
 
-    static const PropertyOwner::PropertyOwnerInfo PlanetsCompareSonificationInfo = {
-        "PlanetsCompareSonification",
-        "Planets Compare Sonification",
-        "Sonification that compares two different planets to each other in a variety of "
-        "aspects."
+    constexpr PropertyOwner::PropertyOwnerInfo PlanetsCompareSonificationInfo = {
+        .identifier = "PlanetsCompareSonification",
+        .name = "Planets Compare Sonification",
+        .description = "Sonification that compares two different planets to each other "
+            "in a variety of aspects."
     };
 
     constexpr DoublePropertyInfo SelectedUpscaleInfo = {

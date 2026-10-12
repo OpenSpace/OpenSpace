@@ -71,7 +71,7 @@ RenderableSphereSpout::RenderableSphereSpout(const Dictionary& dictionary)
         id++;
     }
 
-    if (_guiName.empty()) {
+    if (_name.empty()) {
         // Adding an extra space to the user-facing name as it looks nicer
         setGuiName(std::format("RenderableSphereSpout {}", iIdentifier));
     }
