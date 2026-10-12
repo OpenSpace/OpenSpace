@@ -459,7 +459,7 @@ void SplitComboBox::showPopup() {
     _isTogglingFolder = false;
 
     const QModelIndex current = findFile(currentData().toString());
-    for (QModelIndex p = current.parent(); p.isValid(); p = p.parent()) {
+    for (QModelIndex p = current.parent(); p.isValid();  p = p.parent()) {
         _treeView->expand(p);
     }
 
@@ -608,7 +608,7 @@ void SplitComboBox::keyPressEvent(QKeyEvent* event) {
             // Jump to the next file whose name starts with the character that was typed.
             // The base class implementation would search through the entries of the
             // popup instead and could end up selecting a folder
-            for (int i = 1; i <= last + 1; i += 1) {
+            for (int i = 1; i <= last + 1; i++) {
                 const int idx = (std::max(current, 0) + i) % (last + 1);
                 const QString name = _files[idx].data(Qt::DisplayRole).toString();
                 if (name.startsWith(text, Qt::CaseInsensitive)) {
