@@ -111,7 +111,7 @@
       "value": "150.000000"
     },
     {
-      "name": "Scene.GanymedeMagnetosphere.Renderable.Flow.FlowEnabled",
+      "name": "Scene.GanymedeMagnetosphere.Renderable.Flow.Enabled",
       "type": "setPropertyValueSingle",
       "value": "true"
     },
