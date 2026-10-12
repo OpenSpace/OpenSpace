@@ -27,9 +27,11 @@
 
 #include <openspace/properties/misc/listproperty.h>
 
+#include <span>
+
 namespace openspace {
 
-using IntListPropertyInfo = BasicPropertyInfo<ValueDefaults<std::vector<int>>>;
+using IntListPropertyInfo = BasicPropertyInfo<ValueDefaults<std::span<int>>>;
 
 class IntListProperty : public ListProperty<int> {
 public:

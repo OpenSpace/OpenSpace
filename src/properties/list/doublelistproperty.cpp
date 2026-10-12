@@ -30,7 +30,10 @@
 namespace openspace {
 
 DoubleListProperty::DoubleListProperty(DoubleListPropertyInfo info)
-    : ListProperty(std::move(info))
+    : ListProperty(
+        info,
+        std::vector<double>(info.defaults.value.begin(), info.defaults.value.end())
+    )
 {}
 
 std::string_view DoubleListProperty::className() const {

@@ -25,8 +25,8 @@
 namespace openspace {
 
 template <typename T>
-ListProperty<T>::ListProperty(BasicPropertyInfo<ValueDefaults<std::vector<T>>> info)
-    : TemplateProperty<std::vector<T>>(std::move(info), std::move(info.defaults.value))
+ListProperty<T>::ListProperty(PropertyInfo info, std::vector<T> values)
+    : TemplateProperty<std::vector<T>>(std::move(info), std::move(values))
 {}
 
 template <typename T>

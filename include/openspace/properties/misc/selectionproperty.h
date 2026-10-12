@@ -28,10 +28,13 @@
 #include <openspace/properties/templateproperty.h>
 
 #include <set>
+#include <span>
+#include <string_view>
 
 namespace openspace {
 
-using SelectionPropertyInfo = BasicPropertyInfo<ValueDefaults<std::set<std::string>>>;
+using SelectionPropertyInfo =
+    BasicPropertyInfo<ValueDefaults<std::span<std::string_view>>>;
 
 class SelectionProperty : public TemplateProperty<std::set<std::string>> {
 public:

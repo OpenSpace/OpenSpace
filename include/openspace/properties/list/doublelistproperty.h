@@ -27,9 +27,11 @@
 
 #include <openspace/properties/misc/listproperty.h>
 
+#include <span>
+
 namespace openspace {
 
-using DoubleListPropertyInfo = BasicPropertyInfo<ValueDefaults<std::vector<double>>>;
+using DoubleListPropertyInfo = BasicPropertyInfo<ValueDefaults<std::span<double>>>;
 
 class DoubleListProperty : public ListProperty<double> {
 public:

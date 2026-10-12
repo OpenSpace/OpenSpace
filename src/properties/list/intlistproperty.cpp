@@ -30,7 +30,10 @@
 namespace openspace {
 
 IntListProperty::IntListProperty(IntListPropertyInfo info)
-    : ListProperty(std::move(info))
+    : ListProperty(
+        info,
+        std::vector<int>(info.defaults.value.begin(), info.defaults.value.end())
+    )
 {}
 
 std::string_view IntListProperty::className() const {

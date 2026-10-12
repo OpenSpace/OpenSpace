@@ -27,9 +27,13 @@
 
 #include <openspace/properties/misc/listproperty.h>
 
+#include <span>
+#include <string_view>
+
 namespace openspace {
 
-using StringListPropertyInfo = BasicPropertyInfo<ValueDefaults<std::vector<std::string>>>;
+using StringListPropertyInfo =
+    BasicPropertyInfo<ValueDefaults<std::span<std::string_view>>>;
 
 class StringListProperty : public ListProperty<std::string> {
 public:
