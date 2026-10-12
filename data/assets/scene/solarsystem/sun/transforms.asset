@@ -7,9 +7,10 @@ local SolarSystemBarycenter = {
   Identifier = "SolarSystemBarycenter",
   -- No parent; this node is attached to the scene graph root
   TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = "1550-JAN-01",
-    End = "2650-JAN-22"
+    Type = "TimeFrameKernel",
+    -- Using 'EARTH' as a standin for the entire solar system here. The SSB object is
+    -- handled in a special way by SPICE and will always be valid.
+    Object = "EARTH"
   },
   GUI = {
     Name = "Solar System Barycenter",
