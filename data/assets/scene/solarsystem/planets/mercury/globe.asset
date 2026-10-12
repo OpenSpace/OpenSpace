@@ -30,15 +30,16 @@ local Mercury = {
     Type = "RenderableGlobe",
     Radii = 2439700,
     -- Hapke Parameters
-    -- https://doi.org/10.1016/j.icarus.2015.11.040
+    -- 1: https://doi.org/10.1016/j.icarus.2015.11.040
+    -- 2: (AI Cited: https://www2.mdpi.com/2072-4292/14/2/405)
     Hapke = {
       W = 0.2824,
-      Theta = 13.0,
-      C = 0.1294,
-      B = 0.2588,
-      BS0 = 0.0, -- ?
-      BC0 = 0.0, -- ?
-      HS = 0.05, -- ?
+      Theta = 14.2707,
+      C = 0.1376, -- 1 + 2 avg
+      B = 0.1223, -- 2
+      BS0 = 3.086, -- 2
+      BC0 = 0.0,
+      HS = 0.090, -- 2
       HC = 0.9597,
       Phi = 0.0056
     },
