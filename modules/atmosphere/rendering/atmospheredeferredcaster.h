@@ -83,6 +83,7 @@ public:
         bool sunFollowing, float sunAngularSize, SceneGraphNode* lightSourceNode);
 
     void setHardShadows(bool enabled);
+    void setEllipsoidSquash(glm::dvec3 squash);
 
 private:
     void step3DTexture(opengl::ProgramObject& prg, int layer) const;
@@ -109,7 +110,7 @@ private:
         muSamples, muSSamples, nuSamples, inverseModelTransformMatrix,
         modelTransformMatrix, projectionToModelTransformMatrix, viewToWorldMatrix,
         camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture,
-        inscatterTexture, sunAngularSize) _uniformCache;
+        inscatterTexture, sunAngularSize, ellipsoidSquash) _uniformCache;
 
     opengl::TextureUnit _transmittanceTableTextureUnit;
     opengl::TextureUnit _irradianceTableTextureUnit;
@@ -150,6 +151,7 @@ private:
     const glm::ivec3 _textureSize;
 
     glm::dmat4 _modelTransform;
+    glm::dvec3 _ellipsoidSquash = glm::dvec3(1.0);
     float _opacity = 1.f;
 
     // Eclipse Shadows

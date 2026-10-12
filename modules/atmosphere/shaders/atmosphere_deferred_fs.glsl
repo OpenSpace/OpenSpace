@@ -98,6 +98,8 @@ uniform vec4 viewport;
 uniform vec2 resolution;
 uniform dvec3 camPosObj;
 uniform dvec3 sunDirectionObj;
+// Maps the planet's ellipsoid onto a sphere, (1, 1, 1) for a spherical planet
+uniform dvec3 ellipsoidSquash;
 
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
@@ -276,8 +278,8 @@ Ray calculateRayRenderableGlobe(vec2 st) {
   // Building Ray
   // Ray in object space (in KM)
   Ray ray;
-  ray.origin = camPosObj * 0.001;
-  ray.direction = normalize(objectCoords.xyz * dvec3(0.001) - ray.origin);
+  ray.origin = camPosObj * ellipsoidSquash * 0.001;
+  ray.direction = normalize(objectCoords.xyz * ellipsoidSquash * 0.001 - ray.origin);
   return ray;
 }
 
@@ -313,8 +315,10 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   float r2 = r * r;
   float nu = dot(v, s);
   float muSun = dot(x, s) / r;
-  float rayleighPhase = rayleighPhaseFunction(nu);
-  float miePhase = miePhaseFunction(nu, mieG);
+  // The squashing does not preserve angles, so the phase uses the unsquashed directions
+  float nuPhase = dot(normalize(v / vec3(ellipsoidSquash)), vec3(sunDirectionObj));
+  float rayleighPhase = rayleighPhaseFunction(nuPhase);
+  float miePhase = miePhaseFunction(nuPhase, mieG);
 
   // S[L](x,s,v)
   // I.e. the next line has the scattering light for the "infinite" ray passing through
@@ -585,11 +589,12 @@ void main() {
   dvec4 positionWorldCoords = viewToWorldMatrix * position;
 
   // World to Object (Normal and Position in meters)
-  dvec3 positionObjectsCoords = (inverseModelTransformMatrix * positionWorldCoords).xyz;
+  dvec3 positionObjectsCoords =
+    (inverseModelTransformMatrix * positionWorldCoords).xyz * ellipsoidSquash;
 
   // Distance of the pixel in the gBuffer to the observer
   // JCC (12/12/2017): AMD distance function is buggy.
-  double pixelDepth = length(camPosObj - positionObjectsCoords);
+  double pixelDepth = length(camPosObj * ellipsoidSquash - positionObjectsCoords);
 
   // JCC (12/13/2017): Trick to remove floating error in texture.
   // We see a squared noise on planet's surface when seeing the planet from far away
@@ -625,7 +630,7 @@ void main() {
   float r = length(x);
   vec3 v = vec3(ray.direction);
   float mu = 0.0; // dot(x, v) / r;
-  vec3 s = vec3(sunDirectionObj);
+  vec3 s = vec3(normalize(sunDirectionObj * ellipsoidSquash));
   float tF = float(maxLength - t);
 
   // Because we may move the camera origin to the top of atmosphere we also need to
@@ -633,7 +638,8 @@ void main() {
   // comparison with the planet's ground make sense:
   pixelDepth -= offset;
 
-  dvec3 onATMPos = (modelTransformMatrix * dvec4(x * 1000.0, 1.0)).xyz;
+  dvec3 onATMPos =
+    (modelTransformMatrix * dvec4(dvec3(x) * 1000.0 / ellipsoidSquash, 1.0)).xyz;
   vec2 eclipseShadowATM = calcShadow(shadowDataArray, onATMPos, false);
   float sunIntensityInscatter = sunRadiance * eclipseShadowATM.y;
 
@@ -649,8 +655,8 @@ void main() {
   if (groundHit) {
     vec2 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
     float sunIntensityGround = sunRadiance * eclipseShadowPlanet.y;
-    atmColor = groundColor(x, tF, v, s, attenuation, color.rgb, normal.xyz,
-      irradianceFactor, normal.w, sunIntensityGround);
+    atmColor = groundColor(x, tF, v, vec3(sunDirectionObj), attenuation, color.rgb,
+      normal.xyz, irradianceFactor, normal.w, sunIntensityGround);
   }
   else {
     // In order to get better performance, we are not tracing multiple rays per pixel

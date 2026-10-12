@@ -213,6 +213,10 @@ namespace {
         // The radius of the planet in meters.
         float planetRadius;
 
+        // The radii of the planet's ellipsoid in meters. If not specified, the planet is
+        // a sphere of planetRadius.
+        std::optional<glm::dvec3> radii;
+
         float planetAverageGroundReflectance;
 
         // [[codegen::verbatim(SunIntensityInfo.description)]]
@@ -283,10 +287,10 @@ Documentation RenderableAtmosphere::Documentation() {
 
 RenderableAtmosphere::RenderableAtmosphere(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 99.f)
+    , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 2000.f)
     , _groundAverageReflectance(AverageGroundReflectanceInfo, 0.f, 0.f, 1.f)
     , _groundRadianceEmission(GroundRadianceEmissionInfo, 0.f, 0.f, 1.f)
-    , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 50.f)
+    , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 100.f)
     , _rayleighScatteringCoeff(
         RayleighScatteringCoeffInfo,
         glm::vec3(0.f),
@@ -301,7 +305,7 @@ RenderableAtmosphere::RenderableAtmosphere(const Dictionary& dictionary)
         glm::vec3(0.00001f),
         glm::vec3(0.001f)
     )
-    , _mieHeightScale(MieHeightScaleInfo, 0.f, 0.1f, 50.f)
+    , _mieHeightScale(MieHeightScaleInfo, 0.f, 0.1f, 100.f)
     , _mieScatteringCoeff(
         MieScatteringCoeffInfo,
         glm::vec3(0.004f),
@@ -350,6 +354,7 @@ RenderableAtmosphere::RenderableAtmosphere(const Dictionary& dictionary)
     addProperty(_atmosphereHeight);
 
     _planetRadius = p.planetRadius;
+    _radii = p.radii.value_or(glm::dvec3(_planetRadius * 1000.0));
 
     _groundAverageReflectance = p.planetAverageGroundReflectance;
     _groundAverageReflectance.onChange(updateWithCalculation);
@@ -528,6 +533,7 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
         _lightSourceNode
     );
     _deferredcaster->setHardShadows(_hardShadowsEnabled);
+    _deferredcaster->setEllipsoidSquash(glm::dvec3(_planetRadius * 1000.0) / _radii);
 }
 
 /**

@@ -370,6 +370,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
     const glm::dvec4 camPosObjCoords =
         invModelMatrix * glm::dvec4(data.camera.eyePosition(), 1.0);
     program.setUniform(_uniformCache.camPosObj, glm::dvec3(camPosObjCoords));
+    program.setUniform(_uniformCache.ellipsoidSquash, _ellipsoidSquash);
 
     // For the lighting we use the provided node, or the Sun
     SceneGraphNode* node =
@@ -566,6 +567,10 @@ void AtmosphereDeferredcaster::setParameters(float atmosphereRadius, float plane
 
 void AtmosphereDeferredcaster::setHardShadows(bool enabled) {
     _hardShadowsEnabled = enabled;
+}
+
+void AtmosphereDeferredcaster::setEllipsoidSquash(glm::dvec3 squash) {
+    _ellipsoidSquash = std::move(squash);
 }
 
 void AtmosphereDeferredcaster::calculateTransmittance() {

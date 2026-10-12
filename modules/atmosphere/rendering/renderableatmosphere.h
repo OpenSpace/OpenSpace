@@ -91,6 +91,7 @@ private:
     Vec2Property _atmosphereDimmingSunsetAngle;
 
     float _planetRadius = 0.f;
+    glm::dvec3 _radii = glm::dvec3(0.0);
 
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
 
