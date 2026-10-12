@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SPATIALSELECTIONHANDLER___H__
 
 #include <modules/exoplanetsexperttool/datastructures.h>
+#include <modules/exoplanetsexperttool/convexhull.h>
 #include <modules/exoplanetsexperttool/isosurface.h>
 
 #include <openspace/glm.h>
@@ -100,26 +101,25 @@ struct DensitySelectionSettings {
 };
 
 /**
- * Arbitrarily shaped selection volume, defined as the region where a scalar field is at
- * least #isoValue. Its surface is extracted with extractIsosurface for rendering.
+ * Selection volume made up of one convex hull per selected clump, in Parsecs.
  */
 struct MeshVolume {
     /// Session-local identity, used to detect when the rendered mesh must be replaced
     size_t id = 0;
 
     /// Shared so that copying the query, which happens every frame, stays cheap
-    std::shared_ptr<const VolumeGrid> grid;
+    std::shared_ptr<const std::vector<ConvexHull>> hulls;
+};
 
-    float isoValue = 0.f;
+struct IsoSurfaceVolume {
+    struct Geometry {
+        IsoSurface field;
+        glm::dmat4 parsecToGrid = glm::dmat4(1.0);
+        std::vector<glm::dvec3> triangles;
+    };
 
-    /// Transform from grid index coordinates to Parsecs
-    glm::dmat4 gridToParsec = glm::dmat4(1.0);
-
-    /// Transform from Parsecs to grid index coordinates
-    glm::dmat4 parsecToGrid = glm::dmat4(1.0);
-
-    /// Number of disjoint regions in the volume
-    size_t nComponents = 0;
+    size_t id = 0;
+    std::shared_ptr<const Geometry> geometry;
 };
 
 using SpatialSelectionQuery = std::variant<
@@ -127,7 +127,8 @@ using SpatialSelectionQuery = std::variant<
     BoxVolume,
     SkyMapRect,
     DensitySelectionSettings,
-    MeshVolume
+    MeshVolume,
+    IsoSurfaceVolume
 >;
 
 /**
@@ -219,15 +220,40 @@ public:
         const std::vector<size_t>& candidates, const MeshVolume& volume) const;
 
     /**
-     * Creates a selection volume from the grid nodes selected by a cast selection,
-     * bounded by the density threshold of \p result.
+     * Selects candidate exoplanets whose 3D position falls within the given surface
+     * volume.
+     *
+     * \param data The full dataset of exoplanet items
+     * \param candidates Candidate item indices to test
+     * \param volume The selection volume
+     * \return Indices of exoplanets located inside the volume
+     */
+    std::vector<size_t> selectIsoSurfaceVolume(const std::vector<ExoplanetItem>& data,
+        const std::vector<size_t>& candidates, const IsoSurfaceVolume& volume) const;
+
+    /**
+     * Creates a selection volume from the convex hulls of the particles selected by a
+     * cast selection, one hull per connected clump. Clumps that are too small or flat to
+     * enclose a volume are skipped.
      *
      * \param volume The density volume that \p result was computed from
      * \param result The cast selection result
      * \param volumeToWorld Transform from \p volume coordinates to world meters
-     * \return The selection volume, or std::nullopt if \p result selects nothing
+     * \return The selection volume, or std::nullopt if no clump encloses a volume
      */
     std::optional<MeshVolume> createMeshVolume(const DensityVolume& volume,
+        const CastResult& result, const glm::dmat4& volumeToWorld);
+
+    /**
+     * Builds an iso-surface volume enclosing the selected particles seelcted by a cast
+     * selection.
+     *
+     * \param volume The density volume that \p result was computed from
+     * \param result The cast selection result
+     * \param volumeToWorld Transform from \p volume coordinates to world meters
+     * \return The selection volume, or std::nullopt if the surface cannot be built reliably
+     */
+    std::optional<IsoSurfaceVolume> createIsoSurfaceVolume(const DensityVolume& volume,
         const CastResult& result, const glm::dmat4& volumeToWorld);
 
     /**

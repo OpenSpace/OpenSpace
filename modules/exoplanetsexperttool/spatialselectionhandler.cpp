@@ -208,7 +208,7 @@ std::vector<size_t> SpatialSelectionHandler::selectMeshVolume(
                                             const MeshVolume& volume) const
 {
     std::vector<size_t> result;
-    if (!volume.grid) {
+    if (!volume.hulls) {
         return result;
     }
     result.reserve(candidates.size());
@@ -221,9 +221,11 @@ std::vector<size_t> SpatialSelectionHandler::selectMeshVolume(
         if (!item.position.has_value()) {
             continue;
         }
-        const glm::dvec3 gridPos =
-            glm::dvec3(volume.parsecToGrid * glm::dvec4(*item.position, 1.0));
-        if (volume.grid->interpolate(gridPos) >= volume.isoValue) {
+        const bool isInside = std::any_of(
+            volume.hulls->begin(), volume.hulls->end(),
+            [&item](const ConvexHull& hull) { return hull.contains(*item.position); }
+        );
+        if (isInside) {
             result.push_back(idx);
         }
     }
@@ -236,79 +238,197 @@ std::optional<MeshVolume> SpatialSelectionHandler::createMeshVolume(
                                                        const CastResult& result,
                                                        const glm::dmat4& volumeToWorld)
 {
-    const glm::uvec3 dims = volume.dimensions();
-    const std::vector<float>& density = volume.data();
+    const std::vector<glm::vec3>& positions = volume.particlePositions();
     const std::vector<uint8_t>& mask = result.nodeMask;
-    // The interpolated field is 0 outside the mask, so a zero threshold would select all
-    if (mask.size() != density.size() || !(result.threshold > 0.f)) {
+
+    // Nothing selected, or the node mask doesn't match the volume's voxel count
+    if (result.selectedParticles.empty() || mask.size() != volume.data().size()) {
         return std::nullopt;
     }
 
-    glm::ivec3 low = glm::ivec3(dims);
-    glm::ivec3 high = glm::ivec3(-1);
-    for (unsigned int z = 0; z < dims.z; z++) {
-        for (unsigned int y = 0; y < dims.y; y++) {
-            for (unsigned int x = 0; x < dims.x; x++) {
-                if (mask[volume.nodeIndex(glm::uvec3(x, y, z))]) {
-                    const glm::ivec3 node = glm::ivec3(x, y, z);
-                    low = glm::min(low, node);
-                    high = glm::max(high, node);
-                }
-            }
+    // Build a per-particle lookup table of which particles are selected,
+    // rejecting any out-of-range particle index
+    std::vector<uint8_t> isSelected(positions.size(), 0);
+    for (int i : result.selectedParticles) {
+        if (i < 0 || static_cast<size_t>(i) >= positions.size()) {
+            return std::nullopt;
         }
-    }
-    if (high.x < 0) {
-        return std::nullopt;
+        isSelected[i] = 1;
     }
 
-    // Crop to the selected nodes with one layer of zeros around them to close the surface
-    const glm::ivec3 origin = low - glm::ivec3(1);
-    auto grid = std::make_shared<VolumeGrid>();
-    grid->dimensions = glm::uvec3(high - low + glm::ivec3(3));
-    grid->values.resize(
-        static_cast<size_t>(grid->dimensions.x) * grid->dimensions.y *
-        grid->dimensions.z,
-        0.f
-    );
-    for (unsigned int z = 0; z < grid->dimensions.z; z++) {
-        for (unsigned int y = 0; y < grid->dimensions.y; y++) {
-            for (unsigned int x = 0; x < grid->dimensions.x; x++) {
-                const glm::ivec3 node = origin + glm::ivec3(x, y, z);
-                const bool isInVolume =
-                    glm::all(glm::greaterThanEqual(node, glm::ivec3(0))) &&
-                    glm::all(glm::lessThan(node, glm::ivec3(dims)));
-                if (!isInVolume) {
-                    continue;
-                }
-                const size_t src = volume.nodeIndex(glm::uvec3(node));
-                if (mask[src]) {
-                    grid->values[x + static_cast<size_t>(grid->dimensions.x) *
-                        (y + static_cast<size_t>(grid->dimensions.y) * z)] =
-                        density[src];
-                }
-            }
-        }
-    }
-
-    const glm::dvec3 spacing = glm::dvec3(volume.spacing());
-    const glm::dmat4 gridToVolume =
-        glm::translate(
-            glm::dmat4(1.0),
-            glm::dvec3(volume.boundsMin()) + glm::dvec3(origin) * spacing
-        ) *
-        glm::scale(glm::dmat4(1.0), spacing);
-    const glm::dmat4 gridToParsec =
+    // Transform from volume space to parsec-scaled world space
+    // (volume -> world, then world units -> parsecs)
+    const glm::dmat4 volumeToParsec =
         glm::scale(glm::dmat4(1.0), glm::dvec3(1.0 / distanceconstants::Parsec)) *
-        volumeToWorld * gridToVolume;
+        volumeToWorld;
+
+    // Split the node mask into connected components, so each separate selected
+    // region gets its own hull instead of one hull spanning the gaps between them
+    const Components components = labelComponents(mask, volume.dimensions());
+    std::vector<ConvexHull> hulls;
+    for (size_t label = 0; label < components.sizes.size(); label++) {
+        // Find the selected particles that lie within this component
+        const std::vector<int> particles = particlesInComponent(
+            volume,
+            components.labels,
+            static_cast<int>(label),
+            isSelected
+        );
+        // Transform this component's particle positions into parsec space
+        std::vector<glm::dvec3> points;
+        points.reserve(particles.size());
+        for (int i : particles) {
+            const glm::dvec4 position = glm::dvec4(glm::dvec3(positions[i]), 1.0);
+            points.emplace_back(volumeToParsec * position);
+        }
+        // Compute the convex hull; this can fail for degenerate input (e.g. too few
+        // or coplanar points), in which case the component is simply skipped
+        std::optional<ConvexHull> hull = computeConvexHull(points);
+        if (hull.has_value()) {
+            hulls.push_back(std::move(*hull));
+        }
+    }
+    if (hulls.empty()) {
+        return std::nullopt;
+    }
 
     return MeshVolume{
         .id = _nextMeshVolumeId++,
-        .grid = std::move(grid),
-        .isoValue = result.threshold,
-        .gridToParsec = gridToParsec,
-        .parsecToGrid = glm::inverse(gridToParsec),
-        .nComponents = result.nComponents
+        .hulls = std::make_shared<const std::vector<ConvexHull>>(std::move(hulls))
     };
+}
+
+std::optional<IsoSurfaceVolume>
+SpatialSelectionHandler::createIsoSurfaceVolume(const DensityVolume& volume,
+                                                const CastResult& result,
+                                                const glm::dmat4& volumeToWorld)
+{
+    // Grid cell size along each axis; a non-positive spacing makes the
+    // world-to-grid conversion meaningless, so bail out early
+    const glm::dvec3 spacing = volume.spacing();
+    if (glm::any(glm::lessThanEqual(spacing, glm::dvec3(0.0)))) {
+        return std::nullopt;
+    }
+
+    // Convert each selected particle position into grid (voxel) coordinates
+    std::vector<glm::dvec3> points;
+    const auto& positions = volume.particlePositions();
+    for (int index : result.selectedParticles) {
+        // Reject out-of-range particle indices
+        if (index < 0 || static_cast<size_t>(index) >= positions.size()) {
+            return std::nullopt;
+        }
+        // Position relative to the volume's minimum corner, in units of grid cells
+        glm::dvec3 point = (glm::dvec3(positions[index]) -
+            glm::dvec3(volume.boundsMin())) / spacing;
+
+        // Largest valid grid coordinate along each axis
+        const glm::dvec3 upper = glm::dvec3(volume.dimensions()) - 1.0;
+
+        // Reject particles outside the grid (small epsilon tolerande for floating
+        // point error at the boundaries)
+        if (glm::any(glm::lessThan(point, glm::dvec3(-1.e-4))) ||
+            glm::any(glm::greaterThan(point, upper + 1.e-4)))
+        {
+            return std::nullopt;
+        }
+        // Snap points within the tolerance band back onto the grid
+        point = glm::clamp(point, glm::dvec3(0.0), upper);
+        points.push_back(point);
+    }
+
+    // Generate a smooth scalar field/surface around the selection, using the
+    // node mask and the selected points (in grid coordinates)
+    std::optional<IsoSurface> field = smoothSelectionSurface(
+        volume.dimensions(), result.nodeMask, points
+    );
+    if (!field) {
+        return std::nullopt;
+    }
+
+    // Build the transform from the field's grid coordinates to parsec-scaled world space.
+    // Applied right to left: scale by cell spacing -> translate to the field origin
+    // (volume bounds min + field offset in cells) -> volume-to-world -> world to parsecs
+    const glm::dmat4 gridToParsec =
+        glm::scale(glm::dmat4(1.0), glm::dvec3(1.0 / distanceconstants::Parsec)) *
+        volumeToWorld * glm::translate(glm::dmat4(1.0),
+            glm::dvec3(volume.boundsMin()) + glm::dvec3(field->origin) * spacing) *
+        glm::scale(glm::dmat4(1.0), spacing);
+
+    // The transform must be invertible and finite, otherwise we can't map back
+    const double determinant = glm::determinant(gridToParsec);
+    if (!std::isfinite(determinant) || determinant == 0.0) {
+        return std::nullopt;
+    }
+
+    // Store the inverse transform (parsec -> grid) so that world-space queries
+    // can later be evaluated against the grid-based field
+    auto geometry = std::make_shared<IsoSurfaceVolume::Geometry>();
+    geometry->parsecToGrid = glm::inverse(gridToParsec);
+    // Verify every matrix entry is finite after inversion
+    for (int column = 0; column < 4; ++column) {
+        for (int row = 0; row < 4; ++row) {
+            if (!std::isfinite(geometry->parsecToGrid[column][row])) {
+                return std::nullopt;
+            }
+        }
+    }
+
+    // Sanity check: every selected point must lie inside the generated surface
+    // (points are expressed relative to the field's origin)
+    for (const glm::dvec3& point : points) {
+        if (!field->contains(point - glm::dvec3(field->origin))) {
+            return std::nullopt;
+        }
+    }
+
+    // Extract the triangle mesh (3 vertices per triangle)
+    geometry->triangles = field->triangles();
+    if (geometry->triangles.empty()) {
+        return std::nullopt;
+    }
+    // Transform mesh vertices from grid space into parsec-scaled world space
+    for (glm::dvec3& vertex : geometry->triangles) {
+        vertex = glm::dvec3(gridToParsec * glm::dvec4(vertex, 1.0));
+    }
+
+    // A negative determinant means the transform mirrors the geometry, which
+    // flips triangle winding; swap two vertices per triangle to restore the
+    // original orientation (and thus correct face normals)
+    if (determinant < 0.0) {
+        for (size_t vertex = 0; vertex < geometry->triangles.size(); vertex += 3) {
+            std::swap(geometry->triangles[vertex + 1], geometry->triangles[vertex + 2]);
+        }
+    }
+
+    // Keep the field itself alongside the mesh
+    geometry->field = std::move(*field);
+
+    return IsoSurfaceVolume{
+        .id = _nextMeshVolumeId++,
+        .geometry = std::move(geometry)
+    };
+}
+
+std::vector<size_t> SpatialSelectionHandler::selectIsoSurfaceVolume(
+    const std::vector<ExoplanetItem>& data, const std::vector<size_t>& candidates,
+    const IsoSurfaceVolume& volume) const
+{
+    std::vector<size_t> result;
+    if (!volume.geometry) {
+        return result;
+    }
+    for (size_t index : candidates) {
+        if (index >= data.size() || !data[index].position) {
+            continue;
+        }
+        const glm::dvec3 point(volume.geometry->parsecToGrid *
+            glm::dvec4(*data[index].position, 1.0));
+        if (volume.geometry->field.contains(point)) {
+            result.push_back(index);
+        }
+    }
+    return result;
 }
 
 std::vector<size_t> SpatialSelectionHandler::select(
@@ -328,6 +448,9 @@ std::vector<size_t> SpatialSelectionHandler::select(
     }
     if (const MeshVolume* volume = std::get_if<MeshVolume>(&query)) {
         return selectMeshVolume(data, candidates, *volume);
+    }
+    if (const IsoSurfaceVolume* volume = std::get_if<IsoSurfaceVolume>(&query)) {
+        return selectIsoSurfaceVolume(data, candidates, *volume);
     }
     return selectDensity(
         data,
@@ -455,6 +578,9 @@ void SpatialSelectionHandler::updateSelectionVolume(const SpatialSelectionQuery*
         else if (const MeshVolume* volume = std::get_if<MeshVolume>(query)) {
             parameters = { 3.0, static_cast<double>(volume->id) };
         }
+        else if (const IsoSurfaceVolume* volume = std::get_if<IsoSurfaceVolume>(query)) {
+            parameters = { 3.0, static_cast<double>(volume->id) };
+        }
     }
     for (double value : parameters) {
         if (!std::isfinite(value)) {
@@ -476,14 +602,17 @@ void SpatialSelectionHandler::updateSelectionVolume(const SpatialSelectionQuery*
     );
     if (isVisible && parameters != _selectionVolumeParameters) {
         // The mesh is too large to pass through a property, so hand it over directly
-        if (const MeshVolume* volume = std::get_if<MeshVolume>(query)) {
+        if (std::holds_alternative<MeshVolume>(*query) ||
+            std::holds_alternative<IsoSurfaceVolume>(*query))
+        {
             SceneGraphNode* node = sceneGraphNode(SelectionVolumeIdentifier);
             auto* renderable = node ?
                 dynamic_cast<RenderableSpatialSelectionVolume*>(node->renderable()) :
                 nullptr;
-            if (renderable) {
-                renderable->setCustomMesh(selectionVolumeMesh(*volume));
+            if (!renderable) {
+                return;
             }
+            renderable->setCustomMesh(selectionVolumeMesh(*query));
         }
 
         std::string values;

@@ -139,7 +139,7 @@ public:
     /**
      * The volume most recently generated from the lasso selection, if any.
      */
-    const std::optional<MeshVolume>& generatedVolume() const;
+    const std::optional<SpatialSelectionQuery>& generatedVolume() const;
 
     /**
      * Starts or finishes a lasso stroke at \p mousePos (window pixels). Returns true if
@@ -164,7 +164,7 @@ private:
     void runLassoSelection(RenderableDensityPointCloud* target);
     void applyLassoSelection() const;
     void clearLassoSelection();
-    void generateLassoVolume(RenderableDensityPointCloud* target);
+    void generateLassoVolume(RenderableDensityPointCloud* target, bool isIsosurface);
     void drawLasso() const;
 
     struct ConstellationLineSegment {
@@ -246,7 +246,7 @@ private:
     float _castThresholdExponent = 0.f;
     std::unique_ptr<CastSelection> _castSelection;
     CastResult _castResult;
-    std::optional<MeshVolume> _generatedVolume;
+    std::optional<SpatialSelectionQuery> _generatedVolume;
     size_t _nItemsInGeneratedVolume = 0;
 };
 

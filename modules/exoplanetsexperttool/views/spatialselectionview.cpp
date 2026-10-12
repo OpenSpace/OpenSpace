@@ -769,7 +769,7 @@ bool SpatialSelectionView::isDrawingLasso() const {
     return _isDrawingLasso;
 }
 
-const std::optional<MeshVolume>& SpatialSelectionView::generatedVolume() const {
+const std::optional<SpatialSelectionQuery>& SpatialSelectionView::generatedVolume() const {
     return _generatedVolume;
 }
 
@@ -1491,10 +1491,13 @@ void SpatialSelectionView::renderLassoTab() {
         clearLassoSelection();
     }
 
+    ImGui::BeginDisabled(_castResult.selectedParticles.empty());
+    if (ImGui::Button("Generate Isosurface")) {
+        generateLassoVolume(target, true);
+    }
     ImGui::SameLine();
-    ImGui::BeginDisabled(_castResult.nComponents == 0);
-    if (ImGui::Button("Generate Volume")) {
-        generateLassoVolume(target);
+    if (ImGui::Button("Generate Convex Hull")) {
+        generateLassoVolume(target, false);
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
@@ -1597,12 +1600,15 @@ void SpatialSelectionView::clearLassoSelection() {
     _castSelection = nullptr;
     _castResult = CastResult();
     _generatedVolume = std::nullopt;
+    _nItemsInGeneratedVolume = 0;
     _lassoStroke.clear();
     _lassoStatus.clear();
     applyLassoSelection();
 }
 
-void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* target) {
+void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* target,
+                                              bool isIsosurface)
+{
     SceneGraphNode* node = sceneGraphNode(_lassoTargetNode);
     if (!target || !node || !_castSelection) {
         return;
@@ -1610,28 +1616,43 @@ void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* targ
 
     const glm::dmat4 volumeToWorld = node->modelTransform() *
         glm::scale(glm::dmat4(1.0), glm::dvec3(target->unitToMeter()));
-    _generatedVolume = handler().createMeshVolume(
-        _castSelection->volume(),
-        _castResult,
-        volumeToWorld
-    );
-    if (!_generatedVolume.has_value()) {
-        _lassoStatus = "The selection does not contain a volume";
+    std::optional<SpatialSelectionQuery> generated;
+    std::string summary;
+    if (isIsosurface) {
+        const auto volume = handler().createIsoSurfaceVolume(
+            _castSelection->volume(), _castResult, volumeToWorld
+        );
+        if (volume) {
+            generated = *volume;
+            summary = "Lasso volume (smoothed isosurface)";
+        }
+    }
+    else {
+        const auto volume = handler().createMeshVolume(
+            _castSelection->volume(), _castResult, volumeToWorld
+        );
+        if (volume) {
+            generated = *volume;
+            summary = std::format("Lasso volume ({} convex hull(s))",
+                volume->hulls->size());
+        }
+    }
+    if (!generated) {
+        _lassoStatus = isIsosurface ?
+            "Cannot generate an isosurface: invalid selection or cloud transform" :
+            "No clump has four non-coplanar particles; try Generate Isosurface";
         return;
     }
-
-    const std::vector<size_t> inside = handler().selectMeshVolume(
+    _generatedVolume = std::move(generated);
+    _lassoStatus.clear();
+    const std::vector<size_t> inside = handler().select(
         _dataViewer.data(),
         _dataViewer.currentFiltering(),
-        *_generatedVolume
+        *_generatedVolume,
+        _dataViewer.dataMapping()
     );
     _nItemsInGeneratedVolume = inside.size();
 
-    const std::string summary = std::format(
-        "Lasso volume ({} region(s), density >= {:.3g})",
-        _generatedVolume->nComponents,
-        _generatedVolume->isoValue
-    );
     handler().addSavedSelection("", summary, *_generatedVolume);
     _dataViewer.setSelection(inside);
 }

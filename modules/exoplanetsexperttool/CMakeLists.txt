@@ -29,6 +29,7 @@ set(HEADER_FILES
     castselection/lasso.h
     castselection/spacecast.h
     columnfilter.h
+    convexhull.h
     datahelper.h
     dataloader.h
     datastructures.h
@@ -61,6 +62,7 @@ set(SOURCE_FILES
     castselection/lasso.cpp
     castselection/spacecast.cpp
     columnfilter.cpp
+    convexhull.cpp
     datahelper.cpp
     dataloader.cpp
     dataviewer.cpp
