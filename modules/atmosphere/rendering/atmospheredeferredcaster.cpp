@@ -78,6 +78,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <string_view>
 #include <utility>
@@ -1165,26 +1166,53 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
 void AtmosphereDeferredcaster::step3DTexture(opengl::ProgramObject& prg, int layer) const
 {
     // See OpenGL redbook 8th Edition page 556 for Layered Rendering
-    const float planet2 = _atmospherePlanetRadius * _atmospherePlanetRadius;
-    const float diff = _atmosphereRadius * _atmosphereRadius - planet2;
-    const float ri = static_cast<float>(layer) / static_cast<float>(_rSamples - 1);
-    float eps = 0.01f;
-    if (layer > 0) {
-        if (layer == (_rSamples - 1)) {
-            eps = -0.001f;
-        }
-        else {
-            eps = 0.f;
-        }
-    }
-    const float r = std::sqrt(planet2 + ri * ri * diff) + eps;
-    const float dminG = r - _atmospherePlanetRadius;
-    const float dminT = _atmosphereRadius - r;
-    const float dh = std::sqrt(r * r - planet2);
-    const float dH = dh + std::sqrt(diff);
 
-    prg.setUniform("r", r);
-    prg.setUniform("dhdH", dminT, dH, dminG, dh);
+    // The layer radius is built from squared radii, so the geometry is evaluated in double
+    // precision and only the final values are converted to float. For large planets
+    // (Jupiter, Saturn) float32 cannot resolve the original +0.01 / -0.001 km nudges that
+    // keep the first and last layer strictly inside (Rg, Rt): above 32768 km the spacing
+    // between two floats is 2^-8 km (2^-7 km above 65536 km), so a -0.001 km nudge is
+    // rounded away. The top layer then lands exactly on Rt, dminT becomes 0 and the
+    // unmapping in the precompute shaders evaluates 0/0, which writes NaNs into the
+    // scattering tables. The tables then render as black. Earth/Uranus/Neptune are below
+    // 32768 km and never hit this
+    const double rg = static_cast<double>(_atmospherePlanetRadius);
+    const double rt = static_cast<double>(_atmosphereRadius);
+    const double planet2 = rg * rg;
+    const double diff = rt * rt - planet2;
+    const double ri = static_cast<double>(layer) / static_cast<double>(_rSamples - 1);
+
+    double r = std::sqrt(planet2 + ri * ri * diff);
+
+    // Distance between a float and the next representable float. The nudges must be at
+    // least two of these to survive the conversion to float
+    const double ulpBottom = static_cast<double>(
+        std::nextafter(_atmospherePlanetRadius, std::numeric_limits<float>::max()) -
+        _atmospherePlanetRadius
+    );
+    const double ulpTop = static_cast<double>(
+        std::nextafter(_atmosphereRadius, std::numeric_limits<float>::max()) -
+        _atmosphereRadius
+    );
+    if (layer == 0) {
+        r += std::max(0.01, 2.0 * ulpBottom);
+    }
+    else if (layer == (_rSamples - 1)) {
+        r -= std::max(0.001, 2.0 * ulpTop);
+    }
+
+    // Snap to float exactly once and derive everything else from that exact value, so the
+    // shader sees uniforms that are consistent with the r it actually receives
+    const float rFloat = static_cast<float>(r);
+    const double rUsed = static_cast<double>(rFloat);
+    const double dh = std::sqrt((rUsed - rg) * (rUsed + rg));
+
+    const float dminG = static_cast<float>(rUsed - rg);
+    const float dminT = static_cast<float>(rt - rUsed);
+    const float dH = static_cast<float>(dh + std::sqrt(diff));
+
+    prg.setUniform("r", rFloat);
+    prg.setUniform("dhdH", dminT, dH, dminG, static_cast<float>(dh));
 }
 
 } // namespace openspace

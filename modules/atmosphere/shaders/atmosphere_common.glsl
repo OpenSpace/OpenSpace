@@ -133,6 +133,9 @@ void unmappingMuMuSunNu(float r, vec4 dhdH, int samplesMu, float Rg, float Rt,
     // cosine law: Rt^2 = r^2 + d^2 - 2rdcos(pi-theta) where cosine(theta) = mu
     mu = (Rt*Rt - r2 - d * d) / (2.0 * r * d);
   }
+  // Rounding in the expressions above can push mu marginally outside [-1, 1] (and into
+  // NaN if d is 0). Anything outside the range is numerical noise, so keep it valid
+  mu = clamp(mu, -1.0, 1.0);
 
   float modValueMuSun = mod(fragment.x, float(samplesMuS)) / (float(samplesMuS) - 1.0);
   // The following mapping is different from the paper. See Collienne for an details.
