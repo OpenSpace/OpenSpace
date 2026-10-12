@@ -90,7 +90,7 @@ namespace {
         .identifier = "ShowOverlayOnClients",
         .name = "Show overlay information on clients",
         .description = "If this value is enabled, the overlay information text is also "
-            "automatically rendered on client nodes. This values is disabled by default.",
+            "automatically rendered on client nodes.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
             .value = false
@@ -642,9 +642,13 @@ void RenderEngine::initializeGL() {
 
     for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
         std::string name = global::windowDelegate->nameForWindow(i);
+        if (name.empty()) {
+            name = std::format("Window {}", i);
+        }
+        const std::string identifier = std::format("Window_{}", i);
         PropertyOwner::PropertyOwnerInfo info = {
-            .identifier = std::format("Window_{}", i),
-            .name = name.empty() ? std::format("Window {}", i) : name
+            .identifier = identifier,
+            .name = name
         };
         auto w = std::make_unique<Window>(info, i);
         _windowing.addPropertySubOwner(w.get());

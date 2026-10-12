@@ -47,7 +47,7 @@ namespace {
         .identifier = "Enabled",
         .name = "Enabled",
         .description = "This setting determines whether the labels will be visible or "
-            "not. They are disabled per default.",
+            "not.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
             .value = false

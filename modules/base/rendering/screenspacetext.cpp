@@ -35,10 +35,7 @@ namespace {
         .identifier = "Text",
         .name = "Text",
         .description = "The text to be displayed.",
-        .visibility = Visibility::User,
-        .defaults = {
-            .value = ""
-        }
+        .visibility = Visibility::User
     };
 
     // Shows a static text that can be changed via a property.

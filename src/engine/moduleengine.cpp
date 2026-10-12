@@ -51,7 +51,8 @@ namespace {
         .name = "All modules",
         .description = "The list of all modules that were compiled for this version of "
             "OpenSpace in the same order in which they were initialized.",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 } // namespace
 
@@ -61,7 +62,6 @@ ModuleEngine::ModuleEngine()
     : PropertyOwner({ "Modules" })
     , _allModules(AllModulesInfo)
 {
-    _allModules.setReadOnly(true);
     addProperty(_allModules);
 }
 

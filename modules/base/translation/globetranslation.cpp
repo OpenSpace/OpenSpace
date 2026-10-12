@@ -55,7 +55,7 @@ namespace {
         .name = "Latitude",
         .description = "The latitude of the location on the globe's surface. The value "
             "can range from -90 to 90, with negative values representing the southern "
-            "hemisphere of the globe. The default value is 0.0.",
+            "hemisphere of the globe.",
         .visibility = Visibility::User,
         .defaults = {
             .value = 0.0,
@@ -68,7 +68,7 @@ namespace {
         .name = "Longitude",
         .description = "The longitude of the location on the globe's surface. The value "
             "can range from -180 to 180, with negative values representing the western "
-            "hemisphere of the globe. The default value is 0.0.",
+            "hemisphere of the globe.",
         .visibility = Visibility::User,
         .defaults = {
             .value = 0.0,
@@ -81,7 +81,7 @@ namespace {
         .name = "Altitude",
         .description = "The altitude in meters. If the 'UseHeightmap' property is "
             "'true', this is an offset from the actual surface of the globe. If not, "
-            "this is an offset from the reference ellipsoid. The default value is 0.0.",
+            "this is an offset from the reference ellipsoid.",
         .visibility = Visibility::User,
         .defaults = {
             .value = 0.0,
@@ -94,7 +94,7 @@ namespace {
         .name = "Use heightmap",
         .description = "If this value is 'true', the altitude specified in 'Altitude' "
             "will be treated as an offset from the heightmap. Otherwise, it will be an "
-            "offset from the globe's reference ellipsoid. The default value is 'false'.",
+            "offset from the globe's reference ellipsoid.",
         .visibility = Visibility::User,
         .defaults = {
             .value = false

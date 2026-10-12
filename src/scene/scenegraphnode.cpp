@@ -88,6 +88,7 @@ namespace {
         .name = "Screen visibility",
         .description = "Determines if the node is currently visible on screen.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = false
         }
@@ -98,6 +99,7 @@ namespace {
         .name = "Distance from camera to node",
         .description = "The distance from the camera to the node surface.",
         .visibility = Visibility::Developer,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = -1.0
         }
@@ -160,7 +162,8 @@ namespace {
             "bounding sphere. This is the actual value that is used internally within "
             "the software. If the BoundingSphere property is set to -1, it is the "
             "computed value, otherwise it matches the one set in the property.",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr DoublePropertyInfo EvalInteractionSphereInfo = {
@@ -170,7 +173,8 @@ namespace {
             "interaction sphere. This is the actual value that is used internally within "
             "the software. If the InteractionSphere property is set to -1, it is the "
             "computed value, otherwise it matches the one set in the property.",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr DoublePropertyInfo ApproachFactorInfo = {
@@ -211,7 +215,7 @@ namespace {
     constexpr StringPropertyInfo GuiNameInfo = {
         .identifier = "GuiName",
         .name = "GUI name",
-        .description = "This is the name for the scene graph node in the gui. Example: "
+        .description = "This is the name for the scene graph node in the GUI. Example: "
             "Earth.",
         .visibility = Visibility::Hidden
     };
@@ -263,7 +267,7 @@ namespace {
         .name = "Focusable Hint",
         .description = "This value serves as a hint to determine if it makes sense to "
             "focus the camera on this scene graph node. It only serves as a hint and "
-            "does not actually prevent the focussing. The default value is `true`.",
+            "does not actually prevent the focussing.",
         .visibility = Visibility::Hidden,
         .defaults = {
             .value = true
@@ -666,9 +670,7 @@ SceneGraphNode::SceneGraphNode()
 
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
-    _screenVisibility.setReadOnly(true);
     addProperty(_screenVisibility);
-    _distFromCamToNode.setReadOnly(true);
     addProperty(_distFromCamToNode);
     addProperty(_screenSizeRadius);
     addProperty(_visibilityDistance);
@@ -688,7 +690,6 @@ SceneGraphNode::SceneGraphNode()
     // negative values
     //_boundingSphere.setExponent(10.f);
     addProperty(_boundingSphere);
-    _evaluatedBoundingSphere.setReadOnly(true);
     addProperty(_evaluatedBoundingSphere);
 
     _interactionSphere.onChange(
@@ -706,7 +707,6 @@ SceneGraphNode::SceneGraphNode()
     // negative values
     //_interactionSphere.setExponent(10.f);
     addProperty(_interactionSphere);
-    _evaluatedInteractionSphere.setReadOnly(true);
     addProperty(_evaluatedInteractionSphere);
 
     _reachFactor.setExponent(3.f);

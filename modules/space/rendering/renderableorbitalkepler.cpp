@@ -231,8 +231,7 @@ namespace {
             "by StartRenderIdx and RenderSize.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
-            .value = 0,
-            .minMax = { 0, 1 }
+            .value = 0
         }
     };
 
@@ -242,8 +241,7 @@ namespace {
         .description = "Number of objects to render sequentially from StartRenderIdx.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
-            .value = 1,
-            .minMax = { 1, 2 }
+            .value = 1
         }
     };
 

@@ -63,6 +63,7 @@ namespace {
             .visibility = info.visibility,
             .isEnablable = info.isEnablable,
             .needsConfirmation = info.needsConfirmation,
+            .isReadOnly = info.isReadOnly,
             .defaults = {
                 .isEnabled = info.defaults.isEnabled,
                 .value = info.defaults.value,

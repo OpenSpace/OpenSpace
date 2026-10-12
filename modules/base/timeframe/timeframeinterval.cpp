@@ -56,8 +56,8 @@ namespace {
         .description = "Specifies the time when this TimeFrame becomes active.",
         .visibility = Visibility::User,
         .defaults = {
-            .value = 0,
-            .minMax = { 0, 1E9 }
+            .value = 0.0,
+            .minMax = { 0.0, 1E9 }
         }
     };
 
@@ -85,8 +85,8 @@ namespace {
         .description = "Specifies the time when this TimeFrame becomes inactive.",
         .visibility = Visibility::User,
         .defaults = {
-            .value = 0,
-            .minMax = { 0, 1E9 }
+            .value = 0.0,
+            .minMax = { 0.0, 1E9 }
         }
     };
 

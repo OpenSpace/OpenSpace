@@ -97,7 +97,8 @@ namespace {
         .name = "Texture source",
         .description = "A directory on disk from which to load the texture files for the "
             "sphere.",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr OptionPropertyInfo FitsLayerNameInfo = {
@@ -230,7 +231,6 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         _textureSource = p.textureSource->string();
     }
 
-    _textureSource.setReadOnly(true);
     addProperty(_textureSource);
 
     _loadingType = codegen::map<LoadingType>(

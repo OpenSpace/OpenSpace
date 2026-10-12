@@ -48,9 +48,6 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableFieldlines";
 
-    constexpr float DefaultFieldlineStepSize = 0.5f;
-    constexpr glm::vec4 DefaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
-
     constexpr std::string_view VectorFieldKameleonVariableLorentz = "Lorentz";
 
     enum class SeedPointSource {
@@ -64,7 +61,7 @@ namespace {
         .description = "", // @TODO Missing documentation
         .visibility = Visibility::User,
         .defaults = {
-            .value = DefaultFieldlineStepSize,
+            .value = 0.5f,
             .minMax = { 0.f, 10.f }
         }
     };
@@ -85,7 +82,7 @@ namespace {
         .description = "", // @TODO Missing documentation
         .visibility = Visibility::AdvancedUser,
         .defaults = {
-            .value = DefaultFieldlineColor,
+            .value = glm::vec4(1.f, 0.f, 0.f, 1.f),
             .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
         }
     };

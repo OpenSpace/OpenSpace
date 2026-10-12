@@ -57,7 +57,7 @@ namespace {
             "renderable class. This position is provided in meters.",
         .defaults = {
             .value = glm::vec3(0.f, 2.f, 2.f),
-            .minMax = { glm::vec3(-10.f, -10.f, -10.f), glm::vec3(10.f, 10.f, 10.f) }
+            .minMax = { glm::vec3(-10.f), glm::vec3(10.f) }
         }
     };
 

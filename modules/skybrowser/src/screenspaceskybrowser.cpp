@@ -107,6 +107,7 @@ namespace {
         .name = "Vertical field of view",
         .description = "The vertical field of view of the target.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 10.0,
             .minMax = { 0.00000000001, 70.0 }
@@ -184,10 +185,9 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const Dictionary& dictionary)
     );
 
     _verticalFov = p.verticalFov.value_or(_verticalFov);
-    _verticalFov.setReadOnly(true);
+    addProperty(_verticalFov);
 
     addProperty(_isHidden);
-    addProperty(_verticalFov);
     addProperty(_isPointingSpacecraft);
     addProperty(_updateDuringTargetAnimation);
 

@@ -35,7 +35,7 @@ namespace {
         .identifier = "Spacing",
         .name = "Spacing",
         .description = "This value determines the spacing (in pixels) that this item "
-            "represents. The default value is 15.",
+            "represents.",
         .visibility = Visibility::User,
         .defaults = {
             .value = 15.f,

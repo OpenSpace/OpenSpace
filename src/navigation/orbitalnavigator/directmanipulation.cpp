@@ -257,6 +257,7 @@ namespace {
         .description = "True if the direct manipulation interaction scheme is currently "
             "being applied.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = false
         }
@@ -266,7 +267,7 @@ namespace {
         .identifier = "AllowMouseInput",
         .name = "Allow mouse input",
         .description = "Decides whether direct manipulation should be applied when using "
-            "mouse input.Otherwise, it is only applied for touch input.",
+            "mouse input. Otherwise, it is only applied for touch input.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
             .value = false
@@ -321,12 +322,8 @@ DirectManipulation::DirectManipulation()
     , _defaultRenderableTypes(DefaultRenderableTypesInfo)
 {
     addProperty(_enabled);
-
-    _isActive.setReadOnly(true);
     addProperty(_isActive);
-
     addProperty(_allowMouseInput);
-
     addProperty(_distanceThreshold);
 
     // @TODO (2026-03-31, emmbr) This is a bit of a hack, to apply this setting to

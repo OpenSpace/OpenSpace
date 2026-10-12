@@ -77,6 +77,7 @@ namespace {
         .description = "The number of steps available in the dataset, including the "
             "initial positions.",
         .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 1
         }
@@ -263,9 +264,7 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     });
     addProperty(goToPrevStep);
 
-    nSteps.setReadOnly(true);
     addProperty(nSteps);
-
     addProperty(useSpline);
 }
 

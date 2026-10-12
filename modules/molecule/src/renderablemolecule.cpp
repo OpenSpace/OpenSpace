@@ -98,20 +98,26 @@ namespace {
     constexpr StringPropertyInfo MoleculeFileInfo = {
         .identifier = "MoleculeFile",
         .name = "Molecule file",
-        .description = "The path to the file from which the molecular structure is read."
+        .description = "The path to the file from which the molecular structure is read.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr StringPropertyInfo TrajectoryFileInfo = {
         .identifier = "TrajectoryFile",
         .name = "Trajectory file",
         .description = "The path to the file from which the trajectory information is "
-            "read."
+            "read.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr BoolPropertyInfo CoarseGrainedInfo = {
         .identifier = "CoarseGrained",
         .name = "Coarse grained",
         .description = "Enable if the dataset should be interpreted as coarse grained.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = false
         }
@@ -122,6 +128,8 @@ namespace {
         .name = "Apply PBC on load",
         .description = "Applies Periodic Boundary Constraints upon loading trajectory "
             "frames.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = true
         }
@@ -132,6 +140,7 @@ namespace {
         .name = "Apply PBC per frame",
         .description = "Applies Periodic Boundary Constraints for each interpolated "
             "frame (can be CPU-intensive).",
+        .visibility = Visibility::AdvancedUser,
         .defaults = {
             .value = false
         }
@@ -140,19 +149,22 @@ namespace {
     constexpr BoolPropertyInfo EnabledInfo = {
         .identifier = "Enabled",
         .name = "Enabled",
-        .description = "Enables the representation."
+        .description = "Enables the representation.",
+        .visibility = Visibility::User,
     };
 
     constexpr OptionPropertyInfo TypeInfo = {
         .identifier = "Type",
         .name = "Type",
-        .description = "The visual representation type to use for the molecule."
+        .description = "The visual representation type to use for the molecule.",
+        .visibility = Visibility::User
     };
 
     constexpr OptionPropertyInfo ColorInfo = {
         .identifier = "Color",
         .name = "Color",
-        .description = "The color mapping for the atoms."
+        .description = "The color mapping for the atoms.",
+        .visibility = Visibility::User
     };
 
     constexpr Vec4PropertyInfo UniformColorInfo = {
@@ -160,7 +172,9 @@ namespace {
         .name = "Uniform color",
         .description = "The uniform color to apply for the representation if that color "
             "mode is selected.",
+        .visibility = Visibility::User,
         .defaults = {
+            .value = glm::vec4(0.f),
             .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
         }
     };
@@ -168,14 +182,17 @@ namespace {
     constexpr StringPropertyInfo FilterInfo = {
         .identifier = "Filter",
         .name = "Filter",
-        .description = "The filter used to remove parts of the dataset."
+        .description = "The filter used to remove parts of the dataset.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr FloatPropertyInfo ScaleInfo = {
         .identifier = "Scale",
         .name = "Scale",
         .description = "Scale for the geometric representation of atoms.",
+        .visibility = Visibility::User,
         .defaults = {
+            .value = 0.f,
             .minMax = { 0.f, 10.f }
         }
     };
@@ -185,6 +202,8 @@ namespace {
         .name = "Animation base scale",
         .description = "Base scale for the animation. Tune this to sync up its animation "
             "with other trajectories.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 1.0,
             .minMax = { 0.0, 1e20 }
@@ -195,6 +214,7 @@ namespace {
         .identifier = "AnimationSpeed",
         .name = "Animation speed",
         .description = "Playback speed of the animation (in frames per second).",
+        .visibility = Visibility::AdvancedUser,
         .defaults = {
             .value = 1.0,
             .minMax = { -100.0, 100.0 }
@@ -205,7 +225,8 @@ namespace {
         .identifier = "AnimationRepeatMode",
         .name = "Animation repeat mode",
         .description = "Controls how the animation should be repeated when the end of "
-            "the animation is reached."
+            "the animation is reached.",
+        .visibility = Visibility::AdvancedUser
     };
 
     // Used to render a single molecular system, which can be either static or dynamic.
@@ -334,21 +355,17 @@ RenderableMolecule::RenderableMolecule(const Dictionary& dictionary)
     Parameters p = codegen::bake<Parameters>(dictionary);
 
     _moleculeFile = p.moleculeFile.string();
-    _moleculeFile.setReadOnly(true);
     addProperty(_moleculeFile);
 
     if (p.trajectoryFile.has_value()) {
         _trajectoryFile = p.trajectoryFile->string();
     }
-    _trajectoryFile.setReadOnly(true);
     addProperty(_trajectoryFile);
 
     _coarseGrained = p.coarseGrained.value_or(_coarseGrained);
-    _coarseGrained.setReadOnly(true);
     addProperty(_coarseGrained);
 
     _applyPbcOnLoad = p.applyPbcOnLoad.value_or(_applyPbcOnLoad);
-    _applyPbcOnLoad.setReadOnly(true);
     addProperty(_applyPbcOnLoad);
 
     if (!p.representations.has_value()) {
@@ -383,7 +400,6 @@ RenderableMolecule::RenderableMolecule(const Dictionary& dictionary)
     }
 
     _animationBaseScale = p.animationBaseScale.value_or(_animationBaseScale);
-    _animationBaseScale.setReadOnly(true);
     addProperty(_animationBaseScale);
 
     addPropertySubOwner(_repProps);

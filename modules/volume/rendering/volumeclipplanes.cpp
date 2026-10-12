@@ -28,18 +28,25 @@
 #include <openspace/misc/dictionary.h>
 #include <utility>
 
-namespace openspace {
+namespace {
+    using namespace openspace;
 
-VolumeClipPlanes::VolumeClipPlanes(const Dictionary& dictionary)
-    : PropertyOwner({ "" }) // @TODO Missing name
-    , _nClipPlanes({
+    constexpr IntPropertyInfo NClipPlanesInfo = {
         .identifier = "nClipPlanes",
         .name = "Number of clip planes",
         .description = "", // @TODO Missing documentation
         .defaults = {
+            .value = 0,
             .minMax = { 0, 10 }
         }
-    })
+    };
+} // namespace
+
+namespace openspace {
+
+VolumeClipPlanes::VolumeClipPlanes(const Dictionary& dictionary)
+    : PropertyOwner({ "" }) // @TODO Missing name
+    , _nClipPlanes(NClipPlanesInfo)
 {
     for (const std::string_view key : dictionary.keys()) {
         const Dictionary cutplane = dictionary.value<Dictionary>(key);

@@ -67,7 +67,8 @@ namespace {
         .identifier = "Type",
         .name = "Type",
         .description = "The type of the screenspace renderable.",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr PropertyOwner::PropertyOwnerInfo PlacementInfo = {
@@ -446,7 +447,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const Dictionary& dictionary)
 
     // Type for UI
     _renderableType = p.type;
-    _renderableType.setReadOnly(true);
     addProperty(_renderableType);
 
     _enabled = p.enabled.value_or(_enabled);

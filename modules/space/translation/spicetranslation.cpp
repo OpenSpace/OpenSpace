@@ -60,7 +60,7 @@ namespace {
         .identifier = "Frame",
         .name = "Reference frame",
         .description = "This is the SPICE name of the reference frame in which the "
-            "position should be calculated. The default value is GALACTIC.",
+            "position should be calculated.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
             .value = "GALACTIC"

@@ -58,15 +58,14 @@ namespace {
     constexpr StringPropertyInfo PropertyUriInfo = {
         .identifier = "URI",
         .name = "Property URI",
-        .description = "The URI of the property that is displayed in this dashboard "
-            "item.",
+        .description = "The URI of the property that is displayed.",
         .visibility = Visibility::User
     };
 
     constexpr StringPropertyInfo DisplayStringInfo = {
         .identifier = "DisplayString",
         .name = "Display string",
-        .description = "The String that is being displayed. It must either be empty (in "
+        .description = "The string that is being displayed. It must either be empty (in "
             "which case only the value itself will be displayed), or it must contain "
             "exactly one or more instances of {}, which will be replaced with the "
             "value(s) of the property during rendering. For scalar types, there has to "

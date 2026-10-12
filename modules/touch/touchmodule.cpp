@@ -53,9 +53,9 @@ namespace {
     constexpr IntPropertyInfo TuioPortInfo = {
         .identifier = "TuioPort",
         .name = "TUIO Port",
-        .description = "TUIO UDP port, by default 3333. The port cannot be changed after "
-            "startup.",
+        .description = "TUIO UDP port. The port cannot be changed after startup.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 3333,
             .minMax = { 1, 65535 }
@@ -67,6 +67,7 @@ namespace {
         .name = "Detected touch event",
         .description = "True when there is an active touch TUIO event.",
         .visibility = Visibility::Hidden,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = false
         }
@@ -86,10 +87,7 @@ TouchModule::TouchModule()
     , _tuioPort(TuioPortInfo)
     , _hasActiveTouchEvent(EventsInfo)
 {
-    _tuioPort.setReadOnly(true);
     addProperty(_tuioPort);
-
-    _hasActiveTouchEvent.setReadOnly(true);
     addProperty(_hasActiveTouchEvent);
 }
 

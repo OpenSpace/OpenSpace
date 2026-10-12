@@ -57,7 +57,7 @@ namespace {
         .identifier = "TravelSpeed",
         .name = "Speed of travel",
         .description = "A value for how fast the speed indicator should travel, in "
-            "meters per second. The default value is the speed of light.",
+            "meters per second.",
         .visibility = Visibility::NoviceUser,
         .defaults = {
             .value = distanceconstants::LightSecond,

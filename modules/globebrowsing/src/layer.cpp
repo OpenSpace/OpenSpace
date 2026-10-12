@@ -51,7 +51,8 @@ namespace {
         .name = "Type",
         .description = "The type of this Layer. This value is a read-only property and "
             "thus cannot be changed.",
-        .visibility = Visibility::Developer
+        .visibility = Visibility::Developer,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr OptionPropertyInfo BlendModeInfo = {
@@ -90,7 +91,6 @@ namespace {
         .description = "If this value is triggered, a script will be executed that will "
             "remove this layer before the next frame.",
         .visibility = Visibility::User,
-        .isEnablable = IsEnablable::No,
         .needsConfirmation = NeedsConfirmation::Yes
     };
 
@@ -368,9 +368,6 @@ Layer::Layer(layers::Group::ID id, const Dictionary& layerDict, LayerGroup& pare
         }
     });
 
-    _typeOption.setReadOnly(true);
-
-    // Add the properties
     addProperty(_typeOption);
     addProperty(_blendModeOption);
     addProperty(_enabled);

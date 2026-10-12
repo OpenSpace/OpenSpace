@@ -285,7 +285,7 @@ ScreenSpaceInsetBlackout::BlackoutShape::Point::Point(glm::vec2& inData,
         .name = guiName,
         .description = "Position (x,y) for where the control point is located.",
         .defaults = {
-            .value = *dataptr,
+            .value = inData,
             .minMax = { glm::vec2(0.f), glm::vec2(1.f) },
             .stepSize = glm::vec2(0.01f)
         }

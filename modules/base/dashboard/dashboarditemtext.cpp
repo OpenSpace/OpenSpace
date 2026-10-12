@@ -35,10 +35,7 @@ namespace {
         .identifier = "Text",
         .name = "Text",
         .description = "The text to be displayed.",
-        .visibility = Visibility::User,
-        .defaults = {
-            .value = ""
-        }
+        .visibility = Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {

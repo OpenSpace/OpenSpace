@@ -58,9 +58,8 @@ namespace {
     constexpr TriggerPropertyInfo ClearCacheInfo = {
         .identifier = "ClearCache",
         .name = "Clear cache",
-        .description = "Clears the cache of this DashboardItemFramerate item. If the "
-            "selected option does not use any caching, this trigger does not do "
-            "anything.",
+        .description = "Clears the cache of this item. If the selected option does not "
+            "use any caching, this trigger does not do anything.",
         .visibility = Visibility::AdvancedUser
     };
 

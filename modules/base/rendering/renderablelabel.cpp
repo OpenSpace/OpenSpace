@@ -83,8 +83,7 @@ namespace {
     constexpr OptionPropertyInfo BlendModeInfo = {
         .identifier = "BlendMode",
         .name = "Blending mode",
-        .description = "This determines the blending mode that is applied to the "
-            "renderable.",
+        .description = "This determines the blending mode that is applied.",
         .visibility = Visibility::AdvancedUser
     };
 

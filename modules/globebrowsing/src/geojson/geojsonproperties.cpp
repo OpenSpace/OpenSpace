@@ -220,7 +220,7 @@ namespace {
         .identifier = "Extrude",
         .name = "Extrude",
         .description = "If true, extrude the geometry to intersect the "
-            "globe.Lines/polygons will be extruded with polygons,and points with lines.",
+            "globe. Lines/polygons will be extruded with polygons,and points with lines.",
         .visibility = Visibility::User,
         .defaults = {
             .value = false

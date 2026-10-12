@@ -209,6 +209,7 @@ namespace {
         .name = "Rendered stars",
         .description = "The number of rendered stars in the current frame.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 0,
             .minMax = { 0, 2000000000 }
@@ -221,6 +222,7 @@ namespace {
         .description = "Current remaining budget (bytes) on the CPU RAM for loading more "
             "node data files.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 0.f,
             .minMax = { 0.f, 1.f }
@@ -233,6 +235,7 @@ namespace {
         .description = "Current remaining memory budget [in number of chunks] on the GPU "
             "for streaming additional stars.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 0.f,
             .minMax = { 0.f, 1.f }
@@ -468,11 +471,11 @@ RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
     , _gMagThreshold(FilterGMagInfo)
     , _bpRpThreshold(FilterBpRpInfo)
     , _distThreshold(FilterDistInfo)
-    , _firstRow(FirstRowInfo) // DR1-max: 2539913
+    , _firstRow(FirstRowInfo)
     , _lastRow(LastRowInfo)
     , _fileReaderOption(FileReaderOptionInfo)
     , _renderMode(RenderModeInfo)
-    , _nRenderedStars(NumRenderedStarsInfo) // 2 Billion stars
+    , _nRenderedStars(NumRenderedStarsInfo)
     , _cpuRamBudgetProperty(CpuRamBudgetInfo)
     , _gpuStreamBudgetProperty(GpuStreamBudgetInfo)
     , _maxGpuMemoryPercent(MaxGpuMemoryPercentInfo)
@@ -619,15 +622,8 @@ RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
         }
     }
 
-    // Add a read-only property for the number of rendered stars per frame
-    _nRenderedStars.setReadOnly(true);
     addProperty(_nRenderedStars);
-
-    // Add CPU RAM Budget Property and GPU Stream Budget Property to menu
-    _cpuRamBudgetProperty.setReadOnly(true);
     addProperty(_cpuRamBudgetProperty);
-
-    _gpuStreamBudgetProperty.setReadOnly(true);
     addProperty(_gpuStreamBudgetProperty);
 }
 

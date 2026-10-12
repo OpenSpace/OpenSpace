@@ -88,6 +88,7 @@ namespace {
         .name = "Vertical field of view",
         .description = "The vertical field of view of the target.",
         .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 10.0,
             .minMax = { 0.00000000001, 70.0 }
@@ -158,7 +159,6 @@ RenderableSkyTarget::RenderableSkyTarget(const Dictionary& dictionary)
     addProperty(_lineWidth);
 
     _verticalFov = p.verticalFov.value_or(_verticalFov);
-    _verticalFov.setReadOnly(true);
     addProperty(_verticalFov);
 
     addProperty(_applyRoll);

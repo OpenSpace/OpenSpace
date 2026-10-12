@@ -75,10 +75,7 @@ namespace {
         .identifier = "GuiUrl",
         .name = "Gui URL",
         .description = "The URL of the webpage that is used to load the WebGUI from.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = ""
-        }
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr FloatPropertyInfo GuiScaleInfo = {

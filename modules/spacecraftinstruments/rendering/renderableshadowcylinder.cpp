@@ -90,21 +90,24 @@ namespace {
         .name = "Light source",
         .description = "The SPICE name of the object that is used as the illuminator for "
             "computing the shadow cylinder.",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr StringPropertyInfo ObserverInfo = {
         .identifier = "Observer",
         .name = "Observer",
         .description = "The SPICE name of the object that is the observer.",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr StringPropertyInfo BodyInfo = {
         .identifier = "Body",
         .name = "Target body",
         .description = "The SPICE name of target body that is used as the shadow caster.",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr StringPropertyInfo BodyFrameInfo = {
@@ -112,7 +115,8 @@ namespace {
         .name = "Body frame",
         .description = "The SPICE name of the reference frame in which the shadow "
             "cylinder is expressed.",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr OptionPropertyInfo AberrationInfo = {
@@ -209,18 +213,17 @@ RenderableShadowCylinder::RenderableShadowCylinder(const Dictionary& dictionary)
     addProperty(_terminatorType);
 
     _lightSource = p.lightSource;
-    _observer = p.observer;
-    _body = p.body;
-    _bodyFrame = p.bodyFrame;
-
-    _lightSource.setReadOnly(true);
     addProperty(_lightSource);
-    _observer.setReadOnly(true);
+
+    _observer = p.observer;
     addProperty(_observer);
-    _body.setReadOnly(true);
+
+    _body = p.body;
     addProperty(_body);
-    _bodyFrame.setReadOnly(true);
+
+    _bodyFrame = p.bodyFrame;
     addProperty(_bodyFrame);
+
 
     using T = SpiceManager::AberrationCorrection::Type;
     _aberration.addOptions({

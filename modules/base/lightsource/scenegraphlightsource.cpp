@@ -54,10 +54,7 @@ namespace {
         .identifier = "Node",
         .name = "Node",
         .description = "The identifier of the scene graph node to follow.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = ""
-        }
+        .visibility = Visibility::AdvancedUser
     };
 
     // Represents a light source placed at the position of a scene graph node. That is,

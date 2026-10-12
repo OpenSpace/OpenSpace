@@ -178,7 +178,6 @@ namespace {
             "to prevent double inputs on touch (from both touch input and inserted mouse "
             "inputs).",
         .visibility = Visibility::User,
-        .isEnablable = IsEnablable::No,
         .needsConfirmation = NeedsConfirmation::Yes,
         .defaults = {
             .value = false

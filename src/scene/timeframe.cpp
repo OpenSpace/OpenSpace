@@ -40,8 +40,9 @@ namespace {
         .description = "This property indicates the current state of the TimeFrame time "
             "testing. If the current simulation time is determined to be a valid time, "
             "this property is set to true. Otherwise it will be false, meaning that the "
-            "scene graph node this TimeFrame is attached to would not be shown",
+            "scene graph node this TimeFrame is attached to would not be shown.",
         .visibility = Visibility::Developer,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = false
         }
@@ -85,7 +86,6 @@ TimeFrame::TimeFrame()
     : PropertyOwner({ "TimeFrame", "Time Frame" })
     , _isInTimeFrame(IsInTimeFrameInfo)
 {
-    _isInTimeFrame.setReadOnly(true);
     addProperty(_isInTimeFrame);
 }
 

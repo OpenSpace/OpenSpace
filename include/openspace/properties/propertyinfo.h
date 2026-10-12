@@ -31,9 +31,10 @@
 
 namespace openspace {
 
-BooleanType(NeedsConfirmation);
 BooleanType(IsEnablable);
 BooleanType(IsEnabled);
+BooleanType(NeedsConfirmation);
+BooleanType(IsReadOnly);
 
 /**
  * The visibility classes for Property%s. The classes are strictly ordered as
@@ -140,6 +141,9 @@ struct BasicPropertyInfo {
     /// Determines if the Property require confirmation upon value change
     NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
 
+    /// Determines if the Property is readonly
+    IsReadOnly isReadOnly = IsReadOnly::No;
+
     /// The default values of the Property. The exact shape of this struct depends on the
     /// specific property implementation
     Defaults defaults = {};
@@ -159,6 +163,7 @@ struct BasicPropertyInfo {
             .visibility = visibility,
             .isEnablable = isEnablable,
             .needsConfirmation = needsConfirmation,
+            .isReadOnly = isReadOnly,
             .defaults = { .isEnabled = defaults.isEnabled }
         };
     }

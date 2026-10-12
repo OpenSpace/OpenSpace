@@ -138,9 +138,9 @@ namespace {
     constexpr IntPropertyInfo ProjectionsInBufferInfo = {
         .identifier = "ProjectionsInBuffer",
         .name = "Projections in buffer",
-        .description = "(Read only) The number of images that are currently waiting to "
-            "be projected.",
+        .description = "The number of images that are currently waiting to be projected.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 0,
             .minMax = { 1, 32 }

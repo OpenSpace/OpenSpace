@@ -55,7 +55,7 @@ namespace {
         .visibility = Visibility::AdvancedUser,
         .defaults = {
             .value = 1.f,
-            .minMax = { 0.f, 3.0e12f }
+            .minMax = { 0.f, 3e12f }
         }
     };
 

@@ -57,10 +57,7 @@ namespace {
         .identifier = "DataFile",
         .name = "Data file path",
         .description = "The file path to the JSON data.",
-        .visibility = Visibility::User,
-        .defaults = {
-            .value = ""
-        }
+        .visibility = Visibility::User
     };
 
     // This `DashboardItem` displays text based on the content of a provided data file.

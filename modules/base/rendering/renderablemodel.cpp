@@ -160,7 +160,8 @@ namespace {
     constexpr BoolPropertyInfo EnableFaceCullingInfo = {
         .identifier = "EnableFaceCulling",
         .name = "Enable face culling",
-        .description = "Enable OpenGL automatic face culling optimization.",
+        .description = "If enabled, all parts of the model that are facing away from the "
+            "camera will automatically be removed.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
             .value = true
@@ -207,6 +208,7 @@ namespace {
         .description = "A rotation vector with Euler angles, specified in degrees.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
+            .value = glm::vec3(0.f),
             .minMax = { glm::vec3(0.f), glm::vec3(360.f) }
         }
     };

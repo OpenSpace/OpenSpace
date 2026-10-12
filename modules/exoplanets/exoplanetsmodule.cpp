@@ -48,7 +48,8 @@ namespace {
         .name = "Data folder",
         .description = "The path to the folder containing the exoplanets data and lookup "
             "table.",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr StringPropertyInfo BvColorMapInfo = {
@@ -250,8 +251,6 @@ ExoplanetsModule::ExoplanetsModule()
     , _useOptimisticZone(UseOptimisticZoneInfo)
     , _habitableZoneOpacity(HabitableZoneOpacityInfo)
 {
-    _exoplanetsDataFolder.setReadOnly(true);
-
     _exoplanetsDataFolder.onChange([this]() {
         std::filesystem::path f = _exoplanetsDataFolder.value();
        if (!std::filesystem::is_directory(f)) {

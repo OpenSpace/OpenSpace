@@ -83,7 +83,8 @@ namespace {
         .identifier = "File",
         .name = "File",
         .description = "Path to the GeoJSON file to base the rendering on.",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr FloatPropertyInfo HeightOffsetInfo = {
@@ -167,6 +168,7 @@ namespace {
         .description = "The lat long coordinate of the centroid position of the read "
             "geometry. Note that this value does not include the offset.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = glm::vec2(0.f),
             .minMax = { glm::vec2(-90.f, -180.f), glm::vec2(90.f, 180.f) }
@@ -180,6 +182,7 @@ namespace {
             "bounding box of the read geometry. Note that this value does not include "
             "the offset.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = glm::vec4(0.f),
             .minMax = {
@@ -311,13 +314,8 @@ GeoJsonComponent::SubFeatureProps::SubFeatureProps(PropertyOwner::PropertyOwnerI
     addProperty(Fadeable::_fade);
 
     addProperty(enabled);
-
     addProperty(flyToFeature);
-
-    centroidLatLong.setReadOnly(true);
     addProperty(centroidLatLong);
-
-    boundingboxLatLong.setReadOnly(true);
     addProperty(boundingboxLatLong);
 }
 
@@ -355,7 +353,6 @@ GeoJsonComponent::GeoJsonComponent(const Dictionary& dictionary, RenderableGlobe
     addProperty(_fade);
 
     _geoJsonFile = p.file.string();
-    _geoJsonFile.setReadOnly(true);
     addProperty(_geoJsonFile);
 
     _ignoreHeightsFromFile = p.ignoreHeights.value_or(_ignoreHeightsFromFile);
@@ -433,7 +430,6 @@ GeoJsonComponent::GeoJsonComponent(const Dictionary& dictionary, RenderableGlobe
     }
     addProperty(_pointRenderModeOption);
 
-    _centerLatLong.setReadOnly(true);
     addProperty(_centerLatLong);
 
     _flyToFeature.onChange([this]() { flyToFeature(); });

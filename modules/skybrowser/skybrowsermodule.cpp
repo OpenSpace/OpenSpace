@@ -156,6 +156,7 @@ namespace {
         .description = "The url of the image collection which is loaded into AAS "
             "WorldWide Telescope.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = "https://data.openspaceproject.com/wwt/1/imagecollection.wtml"
         }
@@ -222,7 +223,6 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_hideTargetsBrowsersWithGui);
     addProperty(_inverseZoomDirection);
     addProperty(_spaceCraftAnimationTime);
-    _wwtImageCollectionUrl.setReadOnly(true);
     addProperty(_wwtImageCollectionUrl);
     addProperty(_synchronizeAim);
 

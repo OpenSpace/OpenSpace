@@ -61,8 +61,8 @@ namespace {
             "GDAL is permitted to use for caching.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
-            .minMax = { .min = 0 }, // No caching
-            .stepSize = 1 // Step: One MB
+            .minMax = { .min = 0 },
+            .stepSize = 1
         }
     };
 

@@ -51,10 +51,7 @@ namespace {
         .name = "File path",
         .description = "The file path to the data containing information about when to "
             "display which image.",
-        .visibility = Visibility::User,
-        .defaults = {
-            .value = ""
-        }
+        .visibility = Visibility::User
     };
 
     constexpr BoolPropertyInfo ShowBeforeInfo = {

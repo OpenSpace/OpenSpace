@@ -88,10 +88,7 @@ namespace {
         .description = "This is the object that the axis will focus on. This object must "
             "name an existing scene graph node in the currently loaded scene and the "
             "rotation will stay fixed to the current position of that object.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = ""
-        }
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr StringPropertyInfo YAxisObjectInfo = {
@@ -100,10 +97,7 @@ namespace {
         .description = "This is the object that the axis will focus on. This object must "
             "name an existing scene graph node in the currently loaded scene and the "
             "rotation will stay fixed to the current position of that object.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = ""
-        }
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr StringPropertyInfo ZAxisObjectInfo = {
@@ -112,10 +106,7 @@ namespace {
         .description = "This is the object that the axis will focus on. This object must "
             "name an existing scene graph node in the currently loaded scene and the "
             "rotation will stay fixed to the current position of that object.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = ""
-        }
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr BoolPropertyInfo XAxisInvertObjectInfo = {
@@ -233,10 +224,7 @@ namespace {
             "this value is only needed if any of the three axis uses the Object type. In "
             "this case, the location of the attached node is required to compute the "
             "relative direction.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = ""
-        }
+        .visibility = Visibility::AdvancedUser
     };
 
     // Calculates the rotation in such a way that the attached scene graph node will
@@ -380,7 +368,6 @@ FixedRotation::FixedRotation(const Dictionary& dictionary)
     });
 
     auto setPropertyVisibility = [](Axis& axis) {
-        using Visibility = Visibility;
         switch (axis.type) {
             case Axis::Type::Object:
                 axis.object.setVisibility(Visibility::User);

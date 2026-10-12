@@ -94,7 +94,7 @@ namespace {
         .name = "Use alpha channel",
         .description = "If true, include transparency information in the loaded "
             "textures, if there is any. If false, all loaded textures will be converted "
-            "to RGB format. \nThis setting can be used if you have textures with "
+            "to RGB format. This setting can be used if you have textures with "
             "transparency, but do not need the transparency information. This may be the "
             "case when using additive blending, for example. Converting the files to RGB "
             "on load may then reduce the memory footprint and/or lead to some "
@@ -123,7 +123,8 @@ namespace {
             "on a column in the dataset, and 3) Other, which is used for specific "
             "subtypes where the texture is internally controlled by the renderable and "
             "can't be set from a file (such as the RenderablePolygonCloud).",
-        .visibility = Visibility::AdvancedUser
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
     };
 
     constexpr Vec3PropertyInfo PointColorInfo = {
@@ -244,6 +245,7 @@ namespace {
         .name = "Number of shown data points",
         .description = "Information about how many points are being rendered.",
         .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 0
         }
@@ -254,6 +256,7 @@ namespace {
         .name = "Has orientation data",
         .description = "Set to true if orientation data was read from the dataset.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = false
         }
@@ -671,8 +674,6 @@ RenderablePointCloud::TextureOwner::TextureOwner()
     addProperty(allowCompression);
     addProperty(useAlphaChannel);
     addProperty(spriteTexturePath);
-
-    inputMode.setReadOnly(true);
     addProperty(inputMode);
 }
 
@@ -877,10 +878,7 @@ RenderablePointCloud::RenderablePointCloud(const Dictionary& dictionary)
         _labels->setParentFadeable(this);
     }
 
-    _nDataPoints.setReadOnly(true);
     addProperty(_nDataPoints);
-
-    _hasOrientationData.setReadOnly(true);
     addProperty(_hasOrientationData);
 }
 

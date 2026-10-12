@@ -412,31 +412,24 @@ void GuiPropertyComponent::renderProperty(Property* prop, PropertyOwner* owner) 
     };
 
     // Check if the visibility of the property is high enough to be displayed
-    using Vis = Visibility;
-    const Vis visibilityFilter = global::openSpaceEngine->visibility();
-    const auto v = static_cast<std::underlying_type_t<Vis>>(visibilityFilter);
-    const auto propV = static_cast<std::underlying_type_t<Vis>>(prop->visibility());
-    if (v >= propV) {
-        auto it = FunctionMapping.find(std::string(prop->className()));
-        if (it != FunctionMapping.end()) {
-            if (owner) {
-                it->second(
-                    prop,
-                    owner->identifier(),
-                    ShowToolTip(_showHelpTooltip),
-                    _tooltipDelay
-                );
-            }
-            else {
-                it->second(
-                    prop,
-                    "",
-                    ShowToolTip(_showHelpTooltip),
-                    _tooltipDelay
-                );
-            }
-        }
+    const Visibility visibilityFilter = global::openSpaceEngine->visibility();
+    const auto v = static_cast<std::underlying_type_t<Visibility>>(visibilityFilter);
+    const auto pV = static_cast<std::underlying_type_t<Visibility>>(prop->visibility());
+    if (v < pV) {
+        return;
     }
+
+    auto it = FunctionMapping.find(std::string(prop->className()));
+    if (it == FunctionMapping.end()) {
+        return;
+    }
+
+    it->second(
+        prop,
+        owner ? owner->identifier() : "",
+        ShowToolTip(_showHelpTooltip),
+        _tooltipDelay
+    );
 }
 
 } // namespace openspace

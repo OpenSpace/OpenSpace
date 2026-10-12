@@ -43,7 +43,7 @@ namespace {
         .visibility = Visibility::User,
         .defaults = {
             .value = 0,
-            .minMax = { .min = 0 }
+            .minMax = { 0 }
         }
     };
 
@@ -53,9 +53,10 @@ namespace {
         .description = "The number of images that can be shown. The 'Index' value must "
             "be between 0 and this value - 1.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 0,
-            .minMax = { .min = 0 }
+            .minMax = { 0 }
         }
     };
 
@@ -63,7 +64,8 @@ namespace {
         .identifier = "CurrentImage",
         .name = "Current image",
         .description = "The read-only value of the currently selected image.",
-        .visibility = Visibility::User
+        .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr StringPropertyInfo FolderPathInfo = {
@@ -105,10 +107,7 @@ ImageSequenceTileProvider::ImageSequenceTileProvider(const Dictionary& dictionar
     _index.onChange([this]() { _isImageDirty = true; });
     addProperty(_index);
 
-    _nImages.setReadOnly(true);
     addProperty(_nImages);
-
-    _currentImage.setReadOnly(true);
     addProperty(_currentImage);
 
     _folderPath = p.folderPath.string();

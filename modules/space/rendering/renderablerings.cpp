@@ -78,8 +78,7 @@ namespace {
         .description = "A value that is used to limit the width of the rings. Each of "
             "the two values is a value between 0 and 1, where 0 is the center of the "
             "ring and 1 is the maximum extent at the radius. For example, if the value "
-            "is {0.5, 1.0}, the ring is only shown between radius/2 and radius. It "
-            "defaults to {0.0, 1.0}.",
+            "is {0.5, 1.0}, the ring is only shown between radius/2 and radius.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
             .value = glm::vec2(0.f, 1.f),

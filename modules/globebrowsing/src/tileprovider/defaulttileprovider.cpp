@@ -48,10 +48,7 @@ namespace {
         .name = "File path",
         .description = "The path of the GDAL file or the image file that is to be used "
             "in this tile provider.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = ""
-        }
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr IntPropertyInfo TilePixelSizeInfo = {

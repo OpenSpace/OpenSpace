@@ -48,7 +48,7 @@ namespace {
         .name = "Active color",
         .description = "This value determines the color that the active instrument is "
             "rendered in. Shortly after activation, the used color is mixture of this "
-            "and the flash color. The default value is (0.6, 1.0, 0.0).",
+            "and the flash color.",
         .visibility = Visibility::User,
         .defaults = {
             .value = glm::vec3(0.6f, 1.f, 0.f),
@@ -60,7 +60,7 @@ namespace {
         .identifier = "FlashColor",
         .name = "Flash color",
         .description = "This value determines the color that is used shortly after an "
-            "instrument activation. The default value is (0.9, 1.0, 0.75).",
+            "instrument activation.",
         .visibility = Visibility::User,
         .defaults = {
             .value = glm::vec3(0.9f, 1.f, 0.75f),

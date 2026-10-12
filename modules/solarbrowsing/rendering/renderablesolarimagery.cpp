@@ -132,7 +132,8 @@ namespace {
         .description = "Displays the earliest and latest available image data for the "
             "currently active instrument. Note that data may not be continuously "
             "available across the entire displayed time span.",
-        .visibility = Visibility::User
+        .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr BoolPropertyInfo UseAdditiveBlendingInfo = {
@@ -395,7 +396,6 @@ RenderableSolarImagery::RenderableSolarImagery(const Dictionary& dictionary)
 
     // Data automatically updates when changing the active instrument
     updateTimelineDataRangeInfo();
-    _timelineDataRangeInfo.setReadOnly(true);
     addProperty(_timelineDataRangeInfo);
 
     _downsamplingLevel = p.downsamplingLevel.value_or(_downsamplingLevel);

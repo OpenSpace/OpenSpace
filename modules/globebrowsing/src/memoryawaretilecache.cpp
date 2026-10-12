@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -48,7 +49,9 @@ namespace {
         .description = "This value denotes the amount of RAM memory (in MB) that this "
             "tile cache is utilizing.",
         .visibility = Visibility::Developer,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
+            .value = 0,
             .minMax = { 128, 16384 }
         }
     };
@@ -59,7 +62,9 @@ namespace {
         .description = "This value denotes the amount of GPU memory (in MB) that this "
             "tile cache is utilizing.",
         .visibility = Visibility::Developer,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
+            .value = 0,
             .minMax = { 128, 16384 }
         }
     };
@@ -70,6 +75,7 @@ namespace {
         .description = "", // @TODO Missing documentation
         .visibility = Visibility::AdvancedUser,
         .defaults = {
+            .value = 0,
             .minMax = { 128, 16384 }
         }
     };
@@ -260,14 +266,12 @@ MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
     _cpuAllocatedTileData.setMaxValue(
         static_cast<int>(CpuCap.installedMainMemory() * 0.95f)
     );
-    _cpuAllocatedTileData.setReadOnly(true);
     addProperty(_cpuAllocatedTileData);
 
     _gpuAllocatedTileData = tileCacheSize;
     _gpuAllocatedTileData.setMaxValue(
         static_cast<int>(CpuCap.installedMainMemory() * 0.95f)
     );
-    _gpuAllocatedTileData.setReadOnly(true);
     addProperty(_gpuAllocatedTileData);
 
     _tileCacheSize = tileCacheSize;

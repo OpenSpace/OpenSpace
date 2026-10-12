@@ -84,6 +84,7 @@ namespace {
             "only uses the star luminosity and does not include computation of the "
             "optimistic boundaries.",
         .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = glm::vec2(1000.f, 10000.f)
         }
@@ -155,9 +156,8 @@ RenderableHabitableZone::RenderableHabitableZone(const Dictionary& dictionary)
 
     // The user should not be able to change this property. It's just used to communicate
     // the different rendering that happens outside of this interval
-    addProperty(_kopparapuTeffInterval);
     _kopparapuTeffInterval.setViewOption(Property::ViewOptions::MinMaxRange);
-    _kopparapuTeffInterval.setReadOnly(true);
+    addProperty(_kopparapuTeffInterval);
 
     // Make parent's size related properties read only. We want to set them based on the
     // given temperature and luminosity

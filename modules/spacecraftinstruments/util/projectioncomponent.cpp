@@ -76,8 +76,8 @@ namespace {
         .identifier = "ProjectionFading",
         .name = "Projection fading",
         .description = "This value fades the previously performed projections in or out. "
-            "If this value is equal to '1', the projections are fully visible, if the "
-            "value is equal to '0', the performed projections are completely invisible.",
+            "If this value is equal to 1, the projections are fully visible, if the "
+            "value is equal to 0, the performed projections are completely invisible.",
         .visibility = Visibility::User,
         .defaults = {
             .value = 1.f,

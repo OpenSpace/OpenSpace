@@ -150,7 +150,7 @@ namespace {
         .name = "Night factor",
         .description = "This value is a multiplicative factor that is applied to the "
             "side of the rings that is facing away from the Sun. If this value is equal "
-            "to '1', no darkening of the night side occurs.",
+            "to 1, no darkening of the night side occurs.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
             .value = 0.33f,
@@ -175,7 +175,7 @@ namespace {
         .identifier = "ZFightingPercentage",
         .name = "Z-fighting percentage",
         .description = "The percentage of the correct distance to the surface being "
-            "shadowed. Possible values: [0.0, 1.0].",
+            "shadowed.",
         .visibility = Visibility::Developer,
         .defaults = {
             .value = 0.95f,

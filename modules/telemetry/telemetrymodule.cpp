@@ -50,12 +50,6 @@
 namespace {
     using namespace openspace;
 
-    // The default Open Sound Control receiver is SuperCollider with these default values.
-    // However, the user can define any receiver in the openspace.cfg file as the
-    // ModuleConfiguration for the Telemetry module
-    constexpr const char* DefaultSuperColliderIp = "127.0.0.1";
-    constexpr int DefaultSuperColliderPort = 57120;
-
     constexpr BoolPropertyInfo EnabledInfo = {
         .identifier = "Enabled",
         .name = "Enabled",
@@ -72,8 +66,9 @@ namespace {
         .description = "The network IP address that the telemetry Open Sound Control "
             "messages is sent to.",
         .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
-            .value = DefaultSuperColliderIp
+            .value = "127.0.0.1"
         }
     };
 
@@ -83,8 +78,9 @@ namespace {
         .description = "The network port that the telemetry Open Sound Control messages "
             "are sent to.",
         .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
-            .value = DefaultSuperColliderPort,
+            .value = 57120,
             .minMax = { 1025, 65536 }
         }
     };
@@ -152,11 +148,7 @@ TelemetryModule::TelemetryModule()
     , _includeElevationAngle(IncludeElevationAngleInfo)
 {
     addProperty(_enabled);
-
-    _ipAddress.setReadOnly(true);
     addProperty(_ipAddress);
-
-    _port.setReadOnly(true);
     addProperty(_port);
 
     // Add options to the drop down menu

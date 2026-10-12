@@ -540,7 +540,7 @@ namespace {
 
     template <>
     void createCustomProperty<TriggerProperty, PropertyInfo>(PropertyInfo info,
-                                                std::optional<std::string> onChange)
+                                                      std::optional<std::string> onChange)
     {
         TriggerProperty* p = new TriggerProperty(info);
         if (onChange.has_value() && !onChange->empty()) {
@@ -1485,6 +1485,7 @@ enum class [[codegen::enum]] CustomPropertyType {
             .visibility = info.visibility,
             .isEnablable = info.isEnablable,
             .needsConfirmation = info.needsConfirmation,
+            .isReadOnly = info.isReadOnly,
             .defaults = { .isEnabled = info.defaults.isEnabled }
         };
     };

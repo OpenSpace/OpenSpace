@@ -86,7 +86,7 @@ namespace {
     constexpr StringPropertyInfo ServerProcessEntryPointInfo = {
         .identifier = "ServerProcessEntryPoint",
         .name = "Server process entry point",
-        .description = "The node js command to invoke.",
+        .description = "The Node.js command to invoke.",
         .visibility = Visibility::AdvancedUser
     };
 

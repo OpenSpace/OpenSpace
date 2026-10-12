@@ -311,6 +311,7 @@ namespace {
         .description = "The currently used scale factor whose target value is determined "
             "by 'TargetLodScaleFactor'.",
         .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .value = 15.f,
             .minMax = { 1.f, 50.f }
@@ -335,6 +336,7 @@ namespace {
         .description = "The number of currently active layers. If this value reaches the "
             "maximum, bad things will happen.",
         .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
         .defaults = {
             .minMax = { .min = 0 }
         }
@@ -821,14 +823,12 @@ RenderableGlobe::RenderableGlobe(const Dictionary& dictionary)
         _lodScaleFactorDirty = true;
     });
     addProperty(_targetLodScaleFactor);
-    _currentLodScaleFactor.setReadOnly(true);
     addProperty(_currentLodScaleFactor);
 
     _orenNayarRoughness = p.orenNayarRoughness.value_or(_orenNayarRoughness);
     addProperty(_orenNayarRoughness);
 
     _nActiveLayers.setMaxValue(OpenGLCap.maxTextureUnits() / 3);
-    _nActiveLayers.setReadOnly(true);
     addProperty(_nActiveLayers);
 
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);

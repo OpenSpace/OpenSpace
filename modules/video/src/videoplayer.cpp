@@ -87,20 +87,14 @@ namespace {
         .identifier = "StartTime",
         .name = "Start time",
         .description = "The date and time that the video should start in the format "
-            "'YYYY MM DD hh:mm:ss'.",
-        .defaults = {
-            .value = ""
-        }
+            "'YYYY MM DD hh:mm:ss'."
     };
 
     constexpr StringPropertyInfo EndTimeInfo = {
         .identifier = "EndTime",
         .name = "End time",
         .description = "The date and time that the video should end in the format 'YYYY "
-            "MM DD hh:mm:ss'.",
-        .defaults = {
-            .value = ""
-        }
+            "MM DD hh:mm:ss'."
     };
 
     constexpr BoolPropertyInfo LoopVideoInfo = {

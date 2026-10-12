@@ -56,6 +56,7 @@ Property::Property(PropertyInfo info)
 
     setVisibility(info.visibility);
     setNeedsConfirmation(info.needsConfirmation);
+    setReadOnly(info.isReadOnly);
     _metaData.isEnablable = info.isEnablable;
 }
 

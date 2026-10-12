@@ -61,9 +61,7 @@ namespace {
         .name = "Renderable type",
         .description = "The type of the renderable.",
         .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = "Renderable"
-        }
+        .isReadOnly = IsReadOnly::Yes
     };
 
     constexpr BoolPropertyInfo DimInAtmosphereInfo = {
@@ -212,7 +210,6 @@ Renderable::Renderable(const Dictionary& dictionary, RenderableSettings settings
 
     // Set type for UI
     _renderableType = p.type.value_or(_renderableType);
-    _renderableType.setReadOnly(true);
     addProperty(_renderableType);
 
     _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);
