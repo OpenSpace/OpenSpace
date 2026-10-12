@@ -94,7 +94,7 @@ namespace {
         .visibility = Visibility::User,
         .defaults = {
             .value = 0.0,
-            .minMax = { 0.0, 250.0 * 365.25 }
+            .minMax = { 0.0, 250.0 * 365.25 }  // 250 years should be enough I guess
         }
     };
 
@@ -197,7 +197,7 @@ RenderableTrailOrbit::RenderableTrailOrbit(const Dictionary& dictionary)
     , _limitToTimeRange(LimitToTimeRangeInfo)
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)
-    , _period(PeriodInfo) // 250 years should be enough I guess
+    , _period(PeriodInfo)
     , _resolution(ResolutionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

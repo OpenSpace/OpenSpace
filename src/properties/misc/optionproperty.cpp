@@ -64,6 +64,7 @@ namespace {
             .isEnablable = info.isEnablable,
             .needsConfirmation = info.needsConfirmation,
             .defaults = {
+                .isEnabled = info.defaults.isEnabled,
                 .value = info.defaults.value,
                 .minMax = { 0, std::numeric_limits<int>::max() },
                 .stepSize = 1
