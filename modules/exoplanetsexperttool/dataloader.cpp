@@ -24,8 +24,8 @@
 
 #include <modules/exoplanetsexperttool/dataloader.h>
 
-#include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
+#include <modules/exoplanetsexperttool/util/datahelper.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/filesystem/filesystem.h>

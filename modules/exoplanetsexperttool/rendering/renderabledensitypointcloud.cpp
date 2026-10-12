@@ -24,7 +24,7 @@
 
 #include <modules/exoplanetsexperttool/rendering/renderabledensitypointcloud.h>
 
-#include <modules/exoplanetsexperttool/densityvolume.h>
+#include <modules/exoplanetsexperttool/util/densityvolume.h>
 #include <openspace/data/colormaploader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>

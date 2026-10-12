@@ -25,8 +25,8 @@
 #include <modules/exoplanetsexperttool/views/computecolumnsview.h>
 
 #include <modules/exoplanetsexperttool/dataviewer.h>
-#include <modules/exoplanetsexperttool/columnfilter.h>
-#include <modules/exoplanetsexperttool/expressionparser.h>
+#include <modules/exoplanetsexperttool/util/columnfilter.h>
+#include <modules/exoplanetsexperttool/util/expressionparser.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/json.h>

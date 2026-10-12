@@ -22,41 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SPACECAST___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SPACECAST___H__
+#include <modules/exoplanetsexperttool/util/datahelper.h>
 
-#include <modules/exoplanetsexperttool/castselection/castselection.h>
+#include <charconv>
+#include <cmath>
 
-#include <modules/exoplanetsexperttool/castselection/lasso.h>
+namespace openspace::data {
 
-namespace openspace::exoplanets {
-
-/**
- * SpaceCast selects the disjoint dense volume inside the lasso frustum whose projection
- * best matches the lasso, preferring closer volumes with a similar overlap.
- */
-class SpaceCast : public CastSelection {
-public:
-    SpaceCast(const DensityVolume& volume, const CastInput& input);
-
-    CastResult select(float exponent) const override;
-
-private:
-    Lasso _lasso;
-
-    std::vector<glm::vec2> _nodeScreen;
-    // Clip space w, i.e. the distance to the eye; <= 0 behind the camera
-    std::vector<float> _nodeDepth;
-    // Signed lasso distance divided by the lasso diameter
-    std::vector<float> _nodeDelta;
-    std::vector<uint8_t> _particleInside;
-
-    // Approximate on-screen size of a grid cell is _cellFootprint / depth pixels
-    float _cellFootprint = 0.f;
-
-    float _densityStdDev = 1.f;
+float parseFloatData(const std::string& str) {
+#ifdef WIN32
+    float result;
+    auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
+    if (ec == std::errc()) {
+        return result;
+    }
+    return std::numeric_limits<float>::quiet_NaN();
+#else
+    // clang is missing float support for std::from_chars
+    return !str.empty() ? std::stof(str.c_str(), nullptr) : NAN;
+#endif
 };
 
-} // namespace openspace::exoplanets
+double parseDoubleData(const std::string& str) {
+#ifdef WIN32
+    double result;
+    auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
+    if (ec == std::errc()) {
+        return result;
+    }
+    return std::numeric_limits<double>::quiet_NaN();
+#else
+    // clang is missing double support for std::from_chars
+    return !str.empty() ? std::stod(str.c_str(), nullptr) : NAN;
+#endif
+};
 
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SPACECAST___H__
+int parseIntegerData(const std::string& str) {
+    int result;
+    auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
+    if (ec == std::errc()) {
+        return result;
+    }
+    return std::numeric_limits<int>::quiet_NaN();
+};
+
+bool compareValuesWithNan(float lhs, float rhs) {
+    if (std::isnan(lhs)) {
+        // nan should be considered smaller than non-nan values
+        if (!std::isnan(rhs)) {
+            return true;
+        }
+        // if both are nan, return false
+        return false;
+    }
+
+    // rhs is nan, but not lhs
+    if (std::isnan(rhs)) {
+        return false;
+    }
+    return lhs < rhs;
+}
+
+bool caseInsensitiveLessThan(const char* lhs, const char* rhs) {
+    int res = _stricmp(lhs, rhs);
+    return res <= 0;
+}
+
+} // namespace openspace::data

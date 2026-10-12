@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/exoplanetsexperttool/expressionparser.h>
+#include <modules/exoplanetsexperttool/util/expressionparser.h>
 
 #include <algorithm>
 #include <cctype>

@@ -24,10 +24,10 @@
 
 #include <modules/exoplanetsexperttool/dataviewer.h>
 
-#include <modules/exoplanetsexperttool/columnfilter.h>
-#include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/dataloader.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
+#include <modules/exoplanetsexperttool/util/columnfilter.h>
+#include <modules/exoplanetsexperttool/util/datahelper.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>

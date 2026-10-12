@@ -25,27 +25,27 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-    castselection/castselection.h
-    castselection/lasso.h
-    castselection/spacecast.h
-    columnfilter.h
-    convexhull.h
-    datahelper.h
     dataloader.h
     datastructures.h
     dataviewer.h
-    densityvolume.h
     exoplanetsexperttoolmodule.h
-    expressionparser.h
     glyphhandler.h
     gui.h
-    isosurface.h
     rendering/renderabledensitypointcloud.h
     rendering/renderableexoplanetglyphcloud.h
     rendering/renderablehostcloud.h
     rendering/renderablespatialselectionvolume.h
     rendering/selectionvolumemesh.h
     spatialselectionhandler.h
+    spatialselection/castselection.h
+    spatialselection/convexhull.h
+    spatialselection/isosurface.h
+    spatialselection/lasso.h
+    spatialselection/spacecast.h
+    util/columnfilter.h
+    util/datahelper.h
+    util/densityvolume.h
+    util/expressionparser.h
     views/colormappingview.h
     views/columnselectionview.h
     views/computecolumnsview.h
@@ -58,25 +58,25 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    castselection/castselection.cpp
-    castselection/lasso.cpp
-    castselection/spacecast.cpp
-    columnfilter.cpp
-    convexhull.cpp
-    datahelper.cpp
     dataloader.cpp
     dataviewer.cpp
-    densityvolume.cpp
     exoplanetsexperttoolmodule.cpp
-    expressionparser.cpp
     glyphhandler.cpp
     gui.cpp
-    isosurface.cpp
     rendering/renderabledensitypointcloud.cpp
     rendering/renderableexoplanetglyphcloud.cpp
     rendering/renderablehostcloud.cpp
     rendering/renderablespatialselectionvolume.cpp
     spatialselectionhandler.cpp
+    spatialselection/castselection.cpp
+    spatialselection/convexhull.cpp
+    spatialselection/isosurface.cpp
+    spatialselection/lasso.cpp
+    spatialselection/spacecast.cpp
+    util/columnfilter.cpp
+    util/datahelper.cpp
+    util/densityvolume.cpp
+    util/expressionparser.cpp
     views/colormappingview.cpp
     views/columnselectionview.cpp
     views/computecolumnsview.cpp

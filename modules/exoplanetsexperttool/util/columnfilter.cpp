@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/exoplanetsexperttool/columnfilter.h>
+#include <modules/exoplanetsexperttool/util/columnfilter.h>
 
-#include <modules/exoplanetsexperttool/datahelper.h>
+#include <modules/exoplanetsexperttool/util/datahelper.h>
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/exception.h>
 #include <openspace/misc/stringhelper.h>

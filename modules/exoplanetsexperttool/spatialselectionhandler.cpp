@@ -24,10 +24,10 @@
 
 #include <modules/exoplanetsexperttool/spatialselectionhandler.h>
 
-#include <modules/exoplanetsexperttool/castselection/castselection.h>
-#include <modules/exoplanetsexperttool/densityvolume.h>
 #include <modules/exoplanetsexperttool/rendering/renderablespatialselectionvolume.h>
 #include <modules/exoplanetsexperttool/rendering/selectionvolumemesh.h>
+#include <modules/exoplanetsexperttool/spatialselection/castselection.h>
+#include <modules/exoplanetsexperttool/util/densityvolume.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/misc/dictionary.h>

@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___FILTERINGVIEW___H__
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___FILTERINGVIEW___H__
 
-#include <modules/exoplanetsexperttool/columnfilter.h>
 #include <modules/exoplanetsexperttool/datastructures.h>
+#include <modules/exoplanetsexperttool/util/columnfilter.h>
 #include <optional>
 #include <string>
 

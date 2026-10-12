@@ -25,9 +25,9 @@
 #include <modules/exoplanetsexperttool/views/spatialselectionview.h>
 
 #include <modules/exoplanetsexperttool/dataviewer.h>
-#include <modules/exoplanetsexperttool/densityvolume.h>
 #include <modules/exoplanetsexperttool/rendering/renderabledensitypointcloud.h>
 #include <modules/exoplanetsexperttool/spatialselectionhandler.h>
+#include <modules/exoplanetsexperttool/util/densityvolume.h>
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>

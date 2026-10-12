@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SPATIALSELECTIONVIEW___H__
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SPATIALSELECTIONVIEW___H__
 
-#include <modules/exoplanetsexperttool/castselection/castselection.h>
 #include <modules/exoplanetsexperttool/datastructures.h>
 #include <modules/exoplanetsexperttool/spatialselectionhandler.h>
+#include <modules/exoplanetsexperttool/spatialselection/castselection.h>
 
 #include <openspace/glm.h>
 #include <openspace/util/keys.h>

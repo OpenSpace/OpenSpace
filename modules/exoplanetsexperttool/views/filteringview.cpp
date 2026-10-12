@@ -24,8 +24,8 @@
 
 #include <modules/exoplanetsexperttool/views/filteringview.h>
 
-#include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/dataviewer.h>
+#include <modules/exoplanetsexperttool/util/datahelper.h>
 #include <modules/exoplanetsexperttool/views/spatialselectionview.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>

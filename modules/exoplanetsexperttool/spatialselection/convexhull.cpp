@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/exoplanetsexperttool/convexhull.h>
+#include <modules/exoplanetsexperttool/spatialselection/convexhull.h>
 
 #include <algorithm>
 #include <array>

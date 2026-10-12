@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/exoplanetsexperttool/castselection/lasso.h>
+#include <modules/exoplanetsexperttool/spatialselection/lasso.h>
 
 #include <algorithm>
 #include <cmath>

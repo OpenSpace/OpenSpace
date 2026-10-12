@@ -26,8 +26,8 @@
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SPATIALSELECTIONHANDLER___H__
 
 #include <modules/exoplanetsexperttool/datastructures.h>
-#include <modules/exoplanetsexperttool/convexhull.h>
-#include <modules/exoplanetsexperttool/isosurface.h>
+#include <modules/exoplanetsexperttool/spatialselection/convexhull.h>
+#include <modules/exoplanetsexperttool/spatialselection/isosurface.h>
 
 #include <openspace/glm.h>
 #include <memory>

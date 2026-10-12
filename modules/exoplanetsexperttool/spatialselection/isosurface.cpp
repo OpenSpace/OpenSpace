@@ -1,4 +1,4 @@
-#include <modules/exoplanetsexperttool/isosurface.h>
+#include <modules/exoplanetsexperttool/spatialselection/isosurface.h>
 
 #include <algorithm>
 #include <array>

@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/exoplanetsexperttool/castselection/castselection.h>
+#include <modules/exoplanetsexperttool/spatialselection/castselection.h>
 
-#include <modules/exoplanetsexperttool/castselection/spacecast.h>
-#include <modules/exoplanetsexperttool/densityvolume.h>
+#include <modules/exoplanetsexperttool/spatialselection/spacecast.h>
+#include <modules/exoplanetsexperttool/util/densityvolume.h>
 #include <algorithm>
 #include <cmath>
 #include <execution>

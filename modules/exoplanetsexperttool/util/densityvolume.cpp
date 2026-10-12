@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/exoplanetsexperttool/densityvolume.h>
+#include <modules/exoplanetsexperttool/util/densityvolume.h>
 
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/csvreader.h>
