@@ -358,6 +358,11 @@ void RenderableDensityPointCloud::initialize() {
         _gridDimensions
     ));
 
+    if (!_volume) {
+        LERROR("Could not create volume from dataset");
+        return;
+    }
+
     const float maxDensity = _volume->maxDensity();
     _color.densityRange.setMaxValue(glm::vec2(maxDensity));
     if (!_hasUserDensityRange) {
@@ -476,6 +481,9 @@ double RenderableDensityPointCloud::unitToMeter() const {
 }
 
 void RenderableDensityPointCloud::uploadPointData() {
+    if (!_volume) {
+        return;
+    }
     const std::vector<glm::vec3>& positions = _volume->particlePositions();
     const std::vector<float>& densities = _volume->particleDensities();
 
@@ -516,6 +524,9 @@ void RenderableDensityPointCloud::uploadSelection() {
 }
 
 void RenderableDensityPointCloud::uploadBoundingBox() {
+    if (!_volume) {
+        return;
+    }
     const glm::vec3 lo = _volume->boundsMin();
     const glm::vec3 hi = _volume->boundsMax();
     auto corner = [&lo, &hi](int i) {
