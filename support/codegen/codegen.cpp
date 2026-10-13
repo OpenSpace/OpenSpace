@@ -192,51 +192,18 @@ namespace {
     }
 
     std::string resolveComment(std::string comment) {
-        if (auto [b, e] = findKeyword(comment, keywords::Verbatim);
-            b != std::string::npos)
-        {
-            size_t it = e;
-            if (comment[it] != '(') {
-                throw CodegenError(std::format(
-                    "Malformed codegen::verbatim. Expected ( after token\n{}", comment
-                ));
-            }
-            it++;
-            const size_t end = comment.find(')', it);
-            const std::string argument = comment.substr(it, end - it);
-
-            const size_t endKeyword = end + ")]]"sv.size();
-            if (endKeyword - b == comment.size()) {
-                // If there isn't any other comment, we are done and we emit the argument
-                // to the verbatim function
-                comment = argument;
-            }
-            else {
-                // Otherwise, we need to output code that correctly inserts the verbatim
-                // at the correct position
-                const std::string pre = comment.substr(0, b);
-                const std::string post = comment.substr(endKeyword);
-                comment = std::format(
-                    "std::format(\"{{}}{{}}{{}}\", \"{}\", {}, \"{}\")",
-                    pre, argument, post
-                );
-            }
+        size_t jt = comment.find('"');
+        while (jt != std::string::npos && comment[jt - 1] != '\\') {
+            comment.insert(jt, "\\");
+            jt = comment.find('"', jt + 2); // +1 for \\ and +1 for "
         }
-        else {
-            size_t jt = comment.find('"');
-            while (jt != std::string::npos && comment[jt - 1] != '\\') {
-                comment.insert(jt, "\\");
-                jt = comment.find('"', jt + 2); // +1 for \\ and +1 for "
-            }
 
-            // We add artificial spaces between the multiline comments, which causes there
-            // to be a stray space at the end
-            if (!comment.empty() && comment.back() == ' ') {
-                comment.pop_back();
-            }
-            comment = std::format("\"{}\"", comment);
+        // We add artificial spaces between the multiline comments, which causes there to
+        // be a stray space at the end
+        if (!comment.empty() && comment.back() == ' ') {
+            comment.pop_back();
         }
-        return comment;
+        return std::format("\"{}\"", comment);
     }
 
     std::vector<Enum*> collectEnums(Struct* s) {

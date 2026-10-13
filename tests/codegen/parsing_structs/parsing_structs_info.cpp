@@ -139,18 +139,3 @@ struct [[codegen::Dictionary(Info)]] Parameters {
         CodegenError, CM::StartsWith("codegen::Info requires a non-empty argument")
     );
 }
-
-TEST_CASE("Parsing/Structs/Error: Info and verbatim", "[Parsing][Structs]") {
-    constexpr std::string_view Source = R"(
-struct [[codegen::Dictionary(Info)]] Parameters {
-    // [[codegen::verbatim(ABC)]]
-    int value [[codegen::Info(ABC)]];
-};
-)";
-
-    Code code = parse(Source);
-    CHECK_THROWS_MATCHES(
-        generateResult(code),
-        CodegenError, CM::ContainsSubstring("cannot be used on the same member")
-    );
-}

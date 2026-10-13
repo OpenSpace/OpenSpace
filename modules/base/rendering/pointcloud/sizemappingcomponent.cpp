@@ -128,7 +128,6 @@ namespace {
 
         std::optional<std::string> parameter [[codegen::Info(OptionInfo)]];
 
-        // [[codegen::verbatim(ScaleFactorInfo.description)]]
         enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
             Nanometer,
             Micrometer,
