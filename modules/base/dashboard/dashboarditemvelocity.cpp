@@ -67,12 +67,10 @@ namespace {
     // most natural unit, that is, the one that gives the least number of printed digits,
     // is used.
     struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
-        // [[codegen::verbatim(SimplificationInfo.description)]]
-        std::optional<bool> simplification;
+        std::optional<bool> simplification [[codegen::Info(SimplificationInfo)]];
 
-        // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit
-            [[codegen::inlist(openspace::distanceUnitList())]];
+        std::optional<std::string> requestedUnit [[codegen::Info(RequestedUnitInfo),
+            codegen::inlist(openspace::distanceUnitList())]];
     };
 } // namespace
 #include "dashboarditemvelocity_codegen.cpp"

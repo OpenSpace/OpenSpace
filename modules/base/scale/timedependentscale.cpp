@@ -79,14 +79,13 @@ namespace {
     // A common use-case for this Scale type would be to represent the Radiosphere, which
     // grows at the speed of light.
     struct [[codegen::Dictionary(TimeDependentScale)]] Parameters {
-        // [[codegen::verbatim(ReferenceDateInfo.description)]]
-        std::string referenceDate [[codegen::datetime()]];
+        std::string referenceDate
+            [[codegen::Info(ReferenceDateInfo), codegen::datetime()]];
 
-        // [[codegen::verbatim(SpeedInfo.description)]]
-        std::optional<double> speed [[codegen::greaterequal(0.0)]];
+        std::optional<double> speed
+            [[codegen::Info(SpeedInfo), codegen::greaterequal(0.0)]];
 
-        // [[codegen::verbatim(ClampToPositiveInfo.description)]]
-        std::optional<bool> clampToPositive;
+        std::optional<bool> clampToPositive [[codegen::Info(ClampToPositiveInfo)]];
     };
 } // namespace
 #include "timedependentscale_codegen.cpp"

@@ -120,15 +120,13 @@ namespace {
     // or diameter. This allows it to adapt to differing dataset conventions without
     // requiring the source data to be reformatted.
     struct [[codegen::Dictionary(SizeMappingComponent)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
         // A list specifying all parameters that may be used for size mapping, i.e.
         // scaling the points based on the provided data columns.
         std::optional<std::vector<std::string>> parameterOptions;
 
-        // [[codegen::verbatim(OptionInfo.description)]]
-        std::optional<std::string> parameter;
+        std::optional<std::string> parameter [[codegen::Info(OptionInfo)]];
 
         // [[codegen::verbatim(ScaleFactorInfo.description)]]
         enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
@@ -159,11 +157,9 @@ namespace {
         // <code>ScaleFactor = 1000.0</code>.
         std::optional<std::variant<ScaleUnit, double>> scaleFactor;
 
-        // [[codegen::verbatim(IsRadiusInfo.description)]]
-        std::optional<bool> isRadius;
+        std::optional<bool> isRadius [[codegen::Info(IsRadiusInfo)]];
 
-        // [[codegen::verbatim(InvertScaleInfo.description)]]
-        std::optional<bool> invertScale;
+        std::optional<bool> invertScale [[codegen::Info(InvertScaleInfo)]];
     };
 } // namespace
 #include "sizemappingcomponent_codegen.cpp"

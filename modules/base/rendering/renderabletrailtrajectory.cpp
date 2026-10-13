@@ -119,30 +119,27 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {
-        // [[codegen::verbatim(StartTimeInfo.description)]]
-        std::string startTime [[codegen::annotation("A valid date in ISO 8601 format")]];
+        std::string startTime [[codegen::Info(StartTimeInfo),
+            codegen::annotation("A valid date in ISO 8601 format")]];
 
-        // [[codegen::verbatim(EndTimeInfo.description)]]
-        std::string endTime [[codegen::annotation("A valid date in ISO 8601 format")]];
+        std::string endTime [[codegen::Info(EndTimeInfo),
+            codegen::annotation("A valid date in ISO 8601 format")]];
 
-        // [[codegen::verbatim(SampleIntervalInfo.description)]]
         // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor. If
         // SampleInterval is not specified, it will be automatically calculated to produce
         // two samples per day between the 'StartTime' and 'EndTime'.
-        std::optional<double> sampleInterval;
+        std::optional<double> sampleInterval [[codegen::Info(SampleIntervalInfo)]];
 
-        // [[codegen::verbatim(TimeSubSampleInfo.description)]]
         // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor.
-        std::optional<int> timeStampSubsampleFactor [[codegen::greater(0)]];
+        std::optional<int> timeStampSubsampleFactor
+            [[codegen::Info(TimeSubSampleInfo), codegen::greater(0)]];
 
-        // [[codegen::verbatim(RenderFullPathInfo.description)]]
-        std::optional<bool> showFullTrail;
+        std::optional<bool> showFullTrail [[codegen::Info(RenderFullPathInfo)]];
 
-        // [[codegen::verbatim(AccurateTrailInfo.description)]]
-        std::optional<bool> useAccurateTrail;
+        std::optional<bool> useAccurateTrail [[codegen::Info(AccurateTrailInfo)]];
 
-        // [[codegen::verbatim(AccurateTrailPositionsInfo.description)]]
-        std::optional<int> accurateTrailPositions;
+        std::optional<int> accurateTrailPositions
+            [[codegen::Info(AccurateTrailPositionsInfo)]];
     };
 } // namespace
 #include "renderabletrailtrajectory_codegen.cpp"

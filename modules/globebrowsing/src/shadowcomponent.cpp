@@ -83,12 +83,10 @@ namespace {
     };
 
     struct [[codegen::Dictionary(ShadowComponent)]] Parameters {
-        // [[codegen::verbatim(DistanceFractionInfo.description)]]
-        std::optional<int> distanceFraction;
+        std::optional<int> distanceFraction [[codegen::Info(DistanceFractionInfo)]];
 
-        // [[codegen::verbatim(DepthMapSizeInfo.description)]]
         std::optional<glm::ivec2> depthMapSize
-            [[codegen::greater(glm::ivec2(1280, 720))]];
+            [[codegen::Info(DepthMapSizeInfo), codegen::greater(glm::ivec2(1280, 720))]];
     };
 } // namespace
 #include "shadowcomponent_codegen.cpp"

@@ -71,8 +71,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(SpaceModule)]] Parameters {
-        // [[codegen::verbatim(SpiceExceptionInfo.description)]]
-        std::optional<bool> showExceptions;
+        std::optional<bool> showExceptions [[codegen::Info(SpiceExceptionInfo)]];
     };
 } // namespace
 #include "spacemodule_codegen.cpp"

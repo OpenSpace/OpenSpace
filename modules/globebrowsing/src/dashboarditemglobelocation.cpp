@@ -71,11 +71,9 @@ namespace {
             DegreeMinuteSeconds
         };
 
-        // [[codegen::verbatim(DisplayFormatInfo.description)]]
-        std::optional<DisplayFormat> displayFormat;
+        std::optional<DisplayFormat> displayFormat [[codegen::Info(DisplayFormatInfo)]];
 
-        // [[codegen::verbatim(SignificantDigitsInfo.description)]]
-        std::optional<int> significantDigits;
+        std::optional<int> significantDigits [[codegen::Info(SignificantDigitsInfo)]];
     };
 } // namespace
 #include "dashboarditemglobelocation_codegen.cpp"

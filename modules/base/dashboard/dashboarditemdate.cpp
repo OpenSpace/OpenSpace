@@ -66,11 +66,9 @@ namespace {
     // options provide the ability to customize the output that is printed. See these two
     // parameters for more information on how to structure the inputs.
     struct [[codegen::Dictionary(DashboardItemDate)]] Parameters {
-        // [[codegen::verbatim(FormatStringInfo.description)]]
-        std::optional<std::string> formatString;
+        std::optional<std::string> formatString [[codegen::Info(FormatStringInfo)]];
 
-        // [[codegen::verbatim(TimeFormatInfo.description)]]
-        std::optional<std::string> timeFormat;
+        std::optional<std::string> timeFormat [[codegen::Info(TimeFormatInfo)]];
     };
 } // namespace
 #include "dashboarditemdate_codegen.cpp"

@@ -223,8 +223,7 @@ namespace {
         // A table describing the instrument whose field of view should be rendered.
         Instrument instrument;
 
-        // [[codegen::verbatim(AlwaysDrawFovInfo.description)]]
-        std::optional<bool> alwaysDrawFov;
+        std::optional<bool> alwaysDrawFov [[codegen::Info(AlwaysDrawFovInfo)]];
 
         // A list of potential targets (specified as SPICE names) that the field of view
         // should be tested against.
@@ -233,11 +232,10 @@ namespace {
         // A list of frame conversions that should be registered with the SpiceManager.
         std::optional<std::map<std::string, std::string>> frameConversions;
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(StandoffDistanceInfo.description)]]
-        std::optional<float> standOffDistance;
+        std::optional<float> standOffDistance [[codegen::Info(StandoffDistanceInfo)]];
 
         // If true, the field of view's bounds values will be simplified on load. Bound
         // vectors will be removed if they are the strict linear interpolation between the

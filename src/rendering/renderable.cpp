@@ -87,8 +87,7 @@ namespace {
     // Each `Renderable` type typically also includes a number of settings to alter its
     // appearance. See the documentation for the individual types for more details.
     struct [[codegen::Dictionary(Renderable)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
         // This value determines the opacity of this renderable. A value of 0 means
         // completely transparent.
@@ -98,8 +97,8 @@ namespace {
         // setting properties.
         std::optional<std::variant<std::vector<std::string>, std::string>> tag;
 
-        // [[codegen::verbatim(RenderableTypeInfo.description)]]
-        std::optional<std::string> type [[codegen::private()]];
+        std::optional<std::string> type
+            [[codegen::Info(RenderableTypeInfo), codegen::private()]];
 
         // Fragile! Keep in sync with documentation
         enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderBinMode {
@@ -115,8 +114,7 @@ namespace {
         // Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.
         std::optional<RenderBinMode> renderBinMode;
 
-        // [[codegen::verbatim(DimInAtmosphereInfo.description)]]
-        std::optional<bool> dimInAtmosphere;
+        std::optional<bool> dimInAtmosphere [[codegen::Info(DimInAtmosphereInfo)]];
     };
 } // namespace
 #include "renderable_codegen.cpp"

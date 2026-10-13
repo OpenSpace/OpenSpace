@@ -102,20 +102,17 @@ namespace {
     // uncertainty along the orbit. The disc width is defined as a deviation from the
     // semi-major axis, with separate values for the inner and outer offsets.
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::filesystem::path texture;
+        std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        float size [[codegen::greaterequal(0.f)]];
+        float size [[codegen::Info(SizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(EccentricityInfo.description)]]
-        float eccentricity [[codegen::inrange(0.f, 1.f)]];
+        float eccentricity
+            [[codegen::Info(EccentricityInfo), codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(OffsetInfo.description)]]
-        std::optional<glm::vec2> offset;
+        std::optional<glm::vec2> offset [[codegen::Info(OffsetInfo)]];
 
-        // [[codegen::verbatim(MultiplyColorInfo.description)]]
-        std::optional<glm::vec3> multiplyColor [[codegen::color()]];
+        std::optional<glm::vec3> multiplyColor
+            [[codegen::Info(MultiplyColorInfo), codegen::color()]];
     };
 } // namespace
 #include "renderableorbitdisc_codegen.cpp"

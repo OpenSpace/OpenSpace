@@ -182,6 +182,7 @@ struct Variable {
 
     struct Attributes {
         std::string annotation;
+        std::string info;
         std::string key;
         std::string inlist;
         std::string inrange;

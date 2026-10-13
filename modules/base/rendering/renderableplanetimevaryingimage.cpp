@@ -52,8 +52,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
-        // [[codegen::verbatim(SourceFolderInfo.description)]]
-        std::filesystem::path sourceFolder [[codegen::directory()]];
+        std::filesystem::path sourceFolder
+            [[codegen::Info(SourceFolderInfo), codegen::directory()]];
 
         // If set to `true` the images are only loaded when it is about to be shown
         // instead of preloading them.

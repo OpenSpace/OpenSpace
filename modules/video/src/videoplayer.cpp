@@ -143,20 +143,17 @@ namespace {
         // The video file that is played.
         std::filesystem::path video;
 
-        // [[codegen::verbatim(AudioInfo.description)]]
-        std::optional<bool> playAudio;
+        std::optional<bool> playAudio [[codegen::Info(AudioInfo)]];
 
-        // [[codegen::verbatim(LoopVideoInfo.description)]]
-        std::optional<bool> loopVideo;
+        std::optional<bool> loopVideo [[codegen::Info(LoopVideoInfo)]];
 
-        // [[codegen::verbatim(PlayDelayInfo.description)]] 
-        std::optional<int> playDelay;
+        std::optional<int> playDelay [[codegen::Info(PlayDelayInfo)]];
 
-        // [[codegen::verbatim(StartTimeInfo.description)]]
-        std::optional<std::string> startTime [[codegen::datetime()]];
+        std::optional<std::string> startTime
+            [[codegen::Info(StartTimeInfo), codegen::datetime()]];
 
-        // [[codegen::verbatim(EndTimeInfo.description)]]
-        std::optional<std::string> endTime [[codegen::datetime()]];
+        std::optional<std::string> endTime
+            [[codegen::Info(EndTimeInfo), codegen::datetime()]];
 
         enum class PlaybackMode {
             MapToSimulationTime = 0,

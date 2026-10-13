@@ -228,8 +228,7 @@ namespace {
         // Settings related to using a sparse dataset.
         std::optional<Sparse> sparse;
 
-        // [[codegen::verbatim(StrideInfo.description)]]
-        std::optional<int> stride;
+        std::optional<int> stride [[codegen::Info(StrideInfo)]];
 
         struct ColorSettings {
             enum class [[codegen::map(ColorMode)]] ColorMode {
@@ -238,34 +237,30 @@ namespace {
                 Direction [[codegen::key("Direction")]]
             };
 
-            // [[codegen::verbatim(ColorModeInfo.description)]]
-            ColorMode colorMode;
+            ColorMode colorMode [[codegen::Info(ColorModeInfo)]];
 
-            // [[codegen::verbatim(FixedColorInfo.description)]]
-            std::optional<glm::vec4> fixedColor [[codegen::color()]];
+            std::optional<glm::vec4> fixedColor
+                [[codegen::Info(FixedColorInfo), codegen::color()]];
 
-            // [[codegen::verbatim(ColorMapInfo.description)]]
-            std::optional<std::filesystem::path> colorMap;
+            std::optional<std::filesystem::path> colorMap [[codegen::Info(ColorMapInfo)]];
 
-            // [[codegen::verbatim(ColorMappingDataRangeInfo.description)]]
-            std::optional<glm::vec2> colorMappingDataRange;
+            std::optional<glm::vec2> colorMappingDataRange
+                [[codegen::Info(ColorMappingDataRangeInfo)]];
         };
 
         // Settings related to the coloring of the vectors, such as a fixed color, color
         // map, etc.
         std::optional<ColorSettings> coloring;
 
-        // [[codegen::verbatim(VectorFieldScaleInfo.description)]]
-        std::optional<float> vectorFieldScale [[codegen::greater(1.f)]];
+        std::optional<float> vectorFieldScale
+            [[codegen::Info(VectorFieldScaleInfo), codegen::greater(1.f)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greater(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(FilterByLuaInfo.description)]]
-        std::optional<bool> filterByLua;
+        std::optional<bool> filterByLua [[codegen::Info(FilterByLuaInfo)]];
 
-        // [[codegen::verbatim(FilterScriptInfo.description)]]
-        std::optional<std::filesystem::path> script;
+        std::optional<std::filesystem::path> script [[codegen::Info(FilterScriptInfo)]];
     };
 } // namespace
 #include "renderablevectorfield_codegen.cpp"

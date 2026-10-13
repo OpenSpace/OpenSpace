@@ -268,53 +268,46 @@ namespace {
     // `StartNode`. The look of the arrow can be customized to change the width and length
     // of both the arrow body and head.
     struct [[codegen::Dictionary(RenderableNodeArrow)]] Parameters {
-        // [[codegen::verbatim(StartNodeInfo.description)]]
-        std::string startNode [[codegen::identifier()]];
+        std::string startNode [[codegen::Info(StartNodeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(EndNodeInfo.description)]]
-        std::string endNode [[codegen::identifier()]];
+        std::string endNode [[codegen::Info(EndNodeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(SegmentsInfo.description)]]
-        std::optional<int> segments [[codegen::greaterequal(3)]];
+        std::optional<int> segments
+            [[codegen::Info(SegmentsInfo), codegen::greaterequal(3)]];
 
-        // [[codegen::verbatim(InvertInfo.description)]]
-        std::optional<bool> invert;
+        std::optional<bool> invert [[codegen::Info(InvertInfo)]];
 
-        // [[codegen::verbatim(ArrowHeadSizeInfo.description)]]
-        std::optional<float> arrowHeadSize [[codegen::greaterequal(0.f)]];
+        std::optional<float> arrowHeadSize
+            [[codegen::Info(ArrowHeadSizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(ArrowHeadWidthInfo.description)]]
-        std::optional<float> arrowHeadWidthFactor [[codegen::greaterequal(0.f)]];
+        std::optional<float> arrowHeadWidthFactor
+            [[codegen::Info(ArrowHeadWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(OffsetDistanceInfo.description)]]
-        std::optional<float> offset [[codegen::greaterequal(0.f)]];
+        std::optional<float> offset
+            [[codegen::Info(OffsetDistanceInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(RelativeOffsetInfo.description)]]
-        std::optional<bool> useRelativeOffset;
+        std::optional<bool> useRelativeOffset [[codegen::Info(RelativeOffsetInfo)]];
 
-        // [[codegen::verbatim(LengthInfo.description)]]
-        std::optional<float> length [[codegen::greaterequal(0.f)]];
+        std::optional<float> length
+            [[codegen::Info(LengthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(RelativeLengthInfo.description)]]
-        std::optional<bool> useRelativeLength;
+        std::optional<bool> useRelativeLength [[codegen::Info(RelativeLengthInfo)]];
 
-        // [[codegen::verbatim(WidthInfo.description)]]
-        std::optional<float> width [[codegen::greaterequal(0.f)]];
+        std::optional<float> width
+            [[codegen::Info(WidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(ShadingEnabledInfo.description)]]
-        std::optional<bool> performShading;
+        std::optional<bool> performShading [[codegen::Info(ShadingEnabledInfo)]];
 
-        // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<float> ambientIntensity [[codegen::greaterequal(0.f)]];
+        std::optional<float> ambientIntensity
+            [[codegen::Info(AmbientIntensityInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
-        std::optional<float> diffuseIntensity [[codegen::greaterequal(0.f)]];
+        std::optional<float> diffuseIntensity
+            [[codegen::Info(DiffuseIntensityInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(SpecularIntensityInfo.description)]]
-        std::optional<float> specularIntensity [[codegen::greaterequal(0.f)]];
+        std::optional<float> specularIntensity
+            [[codegen::Info(SpecularIntensityInfo), codegen::greaterequal(0.f)]];
     };
 } // namespace
 #include "renderablenodearrow_codegen.cpp"

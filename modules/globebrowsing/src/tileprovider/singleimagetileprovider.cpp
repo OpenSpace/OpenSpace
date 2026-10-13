@@ -45,8 +45,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(SingleImageProvider)]] Parameters {
-        // [[codegen::verbatim(FilePathInfo.description)]]
-        std::filesystem::path filePath;
+        std::filesystem::path filePath [[codegen::Info(FilePathInfo)]];
     };
 } // namespace
 #include "singleimagetileprovider_codegen.cpp"

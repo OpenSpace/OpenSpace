@@ -65,11 +65,10 @@ namespace {
     // For stereo rendering, a second image can be specified using the `RightURL`
     // property. This image will be used for the right eye.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::string url [[codegen::key("URL")]];
+        std::string url [[codegen::Info(TextureInfo), codegen::key("URL")]];
 
-        // [[codegen::verbatim(RightTextureInfo.description)]]
-        std::optional<std::string> rightUrl [[codegen::key("RightURL")]];
+        std::optional<std::string> rightUrl
+            [[codegen::Info(RightTextureInfo), codegen::key("RightURL")]];
     };
 } // namespace
 #include "renderableplaneimageonline_codegen.cpp"

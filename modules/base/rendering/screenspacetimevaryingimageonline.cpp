@@ -96,14 +96,11 @@ namespace {
     //   ]
     // }
     struct [[codegen::Dictionary(ScreenSpaceTimeVaryingImageOnline)]] Parameters {
-        // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path filePath;
+        std::filesystem::path filePath [[codegen::Info(FileInfo)]];
 
-        // [[codegen::verbatim(ShowBeforeInfo.description)]]
-        std::optional<bool> showBefore;
+        std::optional<bool> showBefore [[codegen::Info(ShowBeforeInfo)]];
 
-        // [[codegen::verbatim(ShowAfterInfo.description)]]
-        std::optional<bool> showAfter;
+        std::optional<bool> showAfter [[codegen::Info(ShowAfterInfo)]];
     };
 } // namespace
 #include "screenspacetimevaryingimageonline_codegen.cpp"

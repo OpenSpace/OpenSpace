@@ -120,23 +120,19 @@ namespace {
     // [GlobeTranslation](#base_translation_globe) to place the scene graph node at the
     // same position for which the rotation is calculated.
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
-        // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe [[codegen::identifier()]];
+        std::string globe [[codegen::Info(GlobeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(LatitudeInfo.description)]]
-        double latitude [[codegen::inrange(-90.0, 90.0)]];
+        double latitude [[codegen::Info(LatitudeInfo), codegen::inrange(-90.0, 90.0)]];
 
-        // [[codegen::verbatim(LongitudeInfo.description)]]
-        double longitude [[codegen::inrange(-180.0, 180.0)]];
+        double longitude
+            [[codegen::Info(LongitudeInfo), codegen::inrange(-180.0, 180.0)]];
 
-        // [[codegen::verbatim(AngleInfo.description)]]
-        std::optional<double> angle [[codegein::inrange(0.0, 360.0)]];
+        std::optional<double> angle
+            [[codegen::Info(AngleInfo), codegein::inrange(0.0, 360.0)]];
 
-        // [[codegen::verbatim(UseHeightmapInfo.description)]]
-        std::optional<bool> useHeightmap;
+        std::optional<bool> useHeightmap [[codegen::Info(UseHeightmapInfo)]];
 
-        // [[codegen::verbatim(UseCameraInfo.description)]]
-        std::optional<bool> useCamera;
+        std::optional<bool> useCamera [[codegen::Info(UseCameraInfo)]];
     };
 } // namespace
 #include "globerotation_codegen.cpp"

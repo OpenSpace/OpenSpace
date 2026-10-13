@@ -255,48 +255,37 @@ namespace {
         // The path to the labels file.
         std::optional<std::filesystem::path> fileName;
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
         // This value determines the opacity of the labels.
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize [[codegen::greater(1.f)]];
+        std::optional<float> fontSize
+            [[codegen::Info(FontSizeInfo), codegen::greater(1.f)]];
 
-        // [[codegen::verbatim(MinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> minMaxSize;
+        std::optional<glm::ivec2> minMaxSize [[codegen::Info(MinMaxSizeInfo)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size [[codegen::greaterequal(0.f)]];
+        std::optional<float> size [[codegen::Info(SizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(HeightOffsetInfo.description)]]
-        std::optional<float> heightOffset;
+        std::optional<float> heightOffset [[codegen::Info(HeightOffsetInfo)]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(FadeDistancesInfo.description)]]
-        std::optional<glm::vec2> fadeDistances;
+        std::optional<glm::vec2> fadeDistances [[codegen::Info(FadeDistancesInfo)]];
 
-        // [[codegen::verbatim(FadeInEnabledInfo.description)]]
-        std::optional<bool> fadeInEnabled;
+        std::optional<bool> fadeInEnabled [[codegen::Info(FadeInEnabledInfo)]];
 
-        // [[codegen::verbatim(FadeOutEnabledInfo.description)]]
-        std::optional<bool> fadeOutEnabled;
+        std::optional<bool> fadeOutEnabled [[codegen::Info(FadeOutEnabledInfo)]];
 
-        // [[codegen::verbatim(DisableCullingInfo.description)]]
-        std::optional<bool> disableCulling;
+        std::optional<bool> disableCulling [[codegen::Info(DisableCullingInfo)]];
 
-        // [[codegen::verbatim(DistanceEPSInfo.description)]]
-        std::optional<float> distanceEPS;
+        std::optional<float> distanceEPS [[codegen::Info(DistanceEPSInfo)]];
 
         enum class [[codegen::map(LabelRenderingAlignmentType)]] Alignment {
             Horizontally,
             Circularly
         };
-        // [[codegen::verbatim(AlignmentOptionInfo.description)]]
-        std::optional<Alignment> alignmentOption;
+        std::optional<Alignment> alignmentOption [[codegen::Info(AlignmentOptionInfo)]];
     };
 } // namespace
 #include "globelabelscomponent_codegen.cpp"

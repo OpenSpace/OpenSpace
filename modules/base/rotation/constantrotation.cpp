@@ -60,12 +60,10 @@ namespace {
     // Makes a scene graph node rotate about the provided axis at a fixed and constant
     // rotation speed.
     struct [[codegen::Dictionary(ConstantRotation)]] Parameters {
-        // [[codegen::verbatim(RotationInfo.description)]]
-        std::optional<glm::dvec3> rotationAxis
-            [[codegen::inrange(glm::dvec3(-1.0), glm::dvec3(1.0))]];
+        std::optional<glm::dvec3> rotationAxis [[codegen::Info(RotationInfo),
+            codegen::inrange(glm::dvec3(-1.0), glm::dvec3(1.0))]];
 
-        // [[codegen::verbatim(RotationRateInfo.description)]]
-        std::optional<float> rotationRate;
+        std::optional<float> rotationRate [[codegen::Info(RotationRateInfo)]];
     };
 } // namespace
 #include "constantrotation_codegen.cpp"

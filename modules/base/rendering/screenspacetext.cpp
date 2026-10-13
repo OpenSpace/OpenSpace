@@ -40,8 +40,7 @@ namespace {
 
     // Shows a static text that can be changed via a property.
     struct [[codegen::Dictionary(ScreenSpaceText)]] Parameters {
-        // [[codegen::verbatim(TextInfo.description)]]
-        std::optional<std::string> text;
+        std::optional<std::string> text [[codegen::Info(TextInfo)]];
     };
 } // namespace
 #include "screenspacetext_codegen.cpp"

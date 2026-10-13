@@ -58,8 +58,7 @@ namespace {
         std::map<std::string, Dictionary> keyframes
             [[codegen::reference("core_translation")]];
 
-        // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
-        std::optional<bool> shouldInterpolate;
+        std::optional<bool> shouldInterpolate [[codegen::Info(ShouldInterpolateInfo)]];
     };
 } // namespace
 #include "timelinetranslation_codegen.cpp"

@@ -65,11 +65,10 @@ namespace {
     // For stereo rendering, a second image can be specified using the `RightTexture`
     // property. This image will be used for the right eye.
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::filesystem::path texture;
+        std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
-        // [[codegen::verbatim(RightTextureInfo.description)]]
-        std::optional<std::filesystem::path> rightTexture;
+        std::optional<std::filesystem::path> rightTexture
+            [[codegen::Info(RightTextureInfo)]];
 
         // If this value is set to true, the image for this plane will not be loaded at
         // startup but rather when plane is shown for the first time. Additionally, if the

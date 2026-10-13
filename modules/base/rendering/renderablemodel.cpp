@@ -287,8 +287,7 @@ namespace {
         // should be forced to render or not.
         std::optional<bool> forceRenderInvisible;
 
-        // [[codegen::verbatim(EnableAnimationInfo.description)]]
-        std::optional<bool> enableAnimation;
+        std::optional<bool> enableAnimation [[codegen::Info(EnableAnimationInfo)]];
 
         // The date and time that the model animation should start. In format
         // `'YYYY MM DD hh:mm:ss'`.
@@ -311,43 +310,32 @@ namespace {
         // animation is played back once at the start time.
         std::optional<AnimationMode> animationMode;
 
-        // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<float> ambientIntensity;
+        std::optional<float> ambientIntensity [[codegen::Info(AmbientIntensityInfo)]];
 
-        // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
-        std::optional<float> diffuseIntensity;
+        std::optional<float> diffuseIntensity [[codegen::Info(DiffuseIntensityInfo)]];
 
-        // [[codegen::verbatim(SpecularIntensityInfo.description)]]
-        std::optional<float> specularIntensity;
+        std::optional<float> specularIntensity [[codegen::Info(SpecularIntensityInfo)]];
 
-        // [[codegen::verbatim(SpecularPowerInfo.description)]]
-        std::optional<float> specularPower;
+        std::optional<float> specularPower [[codegen::Info(SpecularPowerInfo)]];
 
-        // [[codegen::verbatim(ShadingInfo.description)]]
-        std::optional<bool> performShading;
+        std::optional<bool> performShading [[codegen::Info(ShadingInfo)]];
 
-        // [[codegen::verbatim(EnableFaceCullingInfo.description)]]
-        std::optional<bool> enableFaceCulling;
+        std::optional<bool> enableFaceCulling [[codegen::Info(EnableFaceCullingInfo)]];
 
-        // [[codegen::verbatim(ModelTransformInfo.description)]]
-        std::optional<glm::dmat4x4> modelTransform;
+        std::optional<glm::dmat4x4> modelTransform [[codegen::Info(ModelTransformInfo)]];
 
-        // [[codegen::verbatim(PivotInfo.description)]]
-        std::optional<glm::vec3> pivot;
+        std::optional<glm::vec3> pivot [[codegen::Info(PivotInfo)]];
 
-        // [[codegen::verbatim(RotationVecInfo.description)]]
-        std::optional<glm::dvec3> rotationVector
-            [[codegen::inrange(glm::dvec3(-360.0), glm::dvec3(360.0))]];
+        std::optional<glm::dvec3> rotationVector [[codegen::Info(RotationVecInfo),
+            codegen::inrange(glm::dvec3(-360.0), glm::dvec3(360.0))]];
 
         // A list of light sources that this model should accept light from.
         std::optional<std::vector<Dictionary>> lightSources
             [[codegen::reference("core_lightsource")]];
 
-        // [[codegen::verbatim(EnableDepthTestInfo.description)]]
-        std::optional<bool> enableDepthTest;
+        std::optional<bool> enableDepthTest [[codegen::Info(EnableDepthTestInfo)]];
 
-        // [[codegen::verbatim(RenderWireframeInfo.description)]]
-        std::optional<bool> renderWireframe;
+        std::optional<bool> renderWireframe [[codegen::Info(RenderWireframeInfo)]];
 
         enum class Blending {
             Default,
@@ -357,8 +345,7 @@ namespace {
             ColorAdding [[codegen::key("Color Adding")]]
         };
 
-        // [[codegen::verbatim(BlendingOptionInfo.description)]]
-        std::optional<Blending> blendingOption;
+        std::optional<Blending> blendingOption [[codegen::Info(BlendingOptionInfo)]];
 
         // The path to a vertex shader program to use instead of the default shader.
         std::optional<std::filesystem::path> vertexShader;
@@ -366,8 +353,8 @@ namespace {
         // The path to a fragment shader program to use instead of the default shader.
         std::optional<std::filesystem::path> fragmentShader;
 
-        // [[codegen::verbatim(OverrideColorInfo.description)]]
-        std::optional<glm::vec4> overrideColor [[codegen::color()]];
+        std::optional<glm::vec4> overrideColor
+            [[codegen::Info(OverrideColorInfo), codegen::color()]];
 
         struct NodeTransform {
             // This describes a translation that is applied to an internal model node

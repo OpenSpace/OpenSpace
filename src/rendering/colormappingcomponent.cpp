@@ -205,11 +205,9 @@ namespace {
     //   - Predefining which parameters to load from the dataset, and the range of values
     //      to use for color mapping
     struct [[codegen::Dictionary(ColorMappingComponent)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
-        // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path file;
+        std::filesystem::path file [[codegen::Info(FileInfo)]];
 
         struct ColorMapParameter {
             // The key for the data variable to use for color.
@@ -235,32 +233,26 @@ namespace {
         // This value can be changed dynamically in the user interface.
         std::optional<std::string> parameter;
 
-        // [[codegen::verbatim(RangeInfo.description)]]
-        std::optional<glm::vec2> valueRange;
+        std::optional<glm::vec2> valueRange [[codegen::Info(RangeInfo)]];
 
-        // [[codegen::verbatim(HideOutsideInfo.description)]]
-        std::optional<bool> hideValuesOutsideRange;
+        std::optional<bool> hideValuesOutsideRange [[codegen::Info(HideOutsideInfo)]];
 
-        // [[codegen::verbatim(UseNoDataColorInfo.description)]]
-        std::optional<bool> showMissingData;
+        std::optional<bool> showMissingData [[codegen::Info(UseNoDataColorInfo)]];
 
-        // [[codegen::verbatim(NoDataColorInfo.description)]]
-        std::optional<glm::vec4> noDataColor [[codegen::color()]];
+        std::optional<glm::vec4> noDataColor
+            [[codegen::Info(NoDataColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(UseAboveRangeColorInfo.description)]]
-        std::optional<bool> useAboveRangeColor;
+        std::optional<bool> useAboveRangeColor [[codegen::Info(UseAboveRangeColorInfo)]];
 
-        // [[codegen::verbatim(AboveRangeColorInfo.description)]]
-        std::optional<glm::vec4> aboveRangeColor [[codegen::color()]];
+        std::optional<glm::vec4> aboveRangeColor
+            [[codegen::Info(AboveRangeColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(UseBelowRangeColorInfo.description)]]
-        std::optional<bool> useBelowRangeColor;
+        std::optional<bool> useBelowRangeColor [[codegen::Info(UseBelowRangeColorInfo)]];
 
-        // [[codegen::verbatim(BelowRangeColorInfo.description)]]
-        std::optional<glm::vec4> belowRangeColor [[codegen::color()]];
+        std::optional<glm::vec4> belowRangeColor
+            [[codegen::Info(BelowRangeColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(InvertColorMapInfo.description)]]
-        std::optional<bool> invert;
+        std::optional<bool> invert [[codegen::Info(InvertColorMapInfo)]];
     };
 } // namespace
 #include "colormappingcomponent_codegen.cpp"

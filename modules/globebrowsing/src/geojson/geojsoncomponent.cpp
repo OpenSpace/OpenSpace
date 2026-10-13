@@ -236,8 +236,7 @@ namespace {
         // identifier is used instead.
         std::optional<std::string> name;
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
         // The opacity of the component
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
@@ -250,23 +249,18 @@ namespace {
         // three values will then be treated as coordinates with only two values.
         std::optional<bool> ignoreHeights;
 
-        // [[codegen::verbatim(PreventHeightUpdateInfo.description)]]
-        std::optional<bool> preventHeightUpdate;
+        std::optional<bool> preventHeightUpdate
+            [[codegen::Info(PreventHeightUpdateInfo)]];
 
-        // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path file;
+        std::filesystem::path file [[codegen::Info(FileInfo)]];
 
-        // [[codegen::verbatim(HeightOffsetInfo.description)]]
-        std::optional<float> heightOffset;
+        std::optional<float> heightOffset [[codegen::Info(HeightOffsetInfo)]];
 
-        // [[codegen::verbatim(PointSizeScaleInfo.description)]]
-        std::optional<float> pointSizeScale;
+        std::optional<float> pointSizeScale [[codegen::Info(PointSizeScaleInfo)]];
 
-        // [[codegen::verbatim(LineWidthScaleInfo.description)]]
-        std::optional<float> lineWidthScale;
+        std::optional<float> lineWidthScale [[codegen::Info(LineWidthScaleInfo)]];
 
-        // [[codegen::verbatim(CoordinateOffsetInfo.description)]]
-        std::optional<glm::vec2> coordinateOffset;
+        std::optional<glm::vec2> coordinateOffset [[codegen::Info(CoordinateOffsetInfo)]];
 
         enum class
         [[codegen::map(openspace::GlobeGeometryFeature::PointRenderMode)]]
@@ -277,11 +271,10 @@ namespace {
             AlignToGlobeNormal [[codegen::key("Globe Normal")]],
             AlignToGlobeSurface [[codegen::key("Globe Surface")]]
         };
-        // [[codegen::verbatim(PointRenderModeInfo.description)]]
-        std::optional<PointRenderMode> pointRenderMode;
+        std::optional<PointRenderMode> pointRenderMode
+            [[codegen::Info(PointRenderModeInfo)]];
 
-        // [[codegen::verbatim(DrawWireframeInfo.description)]]
-        std::optional<bool> drawWireframe;
+        std::optional<bool> drawWireframe [[codegen::Info(DrawWireframeInfo)]];
 
         // These properties will be used as default values for the geoJson rendering,
         // meaning that they will be used when there is no value given for the

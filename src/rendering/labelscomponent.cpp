@@ -111,8 +111,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
         // The speck label file with the data for the labels.
         std::optional<std::filesystem::path> file;
@@ -126,17 +125,13 @@ namespace {
         // The opacity of the labels.
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size;
+        std::optional<float> size [[codegen::Info(SizeInfo)]];
 
-        // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize;
+        std::optional<float> fontSize [[codegen::Info(FontSizeInfo)]];
 
-        // [[codegen::verbatim(MinMaxInfo.description)]]
-        std::optional<glm::ivec2> minMaxSize;
+        std::optional<glm::ivec2> minMaxSize [[codegen::Info(MinMaxInfo)]];
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
@@ -149,8 +144,7 @@ namespace {
         };
         std::optional<Unit> unit;
 
-        // [[codegen::verbatim(FaceCameraInfo.description)]]
-        std::optional<bool> faceCamera;
+        std::optional<bool> faceCamera [[codegen::Info(FaceCameraInfo)]];
 
         // Transformation matrix to be applied to the labels.
         std::optional<glm::dmat4x4> transformationMatrix;

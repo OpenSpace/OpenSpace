@@ -203,27 +203,23 @@ namespace {
         // should be used the plane should be oriented in a fixed way.
         std::optional<std::variant<bool, RenderOption>> billboard;
 
-        // [[codegen::verbatim(MirrorBacksideInfo.description)]]
-        std::optional<bool> mirrorBackside;
+        std::optional<bool> mirrorBackside [[codegen::Info(MirrorBacksideInfo)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<std::variant<float, glm::vec2>> size;
+        std::optional<std::variant<float, glm::vec2>> size [[codegen::Info(SizeInfo)]];
 
-        // [[codegen::verbatim(AutoScaleInfo.description)]]
-        std::optional<bool> autoScale;
+        std::optional<bool> autoScale [[codegen::Info(AutoScaleInfo)]];
 
         struct DistanceScalingSettings {
-            // [[codegen::verbatim(ScaleByDistanceInfo.description)]]
-            std::optional<bool> scaleByDistance;
+            std::optional<bool> scaleByDistance [[codegen::Info(ScaleByDistanceInfo)]];
 
-            // [[codegen::verbatim(ApparentSizeMultiplierInfo.description)]]
-            std::optional<float> apparentSizeMultiplier [[codegen::greater(0.f)]];
+            std::optional<float> apparentSizeMultiplier
+                [[codegen::Info(ApparentSizeMultiplierInfo), codegen::greater(0.f)]];
 
-            // [[codegen::verbatim(ScaleByDistanceMaxHeightInfo.description)]]
-            std::optional<float> scaleByDistanceMaxHeight [[codegen::greater(0.f)]];
+            std::optional<float> scaleByDistanceMaxHeight
+                [[codegen::Info(ScaleByDistanceMaxHeightInfo), codegen::greater(0.f)]];
 
-            // [[codegen::verbatim(ScaleByDistanceMinHeightInfo.description)]]
-            std::optional<float> scaleByDistanceMinHeight [[codegen::greater(0.f)]];
+            std::optional<float> scaleByDistanceMinHeight
+                [[codegen::Info(ScaleByDistanceMinHeightInfo), codegen::greater(0.f)]];
         };
 
         // Settings for scaling points based on camera distance.
@@ -233,11 +229,10 @@ namespace {
             Normal,
             Additive
         };
-        // [[codegen::verbatim(BlendModeInfo.description)]]
-        std::optional<BlendMode> blendMode;
+        std::optional<BlendMode> blendMode [[codegen::Info(BlendModeInfo)]];
 
-        // [[codegen::verbatim(MultiplyColorInfo.description)]]
-        std::optional<glm::vec3> multiplyColor [[codegen::color()]];
+        std::optional<glm::vec3> multiplyColor
+            [[codegen::Info(MultiplyColorInfo), codegen::color()]];
     };
 } // namespace
 #include "renderableplane_codegen.cpp"

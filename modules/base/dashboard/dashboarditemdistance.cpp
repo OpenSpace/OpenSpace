@@ -135,27 +135,22 @@ namespace {
             Camera
         };
 
-        // [[codegen::verbatim(SourceTypeInfo.description)]]
-        TypeInfo sourceType;
+        TypeInfo sourceType [[codegen::Info(SourceTypeInfo)]];
 
-        // [[codegen::verbatim(SourceNodeIdentifierInfo.description)]]
-        std::optional<std::string> sourceNodeIdentifier [[codegen::identifier()]];
+        std::optional<std::string> sourceNodeIdentifier
+            [[codegen::Info(SourceNodeIdentifierInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(DestinationTypeInfo.description)]]
-        TypeInfo destinationType;
+        TypeInfo destinationType [[codegen::Info(DestinationTypeInfo)]];
 
-        // [[codegen::verbatim(DestinationNodeIdentifierInfo.description)]]
-        std::optional<std::string> destinationNodeIdentifier [[codegen::identifier()]];
+        std::optional<std::string> destinationNodeIdentifier
+            [[codegen::Info(DestinationNodeIdentifierInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(SimplificationInfo.description)]]
-        std::optional<bool> simplification;
+        std::optional<bool> simplification [[codegen::Info(SimplificationInfo)]];
 
-        // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit
-            [[codegen::inlist(openspace::distanceUnitList())]];
+        std::optional<std::string> requestedUnit [[codegen::Info(RequestedUnitInfo),
+            codegen::inlist(openspace::distanceUnitList())]];
 
-        // [[codegen::verbatim(FormatStringInfo.description)]]
-        std::optional<std::string> formatString;
+        std::optional<std::string> formatString [[codegen::Info(FormatStringInfo)]];
     };
 } // namespace
 #include "dashboarditemdistance_codegen.cpp"

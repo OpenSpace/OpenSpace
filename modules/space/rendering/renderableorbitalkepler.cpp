@@ -282,55 +282,46 @@ namespace {
             ViewDirection [[codegen::key("Camera View Direction")]],
             PositionNormal [[codegen::key("Camera Position Normal")]]
         };
-        // [[codegen::verbatim(PointRenderingModeInfo.description)]]
-        std::optional<PointRenderingMode> pointRenderingMode;
+        std::optional<PointRenderingMode> pointRenderingMode
+            [[codegen::Info(PointRenderingModeInfo)]];
 
-        // [[codegen::verbatim(SegmentQualityInfo.description)]]
-        int segmentQuality;
+        int segmentQuality [[codegen::Info(SegmentQualityInfo)]];
 
-        // [[codegen::verbatim(TrailWidthInfo.description)]]
-        std::optional<float> trailWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> trailWidth
+            [[codegen::Info(TrailWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        glm::dvec3 color [[codegen::color()]];
+        glm::dvec3 color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(TrailFadeInfo.description)]]
-        std::optional<float> trailFade [[codegen::greaterequal(0.f)]];
+        std::optional<float> trailFade
+            [[codegen::Info(TrailFadeInfo), codegen::greaterequal(0.f)]];
 
         enum class RenderingMode {
             Trail,
             Point,
             PointsTrails
         };
-        // [[codegen::verbatim(RenderingModeInfo.description)]]
-        std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
+        std::optional<RenderingMode> renderingMode
+            [[codegen::Info(RenderingModeInfo), codegen::key("Rendering")]];
 
-        // [[codegen::verbatim(StartRenderIdxInfo.description)]]
-        std::optional<int> startRenderIdx;
+        std::optional<int> startRenderIdx [[codegen::Info(StartRenderIdxInfo)]];
 
-        // [[codegen::verbatim(RenderSizeInfo.description)]]
-        std::optional<int> renderSize;
+        std::optional<int> renderSize [[codegen::Info(RenderSizeInfo)]];
 
-        // [[codegen::verbatim(ContiguousModeInfo.description)]]
-        std::optional<bool> contiguousMode;
+        std::optional<bool> contiguousMode [[codegen::Info(ContiguousModeInfo)]];
 
-        // [[codegen::verbatim(PointSizeExponentInfo.description)]]
-        std::optional<float> pointSizeExponent;
+        std::optional<float> pointSizeExponent [[codegen::Info(PointSizeExponentInfo)]];
 
-        // [[codegen::verbatim(EnableMaxSizeInfo.description)]]
-        std::optional<bool> enableMaxSize;
+        std::optional<bool> enableMaxSize [[codegen::Info(EnableMaxSizeInfo)]];
 
-        // [[codegen::verbatim(MaxSizeInfo.description)]]
-        std::optional<float> maxSize;
+        std::optional<float> maxSize [[codegen::Info(MaxSizeInfo)]];
 
-        // [[codegen::verbatim(EnableOutlineInfo.description)]]
-        std::optional<bool> enableOutline;
+        std::optional<bool> enableOutline [[codegen::Info(EnableOutlineInfo)]];
 
-        // [[codegen::verbatim(OutlineColorInfo.description)]]
-        std::optional<glm::vec3> outlineColor [[codegen::color()]];
+        std::optional<glm::vec3> outlineColor
+            [[codegen::Info(OutlineColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(OutlineWidthInfo.description)]]
-        std::optional<float> outlineWidth [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> outlineWidth
+            [[codegen::Info(OutlineWidthInfo), codegen::inrange(0.f, 1.f)]];
     };
 } // namespace
 #include "renderableorbitalkepler_codegen.cpp"

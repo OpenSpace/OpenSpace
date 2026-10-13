@@ -115,11 +115,9 @@ namespace {
     };
 
     struct [[codegen::Dictionary(TelemetryModule)]] Parameters {
-        // [[codegen::verbatim(IpAddressInfo.description)]]
-        std::optional<std::string> ipAddress;
+        std::optional<std::string> ipAddress [[codegen::Info(IpAddressInfo)]];
 
-        // [[codegen::verbatim(PortInfo.description)]]
-        std::optional<int> port [[codegen::inrange(1, 65535)]];
+        std::optional<int> port [[codegen::Info(PortInfo), codegen::inrange(1, 65535)]];
 
         enum class
         [[codegen::map(openspace::TelemetryModule::AngleCalculationMode)]]
@@ -128,11 +126,11 @@ namespace {
             Circular
         };
 
-        // [[codegen::verbatim(AngleCalculationModeInfo.description)]]
-        std::optional<AngleCalculationMode> angleCalculationMode;
+        std::optional<AngleCalculationMode> angleCalculationMode
+            [[codegen::Info(AngleCalculationModeInfo)]];
 
-        // [[codegen::verbatim(IncludeElevationAngleInfo.description)]]
-        std::optional<bool> includeElevationAngle;
+        std::optional<bool> includeElevationAngle
+            [[codegen::Info(IncludeElevationAngleInfo)]];
     };
 } // namespace
 #include "telemetrymodule_codegen.cpp"

@@ -110,17 +110,15 @@ namespace {
     // the optimistic inner zone, and the last part the optimistic outer zone (furthest
     // from the star).
     struct [[codegen::Dictionary(RenderableHabitableZone)]] Parameters {
-        // [[codegen::verbatim(EffectiveTemperatureInfo.description)]]
-        float effectiveTemperature [[codegen::greaterequal(0.f)]];
+        float effectiveTemperature
+            [[codegen::Info(EffectiveTemperatureInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(LuminosityInfo.description)]]
-        float luminosity [[codegen::greaterequal(0.f)]];
+        float luminosity [[codegen::Info(LuminosityInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(OptimisticInfo.description)]]
-        std::optional<bool> optimistic;
+        std::optional<bool> optimistic [[codegen::Info(OptimisticInfo)]];
 
-        // [[codegen::verbatim(KopparapuTeffIntervalInfo.description)]]
-        std::optional<glm::vec2> kopparapuTeffInterval;
+        std::optional<glm::vec2> kopparapuTeffInterval
+            [[codegen::Info(KopparapuTeffIntervalInfo)]];
     };
 } // namespace
 #include "renderablehabitablezone_codegen.cpp"

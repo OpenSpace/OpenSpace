@@ -192,17 +192,16 @@ namespace {
     }
 
     struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
-        // [[codegen::verbatim(TileCacheSizeInfo.description)]]
-        std::optional<int> tileCacheSize;
+        std::optional<int> tileCacheSize [[codegen::Info(TileCacheSizeInfo)]];
 
-        // [[codegen::verbatim(DefaultGeoPointTextureInfo.description)]]
-        std::optional<std::string> defaultGeoPointTexture;
+        std::optional<std::string> defaultGeoPointTexture
+            [[codegen::Info(DefaultGeoPointTextureInfo)]];
 
-        // [[codegen::verbatim(MRFCacheEnabledInfo.description)]]
-        std::optional<bool> mrfCacheEnabled [[codegen::key("MRFCacheEnabled")]];
+        std::optional<bool> mrfCacheEnabled
+            [[codegen::Info(MRFCacheEnabledInfo), codegen::key("MRFCacheEnabled")]];
 
-        // [[codegen::verbatim(MRFCacheLocationInfo.description)]]
-        std::optional<std::string> mrfCacheLocation [[codegen::key("MRFCacheLocation")]];
+        std::optional<std::string> mrfCacheLocation
+            [[codegen::Info(MRFCacheLocationInfo), codegen::key("MRFCacheLocation")]];
     };
 } // namespace
 #include "globebrowsingmodule_codegen.cpp"

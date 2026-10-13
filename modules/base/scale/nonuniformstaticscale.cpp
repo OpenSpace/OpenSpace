@@ -53,8 +53,7 @@ namespace {
     // to make a RenderableSphericalGrid that is not a perfect spherical grid, but a
     // tri-axial ellipsoid instead.
     struct [[codegen::Dictionary(NonUniformStaticScale)]] Parameters {
-        // [[codegen::verbatim(ScaleInfo.description)]]
-        glm::dvec3 scale;
+        glm::dvec3 scale [[codegen::Info(ScaleInfo)]];
     };
 } // namespace
 #include "nonuniformstaticscale_codegen.cpp"

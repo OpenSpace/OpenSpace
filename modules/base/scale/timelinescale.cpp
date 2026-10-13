@@ -56,8 +56,7 @@ namespace {
         // that are valid Scale objects.
         std::map<std::string, Dictionary> keyframes [[codegen::reference("core_scale")]];
 
-        // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
-        std::optional<bool> shouldInterpolate;
+        std::optional<bool> shouldInterpolate [[codegen::Info(ShouldInterpolateInfo)]];
     };
 } // namespace
 #include "timelinescale_codegen.cpp"

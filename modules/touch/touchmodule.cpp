@@ -74,8 +74,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(TouchModule)]] Parameters {
-        // [[codegen::verbatim(TuioPortInfo.description)]]
-        std::optional<int> tuioPort [[codegen::inrange(1, 65535)]];
+        std::optional<int> tuioPort
+            [[codegen::Info(TuioPortInfo), codegen::inrange(1, 65535)]];
     };
 } // namespace
 #include "touchmodule_codegen.cpp"

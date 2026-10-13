@@ -39,8 +39,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
-        // [[codegen::verbatim(TextInfo.description)]]
-        std::optional<std::string> text;
+        std::optional<std::string> text [[codegen::Info(TextInfo)]];
     };
 } // namespace
 #include "dashboarditemtext_codegen.cpp"

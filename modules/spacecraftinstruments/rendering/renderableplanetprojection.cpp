@@ -188,29 +188,24 @@ namespace {
         Dictionary projection
             [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 
-        // [[codegen::verbatim(ColorTexturePathsInfo.description)]]
-        std::vector<std::string> colorTexturePaths;
+        std::vector<std::string> colorTexturePaths
+            [[codegen::Info(ColorTexturePathsInfo)]];
 
-        // [[codegen::verbatim(HeightTexturePathsInfo.description)]]
-        std::vector<std::string> heightTexturePaths;
+        std::vector<std::string> heightTexturePaths
+            [[codegen::Info(HeightTexturePathsInfo)]];
 
-        // [[codegen::verbatim(HeightExaggerationInfo.description)]]
-        std::optional<float> heightExaggeration;
+        std::optional<float> heightExaggeration [[codegen::Info(HeightExaggerationInfo)]];
 
-        // [[codegen::verbatim(MeridianShiftInfo.description)]]
-        std::optional<bool> meridianShift;
+        std::optional<bool> meridianShift [[codegen::Info(MeridianShiftInfo)]];
 
-        // [[codegen::verbatim(AmbientBrightnessInfo.description)]]
-        std::optional<double> ambientBrightness;
+        std::optional<double> ambientBrightness [[codegen::Info(AmbientBrightnessInfo)]];
 
-        // [[codegen::verbatim(MaxProjectionsPerFrameInfo.description)]]
-        std::optional<int> maxProjectionsPerFrame;
+        std::optional<int> maxProjectionsPerFrame
+            [[codegen::Info(MaxProjectionsPerFrameInfo)]];
 
-        // [[codegen::verbatim(RadiusInfo.description)]]
-        std::variant<float, glm::vec3> radius;
+        std::variant<float, glm::vec3> radius [[codegen::Info(RadiusInfo)]];
 
-        // [[codegen::verbatim(SegmentsInfo.description)]]
-        int segments;
+        int segments [[codegen::Info(SegmentsInfo)]];
     };
 } // namespace
 #include "renderableplanetprojection_codegen.cpp"

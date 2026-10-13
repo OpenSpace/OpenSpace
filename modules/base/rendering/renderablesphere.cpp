@@ -198,11 +198,10 @@ namespace {
     // The `Orientation` parameter determines whether the provided image is shown on
     // the inside, outside, or both sides of the sphere.
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size [[codegen::greater(0.f)]];
+        std::optional<float> size [[codegen::Info(SizeInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(SegmentsInfo.description)]]
-        std::optional<int> segments [[codegen::greaterequal(4)]];
+        std::optional<int> segments
+            [[codegen::Info(SegmentsInfo), codegen::greaterequal(4)]];
 
         enum class [[codegen::map(Orientation)]] Orientation {
             Outside,
@@ -210,34 +209,29 @@ namespace {
             Both
         };
 
-        // [[codegen::verbatim(OrientationInfo.description)]]
-        std::optional<Orientation> orientation;
+        std::optional<Orientation> orientation [[codegen::Info(OrientationInfo)]];
 
-        // [[codegen::verbatim(MirrorTextureInfo.description)]]
-        std::optional<bool> mirrorTexture;
+        std::optional<bool> mirrorTexture [[codegen::Info(MirrorTextureInfo)]];
 
         enum class [[codegen::map(TextureProjection)]] TextureProjection {
             Equirectangular,
             AngularFisheye [[codegen::key("Angular Fisheye")]]
         };
 
-        // [[codegen::verbatim(TextureProjectionInfo.description)]]
-        std::optional<TextureProjection> textureProjection;
+        std::optional<TextureProjection> textureProjection
+            [[codegen::Info(TextureProjectionInfo)]];
 
-        // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
-        std::optional<bool> disableFadeInOut;
+        std::optional<bool> disableFadeInOut [[codegen::Info(DisableFadeInOutInfo)]];
 
-        // [[codegen::verbatim(FadeInThresholdInfo.description)]]
-        std::optional<float> fadeInThreshold [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> fadeInThreshold
+            [[codegen::Info(FadeInThresholdInfo), codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
-        std::optional<float> fadeOutThreshold [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> fadeOutThreshold
+            [[codegen::Info(FadeOutThresholdInfo), codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(ColorMapInfo.description)]]
-        std::optional<std::filesystem::path> colorMap;
+        std::optional<std::filesystem::path> colorMap [[codegen::Info(ColorMapInfo)]];
 
-        // [[codegen::verbatim(UseColorMapInfo.description)]]
-        std::optional<bool> useColorMap;
+        std::optional<bool> useColorMap [[codegen::Info(UseColorMapInfo)]];
 
         enum class Blending {
             Default,
@@ -246,11 +240,9 @@ namespace {
             ColorAdding [[codegen::key("Color Adding")]]
         };
 
-        // [[codegen::verbatim(BlendingOptionInfo.description)]]
-        std::optional<Blending> blendingOption;
+        std::optional<Blending> blendingOption [[codegen::Info(BlendingOptionInfo)]];
 
-        // [[codegen::verbatim(DisableDepthInfo.description)]]
-        std::optional<bool> disableDepth;
+        std::optional<bool> disableDepth [[codegen::Info(DisableDepthInfo)]];
     };
 } // namespace
 #include "renderablesphere_codegen.cpp"

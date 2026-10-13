@@ -223,20 +223,17 @@ namespace {
     }
 
     struct [[codegen::Dictionary(RenderableGalaxy)]] Parameters {
-        // [[codegen::verbatim(VolumeRenderingEnabledInfo.description)]]
-        std::optional<bool> volumeRenderingEnabled;
+        std::optional<bool> volumeRenderingEnabled
+            [[codegen::Info(VolumeRenderingEnabledInfo)]];
 
-        // [[codegen::verbatim(StarRenderingEnabledInfo.description)]]
-        std::optional<bool> starRenderingEnabled;
+        std::optional<bool> starRenderingEnabled
+            [[codegen::Info(StarRenderingEnabledInfo)]];
 
-        // [[codegen::verbatim(StepSizeInfo.description)]]
-        std::optional<float> stepSizeInfo;
+        std::optional<float> stepSizeInfo [[codegen::Info(StepSizeInfo)]];
 
-        // [[codegen::verbatim(AbsorptionMultiplyInfo.description)]]
-        std::optional<float> absorptionMultiply;
+        std::optional<float> absorptionMultiply [[codegen::Info(AbsorptionMultiplyInfo)]];
 
-        // [[codegen::verbatim(EmissionMultiplyInfo.description)]]
-        std::optional<float> emissionMultiply;
+        std::optional<float> emissionMultiply [[codegen::Info(EmissionMultiplyInfo)]];
 
         // If specified, the default raycasting shader is overwritten and the shader at
         // this location is used instead.
@@ -246,22 +243,21 @@ namespace {
             Points,
             Billboards
         };
-        // [[codegen::verbatim(StarRenderingMethodInfo.description)]]
-        std::optional<StarRenderingMethod> starRenderingMethod;
+        std::optional<StarRenderingMethod> starRenderingMethod
+            [[codegen::Info(StarRenderingMethodInfo)]];
 
-        // [[codegen::verbatim(RotationInfo.description)]]
-        std::optional<glm::vec3> rotation;
+        std::optional<glm::vec3> rotation [[codegen::Info(RotationInfo)]];
 
         struct Volume {
             std::filesystem::path filename;
             glm::ivec3 dimensions;
             glm::vec3 size;
 
-            // [[codegen::verbatim(NumberOfRayCastingStepsInfo.description)]]
-            std::optional<float> steps [[codegen::greater(0.f)]];
+            std::optional<float> steps
+                [[codegen::Info(NumberOfRayCastingStepsInfo), codegen::greater(0.f)]];
 
-            // [[codegen::verbatim(DownscaleVolumeRenderingInfo.description)]]
-            std::optional<float> downscale [[codegen::inrange(0.f, 1.f)]];
+            std::optional<float> downscale [[codegen::Info(DownscaleVolumeRenderingInfo),
+                codegen::inrange(0.f, 1.f)]];
         };
         Volume volume;
 
@@ -269,8 +265,8 @@ namespace {
             std::filesystem::path filename;
             std::filesystem::path texture;
 
-            // [[codegen::verbatim(EnabledPointsRatioInfo.description)]]
-            std::optional<float> enabledPointsRatio;
+            std::optional<float> enabledPointsRatio
+                [[codegen::Info(EnabledPointsRatioInfo)]];
         };
         Points points;
     };

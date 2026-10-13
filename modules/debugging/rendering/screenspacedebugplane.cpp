@@ -46,8 +46,8 @@ namespace {
     // Useful for debugging OpenGL textures. It renders the content of an existing
     // texture, based on a provided OpenGL texture name.
     struct [[codegen::Dictionary(ScreenSpaceDebugPlane)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::optional<int> texture [[codegen::greaterequal(0)]];
+        std::optional<int> texture
+            [[codegen::Info(TextureInfo), codegen::greaterequal(0)]];
     };
 } // namespace
 #include "screenspacedebugplane_codegen.cpp"

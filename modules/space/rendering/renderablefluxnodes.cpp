@@ -362,14 +362,11 @@ namespace {
         // Path to a source folder with the three binary files in it.
         std::filesystem::path sourceFolder [[codegen::directory()]];
 
-        // [[codegen::verbatim(ColorTablePathInfo.description)]]
-        std::filesystem::path colorTablePath;
+        std::filesystem::path colorTablePath [[codegen::Info(ColorTablePathInfo)]];
 
-        // [[codegen::verbatim(GoesEnergyBinsInfo.description)]]
-        std::optional<int> energyBin;
+        std::optional<int> energyBin [[codegen::Info(GoesEnergyBinsInfo)]];
 
-        // [[codegen::verbatim(ColorTableRangeInfo.description)]]
-        std::optional<glm::vec2> colorTableRange;
+        std::optional<glm::vec2> colorTableRange [[codegen::Info(ColorTableRangeInfo)]];
     };
 } // namespace
 #include "renderablefluxnodes_codegen.cpp"

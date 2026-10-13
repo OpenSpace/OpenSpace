@@ -106,14 +106,13 @@ namespace {
     // `Segments` parameter, or different number of segments in the latitudal and
     // longtudal direction using the `LatSegments` and `LongSegments` parameters.
     struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(LongSegmentsInfo.description)]]
-        std::optional<int> longSegments [[codegen::greater(0)]];
+        std::optional<int> longSegments
+            [[codegen::Info(LongSegmentsInfo), codegen::greater(0)]];
 
-        // [[codegen::verbatim(LatSegmentsInfo.description)]]
-        std::optional<int> latSegments [[codegen::greater(0)]];
+        std::optional<int> latSegments
+            [[codegen::Info(LatSegmentsInfo), codegen::greater(0)]];
 
         // The number of segments the sphere is split into. Determines the resolution of
         // the rendered sphere. Should be an even value (if an odd value is provided, the
@@ -123,11 +122,11 @@ namespace {
         // `LatSegments`.
         std::optional<int> segments [[codegen::greater(0)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels
+            [[codegen::Info(LabelsInfo), codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderablesphericalgrid_codegen.cpp"

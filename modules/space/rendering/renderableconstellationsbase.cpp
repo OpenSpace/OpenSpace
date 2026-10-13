@@ -78,18 +78,17 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableConstellationsBase)]] Parameters {
-        // [[codegen::verbatim(NamesFileInfo.description)]]
-        std::optional<std::filesystem::path> namesFile;
+        std::optional<std::filesystem::path> namesFile [[codegen::Info(NamesFileInfo)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greater(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greater(0.f)]];
 
         // A list of constellations (given as abbreviations) to show. If empty or
         // excluded, all constellations will be shown.
         std::optional<std::vector<std::string>> selection;
 
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels
+            [[codegen::Info(LabelsInfo), codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderableconstellationsbase_codegen.cpp"

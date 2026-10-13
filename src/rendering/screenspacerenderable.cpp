@@ -293,74 +293,64 @@ namespace {
         // amongst all existing screen space nodes that have been added to the scene.
         std::optional<std::string> identifier [[codegen::identifier()]];
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
-        // [[codegen::verbatim(RenderDuringBlackoutInfo.description)]]
-        std::optional<bool> renderDuringBlackout;
+        std::optional<bool> renderDuringBlackout
+            [[codegen::Info(RenderDuringBlackoutInfo)]];
 
         // The opacity of the screen space object. If 1, the object is completely opaque.
         // If 0, the object is completely transparent.
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
         struct Placement {
-            // [[codegen::verbatim(UseRadiusAzimuthElevationInfo.description)]]
-            std::optional<bool> useRadiusAzimuthElevation;
+            std::optional<bool> useRadiusAzimuthElevation
+                [[codegen::Info(UseRadiusAzimuthElevationInfo)]];
 
-            // [[codegen::verbatim(FaceCameraInfo.description)]]
-            std::optional<bool> faceCamera;
+            std::optional<bool> faceCamera [[codegen::Info(FaceCameraInfo)]];
 
-            // [[codegen::verbatim(CartesianPositionInfo.description)]]
-            std::optional<glm::vec3> cartesianPosition;
+            std::optional<glm::vec3> cartesianPosition
+                [[codegen::Info(CartesianPositionInfo)]];
 
-            // [[codegen::verbatim(RadiusAzimuthElevationInfo.description)]]
-            std::optional<glm::vec3> radiusAzimuthElevation;
+            std::optional<glm::vec3> radiusAzimuthElevation
+                [[codegen::Info(RadiusAzimuthElevationInfo)]];
 
-            // [[codegen::verbatim(ScaleInfo.description)]]
-            std::optional<float> scale;
+            std::optional<float> scale [[codegen::Info(ScaleInfo)]];
 
-            // [[codegen::verbatim(LocalRotationInfo.description)]]
-            std::optional<glm::vec3> rotation;
+            std::optional<glm::vec3> rotation [[codegen::Info(LocalRotationInfo)]];
         };
 
-        // [[codegen::verbatim(PlacementInfo.description)]]
-        std::optional<Placement> placement;
+        std::optional<Placement> placement [[codegen::Info(PlacementInfo)]];
 
         struct Style {
-            // [[codegen::verbatim(GammaOffsetInfo.description)]]
-            std::optional<float> gammaOffset;
+            std::optional<float> gammaOffset [[codegen::Info(GammaOffsetInfo)]];
 
-            // [[codegen::verbatim(MultiplyColorInfo.description)]]
-            std::optional<glm::vec3> multiplyColor [[codegen::color()]];
+            std::optional<glm::vec3> multiplyColor
+                [[codegen::Info(MultiplyColorInfo), codegen::color()]];
 
-            // [[codegen::verbatim(BackgroundColorInfo.description)]]
-            std::optional<glm::vec4> backgroundColor [[codegen::color()]];
+            std::optional<glm::vec4> backgroundColor
+                [[codegen::Info(BackgroundColorInfo), codegen::color()]];
 
             struct Border {
-                // [[codegen::verbatim(BorderWidthInfo.description)]]
-                std::optional<float> width [[codegen::greater(0.0)]];
+                std::optional<float> width
+                    [[codegen::Info(BorderWidthInfo), codegen::greater(0.0)]];
 
-                // [[codegen::verbatim(BorderColorInfo.description)]]
-                std::optional<glm::vec3> color [[codegen::color()]];
+                std::optional<glm::vec3> color
+                    [[codegen::Info(BorderColorInfo), codegen::color()]];
 
-                // [[codegen::verbatim(BorderFeatherInfo.description)]]
-                std::optional<bool> feather;
+                std::optional<bool> feather [[codegen::Info(BorderFeatherInfo)]];
             };
 
-            // [[codegen::verbatim(BorderInfo.description)]]
-            std::optional<Border> border;
+            std::optional<Border> border [[codegen::Info(BorderInfo)]];
         };
 
-        // [[codegen::verbatim(StyleInfo.description)]]
-        std::optional<Style> style;
+        std::optional<Style> style [[codegen::Info(StyleInfo)]];
 
         // Defines either a single or multiple tags that apply to this
         // `ScreenSpaceRenderable`, thus making it possible to address multiple, separate
         // Renderables with a single property change.
         std::optional<std::variant<std::string, std::vector<std::string>>> tag;
 
-        // [[codegen::verbatim(GuiIsHiddenInfo.description)]]
-        std::optional<bool> hidden;
+        std::optional<bool> hidden [[codegen::Info(GuiIsHiddenInfo)]];
     };
 } // namespace
 #include "screenspacerenderable_codegen.cpp"

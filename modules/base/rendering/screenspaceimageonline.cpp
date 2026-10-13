@@ -56,8 +56,8 @@ namespace {
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
         std::optional<std::string> identifier [[codegen::identifier()]];
 
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::optional<std::string> url [[codegen::key("URL")]];
+        std::optional<std::string> url
+            [[codegen::Info(TextureInfo), codegen::key("URL")]];
     };
 } // namespace
 #include "screenspaceimageonline_codegen.cpp"

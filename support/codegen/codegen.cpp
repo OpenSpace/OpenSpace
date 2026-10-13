@@ -441,7 +441,32 @@ namespace {
 
         std::string ver = fqn(s, "_");
         std::string v = verifier(var->type, *var, s);
-        if (var->comment.empty()) {
+        if (!var->attributes.info.empty()) {
+            std::string description = std::format(
+                "std::string({}.description)", var->attributes.info
+            );
+            if (!var->comment.empty()) {
+                // Generate the comment. First the description from the info, then the
+                // manually written comment above
+                std::string infoDescription = description;
+                std::string manualComment = resolveComment(var->comment);
+
+                description = std::format(
+                    "{} + \" \" + {}", infoDescription, manualComment
+                );
+            }
+            std::string result = std::format(
+                "    codegen_{}->documentations.emplace_back({},{},{},{},{});\n",
+                ver,
+                var->key,
+                v,
+                isOptional ? "Optional::Yes" : "Optional::No",
+                var->attributes.isPrivate ? "Private::Yes" : "Private::No",
+                description
+            );
+            return result;
+        }
+        else if (var->comment.empty()) {
             std::string result = std::format(
                 "    codegen_{}->documentations.emplace_back({},{},{},{});\n",
                 ver,

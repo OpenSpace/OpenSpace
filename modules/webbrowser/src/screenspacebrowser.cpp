@@ -93,11 +93,10 @@ namespace {
         // A unique identifier for this screen space browser.
         std::optional<std::string> identifier [[codegen::identifier()]];
 
-        // [[codegen::verbatim(UrlInfo.description)]]
-        std::optional<std::string> url;
+        std::optional<std::string> url [[codegen::Info(UrlInfo)]];
 
-        // [[codegen::verbatim(DimensionsInfo.description)]]
-        std::optional<glm::vec2> dimensions [[codegen::greater(glm::vec2(0.f))]];
+        std::optional<glm::vec2> dimensions
+            [[codegen::Info(DimensionsInfo), codegen::greater(glm::vec2(0.f))]];
     };
 } // namespace
 #include "screenspacebrowser_codegen.cpp"

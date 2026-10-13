@@ -113,21 +113,18 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableRings)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::filesystem::path texture;
+        std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        float size [[codegen::greaterequal(0.f)]];
+        float size [[codegen::Info(SizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(OffsetInfo.description)]]
-        std::optional<glm::vec2> offset
-            [[codegen::inrange(glm::vec2(0.f), glm::vec2(1.f))]];
+        std::optional<glm::vec2> offset [[codegen::Info(OffsetInfo),
+            codegen::inrange(glm::vec2(0.f), glm::vec2(1.f))]];
 
-        // [[codegen::verbatim(NightFactorInfo.description)]]
-        std::optional<float> nightFactor [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> nightFactor
+            [[codegen::Info(NightFactorInfo), codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(ColorFilterInfo.description)]]
-        std::optional<float> colorFilter [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> colorFilter
+            [[codegen::Info(ColorFilterInfo), codegen::inrange(0.f, 1.f)]];
     };
 } // namespace
 #include "renderablerings_codegen.cpp"

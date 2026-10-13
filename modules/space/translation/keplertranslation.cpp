@@ -191,31 +191,29 @@ namespace {
     // phase along that orbit. This makes it suitable both for static asset definitions
     // and for interactive or programmatic updates to orbital parameters.
     struct [[codegen::Dictionary(KeplerTranslation)]] Parameters {
-        // [[codegen::verbatim(EccentricityInfo.description)]]
-        double eccentricity [[codegen::inrange(0.0, 1.0)]];
+        double eccentricity
+            [[codegen::Info(EccentricityInfo), codegen::inrange(0.0, 1.0)]];
 
-        // [[codegen::verbatim(SemiMajorAxisInfo.description)]]
-        double semiMajorAxis;
+        double semiMajorAxis [[codegen::Info(SemiMajorAxisInfo)]];
 
-        // [[codegen::verbatim(InclinationInfo.description)]]
-        double inclination [[codegen::inrange(-360.0, 360.0)]];
+        double inclination
+            [[codegen::Info(InclinationInfo), codegen::inrange(-360.0, 360.0)]];
 
-        // [[codegen::verbatim(AscendingNodeInfo.description)]]
-        double ascendingNode [[codegen::inrange(-360.0, 360.0)]];
+        double ascendingNode
+            [[codegen::Info(AscendingNodeInfo), codegen::inrange(-360.0, 360.0)]];
 
-        // [[codegen::verbatim(ArgumentOfPeriapsisInfo.description)]]
-        double argumentOfPeriapsis [[codegen::inrange(-360.0, 360.0)]];
+        double argumentOfPeriapsis
+            [[codegen::Info(ArgumentOfPeriapsisInfo), codegen::inrange(-360.0, 360.0)]];
 
-        // [[codegen::verbatim(MeanAnomalyAtEpochInfo.description)]]
-        double meanAnomaly [[codegen::inrange(-360.0, 360.0)]];
+        double meanAnomaly
+            [[codegen::Info(MeanAnomalyAtEpochInfo), codegen::inrange(-360.0, 360.0)]];
 
         // This value determines the epoch for which the initial location is defined in.
         // This is specified either in the form of a date (YYYY MM DD HH:mm:ss) or in the
         // number of seconds past the J2000 epoch.
         std::variant<std::string, double> epoch;
 
-        // [[codegen::verbatim(PeriodInfo.description)]]
-        double period [[codegen::greater(0.0)]];
+        double period [[codegen::Info(PeriodInfo), codegen::greater(0.0)]];
     };
 } // namespace
 #include "keplertranslation_codegen.cpp"

@@ -357,6 +357,14 @@ namespace {
         const std::vector<ParseResult> attributes = parseAttribute(line);
         for (const ParseResult& p : attributes) {
             if (p.key == keywords::Key)               { res.key = p.value; }
+            else if (p.key == keywords::Info) {
+                if (p.value.empty()) {
+                    throw CodegenError(std::format(
+                        "codegen::Info requires a non-empty argument\n{}", line
+                    ));
+                }
+                res.info = p.value;
+            }
             else if (p.key == keywords::Reference)    { res.reference = p.value; }
             else if (p.key == keywords::InRange)      { res.inrange = p.value; }
             else if (p.key == keywords::NotInRange)   { res.notinrange = p.value; }

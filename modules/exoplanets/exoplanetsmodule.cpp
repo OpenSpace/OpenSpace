@@ -183,47 +183,44 @@ namespace {
     constexpr std::string_view TeffToBvConversionFileName = "teff_bv.txt";
 
     struct [[codegen::Dictionary(ExoplanetsModule)]] Parameters {
-        // [[codegen::verbatim(DataFolderInfo.description)]]
-        std::optional<std::filesystem::path> dataFolder [[codegen::directory()]];
+        std::optional<std::filesystem::path> dataFolder
+            [[codegen::Info(DataFolderInfo), codegen::directory()]];
 
-        // [[codegen::verbatim(BvColorMapInfo.description)]]
-        std::optional<std::filesystem::path> bvColormap;
+        std::optional<std::filesystem::path> bvColormap [[codegen::Info(BvColorMapInfo)]];
 
-        // [[codegen::verbatim(StarTextureInfo.description)]]
-        std::optional<std::filesystem::path> starTexture;
+        std::optional<std::filesystem::path> starTexture
+            [[codegen::Info(StarTextureInfo)]];
 
-        // [[codegen::verbatim(StarGlareTextureInfo.description)]]
-        std::optional<std::filesystem::path> starGlareTexture;
+        std::optional<std::filesystem::path> starGlareTexture
+            [[codegen::Info(StarGlareTextureInfo)]];
 
-        // [[codegen::verbatim(NoDataTextureInfo.description)]]
-        std::optional<std::filesystem::path> noDataTexture;
+        std::optional<std::filesystem::path> noDataTexture
+            [[codegen::Info(NoDataTextureInfo)]];
 
-        // [[codegen::verbatim(PlanetDefaultTextureInfo.description)]]
-        std::optional<std::filesystem::path> planetDefaultTexture;
+        std::optional<std::filesystem::path> planetDefaultTexture
+            [[codegen::Info(PlanetDefaultTextureInfo)]];
 
-        // [[codegen::verbatim(OrbitDiscTextureInfo.description)]]
-        std::optional<std::filesystem::path> orbitDiscTexture;
+        std::optional<std::filesystem::path> orbitDiscTexture
+            [[codegen::Info(OrbitDiscTextureInfo)]];
 
-        // [[codegen::verbatim(HabitableZoneTextureInfo.description)]]
-        std::optional<std::filesystem::path> habitableZoneTexture;
+        std::optional<std::filesystem::path> habitableZoneTexture
+            [[codegen::Info(HabitableZoneTextureInfo)]];
 
-        // [[codegen::verbatim(ComparisonCircleColorInfo.description)]]
-        std::optional<glm::vec3> comparisonCircleColor [[codegen::color()]];
+        std::optional<glm::vec3> comparisonCircleColor
+            [[codegen::Info(ComparisonCircleColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(ShowComparisonCircleInfo.description)]]
-        std::optional<bool> showComparisonCircle;
+        std::optional<bool> showComparisonCircle
+            [[codegen::Info(ShowComparisonCircleInfo)]];
 
-        // [[codegen::verbatim(ShowOrbitUncertaintyInfo.description)]]
-        std::optional<bool> showOrbitUncertainty;
+        std::optional<bool> showOrbitUncertainty
+            [[codegen::Info(ShowOrbitUncertaintyInfo)]];
 
-        // [[codegen::verbatim(ShowHabitableZoneInfo.description)]]
-        std::optional<bool> showHabitableZone;
+        std::optional<bool> showHabitableZone [[codegen::Info(ShowHabitableZoneInfo)]];
 
-        // [[codegen::verbatim(UseOptimisticZoneInfo.description)]]
-        std::optional<bool> useOptimisticZone;
+        std::optional<bool> useOptimisticZone [[codegen::Info(UseOptimisticZoneInfo)]];
 
-        // [[codegen::verbatim(HabitableZoneOpacityInfo.description)]]
-        std::optional<float> habitableZoneOpacity [[codegen::inrange(0, 1)]];
+        std::optional<float> habitableZoneOpacity
+            [[codegen::Info(HabitableZoneOpacityInfo), codegen::inrange(0, 1)]];
     };
 } // namespace
 #include "exoplanetsmodule_codegen.cpp"

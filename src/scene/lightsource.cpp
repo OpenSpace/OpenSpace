@@ -64,8 +64,7 @@ namespace {
         // the identifier is used.
         std::optional<std::string> name;
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
     };
 } // namespace
 #include "lightsource_codegen.cpp"

@@ -99,11 +99,9 @@ namespace {
     // of the constellation, the text of that label is replaced with the full name from
     // the `NamesFile`.
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
-        // [[codegen::verbatim(VertexInfo.description)]]
-        std::filesystem::path file;
+        std::filesystem::path file [[codegen::Info(VertexInfo)]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
     };
 } // namespace
 #include "renderableconstellationbounds_codegen.cpp"

@@ -102,36 +102,31 @@ namespace {
             RequirePassword
         };
 
-        // [[codegen::verbatim(DefaultAccessInfo.description)]]
-        std::optional<Access> defaultAccess;
+        std::optional<Access> defaultAccess [[codegen::Info(DefaultAccessInfo)]];
 
         // The identifier for this interface.
         std::string identifier;
 
-        // [[codegen::verbatim(AllowAddressesInfo.description)]]
-        std::optional<std::vector<std::string>> allowAddresses;
+        std::optional<std::vector<std::string>> allowAddresses
+            [[codegen::Info(AllowAddressesInfo)]];
 
-        // [[codegen::verbatim(DenyAddressesInfo.description)]]
-        std::optional<std::vector<std::string>> denyAddresses;
+        std::optional<std::vector<std::string>> denyAddresses
+            [[codegen::Info(DenyAddressesInfo)]];
 
-        // [[codegen::verbatim(RequirePasswordAddressesInfo.description)]]
-        std::optional<std::vector<std::string>> requirePasswordAddresses;
+        std::optional<std::vector<std::string>> requirePasswordAddresses
+            [[codegen::Info(RequirePasswordAddressesInfo)]];
 
         enum class [[codegen::stringify()]] Type {
             TcpSocket,
             WebSocket
         };
-        // [[codegen::verbatim(TypeInfo.description)]]
-        Type type;
+        Type type [[codegen::Info(TypeInfo)]];
 
-        // [[codegen::verbatim(PasswordInfo.description)]]
-        std::optional<std::string> password;
+        std::optional<std::string> password [[codegen::Info(PasswordInfo)]];
 
-        // [[codegen::verbatim(PortInfo.description)]]
-        int port;
+        int port [[codegen::Info(PortInfo)]];
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        bool enabled;
+        bool enabled [[codegen::Info(EnabledInfo)]];
     };
 } // namespace
 #include "serverinterface_codegen.cpp"

@@ -167,29 +167,24 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
-        // [[codegen::verbatim(SourceDirectoryInfo.description)]]
-        std::filesystem::path sourceDirectory [[codegen::directory()]];
+        std::filesystem::path sourceDirectory
+            [[codegen::Info(SourceDirectoryInfo), codegen::directory()]];
 
-        // [[codegen::verbatim(TransferFunctionInfo.description)]]
-        std::filesystem::path transferFunction;
+        std::filesystem::path transferFunction [[codegen::Info(TransferFunctionInfo)]];
 
-        // [[codegen::verbatim(SecondsBeforeInfo.description)]]
-        std::optional<float> secondsBefore;
+        std::optional<float> secondsBefore [[codegen::Info(SecondsBeforeInfo)]];
 
-        // [[codegen::verbatim(SecondsAfterInfo.description)]]
-        float secondsAfter;
+        float secondsAfter [[codegen::Info(SecondsAfterInfo)]];
 
         // If true, the volume data will be inverted at its z-axis.
         std::optional<bool> invertDataAtZ;
 
-        // [[codegen::verbatim(BrightnessInfo.description)]]
-        std::optional<float> brightness;
+        std::optional<float> brightness [[codegen::Info(BrightnessInfo)]];
 
-        // [[codegen::verbatim(StepSizeInfo.description)]]
-        std::optional<float> stepSize;
+        std::optional<float> stepSize [[codegen::Info(StepSizeInfo)]];
 
-        // [[codegen::verbatim(GridTypeInfo.description)]]
-        std::optional<std::string> gridType [[codegen::inlist("Spherical", "Cartesian")]];
+        std::optional<std::string> gridType
+            [[codegen::Info(GridTypeInfo), codegen::inlist("Spherical", "Cartesian")]];
 
         // @TODO Missing documentation
         std::optional<Dictionary> clipPlanes;

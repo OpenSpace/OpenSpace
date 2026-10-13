@@ -45,8 +45,8 @@ namespace {
 
     // Adds a variable amount of spacing between two other `DashboardItem`s.
     struct [[codegen::Dictionary(DashboardItemSpacing)]] Parameters {
-        // [[codegen::verbatim(SpacingInfo.description)]]
-        std::optional<float> spacing [[codegen::greaterequal(0.f)]];
+        std::optional<float> spacing
+            [[codegen::Info(SpacingInfo), codegen::greaterequal(0.f)]];
     };
 } // namespace
 #include "dashboarditemspacing_codegen.cpp"

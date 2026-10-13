@@ -137,26 +137,21 @@ namespace {
     // If the `UseCamera` value is set, the object's position automatically updates based
     // on the current camera location.
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {
-        // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe [[codegen::identifier()]];
+        std::string globe [[codegen::Info(GlobeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(LatitudeInfo.description)]]
-        std::optional<double> latitude [[codegen::inrange(-90.0, 90.0)]];
+        std::optional<double> latitude
+            [[codegen::Info(LatitudeInfo), codegen::inrange(-90.0, 90.0)]];
 
-        // [[codegen::verbatim(LongitudeInfo.description)]]
-        std::optional<double> longitude [[codegen::inrange(-180.0, 180.0)]];
+        std::optional<double> longitude
+            [[codegen::Info(LongitudeInfo), codegen::inrange(-180.0, 180.0)]];
 
-        // [[codegen::verbatim(AltitudeInfo.description)]]
-        std::optional<double> altitude;
+        std::optional<double> altitude [[codegen::Info(AltitudeInfo)]];
 
-        // [[codegen::verbatim(UseHeightmapInfo.description)]]
-        std::optional<bool> useHeightmap;
+        std::optional<bool> useHeightmap [[codegen::Info(UseHeightmapInfo)]];
 
-        // [[codegen::verbatim(UseCameraInfo.description)]]
-        std::optional<bool> useCamera;
+        std::optional<bool> useCamera [[codegen::Info(UseCameraInfo)]];
 
-        // [[codegen::verbatim(UseCameraAltitudeInfo.description)]]
-        std::optional<bool> useCameraAltitude;
+        std::optional<bool> useCameraAltitude [[codegen::Info(UseCameraAltitudeInfo)]];
     };
 } // namespace
 #include "globetranslation_codegen.cpp"

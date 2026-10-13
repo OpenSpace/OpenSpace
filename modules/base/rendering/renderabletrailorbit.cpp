@@ -113,25 +113,20 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
-        // [[codegen::verbatim(ForceFullOrbitTrailInfo.description)]]
-        std::optional<bool> forceFullOrbitTrail;
+        std::optional<bool> forceFullOrbitTrail
+            [[codegen::Info(ForceFullOrbitTrailInfo)]];
 
-        // [[codegen::verbatim(LimitToTimeRangeInfo.description)]]
-        std::optional<bool> limitToTimeRange;
+        std::optional<bool> limitToTimeRange [[codegen::Info(LimitToTimeRangeInfo)]];
 
-        // [[codegen::verbatim(StartTimeInfo.description)]]
-        std::optional<std::string> startTime
-            [[codegen::annotation("A valid date in ISO 8601 format")]];
+        std::optional<std::string> startTime [[codegen::Info(StartTimeInfo),
+            codegen::annotation("A valid date in ISO 8601 format")]];
 
-        // [[codegen::verbatim(EndTimeInfo.description)]]
-        std::optional<std::string> endTime
-            [[codegen::annotation("A valid date in ISO 8601 format")]];
+        std::optional<std::string> endTime [[codegen::Info(EndTimeInfo),
+            codegen::annotation("A valid date in ISO 8601 format")]];
 
-        // [[codegen::verbatim(PeriodInfo.description)]]
-        double period [[codegen::greater(0.0)]];
+        double period [[codegen::Info(PeriodInfo), codegen::greater(0.0)]];
 
-        // [[codegen::verbatim(ResolutionInfo.description)]]
-        int resolution [[codegen::greater(1)]];
+        int resolution [[codegen::Info(ResolutionInfo), codegen::greater(1)]];
     };
 } // namespace
 #include "renderabletrailorbit_codegen.cpp"

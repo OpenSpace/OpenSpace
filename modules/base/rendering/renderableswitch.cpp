@@ -64,8 +64,8 @@ namespace {
         // The renderable to show when the camera is further away than the threshold.
         std::optional<Dictionary> renderableFar [[codegen::reference("core_renderable")]];
 
-        // [[codegen::verbatim(DistanceThresholdInfo.description)]]
-        std::optional<double> distanceThreshold [[codegen::greaterequal(0.0)]];
+        std::optional<double> distanceThreshold
+            [[codegen::Info(DistanceThresholdInfo), codegen::greaterequal(0.0)]];
     };
 } // namespace
 #include "renderableswitch_codegen.cpp"

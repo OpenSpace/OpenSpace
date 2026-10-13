@@ -150,40 +150,31 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableKameleonVolume)]] Parameters {
-        // [[codegen::verbatim(DimensionsInfo.description)]]
-        glm::ivec3 dimensions [[codegen::greater(glm::ivec3(0))]];
+        glm::ivec3 dimensions
+            [[codegen::Info(DimensionsInfo), codegen::greater(glm::ivec3(0))]];
 
-        // [[codegen::verbatim(StepSizeInfo.description)]]
-        float stepSize;
+        float stepSize [[codegen::Info(StepSizeInfo)]];
 
-        // [[codegen::verbatim(TransferFunctionInfo.description)]]
-        std::optional<std::filesystem::path> transferFunction;
+        std::optional<std::filesystem::path> transferFunction
+            [[codegen::Info(TransferFunctionInfo)]];
 
-        // [[codegen::verbatim(SourcePathInfo.description)]]
-        std::optional<std::filesystem::path> source;
+        std::optional<std::filesystem::path> source [[codegen::Info(SourcePathInfo)]];
 
-        // [[codegen::verbatim(VariableInfo.description)]]
-        std::optional<std::string> variable;
+        std::optional<std::string> variable [[codegen::Info(VariableInfo)]];
 
-        // [[codegen::verbatim(LowerDomainBoundInfo.description)]]
-        std::optional<glm::vec3> lowerDomainBound;
+        std::optional<glm::vec3> lowerDomainBound [[codegen::Info(LowerDomainBoundInfo)]];
 
-        // [[codegen::verbatim(UpperDomainBoundInfo.description)]]
-        std::optional<glm::vec3> upperDomainBound;
+        std::optional<glm::vec3> upperDomainBound [[codegen::Info(UpperDomainBoundInfo)]];
 
-        // [[codegen::verbatim(DomainScaleInfo.description)]]
-        std::optional<glm::vec3> domainScale;
+        std::optional<glm::vec3> domainScale [[codegen::Info(DomainScaleInfo)]];
 
-        // [[codegen::verbatim(LowerValueBoundInfo.description)]]
-        std::optional<float> lowerValueBound;
+        std::optional<float> lowerValueBound [[codegen::Info(LowerValueBoundInfo)]];
 
-        // [[codegen::verbatim(UpperValueBoundInfo.description)]]
-        std::optional<float> upperValueBound;
+        std::optional<float> upperValueBound [[codegen::Info(UpperValueBoundInfo)]];
 
         std::optional<Dictionary> clipPlanes;
 
-        // [[codegen::verbatim(CacheInfo.description)]]
-        std::optional<bool> cache;
+        std::optional<bool> cache [[codegen::Info(CacheInfo)]];
 
         enum class GridType {
             Cartesian,

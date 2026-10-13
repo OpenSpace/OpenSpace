@@ -66,11 +66,9 @@ namespace {
     // The JSON must contain a 'data' array with timestamp-value pairs. Example format:
     // { \"data\": [[\"2024-05-10T00:00:00Z\", 2.33], [\"2024-05-10T03:00:00Z\", 3.0]] }.
     struct [[codegen::Dictionary(DashboardItemTimeVaryingText)]] Parameters {
-        // [[codegen::verbatim(FormatStringInfo.description)]]
-        std::optional<std::string> formatString;
+        std::optional<std::string> formatString [[codegen::Info(FormatStringInfo)]];
 
-        // [[codegen::verbatim(DataFileInfo.description)]]
-        std::filesystem::path dataFile;
+        std::filesystem::path dataFile [[codegen::Info(DataFileInfo)]];
     };
 } // namespace
 #include "dashboarditemtimevaryingtext_codegen.cpp"

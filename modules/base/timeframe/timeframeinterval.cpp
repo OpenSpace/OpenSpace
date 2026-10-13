@@ -104,11 +104,10 @@ namespace {
     // corresponds to $-\infty$ and $\infty$ respectively. If both the start and end time
     // are not specified, the `TimeFrameInterval` will always be valid.
     struct [[codegen::Dictionary(TimeFrameInterval)]] Parameters {
-        // [[codegen::verbatim(StartInfo.description)]]
-        std::optional<std::variant<double, std::string>> start;
+        std::optional<std::variant<double, std::string>> start
+            [[codegen::Info(StartInfo)]];
 
-        // [[codegen::verbatim(EndInfo.description)]]
-        std::optional<std::variant<double, std::string>> end;
+        std::optional<std::variant<double, std::string>> end [[codegen::Info(EndInfo)]];
     };
 } // namespace
 #include "timeframeinterval_codegen.cpp"

@@ -135,36 +135,30 @@ namespace {
     // occluded by the body. A concrete example is using the Sun as the observer, in which
     // case the shadow cylinder indicates the areas in which there is darkness.
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
-        // [[codegen::verbatim(NumberPointsInfo.description)]]
-        std::optional<int> numberOfPoints [[codegen::greaterequal(0)]];
+        std::optional<int> numberOfPoints
+            [[codegen::Info(NumberPointsInfo), codegen::greaterequal(0)]];
 
-        // [[codegen::verbatim(ShadowLengthInfo.description)]]
-        std::optional<float> shadowLength;
+        std::optional<float> shadowLength [[codegen::Info(ShadowLengthInfo)]];
 
-        // [[codegen::verbatim(ShadowColorInfo.description)]]
-        std::optional<glm::vec3> shadowColor [[codegen::color()]];
+        std::optional<glm::vec3> shadowColor
+            [[codegen::Info(ShadowColorInfo), codegen::color()]];
 
         enum class [[codegen::map(openspace::SpiceManager::TerminatorType)]] Terminator {
             Umbral [[codegen::key("UMBRAL")]],
             Penumbral [[codegen::key("PENUMBRAL")]]
         };
-        // [[codegen::verbatim(TerminatorTypeInfo.description)]]
-        Terminator terminatorType;
+        Terminator terminatorType [[codegen::Info(TerminatorTypeInfo)]];
 
-        // [[codegen::verbatim(LightSourceInfo.description)]]
-        std::string lightSource [[codegen::identifier()]];
+        std::string lightSource [[codegen::Info(LightSourceInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(ObserverInfo.description)]]
-        std::string observer;
+        std::string observer [[codegen::Info(ObserverInfo)]];
 
-        // [[codegen::verbatim(BodyInfo.description)]]
-        std::string body;
+        std::string body [[codegen::Info(BodyInfo)]];
 
-        // [[codegen::verbatim(BodyFrameInfo.description)]]
-        std::string bodyFrame;
+        std::string bodyFrame [[codegen::Info(BodyFrameInfo)]];
 
-        // [[codegen::verbatim(AberrationInfo.description)]]
-        std::string aberration [[codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S")]];
+        std::string aberration [[codegen::Info(AberrationInfo),
+            codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S")]];
     };
 } // namespace
 #include "renderableshadowcylinder_codegen.cpp"

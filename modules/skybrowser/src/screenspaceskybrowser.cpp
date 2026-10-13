@@ -143,17 +143,14 @@ namespace {
         // frame rate.
         std::optional<float> textureQuality [[codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(IsHiddenInfo.description)]]
-        std::optional<bool> isHidden;
+        std::optional<bool> isHidden [[codegen::Info(IsHiddenInfo)]];
 
-        // [[codegen::verbatim(PointSpacecraftInfo.description)]]
-        std::optional<bool> pointSpacecraft;
+        std::optional<bool> pointSpacecraft [[codegen::Info(PointSpacecraftInfo)]];
 
-        // [[codegen::verbatim(UpdateDuringAnimationInfo.description)]]
-        std::optional<bool> updateDuringTargetAnimation;
+        std::optional<bool> updateDuringTargetAnimation
+            [[codegen::Info(UpdateDuringAnimationInfo)]];
 
-        // [[codegen::verbatim(VerticalFovInfo.description)]]
-        std::optional<double> verticalFov;
+        std::optional<double> verticalFov [[codegen::Info(VerticalFovInfo)]];
     };
 } // namespace
 #include "screenspaceskybrowser_codegen.cpp"

@@ -64,8 +64,7 @@ namespace {
         // interface.
         std::optional<std::string> guiName;
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
     };
 } // namespace
 #include "dashboarditem_codegen.cpp"

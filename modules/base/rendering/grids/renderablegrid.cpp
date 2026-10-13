@@ -135,29 +135,27 @@ namespace {
     // dimension into. A secondary color can be used to highlight grid lines with a given
     // interval.
     struct [[codegen::Dictionary(RenderableGrid)]] Parameters {
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(HighlightColorInfo.description)]]
-        std::optional<glm::vec3> highlightColor [[codegen::color()]];
+        std::optional<glm::vec3> highlightColor
+            [[codegen::Info(HighlightColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(SegmentsInfo.description)]]
-        std::optional<glm::ivec2> segments [[codegen::greater(glm::ivec2(0))]];
+        std::optional<glm::ivec2> segments
+            [[codegen::Info(SegmentsInfo), codegen::greater(glm::ivec2(0))]];
 
-        // [[codegen::verbatim(HighlightRateInfo.description)]]
-        std::optional<glm::ivec2> highlightRate [[codegen::greater(glm::ivec2(0))]];
+        std::optional<glm::ivec2> highlightRate
+            [[codegen::Info(HighlightRateInfo), codegen::greater(glm::ivec2(0))]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(HighlightLineWidthInfo.description)]]
-        std::optional<float> highlightLineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> highlightLineWidth
+            [[codegen::Info(HighlightLineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<glm::vec2> size;
+        std::optional<glm::vec2> size [[codegen::Info(SizeInfo)]];
 
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels
+            [[codegen::Info(LabelsInfo), codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderablegrid_codegen.cpp"

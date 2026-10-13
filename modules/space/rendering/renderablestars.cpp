@@ -395,11 +395,10 @@ namespace {
     // field to reflect stellar motion rather than remaining static. This is especially
     // useful for long-timescale astronomical simulations and temporal exploration.
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
-        // [[codegen::verbatim(SpeckFileInfo.description)]]
-        std::filesystem::path speckFile [[codegen::key("File")]];
+        std::filesystem::path speckFile
+            [[codegen::Info(SpeckFileInfo), codegen::key("File")]];
 
-        // [[codegen::verbatim(ColorTextureInfo.description)]]
-        std::filesystem::path colorMap;
+        std::filesystem::path colorMap [[codegen::Info(ColorTextureInfo)]];
 
         enum class ColorOption {
             Color,
@@ -408,17 +407,14 @@ namespace {
             OtherData [[codegen::key("Other Data")]],
             FixedColor [[codegen::key("Fixed Color")]]
         };
-        // [[codegen::verbatim(ColorOptionInfo.description)]]
-        std::optional<ColorOption> colorOption;
+        std::optional<ColorOption> colorOption [[codegen::Info(ColorOptionInfo)]];
 
-        // [[codegen::verbatim(OtherDataOptionInfo.description)]]
-        std::optional<std::string> otherData;
+        std::optional<std::string> otherData [[codegen::Info(OtherDataOptionInfo)]];
 
-        // [[codegen::verbatim(OtherDataColorMapInfo.description)]]
-        std::optional<std::filesystem::path> otherDataColorMap;
+        std::optional<std::filesystem::path> otherDataColorMap
+            [[codegen::Info(OtherDataColorMapInfo)]];
 
-        // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
-        std::optional<bool> filterOutOfRange;
+        std::optional<bool> filterOutOfRange [[codegen::Info(FilterOutOfRangeInfo)]];
 
         // Specifies a value that is always filtered out of the value ranges on load. This
         // can be used to trim the dataset's automatic value range.
@@ -429,27 +425,20 @@ namespace {
         std::optional<float> staticFilterReplacement;
 
         struct Texture {
-            // [[codegen::verbatim(TextureInfo.description)]]
-            std::filesystem::path texture;
+            std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
-            // [[codegen::verbatim(MultiplierInfo.description)]]
-            std::optional<float> multiplier;
+            std::optional<float> multiplier [[codegen::Info(MultiplierInfo)]];
 
-            // [[codegen::verbatim(GammaInfo.description)]]
-            std::optional<float> gamma;
+            std::optional<float> gamma [[codegen::Info(GammaInfo)]];
 
-            // [[codegen::verbatim(ScaleInfo.description)]]
-            std::optional<float> scale;
+            std::optional<float> scale [[codegen::Info(ScaleInfo)]];
         };
 
-        // [[codegen::verbatim(GlareOwnerInfo.description)]]
-        Texture glare;
+        Texture glare [[codegen::Info(GlareOwnerInfo)]];
 
-        // [[codegen::verbatim(CoreOwnerInfo.description)]]
-        std::optional<Texture> core;
+        std::optional<Texture> core [[codegen::Info(CoreOwnerInfo)]];
 
-        // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
-        std::optional<float> magnitudeExponent;
+        std::optional<float> magnitudeExponent [[codegen::Info(MagnitudeExponentInfo)]];
 
         enum class [[codegen::map(SizeComposition)]] SizeComposition {
             DistanceModulus [[codegen::key("Distance Modulus")]],
@@ -459,40 +448,30 @@ namespace {
             AppMagnitude [[codegen::key("App Magnitude")]]
         };
 
-        // [[codegen::verbatim(SizeCompositionMethodInfo.description)]]
-        std::optional<SizeComposition> sizeComposition;
+        std::optional<SizeComposition> sizeComposition
+            [[codegen::Info(SizeCompositionMethodInfo)]];
 
         struct DataMapping {
-            // [[codegen::verbatim(MappingBvInfo.description)]]
-            std::optional<std::string> bv;
-            // [[codegen::verbatim(MappingLuminanceInfo.description)]]
-            std::optional<std::string> luminance;
-            // [[codegen::verbatim(MappingAbsMagnitudeInfo.description)]]
-            std::optional<std::string> absoluteMagnitude;
-            // [[codegen::verbatim(MappingVxInfo.description)]]
-            std::optional<std::string> vx;
-            // [[codegen::verbatim(MappingVyInfo.description)]]
-            std::optional<std::string> vy;
-            // [[codegen::verbatim(MappingVzInfo.description)]]
-            std::optional<std::string> vz;
-            // [[codegen::verbatim(MappingSpeedInfo.description)]]
-            std::optional<std::string> speed;
+            std::optional<std::string> bv [[codegen::Info(MappingBvInfo)]];
+            std::optional<std::string> luminance [[codegen::Info(MappingLuminanceInfo)]];
+            std::optional<std::string> absoluteMagnitude
+                [[codegen::Info(MappingAbsMagnitudeInfo)]];
+            std::optional<std::string> vx [[codegen::Info(MappingVxInfo)]];
+            std::optional<std::string> vy [[codegen::Info(MappingVyInfo)]];
+            std::optional<std::string> vz [[codegen::Info(MappingVzInfo)]];
+            std::optional<std::string> speed [[codegen::Info(MappingSpeedInfo)]];
         };
         // The mappings between data values and the variable names specified in the SPECK
         // file.
         DataMapping dataMapping;
 
-        // [[codegen::verbatim(FadeInDistancesInfo.description)]]
-        std::optional<glm::dvec2> fadeInDistances;
+        std::optional<glm::dvec2> fadeInDistances [[codegen::Info(FadeInDistancesInfo)]];
 
-        // [[codegen::verbatim(UseProperMotionInfo.description)]]
-        std::optional<bool> useProperMotion;
+        std::optional<bool> useProperMotion [[codegen::Info(UseProperMotionInfo)]];
 
-        // [[codegen::verbatim(ProperMotionEpochInfo.description)]]
-        std::optional<double> properMotionEpoch;
+        std::optional<double> properMotionEpoch [[codegen::Info(ProperMotionEpochInfo)]];
 
-        // [[codegen::verbatim(EnableFadeInInfo.description)]]
-        std::optional<bool> enableFadeIn;
+        std::optional<bool> enableFadeIn [[codegen::Info(EnableFadeInInfo)]];
     };
 } // namespace
 #include "renderablestars_codegen.cpp"

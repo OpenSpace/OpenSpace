@@ -207,34 +207,28 @@ namespace {
             Additive
         };
 
-        // [[codegen::verbatim(BlendModeInfo.description)]]
-        std::optional<BlendMode> blendMode;
+        std::optional<BlendMode> blendMode [[codegen::Info(BlendModeInfo)]];
 
         enum class [[codegen::map(Orientation)]] Orientation {
             ViewDirection [[codegen::key("Camera View Direction")]],
             PositionNormal [[codegen::key("Camera Position Normal")]]
         };
 
-        // [[codegen::verbatim(OrientationOptionInfo.description)]]
-        std::optional<Orientation> orientationOption;
+        std::optional<Orientation> orientationOption
+            [[codegen::Info(OrientationOptionInfo)]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(TextInfo.description)]]
-        std::optional<std::string> text;
+        std::optional<std::string> text [[codegen::Info(TextInfo)]];
 
-        // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize [[codegen::greater(0.f)]];
+        std::optional<float> fontSize
+            [[codegen::Info(FontSizeInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size [[codegen::greaterequal(0.f)]];
+        std::optional<float> size [[codegen::Info(SizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(MinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> minMaxSize;
+        std::optional<glm::ivec2> minMaxSize [[codegen::Info(MinMaxSizeInfo)]];
 
-        // [[codegen::verbatim(EnableFadingEffectInfo.description)]]
-        std::optional<bool> enableFading;
+        std::optional<bool> enableFading [[codegen::Info(EnableFadingEffectInfo)]];
 
         // Transformation matrix to be applied to the label.
         std::optional<glm::dmat4x4> transformationMatrix;
@@ -254,15 +248,13 @@ namespace {
             GigaLightyear [[codegen::key("Gly")]]
         };
 
-        // [[codegen::verbatim(FadeUnitOptionInfo.description)]]
-        std::optional<Unit> fadeUnit;
+        std::optional<Unit> fadeUnit [[codegen::Info(FadeUnitOptionInfo)]];
 
-        // [[codegen::verbatim(FadeDistancesInfo.description)]]
         std::optional<glm::vec2> fadeDistances
-            [[codegen::greaterequal(glm::vec2(0.f))]];
+            [[codegen::Info(FadeDistancesInfo), codegen::greaterequal(glm::vec2(0.f))]];
 
-        // [[codegen::verbatim(FadeWidthsInfo.description)]]
-        std::optional<glm::vec2> fadeWidths [[codegen::greaterequal(glm::vec2(0.f))]];
+        std::optional<glm::vec2> fadeWidths
+            [[codegen::Info(FadeWidthsInfo), codegen::greaterequal(glm::vec2(0.f))]];
     };
 } // namespace
 #include "renderablelabel_codegen.cpp"

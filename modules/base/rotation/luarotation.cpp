@@ -59,8 +59,7 @@ namespace {
     // returned matrix must be a valid rotation matrix. The script parameter describes in
     // greater detail how the Lua script file should be constructed.
     struct [[codegen::Dictionary(LuaRotation)]] Parameters {
-        // [[codegen::verbatim(ScriptInfo.description)]]
-        std::filesystem::path script;
+        std::filesystem::path script [[codegen::Info(ScriptInfo)]];
     };
 } // namespace
 #include "luarotation_codegen.cpp"

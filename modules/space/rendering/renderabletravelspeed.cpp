@@ -160,23 +160,21 @@ namespace {
     // set simulation time and the set `TravelSpeed`. That is, increasing the simulation
     // speed makes the indicator move faster.
     struct [[codegen::Dictionary(RenderableTravelSpeed)]] Parameters {
-        // [[codegen::verbatim(TargetInfo.description)]]
-        std::string target [[codegen::identifier()]];
+        std::string target [[codegen::Info(TargetInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(SpeedInfo.description)]]
-        std::optional<double> travelSpeed [[codegen::greater(0.f)]];
+        std::optional<double> travelSpeed
+            [[codegen::Info(SpeedInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(LineColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(LineColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greater(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(IndicatorLengthInfo.description)]]
-        std::optional<float> indicatorLength [[codegen::greater(0.f)]];
+        std::optional<float> indicatorLength
+            [[codegen::Info(IndicatorLengthInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(FadeLengthInfo.description)]]
-        std::optional<float> fadeLength [[codegen::greater(0.f)]];
+        std::optional<float> fadeLength
+            [[codegen::Info(FadeLengthInfo), codegen::greater(0.f)]];
     };
 } // namespace
 #include "renderabletravelspeed_codegen.cpp"

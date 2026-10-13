@@ -90,15 +90,14 @@ namespace {
         // start and end.
         std::string nodeLine [[codegen::identifier()]];
 
-        // [[codegen::verbatim(DistanceUnitInfo.description)]]
-        std::optional<std::string> distanceUnit
-            [[codegen::inlist(openspace::distanceUnitList())]];
+        std::optional<std::string> distanceUnit [[codegen::Info(DistanceUnitInfo),
+            codegen::inlist(openspace::distanceUnitList())]];
 
-        // [[codegen::verbatim(CustomUnitDescriptorInfo.description)]]
-        std::optional<std::string> customUnitDescriptor;
+        std::optional<std::string> customUnitDescriptor
+            [[codegen::Info(CustomUnitDescriptorInfo)]];
 
-        // [[codegen::verbatim(PrecisionInfo.description)]]
-        std::optional<int> precision [[codegen::greaterequal(0)]];
+        std::optional<int> precision
+            [[codegen::Info(PrecisionInfo), codegen::greaterequal(0)]];
     };
 } // namespace
 #include "renderabledistancelabel_codegen.cpp"

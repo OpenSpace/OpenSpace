@@ -232,11 +232,9 @@ namespace {
         // the first available instrument is used.
         std::optional<std::string> startInstrument;
 
-        // [[codegen::verbatim(EnableBorderInfo.description)]]
-        std::optional<bool> enableBorder;
+        std::optional<bool> enableBorder [[codegen::Info(EnableBorderInfo)]];
 
-        // [[codegen::verbatim(EnableFrustumInfo.description)]]
-        std::optional<bool> enableFrustum;
+        std::optional<bool> enableFrustum [[codegen::Info(EnableFrustumInfo)]];
 
         enum class [[codegen::map(FaceMode)]] FaceMode {
             FrontOnly [[codgen::key("Front Only")]],
@@ -244,32 +242,24 @@ namespace {
             DoubleSided [[codegen::key("Double Sided")]]
         };
 
-        // [[codegen::verbatim(FaceModeInfo.description)]]
-        std::optional<FaceMode> faceMode;
+        std::optional<FaceMode> faceMode [[codegen::Info(FaceModeInfo)]];
 
-        // [[codegen::verbatim(MoveFactorInfo.description)]]
-        std::optional<float> moveFactor;
+        std::optional<float> moveFactor [[codegen::Info(MoveFactorInfo)]];
 
-        // [[codegen::verbatim(DownsamplingLevelInfo.description)]]
-        std::optional<int> downsamplingLevel;
+        std::optional<int> downsamplingLevel [[codegen::Info(DownsamplingLevelInfo)]];
 
-        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
-        std::optional<bool> useAdditiveBlending;
+        std::optional<bool> useAdditiveBlending
+            [[codegen::Info(UseAdditiveBlendingInfo)]];
 
-        // [[codegen::verbatim(ContrastValueInfo.description)]]
-        std::optional<float> contrast;
+        std::optional<float> contrast [[codegen::Info(ContrastValueInfo)]];
 
-        // [[codegen::verbatim(GammaValueInfo.description)]]
-        std::optional<float> gamma;
+        std::optional<float> gamma [[codegen::Info(GammaValueInfo)]];
 
-        // [[codegen::verbatim(VerboseModeInfo.description)]]
-        std::optional<bool> verboseMode;
+        std::optional<bool> verboseMode [[codegen::Info(VerboseModeInfo)]];
 
-        // [[codegen::verbatim(PredictFramesAfterInfo.description)]]
-        std::optional<int> predictFramesAfter;
+        std::optional<int> predictFramesAfter [[codegen::Info(PredictFramesAfterInfo)]];
 
-        // [[codegen::verbatim(PredictFramesBeforeInfo.description)]]
-        std::optional<int> predictFramesBefore;
+        std::optional<int> predictFramesBefore [[codegen::Info(PredictFramesBeforeInfo)]];
     };
 } // namespace
 #include "renderablesolarimagery_codegen.cpp"

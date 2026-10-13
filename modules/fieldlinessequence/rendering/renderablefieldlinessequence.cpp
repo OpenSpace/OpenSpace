@@ -317,14 +317,12 @@ namespace {
             ByQuantity [[codegen::key("By Quantity")]]
         };
 
-        // [[codegen::verbatim(ColorMethodInfo.description)]]
-        std::optional<ColorMethod> colorMethod;
+        std::optional<ColorMethod> colorMethod [[codegen::Info(ColorMethodInfo)]];
 
-        // [[codegen::verbatim(ColorQuantityInfo.description)]]
-        std::optional<int> colorQuantity;
+        std::optional<int> colorQuantity [[codegen::Info(ColorQuantityInfo)]];
 
-        // [[codegen::verbatim(ColorUniformInfo.description)]]
-        std::optional<glm::vec4> color [[codegen::color()]];
+        std::optional<glm::vec4> color
+            [[codegen::Info(ColorUniformInfo), codegen::color()]];
 
         // A list of paths to transferfunction .txt files containing color tables
         // used for colorizing the fieldlines according to different parameters.
@@ -334,32 +332,24 @@ namespace {
         // Should be entered as min value, max value.
         std::optional<std::vector<glm::vec2>> colorTableRanges;
 
-        // [[codegen::verbatim(ColorMinMaxInfo.description)]]
-        std::optional<glm::vec2> colorMinMaxRange;
+        std::optional<glm::vec2> colorMinMaxRange [[codegen::Info(ColorMinMaxInfo)]];
 
-        // [[codegen::verbatim(FlowEnabledInfo.description)]]
-        std::optional<bool> flowEnabled;
+        std::optional<bool> flowEnabled [[codegen::Info(FlowEnabledInfo)]];
 
-        // [[codegen::verbatim(FlowColorInfo.description)]]
-        std::optional<glm::vec4> flowColor [[codegen::color()]];
+        std::optional<glm::vec4> flowColor
+            [[codegen::Info(FlowColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(FlowReversedInfo.description)]]
-        std::optional<bool> reversedFlow;
+        std::optional<bool> reversedFlow [[codegen::Info(FlowReversedInfo)]];
 
-        // [[codegen::verbatim(FlowParticleSizeInfo.description)]]
-        std::optional<int> particleSize;
+        std::optional<int> particleSize [[codegen::Info(FlowParticleSizeInfo)]];
 
-        // [[codegen::verbatim(FlowParticleSpacingInfo.description)]]
-        std::optional<int> particleSpacing;
+        std::optional<int> particleSpacing [[codegen::Info(FlowParticleSpacingInfo)]];
 
-        // [[codegen::verbatim(FlowSpeedInfo.description)]]
-        std::optional<int> flowSpeed;
+        std::optional<int> flowSpeed [[codegen::Info(FlowSpeedInfo)]];
 
-        // [[codegen::verbatim(MaskingEnabledInfo.description)]]
-        std::optional<bool> maskingEnabled;
+        std::optional<bool> maskingEnabled [[codegen::Info(MaskingEnabledInfo)]];
 
-        // [[codegen::verbatim(MaskingQuantityInfo.description)]]
-        std::optional<int> maskingQuantity;
+        std::optional<int> maskingQuantity [[codegen::Info(MaskingQuantityInfo)]];
 
         // Ranges for which their corresponding quantity parameter value will be masked
         // by. Should be entered as a list of min value, max value pairs.
@@ -369,14 +359,11 @@ namespace {
         // Should be entered as a min value, max value pair.
         std::optional<glm::vec2> maskingMinMaxRange;
 
-        // [[codegen::verbatim(DomainEnabledInfo.description)]]
-        std::optional<bool> domainEnabled;
+        std::optional<bool> domainEnabled [[codegen::Info(DomainEnabledInfo)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::Info(LineWidthInfo)]];
 
-        // [[codegen::verbatim(ColorUseABlendingInfo.description)]]
-        std::optional<bool> alphaBlendingEnabled;
+        std::optional<bool> alphaBlendingEnabled [[codegen::Info(ColorUseABlendingInfo)]];
 
         // Set if first/last file should render when time is outside of the sequence
         // interval. This can be used regardless of LoadingType. If this value is not

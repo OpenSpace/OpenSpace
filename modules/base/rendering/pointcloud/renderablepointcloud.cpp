@@ -421,11 +421,10 @@ namespace {
             [[codegen::reference("core_dataloader_datamapping")]];
 
         struct Texture {
-            // [[codegen::verbatim(TextureEnabledInfo.description)]]
-            std::optional<bool> enabled;
+            std::optional<bool> enabled [[codegen::Info(TextureEnabledInfo)]];
 
-            // [[codegen::verbatim(SpriteTextureInfo.description)]]
-            std::optional<std::filesystem::path> file;
+            std::optional<std::filesystem::path> file
+                [[codegen::Info(SpriteTextureInfo)]];
 
             // The folder where the textures are located when using multiple different
             // textures to render the points. Setting this value means that multiple
@@ -435,17 +434,15 @@ namespace {
             // best if using textures with the exact same resolution.
             std::optional<std::filesystem::path> folder [[codegen::directory()]];
 
-            // [[codegen::verbatim(AllowTextureCompressionInfo.description)]]
-            std::optional<bool> allowCompression;
+            std::optional<bool> allowCompression
+                [[codegen::Info(AllowTextureCompressionInfo)]];
 
-            // [[codegen::verbatim(UseAlphaInfo.description)]]
-            std::optional<bool> useAlphaChannel;
+            std::optional<bool> useAlphaChannel [[codegen::Info(UseAlphaInfo)]];
         };
         // Settings related to the texturing of the points.
         std::optional<Texture> texture;
 
-        // [[codegen::verbatim(DrawElementsInfo.description)]]
-        std::optional<bool> drawElements;
+        std::optional<bool> drawElements [[codegen::Info(DrawElementsInfo)]];
 
         enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
@@ -468,11 +465,10 @@ namespace {
         // dataset contains orientation information for the points.
         std::optional<std::variant<bool, RenderOption>> billboard;
 
-        // [[codegen::verbatim(UseOrientationDataInfo.description)]]
-        std::optional<bool> useOrientationData;
+        std::optional<bool> useOrientationData [[codegen::Info(UseOrientationDataInfo)]];
 
-        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
-        std::optional<bool> useAdditiveBlending;
+        std::optional<bool> useAdditiveBlending
+            [[codegen::Info(UseAdditiveBlendingInfo)]];
 
         // If true, skip the first data point in the loaded dataset.
         std::optional<bool> skipFirstDataPoint;
@@ -490,71 +486,67 @@ namespace {
         // distances/positions in the data files.
         std::optional<Unit> unit;
 
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels
+            [[codegen::Info(LabelsInfo), codegen::reference("core_labelscomponent")]];
 
         struct SizeSettings {
             // Settings related to scaling the points based on data.
             std::optional<Dictionary> sizeMapping
                 [[codegen::reference("base_sizemappingcomponent")]];
 
-            // [[codegen::verbatim(ScaleExponentInfo.description)]]
-            std::optional<float> scaleExponent [[codegen::greaterequal(0.f)]];
+            std::optional<float> scaleExponent
+                [[codegen::Info(ScaleExponentInfo), codegen::greaterequal(0.f)]];
 
-            // [[codegen::verbatim(ScaleFactorInfo.description)]]
-            std::optional<float> scaleFactor [[codegen::greaterequal(0.f)]];
+            std::optional<float> scaleFactor
+                [[codegen::Info(ScaleFactorInfo), codegen::greaterequal(0.f)]];
 
-            // [[codegen::verbatim(UseMaxSizeControlInfo.description)]]
-            std::optional<bool> enableMaxSizeControl;
+            std::optional<bool> enableMaxSizeControl
+                [[codegen::Info(UseMaxSizeControlInfo)]];
 
-            // [[codegen::verbatim(MaxSizeInfo.description)]]
-            std::optional<float> maxSize [[codegen::greaterequal(0.f)]];
+            std::optional<float> maxSize
+                [[codegen::Info(MaxSizeInfo), codegen::greaterequal(0.f)]];
         };
         // Settings related to the scale of the points, whether they should limit to a
         // certain max size, etc.
         std::optional<SizeSettings> sizeSettings;
 
         struct ColorSettings {
-            // [[codegen::verbatim(PointColorInfo.description)]]
-            std::optional<glm::vec3> fixedColor [[codegen::color()]];
+            std::optional<glm::vec3> fixedColor
+                [[codegen::Info(PointColorInfo), codegen::color()]];
 
             // Settings related to the choice of color map, parameters, etc.
             std::optional<Dictionary> colorMapping
                 [[codegen::reference("core_colormappingcomponent")]];
 
-            // [[codegen::verbatim(EnableOutlineInfo.description)]]
-            std::optional<bool> enableOutline;
+            std::optional<bool> enableOutline [[codegen::Info(EnableOutlineInfo)]];
 
-            // [[codegen::verbatim(OutlineColorInfo.description)]]
-            std::optional<glm::vec3> outlineColor [[codegen::color()]];
+            std::optional<glm::vec3> outlineColor
+                [[codegen::Info(OutlineColorInfo), codegen::color()]];
 
-            // [[codegen::verbatim(OutlineWidthInfo.description)]]
-            std::optional<float> outlineWidth [[codegen::greaterequal(0.f)]];
+            std::optional<float> outlineWidth
+                [[codegen::Info(OutlineWidthInfo), codegen::greaterequal(0.f)]];
 
             enum class [[codegen::map(OutlineStyle)]] OutlineStyle {
                 Round,
                 Square,
                 Bottom
             };
-            // [[codegen::verbatim(OutlineStyleInfo.description)]]
-            std::optional<OutlineStyle> outlineStyle;
+            std::optional<OutlineStyle> outlineStyle [[codegen::Info(OutlineStyleInfo)]];
 
-            // [[codegen::verbatim(ApplyColorMapToOutlineInfo.description)]]
-            std::optional<bool> applyColorMapToOutline;
+            std::optional<bool> applyColorMapToOutline
+                [[codegen::Info(ApplyColorMapToOutlineInfo)]];
         };
         // Settings related to the coloring of the points, such as a fixed color, color
         // map, etc.
         std::optional<ColorSettings> coloring;
 
         struct Fading {
-            // [[codegen::verbatim(EnableDistanceFadeInfo.description)]]
-            std::optional<bool> enabled;
+            std::optional<bool> enabled [[codegen::Info(EnableDistanceFadeInfo)]];
 
-            // [[codegen::verbatim(FadeInDistancesInfo.description)]]
-            std::optional<glm::dvec2> fadeInDistances;
+            std::optional<glm::dvec2> fadeInDistances
+                [[codegen::Info(FadeInDistancesInfo)]];
 
-            // [[codegen::verbatim(InvertFadeInfo.description)]]
-            std::optional<bool> invert;
+            std::optional<bool> invert [[codegen::Info(InvertFadeInfo)]];
         };
         // Settings related to fading based on camera distance. Can be used to either fade
         // away or fade in the points when reaching a certain distance from the origin of

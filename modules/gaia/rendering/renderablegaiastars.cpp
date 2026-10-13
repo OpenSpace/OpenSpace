@@ -359,8 +359,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableGaiaStars)]] Parameters {
-        // [[codegen::verbatim(FilePathInfo.description)]]
-        std::string file;
+        std::string file [[codegen::Info(FilePathInfo)]];
 
         enum class [[codegen::map(openspace::FileReaderOption)]] FileReader {
             Fits,
@@ -369,78 +368,59 @@ namespace {
             BinaryOctree,
             StreamOctree
         };
-        // [[codegen::verbatim(FileReaderOptionInfo.description)]]
-        FileReader fileReaderOption;
+        FileReader fileReaderOption [[codegen::Info(FileReaderOptionInfo)]];
 
         enum class [[codegen::map(openspace::RenderMode)]] RenderMode {
             Static,
             Color,
             Motion
         };
-        // [[codegen::verbatim(RenderModeInfo.description)]]
-        std::optional<RenderMode> renderMode;
+        std::optional<RenderMode> renderMode [[codegen::Info(RenderModeInfo)]];
 
-        // [codegen::verbatim(ColorTextureInfo.description)]]
-        std::string colorMap;
+        std::string colorMap [[codegen::Info(ColorTextureInfo)]];
 
-        // [codegen::verbatim(LuminosityMultiplierInfo.description)]]
-        std::optional<float> luminosityMultiplier;
+        std::optional<float> luminosityMultiplier
+            [[codegen::Info(LuminosityMultiplierInfo)]];
 
-        // [codegen::verbatim(CutOffThresholdInfo.description)]]
-        std::optional<float> cutOffThreshold;
+        std::optional<float> cutOffThreshold [[codegen::Info(CutOffThresholdInfo)]];
 
-        // [codegen::verbatim(TmPointFilterSizeInfo.description)]]
-        std::optional<int> filterSize;
+        std::optional<int> filterSize [[codegen::Info(TmPointFilterSizeInfo)]];
 
-        // [codegen::verbatim(TmPointSigmaInfo.description)]]
-        std::optional<float> sigma;
+        std::optional<float> sigma [[codegen::Info(TmPointSigmaInfo)]];
 
-        // [codegen::verbatim(AdditionalNodesInfo.description)]]
-        std::optional<glm::ivec2> additionalNodes;
+        std::optional<glm::ivec2> additionalNodes [[codegen::Info(AdditionalNodesInfo)]];
 
-        // [codegen::verbatim(TmPointPxThresholdInfo.description)]]
-        std::optional<float> pixelWeightThreshold;
+        std::optional<float> pixelWeightThreshold
+            [[codegen::Info(TmPointPxThresholdInfo)]];
 
-        // [codegen::verbatim(FirstRowInfo.description)]]
-        std::optional<int> firstRow;
+        std::optional<int> firstRow [[codegen::Info(FirstRowInfo)]];
 
-        // [codegen::verbatim(LastRowInfo.description)]]
-        std::optional<int> lastRow;
+        std::optional<int> lastRow [[codegen::Info(LastRowInfo)]];
 
         // A list of strings with the names of all the columns that are to be read from
         // the specified FITS file. No need to define if data already has been processed.
         // [Works only with FileReaderOption::Fits].
         std::optional<Dictionary> columnNames;
 
-        // [codegen::verbatim(LodPixelThresholdInfo.description)]]
-        std::optional<float> lodPixelThreshold;
+        std::optional<float> lodPixelThreshold [[codegen::Info(LodPixelThresholdInfo)]];
 
-        // [codegen::verbatim(MaxGpuMemoryPercentInfo.description)]]
-        std::optional<float> maxGpuMemoryPercent;
+        std::optional<float> maxGpuMemoryPercent
+            [[codegen::Info(MaxGpuMemoryPercentInfo)]];
 
-        // [codegen::verbatim(MaxCpuMemoryPercentInfo.description)]]
-        std::optional<float> maxCpuMemoryPercent;
+        std::optional<float> maxCpuMemoryPercent
+            [[codegen::Info(MaxCpuMemoryPercentInfo)]];
 
-        // [codegen::verbatim(FilterPosXInfo.description)]]
-        std::optional<glm::vec2> filterPosX;
+        std::optional<glm::vec2> filterPosX [[codegen::Info(FilterPosXInfo)]];
 
-        // [codegen::verbatim(FilterPosYInfo.description)]]
-        std::optional<glm::vec2> filterPosY;
+        std::optional<glm::vec2> filterPosY [[codegen::Info(FilterPosYInfo)]];
 
-        // [codegen::verbatim(FilterPosZInfo.description)]]
-        std::optional<glm::vec2> filterPosZ;
+        std::optional<glm::vec2> filterPosZ [[codegen::Info(FilterPosZInfo)]];
 
-        // [codegen::verbatim(FilterGMagInfo.description)]]
-        std::optional<glm::vec2> filterGMag;
+        std::optional<glm::vec2> filterGMag [[codegen::Info(FilterGMagInfo)]];
 
-        // [codegen::verbatim(FilterBpRpInfo.description)]]
-        std::optional<glm::vec2> filterBpRp;
+        std::optional<glm::vec2> filterBpRp [[codegen::Info(FilterBpRpInfo)]];
 
-        // [codegen::verbatim(FilterDistInfo.description)]]
-        std::optional<glm::vec2> filterDist;
-
-        // [codegen::verbatim(ReportGlErrorsInfo.description)]]
-        std::optional<bool> reportGlErrors;
+        std::optional<glm::vec2> filterDist [[codegen::Info(FilterDistInfo)]];
     };
 } // namespace
 #include "renderablegaiastars_codegen.cpp"

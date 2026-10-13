@@ -195,38 +195,32 @@ namespace {
 
 
     struct [[codegen::Dictionary(RenderableEclipseCone)]] Parameters {
-        // [[codegen::verbatim(NumberPointsInfo.description)]]
-        std::optional<int> numberOfPoints [[codegen::greater(0)]];
+        std::optional<int> numberOfPoints
+            [[codegen::Info(NumberPointsInfo), codegen::greater(0)]];
 
-        // [[codegen::verbatim(ShadowLengthInfo.description)]]
-        std::optional<float> shadowLength [[codegen::greater(0.f)]];
+        std::optional<float> shadowLength
+            [[codegen::Info(ShadowLengthInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(ShowUmbralShadowInfo.description)]]
-        std::optional<bool> showUmbralShadow;
+        std::optional<bool> showUmbralShadow [[codegen::Info(ShowUmbralShadowInfo)]];
 
-        // [[codegen::verbatim(UmbralShadowColorInfo.description)]]
-        std::optional<glm::vec4> umbralShadowColor [[codegen::color()]];
+        std::optional<glm::vec4> umbralShadowColor
+            [[codegen::Info(UmbralShadowColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(ShowPenumbralShadowInfo.description)]]
-        std::optional<bool> showPenumbralShadow;
+        std::optional<bool> showPenumbralShadow
+            [[codegen::Info(ShowPenumbralShadowInfo)]];
 
-        // [[codegen::verbatim(PenumbralShadowColorInfo.description)]]
-        std::optional<glm::vec4> penumbralShadowColor [[codegen::color()]];
+        std::optional<glm::vec4> penumbralShadowColor
+            [[codegen::Info(PenumbralShadowColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(LightSourceInfo.description)]]
-        std::string lightSource [[codegen::identifier()]];
+        std::string lightSource [[codegen::Info(LightSourceInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(LightSourceFrameInfo.description)]]
-        std::string lightSourceFrame;
+        std::string lightSourceFrame [[codegen::Info(LightSourceFrameInfo)]];
 
-        // [[codegen::verbatim(ShadowerInfo.description)]]
-        std::string shadower [[codegen::identifier()]];
+        std::string shadower [[codegen::Info(ShadowerInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(ShadowerFrameInfo.description)]]
-        std::string shadowerFrame;
+        std::string shadowerFrame [[codegen::Info(ShadowerFrameInfo)]];
 
-        // [[codegen::verbatim(ShadoweeInfo.description)]]
-        std::string shadowee [[codegen::identifier()]];
+        std::string shadowee [[codegen::Info(ShadoweeInfo), codegen::identifier()]];
     };
 } // namespace
 #include "renderableeclipsecone_codegen.cpp"

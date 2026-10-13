@@ -78,14 +78,12 @@ namespace {
     // The disc will be filled i.e. a full circle, per default, but may also be made with
     // a hole in the center using the `Width` parameter.
     struct [[codegen::Dictionary(RenderableDisc)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::filesystem::path texture;
+        std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size [[codegen::greaterequal(0.f)]];
+        std::optional<float> size [[codegen::Info(SizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(WidthInfo.description)]]
-        std::optional<float> width [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> width
+            [[codegen::Info(WidthInfo), codegen::inrange(0.f, 1.f)]];
     };
 } // namespace
 #include "renderabledisc_codegen.cpp"

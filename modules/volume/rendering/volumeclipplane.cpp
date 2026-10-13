@@ -52,11 +52,10 @@ namespace {
     };
 
     struct [[codegen::Dictionary(VolumeClipPlane)]] Parameters {
-        // [[codegen::verbatim(NormalInfo.description)]]
-        glm::vec3 normal [[codegen::inrange(glm::vec3(-1.f), glm::vec3(1.f))]];
+        glm::vec3 normal [[codegen::Info(NormalInfo),
+            codegen::inrange(glm::vec3(-1.f), glm::vec3(1.f))]];
 
-        // [[codegen::verbatim(OffsetsInfo.description)]]
-        glm::vec3 offsets;
+        glm::vec3 offsets [[codegen::Info(OffsetsInfo)]];
     };
 } // namespace
 #include "volumeclipplane_codegen.cpp"

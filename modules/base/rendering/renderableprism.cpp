@@ -126,26 +126,23 @@ namespace {
     // lines. The number of polygon segments is determined by the `Segments`
     // property, with the same number being used for both the base and the top.
     struct [[codegen::Dictionary(RenderablePrism)]] Parameters {
-        // [[codegen::verbatim(SegmentsInfo.description)]]
-        int segments [[codegen::greaterequal(3)]];
+        int segments [[codegen::Info(SegmentsInfo), codegen::greaterequal(3)]];
 
-        // [[codegen::verbatim(LinesInfo.description)]]
-        std::optional<int> lines [[codegen::greaterequal(0)]];
+        std::optional<int> lines [[codegen::Info(LinesInfo), codegen::greaterequal(0)]];
 
-        // [[codegen::verbatim(RadiusInfo.description)]]
-        std::optional<float> radius [[codegen::greaterequal(0.f)]];
+        std::optional<float> radius
+            [[codegen::Info(RadiusInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(BaseRadiusInfo.description)]]
-        std::optional<float> baseRadius [[codegen::greaterequal(0.f)]];
+        std::optional<float> baseRadius
+            [[codegen::Info(BaseRadiusInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(LineColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(LineColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(LengthInfo.description)]]
-        std::optional<float> length [[codegen::greaterequal(0.f)]];
+        std::optional<float> length
+            [[codegen::Info(LengthInfo), codegen::greaterequal(0.f)]];
     };
 } // namespace
 #include "renderableprism_codegen.cpp"

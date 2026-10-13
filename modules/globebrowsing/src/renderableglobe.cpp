@@ -611,29 +611,23 @@ namespace {
         // to that value.
         std::optional<std::variant<glm::dvec3, double>> radii;
 
-        // [[codegen::verbatim(PerformShadingInfo.description)]]
-        std::optional<bool> performShading;
+        std::optional<bool> performShading [[codegen::Info(PerformShadingInfo)]];
 
-        // [[codegen::verbatim(AccurateNormalsInfo.description)]]
-        std::optional<bool> useAccurateNormals;
+        std::optional<bool> useAccurateNormals [[codegen::Info(AccurateNormalsInfo)]];
 
-        // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<float> ambientIntensity;
+        std::optional<float> ambientIntensity [[codegen::Info(AmbientIntensityInfo)]];
 
-        // [[codegen::verbatim(LightSourceNodeInfo.description)]]
-        std::optional<std::string> lightSourceNode;
+        std::optional<std::string> lightSourceNode [[codegen::Info(LightSourceNodeInfo)]];
 
-        // [[codegen::verbatim(RenderAtDistanceInfo.description)]]
-        std::optional<bool> renderAtDistance;
+        std::optional<bool> renderAtDistance [[codegen::Info(RenderAtDistanceInfo)]];
 
-        // [[codegen::verbatim(TargetLodScaleFactorInfo.description)]]
-        std::optional<float> targetLodScaleFactor;
+        std::optional<float> targetLodScaleFactor
+            [[codegen::Info(TargetLodScaleFactorInfo)]];
 
-        // [[codegen::verbatim(ModelSpaceRenderingInfo.description)]]
-        std::optional<int> modelSpaceRenderingCutoffLevel [[codegen::greater(0)]];
+        std::optional<int> modelSpaceRenderingCutoffLevel
+            [[codegen::Info(ModelSpaceRenderingInfo), codegen::greater(0)]];
 
-        // [[codegen::verbatim(OrenNayarRoughnessInfo.description)]]
-        std::optional<float> orenNayarRoughness;
+        std::optional<float> orenNayarRoughness [[codegen::Info(OrenNayarRoughnessInfo)]];
 
         enum class [[codegen::map(openspace::layers::Group::ID)]] Group {
             HeightLayers,

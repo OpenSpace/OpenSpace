@@ -154,8 +154,8 @@ namespace {
     // layers in `LayerNames` and `LayerMinMaxCapValues`. `CacheData` and `showAtAllTimes`
     // are two other optional parameters.
     struct [[codegen::Dictionary(RenderableTimeVaryingFitsSphere)]] Parameters {
-        // [[codegen::verbatim(TextureSourceInfo.description)]]
-        std::optional<std::filesystem::path> textureSource;
+        std::optional<std::filesystem::path> textureSource
+            [[codegen::Info(TextureSourceInfo)]];
 
         enum class [[codegen::map(
             openspace::RenderableTimeVaryingFitsSphere::LoadingType)]] LoadingType
@@ -187,8 +187,7 @@ namespace {
         // When specified, that data layer will be the option used.
         std::optional<int> fitsLayer;
 
-        // [[codegen::verbatim(FitsLayerNameInfo.description)]]
-        std::optional<Dictionary> layerNames;
+        std::optional<Dictionary> layerNames [[codegen::Info(FitsLayerNameInfo)]];
 
         // A range per layer to be used to cap where the color range will lie. Values
         // outside of range will be overexposed, i.e. data values below the min or above

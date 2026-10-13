@@ -96,20 +96,17 @@ namespace {
     // [spkpos_c](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html)
     // function of the SPICE library.
     struct [[codegen::Dictionary(SpiceTranslation)]] Parameters {
-        // [[codegen::verbatim(TargetInfo.description)]]
-        std::variant<std::string, int> target;
+        std::variant<std::string, int> target [[codegen::Info(TargetInfo)]];
 
-        // [[codegen::verbatim(ObserverInfo.description)]]
-        std::variant<std::string, int> observer;
+        std::variant<std::string, int> observer [[codegen::Info(ObserverInfo)]];
 
         std::optional<std::string> frame
             [[codegen::annotation("A valid SPICE NAIF name for a reference frame")]];
 
-        // [[codegen::verbatim(FixedDateInfo.description)]]
-        std::optional<std::string> fixedDate [[codegen::datetime()]];
+        std::optional<std::string> fixedDate
+            [[codegen::Info(FixedDateInfo), codegen::datetime()]];
 
-        // [[codegen::verbatim(TimeOffsetInfo.description)]]
-        std::optional<float> timeOffset;
+        std::optional<float> timeOffset [[codegen::Info(TimeOffsetInfo)]];
     };
 } // namespace
 #include "spicetranslation_codegen.cpp"

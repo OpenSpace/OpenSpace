@@ -55,11 +55,9 @@ namespace {
     };
 
     struct [[codegen::Dictionary(Shadower)]] Parameters {
-        // [[codegen::verbatim(FrustumSizeInfo.description)]]
-        std::optional<float> frustumSize;
+        std::optional<float> frustumSize [[codegen::Info(FrustumSizeInfo)]];
 
-        // [[codegen::verbatim(CastShadowInfo.description)]]
-        std::optional<bool> castShadow;
+        std::optional<bool> castShadow [[codegen::Info(CastShadowInfo)]];
     };
 } // namespace
 #include "shadowmapping_codegen.cpp"

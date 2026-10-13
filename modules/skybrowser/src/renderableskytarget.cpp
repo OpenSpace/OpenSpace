@@ -109,20 +109,18 @@ namespace {
     // This is a utility renderable used by the SkyBrowser module to visualize a
     // crosshair-like target in the sky.
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {
-        // [[codegen::verbatim(crossHairSizeInfo.description)]]
-        std::optional<float> crossHairSize [[codegen::greaterequal(0.f)]];
+        std::optional<float> crossHairSize
+            [[codegen::Info(crossHairSizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(RectangleThresholdInfo.description)]]
-        std::optional<float> rectangleThreshold [[codegen::greaterequal(0.f)]];
+        std::optional<float> rectangleThreshold
+            [[codegen::Info(RectangleThresholdInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(VerticalFovInfo.description)]]
-        std::optional<double> verticalFov;
+        std::optional<double> verticalFov [[codegen::Info(VerticalFovInfo)]];
 
-        // [[codegen::verbatim(ApplyRollInfo.description)]]
-        std::optional<bool> applyRoll;
+        std::optional<bool> applyRoll [[codegen::Info(ApplyRollInfo)]];
     };
 } // namespace
 #include "renderableskytarget_codegen.cpp"

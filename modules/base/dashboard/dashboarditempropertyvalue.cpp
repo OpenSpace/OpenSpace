@@ -81,11 +81,10 @@ namespace {
     // the `DisplayString` will have to be adapted. See the documentation for the
     // `DisplayString` for more information.
     struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
-        // [[codegen::verbatim(PropertyUriInfo.description)]]
-        std::optional<std::string> uri [[codegen::key("URI")]];
+        std::optional<std::string> uri
+            [[codegen::Info(PropertyUriInfo), codegen::key("URI")]];
 
-        // [[codegen::verbatim(DisplayStringInfo.description)]]
-        std::optional<std::string> displayString;
+        std::optional<std::string> displayString [[codegen::Info(DisplayStringInfo)]];
     };
 } // namespace
 #include "dashboarditempropertyvalue_codegen.cpp"

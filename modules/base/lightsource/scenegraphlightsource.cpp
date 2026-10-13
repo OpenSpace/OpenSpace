@@ -65,11 +65,9 @@ namespace {
     // distance between the two scene graph nodes. Only the `Intensity` value has an
     // impact on the brightness.
     struct [[codegen::Dictionary(SceneGraphLightSource)]] Parameters {
-        // [[codegen::verbatim(IntensityInfo.description)]]
-        std::optional<float> intensity;
+        std::optional<float> intensity [[codegen::Info(IntensityInfo)]];
 
-        // [[codegen::verbatim(NodeInfo.description)]]
-        std::string node [[codegen::identifier()]];
+        std::string node [[codegen::Info(NodeInfo), codegen::identifier()]];
     };
 } // namespace
 #include "scenegraphlightsource_codegen.cpp"

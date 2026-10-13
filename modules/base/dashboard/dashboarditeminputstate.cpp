@@ -92,20 +92,15 @@ namespace {
     // Each input method has the ability to be selectively disabled, meaning that all
     // inputs from that input method are ignored by the system entirely.
     struct [[codegen::Dictionary(DashboardItemInputState)]] Parameters {
-        // [[codegen::verbatim(ShowWhenEnabledInfo.description)]]
-        std::optional<bool> showWhenEnabled;
+        std::optional<bool> showWhenEnabled [[codegen::Info(ShowWhenEnabledInfo)]];
 
-        // [[codegen::verbatim(ShowWhenDisabledInfo.description)]]
-        std::optional<bool> showWhenDisabled;
+        std::optional<bool> showWhenDisabled [[codegen::Info(ShowWhenDisabledInfo)]];
 
-        // [[codegen::verbatim(ShowKeyboardInfo.description)]]
-        std::optional<bool> showKeyboard;
+        std::optional<bool> showKeyboard [[codegen::Info(ShowKeyboardInfo)]];
 
-        // [[codegen::verbatim(ShowMouseInfo.description)]]
-        std::optional<bool> showMouse;
+        std::optional<bool> showMouse [[codegen::Info(ShowMouseInfo)]];
 
-        // [[codegen::verbatim(ShowJoystickInfo.description)]]
-        std::optional<bool> showJoystick;
+        std::optional<bool> showJoystick [[codegen::Info(ShowJoystickInfo)]];
     };
 } // namespace
 #include "dashboarditeminputstate_codegen.cpp"

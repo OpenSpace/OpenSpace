@@ -119,23 +119,20 @@ namespace {
             Camera
         };
 
-        // [[codegen::verbatim(SourceTypeInfo.description)]]
-        Type sourceType;
+        Type sourceType [[codegen::Info(SourceTypeInfo)]];
 
-        // [[codegen::verbatim(SourceNodeIdentifierInfo.description)]]
-        std::optional<std::string> sourceNodeIdentifier [[codegen::identifier()]];
+        std::optional<std::string> sourceNodeIdentifier
+            [[codegen::Info(SourceNodeIdentifierInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(ReferenceTypeInfo.description)]]
-        Type referenceType;
+        Type referenceType [[codegen::Info(ReferenceTypeInfo)]];
 
-        // [[codegen::verbatim(ReferenceNodeIdentifierInfo.description)]]
-        std::optional<std::string> referenceNodeIdentifier [[codegen::identifier()]];
+        std::optional<std::string> referenceNodeIdentifier
+            [[codegen::Info(ReferenceNodeIdentifierInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(DestinationTypeInfo.description)]]
-        Type destinationType;
+        Type destinationType [[codegen::Info(DestinationTypeInfo)]];
 
-        // [[codegen::verbatim(DestinationNodeIdentifierInfo.description)]]
-        std::optional<std::string> destinationNodeIdentifier [[codegen::identifier()]];
+        std::optional<std::string> destinationNodeIdentifier
+            [[codegen::Info(DestinationNodeIdentifierInfo), codegen::identifier()]];
     };
 } // namespace
 #include "dashboarditemangle_codegen.cpp"

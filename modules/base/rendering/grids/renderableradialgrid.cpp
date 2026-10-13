@@ -114,23 +114,21 @@ namespace {
     // hole in the center. The second (outer) radius defines the full grid size. To create
     // a solid circle that connects at the center, set the inner radius to zero (default).
     struct [[codegen::Dictionary(RenderableRadialGrid)]] Parameters {
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(GridSegmentsInfo.description)]]
-        std::optional<glm::ivec2> gridSegments [[codegen::greaterequal(glm::ivec2(1))]];
+        std::optional<glm::ivec2> gridSegments
+            [[codegen::Info(GridSegmentsInfo), codegen::greaterequal(glm::ivec2(1))]];
 
-        // [[codegen::verbatim(CircleSegmentsInfo.description)]]
-        std::optional<int> circleSegments;
+        std::optional<int> circleSegments [[codegen::Info(CircleSegmentsInfo)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(RadiiInfo.description)]]
-        std::optional<glm::vec2> radii [[codegen::greaterequal(glm::vec2(0.f))]];
+        std::optional<glm::vec2> radii
+            [[codegen::Info(RadiiInfo), codegen::greaterequal(glm::vec2(0.f))]];
 
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels
+            [[codegen::Info(LabelsInfo), codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderableradialgrid_codegen.cpp"

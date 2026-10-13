@@ -148,17 +148,13 @@ namespace {
         // instead.
         std::optional<std::string> time [[codegen::datetime()]];
 
-        // [[codegen::verbatim(CameraPositionInfo.description)]]
-        std::optional<glm::vec3> cameraPosition;
+        std::optional<glm::vec3> cameraPosition [[codegen::Info(CameraPositionInfo)]];
 
-        // [[codegen::verbatim(CameraCenterInfo.description)]]
-        std::optional<glm::vec3> cameraCenter;
+        std::optional<glm::vec3> cameraCenter [[codegen::Info(CameraCenterInfo)]];
 
-        // [[codegen::verbatim(CameraUpInfo.description)]]
-        std::optional<glm::vec3> cameraUp;
+        std::optional<glm::vec3> cameraUp [[codegen::Info(CameraUpInfo)]];
 
-        // [[codegen::verbatim(CameraFovInfo.description)]]
-        std::optional<float> cameraFov;
+        std::optional<float> cameraFov [[codegen::Info(CameraFovInfo)]];
     };
 } // namespace
 #include "screenspacerenderablerenderable_codegen.cpp"

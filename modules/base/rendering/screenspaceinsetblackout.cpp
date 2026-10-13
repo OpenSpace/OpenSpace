@@ -257,8 +257,8 @@ namespace {
             // calibration grid.
             std::optional<std::filesystem::path> calibrationTexturePath;
 
-            // [[codegen::verbatim(CalibrationPatternInfo.description)]]
-            std::optional<bool> enableCalibrationPattern;
+            std::optional<bool> enableCalibrationPattern
+                [[codegen::Info(CalibrationPatternInfo)]];
         };
         BlackoutShape blackoutshape;
     };

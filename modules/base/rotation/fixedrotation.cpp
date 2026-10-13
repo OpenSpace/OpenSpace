@@ -263,8 +263,7 @@ namespace {
     // very good reason not to, whenever an axis is specified as a direction vector, that
     // axis' `orthogonal` setting should also probably be enabled.
     struct [[codegen::Dictionary(FixedRotation)]] Parameters {
-        // [[codegen::verbatim(AttachedInfo.description)]]
-        std::optional<std::string> attached;
+        std::optional<std::string> attached [[codegen::Info(AttachedInfo)]];
 
         // This value specifies the direction of the new X axis. If this value is not
         // specified, it will be computed by completing a right handed coordinate system
@@ -273,11 +272,9 @@ namespace {
         // value is a 3-vector, it is interpreted as a direction vector.
         std::optional<std::variant<std::string, glm::vec3>> xAxis;
 
-        // [[codegen::verbatim(XAxisOrthogonalVectorInfo.description)]]
-        std::optional<bool> xAxisOrthogonal;
+        std::optional<bool> xAxisOrthogonal [[codegen::Info(XAxisOrthogonalVectorInfo)]];
 
-        // [[codegen::verbatim(XAxisInvertObjectInfo.description)]]
-        std::optional<bool> xAxisInvert;
+        std::optional<bool> xAxisInvert [[codegen::Info(XAxisInvertObjectInfo)]];
 
         // This value specifies the direction of the new Y axis. If this value is not
         // specified, it will be computed by completing a right handed coordinate system
@@ -286,11 +283,9 @@ namespace {
         // value is a 3-vector, it is interpreted as a direction vector.
         std::optional<std::variant<std::string, glm::vec3>> yAxis;
 
-        // [[codegen::verbatim(YAxisOrthogonalVectorInfo.description)]]
-        std::optional<bool> yAxisOrthogonal;
+        std::optional<bool> yAxisOrthogonal [[codegen::Info(YAxisOrthogonalVectorInfo)]];
 
-        // [[codegen::verbatim(YAxisInvertObjectInfo.description)]]
-        std::optional<bool> yAxisInvert;
+        std::optional<bool> yAxisInvert [[codegen::Info(YAxisInvertObjectInfo)]];
 
         // This value specifies the direction of the new Z axis. If this value is not
         // specified, it will be computed by completing a right handed coordinate system
@@ -299,11 +294,9 @@ namespace {
         // value is a 3-vector, it is interpreted as a direction vector.
         std::optional<std::variant<std::string, glm::vec3>> zAxis;
 
-        // [[codegen::verbatim(ZAxisOrthogonalVectorInfo.description)]]
-        std::optional<bool> zAxisOrthogonal;
+        std::optional<bool> zAxisOrthogonal [[codegen::Info(ZAxisOrthogonalVectorInfo)]];
 
-        // [[codegen::verbatim(ZAxisInvertObjectInfo.description)]]
-        std::optional<bool> zAxisInvert;
+        std::optional<bool> zAxisInvert [[codegen::Info(ZAxisInvertObjectInfo)]];
     };
 } // namespace
 #include "fixedrotation_codegen.cpp"

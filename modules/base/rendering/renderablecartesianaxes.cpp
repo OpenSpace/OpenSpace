@@ -83,14 +83,11 @@ namespace {
     // be scaled to match the parent object for the axes to be visible in the scene, for
     // example using a [StaticScale](#base_scale_static).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
-        // [[codegen::verbatim(XColorInfo.description)]]
-        std::optional<glm::vec3> xColor [[codegen::color()]];
+        std::optional<glm::vec3> xColor [[codegen::Info(XColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(YColorInfo.description)]]
-        std::optional<glm::vec3> yColor [[codegen::color()]];
+        std::optional<glm::vec3> yColor [[codegen::Info(YColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(ZColorInfo.description)]]
-        std::optional<glm::vec3> zColor [[codegen::color()]];
+        std::optional<glm::vec3> zColor [[codegen::Info(ZColorInfo), codegen::color()]];
     };
 } // namespace
 #include "renderablecartesianaxes_codegen.cpp"

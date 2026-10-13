@@ -198,8 +198,8 @@ namespace {
             Cartoon
         };
 
-        // [[codegen::verbatim(RepresentationInfo.description)]]
-        std::optional<Representation> representation;
+        std::optional<Representation> representation
+            [[codegen::Info(RepresentationInfo)]];
 
         enum class [[codegen::map(molecule::rep::Color)]] Coloring {
             // Uniform,
@@ -212,41 +212,29 @@ namespace {
             SecondaryStructure
         };
 
-        // [[codegen::verbatim(ColoringInfo.description)]]
-        std::optional<Coloring> coloring;
+        std::optional<Coloring> coloring [[codegen::Info(ColoringInfo)]];
 
-        // [[codegen::verbatim(RepScaleInfo.description)]]
-        std::optional<float> repScale;
+        std::optional<float> repScale [[codegen::Info(RepScaleInfo)]];
 
-        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
-        std::optional<float> animationSpeed;
+        std::optional<float> animationSpeed [[codegen::Info(AnimationSpeedInfo)]];
 
-        // [[codegen::verbatim(SimulationSpeedInfo.description)]]
-        std::optional<float> simulationSpeed;
+        std::optional<float> simulationSpeed [[codegen::Info(SimulationSpeedInfo)]];
 
-        // [[codegen::verbatim(LinearVelocityInfo.description)]]
-        float linearVelocity;
+        float linearVelocity [[codegen::Info(LinearVelocityInfo)]];
 
-        // [[codegen::verbatim(AngularVelocityInfo.description)]]
-        float angularVelocity;
+        float angularVelocity [[codegen::Info(AngularVelocityInfo)]];
 
-        // [[codegen::verbatim(SimulationBoxInfo.description)]]
-        glm::dvec3 simulationBox;
+        glm::dvec3 simulationBox [[codegen::Info(SimulationBoxInfo)]];
 
-        // [[codegen::verbatim(CollisionRadiusInfo.description)]]
-        float collisionRadius;
+        float collisionRadius [[codegen::Info(CollisionRadiusInfo)]];
 
-        // [[codegen::verbatim(FilterInfo.description)]]
-        std::optional<std::string> filter;
+        std::optional<std::string> filter [[codegen::Info(FilterInfo)]];
 
-        // [[codegen::verbatim(CircleColorInfo.description)]]
-        std::optional<glm::vec4> circleColor;
+        std::optional<glm::vec4> circleColor [[codegen::Info(CircleColorInfo)]];
 
-        // [[codegen::verbatim(CircleWidthInfo.description)]]
-        std::optional<float> circleWidth;
+        std::optional<float> circleWidth [[codegen::Info(CircleWidthInfo)]];
 
-        // [[codegen::verbatim(CircleFalloffInfo.description)]]
-        std::optional<float> circleFalloff;
+        std::optional<float> circleFalloff [[codegen::Info(CircleFalloffInfo)]];
     };
 } // namespace
 #include "renderablesimulationbox_codegen.cpp"

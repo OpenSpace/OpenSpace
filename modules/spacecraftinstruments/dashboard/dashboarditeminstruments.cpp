@@ -74,11 +74,11 @@ namespace {
     // visual representation on how much time has passed since the previous image capture
     // and how much time remains until the instrument captures the next image.
     struct [[codegen::Dictionary(DashboardItemInstruments)]] Parameters {
-        // [[codegen::verbatim(ActiveColorInfo.description)]]
-        std::optional<glm::vec3> activeColor [[codegen::color()]];
+        std::optional<glm::vec3> activeColor
+            [[codegen::Info(ActiveColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(FlashColorInfo.description)]]
-        std::optional<glm::vec3> flashColor [[codegen::color()]];
+        std::optional<glm::vec3> flashColor
+            [[codegen::Info(FlashColorInfo), codegen::color()]];
     };
 } // namespace
 #include "dashboarditeminstruments_codegen.cpp"

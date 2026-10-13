@@ -158,23 +158,21 @@ namespace {
         // A translation used to compute locations along the path.
         Dictionary translation [[codegen::reference("core_translation")]];
 
-        // [[codegen::verbatim(LineColorInfo.description)]]
-        glm::vec3 color [[codegen::color()]];
+        glm::vec3 color [[codegen::Info(LineColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(EnableFadeInfo.description)]]
-        std::optional<bool> enableFade;
+        std::optional<bool> enableFade [[codegen::Info(EnableFadeInfo)]];
 
-        // [[codegen::verbatim(LineLengthInfo.description)]]
-        std::optional<float> lineLength [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> lineLength
+            [[codegen::Info(LineLengthInfo), codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(LineFadeAmountInfo.description)]]
-        std::optional<float> lineFadeAmount [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> lineFadeAmount
+            [[codegen::Info(LineFadeAmountInfo), codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(PointSizeInfo.description)]]
-        std::optional<int> pointSize [[codegen::greaterequal(0)]];
+        std::optional<int> pointSize
+            [[codegen::Info(PointSizeInfo), codegen::greaterequal(0)]];
 
         enum class RenderingMode {
             Lines,
@@ -182,8 +180,8 @@ namespace {
             LinesPoints [[codegen::key("Lines+Points")]],
             PointsLines [[codegen::key("Lines+Points")]]
         };
-        // [[codegen::verbatim(RenderingModeInfo.description)]]
-        std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
+        std::optional<RenderingMode> renderingMode
+            [[codegen::Info(RenderingModeInfo), codegen::key("Rendering")]];
     };
 } // namespace
 #include "renderabletrail_codegen.cpp"

@@ -47,8 +47,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(TileIndexTileProvider)]] Parameters {
-        // [[codegen::verbatim(UniqueBackgroundColors.description)]]
-        std::optional<bool> uniqueBackgroundColors;
+        std::optional<bool> uniqueBackgroundColors
+            [[codegen::Info(UniqueBackgroundColors)]];
     };
 } // namespace
 #include "tileindextileprovider_codegen.cpp"

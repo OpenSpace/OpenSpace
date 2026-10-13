@@ -77,11 +77,10 @@ namespace {
     };
 
     struct [[codegen::Dictionary(ImageSequenceTileProvider)]] Parameters {
-        // [[codegen::verbatim(IndexInfo.description)]]
-        std::optional<int> index;
+        std::optional<int> index [[codegen::Info(IndexInfo)]];
 
-        // [[codegen::verbatim(FolderPathInfo.description)]]
-        std::filesystem::path folderPath [[codegen::directory()]];
+        std::filesystem::path folderPath
+            [[codegen::Info(FolderPathInfo), codegen::directory()]];
     };
 } // namespace
 #include "imagesequencetileprovider_codegen.cpp"

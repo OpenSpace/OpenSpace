@@ -163,32 +163,25 @@ namespace {
     };
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
-        // [[codegen::verbatim(AllowRotationInfo.description)]]
-        std::optional<bool> allowCameraRotation;
+        std::optional<bool> allowCameraRotation [[codegen::Info(AllowRotationInfo)]];
 
-        // [[codegen::verbatim(CameraRotSpeedInfo.description)]]
-        std::optional<double> cameraRotSpeed;
+        std::optional<double> cameraRotSpeed [[codegen::Info(CameraRotSpeedInfo)]];
 
-        // [[codegen::verbatim(TargetSpeedInfo.description)]]
-        std::optional<double> targetSpeed;
+        std::optional<double> targetSpeed [[codegen::Info(TargetSpeedInfo)]];
 
-        // [[codegen::verbatim(BrowserSpeedInfo.description)]]
-        std::optional<double> browserSpeed;
+        std::optional<double> browserSpeed [[codegen::Info(BrowserSpeedInfo)]];
 
-        // [[codegen::verbatim(HideWithGuiInfo.description)]]
-        std::optional<bool> hideTargetsBrowsersGui;
+        std::optional<bool> hideTargetsBrowsersGui [[codegen::Info(HideWithGuiInfo)]];
 
-        // [[codegen::verbatim(InverseZoomInfo.description)]]
-        std::optional<bool> inverseZoomDirection;
+        std::optional<bool> inverseZoomDirection [[codegen::Info(InverseZoomInfo)]];
 
-        // [[codegen::verbatim(SynchronizeAimInfo.description)]]
-        std::optional<bool> synchronizeAim;
+        std::optional<bool> synchronizeAim [[codegen::Info(SynchronizeAimInfo)]];
 
-        // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
-        std::optional<double> spaceCraftAnimationTime;
+        std::optional<double> spaceCraftAnimationTime
+            [[codegen::Info(SpaceCraftTimeInfo)]];
 
-        // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
-        std::optional<std::string> wwtImageCollectionUrl;
+        std::optional<std::string> wwtImageCollectionUrl
+            [[codegen::Info(SpaceCraftTimeInfo)]];
 
         // How often the SkyBrowser module should send updates to the UI.
         // Set in milliseconds, so for example a value of 100 will result in

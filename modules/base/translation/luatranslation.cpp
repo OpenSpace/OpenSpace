@@ -59,8 +59,7 @@ namespace {
     // script parameter describes in greater detail how the Lua script file should be
     // constructed.
     struct [[codegen::Dictionary(LuaTranslation)]] Parameters {
-        // [[codegen::verbatim(ScriptInfo.description)]]
-        std::filesystem::path script;
+        std::filesystem::path script [[codegen::Info(ScriptInfo)]];
     };
 } // namespace
 #include "luatranslation_codegen.cpp"

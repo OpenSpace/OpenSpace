@@ -103,11 +103,11 @@ namespace {
         // Determines whether the WebBrowser module is enabled.
         std::optional<bool> enabled;
 
-        // [[codegen::verbatim(UpdateBrowserBetweenRenderablesInfo.description)]]
-        std::optional<bool> updateBrowserBetweenRenderables;
+        std::optional<bool> updateBrowserBetweenRenderables
+            [[codegen::Info(UpdateBrowserBetweenRenderablesInfo)]];
 
-        // [[codegen::verbatim(BrowserUpdateIntervalInfo.description)]]
-        std::optional<float> browserUpdateInterval [[codegen::greaterequal(0.f)]];
+        std::optional<float> browserUpdateInterval
+            [[codegen::Info(BrowserUpdateIntervalInfo), codegen::greaterequal(0.f)]];
 
         // If this value is set to `true`, it is possible to remote debug the CEF browser
         // through port 8088. If it is set to `false` (the default), the remote debugging

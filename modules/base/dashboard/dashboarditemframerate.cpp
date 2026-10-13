@@ -180,8 +180,7 @@ namespace {
             FPSAvg [[codegen::key("Average frames per second")]]
         };
 
-        // [[codegen::verbatim(FrametimeInfo.description)]]
-        std::optional<Type> frametimeType;
+        std::optional<Type> frametimeType [[codegen::Info(FrametimeInfo)]];
     };
 } // namespace
 #include "dashboarditemframerate_codegen.cpp"

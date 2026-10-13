@@ -324,14 +324,12 @@ namespace {
         // children.
         std::optional<Dictionary> renderable [[codegen::reference("core_renderable")]];
 
-        // [[codegen::verbatim(BoundingSphereInfo.description)]]
-        std::optional<double> boundingSphere;
+        std::optional<double> boundingSphere [[codegen::Info(BoundingSphereInfo)]];
 
-        // [[codegen::verbatim(InteractionSphereInfo.description)]]
-        std::optional<double> interactionSphere;
+        std::optional<double> interactionSphere [[codegen::Info(InteractionSphereInfo)]];
 
-        // [[codegen::verbatim(SupportsDirectInteractionInfo.description)]]
-        std::optional<bool> supportsDirectInteraction;
+        std::optional<bool> supportsDirectInteraction
+            [[codegen::Info(SupportsDirectInteractionInfo)]];
 
         struct Transform {
             // This node describes a translation that is applied to the scene graph node
@@ -413,8 +411,7 @@ namespace {
             // not display, for example, barycenters.
             std::optional<bool> hidden;
 
-            // [[codegen::verbatim(GuiFocusableInfo.description)]]
-            std::optional<bool> focusable;
+            std::optional<bool> focusable [[codegen::Info(GuiFocusableInfo)]];
 
             // If this value is specified, the scene graph node will be ordered in
             // relation to its neighbors in the GUI based on this value, so that nodes

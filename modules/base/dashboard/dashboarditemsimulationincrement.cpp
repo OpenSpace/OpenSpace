@@ -108,17 +108,15 @@ namespace {
     // `TransitionFormat` is used if the simulation increment is currently interpolating
     // to a new value.
     struct [[codegen::Dictionary(DashboardItemSimulationIncrement)]] Parameters {
-        // [[codegen::verbatim(SimplificationInfo.description)]]
-        std::optional<bool> simplification;
+        std::optional<bool> simplification [[codegen::Info(SimplificationInfo)]];
 
-        // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+        std::optional<std::string> requestedUnit
+            [[codegen::Info(RequestedUnitInfo), codegen::inlist(unitList())]];
 
-        // [[codegen::verbatim(TransitionFormatInfo.description)]]
-        std::optional<std::string> transitionFormat;
+        std::optional<std::string> transitionFormat
+            [[codegen::Info(TransitionFormatInfo)]];
 
-        // [[codegen::verbatim(RegularFormatInfo.description)]]
-        std::optional<std::string> regularFormat;
+        std::optional<std::string> regularFormat [[codegen::Info(RegularFormatInfo)]];
     };
 } // namespace
 #include "dashboarditemsimulationincrement_codegen.cpp"

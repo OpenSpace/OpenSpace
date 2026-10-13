@@ -61,11 +61,9 @@ namespace {
     };
 
     struct [[codegen::Dictionary(ScreenSpaceRenderableText)]] Parameters {
-        // [[codegen::verbatim(FontNameInfo.description)]]
-        std::optional<std::string> fontName;
+        std::optional<std::string> fontName [[codegen::Info(FontNameInfo)]];
 
-        // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize;
+        std::optional<float> fontSize [[codegen::Info(FontSizeInfo)]];
     };
 } // namespace
 #include "screenspacerenderabletext_codegen.cpp"

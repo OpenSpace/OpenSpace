@@ -82,10 +82,8 @@ namespace {
     // which allows a trajectory to be assembled from multiple exports or extended over
     // longer time spans.
     struct [[codegen::Dictionary(HorizonsTranslation)]] Parameters {
-        // [[codegen::verbatim(HorizonsTextFileInfo.description)]]
-        std::variant<
-            std::filesystem::path, std::vector<std::filesystem::path>
-        > horizonsTextFile;
+        std::variant<std::filesystem::path, std::vector<std::filesystem::path>>
+            horizonsTextFile [[codegen::Info(HorizonsTextFileInfo)]];
     };
 } // namespace
 #include "horizonstranslation_codegen.cpp"

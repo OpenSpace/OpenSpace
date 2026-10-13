@@ -73,8 +73,7 @@ namespace {
     // and hence expects an equirectangular image. However, it can also be used to show
     // fisheye images by changing the `TextureProjection`.
     struct [[codegen::Dictionary(RenderableSphereImageOnline)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::string url [[codegen::key("URL")]];
+        std::string url [[codegen::Info(TextureInfo), codegen::key("URL")]];
     };
 } // namespace
 #include "renderablesphereimageonline_codegen.cpp"

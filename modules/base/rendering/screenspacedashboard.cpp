@@ -69,8 +69,7 @@ namespace {
         std::optional<std::string> identifier [[codegen::identifier(),
             codegen::private()]];
 
-        // [[codegen::verbatim(UseMainInfo.description)]]
-        std::optional<bool> useMainDashboard;
+        std::optional<bool> useMainDashboard [[codegen::Info(UseMainInfo)]];
 
         // A list of DashboardItems that are added automatically upon construction of the
         // ScreenSpaceDashboard. This value must not be specified if `UseMainDashboard` is

@@ -279,19 +279,16 @@ namespace {
         // calculations.
         std::optional<ShadowGroup> shadowGroup;
 
-        // [[codegen::verbatim(AtmosphereHeightInfo.description)]]
-        float atmosphereHeight;
+        float atmosphereHeight [[codegen::Info(AtmosphereHeightInfo)]];
 
         // The radius of the planet in meters.
         float planetRadius;
 
         float planetAverageGroundReflectance;
 
-        // [[codegen::verbatim(SunIntensityInfo.description)]]
-        std::optional<float> sunIntensity;
+        std::optional<float> sunIntensity [[codegen::Info(SunIntensityInfo)]];
 
-        // [[codegen::verbatim(GroundRadianceEmissionInfo.description)]]
-        float groundRadianceEmission;
+        float groundRadianceEmission [[codegen::Info(GroundRadianceEmissionInfo)]];
 
         struct Rayleigh {
             struct Coefficients {
@@ -329,17 +326,16 @@ namespace {
         };
         std::optional<ATMDebug> debug;
 
-        // [[codegen::verbatim(AtmosphereDimmingHeightInfo.description)]]
-        std::optional<float> atmosphereDimmingHeight;
+        std::optional<float>
+            atmosphereDimmingHeight [[codegen::Info(AtmosphereDimmingHeightInfo)]];
 
-        // [[codegen::verbatim(SunsetAngleInfo.description)]]
-        std::optional<glm::vec2> sunsetAngle;
+        std::optional<glm::vec2> sunsetAngle [[codegen::Info(SunsetAngleInfo)]];
 
-        // [[codegen::verbatim(SunAngularSize.description)]]
-        std::optional<float> sunAngularSize [[codegen::inrange(0.0, 180.0)]];
+        std::optional<float> sunAngularSize [[codegen::Info(SunAngularSize),
+            codegen::inrange(0.0, 180.0)]];
 
-        // [[codegen::verbatim(LightSourceNodeInfo.description)]]
-        std::optional<std::string> lightSourceNode [[codegen::identifier()]];
+        std::optional<std::string> lightSourceNode [[codegen::Info(LightSourceNodeInfo),
+            codegen::identifier()]];
     };
 } // namespace
 #include "renderableatmosphere_codegen.cpp"

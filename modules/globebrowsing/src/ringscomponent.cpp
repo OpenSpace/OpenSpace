@@ -196,47 +196,40 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RingsComponent)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
         // This value determines the overall opacity of the rings.
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::optional<std::filesystem::path> texture;
+        std::optional<std::filesystem::path> texture [[codegen::Info(TextureInfo)]];
 
-        // [[codegen::verbatim(TextureFwrdInfo.description)]]
-        std::optional<std::filesystem::path> textureFwrd;
+        std::optional<std::filesystem::path> textureFwrd
+            [[codegen::Info(TextureFwrdInfo)]];
 
-        // [[codegen::verbatim(TextureBckwrdInfo.description)]]
-        std::optional<std::filesystem::path> textureBckwrd;
+        std::optional<std::filesystem::path> textureBckwrd
+            [[codegen::Info(TextureBckwrdInfo)]];
 
-        // [[codegen::verbatim(TextureUnlitInfo.description)]]
-        std::optional<std::filesystem::path> textureUnlit;
+        std::optional<std::filesystem::path> textureUnlit
+            [[codegen::Info(TextureUnlitInfo)]];
 
-        // [[codegen::verbatim(TextureColorInfo.description)]]
-        std::optional<std::filesystem::path> textureColor;
+        std::optional<std::filesystem::path> textureColor
+            [[codegen::Info(TextureColorInfo)]];
 
-        // [[codegen::verbatim(TextureTransparencyInfo.description)]]
-        std::optional<std::filesystem::path> textureTransparency;
+        std::optional<std::filesystem::path> textureTransparency
+            [[codegen::Info(TextureTransparencyInfo)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size;
+        std::optional<float> size [[codegen::Info(SizeInfo)]];
 
-        // [[codegen::verbatim(OffsetInfo.description)]]
-        std::optional<glm::vec2> offset;
+        std::optional<glm::vec2> offset [[codegen::Info(OffsetInfo)]];
 
-        // [[codegen::verbatim(NightFactorInfo.description)]]
-        std::optional<float> nightFactor;
+        std::optional<float> nightFactor [[codegen::Info(NightFactorInfo)]];
 
-        // [[codegen::verbatim(ColorFilterInfo.description)]]
-        std::optional<float> colorFilter;
+        std::optional<float> colorFilter [[codegen::Info(ColorFilterInfo)]];
 
-        // [[codegen::verbatim(ZFightingPercentageInfo.description)]]
-        std::optional<float> zFightingPercentage;
+        std::optional<float> zFightingPercentage
+            [[codegen::Info(ZFightingPercentageInfo)]];
 
-        // [[codegen::verbatim(NumberShadowSamplesInfo.description)]]
-        std::optional<int> numberShadowSamples;
+        std::optional<int> numberShadowSamples [[codegen::Info(NumberShadowSamplesInfo)]];
     };
 } // namespace
 #include "ringscomponent_codegen.cpp"

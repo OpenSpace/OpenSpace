@@ -178,14 +178,13 @@ namespace {
         int numberOfObjects [[codegen::greaterequal(1)]];
 
         struct Interpolation {
-            // [[codegen::verbatim(InterpolationValueInfo.description)]]
-            std::optional<float> value [[codegen::inrange(0.f, 1.f)]];
+            std::optional<float> value
+                [[codegen::Info(InterpolationValueInfo), codegen::inrange(0.f, 1.f)]];
 
-            // [[codegen::verbatim(InterpolationSpeedInfo.description)]]
-            std::optional<float> speed [[codegen::greater(0.f)]];
+            std::optional<float> speed
+                [[codegen::Info(InterpolationSpeedInfo), codegen::greater(0.f)]];
 
-            // [[codegen::verbatim(UseSplineInfo.description)]]
-            std::optional<bool> useSplineInterpolation;
+            std::optional<bool> useSplineInterpolation [[codegen::Info(UseSplineInfo)]];
         };
         // Initial settings for the interpolation.
         std::optional<Interpolation> interpolation;

@@ -91,11 +91,9 @@ namespace {
     // of the constellation, the text of that label is replaced with the full name from
     // the `NamesFile`.
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {
-        // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path file;
+        std::filesystem::path file [[codegen::Info(FileInfo)]];
 
-        // [[codegen::verbatim(DrawElementsInfo.description)]]
-        std::optional<bool> drawElements;
+        std::optional<bool> drawElements [[codegen::Info(DrawElementsInfo)]];
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],

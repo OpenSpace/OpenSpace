@@ -49,8 +49,7 @@ namespace {
     // and hence expects an equirectangular image. However, it can also be used to show
     // fisheye images by changing the `TextureProjection`.
     struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::filesystem::path texture;
+        std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
         // If this value is set to true, the image for this sphere will not be loaded at
         // startup but rather when sphere is shown for the first time. Additionally, if

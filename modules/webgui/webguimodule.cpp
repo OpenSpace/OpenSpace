@@ -118,14 +118,13 @@ namespace {
     };
 
     struct [[codegen::Dictionary(WebGuiModule)]] Parameters {
-        // [[codegen::verbatim(PortInfo.description)]]
-        std::optional<int> port [[codegen::key("HttpPort"), codegen::inrange(1, 65535)]];
+        std::optional<int> port [[codegen::Info(PortInfo),
+            codegen::key("HttpPort"), codegen::inrange(1, 65535)]];
 
-        // [[codegen::verbatim(AddressInfo.description)]]
-        std::string address;
+        std::string address [[codegen::Info(AddressInfo)]];
 
-        // [[codegen::verbatim(WebSocketInterfaceInfo.description)]]
-        std::optional<std::string> webSocketInterface;
+        std::optional<std::string> webSocketInterface
+            [[codegen::Info(WebSocketInterfaceInfo)]];
     };
 } // namespace
 #include "webguimodule_codegen.cpp"

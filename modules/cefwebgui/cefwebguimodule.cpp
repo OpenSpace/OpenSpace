@@ -90,14 +90,11 @@ namespace {
     };
 
     struct [[codegen::Dictionary(CefWebGuiModule)]] Parameters {
-        // [[codegen::verbatim(GuiScaleInfo.description)]]
-        std::optional<float> guiScale;
+        std::optional<float> guiScale [[codegen::Info(GuiScaleInfo)]];
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
-        // [[codegen::verbatim(VisibleInfo.description)]]
-        std::optional<bool> visible;
+        std::optional<bool> visible [[codegen::Info(VisibleInfo)]];
     };
 } // namespace
 #include "cefwebguimodule_codegen.cpp"

@@ -77,20 +77,18 @@ namespace {
     // [pxform_c](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/pxform_c.html)
     // function of the SPICE library.
     struct [[codegen::Dictionary(SpiceRotation)]] Parameters {
-        // [[codegen::verbatim(SourceInfo.description)]]
-        std::string sourceFrame
-            [[codegen::annotation("A valid SPICE NAIF name or integer")]];
+        std::string sourceFrame [[codegen::Info(SourceInfo),
+            codegen::annotation("A valid SPICE NAIF name or integer")]];
 
         // This value specifies the destination frame that is used for the coordinate
         // transformation. This has to be a valid SPICE name. If this value is not
         // specified, a reference frame of 'GALACTIC' is used instead.
         std::optional<std::string> destinationFrame;
 
-        // [[codegen::verbatim(FixedDateInfo.description)]]
-        std::optional<std::string> fixedDate [[codegen::datetime()]];
+        std::optional<std::string> fixedDate
+            [[codegen::Info(FixedDateInfo), codegen::datetime()]];
 
-        // [[codegen::verbatim(TimeOffsetInfo.description)]]
-        std::optional<float> timeOffset;
+        std::optional<float> timeOffset [[codegen::Info(TimeOffsetInfo)]];
     };
 } // namespace
 #include "spicerotation_codegen.cpp"

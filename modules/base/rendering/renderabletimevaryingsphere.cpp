@@ -64,8 +64,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {
-        // [[codegen::verbatim(TextureSourceInfo.description)]]
-        std::filesystem::path textureSource [[codegen::directory()]];
+        std::filesystem::path textureSource
+            [[codegen::Info(TextureSourceInfo), codegen::directory()]];
     };
 } // namespace
 #include "renderabletimevaryingsphere_codegen.cpp"

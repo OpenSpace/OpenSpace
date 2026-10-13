@@ -83,13 +83,11 @@ namespace {
     };
 
     struct [[codegen::Dictionary(SpoutReceiver)]] ReceiverParameters {
-        // [[codegen::verbatim(NameReceiverInfo.description)]]
-        std::optional<std::string> spoutName;
+        std::optional<std::string> spoutName [[codegen::Info(NameReceiverInfo)]];
     };
 
     struct [[codegen::Dictionary(SpoutSender)]] SenderParameters {
-        // [[codegen::verbatim(NameSenderInfo.description)]]
-        std::string spoutName;
+        std::string spoutName [[codegen::Info(NameSenderInfo)]];
     };
 } // namespace
 #include "spoutwrapper_codegen.cpp"

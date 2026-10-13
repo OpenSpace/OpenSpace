@@ -316,32 +316,28 @@ namespace {
     };
 
     struct [[codegen::Dictionary(GeoJsonProperties)]] Parameters {
-        // [[codegen::verbatim(OpacityInfo.description)]]
-        std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
+        std::optional<float> opacity
+            [[codegen::Info(OpacityInfo), codegen::inrange(0.0, 1.0)]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(FillOpacityInfo.description)]]
-        std::optional<float> fillOpacity [[codegen::inrange(0.0, 1.0)]];
+        std::optional<float> fillOpacity
+            [[codegen::Info(FillOpacityInfo), codegen::inrange(0.0, 1.0)]];
 
-        // [[codegen::verbatim(FillColorInfo.description)]]
-        std::optional<glm::vec3> fillColor [[codegen::color()]];
+        std::optional<glm::vec3> fillColor
+            [[codegen::Info(FillColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greater(0.0)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greater(0.0)]];
 
-        // [[codegen::verbatim(PointSizeInfo.description)]]
-        std::optional<float> pointSize [[codegen::greater(0.0)]];
+        std::optional<float> pointSize
+            [[codegen::Info(PointSizeInfo), codegen::greater(0.0)]];
 
-        // [[codegen::verbatim(PointTextureInfo.description)]]
-        std::optional<std::string> pointTexture;
+        std::optional<std::string> pointTexture [[codegen::Info(PointTextureInfo)]];
 
-        // [[codegen::verbatim(ExtrudeInfo.description)]]
-        std::optional<bool> extrude;
+        std::optional<bool> extrude [[codegen::Info(ExtrudeInfo)]];
 
-        // [[codegen::verbatim(PerformShadingInfo.description)]]
-        std::optional<bool> performShading;
+        std::optional<bool> performShading [[codegen::Info(PerformShadingInfo)]];
 
         enum class
         [[codegen::map(openspace::GeoJsonProperties::AltitudeMode)]]
@@ -350,8 +346,7 @@ namespace {
             Absolute,
             RelativeToGround
         };
-        // [[codegen::verbatim(AltitudeModeInfo.description)]]
-        std::optional<AltitudeMode> altitudeMode;
+        std::optional<AltitudeMode> altitudeMode [[codegen::Info(AltitudeModeInfo)]];
 
         enum class
         [[codegen::map(openspace::GeoJsonProperties::PointTextureAnchor)]]
@@ -360,21 +355,19 @@ namespace {
             Bottom,
             Center
         };
-        // [[codegen::verbatim(PointAnchorOptionInfo.description)]]
-        std::optional<PointTextureAnchor> pointTextureAnchor;
+        std::optional<PointTextureAnchor> pointTextureAnchor
+            [[codegen::Info(PointAnchorOptionInfo)]];
 
         struct Tessellation {
-            // [[codegen::verbatim(TessellationEnabledInfo.description)]]
-            std::optional<bool> enabled;
+            std::optional<bool> enabled [[codegen::Info(TessellationEnabledInfo)]];
 
-            // [[codegen::verbatim(UseTessellationLevelInfo.description)]]
-            std::optional<bool> useTessellationLevel;
+            std::optional<bool> useTessellationLevel
+                [[codegen::Info(UseTessellationLevelInfo)]];
 
-            // [[codegen::verbatim(TessellationLevelInfo.description)]]
-            std::optional<int> tessellationLevel;
+            std::optional<int> tessellationLevel [[codegen::Info(TessellationLevelInfo)]];
 
-            // [[codegen::verbatim(TessellationDistanceInfo.description)]]
-            std::optional<float> tessellationDistance;
+            std::optional<float> tessellationDistance
+                [[codegen::Info(TessellationDistanceInfo)]];
         };
         std::optional<Tessellation> tessellation;
     };

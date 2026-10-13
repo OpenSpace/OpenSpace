@@ -102,11 +102,9 @@ namespace {
     }
 
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
-        // [[codegen::verbatim(UseFixedTimeInfo.description)]]
-        std::optional<bool> useFixedTime;
+        std::optional<bool> useFixedTime [[codegen::Info(UseFixedTimeInfo)]];
 
-        // [[codegen::verbatim(FixedTimeInfo.description)]]
-        std::optional<std::string> fixedTime;
+        std::optional<std::string> fixedTime [[codegen::Info(FixedTimeInfo)]];
 
         enum class Mode {
             Prototyped,

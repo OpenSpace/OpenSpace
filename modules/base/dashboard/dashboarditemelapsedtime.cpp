@@ -82,14 +82,12 @@ namespace {
     // since the `ReferenceTime`. The output can be configured through the `FormatString`
     // and the unit that is used to display the configurable as well.
     struct [[codegen::Dictionary(DashboardItemElapsedTime)]] Parameters {
-        // [[codegen::verbatim(FormatStringInfo.description)]]
-        std::optional<std::string> formatString;
+        std::optional<std::string> formatString [[codegen::Info(FormatStringInfo)]];
 
-        // [[codegen::verbatim(ReferenceTimeInfo.description)]]
-        std::string referenceTime [[codegen::datetime()]];
+        std::string referenceTime
+            [[codegen::Info(ReferenceTimeInfo), codegen::datetime()]];
 
-        // [[codegen::verbatim(SimplifyTimeInfo.description)]]
-        std::optional<bool> simplifyTime;
+        std::optional<bool> simplifyTime [[codegen::Info(SimplifyTimeInfo)]];
 
         enum class [[codegen::map(openspace::TimeUnit)]] TimeUnit {
             Nanosecond,
@@ -103,8 +101,7 @@ namespace {
             Year
         };
 
-        // [[codegen::verbatim(LowestTimeUnitInfo.description)]]
-        std::optional<TimeUnit> lowestTimeUnit;
+        std::optional<TimeUnit> lowestTimeUnit [[codegen::Info(LowestTimeUnitInfo)]];
     };
 } // namespace
 #include "dashboarditemelapsedtime_codegen.cpp"

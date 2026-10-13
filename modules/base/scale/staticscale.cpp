@@ -48,8 +48,7 @@ namespace {
     // multiplication so that a `Scale` value of 10 means that the object will be 10 times
     // larger than its original size.
     struct [[codegen::Dictionary(StaticScale)]] Parameters {
-        // [[codegen::verbatim(ScaleInfo.description)]]
-        double scale;
+        double scale [[codegen::Info(ScaleInfo)]];
     };
 } // namespace
 #include "staticscale_codegen.cpp"

@@ -56,8 +56,8 @@ namespace {
     struct [[codegen::Dictionary(ScreenSpaceImageLocal)]] Parameters {
         std::optional<std::string> identifier [[codegen::identifier()]];
 
-        // [[codegen::verbatim(TexturePathInfo.description)]]
-        std::optional<std::filesystem::path> texturePath;
+        std::optional<std::filesystem::path> texturePath
+            [[codegen::Info(TexturePathInfo)]];
 
         // If this value is set to true, the image for this plane will not be loaded at
         // startup but rather when plane is shown for the first time. Additionally, if the

@@ -126,8 +126,7 @@ namespace {
         // presented to the user.
         std::optional<std::string> description;
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
         // Specifies the type of layer that is to be added. If this value is not
         // specified, the layer is a DefaultTileProvider.

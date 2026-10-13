@@ -86,8 +86,7 @@ namespace {
         // The layer into which this tile provider is loaded.
         int layerGroupID;
 
-        // [[codegen::verbatim(TilePixelSizeInfo.description)]]
-        std::optional<int> tilePixelSize;
+        std::optional<int> tilePixelSize [[codegen::Info(TilePixelSizeInfo)]];
 
         // Determines if the tiles should be preprocessed before uploading to the GPU.
         std::optional<bool> performPreProcessing;

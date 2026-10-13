@@ -46,8 +46,7 @@ namespace {
     // Represents a light source placed at the position of the camera. An object with
     // this light source will always be illuminated from the current view direction.
     struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
-        // [[codegen::verbatim(IntensityInfo.description)]]
-        std::optional<float> intensity;
+        std::optional<float> intensity [[codegen::Info(IntensityInfo)]];
     };
 } // namespace
 #include "cameralightsource_codegen.cpp"

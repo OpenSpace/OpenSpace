@@ -157,26 +157,24 @@ namespace {
     // also be added to show the distance as a number. That renderable is designed to show
     // the distance between the start and end node for a given `RenderableNodeLine`.
     struct [[codegen::Dictionary(RenderableNodeLine)]] Parameters {
-        // [[codegen::verbatim(StartNodeInfo.description)]]
-        std::optional<std::string> startNode [[codegen::identifier()]];
+        std::optional<std::string> startNode
+            [[codegen::Info(StartNodeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(EndNodeInfo.description)]]
-        std::optional<std::string> endNode [[codegen::identifier()]];
+        std::optional<std::string> endNode
+            [[codegen::Info(EndNodeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(LineColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(LineColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(StartOffsetInfo.description)]]
-        std::optional<float> startOffset [[codegen::greaterequal(0.f)]];
+        std::optional<float> startOffset
+            [[codegen::Info(StartOffsetInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(EndOffsetInfo.description)]]
-        std::optional<float> endOffset [[codegen::greaterequal(0.f)]];
+        std::optional<float> endOffset
+            [[codegen::Info(EndOffsetInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(RelativeOffsetsInfo.description)]]
-        std::optional<bool> useRelativeOffsets;
+        std::optional<bool> useRelativeOffsets [[codegen::Info(RelativeOffsetsInfo)]];
     };
 } // namespace
 #include "renderablenodeline_codegen.cpp"

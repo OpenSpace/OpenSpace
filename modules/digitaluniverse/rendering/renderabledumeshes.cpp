@@ -145,8 +145,7 @@ namespace {
         // object being rendered.
         std::filesystem::path file;
 
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
+        std::optional<bool> drawLabels [[codegen::Info(DrawLabelInfo)]];
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
@@ -160,24 +159,21 @@ namespace {
         // The unit used when interpreting the positions in the dataset.
         std::optional<Unit> unit;
 
-        // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor [[codegen::color()]];
+        std::optional<glm::vec3> textColor
+            [[codegen::Info(TextColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(TextOpacityInfo.description)]]
-        std::optional<float> textOpacity;
+        std::optional<float> textOpacity [[codegen::Info(TextOpacityInfo)]];
 
-        // [[codegen::verbatim(TextSizeInfo.description)]]
-        std::optional<float> textSize;
+        std::optional<float> textSize [[codegen::Info(TextSizeInfo)]];
 
         // The path to the label file that contains information about the astronomical
         // objects being rendered.
         std::optional<std::string> labelFile;
 
-        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> textMinMaxSize;
+        std::optional<glm::ivec2> textMinMaxSize [[codegen::Info(LabelMinMaxSizeInfo)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
         // The defined colors for the meshes to be rendered.
         std::optional<std::vector<glm::vec3>> meshColor;

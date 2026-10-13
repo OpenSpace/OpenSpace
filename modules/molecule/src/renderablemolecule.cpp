@@ -243,14 +243,12 @@ namespace {
     //
     // If no trajectory file is provided only the structural information is shown.
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
-        // [[codegen::verbatim(MoleculeFileInfo.description)]]
-        std::filesystem::path moleculeFile;
+        std::filesystem::path moleculeFile [[codegen::Info(MoleculeFileInfo)]];
 
-        // [[codegen::verbatim(TrajectoryFileInfo.description)]]
-        std::optional<std::filesystem::path> trajectoryFile;
+        std::optional<std::filesystem::path> trajectoryFile
+            [[codegen::Info(TrajectoryFileInfo)]];
 
-        // [[codegen::verbatim(CoarseGrainedInfo.description)]]
-        std::optional<bool> coarseGrained;
+        std::optional<bool> coarseGrained [[codegen::Info(CoarseGrainedInfo)]];
 
         // This is a representation of a molecular dataset. Each representation is
         // rendered independently and can contain different rendering and filtering
@@ -304,17 +302,14 @@ namespace {
         // individually.
         std::optional<std::vector<Representation>> representations;
 
-        // [[codegen::verbatim(ApplyPbcOnLoadInfo.description)]]
-        std::optional<bool> applyPbcOnLoad;
+        std::optional<bool> applyPbcOnLoad [[codegen::Info(ApplyPbcOnLoadInfo)]];
 
-        // [[codegen::verbatim(ApplyPbcPerFrameInfo.description)]]
-        std::optional<bool> applyPbcPerFrame;
+        std::optional<bool> applyPbcPerFrame [[codegen::Info(ApplyPbcPerFrameInfo)]];
 
-        // [[codegen::verbatim(AnimationBaseScaleInfo.description)]]
-        std::optional<double> animationBaseScale;
+        std::optional<double> animationBaseScale
+            [[codegen::Info(AnimationBaseScaleInfo)]];
 
-        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
-        std::optional<double> animationSpeed;
+        std::optional<double> animationSpeed [[codegen::Info(AnimationSpeedInfo)]];
 
         enum class [[codegen::map(AnimationRepeatMode)]] AnimationRepeatMode {
             PingPong,
@@ -322,8 +317,8 @@ namespace {
             Clamp
         };
 
-        // [[codegen::verbatim(AnimationRepeatModeInfo.description)]]
-        std::optional<AnimationRepeatMode> animationRepeatMode;
+        std::optional<AnimationRepeatMode> animationRepeatMode
+            [[codegen::Info(AnimationRepeatModeInfo)]];
     };
 } // namespace
 #include "renderablemolecule_codegen.cpp"

@@ -103,8 +103,7 @@ namespace {
         Dictionary projection
             [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 
-        // [[codegen::verbatim(PerformShadingInfo.description)]]
-        std::optional<bool> performShading;
+        std::optional<bool> performShading [[codegen::Info(PerformShadingInfo)]];
     };
 } // namespace
 #include "renderablemodelprojection_codegen.cpp"

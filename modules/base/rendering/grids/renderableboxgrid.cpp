@@ -78,14 +78,12 @@ namespace {
     // Per default the box is given a uniform size of 1x1x1 meters. It can then be scaled
     // to the desired size. Alternatively, the size in each dimension can be specified.
     struct [[codegen::Dictionary(RenderableBoxGrid)]] Parameters {
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<glm::vec3> size;
+        std::optional<glm::vec3> size [[codegen::Info(SizeInfo)]];
     };
 } // namespace
 #include "renderableboxgrid_codegen.cpp"
