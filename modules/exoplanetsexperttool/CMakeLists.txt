@@ -67,6 +67,7 @@ set(SOURCE_FILES
     rendering/renderableexoplanetglyphcloud.cpp
     rendering/renderablehostcloud.cpp
     rendering/renderablespatialselectionvolume.cpp
+    rendering/selectionvolumemesh.cpp
     spatialselectionhandler.cpp
     spatialselection/castselection.cpp
     spatialselection/convexhull.cpp
