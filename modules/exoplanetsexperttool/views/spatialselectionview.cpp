@@ -1456,8 +1456,8 @@ void SpatialSelectionView::renderLassoTab() {
     const bool thresholdChanged = ImGui::SliderFloat(
         "Density threshold",
         &_castThresholdExponent,
-        -4.f,
-        4.f,
+        -10.f,
+        10.f,
         "2^%.2f x base"
     );
     ImGui::SameLine();
@@ -1477,6 +1477,7 @@ void SpatialSelectionView::renderLassoTab() {
         const float percent = maxDensity > 0.f ?
             100.f * _castResult.threshold / maxDensity :
             0.f;
+
         ImGui::Text(
             "Threshold: %.4g (%.2f%% of max density)", _castResult.threshold, percent
         );
@@ -1607,7 +1608,7 @@ void SpatialSelectionView::clearLassoSelection() {
 }
 
 void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* target,
-                                              bool isIsosurface)
+                                               bool isIsosurface)
 {
     SceneGraphNode* node = sceneGraphNode(_lassoTargetNode);
     if (!target || !node || !_castSelection) {
@@ -1644,6 +1645,8 @@ void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* targ
         return;
     }
     _generatedVolume = std::move(generated);
+    // @TODO: Make sure the selected volume is shown also in the dome?
+
     _lassoStatus.clear();
     const std::vector<size_t> inside = handler().select(
         _dataViewer.data(),
