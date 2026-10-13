@@ -84,6 +84,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/openspace/designpattern/synchronousevent.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/core_registration.h
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentation.h
+    ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentation.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentationengine.h
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/schema.h
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/verifier.h

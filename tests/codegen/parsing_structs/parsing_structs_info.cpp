@@ -115,14 +115,15 @@ struct [[codegen::Dictionary(Info)]] Parameters {
     CHECK_THAT(
         r,
         CM::ContainsSubstring(
-            "Optional::Yes,Private::No,std::string(SunAngularSize.description));"
+            "Optional::Yes,Private::No,"
+            "openspace::descriptionWithDefaultValue(SunAngularSize));"
         )
     );
     CHECK_THAT(
         r,
         CM::ContainsSubstring(
             "Optional::Yes,Private::No,"
-            "std::string(SunAngularSize.description) + \" \" + \"direct comment\");"
+            "openspace::descriptionWithDefaultValue(SunAngularSize, \"direct comment\"));"
         )
     );
 }

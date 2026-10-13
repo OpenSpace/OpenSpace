@@ -30,6 +30,7 @@
 #include <openspace/misc/stringconversion.h>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace openspace {
@@ -289,6 +290,22 @@ TestResult testSpecification(const Documentation& documentation,
 void testSpecificationAndThrow(const Documentation& documentation,
     const Dictionary& dictionary, std::string component);
 
+/**
+ * Creates the description of a documentation entry from the provided \p info, which can
+ * be any type that has a `description` member, for example a PropertyInfo or a
+ * PropertyOwnerInfo. If the \p comment is not empty, it is appended to the description.
+ * If the \p info provides a default value (`info.defaults.value`), the default value is
+ * appended to the end of the description as well. Empty strings and lists as well as the
+ * index of an OptionProperty are not added as they do not provide useful information.
+ *
+ * \param info The information object from which the description and default value are
+ *        extracted
+ * \param comment An additional comment that is appended after the description
+ * \return The description containing the comment and the default value, if one exists
+ */
+template <typename Info>
+std::string descriptionWithDefaultValue(const Info& info, std::string_view comment = "");
+
 } // namespace openspace
 
 // Make the overload for std::to_string available for the Offense::Reason for easier
@@ -312,6 +329,8 @@ template <>
 std::string to_string(const openspace::TestResult::Warning::Reason& value);
 
 } // namespace openspace
+
+#include "documentation.inl"
 
 // The verifier header depends on the classes defined in here, but we want to make it
 // easier for consumers of this header to just have access to all verifiers without

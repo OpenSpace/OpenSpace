@@ -409,18 +409,31 @@ namespace {
         std::string ver = fqn(s, "_");
         std::string v = verifier(var->type, *var, s);
         if (!var->attributes.info.empty()) {
-            std::string description = std::format(
-                "std::string({}.description)", var->attributes.info
-            );
-            if (!var->comment.empty()) {
-                // Generate the comment. First the description from the info, then the
-                // manually written comment above
-                std::string infoDescription = description;
-                std::string manualComment = resolveComment(var->comment);
-
+            // Generate the comment. First the description from the info, then the
+            // manually written comment above
+            std::string description;
+            if (isOptional) {
+                // If an optional value is not specified, the default value from the info
+                // is used instead, so the helper function appends that default value to
+                // the description as well
+                std::string comment =
+                    var->comment.empty() ?
+                    "" :
+                    std::format(", {}", resolveComment(var->comment));
                 description = std::format(
-                    "{} + \" \" + {}", infoDescription, manualComment
+                    "openspace::descriptionWithDefaultValue({}{})",
+                    var->attributes.info, comment
                 );
+            }
+            else {
+                description = std::format(
+                    "std::string({}.description)", var->attributes.info
+                );
+                if (!var->comment.empty()) {
+                    description += std::format(
+                        " + \" \" + {}", resolveComment(var->comment)
+                    );
+                }
             }
             std::string result = std::format(
                 "    codegen_{}->documentations.emplace_back({},{},{},{},{});\n",
