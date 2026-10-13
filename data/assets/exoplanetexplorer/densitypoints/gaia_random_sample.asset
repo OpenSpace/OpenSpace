@@ -1,0 +1,35 @@
+
+local colormaps = asset.require("util/default_colormaps")
+
+local Node ={
+  Identifier = "CastDensityPoints_GaiaRandomSample",
+  Renderable = {
+    Type = "RenderableDensityPointCloud",
+    File = "D:/Exoplanets Experts Paper/PointCloudData/Gaia_dr3_random_sample__galactic_xyz_pc.csv",
+    XColumn = "x", YColumn = "y", ZColumn = "z",
+    Unit = "pc",
+    GridDimensions = { 128, 128, 128 },
+    Color = {
+      ColorMap = colormaps.Uniform.Viridis
+    },
+    PointSize = 3,
+    BoundingBox = {
+      Enabled = true
+    },
+    Opacity = 0.5
+  },
+  GUI = {
+    Name = "Gaia Random Sample Density Points",
+    Description = "Density points representing a random sample from the Gaia DR3 catalog in galactic XYZ coordinates.",
+    Path = "/ExoplanetExplorer/Density Points"
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(Node)
+
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(Node)
+end)

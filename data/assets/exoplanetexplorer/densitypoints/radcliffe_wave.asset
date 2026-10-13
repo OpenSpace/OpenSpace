@@ -1,0 +1,35 @@
+
+local colormaps = asset.require("util/default_colormaps")
+
+local Node ={
+  Identifier = "CastDensityPoints_RadcliffeWave",
+  Renderable = {
+    Type = "RenderableDensityPointCloud",
+    File = "D:/Exoplanets Experts Paper/PointCloudData/Radcliffe_Wave_stellar_clusters_Konietzka2023.csv",
+    XColumn = "x", YColumn = "y", ZColumn = "z",
+    Unit = "pc",
+    GridDimensions = { 128, 128, 128 },
+    Color = {
+      ColorMap = colormaps.Uniform.Viridis
+    },
+    PointSize = 12,
+    BoundingBox = {
+      Enabled = true
+    },
+    Opacity = 0.5
+  },
+  GUI = {
+    Name = "Radcliffe Wave Density Points",
+    Description = "Density points representing the Radcliffe Wave stellar clusters. Dataset from: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/XSCB9N",
+    Path = "/ExoplanetExplorer/Density Points"
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(Node)
+
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(Node)
+end)
