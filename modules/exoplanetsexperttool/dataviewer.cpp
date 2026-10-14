@@ -685,25 +685,6 @@ void DataViewer::render() {
         renderSettingsMenu();
 
         if (ImGui::BeginMenu("Navigation")) {
-            if (_spatialSelectionView) {
-                const bool isSelection = _spatialSelectionView->isSelectionMode();
-                if (isSelection) {
-                    if (ImGui::MenuItem("Switch to Navigation Mode")) {
-                        _spatialSelectionView->setInteractionMode(
-                            InteractionMode::Navigation
-                        );
-                    }
-                }
-                else {
-                    if (ImGui::MenuItem("Switch to Selection Mode")) {
-                        _spatialSelectionView->setInteractionMode(
-                            InteractionMode::Selection
-                        );
-                    }
-                }
-                ImGui::Separator();
-            }
-
             if (ImGui::Button("Refocus on Earth")) {
                 refocusView();
             }

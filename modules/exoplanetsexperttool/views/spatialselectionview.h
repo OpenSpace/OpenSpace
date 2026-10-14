@@ -42,18 +42,6 @@ class DataViewer;
 class RenderableDensityPointCloud;
 
 /**
- * Mouse interaction mode determining whether mouse input drives camera navigation
- * or spatial selection tools.
- */
-enum class InteractionMode {
-    /// Standard camera navigation
-    Navigation = 0,
-
-    /// Mouse interaction dedicated to spatial selection
-    Selection
-};
-
-/**
  * The spatial geometry or method currently used for point selection.
  */
 enum class SpatialSelectionMethod {
@@ -88,27 +76,6 @@ public:
 
     SpatialSelectionHandler& handler();
     const SpatialSelectionHandler& handler() const;
-
-    /**
-     * Returns the active mouse interaction mode.
-     *
-     * \return Active InteractionMode
-     */
-    InteractionMode interactionMode() const;
-
-    /**
-     * Sets the active mouse interaction mode.
-     *
-     * \param mode The interaction mode to switch to
-     */
-    void setInteractionMode(InteractionMode mode);
-
-    /**
-     * Returns true if Selection Mode is currently active.
-     *
-     * \return `true` if selection mode is active
-     */
-    bool isSelectionMode() const;
 
     /**
      * Renders the Spatial Selection ImGui window.
@@ -151,7 +118,6 @@ public:
     void lassoMousePosition(const glm::vec2& mousePos);
 
 private:
-    void renderModeSelector();
     bool renderMethodTabs();
     bool renderShape3DTab();
     bool renderSkyMapTab();
@@ -180,9 +146,6 @@ private:
 
     /// Reference to the main DataViewer coordinator
     DataViewer& _dataViewer;
-
-    /// Active mouse interaction mode
-    InteractionMode _mode = InteractionMode::Navigation;
 
     /// Active spatial selection category
     SpatialSelectionMethod _currentMethod = SpatialSelectionMethod::Shape3D;

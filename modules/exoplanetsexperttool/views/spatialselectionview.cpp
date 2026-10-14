@@ -749,18 +749,6 @@ const SpatialSelectionHandler& SpatialSelectionView::handler() const {
     return _dataViewer.spatialSelectionHandler();
 }
 
-InteractionMode SpatialSelectionView::interactionMode() const {
-    return _mode;
-}
-
-void SpatialSelectionView::setInteractionMode(InteractionMode mode) {
-    _mode = mode;
-}
-
-bool SpatialSelectionView::isSelectionMode() const {
-    return _mode == InteractionMode::Selection;
-}
-
 bool SpatialSelectionView::isLassoTabActive() const {
     return _lassoTabActive;
 }
@@ -782,7 +770,7 @@ bool SpatialSelectionView::lassoMouseButton(MouseButton button, MouseAction acti
     }
 
     if (action == MouseAction::Press) {
-        const bool canStart = isSelectionMode() && _lassoTabActive &&
+        const bool canStart = _lassoTabActive &&
             hasKeyModifier(modifier, KeyModifier::Shift);
         if (!canStart) {
             return false;
@@ -980,8 +968,6 @@ bool SpatialSelectionView::render(bool* open) {
     }
 
     bool changed = false;
-    renderModeSelector();
-    ImGui::Separator();
 
     changed |= renderMethodTabs();
 
@@ -999,30 +985,6 @@ bool SpatialSelectionView::render(bool* open) {
 
     ImGui::End();
     return changed;
-}
-
-void SpatialSelectionView::renderModeSelector() {
-    ImGui::TextUnformatted("Mouse Interaction Mode:");
-    ImGui::SameLine();
-    view::helper::renderHelpMarker(
-        "Navigation Mode: Standard OpenSpace mouse navigation (rotate, zoom, pan).\n"
-        "Selection Mode: Mouse clicks and drags are dedicated to selection tools."
-    );
-
-    int modeIdx = static_cast<int>(_mode);
-    if (ImGui::RadioButton("Navigation Mode", &modeIdx, 0)) {
-        _mode = InteractionMode::Navigation;
-    }
-    ImGui::SameLine();
-    if (ImGui::RadioButton("Selection Mode", &modeIdx, 1)) {
-        _mode = InteractionMode::Selection;
-    }
-
-    if (_mode == InteractionMode::Selection) {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.9f, 0.4f, 1.f));
-        ImGui::TextUnformatted("● Selection Mode Active (Camera navigation paused)");
-        ImGui::PopStyleColor();
-    }
 }
 
 bool SpatialSelectionView::renderMethodTabs() {
@@ -1372,18 +1334,6 @@ void SpatialSelectionView::renderDensityTab() {
 }
 
 void SpatialSelectionView::renderLassoTab() {
-    ImGui::TextWrapped(
-        "In Selection Mode, hold Shift and drag with the left mouse button to draw a "
-        "lasso around the particles to select."
-    );
-    if (!isSelectionMode()) {
-        ImGui::TextColored(
-            ImVec4(1.f, 0.7f, 0.3f, 1.f),
-            "Switch to Selection Mode to draw a lasso"
-        );
-    }
-    ImGui::Spacing();
-
     std::vector<std::string> candidates;
     if (global::renderEngine->scene()) {
         for (SceneGraphNode* node : global::renderEngine->scene()->allSceneGraphNodes()) {
@@ -1398,6 +1348,15 @@ void SpatialSelectionView::renderLassoTab() {
     if (!hasTarget && !candidates.empty()) {
         _lassoTargetNode = candidates.front();
     }
+
+    ImGui::TextWrapped(
+        "Do a spatial selectionbased on the density of points in another point cloud."
+    );
+    ImGui::Spacing();
+    ImGui::TextWrapped(
+        "Hold Shift and drag with the left mouse button to draw a "
+        "lasso around the particles to select."
+    );
 
     if (ImGui::BeginCombo("Point cloud", _lassoTargetNode.c_str())) {
         for (const std::string& identifier : candidates) {
