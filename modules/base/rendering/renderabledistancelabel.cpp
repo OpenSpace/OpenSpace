@@ -39,37 +39,42 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableDistanceLabel";
 
-    constexpr Property::PropertyInfo NodeLineInfo = {
-        "NodeLine",
-        "Node line",
-        "The identifier of a scene graph node with a RenderableNodeLine that this label "
-        "should track. The label text will be updating based on the distance from the "
-        "node line's start and end.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo NodeLineInfo = {
+        .identifier = "NodeLine",
+        .name = "Node line",
+        .description = "The identifier of a scene graph node with a RenderableNodeLine "
+            "that this label should track. The label text will be updating based on the "
+            "distance from the node line's start and end.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DistanceUnitInfo = {
-        "DistanceUnit",
-        "Display distance unit",
-        "The unit in which the distance value should be displayed. Defaults to 'km' if "
-        "not specified.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo DistanceUnitInfo = {
+        .identifier = "DistanceUnit",
+        .name = "Display distance unit",
+        .description = "The unit in which the distance value should be displayed. "
+            "Defaults to 'km' if not specified.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo CustomUnitDescriptorInfo = {
-        "CustomUnitDescriptor",
-        "Custom unit descriptor",
-        "Property to define a custom unit descriptor to use to describe the distance "
-        "value. Defaults to the selected unit's SI descriptor if not specified.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo CustomUnitDescriptorInfo = {
+        .identifier = "CustomUnitDescriptor",
+        .name = "Custom unit descriptor",
+        .description = "Property to define a custom unit descriptor to use to describe "
+            "the distance value. Defaults to the selected unit's SI descriptor if not "
+            "specified.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PrecisionInfo = {
-        "Precision",
-        "Precision",
-        "The precision in which to to show the distance number, i.e. the number of "
-        "digits after the decimal point.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo PrecisionInfo = {
+        .identifier = "Precision",
+        .name = "Precision",
+        .description = "The precision in which to to show the distance number, i.e. the "
+            "number of digits after the decimal point.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 10 }
+        }
     };
 
     // Creates a label that shows the distance between two nodes, based on an existing
@@ -85,15 +90,14 @@ namespace {
         // start and end.
         std::string nodeLine [[codegen::identifier()]];
 
-        // [[codegen::verbatim(DistanceUnitInfo.description)]]
-        std::optional<std::string> distanceUnit
-            [[codegen::inlist(openspace::distanceUnitList())]];
+        std::optional<std::string> distanceUnit [[codegen::Info(DistanceUnitInfo),
+            codegen::inlist(openspace::distanceUnitList())]];
 
-        // [[codegen::verbatim(CustomUnitDescriptorInfo.description)]]
-        std::optional<std::string> customUnitDescriptor;
+        std::optional<std::string> customUnitDescriptor
+            [[codegen::Info(CustomUnitDescriptorInfo)]];
 
-        // [[codegen::verbatim(PrecisionInfo.description)]]
-        std::optional<int> precision [[codegen::greaterequal(0)]];
+        std::optional<int> precision
+            [[codegen::Info(PrecisionInfo), codegen::greaterequal(0)]];
     };
 } // namespace
 #include "renderabledistancelabel_codegen.cpp"
@@ -112,7 +116,7 @@ RenderableDistanceLabel::RenderableDistanceLabel(const Dictionary& dictionary)
     , _nodelineId(NodeLineInfo)
     , _distanceUnit(DistanceUnitInfo)
     , _customUnitDescriptor(CustomUnitDescriptorInfo)
-    , _precision(PrecisionInfo, 0, 0, 10)
+    , _precision(PrecisionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

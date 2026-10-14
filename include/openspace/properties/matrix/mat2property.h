@@ -32,21 +32,20 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::mat2x2> {
+    static constexpr glm::mat2x2 Min =
+        createFillMat2x2<float>(std::numeric_limits<float>::lowest());
+    static constexpr glm::mat2x2 Max =
+        createFillMat2x2<float>(std::numeric_limits<float>::max());
+    static constexpr glm::mat2x2 Step = createFillMat2x2<float>(0.01f);
+};
+
+using Mat2PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::mat2x2>>;
+
 class Mat2Property : public NumericalProperty<glm::mat2x2> {
 public:
-    explicit Mat2Property(PropertyInfo info, glm::mat2x2 value = glm::mat2x2(0.f),
-        glm::mat2x2 minValue =
-            createFillMat2x2<float>(std::numeric_limits<float>::lowest()),
-        glm::mat2x2 maxValue =
-            createFillMat2x2<float>(std::numeric_limits<float>::max()),
-        glm::mat2x2 stepValue = createFillMat2x2<float>(0.01f));
-    Mat2Property(PropertyInfo info, IsEnabled isEnabled,
-        glm::mat2x2 value = glm::mat2x2(0.f),
-        glm::mat2x2 minValue =
-            createFillMat2x2<float>(std::numeric_limits<float>::lowest()),
-        glm::mat2x2 maxValue =
-            createFillMat2x2<float>(std::numeric_limits<float>::max()),
-        glm::mat2x2 stepValue = createFillMat2x2<float>(0.01f));
+    explicit Mat2Property(Mat2PropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

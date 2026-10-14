@@ -61,21 +61,24 @@ namespace {
 
     constexpr std::string_view TimePlaceholder = "${OpenSpaceTimeId}";
 
-    constexpr Property::PropertyInfo UseFixedTimeInfo = {
-        "UseFixedTime",
-        "Use fixed time",
-        "If this value is enabled, the time-varying timevarying dataset will always use "
-        "the time that is specified in the 'FixedTime' property, rather than using the "
-        "actual time from OpenSpace.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseFixedTimeInfo = {
+        .identifier = "UseFixedTime",
+        .name = "Use fixed time",
+        .description = "If this value is enabled, the time-varying timevarying dataset "
+            "will always use the time that is specified in the 'FixedTime' property, "
+            "rather than using the actual time from OpenSpace.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo FixedTimeInfo = {
-        "FixedTime",
-        "Fixed time",
-        "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
-        "time taken from OpenSpace for the displayed tiles.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FixedTimeInfo = {
+        .identifier = "FixedTime",
+        .name = "Fixed time",
+        .description = "If the 'UseFixedTime' is enabled, this time will be used instead "
+            "of the actual time taken from OpenSpace for the displayed tiles.",
+        .visibility = Visibility::AdvancedUser
     };
 
     std::string_view timeStringify(const std::string& format, const Time& t) {
@@ -99,11 +102,9 @@ namespace {
     }
 
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
-        // [[codegen::verbatim(UseFixedTimeInfo.description)]]
-        std::optional<bool> useFixedTime;
+        std::optional<bool> useFixedTime [[codegen::Info(UseFixedTimeInfo)]];
 
-        // [[codegen::verbatim(FixedTimeInfo.description)]]
-        std::optional<std::string> fixedTime;
+        std::optional<std::string> fixedTime [[codegen::Info(FixedTimeInfo)]];
 
         enum class Mode {
             Prototyped,
@@ -177,7 +178,7 @@ Documentation TemporalTileProvider::Documentation() {
 
 TemporalTileProvider::TemporalTileProvider(const Dictionary& dictionary)
     : _initDict(dictionary)
-    , _useFixedTime(UseFixedTimeInfo, false)
+    , _useFixedTime(UseFixedTimeInfo)
     , _fixedTime(FixedTimeInfo)
 {
     ZoneScoped;

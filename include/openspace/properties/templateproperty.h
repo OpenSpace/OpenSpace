@@ -41,7 +41,7 @@ namespace openspace {
  *
  * Each instantiation of this class should provide a constructor that deals with the
  * default value for that specific type `T`, so that a property can be created from just a
- * Property::PropertyInfo object.
+ * PropertyInfo object.
  *
  * \tparam T The type of value that is stored in this TemplateProperty
  *
@@ -62,10 +62,9 @@ public:
      * \param value The default value of the Property
      *
      * \pre \p info.identifier must not be empty
-     * \pre \p info.guiName must not be empty
+     * \pre \p info.name must not be empty
      */
     TemplateProperty(PropertyInfo info, T value);
-    TemplateProperty(PropertyInfo info, IsEnabled isEnabled, T value);
 
     /**
      * Returns the `std::type_info` describing the template parameter `T`. It can be used

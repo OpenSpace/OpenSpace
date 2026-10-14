@@ -45,7 +45,7 @@ struct Settings {
     std::optional<std::string> profile;
     std::optional<std::vector<std::string>> profileAddons;
     std::optional<bool> rememberLastProfile;
-    std::optional<Property::Visibility> visibility;
+    std::optional<Visibility> visibility;
     std::optional<bool> bypassLauncher;
     std::optional<Configuration::LayerServer> layerServer;
 

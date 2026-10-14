@@ -59,82 +59,108 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableSimulationBox";
 
-    constexpr Property::PropertyInfo RepresentationInfo = {
-        "Representation",
-        "Representation type",
-        "The visual representation type to use for the molecule."
+    constexpr OptionPropertyInfo RepresentationInfo = {
+        .identifier = "Representation",
+        .name = "Representation type",
+        .description = "The visual representation type to use for the molecule."
     };
 
-    constexpr Property::PropertyInfo ColoringInfo = {
-        "Coloring",
-        "Coloring",
-        "The color mapping for the atoms."
+    constexpr OptionPropertyInfo ColoringInfo = {
+        .identifier = "Coloring",
+        .name = "Coloring",
+        .description = "The color mapping for the atoms."
     };
 
-    constexpr Property::PropertyInfo RepScaleInfo = {
-        "RepScale",
-        "Representation scale",
-        "Thickness of the atoms when using the Space Fill or Licorice representations."
+    constexpr FloatPropertyInfo RepScaleInfo = {
+        .identifier = "RepScale",
+        .name = "Representation scale",
+        .description = "Thickness of the atoms when using the Space Fill or Licorice "
+            "representations.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.1f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo AnimationSpeedInfo = {
-        "AnimationSpeed",
-        "Animation speed",
-        "Playback speed of the animation (in frames per second)."
+    constexpr FloatPropertyInfo AnimationSpeedInfo = {
+        .identifier = "AnimationSpeed",
+        .name = "Animation speed",
+        .description = "Playback speed of the animation (in frames per second).",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 100.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SimulationSpeedInfo = {
-        "SimulationSpeed",
-        "Simulation speed",
-        "Adjust the speed of the simulation (seconds per second)."
+    constexpr FloatPropertyInfo SimulationSpeedInfo = {
+        .identifier = "SimulationSpeed",
+        .name = "Simulation speed",
+        .description = "Adjust the speed of the simulation (seconds per second).",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1000.f }
+        }
     };
 
-    constexpr Property::PropertyInfo LinearVelocityInfo = {
-        "LinearVelocity",
-        "Linear velocity",
-        "Average linear velocity at the start of the simulation (m/s)."
+    constexpr FloatPropertyInfo LinearVelocityInfo = {
+        .identifier = "LinearVelocity",
+        .name = "Linear velocity",
+        .description = "Average linear velocity at the start of the simulation (m/s)."
     };
 
-    constexpr Property::PropertyInfo AngularVelocityInfo = {
-        "AngularVelocity",
-        "Angular velocity",
-        "Average angular velocity at the start of the simulation (radians/s)."
+    constexpr FloatPropertyInfo AngularVelocityInfo = {
+        .identifier = "AngularVelocity",
+        .name = "Angular velocity",
+        .description = "Average angular velocity at the start of the simulation "
+            "(radians/s)."
     };
 
-    constexpr Property::PropertyInfo SimulationBoxInfo = {
-        "SimulationBox",
-        "Simulation box",
-        "Size of the periodic simulation box."
+    constexpr DVec3PropertyInfo SimulationBoxInfo = {
+        .identifier = "SimulationBox",
+        .name = "Simulation box",
+        .description = "Size of the periodic simulation box."
     };
 
-    constexpr Property::PropertyInfo CollisionRadiusInfo = {
-        "CollisionRadius",
-        "Collision radius",
-        "Radius of the collision sphere around molecules."
+    constexpr FloatPropertyInfo CollisionRadiusInfo = {
+        .identifier = "CollisionRadius",
+        .name = "Collision radius",
+        .description = "Radius of the collision sphere around molecules."
     };
 
-    constexpr Property::PropertyInfo FilterInfo = {
-        "Filter",
-        "Filter",
-        "The filter used to remove parts of the dataset."
+    constexpr StringPropertyInfo FilterInfo = {
+        .identifier = "Filter",
+        .name = "Filter",
+        .description = "The filter used to remove parts of the dataset."
     };
 
-    constexpr Property::PropertyInfo CircleColorInfo = {
-        "CircleColor",
-        "Circle color",
-        "Color of the circle outlining the simulation."
+    constexpr Vec4PropertyInfo CircleColorInfo = {
+        .identifier = "CircleColor",
+        .name = "Circle color",
+        .description = "Color of the circle outlining the simulation.",
+        .defaults = {
+            .value = glm::vec4(1.f, 1.f, 1.f, 0.25f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo CircleWidthInfo = {
-        "CircleWidth",
-        "Circle width",
-        "Width of the circle outlining the simulation."
+    constexpr FloatPropertyInfo CircleWidthInfo = {
+        .identifier = "CircleWidth",
+        .name = "Circle width",
+        .description = "Width of the circle outlining the simulation.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo CircleFalloffInfo = {
-        "CircleFalloff",
-        "Circle falloff",
-        "Falloff exponent of the circle outlining the simulation."
+    constexpr FloatPropertyInfo CircleFalloffInfo = {
+        .identifier = "CircleFalloff",
+        .name = "Circle falloff",
+        .description = "Falloff exponent of the circle outlining the simulation.",
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
 
@@ -172,8 +198,8 @@ namespace {
             Cartoon
         };
 
-        // [[codegen::verbatim(RepresentationInfo.description)]]
-        std::optional<Representation> representation;
+        std::optional<Representation> representation
+            [[codegen::Info(RepresentationInfo)]];
 
         enum class [[codegen::map(molecule::rep::Color)]] Coloring {
             // Uniform,
@@ -186,41 +212,29 @@ namespace {
             SecondaryStructure
         };
 
-        // [[codegen::verbatim(ColoringInfo.description)]]
-        std::optional<Coloring> coloring;
+        std::optional<Coloring> coloring [[codegen::Info(ColoringInfo)]];
 
-        // [[codegen::verbatim(RepScaleInfo.description)]]
-        std::optional<float> repScale;
+        std::optional<float> repScale [[codegen::Info(RepScaleInfo)]];
 
-        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
-        std::optional<float> animationSpeed;
+        std::optional<float> animationSpeed [[codegen::Info(AnimationSpeedInfo)]];
 
-        // [[codegen::verbatim(SimulationSpeedInfo.description)]]
-        std::optional<float> simulationSpeed;
+        std::optional<float> simulationSpeed [[codegen::Info(SimulationSpeedInfo)]];
 
-        // [[codegen::verbatim(LinearVelocityInfo.description)]]
-        float linearVelocity;
+        float linearVelocity [[codegen::Info(LinearVelocityInfo)]];
 
-        // [[codegen::verbatim(AngularVelocityInfo.description)]]
-        float angularVelocity;
+        float angularVelocity [[codegen::Info(AngularVelocityInfo)]];
 
-        // [[codegen::verbatim(SimulationBoxInfo.description)]]
-        glm::dvec3 simulationBox;
+        glm::dvec3 simulationBox [[codegen::Info(SimulationBoxInfo)]];
 
-        // [[codegen::verbatim(CollisionRadiusInfo.description)]]
-        float collisionRadius;
+        float collisionRadius [[codegen::Info(CollisionRadiusInfo)]];
 
-        // [[codegen::verbatim(FilterInfo.description)]]
-        std::optional<std::string> filter;
+        std::optional<std::string> filter [[codegen::Info(FilterInfo)]];
 
-        // [[codegen::verbatim(CircleColorInfo.description)]]
-        std::optional<glm::vec4> circleColor;
+        std::optional<glm::vec4> circleColor [[codegen::Info(CircleColorInfo)]];
 
-        // [[codegen::verbatim(CircleWidthInfo.description)]]
-        std::optional<float> circleWidth;
+        std::optional<float> circleWidth [[codegen::Info(CircleWidthInfo)]];
 
-        // [[codegen::verbatim(CircleFalloffInfo.description)]]
-        std::optional<float> circleFalloff;
+        std::optional<float> circleFalloff [[codegen::Info(CircleFalloffInfo)]];
     };
 } // namespace
 #include "renderablesimulationbox_codegen.cpp"
@@ -238,22 +252,17 @@ RenderableSimulationBox::RenderableSimulationBox(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _representation(RepresentationInfo)
     , _coloring(ColoringInfo)
-    , _repScale(RepScaleInfo, 1.f, 0.1f, 10.f)
-    , _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 100.f)
-    , _simulationSpeed(SimulationSpeedInfo, 1.f, 0.f, 1000.f)
+    , _repScale(RepScaleInfo)
+    , _animationSpeed(AnimationSpeedInfo)
+    , _simulationSpeed(SimulationSpeedInfo)
     , _linearVelocity(LinearVelocityInfo)
     , _angularVelocity(AngularVelocityInfo)
     , _simulationBox(SimulationBoxInfo)
     , _collisionRadius(CollisionRadiusInfo)
     , _filter(FilterInfo)
-    , _circleColor(
-        CircleColorInfo,
-        glm::vec4(1.f, 1.f, 1.f, 0.25f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _circleWidth(CircleWidthInfo, 1.f, 0.f, 10.f)
-    , _circleFalloff(CircleFalloffInfo, 0.f, 0.f, 1.f)
+    , _circleColor(CircleColorInfo)
+    , _circleWidth(CircleWidthInfo)
+    , _circleFalloff(CircleFalloffInfo)
 {
     addProperty(Fadeable::_opacity);
 

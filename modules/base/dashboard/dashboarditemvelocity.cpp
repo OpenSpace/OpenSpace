@@ -40,21 +40,24 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SimplificationInfo = {
-        "Simplification",
-        "Simplification",
-        "If this value is enabled, the velocity is displayed in nuanced units, such as "
-        "m/s, AU/s, light years / s etc. If this value is disabled, the unit can be "
-        "explicitly requested.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo SimplificationInfo = {
+        .identifier = "Simplification",
+        .name = "Simplification",
+        .description = "If this value is enabled, the velocity is displayed in nuanced "
+            "units, such as m/s, AU/s, light years / s etc. If this value is disabled, "
+            "the unit can be explicitly requested.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo RequestedUnitInfo = {
-        "RequestedUnit",
-        "Requested unit",
-        "If the simplification is disabled, this distance unit is used for the velocity "
-        "display.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo RequestedUnitInfo = {
+        .identifier = "RequestedUnit",
+        .name = "Requested unit",
+        .description = "If the simplification is disabled, this distance unit is used "
+            "for the velocity display.",
+        .visibility = Visibility::User
     };
 
     // This `DashboardItem` shows the velocity of the camera, that is how fast the camera
@@ -64,12 +67,10 @@ namespace {
     // most natural unit, that is, the one that gives the least number of printed digits,
     // is used.
     struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
-        // [[codegen::verbatim(SimplificationInfo.description)]]
-        std::optional<bool> simplification;
+        std::optional<bool> simplification [[codegen::Info(SimplificationInfo)]];
 
-        // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit
-            [[codegen::inlist(openspace::distanceUnitList())]];
+        std::optional<std::string> requestedUnit [[codegen::Info(RequestedUnitInfo),
+            codegen::inlist(openspace::distanceUnitList())]];
     };
 } // namespace
 #include "dashboarditemvelocity_codegen.cpp"
@@ -85,13 +86,13 @@ Documentation DashboardItemVelocity::Documentation() {
 
 DashboardItemVelocity::DashboardItemVelocity(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _doSimplification(SimplificationInfo, true)
+    , _doSimplification(SimplificationInfo)
     , _requestedUnit(RequestedUnitInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
-            _doSimplification ? Property::Visibility::Hidden : Property::Visibility::User
+            _doSimplification ? Visibility::Hidden : Visibility::User
         );
     });
     _doSimplification = p.simplification.value_or(_doSimplification);

@@ -53,227 +53,320 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableFluxNodes";
 
-    constexpr Property::PropertyInfo GoesEnergyBinsInfo = {
-        "GoesEnergy",
-        "GOES energy",
-        "Select which energy bin you want to show. GOES = Geostationary Operational "
-        "Environmental Satellites. Emin01 is values > 10 MeV, Default is Emin03 where "
-        "values > 100 MeV.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo GoesEnergyBinsInfo = {
+        .identifier = "GoesEnergy",
+        .name = "GOES energy",
+        .description = "Select which energy bin you want to show. GOES = Geostationary "
+            "Operational Environmental Satellites. Emin01 is values > 10 MeV, Default is "
+            "Emin03 where values > 100 MeV.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorModeInfo = {
-        "ColorMode",
-        "Color mode",
-        "Color lines uniformly or using color tables based on specific values on nodes, "
-        "for examples flux values.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo ColorModeInfo = {
+        .identifier = "ColorMode",
+        .name = "Color mode",
+        .description = "Color lines uniformly or using color tables based on specific "
+            "values on nodes, for examples flux values.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo ColorTablePathInfo = {
-        "ColorTablePath",
-        "Path to color table",
-        "Color Table/Transfer Function to use for 'By Flux Value' coloring.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo ColorTablePathInfo = {
+        .identifier = "ColorTablePath",
+        .name = "Path to color table",
+        .description = "Color Table/Transfer Function to use for 'By Flux Value' "
+            "coloring.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StreamColorInfo = {
-        "Color",
-        "Color",
-        "Color of particles.",
-        Property::Visibility::NoviceUser
+    constexpr Vec4PropertyInfo StreamColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "Color of particles.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo NodeSizeInfo = {
-       "NodeSize",
-       "Size of nodes",
-       "Change the size of the rendered points of the nodes.",
-       Property::Visibility::User
+    constexpr FloatPropertyInfo NodeSizeInfo = {
+        .identifier = "NodeSize",
+        .name = "Size of nodes",
+        .description = "Change the size of the rendered points of the nodes.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 1.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ThresholdFluxInfo = {
-       "ThresholdFlux",
-       "Threshold flux value",
-       "This value specifies the threshold that will be changed with the flux value.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ThresholdFluxInfo = {
+        .identifier = "ThresholdFlux",
+        .name = "Threshold flux value",
+        .description = "This value specifies the threshold that will be changed with the "
+            "flux value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = -1.5f,
+            .minMax = { -50.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo FilteringInfo = {
-        "FilterLower",
-        "Filtering lower value in AU",
-        "Use filtering to show nodes within a given range.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FilteringInfo = {
+        .identifier = "FilterLower",
+        .name = "Filtering lower value in AU",
+        .description = "Use filtering to show nodes within a given range.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr Property::PropertyInfo FilteringUpperInfo = {
-        "FilterUpper",
-        "Filtering upper value in AU",
-        "Use filtering to show nodes within a given range.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FilteringUpperInfo = {
+        .identifier = "FilterUpper",
+        .name = "Filtering upper value in AU",
+        .description = "Use filtering to show nodes within a given range.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 5.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr Property::PropertyInfo AmountofNodesInfo = {
-        "AmountOfNodes",
-        "Every nth node to render in",
-        "Show only every nth node.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo AmountofNodesInfo = {
+        .identifier = "AmountOfNodes",
+        .name = "Every nth node to render in",
+        .description = "Show only every nth node.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1,
+            .minMax = { 1, 100 }
+        }
     };
 
-    constexpr Property::PropertyInfo DefaultNodeSkipInfo = {
-        "NodeSkip",
-        "Every nth node to render default",
-        "Show only every nth node outside of skippingmethod.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo DefaultNodeSkipInfo = {
+        .identifier = "NodeSkip",
+        .name = "Every nth node to render default",
+        .description = "Show only every nth node outside of skippingmethod.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1,
+            .minMax = { 1, 100 }
+        }
     };
 
-    constexpr Property::PropertyInfo EarthNodeSkipInfo = {
-        "NodeSkipEarth",
-        "Every nth node to render close to Earth",
-        "Show only every nth node outside of skippingmethod.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo EarthNodeSkipInfo = {
+        .identifier = "NodeSkipEarth",
+        .name = "Every nth node to render close to Earth",
+        .description = "Show only every nth node outside of skippingmethod.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1,
+            .minMax = { 1, 100 }
+        }
     };
 
-    constexpr Property::PropertyInfo ScalingmethodInfo = {
-        "ScalingFlux",
-        "Scale the flux value with color table",
-        "Use scaling to color nodes with a given method.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo ScalingMethodInfo = {
+        .identifier = "ScalingFlux",
+        .name = "Scale the flux value with color table",
+        .description = "Use scaling to color nodes with a given method.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NodeskipMethodInfo = {
-        "SkippingNodes",
-        "How to select nodes to skip",
-        "Methods to select nodes to skip.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo NodeskipMethodInfo = {
+        .identifier = "SkippingNodes",
+        .name = "How to select nodes to skip",
+        .description = "Methods to select nodes to skip.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorTableRangeInfo = {
-        "ColorTableRange",
-        "Color table range",
-        "Valid range for the color table as the exponent, with base 10, of flux values. "
-        "[Min, Max].",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo ColorTableRangeInfo = {
+        .identifier = "ColorTableRange",
+        .name = "Color table range",
+        .description = "Valid range for the color table as the exponent, with base 10, "
+            "of flux values. [Min, Max].",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(-2.f, 4.f),
+            .minMax = { glm::vec2(-8.f), glm::vec2(8.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo DomainZInfo = {
-        "ZLimit",
-        "Z-limits",
-        "Valid range along the Z-axis. [Min, Max].",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo DomainZInfo = {
+        .identifier = "ZLimit",
+        .name = "Z-limits",
+        .description = "Valid range along the Z-axis. [Min, Max].",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(-2.5f, 2.5f),
+            .minMax = { glm::vec2(-2.5f, -2.5f), glm::vec2(2.5f, 2.5f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FluxColorAlphaInfo = {
-        "FluxColorAlpha",
-        "Flux color alpha",
-        "The value of alpha for the flux color mode.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FluxColorAlphaInfo = {
+        .identifier = "FluxColorAlpha",
+        .name = "Flux color alpha",
+        .description = "The value of alpha for the flux color mode.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo FluxNodeskipThresholdInfo = {
-        "SkippingNodesByFlux",
-        "Skipping nodes by flux",
-        "Select nodes to skip depending on flux value.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FluxNodeskipThresholdInfo = {
+        .identifier = "SkippingNodesByFlux",
+        .name = "Skipping nodes by flux",
+        .description = "Select nodes to skip depending on flux value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { -20.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo RadiusNodeSkipThresholdInfo = {
-        "SkippingNodesByRadius",
-        "Skipping nodes by radius",
-        "Select nodes to skip depending on Radius.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo RadiusNodeSkipThresholdInfo = {
+        .identifier = "SkippingNodesByRadius",
+        .name = "Skipping nodes by radius",
+        .description = "Select nodes to skip depending on Radius.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DistanceThresholdInfo = {
-        "DistancePlanetThreshold",
-        "Threshold for distance between planet",
-        "Changes threshold distance for highlighting nodes close to Earth.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo DistanceThresholdInfo = {
+        .identifier = "DistancePlanetThreshold",
+        .name = "Threshold for distance between planet",
+        .description = "Changes threshold distance for highlighting nodes close to "
+            "Earth.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ProximityNodesSizeInfo = {
-        "ProximityNodesSize",
-        "Earths proximity nodes size",
-        "Changes size of nodes only close to Earth.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ProximityNodesSizeInfo = {
+        .identifier = "ProximityNodesSize",
+        .name = "Earths proximity nodes size",
+        .description = "Changes size of nodes only close to Earth.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 100.f }
+        }
     };
 
-    constexpr Property::PropertyInfo MaxNodeDistanceSizeInfo = {
-        "MaxNodeDistanceSize",
-        "Max node distance size",
-        "The maximum size of the nodes at a certain distance.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo MaxNodeDistanceSizeInfo = {
+        .identifier = "MaxNodeDistanceSize",
+        .name = "Max node distance size",
+        .description = "The maximum size of the nodes at a certain distance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo CameraPerspectiveEnabledInfo = {
-        "CameraPerspectiveEnabled",
-        "Use camera perspective",
-        "Camera perspective changes the size of the nodes dependent on the distance from "
-        "camera.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo CameraPerspectiveEnabledInfo = {
+        .identifier = "CameraPerspectiveEnabled",
+        .name = "Use camera perspective",
+        .description = "Camera perspective changes the size of the nodes dependent on "
+            "the distance from camera.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo DrawingCirclesInfo = {
-        "RenderingCircles",
-        "Render as circles",
-        "Using fragment shader to draw nodes as circles instead of squares.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo DrawingCirclesInfo = {
+        .identifier = "RenderingCircles",
+        .name = "Render as circles",
+        .description = "Using fragment shader to draw nodes as circles instead of "
+            "squares.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo DrawingHollowInfo = {
-        "RenderingHollowCircles",
-        "Render as hollow circles",
-        "Using fragment shader to draw nodes as hollow circles.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo DrawingHollowInfo = {
+        .identifier = "RenderingHollowCircles",
+        .name = "Render as hollow circles",
+        .description = "Using fragment shader to draw nodes as hollow circles.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo GaussiandAlphaFilterInfo = {
-        "RenderingGaussianAlphaFilter",
-        "Alpha by gaussian",
-        "Using fragment shader to draw nodes with Gaussian filter for alpha value.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo GaussiandAlphaFilterInfo = {
+        .identifier = "RenderingGaussianAlphaFilter",
+        .name = "Alpha by gaussian",
+        .description = "Using fragment shader to draw nodes with Gaussian filter for "
+            "alpha value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo PerspectiveDistanceFactorInfo = {
-        "PerspectiveDistanceFactor",
-        "Perspective distance factor",
-        "This value decides how far away the camera must be to start impacting the node "
-        "size.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo PerspectiveDistanceFactorInfo = {
+        .identifier = "PerspectiveDistanceFactor",
+        .name = "Perspective distance factor",
+        .description = "This value decides how far away the camera must be to start "
+            "impacting the node size.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 2.67f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr Property::PropertyInfo MinMaxNodeSizeInfo = {
-        "MinMaxNodeSize",
-        "Min & max node size",
-        "The minimum and maximum node size.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo MinMaxNodeSizeInfo = {
+        .identifier = "MinMaxNodeSize",
+        .name = "Min & max node size",
+        .description = "The minimum and maximum node size.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(2.f, 30.f),
+            .minMax = { glm::vec2(1.f), glm::vec2(10.f, 200.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo pulseEnabledInfo = {
-        "PulseEnabled",
-        "Nodes close to Earth pulsate",
-        "Toggles the pulse for nodes close to Earth.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo pulseEnabledInfo = {
+        .identifier = "PulseEnabled",
+        .name = "Nodes close to Earth pulsate",
+        .description = "Toggles the pulse for nodes close to Earth.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo gaussianPulseEnabledInfo = {
-        "GaussianPulseEnabled",
-        "Nodes close to Earth pulsate with alpha by gaussian",
-        "Toggles the pulse with alpha by gaussian for nodes close to Earth.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo gaussianPulseEnabledInfo = {
+        .identifier = "GaussianPulseEnabled",
+        .name = "Nodes close to Earth pulsate with alpha by gaussian",
+        .description = "Toggles the pulse with alpha by gaussian for nodes close to "
+            "Earth.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
     struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {
         // Path to a source folder with the three binary files in it.
         std::filesystem::path sourceFolder [[codegen::directory()]];
 
-        // [[codegen::verbatim(ColorTablePathInfo.description)]]
-        std::filesystem::path colorTablePath;
+        std::filesystem::path colorTablePath [[codegen::Info(ColorTablePathInfo)]];
 
-        // [[codegen::verbatim(GoesEnergyBinsInfo.description)]]
-        std::optional<int> energyBin;
+        std::optional<int> energyBin [[codegen::Info(GoesEnergyBinsInfo)]];
 
-        // [[codegen::verbatim(ColorTableRangeInfo.description)]]
-        std::optional<glm::vec2> colorTableRange;
+        std::optional<glm::vec2> colorTableRange [[codegen::Info(ColorTableRangeInfo)]];
     };
 } // namespace
 #include "renderablefluxnodes_codegen.cpp"
@@ -293,56 +386,36 @@ RenderableFluxNodes::RenderableFluxNodes(const Dictionary& dictionary)
     , _goesEnergyBins(GoesEnergyBinsInfo)
     , _styleGroup({ "Style" })
     , _colorMode(ColorModeInfo)
-    , _streamColor(
-        StreamColorInfo,
-        glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _streamColor(StreamColorInfo)
     , _colorTablePath(ColorTablePathInfo)
-    , _colorTableRange(
-        ColorTableRangeInfo,
-        glm::vec2(-2.f, 4.f),
-        glm::vec2(-8.f),
-        glm::vec2(8.f)
-    )
-    , _fluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
+    , _colorTableRange(ColorTableRangeInfo)
+    , _fluxColorAlpha(FluxColorAlphaInfo)
     , _streamGroup({ "Streams" })
-    , _scalingMethod(ScalingmethodInfo)
+    , _scalingMethod(ScalingMethodInfo)
     , _nodesAmountGroup({ "NodeGroup" })
-    , _nodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
-    , _distanceThreshold(DistanceThresholdInfo, 0.f, 0.f, 1.f)
-    , _proximityNodesSize(ProximityNodesSizeInfo, 1.f, 0.f, 100.f)
-    , _maxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
-    , _minMaxNodeSize(
-        MinMaxNodeSizeInfo,
-        glm::vec2(2.f, 30.f),
-        glm::vec2(1.f),
-        glm::vec2(10.f, 200.f)
-    )
-    , _domainZ(
-        DomainZInfo,
-        glm::vec2(-2.5f, 2.5f),
-        glm::vec2(-2.5f, -2.5f),
-        glm::vec2(2.5f, 2.5f)
-    )
-    , _thresholdFlux(ThresholdFluxInfo, -1.5f, -50.f, 10.f)
-    , _filteringLower(FilteringInfo, 0.f, 0.f, 5.f)
-    , _filteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
-    , _amountofNodes(AmountofNodesInfo, 1, 1, 100)
+    , _nodeSize(NodeSizeInfo)
+    , _distanceThreshold(DistanceThresholdInfo)
+    , _proximityNodesSize(ProximityNodesSizeInfo)
+    , _maxNodeDistanceSize(MaxNodeDistanceSizeInfo)
+    , _minMaxNodeSize(MinMaxNodeSizeInfo)
+    , _domainZ(DomainZInfo)
+    , _thresholdFlux(ThresholdFluxInfo)
+    , _filteringLower(FilteringInfo)
+    , _filteringUpper(FilteringUpperInfo)
+    , _amountofNodes(AmountofNodesInfo)
     , _nodeskipMethod(NodeskipMethodInfo)
-    , _defaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
-    , _fluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0.f, -20.f, 10.f)
-    , _earthNodeSkip(EarthNodeSkipInfo, 1, 1, 100)
-    , _radiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
+    , _defaultNodeSkip(DefaultNodeSkipInfo)
+    , _fluxNodeskipThreshold(FluxNodeskipThresholdInfo)
+    , _earthNodeSkip(EarthNodeSkipInfo)
+    , _radiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo)
     , _cameraPerspectiveGroup({ "CameraPerspective" })
-    , _cameraPerspectiveEnabled(CameraPerspectiveEnabledInfo, false)
-    , _drawingCircles(DrawingCirclesInfo, true)
-    , _drawingHollow(DrawingHollowInfo, false)
-    , _gaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
-    , _perspectiveDistanceFactor(PerspectiveDistanceFactorInfo, 2.67f, 1.f, 20.f)
-    , _pulseEnabled(pulseEnabledInfo, false)
-    , _gaussianPulseEnabled(gaussianPulseEnabledInfo, false)
+    , _cameraPerspectiveEnabled(CameraPerspectiveEnabledInfo)
+    , _drawingCircles(DrawingCirclesInfo)
+    , _drawingHollow(DrawingHollowInfo)
+    , _gaussianAlphaFilter(GaussiandAlphaFilterInfo)
+    , _perspectiveDistanceFactor(PerspectiveDistanceFactorInfo)
+    , _pulseEnabled(pulseEnabledInfo)
+    , _gaussianPulseEnabled(gaussianPulseEnabledInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

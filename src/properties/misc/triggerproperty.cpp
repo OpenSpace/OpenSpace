@@ -26,8 +26,8 @@
 
 namespace openspace {
 
-TriggerProperty::TriggerProperty(PropertyInfo info)
-    : Property(std::move(info))
+TriggerProperty::TriggerProperty(TriggerPropertyInfo info)
+    : Property(static_cast<PropertyInfo>(info))
 {}
 
 std::string_view TriggerProperty::className() const {

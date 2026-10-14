@@ -41,19 +41,23 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo DisplayFormatInfo = {
-        "DisplayFormat",
-        "Display format",
-        "Choosing the format in which the camera location is displayed.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo DisplayFormatInfo = {
+        .identifier = "DisplayFormat",
+        .name = "Display format",
+        .description = "Choosing the format in which the camera location is displayed.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SignificantDigitsInfo = {
-        "SignificantDigits",
-        "Significant digits",
-        "Determines the number of significant digits that are shown in the location "
-        "text.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo SignificantDigitsInfo = {
+        .identifier = "SignificantDigits",
+        .name = "Significant digits",
+        .description = "Determines the number of significant digits that are shown in "
+            "the location text.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 4,
+            .minMax = { 1, 12 }
+        }
     };
 
     // Shows the longitude/latitude location of the camera and its distance to the current
@@ -67,11 +71,9 @@ namespace {
             DegreeMinuteSeconds
         };
 
-        // [[codegen::verbatim(DisplayFormatInfo.description)]]
-        std::optional<DisplayFormat> displayFormat;
+        std::optional<DisplayFormat> displayFormat [[codegen::Info(DisplayFormatInfo)]];
 
-        // [[codegen::verbatim(SignificantDigitsInfo.description)]]
-        std::optional<int> significantDigits;
+        std::optional<int> significantDigits [[codegen::Info(SignificantDigitsInfo)]];
     };
 } // namespace
 #include "dashboarditemglobelocation_codegen.cpp"
@@ -88,7 +90,7 @@ Documentation DashboardItemGlobeLocation::Documentation() {
 DashboardItemGlobeLocation::DashboardItemGlobeLocation(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _displayFormat(DisplayFormatInfo)
-    , _significantDigits(SignificantDigitsInfo, 4, 1, 12)
+    , _significantDigits(SignificantDigitsInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

@@ -47,129 +47,184 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableNodeArrow";
 
-    constexpr Property::PropertyInfo StartNodeInfo = {
-        "StartNode",
-        "Start node",
-        "The identifier of the node the arrow starts from.",
-        Property::Visibility::NoviceUser
+    constexpr StringPropertyInfo StartNodeInfo = {
+        .identifier = "StartNode",
+        .name = "Start node",
+        .description = "The identifier of the node the arrow starts from.",
+        .visibility = Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo EndNodeInfo = {
-        "EndNode",
-        "End node",
-        "The identifier of the node the arrow should point towards.",
-        Property::Visibility::NoviceUser
+    constexpr StringPropertyInfo EndNodeInfo = {
+        .identifier = "EndNode",
+        .name = "End node",
+        .description = "The identifier of the node the arrow should point towards.",
+        .visibility = Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The RGB color for the arrow.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The RGB color for the arrow.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Number of segments",
-        "The number of segments that the shapes of the arrow are divided into. A higher "
-        "number leads to a higher resolution and smoother shape.",
-        Property::Visibility::AdvancedUser
+    constexpr UIntPropertyInfo SegmentsInfo = {
+        .identifier = "Segments",
+        .name = "Number of segments",
+        .description = "The number of segments that the shapes of the arrow are divided "
+            "into. A higher number leads to a higher resolution and smoother shape.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 10,
+            .minMax = { 3, 100 }
+        }
     };
 
-    constexpr Property::PropertyInfo InvertInfo = {
-        "Invert",
-        "Invert direction",
-        "If true, the arrow direction is inverted so that it points to the start node "
-        "instead of the end node.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo InvertInfo = {
+        .identifier = "Invert",
+        .name = "Invert direction",
+        .description = "If true, the arrow direction is inverted so that it points to "
+            "the start node instead of the end node.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ArrowHeadSizeInfo = {
-        "ArrowHeadSize",
-        "Arrow head size",
-        "The length of the arrow head, given in relative value of the entire length of "
-        "the arrow. For example, 0.1 makes the arrow head length be 10% of the full "
-        "arrow length.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ArrowHeadSizeInfo = {
+        .identifier = "ArrowHeadSize",
+        .name = "Arrow head size",
+        .description = "The length of the arrow head, given in relative value of the "
+            "entire length of the arrow. For example, 0.1 makes the arrow head length be "
+            "10% of the full arrow length.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.1f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ArrowHeadWidthInfo = {
-        "ArrowHeadWidthFactor",
-        "Arrow head width factor",
-        "A factor that is multiplied with the width, or the arrow itself, to determine "
-        "the width of the base of the arrow head.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ArrowHeadWidthInfo = {
+        .identifier = "ArrowHeadWidthFactor",
+        .name = "Arrow head width factor",
+        .description = "A factor that is multiplied with the width, or the arrow itself, "
+            "to determine the width of the base of the arrow head.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 1.f, 100.f }
+        }
     };
 
-    constexpr Property::PropertyInfo OffsetDistanceInfo = {
-        "Offset",
-        "Offset distance",
-        "The distance from the center of the start node where the arrow starts. If "
-        "'UseRelativeOffset' is true, the value should be given as a factor to multiply "
-        "with the bounding sphere of the node. Otherwise, the value is specified in "
-        "meters.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo OffsetDistanceInfo = {
+        .identifier = "Offset",
+        .name = "Offset distance",
+        .description = "The distance from the center of the start node where the arrow "
+            "starts. If 'UseRelativeOffset' is true, the value should be given as a "
+            "factor to multiply with the bounding sphere of the node. Otherwise, the "
+            "value is specified in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1e20f }
+        }
     };
 
-    constexpr Property::PropertyInfo RelativeOffsetInfo = {
-        "UseRelativeOffset",
-        "Use relative offset distance",
-        "Decides whether to use relative distances for the offset distance. This means "
-        "that the offset distance will be computed as the provided 'Offset' value times "
-        "the bounding sphere of the start node. If false, meters is used.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo RelativeOffsetInfo = {
+        .identifier = "UseRelativeOffset",
+        .name = "Use relative offset distance",
+        .description = "Decides whether to use relative distances for the offset "
+            "distance. This means that the offset distance will be computed as the "
+            "provided 'Offset' value times the bounding sphere of the start node. If "
+            "false, meters is used.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo LengthInfo = {
-        "Length",
-        "Length",
-        "The length of the arrow, given either in meters or as a factor to be multiplied "
-        "with the bounding sphere of the start node (if 'UseRelativeLength' is true).",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo LengthInfo = {
+        .identifier = "Length",
+        .name = "Length",
+        .description = "The length of the arrow, given either in meters or as a factor "
+            "to be multiplied with the bounding sphere of the start node (if "
+            "'UseRelativeLength' is true).",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 100.f,
+            .minMax = { 0.f, 1e20f }
+        }
     };
 
-    constexpr Property::PropertyInfo RelativeLengthInfo = {
-        "UseRelativeLength",
-        "Use relative length",
-        "Decides whether to use relative size for the length of the arrow. This means "
-        "that the arrow length will be computed as the provided 'Length' value times the "
-        "bounding sphere of the start node. If false, meters is used.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo RelativeLengthInfo = {
+        .identifier = "UseRelativeLength",
+        .name = "Use relative length",
+        .description = "Decides whether to use relative size for the length of the "
+            "arrow. This means that the arrow length will be computed as the provided "
+            "'Length' value times the bounding sphere of the start node. If false, "
+            "meters is used.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo WidthInfo = {
-        "Width",
-        "Width",
-        "The width of the arrow, in meters.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo WidthInfo = {
+        .identifier = "Width",
+        .name = "Width",
+        .description = "The width of the arrow, in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 10.f,
+            .minMax = { 0.f, 1e11f }
+        }
     };
 
-    constexpr Property::PropertyInfo AmbientIntensityInfo = {
-        "AmbientIntensity",
-        "Ambient intensity",
-        "A multiplier for ambient lighting for the shading of the arrow.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo AmbientIntensityInfo = {
+        .identifier = "AmbientIntensity",
+        .name = "Ambient intensity",
+        .description = "A multiplier for ambient lighting for the shading of the arrow.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.2f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DiffuseIntensityInfo = {
-        "DiffuseIntensity",
-        "Diffuse intensity",
-        "A multiplier for diffuse lighting for the shading of the arrow.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo DiffuseIntensityInfo = {
+        .identifier = "DiffuseIntensity",
+        .name = "Diffuse intensity",
+        .description = "A multiplier for diffuse lighting for the shading of the arrow.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.7f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SpecularIntensityInfo = {
-        "SpecularIntensity",
-        "Specular intensity",
-        "A multiplier for specular lighting for the shading of the arrow.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo SpecularIntensityInfo = {
+        .identifier = "SpecularIntensity",
+        .name = "Specular intensity",
+        .description = "A multiplier for specular lighting for the shading of the arrow.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ShadingEnabledInfo = {
-        "PerformShading",
-        "Perform shading",
-        "Determines whether shading should be applied to the arrow model.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShadingEnabledInfo = {
+        .identifier = "PerformShading",
+        .name = "Perform shading",
+        .description = "Determines whether shading should be applied to the arrow model.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
     void updateDistanceBasedOnRelativeValues(const std::string& nodeName,
@@ -213,53 +268,46 @@ namespace {
     // `StartNode`. The look of the arrow can be customized to change the width and length
     // of both the arrow body and head.
     struct [[codegen::Dictionary(RenderableNodeArrow)]] Parameters {
-        // [[codegen::verbatim(StartNodeInfo.description)]]
-        std::string startNode [[codegen::identifier()]];
+        std::string startNode [[codegen::Info(StartNodeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(EndNodeInfo.description)]]
-        std::string endNode [[codegen::identifier()]];
+        std::string endNode [[codegen::Info(EndNodeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(SegmentsInfo.description)]]
-        std::optional<int> segments [[codegen::greaterequal(3)]];
+        std::optional<int> segments
+            [[codegen::Info(SegmentsInfo), codegen::greaterequal(3)]];
 
-        // [[codegen::verbatim(InvertInfo.description)]]
-        std::optional<bool> invert;
+        std::optional<bool> invert [[codegen::Info(InvertInfo)]];
 
-        // [[codegen::verbatim(ArrowHeadSizeInfo.description)]]
-        std::optional<float> arrowHeadSize [[codegen::greaterequal(0.f)]];
+        std::optional<float> arrowHeadSize
+            [[codegen::Info(ArrowHeadSizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(ArrowHeadWidthInfo.description)]]
-        std::optional<float> arrowHeadWidthFactor [[codegen::greaterequal(0.f)]];
+        std::optional<float> arrowHeadWidthFactor
+            [[codegen::Info(ArrowHeadWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(OffsetDistanceInfo.description)]]
-        std::optional<float> offset [[codegen::greaterequal(0.f)]];
+        std::optional<float> offset
+            [[codegen::Info(OffsetDistanceInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(RelativeOffsetInfo.description)]]
-        std::optional<bool> useRelativeOffset;
+        std::optional<bool> useRelativeOffset [[codegen::Info(RelativeOffsetInfo)]];
 
-        // [[codegen::verbatim(LengthInfo.description)]]
-        std::optional<float> length [[codegen::greaterequal(0.f)]];
+        std::optional<float> length
+            [[codegen::Info(LengthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(RelativeLengthInfo.description)]]
-        std::optional<bool> useRelativeLength;
+        std::optional<bool> useRelativeLength [[codegen::Info(RelativeLengthInfo)]];
 
-        // [[codegen::verbatim(WidthInfo.description)]]
-        std::optional<float> width [[codegen::greaterequal(0.f)]];
+        std::optional<float> width
+            [[codegen::Info(WidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(ShadingEnabledInfo.description)]]
-        std::optional<bool> performShading;
+        std::optional<bool> performShading [[codegen::Info(ShadingEnabledInfo)]];
 
-        // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<float> ambientIntensity [[codegen::greaterequal(0.f)]];
+        std::optional<float> ambientIntensity
+            [[codegen::Info(AmbientIntensityInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
-        std::optional<float> diffuseIntensity [[codegen::greaterequal(0.f)]];
+        std::optional<float> diffuseIntensity
+            [[codegen::Info(DiffuseIntensityInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(SpecularIntensityInfo.description)]]
-        std::optional<float> specularIntensity [[codegen::greaterequal(0.f)]];
+        std::optional<float> specularIntensity
+            [[codegen::Info(SpecularIntensityInfo), codegen::greaterequal(0.f)]];
     };
 } // namespace
 #include "renderablenodearrow_codegen.cpp"
@@ -275,10 +323,10 @@ Documentation RenderableNodeArrow::Documentation() {
 
 RenderableNodeArrow::Shading::Shading()
     : PropertyOwner({ "Shading" })
-    , enabled(ShadingEnabledInfo, true)
-    , ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
-    , diffuseIntensity(DiffuseIntensityInfo, 0.7f, 0.f, 1.f)
-    , specularIntensity(SpecularIntensityInfo, 0.f, 0.f, 1.f)
+    , enabled(ShadingEnabledInfo)
+    , ambientIntensity(AmbientIntensityInfo)
+    , diffuseIntensity(DiffuseIntensityInfo)
+    , specularIntensity(SpecularIntensityInfo)
 {
     addProperty(enabled);
     addProperty(ambientIntensity);
@@ -290,16 +338,16 @@ RenderableNodeArrow::RenderableNodeArrow(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _start(StartNodeInfo)
     , _end(EndNodeInfo)
-    , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _segments(SegmentsInfo, 10, 3, 100)
-    , _invertArrowDirection(InvertInfo, false)
-    , _arrowHeadSize(ArrowHeadSizeInfo, 0.1f, 0.f, 1.f)
-    , _arrowHeadWidthFactor(ArrowHeadWidthInfo, 2.f, 1.f, 100.f)
-    , _offsetDistance(OffsetDistanceInfo, 0.f, 0.f, 1e20f)
-    , _useRelativeOffset(RelativeOffsetInfo, false)
-    , _length(LengthInfo, 100.f, 0.f, 1e20f)
-    , _useRelativeLength(RelativeLengthInfo, false)
-    , _width(WidthInfo, 10.f, 0.f, 1e11f)
+    , _color(ColorInfo)
+    , _segments(SegmentsInfo)
+    , _invertArrowDirection(InvertInfo)
+    , _arrowHeadSize(ArrowHeadSizeInfo)
+    , _arrowHeadWidthFactor(ArrowHeadWidthInfo)
+    , _offsetDistance(OffsetDistanceInfo)
+    , _useRelativeOffset(RelativeOffsetInfo)
+    , _length(LengthInfo)
+    , _useRelativeLength(RelativeLengthInfo)
+    , _width(WidthInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

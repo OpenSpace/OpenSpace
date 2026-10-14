@@ -240,45 +240,62 @@ namespace {
         }
     }
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enable direct manipulation",
-        "Decides whether the direct manipulation mode should be enabled or not.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enable direct manipulation",
+        .description = "Decides whether the direct manipulation mode should be enabled "
+            "or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo IsActiveInfo = {
-        "IsActive",
-        "Is active",
-        "True if the direct manipulation interaction scheme is currently being applied.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo IsActiveInfo = {
+        .identifier = "IsActive",
+        .name = "Is active",
+        .description = "True if the direct manipulation interaction scheme is currently "
+            "being applied.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AllowMouseInputInfo = {
-        "AllowMouseInput",
-        "Allow mouse input",
-        "Decides whether direct manipulation should be applied when using mouse input."
-        "Otherwise, it is only applied for touch input.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo AllowMouseInputInfo = {
+        .identifier = "AllowMouseInput",
+        .name = "Allow mouse input",
+        .description = "Decides whether direct manipulation should be applied when using "
+            "mouse input. Otherwise, it is only applied for touch input.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo DistanceThresholdInfo = {
-        "DistanceThreshold",
-        "Distance threshold factor",
-        "This threshold affects the distance from the interaction sphere at which the "
-        "direct manipulation interaction mode starts being active. The value is given as "
-        "a factor times the interaction sphere.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo DistanceThresholdInfo = {
+        .identifier = "DistanceThreshold",
+        .name = "Distance threshold factor",
+        .description = "This threshold affects the distance from the interaction sphere "
+            "at which the direct manipulation interaction mode starts being active. The "
+            "value is given as a factor times the interaction sphere.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 5.f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DefaultRenderableTypesInfo = {
-        "DefaultRenderableTypes",
-        "Default renderable types",
-        "A list of renderable types that will automatically use the direct manipulation "
-        "scheme when interacted with, keeping the finger on a static position on the "
-        "interaction sphere of the object when touching. Good for relatively spherical "
-        "objects. Per default, it's set to RenderableGlobes.",
-        Property::Visibility::AdvancedUser
+    constexpr StringListPropertyInfo DefaultRenderableTypesInfo = {
+        .identifier = "DefaultRenderableTypes",
+        .name = "Default renderable types",
+        .description = "A list of renderable types that will automatically use the "
+            "direct manipulation scheme when interacted with, keeping the finger on a "
+            "static position on the interaction sphere of the object when touching. Good "
+            "for relatively spherical objects. Per default, it's set to "
+            "RenderableGlobes.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr std::string_view Description =
@@ -298,19 +315,15 @@ DirectManipulation::DirectManipulation()
         "Direct Manipulation",
         std::string(Description)
       })
-    , _enabled(EnabledInfo, true)
-    , _isActive(IsActiveInfo, false)
-    , _allowMouseInput(AllowMouseInputInfo, false)
-    , _distanceThreshold(DistanceThresholdInfo, 5.f, 0.f, 10.f)
+    , _enabled(EnabledInfo)
+    , _isActive(IsActiveInfo)
+    , _allowMouseInput(AllowMouseInputInfo)
+    , _distanceThreshold(DistanceThresholdInfo)
     , _defaultRenderableTypes(DefaultRenderableTypesInfo)
 {
     addProperty(_enabled);
-
-    _isActive.setReadOnly(true);
     addProperty(_isActive);
-
     addProperty(_allowMouseInput);
-
     addProperty(_distanceThreshold);
 
     // @TODO (2026-03-31, emmbr) This is a bit of a hack, to apply this setting to

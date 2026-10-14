@@ -32,17 +32,20 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::uvec3> {
+    static constexpr glm::uvec3 Min =
+        glm::uvec3(std::numeric_limits<unsigned int>::lowest());
+    static constexpr glm::uvec3 Max =
+        glm::uvec3(std::numeric_limits<unsigned int>::max());
+    static constexpr glm::uvec3 Step = glm::uvec3(1);
+};
+
+using UVec3PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::uvec3>>;
+
 class UVec3Property : public NumericalProperty<glm::uvec3> {
 public:
-    explicit UVec3Property(PropertyInfo info, glm::uvec3 value = glm::uvec3(0),
-        glm::uvec3 minValue = glm::uvec3(std::numeric_limits<unsigned int>::lowest()),
-        glm::uvec3 maxValue = glm::uvec3(std::numeric_limits<unsigned int>::max()),
-        glm::uvec3 stepValue = glm::uvec3(1));
-    UVec3Property(PropertyInfo info, IsEnabled isEnabled,
-        glm::uvec3 value = glm::uvec3(0),
-        glm::uvec3 minValue = glm::uvec3(std::numeric_limits<unsigned int>::lowest()),
-        glm::uvec3 maxValue = glm::uvec3(std::numeric_limits<unsigned int>::max()),
-        glm::uvec3 stepValue = glm::uvec3(1));
+    explicit UVec3Property(UVec3PropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

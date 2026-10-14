@@ -31,21 +31,22 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<unsigned long> {
+    static constexpr unsigned long Min = std::numeric_limits<unsigned long>::lowest();
+    static constexpr unsigned long Max = std::numeric_limits<unsigned long>::max();
+    static constexpr unsigned long Step = 1ul;
+};
+
+using ULongPropertyInfo = BasicPropertyInfo<NumericalDefaults<unsigned long>>;
+
 /**
  * This class is a concrete implementation of TemplateProperty with the type
  * `unsigned long`.
  */
 class ULongProperty : public NumericalProperty<unsigned long> {
 public:
-    explicit ULongProperty(PropertyInfo info, unsigned long value = 0ul,
-        unsigned long minValue = std::numeric_limits<unsigned long>::lowest(),
-        unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
-        unsigned long stepValue = 1ul);
-    ULongProperty(PropertyInfo info, IsEnabled isEnabled,
-        unsigned long value = 0ul,
-        unsigned long minValue = std::numeric_limits<unsigned long>::lowest(),
-        unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
-        unsigned long stepValue = 1ul);
+    explicit ULongProperty(ULongPropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

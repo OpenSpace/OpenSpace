@@ -39,11 +39,11 @@ namespace {
     constexpr int AngleModeIndex = 0;
     constexpr int IncludeElevationIndex = 1;
 
-    static const PropertyOwner::PropertyOwnerInfo AngleModeTelemetryInfo = {
-        "AngleModeTelemetry",
-        "Angle Mode Telemetry",
-        "Telemetry that gathers data of what angle calculation mode is currently used "
-        "for all telemetries in the telemetry module"
+    constexpr PropertyOwner::PropertyOwnerInfo AngleModeTelemetryInfo = {
+        .identifier = "AngleModeTelemetry",
+        .name = "Angle Mode Telemetry",
+        .description = "Telemetry that gathers data of what angle calculation mode is "
+            "currently used for all telemetries in the telemetry module"
     };
 } // namespace
 

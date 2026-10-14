@@ -33,12 +33,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "The path to an image on disk to use as a texture for this sphere. The image is "
-        "expected to be an equirectangular projection.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "The path to an image on disk to use as a texture for this "
+            "sphere. The image is expected to be an equirectangular projection.",
+        .visibility = Visibility::User
     };
 
     // Shows a sphere with an image provided by a local file on disk. To show a sphere
@@ -49,8 +49,7 @@ namespace {
     // and hence expects an equirectangular image. However, it can also be used to show
     // fisheye images by changing the `TextureProjection`.
     struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::filesystem::path texture;
+        std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
         // If this value is set to true, the image for this sphere will not be loaded at
         // startup but rather when sphere is shown for the first time. Additionally, if

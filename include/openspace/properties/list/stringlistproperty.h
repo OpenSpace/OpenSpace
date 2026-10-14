@@ -27,14 +27,17 @@
 
 #include <openspace/properties/misc/listproperty.h>
 
+#include <span>
+#include <string_view>
+
 namespace openspace {
+
+using StringListPropertyInfo =
+    BasicPropertyInfo<ValueDefaults<std::span<std::string_view>>>;
 
 class StringListProperty : public ListProperty<std::string> {
 public:
-    explicit StringListProperty(PropertyInfo info,
-        std::vector<std::string> values = std::vector<std::string>());
-    StringListProperty(PropertyInfo info, IsEnabled isEnabled,
-        std::vector<std::string> values = std::vector<std::string>());
+    explicit StringListProperty(StringListPropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

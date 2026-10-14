@@ -51,56 +51,58 @@ namespace {
         Camera
     };
 
-    constexpr Property::PropertyInfo SourceTypeInfo = {
-        "SourceType",
-        "Source type",
-        "The type of position that is used as the triangle apex used to calculate the "
-        "angle.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo SourceTypeInfo = {
+        .identifier = "SourceType",
+        .name = "Source type",
+        .description = "The type of position that is used as the triangle apex used to "
+            "calculate the angle.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo SourceNodeIdentifierInfo = {
-        "SourceNodeIdentifier",
-        "Source node identifier",
-        "If a scene graph node is selected as type, this value specifies the identifier "
-        "of the node that is to be used as the apex of the triangle used to calculate "
-        "the angle. The computed angle is the incident angle to Source in the triangle ("
-        "Source, Reference, Destination).",
-        Property::Visibility::User
+    constexpr StringPropertyInfo SourceNodeIdentifierInfo = {
+        .identifier = "SourceNodeIdentifier",
+        .name = "Source node identifier",
+        .description = "If a scene graph node is selected as type, this value specifies "
+            "the identifier of the node that is to be used as the apex of the triangle "
+            "used to calculate the angle. The computed angle is the incident angle to "
+            "Source in the triangle (Source, Reference, Destination).",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo ReferenceTypeInfo = {
-        "ReferenceType",
-        "Reference type",
-        "The type of position that is used as the destination of the reference line used "
-        "to calculate the angle. The computed angle is the incident angle to Source in "
-        "the triangle (Source, Reference, Destination).",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo ReferenceTypeInfo = {
+        .identifier = "ReferenceType",
+        .name = "Reference type",
+        .description = "The type of position that is used as the destination of the "
+            "reference line used to calculate the angle. The computed angle is the "
+            "incident angle to Source in the triangle (Source, Reference, Destination).",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo ReferenceNodeIdentifierInfo = {
-        "ReferenceNodeIdentifier",
-        "Reference node identifier",
-        "If a scene graph node is selected as type, this value specifies the identifier "
-        "of the node that is to be used as the reference direction to compute the angle.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo ReferenceNodeIdentifierInfo = {
+        .identifier = "ReferenceNodeIdentifier",
+        .name = "Reference node identifier",
+        .description = "If a scene graph node is selected as type, this value specifies "
+            "the identifier of the node that is to be used as the reference direction to "
+            "compute the angle.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo DestinationTypeInfo = {
-        "DestinationType",
-        "Destination type",
-        "The type of position that is used as the destination to calculate the angle. "
-        "The computed angle is the incident angle to Source in the triangle (Source, "
-        "Reference, Destination).",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo DestinationTypeInfo = {
+        .identifier = "DestinationType",
+        .name = "Destination type",
+        .description = "The type of position that is used as the destination to "
+            "calculate the angle. The computed angle is the incident angle to Source in "
+            "the triangle (Source, Reference, Destination).",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo DestinationNodeIdentifierInfo = {
-        "DestinationNodeIdentifier",
-        "Destination node identifier",
-        "If a scene graph node is selected as type, this value specifies the identifier "
-        "of the node that is to be used as the destination for computing the angle.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo DestinationNodeIdentifierInfo = {
+        .identifier = "DestinationNodeIdentifier",
+        .name = "Destination node identifier",
+        .description = "If a scene graph node is selected as type, this value specifies "
+            "the identifier of the node that is to be used as the destination for "
+            "computing the angle.",
+        .visibility = Visibility::User
     };
 
     // Shows the angle between the lines `Source`->`Reference` and
@@ -117,23 +119,20 @@ namespace {
             Camera
         };
 
-        // [[codegen::verbatim(SourceTypeInfo.description)]]
-        Type sourceType;
+        Type sourceType [[codegen::Info(SourceTypeInfo)]];
 
-        // [[codegen::verbatim(SourceNodeIdentifierInfo.description)]]
-        std::optional<std::string> sourceNodeIdentifier [[codegen::identifier()]];
+        std::optional<std::string> sourceNodeIdentifier
+            [[codegen::Info(SourceNodeIdentifierInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(ReferenceTypeInfo.description)]]
-        Type referenceType;
+        Type referenceType [[codegen::Info(ReferenceTypeInfo)]];
 
-        // [[codegen::verbatim(ReferenceNodeIdentifierInfo.description)]]
-        std::optional<std::string> referenceNodeIdentifier [[codegen::identifier()]];
+        std::optional<std::string> referenceNodeIdentifier
+            [[codegen::Info(ReferenceNodeIdentifierInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(DestinationTypeInfo.description)]]
-        Type destinationType;
+        Type destinationType [[codegen::Info(DestinationTypeInfo)]];
 
-        // [[codegen::verbatim(DestinationNodeIdentifierInfo.description)]]
-        std::optional<std::string> destinationNodeIdentifier [[codegen::identifier()]];
+        std::optional<std::string> destinationNodeIdentifier
+            [[codegen::Info(DestinationNodeIdentifierInfo), codegen::identifier()]];
     };
 } // namespace
 #include "dashboarditemangle_codegen.cpp"

@@ -43,22 +43,26 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo FilePathInfo = {
-        "FilePath",
-        "File path",
-        "The path of the GDAL file or the image file that is to be used in this tile "
-        "provider.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FilePathInfo = {
+        .identifier = "FilePath",
+        .name = "File path",
+        .description = "The path of the GDAL file or the image file that is to be used "
+            "in this tile provider.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TilePixelSizeInfo = {
-        "TilePixelSize",
-        "Tile pixel size",
-        "This value is the preferred size (in pixels) for each tile. Choosing the right "
-        "value is a tradeoff between more efficiency (larger images) and better quality "
-        "(smaller images). The tile pixel size has to be smaller than the size of the "
-        "complete image if a single image is used.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo TilePixelSizeInfo = {
+        .identifier = "TilePixelSize",
+        .name = "Tile pixel size",
+        .description = "This value is the preferred size (in pixels) for each tile. "
+            "Choosing the right value is a tradeoff between more efficiency (larger "
+            "images) and better quality (smaller images). The tile pixel size has to be "
+            "smaller than the size of the complete image if a single image is used.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 32,
+            .minMax = { 32, 2048 }
+        }
     };
 
     enum class [[codegen::stringify()]] Compression {
@@ -82,8 +86,7 @@ namespace {
         // The layer into which this tile provider is loaded.
         int layerGroupID;
 
-        // [[codegen::verbatim(TilePixelSizeInfo.description)]]
-        std::optional<int> tilePixelSize;
+        std::optional<int> tilePixelSize [[codegen::Info(TilePixelSizeInfo)]];
 
         // Determines if the tiles should be preprocessed before uploading to the GPU.
         std::optional<bool> performPreProcessing;
@@ -125,8 +128,8 @@ Documentation DefaultTileProvider::Documentation() {
 }
 
 DefaultTileProvider::DefaultTileProvider(const Dictionary& dictionary)
-    : _filePath(FilePathInfo, "")
-    , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
+    : _filePath(FilePathInfo)
+    , _tilePixelSize(TilePixelSizeInfo)
 {
     ZoneScoped;
 

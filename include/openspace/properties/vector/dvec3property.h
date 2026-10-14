@@ -32,17 +32,18 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::dvec3> {
+    static constexpr glm::dvec3 Min = glm::dvec3(std::numeric_limits<double>::lowest());
+    static constexpr glm::dvec3 Max = glm::dvec3(std::numeric_limits<double>::max());
+    static constexpr glm::dvec3 Step = glm::dvec3(0.01);
+};
+
+using DVec3PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::dvec3>>;
+
 class DVec3Property : public NumericalProperty<glm::dvec3> {
 public:
-    explicit DVec3Property(PropertyInfo info, glm::dvec3 value = glm::dvec3(0.0),
-        glm::dvec3 minValue = glm::dvec3(std::numeric_limits<double>::lowest()),
-        glm::dvec3 maxValue = glm::dvec3(std::numeric_limits<double>::max()),
-        glm::dvec3 stepValue = glm::dvec3(0.01));
-    DVec3Property(PropertyInfo info, IsEnabled isEnabled,
-        glm::dvec3 value = glm::dvec3(0.0),
-        glm::dvec3 minValue = glm::dvec3(std::numeric_limits<double>::lowest()),
-        glm::dvec3 maxValue = glm::dvec3(std::numeric_limits<double>::max()),
-        glm::dvec3 stepValue = glm::dvec3(0.01));
+    explicit DVec3Property(DVec3PropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

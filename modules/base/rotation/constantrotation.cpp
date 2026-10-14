@@ -33,29 +33,37 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo RotationInfo = {
-        "RotationAxis",
-        "Rotation axis",
-        "This value is the rotation axis around which the object will rotate.",
-        Property::Visibility::AdvancedUser
+    constexpr DVec3PropertyInfo RotationInfo = {
+        .identifier = "RotationAxis",
+        .name = "Rotation axis",
+        .description = "This value is the rotation axis around which the object will "
+            "rotate.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::dvec3(0.0, 0.0, 1.0),
+            .minMax = { glm::dvec3(-1.0), glm::dvec3(1.0) }
+        }
     };
 
-    constexpr Property::PropertyInfo RotationRateInfo = {
-        "RotationRate",
-        "Rotation rate",
-        "This value determines the number of revolutions per in-game second.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo RotationRateInfo = {
+        .identifier = "RotationRate",
+        .name = "Rotation rate",
+        .description = "This value determines the number of revolutions per in-game "
+            "second.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { -1000.f, 1000.f }
+        }
     };
 
     // Makes a scene graph node rotate about the provided axis at a fixed and constant
     // rotation speed.
     struct [[codegen::Dictionary(ConstantRotation)]] Parameters {
-        // [[codegen::verbatim(RotationInfo.description)]]
-        std::optional<glm::dvec3> rotationAxis
-            [[codegen::inrange(glm::dvec3(-1.0), glm::dvec3(1.0))]];
+        std::optional<glm::dvec3> rotationAxis [[codegen::Info(RotationInfo),
+            codegen::inrange(glm::dvec3(-1.0), glm::dvec3(1.0))]];
 
-        // [[codegen::verbatim(RotationRateInfo.description)]]
-        std::optional<float> rotationRate;
+        std::optional<float> rotationRate [[codegen::Info(RotationRateInfo)]];
     };
 } // namespace
 #include "constantrotation_codegen.cpp"
@@ -71,13 +79,8 @@ Documentation ConstantRotation::Documentation() {
 
 ConstantRotation::ConstantRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
-    , _rotationAxis(
-        RotationInfo,
-        glm::dvec3(0.0, 0.0, 1.0),
-        glm::dvec3(-1.0),
-        glm::dvec3(1.0)
-    )
-    , _rotationRate(RotationRateInfo, 1.f, -1000.f, 1000.f)
+    , _rotationAxis(RotationInfo)
+    , _rotationRate(RotationRateInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

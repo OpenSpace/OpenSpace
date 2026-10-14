@@ -192,51 +192,18 @@ namespace {
     }
 
     std::string resolveComment(std::string comment) {
-        if (auto [b, e] = findKeyword(comment, keywords::Verbatim);
-            b != std::string::npos)
-        {
-            size_t it = e;
-            if (comment[it] != '(') {
-                throw CodegenError(std::format(
-                    "Malformed codegen::verbatim. Expected ( after token\n{}", comment
-                ));
-            }
-            it++;
-            const size_t end = comment.find(')', it);
-            const std::string argument = comment.substr(it, end - it);
-
-            const size_t endKeyword = end + ")]]"sv.size();
-            if (endKeyword - b == comment.size()) {
-                // If there isn't any other comment, we are done and we emit the argument
-                // to the verbatim function
-                comment = argument;
-            }
-            else {
-                // Otherwise, we need to output code that correctly inserts the verbatim
-                // at the correct position
-                const std::string pre = comment.substr(0, b);
-                const std::string post = comment.substr(endKeyword);
-                comment = std::format(
-                    "std::format(\"{{}}{{}}{{}}\", \"{}\", {}, \"{}\")",
-                    pre, argument, post
-                );
-            }
+        size_t jt = comment.find('"');
+        while (jt != std::string::npos && comment[jt - 1] != '\\') {
+            comment.insert(jt, "\\");
+            jt = comment.find('"', jt + 2); // +1 for \\ and +1 for "
         }
-        else {
-            size_t jt = comment.find('"');
-            while (jt != std::string::npos && comment[jt - 1] != '\\') {
-                comment.insert(jt, "\\");
-                jt = comment.find('"', jt + 2); // +1 for \\ and +1 for "
-            }
 
-            // We add artificial spaces between the multiline comments, which causes there
-            // to be a stray space at the end
-            if (!comment.empty() && comment.back() == ' ') {
-                comment.pop_back();
-            }
-            comment = std::format("\"{}\"", comment);
+        // We add artificial spaces between the multiline comments, which causes there to
+        // be a stray space at the end
+        if (!comment.empty() && comment.back() == ' ') {
+            comment.pop_back();
         }
-        return comment;
+        return std::format("\"{}\"", comment);
     }
 
     std::vector<Enum*> collectEnums(Struct* s) {
@@ -441,7 +408,45 @@ namespace {
 
         std::string ver = fqn(s, "_");
         std::string v = verifier(var->type, *var, s);
-        if (var->comment.empty()) {
+        if (!var->attributes.info.empty()) {
+            // Generate the comment. First the description from the info, then the
+            // manually written comment above
+            std::string description;
+            if (isOptional) {
+                // If an optional value is not specified, the default value from the info
+                // is used instead, so the helper function appends that default value to
+                // the description as well
+                std::string comment =
+                    var->comment.empty() ?
+                    "" :
+                    std::format(", {}", resolveComment(var->comment));
+                description = std::format(
+                    "openspace::descriptionWithDefaultValue({}{})",
+                    var->attributes.info, comment
+                );
+            }
+            else {
+                description = std::format(
+                    "std::string({}.description)", var->attributes.info
+                );
+                if (!var->comment.empty()) {
+                    description += std::format(
+                        " + \" \" + {}", resolveComment(var->comment)
+                    );
+                }
+            }
+            std::string result = std::format(
+                "    codegen_{}->documentations.emplace_back({},{},{},{},{});\n",
+                ver,
+                var->key,
+                v,
+                isOptional ? "Optional::Yes" : "Optional::No",
+                var->attributes.isPrivate ? "Private::Yes" : "Private::No",
+                description
+            );
+            return result;
+        }
+        else if (var->comment.empty()) {
             std::string result = std::format(
                 "    codegen_{}->documentations.emplace_back({},{},{},{});\n",
                 ver,

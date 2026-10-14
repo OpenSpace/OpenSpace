@@ -64,93 +64,137 @@ namespace {
 
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Enables and disables labels' rendering.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Enables and disables labels' rendering.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font size",
-        "Font size for the rendering labels. This is different from the text size.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo FontSizeInfo = {
+        .identifier = "FontSize",
+        .name = "Font size",
+        .description = "Font size for the rendering labels. This is different from the "
+            "text size.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 30.f,
+            .minMax = { 1.f, 300.f }
+        }
     };
 
-    constexpr Property::PropertyInfo MinMaxSizeInfo = {
-        "MinMaxSize",
-        "Min/max text size",
-        "Minimum and maximum label size, in pixels.",
-        Property::Visibility::AdvancedUser
+    constexpr IVec2PropertyInfo MinMaxSizeInfo = {
+        .identifier = "MinMaxSize",
+        .name = "Min/max text size",
+        .description = "Minimum and maximum label size, in pixels.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::ivec2(1, 1000),
+            .minMax = { glm::ivec2(1), glm::ivec2(1000) }
+        }
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
-        "LabelsSize",
-        "Labels size",
-        "This value affects the size scale of the labels.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo SizeInfo = {
+        .identifier = "LabelsSize",
+        .name = "Labels size",
+        .description = "This value affects the size scale of the labels.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 2.5f,
+            .minMax = { 0.f, 30.f }
+        }
     };
 
-    constexpr Property::PropertyInfo HeightOffsetInfo = {
-        "HeightOffset",
-        "Height offset",
-        "This value moves the label away from the globe surface by the specified "
-        "distance (in meters).",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo HeightOffsetInfo = {
+        .identifier = "HeightOffset",
+        .name = "Height offset",
+        .description = "This value moves the label away from the globe surface by the "
+            "specified distance (in meters).",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 100.f,
+            .minMax = { 0.f, 10000.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The text color of the labels.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The text color of the labels.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f, 1.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FadeDistancesInfo = {
-        "FadeDistances",
-        "Fade-in distances",
-        "The distances above the globe's surface at which the labels start fading in or "
-        "out, given in meters. The final distances are also adjusted by the specified "
-        "height offset.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo FadeDistancesInfo = {
+        .identifier = "FadeDistances",
+        .name = "Fade-in distances",
+        .description = "The distances above the globe's surface at which the labels "
+            "start fading in or out, given in meters. The final distances are also "
+            "adjusted by the specified height offset.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(1e4f, 1e6f),
+            .minMax = { glm::vec2(1.f), glm::vec2(1e8f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FadeInEnabledInfo = {
-        "FadeInEnabled",
-        "Fade-in enabled",
-        "Sets whether the labels fade in when approaching the globe from a distance. If "
-        "false, no fading happens and the labels immediately has full opacity.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo FadeInEnabledInfo = {
+        .identifier = "FadeInEnabled",
+        .name = "Fade-in enabled",
+        .description = "Sets whether the labels fade in when approaching the globe from "
+            "a distance. If false, no fading happens and the labels immediately has full "
+            "opacity.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo FadeOutEnabledInfo = {
-        "FadeOutEnabled",
-        "Fade-out enabled",
-        "Sets whether the labels fade out when approaching the surface of the globe. If "
-        "false, no fading happens and the labels stays in full opacity.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo FadeOutEnabledInfo = {
+        .identifier = "FadeOutEnabled",
+        .name = "Fade-out enabled",
+        .description = "Sets whether the labels fade out when approaching the surface of "
+            "the globe. If false, no fading happens and the labels stays in full "
+            "opacity.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo DisableCullingInfo = {
-        "DisableCulling",
-        "Culling disabled",
-        "Labels culling disabled.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo DisableCullingInfo = {
+        .identifier = "DisableCulling",
+        .name = "Culling disabled",
+        .description = "Labels culling disabled.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo DistanceEPSInfo = {
-        "DistanceEPS",
-        "Culling distance",
-        "Labels culling distance from globe's center.",
-        Property::Visibility::Developer
+    constexpr FloatPropertyInfo DistanceEPSInfo = {
+        .identifier = "DistanceEPS",
+        .name = "Culling distance",
+        .description = "Labels culling distance from globe's center.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 100000.f,
+            .minMax = { 1000.f, 10000000.f }
+        }
     };
 
-    constexpr Property::PropertyInfo AlignmentOptionInfo = {
-        "AlignmentOption",
-        "Alignment option",
-        "Labels are aligned horizontally or circularly related to the planet.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo AlignmentOptionInfo = {
+        .identifier = "AlignmentOption",
+        .name = "Alignment option",
+        .description = "Labels are aligned horizontally or circularly related to the "
+            "planet.",
+        .visibility = Visibility::User
     };
 
     bool isLabelInFrustum(const glm::dmat4& mvMatrix, const glm::dvec3& position) {
@@ -211,48 +255,37 @@ namespace {
         // The path to the labels file.
         std::optional<std::filesystem::path> fileName;
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
         // This value determines the opacity of the labels.
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize [[codegen::greater(1.f)]];
+        std::optional<float> fontSize
+            [[codegen::Info(FontSizeInfo), codegen::greater(1.f)]];
 
-        // [[codegen::verbatim(MinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> minMaxSize;
+        std::optional<glm::ivec2> minMaxSize [[codegen::Info(MinMaxSizeInfo)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size [[codegen::greaterequal(0.f)]];
+        std::optional<float> size [[codegen::Info(SizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(HeightOffsetInfo.description)]]
-        std::optional<float> heightOffset;
+        std::optional<float> heightOffset [[codegen::Info(HeightOffsetInfo)]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(FadeDistancesInfo.description)]]
-        std::optional<glm::vec2> fadeDistances;
+        std::optional<glm::vec2> fadeDistances [[codegen::Info(FadeDistancesInfo)]];
 
-        // [[codegen::verbatim(FadeInEnabledInfo.description)]]
-        std::optional<bool> fadeInEnabled;
+        std::optional<bool> fadeInEnabled [[codegen::Info(FadeInEnabledInfo)]];
 
-        // [[codegen::verbatim(FadeOutEnabledInfo.description)]]
-        std::optional<bool> fadeOutEnabled;
+        std::optional<bool> fadeOutEnabled [[codegen::Info(FadeOutEnabledInfo)]];
 
-        // [[codegen::verbatim(DisableCullingInfo.description)]]
-        std::optional<bool> disableCulling;
+        std::optional<bool> disableCulling [[codegen::Info(DisableCullingInfo)]];
 
-        // [[codegen::verbatim(DistanceEPSInfo.description)]]
-        std::optional<float> distanceEPS;
+        std::optional<float> distanceEPS [[codegen::Info(DistanceEPSInfo)]];
 
         enum class [[codegen::map(LabelRenderingAlignmentType)]] Alignment {
             Horizontally,
             Circularly
         };
-        // [[codegen::verbatim(AlignmentOptionInfo.description)]]
-        std::optional<Alignment> alignmentOption;
+        std::optional<Alignment> alignmentOption [[codegen::Info(AlignmentOptionInfo)]];
     };
 } // namespace
 #include "globelabelscomponent_codegen.cpp"
@@ -265,22 +298,17 @@ Documentation GlobeLabelsComponent::Documentation() {
 
 GlobeLabelsComponent::GlobeLabelsComponent()
     : PropertyOwner({ "Labels" })
-    , _enabled(EnabledInfo, false)
-    , _color(ColorInfo, glm::vec3(1.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _fontSize(FontSizeInfo, 30.f, 1.f, 300.f)
-    , _size(SizeInfo, 2.5f, 0.f, 30.f)
-    , _minMaxSize(MinMaxSizeInfo, glm::ivec2(1, 1000), glm::ivec2(1), glm::ivec2(1000))
-    , _heightOffset(HeightOffsetInfo, 100.f, 0.f, 10000.f)
-    , _fadeDistances(
-        FadeDistancesInfo,
-        glm::vec2(1e4f, 1e6f),
-        glm::vec2(1.f),
-        glm::vec2(1e8f)
-    )
-    , _fadeInEnabled(FadeInEnabledInfo, false)
-    , _fadeOutEnabled(FadeOutEnabledInfo, false)
-    , _disableCulling(DisableCullingInfo, false)
-    , _distanceEPS(DistanceEPSInfo, 100000.f, 1000.f, 10000000.f)
+    , _enabled(EnabledInfo)
+    , _color(ColorInfo)
+    , _fontSize(FontSizeInfo)
+    , _size(SizeInfo)
+    , _minMaxSize(MinMaxSizeInfo)
+    , _heightOffset(HeightOffsetInfo)
+    , _fadeDistances(FadeDistancesInfo)
+    , _fadeInEnabled(FadeInEnabledInfo)
+    , _fadeOutEnabled(FadeOutEnabledInfo)
+    , _disableCulling(DisableCullingInfo)
+    , _distanceEPS(DistanceEPSInfo)
     , _alignmentOption(AlignmentOptionInfo)
 {
     addProperty(_enabled);

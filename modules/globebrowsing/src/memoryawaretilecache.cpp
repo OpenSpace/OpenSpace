@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -42,41 +43,55 @@ namespace {
 
     constexpr std::string_view _loggerCat = "MemoryAwareTileCache";
 
-    constexpr Property::PropertyInfo CpuAllocatedDataInfo = {
-        "CpuAllocatedTileData",
-        "CPU allocated tile data (MB)",
-        "This value denotes the amount of RAM memory (in MB) that this tile cache is "
-        "utilizing.",
-        Property::Visibility::Developer
+    constexpr IntPropertyInfo CpuAllocatedDataInfo = {
+        .identifier = "CpuAllocatedTileData",
+        .name = "CPU allocated tile data (MB)",
+        .description = "This value denotes the amount of RAM memory (in MB) that this "
+            "tile cache is utilizing.",
+        .visibility = Visibility::Developer,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 0,
+            .minMax = { 128, 16384 }
+        }
     };
 
-    constexpr Property::PropertyInfo GpuAllocatedDataInfo = {
-        "GpuAllocatedTileData",
-        "GPU allocated tile data (MB)",
-        "This value denotes the amount of GPU memory (in MB) that this tile cache is "
-        "utilizing.",
-        Property::Visibility::Developer
+    constexpr IntPropertyInfo GpuAllocatedDataInfo = {
+        .identifier = "GpuAllocatedTileData",
+        .name = "GPU allocated tile data (MB)",
+        .description = "This value denotes the amount of GPU memory (in MB) that this "
+            "tile cache is utilizing.",
+        .visibility = Visibility::Developer,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 0,
+            .minMax = { 128, 16384 }
+        }
     };
 
-    constexpr Property::PropertyInfo TileCacheSizeInfo = {
-        "TileCacheSize",
-        "Tile cache size",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo TileCacheSizeInfo = {
+        .identifier = "TileCacheSize",
+        .name = "Tile cache size",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0,
+            .minMax = { 128, 16384 }
+        }
     };
 
-    constexpr Property::PropertyInfo ApplyTileCacheInfo = {
-        "ApplyTileCacheSize",
-        "Apply tile cache size",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr TriggerPropertyInfo ApplyTileCacheInfo = {
+        .identifier = "ApplyTileCacheSize",
+        .name = "Apply tile cache size",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ClearTileCacheInfo = {
-        "ClearTileCache",
-        "Clear tile cache",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr TriggerPropertyInfo ClearTileCacheInfo = {
+        .identifier = "ClearTileCache",
+        .name = "Clear tile cache",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 
     GLenum toGlTextureFormat(GLenum glType, opengl::Texture::Format format) {
@@ -229,9 +244,9 @@ size_t MemoryAwareTileCache::TextureContainer::size() const {
 MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
     : PropertyOwner({ "TileCache", "Tile Cache" })
     , _numTextureBytesAllocatedOnCPU(0)
-    , _cpuAllocatedTileData(CpuAllocatedDataInfo, tileCacheSize, 128, 16384, 1)
-    , _gpuAllocatedTileData(GpuAllocatedDataInfo, tileCacheSize, 128, 16384, 1)
-    , _tileCacheSize(TileCacheSizeInfo, tileCacheSize, 128, 16384, 1)
+    , _cpuAllocatedTileData(CpuAllocatedDataInfo)
+    , _gpuAllocatedTileData(GpuAllocatedDataInfo)
+    , _tileCacheSize(TileCacheSizeInfo)
     , _applyTileCacheSize(ApplyTileCacheInfo)
     , _clearTileCache(ClearTileCacheInfo)
 {
@@ -247,18 +262,19 @@ MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
     });
     addProperty(_applyTileCacheSize);
 
+    _cpuAllocatedTileData = tileCacheSize;
     _cpuAllocatedTileData.setMaxValue(
         static_cast<int>(CpuCap.installedMainMemory() * 0.95f)
     );
-    _cpuAllocatedTileData.setReadOnly(true);
     addProperty(_cpuAllocatedTileData);
 
+    _gpuAllocatedTileData = tileCacheSize;
     _gpuAllocatedTileData.setMaxValue(
         static_cast<int>(CpuCap.installedMainMemory() * 0.95f)
     );
-    _gpuAllocatedTileData.setReadOnly(true);
     addProperty(_gpuAllocatedTileData);
 
+    _tileCacheSize = tileCacheSize;
     _tileCacheSize.setMaxValue(
         static_cast<int>(CpuCap.installedMainMemory() * 0.95f)
     );

@@ -28,24 +28,9 @@
 
 namespace openspace {
 
-FloatProperty::FloatProperty(PropertyInfo info, float value, float minValue,
-                             float maxValue, float stepValue)
-    : NumericalProperty<float>(std::move(info), value, minValue, maxValue, stepValue)
+FloatProperty::FloatProperty(FloatPropertyInfo info)
+    : NumericalProperty<float>(std::move(info))
 {}
-
-FloatProperty::FloatProperty(PropertyInfo info, IsEnabled isEnabled, float value,
-                             float minValue, float maxValue, float stepValue)
-    : NumericalProperty<float>(
-        std::move(info),
-        isEnabled,
-        value,
-        minValue,
-        maxValue,
-        stepValue
-    )
-{
-    _isEnabled = isEnabled;
-}
 
 std::string_view FloatProperty::className() const {
     return "FloatProperty";

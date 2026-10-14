@@ -41,80 +41,92 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ForceFullOrbitTrailInfo = {
-        "ForceFullOrbitTrail",
-        "Force full orbit trail",
-        "Forces the trail to always have a visible length of one orbit. If the time "
-        "from the start date of the trail and the current time in OpenSpace is less "
-        "than one period (full rotation), then the trail will extends into the future "
-        "compared to the current OpenSpace time. If the current time in OpenSpace has "
-        "passed the end date, the last full period of the trail will be shown. Only "
-        "works if there exist a Start Time and End Time for the orbit data.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ForceFullOrbitTrailInfo = {
+        .identifier = "ForceFullOrbitTrail",
+        .name = "Force full orbit trail",
+        .description = "Forces the trail to always have a visible length of one orbit. "
+            "If the time from the start date of the trail and the current time in "
+            "OpenSpace is less than one period (full rotation), then the trail will "
+            "extends into the future compared to the current OpenSpace time. If the "
+            "current time in OpenSpace has passed the end date, the last full period of "
+            "the trail will be shown. Only works if there exist a Start Time and End "
+            "Time for the orbit data.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo LimitToTimeRangeInfo = {
-        "LimitToTimeRange",
-        "Limit to time range",
-        "Only forces full trail orbit trail between start time and one orbital period "
-        "after the end time.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo LimitToTimeRangeInfo = {
+        .identifier = "LimitToTimeRange",
+        .name = "Limit to time range",
+        .description = "Only forces full trail orbit trail between start time and one "
+            "orbital period after the end time.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo StartTimeInfo = {
-        "StartTime",
-        "Start Time",
-        "The start time for the range of this orbit. The date must be in ISO 8601.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo StartTimeInfo = {
+        .identifier = "StartTime",
+        .name = "Start Time",
+        .description = "The start time for the range of this orbit. The date must be in "
+            "ISO 8601.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EndTimeInfo = {
-        "EndTime",
-        "End Time",
-        "The end time for the range of this orbit. The date must be in ISO 8601.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo EndTimeInfo = {
+        .identifier = "EndTime",
+        .name = "End Time",
+        .description = "The end time for the range of this orbit. The date must be in "
+            "ISO 8601.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PeriodInfo = {
-        "Period",
-        "Period (in days)",
-        "The objects period, i.e. the length of its orbit around the parent object given "
-        "in (Earth) days. In the case of Earth, this would be a sidereal year "
-        "(=365.242 days). If this values is specified as multiples of the period, it is "
-        "possible to show the effects of precession.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo PeriodInfo = {
+        .identifier = "Period",
+        .name = "Period (in days)",
+        .description = "The objects period, i.e. the length of its orbit around the "
+            "parent object given in (Earth) days. In the case of Earth, this would be a "
+            "sidereal year (=365.242 days). If this values is specified as multiples of "
+            "the period, it is possible to show the effects of precession.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { 0.0, 250.0 * 365.25 }  // 250 years should be enough I guess
+        }
     };
 
-    constexpr Property::PropertyInfo ResolutionInfo = {
-        "Resolution",
-        "Number of samples along the orbit",
-        "The number of samples along the orbit. This determines the resolution of the "
-        "trail; the tradeoff being that a higher resolution is able to resolve more "
-        "detail, but will take more resources while rendering, too. The higher, the "
-        "smoother the trail, but also more memory will be used.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo ResolutionInfo = {
+        .identifier = "Resolution",
+        .name = "Number of samples along the orbit",
+        .description = "The number of samples along the orbit. This determines the "
+            "resolution of the trail; the tradeoff being that a higher resolution is "
+            "able to resolve more detail, but will take more resources while rendering, "
+            "too. The higher, the smoother the trail, but also more memory will be used.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 10000,
+            .minMax = { 1, 1000000 }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
-        // [[codegen::verbatim(ForceFullOrbitTrailInfo.description)]]
-        std::optional<bool> forceFullOrbitTrail;
+        std::optional<bool> forceFullOrbitTrail
+            [[codegen::Info(ForceFullOrbitTrailInfo)]];
 
-        // [[codegen::verbatim(LimitToTimeRangeInfo.description)]]
-        std::optional<bool> limitToTimeRange;
+        std::optional<bool> limitToTimeRange [[codegen::Info(LimitToTimeRangeInfo)]];
 
-        // [[codegen::verbatim(StartTimeInfo.description)]]
-        std::optional<std::string> startTime
-            [[codegen::annotation("A valid date in ISO 8601 format")]];
+        std::optional<std::string> startTime [[codegen::Info(StartTimeInfo),
+            codegen::annotation("A valid date in ISO 8601 format")]];
 
-        // [[codegen::verbatim(EndTimeInfo.description)]]
-        std::optional<std::string> endTime
-            [[codegen::annotation("A valid date in ISO 8601 format")]];
+        std::optional<std::string> endTime [[codegen::Info(EndTimeInfo),
+            codegen::annotation("A valid date in ISO 8601 format")]];
 
-        // [[codegen::verbatim(PeriodInfo.description)]]
-        double period [[codegen::greater(0.0)]];
+        double period [[codegen::Info(PeriodInfo), codegen::greater(0.0)]];
 
-        // [[codegen::verbatim(ResolutionInfo.description)]]
-        int resolution [[codegen::greater(1)]];
+        int resolution [[codegen::Info(ResolutionInfo), codegen::greater(1)]];
     };
 } // namespace
 #include "renderabletrailorbit_codegen.cpp"
@@ -176,12 +188,12 @@ Documentation RenderableTrailOrbit::Documentation() {
 
 RenderableTrailOrbit::RenderableTrailOrbit(const Dictionary& dictionary)
     : RenderableTrail(dictionary)
-    , _forceFullOrbitTrail(ForceFullOrbitTrailInfo, false)
-    , _limitToTimeRange(LimitToTimeRangeInfo, true)
+    , _forceFullOrbitTrail(ForceFullOrbitTrailInfo)
+    , _limitToTimeRange(LimitToTimeRangeInfo)
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)
-    , _period(PeriodInfo, 0.0, 0.0, 250.0 * 365.25) // 250 years should be enough I guess
-    , _resolution(ResolutionInfo, 10000, 1, 1000000)
+    , _period(PeriodInfo)
+    , _resolution(ResolutionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

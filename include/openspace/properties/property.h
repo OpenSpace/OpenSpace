@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_CORE___PROPERTY___H__
 #define __OPENSPACE_CORE___PROPERTY___H__
 
+#include <openspace/lua/lua_types.h>
 #include <openspace/misc/boolean.h>
 #include <openspace/misc/easing.h>
-#include <openspace/lua/lua_types.h>
+#include <openspace/properties/propertyinfo.h>
 #include <openspace/util/json_helper.h>
 #include <cstdint>
 #include <functional>
@@ -70,79 +71,6 @@ class PropertyOwner;
  */
 class Property {
 public:
-    BooleanType(NeedsConfirmation);
-
-    // Enabled state of the property itself    
-    BooleanType(IsEnablable);
-    BooleanType(IsEnabled);
-
-    /**
-     * The visibility classes for Property%s. The classes are strictly ordered as
-     * Hidden > Developer > AdvancedUser > User > NoviceUser > Always
-     */
-    enum class Visibility {
-        /// Never visible
-        Hidden = 5,
-        /// Visible in Developer mode
-        Developer = 4,
-        /// Visible in Advanced User mode
-        AdvancedUser = 3,
-        /// Visible in User mode
-        User = 2,
-        /// Visible in Novice User mode
-        NoviceUser = 1,
-        /// Visible for all types, no matter what
-        Always = 0,
-
-        /// The default visibility for properties
-        Default = Always
-    };
-
-    /**
-     * This structure is passed to the constructor of a Property and contains the unique
-     * identifier, a GUI name and descriptive text that are both user facing.
-     */
-    struct PropertyInfo {
-        /**
-         * GCC requires an explicit constructor here, as it does not handle the default
-         * argument for the struct initialization.
-         */
-        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                               IsEnablable isEnablable_ = IsEnablable::No,
-                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
-            : identifier(ident)
-            , guiName(gui)
-            , description(desc)
-            , isEnablable(isEnablable_)
-            , needsConfirmation(needsConfirmation_)
-        {}
-
-        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                               Visibility vis,
-                               IsEnablable isEnablable_ = IsEnablable::No,
-                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
-            : identifier(ident)
-            , guiName(gui)
-            , description(desc)
-            , visibility(vis)
-            , isEnablable(isEnablable_)
-            , needsConfirmation(needsConfirmation_)
-        {}
-
-        /// The unique identifier that is part of the fully qualified URI of this Property
-        const char* identifier;
-        /// The name that is displayed in the user interface
-        const char* guiName;
-        /// The user facing description of this Property
-        const char* description;
-        /// Determines the visibility of this Property in the user interface
-        Visibility visibility = Visibility::Default;
-        /// Determines if the Property is enablable (linked to a boolean)
-        IsEnablable isEnablable = IsEnablable::No;
-        /// Determines if the Property require confirmation upon value change
-        NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
-    };
-
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an
     /// onChange callback
     using OnChangeHandle = uint32_t;
@@ -168,8 +96,8 @@ public:
     /**
      * The constructor for the property. The \p info (see PropertyInfo) contains
      * necessary information for this Property. PropertyInfo::identifier needs to be
-     * unique for each PropertyOwner. The PropertyInfo::guiName will be stored in the
-     * metaData to be accessed by the GUI elements using the PropertyInfo::guiName key.
+     * unique for each PropertyOwner. The PropertyInfo::name will be stored in the
+     * metaData to be accessed by the GUI elements using the PropertyInfo::name key.
      * The default visibility settings is Visibility::Always, whereas the default
      * read-only state is `false`.
      *
@@ -179,9 +107,9 @@ public:
      *        if the Property is also enablable
      *
      * \pre \p info.identifier must not be empty
-     * \pre \p info.guiName must not be empty
+     * \pre \p info.name must not be empty
      */
-    explicit Property(PropertyInfo info, IsEnabled isEnabled = IsEnabled::No);
+    explicit Property(PropertyInfo info);
 
     /**
      * The destructor taking care of deallocating all unused memory. This method will not
@@ -595,7 +523,7 @@ protected:
      */
     struct {
         std::optional<std::string> group;
-        Visibility visibility = Visibility::Default;
+        Visibility visibility = Visibility::Always;
         std::optional<bool> readOnly;
         bool needsConfirmation = false;
         bool isEnablable = false;

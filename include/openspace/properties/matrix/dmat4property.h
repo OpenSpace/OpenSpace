@@ -32,21 +32,20 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::dmat4x4> {
+    static constexpr glm::dmat4x4 Min =
+        createFillMat4x4<double>(std::numeric_limits<double>::lowest());
+    static constexpr glm::dmat4x4 Max =
+        createFillMat4x4<double>(std::numeric_limits<double>::max());
+    static constexpr glm::dmat4x4 Step = createFillMat4x4<double>(0.01);
+};
+
+using DMat4PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::dmat4x4>>;
+
 class DMat4Property : public NumericalProperty<glm::dmat4x4> {
 public:
-    explicit DMat4Property(PropertyInfo info, glm::dmat4x4 value = glm::dmat4x4(0.0),
-        glm::dmat4x4 minValue =
-            createFillMat4x4<double>(std::numeric_limits<double>::lowest()),
-        glm::dmat4x4 maxValue =
-            createFillMat4x4<double>(std::numeric_limits<double>::max()),
-        glm::dmat4x4 stepValue = createFillMat4x4<double>(0.01));
-    DMat4Property(PropertyInfo info, IsEnabled isEnabled,
-        glm::dmat4x4 value = glm::dmat4x4(0.0),
-        glm::dmat4x4 minValue =
-            createFillMat4x4<double>(std::numeric_limits<double>::lowest()),
-        glm::dmat4x4 maxValue =
-            createFillMat4x4<double>(std::numeric_limits<double>::max()),
-        glm::dmat4x4 stepValue = createFillMat4x4<double>(0.01));
+    explicit DMat4Property(DMat4PropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

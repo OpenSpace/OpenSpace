@@ -39,47 +39,57 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SimplificationInfo = {
-        "Simplification",
-        "Do time simplification",
-        "If this value is enabled, the time is displayed in nuanced units, such as "
-        "minutes, hours, days, years, etc. If this value is disabled, it is always "
-        "displayed in seconds.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo SimplificationInfo = {
+        .identifier = "Simplification",
+        .name = "Do time simplification",
+        .description = "If this value is enabled, the time is displayed in nuanced "
+            "units, such as minutes, hours, days, years, etc. If this value is disabled, "
+            "it is always displayed in seconds.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo RequestedUnitInfo = {
-        "RequestedUnit",
-        "Requested unit",
-        "If the simplification is disabled, this time unit is used as a destination to "
-        "convert the seconds into.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo RequestedUnitInfo = {
+        .identifier = "RequestedUnit",
+        .name = "Requested unit",
+        .description = "If the simplification is disabled, this time unit is used as a "
+            "destination to convert the seconds into.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo TransitionFormatInfo = {
-        "TransitionFormat",
-        "Transition format",
-        "Format string used to format the text used while in a delta time transition, "
-        "that is if the current delta time is being interpolated to reach a target "
-        "delta time. This format gets five parameters in this order:  The target delta "
-        "time value, the target delta time unit, the string 'Paused' if the delta time "
-        "is paused or the empty string otherwise, the current delta time value, and the "
-        "current delta time unit. More information about how to make use of the format "
-        "string, see the documentation at "
-        "https://en.cppreference.com/w/cpp/utility/format/spec",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TransitionFormatInfo = {
+        .identifier = "TransitionFormat",
+        .name = "Transition format",
+        .description = "Format string used to format the text used while in a delta time "
+            "transition, that is if the current delta time is being interpolated to "
+            "reach a target delta time. This format gets five parameters in this order:  "
+            "The target delta time value, the target delta time unit, the string "
+            "'Paused' if the delta time is paused or the empty string otherwise, the "
+            "current delta time value, and the current delta time unit. More information "
+            "about how to make use of the format string, see the documentation at "
+            "https://en.cppreference.com/w/cpp/utility/format/spec",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "Simulation increment: {:.1f} {:s} / second{:s} "
+                "(current: {:.1f} {:s})"
+        }
     };
 
-    constexpr Property::PropertyInfo RegularFormatInfo = {
-        "RegularFormat",
-        "Regular format",
-        "The format string used to format the text if the target delta time is the same "
-        "as the current delta time. This format gets three parameters in this order: The "
-        "target delta value, the target delta unit, and the string 'Paused' if the delta "
-        "time is paused or the empty string otherwise. More information about how to "
-        "make use of the format string, see the documentation at "
-        "https://en.cppreference.com/w/cpp/utility/format/spec",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo RegularFormatInfo = {
+        .identifier = "RegularFormat",
+        .name = "Regular format",
+        .description = "The format string used to format the text if the target delta "
+            "time is the same as the current delta time. This format gets three "
+            "parameters in this order: The target delta value, the target delta unit, "
+            "and the string 'Paused' if the delta time is paused or the empty string "
+            "otherwise. More information about how to make use of the format string, see "
+            "the documentation at https://en.cppreference.com/w/cpp/utility/format/spec",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "Simulation increment: {:.1f} {:s} / second{:s}"
+        }
     };
 
     std::vector<std::string> unitList() {
@@ -98,17 +108,15 @@ namespace {
     // `TransitionFormat` is used if the simulation increment is currently interpolating
     // to a new value.
     struct [[codegen::Dictionary(DashboardItemSimulationIncrement)]] Parameters {
-        // [[codegen::verbatim(SimplificationInfo.description)]]
-        std::optional<bool> simplification;
+        std::optional<bool> simplification [[codegen::Info(SimplificationInfo)]];
 
-        // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+        std::optional<std::string> requestedUnit
+            [[codegen::Info(RequestedUnitInfo), codegen::inlist(unitList())]];
 
-        // [[codegen::verbatim(TransitionFormatInfo.description)]]
-        std::optional<std::string> transitionFormat;
+        std::optional<std::string> transitionFormat
+            [[codegen::Info(TransitionFormatInfo)]];
 
-        // [[codegen::verbatim(RegularFormatInfo.description)]]
-        std::optional<std::string> regularFormat;
+        std::optional<std::string> regularFormat [[codegen::Info(RegularFormatInfo)]];
     };
 } // namespace
 #include "dashboarditemsimulationincrement_codegen.cpp"
@@ -125,20 +133,17 @@ Documentation DashboardItemSimulationIncrement::Documentation() {
 DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
                                                              const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _doSimplification(SimplificationInfo, true)
+    , _doSimplification(SimplificationInfo)
     , _requestedUnit(RequestedUnitInfo)
-    , _transitionFormat(
-        TransitionFormatInfo,
-        "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})"
-    )
-    , _regularFormat(RegularFormatInfo, "Simulation increment: {:.1f} {:s} / second{:s}")
+    , _transitionFormat(TransitionFormatInfo)
+    , _regularFormat(RegularFormatInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
-            _doSimplification ? Property::Visibility::Hidden : Property::Visibility::User
+            _doSimplification ? Visibility::Hidden : Visibility::User
         );
     });
     addProperty(_doSimplification);
@@ -153,7 +158,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _doSimplification = false;
     }
     _requestedUnit.setVisibility(
-        _doSimplification ? Property::Visibility::Hidden : Property::Visibility::User
+        _doSimplification ? Visibility::Hidden : Visibility::User
     );
     addProperty(_requestedUnit);
 

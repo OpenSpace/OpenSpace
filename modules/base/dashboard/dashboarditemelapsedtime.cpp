@@ -38,52 +38,56 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo FormatStringInfo = {
-        "FormatString",
-        "Format string",
-        "The format text describing how this dashboard item renders its text. This text "
-        "must contain exactly one {} which is a placeholder that will contain the value "
-        "of the elapsed time.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FormatStringInfo = {
+        .identifier = "FormatString",
+        .name = "Format string",
+        .description = "The format text describing how this dashboard item renders its "
+            "text. This text must contain exactly one {} which is a placeholder that "
+            "will contain the value of the elapsed time.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "Elapsed time: {}"
+        }
     };
 
-    constexpr Property::PropertyInfo ReferenceTimeInfo = {
-        "ReferenceTime",
-        "Reference time",
-        "The reference time relative to which the elapsed time is specified. The format "
-        "must be an ISO 8601-compliant date string.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo ReferenceTimeInfo = {
+        .identifier = "ReferenceTime",
+        .name = "Reference time",
+        .description = "The reference time relative to which the elapsed time is "
+            "specified. The format must be an ISO 8601-compliant date string.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo SimplifyTimeInfo = {
-        "SimplifyTime",
-        "Simplify time",
-        "If this value is enabled, the elapsed time will be simplified into seconds, "
-        "minutes, hours, etc. If the value is disabled, the elapsed time is always "
-        "presented in seconds. The default value for this is 'true'.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo SimplifyTimeInfo = {
+        .identifier = "SimplifyTime",
+        .name = "Simplify time",
+        .description = "If this value is enabled, the elapsed time will be simplified "
+            "into seconds, minutes, hours, etc. If the value is disabled, the elapsed "
+            "time is always presented in seconds. The default value for this is 'true'.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo LowestTimeUnitInfo = {
-        "LowestTimeUnit",
-        "Lowest time unit when simplifying",
-        "If 'SimplifyTime' is enabled, this is the lowest time unit that will be shown. "
-        "All finer grained timesteps will be ignored.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo LowestTimeUnitInfo = {
+        .identifier = "LowestTimeUnit",
+        .name = "Lowest time unit when simplifying",
+        .description = "If 'SimplifyTime' is enabled, this is the lowest time unit that "
+            "will be shown. All finer grained timesteps will be ignored.",
+        .visibility = Visibility::User
     };
 
     // Displays the remaining time until a provided `ReferenceTime` or the elapsed time
     // since the `ReferenceTime`. The output can be configured through the `FormatString`
     // and the unit that is used to display the configurable as well.
     struct [[codegen::Dictionary(DashboardItemElapsedTime)]] Parameters {
-        // [[codegen::verbatim(FormatStringInfo.description)]]
-        std::optional<std::string> formatString;
+        std::optional<std::string> formatString [[codegen::Info(FormatStringInfo)]];
 
-        // [[codegen::verbatim(ReferenceTimeInfo.description)]]
-        std::string referenceTime [[codegen::datetime()]];
+        std::string referenceTime
+            [[codegen::Info(ReferenceTimeInfo), codegen::datetime()]];
 
-        // [[codegen::verbatim(SimplifyTimeInfo.description)]]
-        std::optional<bool> simplifyTime;
+        std::optional<bool> simplifyTime [[codegen::Info(SimplifyTimeInfo)]];
 
         enum class [[codegen::map(openspace::TimeUnit)]] TimeUnit {
             Nanosecond,
@@ -97,8 +101,7 @@ namespace {
             Year
         };
 
-        // [[codegen::verbatim(LowestTimeUnitInfo.description)]]
-        std::optional<TimeUnit> lowestTimeUnit;
+        std::optional<TimeUnit> lowestTimeUnit [[codegen::Info(LowestTimeUnitInfo)]];
     };
 } // namespace
 #include "dashboarditemelapsedtime_codegen.cpp"
@@ -114,9 +117,9 @@ Documentation DashboardItemElapsedTime::Documentation() {
 
 DashboardItemElapsedTime::DashboardItemElapsedTime(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _formatString(FormatStringInfo, "Elapsed time: {}")
+    , _formatString(FormatStringInfo)
     , _referenceTime(ReferenceTimeInfo)
-    , _simplifyTime(SimplifyTimeInfo, true)
+    , _simplifyTime(SimplifyTimeInfo)
     , _lowestTimeUnit(LowestTimeUnitInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

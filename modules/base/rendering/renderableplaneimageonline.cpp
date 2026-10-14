@@ -40,23 +40,23 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "URL",
-        "Image URL",
-        "Sets the URL of the texture that is displayed on this screen space plane. If "
-        "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. During stereo rendering, this texture is considered the left "
-        "eye.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "URL",
+        .name = "Image URL",
+        .description = "Sets the URL of the texture that is displayed on this screen "
+            "space plane. If this value is changed, the image at the new path will "
+            "automatically be loaded and displayed. During stereo rendering, this "
+            "texture is considered the left eye.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo RightTextureInfo = {
-        "RightTexture",
-        "Right Eye Image URL",
-        "Sets the URL of the texture that is displayed on this plane for the right eye "
-        "during stereo rendering. If this value is changed, the image at the new path "
-        "will automatically be loaded and displayed.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo RightTextureInfo = {
+        .identifier = "RightTexture",
+        .name = "Right Eye Image URL",
+        .description = "Sets the URL of the texture that is displayed on this plane for "
+            "the right eye during stereo rendering. If this value is changed, the image "
+            "at the new path will automatically be loaded and displayed.",
+        .visibility = Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture image is loaded from the internet
@@ -65,11 +65,10 @@ namespace {
     // For stereo rendering, a second image can be specified using the `RightURL`
     // property. This image will be used for the right eye.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::string url [[codegen::key("URL")]];
+        std::string url [[codegen::Info(TextureInfo), codegen::key("URL")]];
 
-        // [[codegen::verbatim(RightTextureInfo.description)]]
-        std::optional<std::string> rightUrl [[codegen::key("RightURL")]];
+        std::optional<std::string> rightUrl
+            [[codegen::Info(RightTextureInfo), codegen::key("RightURL")]];
     };
 } // namespace
 #include "renderableplaneimageonline_codegen.cpp"

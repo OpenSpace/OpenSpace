@@ -44,20 +44,20 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "A path to an image file to use as a texture for the plane. During stereo "
-        "rendering, this texture is considered the left eye.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "A path to an image file to use as a texture for the plane. "
+            "During stereo rendering, this texture is considered the left eye.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo RightTextureInfo = {
-        "RightTexture",
-        "Right Eye Texture",
-        "Sets the path of the texture that is displayed on this plane for the right eye "
-        "during stereo rendering.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo RightTextureInfo = {
+        .identifier = "RightTexture",
+        .name = "Right Eye Texture",
+        .description = "Sets the path of the texture that is displayed on this plane for "
+            "the right eye during stereo rendering.",
+        .visibility = Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture is provided by a local file on disk.
@@ -65,11 +65,10 @@ namespace {
     // For stereo rendering, a second image can be specified using the `RightTexture`
     // property. This image will be used for the right eye.
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::filesystem::path texture;
+        std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
-        // [[codegen::verbatim(RightTextureInfo.description)]]
-        std::optional<std::filesystem::path> rightTexture;
+        std::optional<std::filesystem::path> rightTexture
+            [[codegen::Info(RightTextureInfo)]];
 
         // If this value is set to true, the image for this plane will not be loaded at
         // startup but rather when plane is shown for the first time. Additionally, if the
@@ -238,12 +237,12 @@ void RenderablePlaneImageLocal::loadTexture() {
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
     if (_isStereo) {
-        opengl::Texture* t = _rightTexture;
+        opengl::Texture* rt = _rightTexture;
 
-        const unsigned int hash = hashCRC32File(_rightTexturePath);
+        const unsigned int rHash = hashCRC32File(_rightTexturePath);
 
         _rightTexture = BaseModule::TextureManager.request(
-            std::to_string(hash),
+            std::to_string(rHash),
             [path = _rightTexturePath.value()]() ->
                 std::unique_ptr<opengl::Texture>
             {
@@ -263,7 +262,7 @@ void RenderablePlaneImageLocal::loadTexture() {
             }
         );
 
-        BaseModule::TextureManager.release(t);
+        BaseModule::TextureManager.release(rt);
 
         _rightTextureFile = std::make_unique<filesystem::File>(_rightTexturePath.value());
         _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });

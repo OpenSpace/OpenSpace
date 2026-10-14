@@ -31,12 +31,17 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo RotationInfo = {
-        "Rotation",
-        "Rotation",
-        "This value is the used as a 3x3 rotation matrix that is applied to the scene "
-        "graph node that this transformation is attached to relative to its parent.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo RotationInfo = {
+        .identifier = "Rotation",
+        .name = "Rotation",
+        .description = "This value is the used as a 3x3 rotation matrix that is applied "
+            "to the scene graph node that this transformation is attached to relative to "
+            "its parent.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(-glm::pi<float>()), glm::vec3(glm::pi<float>()) }
+        }
     };
 
     // Conversion from rotation matrix to euler angles, given that the rotation is a pure
@@ -92,12 +97,7 @@ Documentation StaticRotation::Documentation() {
 
 StaticRotation::StaticRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
-    , _eulerRotation(
-        RotationInfo,
-        glm::vec3(0.f),
-        glm::vec3(-glm::pi<float>()),
-        glm::vec3(glm::pi<float>())
-    )
+    , _eulerRotation(RotationInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

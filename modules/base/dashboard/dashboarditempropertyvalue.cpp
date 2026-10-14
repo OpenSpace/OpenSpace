@@ -55,36 +55,36 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo PropertyUriInfo = {
-        "URI",
-        "Property URI",
-        "The URI of the property that is displayed in this dashboard item.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo PropertyUriInfo = {
+        .identifier = "URI",
+        .name = "Property URI",
+        .description = "The URI of the property that is displayed.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo DisplayStringInfo = {
-        "DisplayString",
-        "Display string",
-        "The String that is being displayed. It must either be empty (in which case only "
-        "the value itself will be displayed), or it must contain exactly one or more "
-        "instances of {}, which will be replaced with the value(s) of the property "
-        "during rendering. For scalar types, there has to be exactly one instance of {}, "
-        "for vector types, there need to be as many {} as there are components in the "
-        "vector, for example two {} for vec2 types, three for vec3 types, etc. For more "
-        "information on how to structure the formatting string, see the documentation at "
-        "https://en.cppreference.com/w/cpp/utility/format/spec",
-        Property::Visibility::User
+    constexpr StringPropertyInfo DisplayStringInfo = {
+        .identifier = "DisplayString",
+        .name = "Display string",
+        .description = "The string that is being displayed. It must either be empty (in "
+            "which case only the value itself will be displayed), or it must contain "
+            "exactly one or more instances of {}, which will be replaced with the "
+            "value(s) of the property during rendering. For scalar types, there has to "
+            "be exactly one instance of {}, for vector types, there need to be as many "
+            "{} as there are components in the vector, for example two {} for vec2 "
+            "types, three for vec3 types, etc. For more information on how to structure "
+            "the formatting string, see the documentation at "
+            "https://en.cppreference.com/w/cpp/utility/format/spec",
+        .visibility = Visibility::User
     };
 
     // Shows the value of the provided property. Depending on the type of the property,
     // the `DisplayString` will have to be adapted. See the documentation for the
     // `DisplayString` for more information.
     struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
-        // [[codegen::verbatim(PropertyUriInfo.description)]]
-        std::optional<std::string> uri [[codegen::key("URI")]];
+        std::optional<std::string> uri
+            [[codegen::Info(PropertyUriInfo), codegen::key("URI")]];
 
-        // [[codegen::verbatim(DisplayStringInfo.description)]]
-        std::optional<std::string> displayString;
+        std::optional<std::string> displayString [[codegen::Info(DisplayStringInfo)]];
     };
 } // namespace
 #include "dashboarditempropertyvalue_codegen.cpp"

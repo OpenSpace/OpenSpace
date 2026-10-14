@@ -31,17 +31,21 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<double> {
+    static constexpr double Min = std::numeric_limits<double>::lowest();
+    static constexpr double Max = std::numeric_limits<double>::max();
+    static constexpr double Step = 0.01;
+};
+
+using DoublePropertyInfo = BasicPropertyInfo<NumericalDefaults<double>>;
+
 /**
  * This class is a concrete implementation of TemplateProperty with the type `double`.
  */
 class DoubleProperty : public NumericalProperty<double> {
 public:
-    explicit DoubleProperty(PropertyInfo info, double value = 0.0,
-        double minValue = std::numeric_limits<double>::lowest(),
-        double maxValue = std::numeric_limits<double>::max(), double stepValue = 0.01);
-    DoubleProperty(PropertyInfo info, IsEnabled isEnabled, double value = 0.0,
-        double minValue = std::numeric_limits<double>::lowest(),
-        double maxValue = std::numeric_limits<double>::max(), double stepValue = 0.01);
+    explicit DoubleProperty(DoublePropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

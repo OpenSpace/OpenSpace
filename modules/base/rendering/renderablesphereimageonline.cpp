@@ -37,12 +37,12 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "URL",
-        "Image URL",
-        "A URL to an image to use as a texture for this sphere. The image is expected to "
-        "be an equirectangular projection.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "URL",
+        .name = "Image URL",
+        .description = "A URL to an image to use as a texture for this sphere. The image "
+            "is expected to be an equirectangular projection.",
+        .visibility = Visibility::User
     };
 
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(const std::string& url)
@@ -73,8 +73,7 @@ namespace {
     // and hence expects an equirectangular image. However, it can also be used to show
     // fisheye images by changing the `TextureProjection`.
     struct [[codegen::Dictionary(RenderableSphereImageOnline)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::string url [[codegen::key("URL")]];
+        std::string url [[codegen::Info(TextureInfo), codegen::key("URL")]];
     };
 } // namespace
 #include "renderablesphereimageonline_codegen.cpp"

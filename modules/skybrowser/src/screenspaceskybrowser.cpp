@@ -43,61 +43,75 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureQualityInfo = {
-        "TextureQuality",
-        "Quality of texture",
-        "A parameter to set the resolution of the texture. 1 is full resolution and "
-        "slower frame rate. Lower value means lower resolution of texture and faster "
-        "frame rate.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo DisplayCopyInfo = {
+        .identifier = "DisplayCopy",
+        .name = "Display copy position",
+        .description = "Display a copy of this sky browser at an additional position. "
+            "This copy will not be interactive. The position is in RAE (Radius, Azimuth, "
+            "Elevation) coordinates or Cartesian, depending on if the browser uses RAE "
+            "or Cartesian coordinates.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .minMax = {
+                glm::vec3(-4.f, -4.f, -10.f),
+                glm::vec3(4.f, 4.f, glm::half_pi<float>())
+            }
+        }
     };
 
-    constexpr Property::PropertyInfo DisplayCopyInfo = {
-        "DisplayCopy",
-        "Display copy position",
-        "Display a copy of this sky browser at an additional position. This copy will "
-        "not be interactive. The position is in RAE (Radius, Azimuth, Elevation) "
-        "coordinates or Cartesian, depending on if the browser uses RAE or Cartesian "
-        "coordinates.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo DisplayCopyShowInfo = {
+        .identifier = "ShowDisplayCopy",
+        .name = "Show display copy",
+        .description = "Show the display copy.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo DisplayCopyShowInfo = {
-        "ShowDisplayCopy",
-        "Show display copy",
-        "Show the display copy.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo IsHiddenInfo = {
+        .identifier = "IsHidden",
+        .name = "Is hidden",
+        .description = "If checked, the browser will be not be displayed. If it is not "
+            "checked, it will be.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo IsHiddenInfo = {
-        "IsHidden",
-        "Is hidden",
-        "If checked, the browser will be not be displayed. If it is not checked, it will "
-        "be.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo PointSpacecraftInfo = {
+        .identifier = "PointSpacecraft",
+        .name = "Point spacecraft",
+        .description = "If checked, spacecrafts will point towards the coordinate of an "
+            "image upon selection.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo PointSpacecraftInfo = {
-        "PointSpacecraft",
-        "Point spacecraft",
-        "If checked, spacecrafts will point towards the coordinate of an image upon "
-        "selection.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo UpdateDuringAnimationInfo = {
+        .identifier = "UpdateDuringTargetAnimation",
+        .name = "Update during target animation",
+        .description = "If checked, the sky browser display copy will update its "
+            "coordinates while the target is animating.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo UpdateDuringAnimationInfo = {
-        "UpdateDuringTargetAnimation",
-        "Update during target animation",
-        "If checked, the sky browser display copy will update its coordinates while the "
-        "target is animating.",
-        Property::Visibility::User
-    };
-
-    constexpr Property::PropertyInfo VerticalFovInfo = {
-        "VerticalFov",
-        "Vertical field of view",
-        "The vertical field of view of the target.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo VerticalFovInfo = {
+        .identifier = "VerticalFov",
+        .name = "Vertical field of view",
+        .description = "The vertical field of view of the target.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 10.0,
+            .minMax = { 0.00000000001, 70.0 }
+        }
     };
 
     /**
@@ -124,20 +138,19 @@ namespace {
     // created from interacting with the SkyBrowser user interface panel. If created in
     // an asset, it requires some extra scripting to work with the SkyBrowser feature.
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
-        // [[codegen::verbatim(TextureQualityInfo.description)]]
+        // A parameter to set the resolution of the texture. 1 is full resolution and
+        // slower frame rate. Lower value means lower resolution of texture and faster
+        // frame rate.
         std::optional<float> textureQuality [[codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(IsHiddenInfo.description)]]
-        std::optional<bool> isHidden;
+        std::optional<bool> isHidden [[codegen::Info(IsHiddenInfo)]];
 
-        // [[codegen::verbatim(PointSpacecraftInfo.description)]]
-        std::optional<bool> pointSpacecraft;
+        std::optional<bool> pointSpacecraft [[codegen::Info(PointSpacecraftInfo)]];
 
-        // [[codegen::verbatim(UpdateDuringAnimationInfo.description)]]
-        std::optional<bool> updateDuringTargetAnimation;
+        std::optional<bool> updateDuringTargetAnimation
+            [[codegen::Info(UpdateDuringAnimationInfo)]];
 
-        // [[codegen::verbatim(VerticalFovInfo.description)]]
-        std::optional<double> verticalFov;
+        std::optional<double> verticalFov [[codegen::Info(VerticalFovInfo)]];
     };
 } // namespace
 #include "screenspaceskybrowser_codegen.cpp"
@@ -150,10 +163,10 @@ Documentation ScreenSpaceSkyBrowser::Documentation() {
 
 ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const Dictionary& dictionary)
     : ScreenSpaceBrowser(dictionary)
-    , _isHidden(IsHiddenInfo, true)
-    , _isPointingSpacecraft(PointSpacecraftInfo, false)
-    , _updateDuringTargetAnimation(UpdateDuringAnimationInfo, true)
-    , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
+    , _isHidden(IsHiddenInfo)
+    , _isPointingSpacecraft(PointSpacecraftInfo)
+    , _updateDuringTargetAnimation(UpdateDuringAnimationInfo)
+    , _verticalFov(VerticalFovInfo)
     , _wwtCommunicator(_browserInstance.get())
 
 {
@@ -169,10 +182,9 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const Dictionary& dictionary)
     );
 
     _verticalFov = p.verticalFov.value_or(_verticalFov);
-    _verticalFov.setReadOnly(true);
+    addProperty(_verticalFov);
 
     addProperty(_isHidden);
-    addProperty(_verticalFov);
     addProperty(_isPointingSpacecraft);
     addProperty(_updateDuringTargetAnimation);
 
@@ -269,27 +281,21 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
 void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCopies) {
     const size_t start = _displayCopies.size();
     for (int i = 0; i < nCopies; i++) {
-        Property::PropertyInfo info = DisplayCopyInfo;
+        Vec3PropertyInfo info = DisplayCopyInfo;
         const float azimuth = i * glm::two_pi<float>() / nCopies;
         const glm::vec3 position = raePosition + glm::vec3(0.f, azimuth, 0.f);
         // @TODO(abock) I think the lifetime for this string is a bit tricky. I don't
         // think it will live long enough to be actually usable
         const std::string idDisplayCopy = "DisplayCopy" + std::to_string(start + i);
-        info.identifier = idDisplayCopy.c_str();
-        _displayCopies.push_back(
-            std::make_unique<Vec3Property>(
-                info,
-                position,
-                glm::vec3(-4.f, -4.f, -10.f),
-                glm::vec3(4.f, 4.f, glm::half_pi<float>())
-            )
-        );
-        Property::PropertyInfo showInfo = DisplayCopyShowInfo;
+        info.identifier = idDisplayCopy;
+        info.defaults.value = position;
+        _displayCopies.push_back(std::make_unique<Vec3Property>(info));
+        BoolPropertyInfo showInfo = DisplayCopyShowInfo;
         // @TODO(abock) I think the lifetime for this string is a bit tricky. I don't
         // think it will live long enough to be actually usable
         const std::string idDispCpyVis = "ShowDisplayCopy" + std::to_string(start + i);
-        showInfo.identifier = idDispCpyVis.c_str();
-        _showDisplayCopies.push_back(std::make_unique<BoolProperty>(showInfo, true));
+        showInfo.identifier = idDispCpyVis;
+        _showDisplayCopies.push_back(std::make_unique<BoolProperty>(showInfo));
         addProperty(_displayCopies.back().get());
         addProperty(_showDisplayCopies.back().get());
     }

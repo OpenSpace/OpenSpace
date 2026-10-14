@@ -92,42 +92,40 @@ namespace {
         return Time::convertTime(res);
     }
 
-    constexpr Property::PropertyInfo TextureSourceInfo = {
-        "TextureSource",
-        "Texture source",
-        "A directory on disk from which to load the texture files for the sphere.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureSourceInfo = {
+        .identifier = "TextureSource",
+        .name = "Texture source",
+        .description = "A directory on disk from which to load the texture files for the "
+            "sphere.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo FitsLayerInfo = {
-        "FitsLayer",
-        "Texture layer",
-        "The index, a whole positive number, of the layer in the FITS file to use as "
-        "texture. If not specified, the first layer in the data will be used regardless. "
-        "When specified, that data layer will be the option used.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo FitsLayerNameInfo = {
+        .identifier = "LayerNames",
+        .name = "Texture layer options",
+        .description = "This value specifies which name of the fits layer to use as "
+            "texture.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FitsLayerNameInfo = {
-        "LayerNames",
-        "Texture layer options",
-        "This value specifies which name of the fits layer to use as texture.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo TextureFilterInfo = {
+        .identifier = "TextureFilter",
+        .name = "Texture filter",
+        .description = "Option to choose nearest neighbor or linear filtering for the "
+            "texture.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TextureFilterInfo = {
-        "TextureFilter",
-        "Texture filter",
-        "Option to choose nearest neighbor or linear filtering for the texture.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo SaveDownloadsOnShutdown = {
-        "SaveDownloadsOnShutdown",
-        "Save downloads on shutdown",
-        "This is an option for if dynamically downloaded files should be saved for the "
-        "next run or not.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo SaveDownloadsOnShutdown = {
+        .identifier = "SaveDownloadsOnShutdown",
+        .name = "Save downloads on shutdown",
+        .description = "This is an option for if dynamically downloaded files should be "
+            "saved for the next run or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // Reads a data sequence from specifically FITS files, makes textures from them, and
@@ -156,8 +154,8 @@ namespace {
     // layers in `LayerNames` and `LayerMinMaxCapValues`. `CacheData` and `showAtAllTimes`
     // are two other optional parameters.
     struct [[codegen::Dictionary(RenderableTimeVaryingFitsSphere)]] Parameters {
-        // [[codegen::verbatim(TextureSourceInfo.description)]]
-        std::optional<std::filesystem::path> textureSource;
+        std::optional<std::filesystem::path> textureSource
+            [[codegen::Info(TextureSourceInfo)]];
 
         enum class [[codegen::map(
             openspace::RenderableTimeVaryingFitsSphere::LoadingType)]] LoadingType
@@ -184,11 +182,12 @@ namespace {
         // A URL that returns a JSON formatted page with a list of each available file.
         std::optional<std::string> dataURL;
 
-        // [[codegen::verbatim(FitsLayerInfo.description)]]
+        // The index, a whole positive number, of the layer in the FITS file to use as
+        // texture. If not specified, the first layer in the data will be used regardless.
+        // When specified, that data layer will be the option used.
         std::optional<int> fitsLayer;
 
-        // [[codegen::verbatim(FitsLayerNameInfo.description)]]
-        std::optional<Dictionary> layerNames;
+        std::optional<Dictionary> layerNames [[codegen::Info(FitsLayerNameInfo)]];
 
         // A range per layer to be used to cap where the color range will lie. Values
         // outside of range will be overexposed, i.e. data values below the min or above
@@ -221,7 +220,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                                                              const Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _fitsLayerName(FitsLayerNameInfo)
-    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
+    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown)
     , _textureFilterProperty(TextureFilterInfo)
     , _textureSource(TextureSourceInfo)
 {
@@ -231,7 +230,6 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         _textureSource = p.textureSource->string();
     }
 
-    _textureSource.setReadOnly(true);
     addProperty(_textureSource);
 
     _loadingType = codegen::map<LoadingType>(

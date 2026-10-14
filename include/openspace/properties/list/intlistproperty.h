@@ -27,14 +27,15 @@
 
 #include <openspace/properties/misc/listproperty.h>
 
+#include <span>
+
 namespace openspace {
+
+using IntListPropertyInfo = BasicPropertyInfo<ValueDefaults<std::span<int>>>;
 
 class IntListProperty : public ListProperty<int> {
 public:
-    explicit IntListProperty(PropertyInfo info,
-        std::vector<int> values = std::vector<int>());
-    IntListProperty(PropertyInfo info, IsEnabled isEnabled,
-        std::vector<int> values = std::vector<int>());
+    explicit IntListProperty(IntListPropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

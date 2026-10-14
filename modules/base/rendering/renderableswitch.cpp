@@ -34,11 +34,16 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo DistanceThresholdInfo = {
-        "DistanceThreshold",
-        "Distance threshold",
-        "Threshold in meters for when the switch happens between the two renderables.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo DistanceThresholdInfo = {
+        .identifier = "DistanceThreshold",
+        .name = "Distance threshold",
+        .description = "Threshold in meters for when the switch happens between the two "
+            "renderables.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1e25f }
+        }
     };
 
     // Can be used to render one of two renderables depending on the distance between the
@@ -59,8 +64,8 @@ namespace {
         // The renderable to show when the camera is further away than the threshold.
         std::optional<Dictionary> renderableFar [[codegen::reference("core_renderable")]];
 
-        // [[codegen::verbatim(DistanceThresholdInfo.description)]]
-        std::optional<double> distanceThreshold [[codegen::greaterequal(0.0)]];
+        std::optional<double> distanceThreshold
+            [[codegen::Info(DistanceThresholdInfo), codegen::greaterequal(0.0)]];
     };
 } // namespace
 #include "renderableswitch_codegen.cpp"
@@ -76,7 +81,7 @@ Documentation RenderableSwitch::Documentation() {
 
 RenderableSwitch::RenderableSwitch(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _distanceThreshold(DistanceThresholdInfo, 1.f, 0.f, 1e25f)
+    , _distanceThreshold(DistanceThresholdInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

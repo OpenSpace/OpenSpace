@@ -29,6 +29,19 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/filesystem/filesystem.h>
 #include <openspace/misc/dictionary.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/matrix/dmat2property.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <array>
 #include <string>
 
 using namespace openspace;
@@ -2696,4 +2709,171 @@ TEST_CASE("Documentation: Verifier Documentation Post Conditions", "[documentati
     CHECK(!AnnotationVerifier<DoubleVector4Verifier>("A"s).documentation().empty());
 
     CHECK(!ReferencingVerifier("identifier"s).documentation().empty());
+}
+
+TEST_CASE("Documentation: Description With Default Value", "[documentation]") {
+    SECTION("No default value") {
+        constexpr PropertyOwner::PropertyOwnerInfo OwnerInfo = {
+            .identifier = "Owner",
+            .name = "Owner",
+            .description = "Description."
+        };
+        CHECK(descriptionWithDefaultValue(OwnerInfo) == "Description.");
+
+        constexpr TriggerPropertyInfo TriggerInfo = {
+            .identifier = "Trigger",
+            .name = "Trigger",
+            .description = "Description."
+        };
+        CHECK(descriptionWithDefaultValue(TriggerInfo) == "Description.");
+    }
+
+    SECTION("Comment") {
+        constexpr PropertyOwner::PropertyOwnerInfo OwnerInfo = {
+            .identifier = "Owner",
+            .name = "Owner",
+            .description = "Description."
+        };
+        CHECK(
+            descriptionWithDefaultValue(OwnerInfo, "Comment.") ==
+            "Description. Comment."
+        );
+
+        constexpr BoolPropertyInfo BoolInfo = {
+            .identifier = "Bool",
+            .name = "Bool",
+            .description = "Description.",
+            .defaults = { .value = true }
+        };
+        CHECK(
+            descriptionWithDefaultValue(BoolInfo, "Comment.") ==
+            "Description. Comment. Default value: true"
+        );
+    }
+
+    SECTION("Bool") {
+        constexpr BoolPropertyInfo Info = {
+            .identifier = "Bool",
+            .name = "Bool",
+            .description = "Description."
+        };
+        CHECK(descriptionWithDefaultValue(Info) == "Description. Default value: false");
+    }
+
+    SECTION("Int") {
+        constexpr IntPropertyInfo Info = {
+            .identifier = "Int",
+            .name = "Int",
+            .description = "Description.",
+            .defaults = { .value = -5 }
+        };
+        CHECK(descriptionWithDefaultValue(Info) == "Description. Default value: -5");
+    }
+
+    SECTION("Float") {
+        constexpr FloatPropertyInfo Info = {
+            .identifier = "Float",
+            .name = "Float",
+            .description = "Description.",
+            .defaults = { .value = 1.f }
+        };
+        CHECK(descriptionWithDefaultValue(Info) == "Description. Default value: 1.0");
+
+        constexpr DoublePropertyInfo Info2 = {
+            .identifier = "Double",
+            .name = "Double",
+            .description = "Description.",
+            .defaults = { .value = 0.25 }
+        };
+        CHECK(descriptionWithDefaultValue(Info2) == "Description. Default value: 0.25");
+    }
+
+    SECTION("Vector") {
+        constexpr Vec3PropertyInfo Info = {
+            .identifier = "Vec3",
+            .name = "Vec3",
+            .description = "Description.",
+            .defaults = {
+                .value = glm::vec3(1.f),
+                .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+            }
+        };
+        CHECK(
+            descriptionWithDefaultValue(Info) ==
+            "Description. Default value: { 1.0, 1.0, 1.0 }"
+        );
+
+        constexpr IVec2PropertyInfo Info2 = {
+            .identifier = "IVec2",
+            .name = "IVec2",
+            .description = "Description.",
+            .defaults = { .value = glm::ivec2(1, 2) }
+        };
+        CHECK(
+            descriptionWithDefaultValue(Info2) == "Description. Default value: { 1, 2 }"
+        );
+    }
+
+    SECTION("Matrix") {
+        constexpr DMat2PropertyInfo Info = {
+            .identifier = "DMat2",
+            .name = "DMat2",
+            .description = "Description.",
+            .defaults = { .value = glm::dmat2(1.0, 2.0, 3.0, 4.0) }
+        };
+        CHECK(
+            descriptionWithDefaultValue(Info) ==
+            "Description. Default value: { 1.0, 2.0, 3.0, 4.0 }"
+        );
+    }
+
+    SECTION("String") {
+        constexpr StringPropertyInfo Info = {
+            .identifier = "String",
+            .name = "String",
+            .description = "Description.",
+            .defaults = { .value = "abc" }
+        };
+        CHECK(
+            descriptionWithDefaultValue(Info) == "Description. Default value: \"abc\""
+        );
+
+        constexpr StringPropertyInfo EmptyInfo = {
+            .identifier = "String",
+            .name = "String",
+            .description = "Description."
+        };
+        CHECK(descriptionWithDefaultValue(EmptyInfo) == "Description.");
+    }
+
+    SECTION("List") {
+        std::array<std::string_view, 2> values = { "a", "b" };
+        const StringListPropertyInfo Info = {
+            .identifier = "StringList",
+            .name = "StringList",
+            .description = "Description.",
+            .defaults = { .value = values }
+        };
+        CHECK(
+            descriptionWithDefaultValue(Info) ==
+            "Description. Default value: { \"a\", \"b\" }"
+        );
+
+        constexpr StringListPropertyInfo EmptyInfo = {
+            .identifier = "StringList",
+            .name = "StringList",
+            .description = "Description."
+        };
+        CHECK(descriptionWithDefaultValue(EmptyInfo) == "Description.");
+    }
+
+    SECTION("Option") {
+        constexpr OptionPropertyInfo Info = {
+            .identifier = "Option",
+            .name = "Option",
+            .description = "Description.",
+            .defaults = { .value = 2 }
+        };
+        CHECK(descriptionWithDefaultValue(Info) == "Description.");
+    }
 }

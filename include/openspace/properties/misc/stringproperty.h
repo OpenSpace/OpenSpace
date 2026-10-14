@@ -27,13 +27,28 @@
 
 #include <openspace/properties/templateproperty.h>
 
+#include <string>
+#include <string_view>
+
 namespace openspace {
+
+/**
+ * A character traits used for the default value of StringProperty. It is identical to
+ * `std::char_traits<char>`, but since it is a separate type, `std::string` can not
+ * automatically be converted. Such a conversion would create an `std::string_view` to a
+ * dangling `std::string` which usally is a temporary and that would no longer exist by
+ * the time the StringProperty is created, causing a crash. For `const char*` and
+ * `std::string_view` this will work.
+ */
+struct StringDefaultTraits : std::char_traits<char> {};
+
+using StringPropertyInfo = BasicPropertyInfo<
+    ValueDefaults<std::basic_string_view<char, StringDefaultTraits>>
+>;
 
 class StringProperty : public TemplateProperty<std::string> {
 public:
-    explicit StringProperty(PropertyInfo info, std::string value = "");
-    StringProperty(PropertyInfo info, IsEnabled isEnabled,
-        std::string value = "");
+    explicit StringProperty(StringPropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

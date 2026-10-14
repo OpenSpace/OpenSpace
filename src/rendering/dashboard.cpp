@@ -36,28 +36,40 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "IsEnabled",
-        "Enabled",
-        "If this value is 'false', this dashboard will be invisible, regardless of the "
-        "state of the individual components.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "IsEnabled",
+        .name = "Enabled",
+        .description = "If this value is 'false', this dashboard will be invisible, "
+            "regardless of the state of the individual components.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo StartPositionOffsetInfo = {
-        "StartPositionOffset",
-        "Start position offset",
-        "A 2D vector controlling where the dashboard rendering starts. Adding an offset "
-        "in x and y-direction on screen.",
-        Property::Visibility::User
+    constexpr IVec2PropertyInfo StartPositionOffsetInfo = {
+        .identifier = "StartPositionOffset",
+        .name = "Start position offset",
+        .description = "A 2D vector controlling where the dashboard rendering starts. "
+            "Adding an offset in x and y-direction on screen.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::ivec2(10),
+            .minMax = { glm::ivec2(0), glm::ivec2(8192) }
+        }
     };
 
-    constexpr Property::PropertyInfo RefreshRateInfo = {
-        "RefreshRate",
-        "Refresh rate (in ms)",
-        "The number of milliseconds between refreshes of the dashboard items. If the "
-        "value is 0 the dashboard is refreshed at the same rate as the main rendering.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo RefreshRateInfo = {
+        .identifier = "RefreshRate",
+        .name = "Refresh rate (in ms)",
+        .description = "The number of milliseconds between refreshes of the dashboard "
+            "items. If the value is 0 the dashboard is refreshed at the same rate as the "
+            "main rendering.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 1000 }
+        }
     };
 } // namespace
 
@@ -65,14 +77,9 @@ namespace openspace {
 
 Dashboard::Dashboard()
     : PropertyOwner({ "Dashboard" })
-    , _isEnabled(EnabledInfo, true)
-    , _startPositionOffset(
-        StartPositionOffsetInfo,
-        glm::ivec2(10),
-        glm::ivec2(0),
-        glm::ivec2(8192)
-    )
-    , _refreshRate(RefreshRateInfo, 0, 0, 1000)
+    , _isEnabled(EnabledInfo)
+    , _startPositionOffset(StartPositionOffsetInfo)
+    , _refreshRate(RefreshRateInfo)
     , _lastRefresh(std::chrono::steady_clock::now())
 {
     addProperty(_isEnabled);

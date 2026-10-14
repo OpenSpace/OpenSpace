@@ -52,35 +52,22 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableConstellationLines";
 
-    constexpr Property::PropertyInfo FileInfo = {
-        "File",
-        "Constellation data file path",
-        "The path to a SPECK file that contains the data for the constellation lines.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FileInfo = {
+        .identifier = "File",
+        .name = "Constellation data file path",
+        .description = "The path to a SPECK file that contains the data for the "
+            "constellation lines.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DrawElementsInfo = {
-        "DrawElements",
-        "Draw elements",
-        "Enables/Disables the drawing of the constellations.",
-        Property::Visibility::NoviceUser
-    };
-
-    constexpr Property::PropertyInfo UnitInfo = {
-        "Unit",
-        "Unit",
-        "The distance unit used for the constellation lines data.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo ColorsInfo = {
-        "Colors",
-        "Constellation colors",
-        "A list of colors to use for the constellations. A data file may include several "
-        "groups of constellations, where each group can have a distinct color. The index "
-        "for the color parameter for each constellation in the data file corresponds to "
-        "the order of the colors in this list.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo DrawElementsInfo = {
+        .identifier = "DrawElements",
+        .name = "Draw elements",
+        .description = "Enables/Disables the drawing of the constellations.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     // @TODO (2025-01-07, emmbr) I did not add any description of the file format below,
@@ -104,11 +91,9 @@ namespace {
     // of the constellation, the text of that label is replaced with the full name from
     // the `NamesFile`.
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {
-        // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path file;
+        std::filesystem::path file [[codegen::Info(FileInfo)]];
 
-        // [[codegen::verbatim(DrawElementsInfo.description)]]
-        std::optional<bool> drawElements;
+        std::optional<bool> drawElements [[codegen::Info(DrawElementsInfo)]];
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
@@ -119,10 +104,13 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             Gigalightyear [[codegen::key("Gly")]]
         };
-        // [[codegen::verbatim(UnitInfo.description)]]
+        // The distance unit used for the constellation lines data.
         std::optional<Unit> unit;
 
-        // [[codegen::verbatim(ColorsInfo.description)]]
+        // A list of colors to use for the constellations. A data file may include several
+        // groups of constellations, where each group can have a distinct color. The index
+        // for the color parameter for each constellation in the data file corresponds to
+        // the order of the colors in this list.
         std::optional<std::vector<glm::vec3>> colors [[codegen::color()]];
     };
 } // namespace
@@ -140,7 +128,7 @@ Documentation RenderableConstellationLines::Documentation() {
 RenderableConstellationLines::RenderableConstellationLines(const Dictionary& dictionary)
     : RenderableConstellationsBase(dictionary)
     , _speckFile(FileInfo)
-    , _drawElements(DrawElementsInfo, true)
+    , _drawElements(DrawElementsInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

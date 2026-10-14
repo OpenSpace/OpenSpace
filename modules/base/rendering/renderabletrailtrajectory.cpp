@@ -39,91 +39,107 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo StartTimeInfo = {
-        "StartTime",
-        "Start time",
-        "The start time for the range of this trajectory. The date must be in ISO 8601 "
-        "format: YYYY MM DD HH:mm:ss.xxx.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo StartTimeInfo = {
+        .identifier = "StartTime",
+        .name = "Start time",
+        .description = "The start time for the range of this trajectory. The date must "
+            "be in ISO 8601 format: YYYY MM DD HH:mm:ss.xxx.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EndTimeInfo = {
-        "EndTime",
-        "End time",
-        "The end time for the range of this trajectory. The date must be in ISO 8601 "
-        "format: YYYY MM DD HH:mm:ss.xxx.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo EndTimeInfo = {
+        .identifier = "EndTime",
+        .name = "End time",
+        .description = "The end time for the range of this trajectory. The date must be "
+            "in ISO 8601 format: YYYY MM DD HH:mm:ss.xxx.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SampleIntervalInfo = {
-        "SampleInterval",
-        "Sample interval",
-        "The interval between samples of the trajectory. This value (together with "
-        "'TimeStampSubsampleFactor') determines how far apart (in seconds) the samples "
-        "are spaced along the trajectory.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo SampleIntervalInfo = {
+        .identifier = "SampleInterval",
+        .name = "Sample interval",
+        .description = "The interval between samples of the trajectory. This value "
+            "(together with 'TimeStampSubsampleFactor') determines how far apart (in "
+            "seconds) the samples are spaced along the trajectory.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = timeconstants::SecondsPerDay / 2.0,
+            .minMax = { 1.0, 1e6 }
+        }
     };
 
-    constexpr Property::PropertyInfo TimeSubSampleInfo = {
-        "TimeStampSubsampleFactor",
-        "Time stamp subsampling factor",
-        "The factor that is used to create subsamples along the trajectory. This value "
-        "(together with 'SampleInterval') determines how far apart (in seconds) the "
-        "samples are spaced along the trajectory. Subsamples are rendered as smaller "
-        "points compared to normal samples (from 'SampleInterval') when rendering the "
-        "trail as points.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo TimeSubSampleInfo = {
+        .identifier = "TimeStampSubsampleFactor",
+        .name = "Time stamp subsampling factor",
+        .description = "The factor that is used to create subsamples along the "
+            "trajectory. This value (together with 'SampleInterval') determines how far "
+            "apart (in seconds) the samples are spaced along the trajectory. Subsamples "
+            "are rendered as smaller points compared to normal samples (from "
+            "'SampleInterval') when rendering the trail as points.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1,
+            .minMax = { 1, 100 }
+        }
     };
 
-    constexpr Property::PropertyInfo RenderFullPathInfo = {
-        "ShowFullTrail",
-        "Render full trail",
-        "If true, the entire trail will be rendered. If false, only the trail until the "
-        "current time in the application will be shown.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo RenderFullPathInfo = {
+        .identifier = "ShowFullTrail",
+        .name = "Render full trail",
+        .description = "If true, the entire trail will be rendered. If false, only the "
+            "trail until the current time in the application will be shown.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AccurateTrailInfo = {
-        "AccurateTrail",
-        "Use accurate trail",
-        "If true, the trail around the spacecraft will be recalculated to present a "
-        "smoother trail. If false, the original trail will be used.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo AccurateTrailInfo = {
+        .identifier = "AccurateTrail",
+        .name = "Use accurate trail",
+        .description = "If true, the trail around the spacecraft will be recalculated to "
+            "present a smoother trail. If false, the original trail will be used.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo AccurateTrailPositionsInfo = {
-        "AccurateTrailPositions",
-        "Number of accurate trail points",
-        "The number of vertices, each side of the object, that will be recalculated for "
-        "greater accuracy. This also ensures that the object connects with the trail.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo AccurateTrailPositionsInfo = {
+        .identifier = "AccurateTrailPositions",
+        .name = "Number of accurate trail points",
+        .description = "The number of vertices, each side of the object, that will be "
+            "recalculated for greater accuracy. This also ensures that the object "
+            "connects with the trail.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 100,
+            .minMax = { 2, 1000 }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {
-        // [[codegen::verbatim(StartTimeInfo.description)]]
-        std::string startTime [[codegen::annotation("A valid date in ISO 8601 format")]];
+        std::string startTime [[codegen::Info(StartTimeInfo),
+            codegen::annotation("A valid date in ISO 8601 format")]];
 
-        // [[codegen::verbatim(EndTimeInfo.description)]]
-        std::string endTime [[codegen::annotation("A valid date in ISO 8601 format")]];
+        std::string endTime [[codegen::Info(EndTimeInfo),
+            codegen::annotation("A valid date in ISO 8601 format")]];
 
-        // [[codegen::verbatim(SampleIntervalInfo.description)]]
         // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor. If
         // SampleInterval is not specified, it will be automatically calculated to produce
         // two samples per day between the 'StartTime' and 'EndTime'.
-        std::optional<double> sampleInterval;
+        std::optional<double> sampleInterval [[codegen::Info(SampleIntervalInfo)]];
 
-        // [[codegen::verbatim(TimeSubSampleInfo.description)]]
         // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor.
-        std::optional<int> timeStampSubsampleFactor [[codegen::greater(0)]];
+        std::optional<int> timeStampSubsampleFactor
+            [[codegen::Info(TimeSubSampleInfo), codegen::greater(0)]];
 
-        // [[codegen::verbatim(RenderFullPathInfo.description)]]
-        std::optional<bool> showFullTrail;
+        std::optional<bool> showFullTrail [[codegen::Info(RenderFullPathInfo)]];
 
-        // [[codegen::verbatim(AccurateTrailInfo.description)]]
-        std::optional<bool> useAccurateTrail;
+        std::optional<bool> useAccurateTrail [[codegen::Info(AccurateTrailInfo)]];
 
-        // [[codegen::verbatim(AccurateTrailPositionsInfo.description)]]
-        std::optional<int> accurateTrailPositions;
+        std::optional<int> accurateTrailPositions
+            [[codegen::Info(AccurateTrailPositionsInfo)]];
     };
 } // namespace
 #include "renderabletrailtrajectory_codegen.cpp"
@@ -153,11 +169,11 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const Dictionary& dictionar
     : RenderableTrail(dictionary)
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)
-    , _sampleInterval(SampleIntervalInfo, timeconstants::SecondsPerDay / 2.0, 1.0, 1e6)
-    , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 100)
-    , _renderFullTrail(RenderFullPathInfo, false)
-    , _useAccurateTrail(AccurateTrailInfo, true)
-    , _nReplacementPoints(AccurateTrailPositionsInfo, 100, 2, 1000)
+    , _sampleInterval(SampleIntervalInfo)
+    , _timeStampSubsamplingFactor(TimeSubSampleInfo)
+    , _renderFullTrail(RenderFullPathInfo)
+    , _useAccurateTrail(AccurateTrailInfo)
+    , _nReplacementPoints(AccurateTrailPositionsInfo)
     , _maxVertex(glm::vec3(-std::numeric_limits<float>::max()))
     , _minVertex(glm::vec3(std::numeric_limits<float>::max()))
 {

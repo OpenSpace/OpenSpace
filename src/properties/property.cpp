@@ -42,11 +42,11 @@ std::string Property::ViewOptions::MinMaxRange = "MinMaxRange";
 uint64_t Property::Identifier = 0;
 #endif // _DEBUG
 
-Property::Property(PropertyInfo info, IsEnabled isEnabled)
+Property::Property(PropertyInfo info)
     : _identifier(info.identifier)
-    , _guiName(info.guiName)
+    , _guiName(info.name)
     , _description(info.description)
-    , _isEnabled(isEnabled)
+    , _isEnabled(info.defaults.isEnabled)
 #ifdef _DEBUG
     , _id(Identifier++)
 #endif // _DEBUG
@@ -56,6 +56,7 @@ Property::Property(PropertyInfo info, IsEnabled isEnabled)
 
     setVisibility(info.visibility);
     setNeedsConfirmation(info.needsConfirmation);
+    setReadOnly(info.isReadOnly);
     _metaData.isEnablable = info.isEnablable;
 }
 
@@ -115,7 +116,7 @@ void Property::setVisibility(Visibility visibility) {
     }
 }
 
-Property::Visibility Property::visibility() const {
+Visibility Property::visibility() const {
     return _metaData.visibility;
 }
 
@@ -143,11 +144,11 @@ bool Property::viewOption(const std::string& option, bool defaultValue) const {
     return it != _metaData.viewOptions.end() ? it->second : defaultValue;
 }
 
-Property::IsEnablable Property::isEnablable() const {
+IsEnablable Property::isEnablable() const {
     return IsEnablable(_metaData.isEnablable);
 }
 
-Property::IsEnabled Property::isEnabled() const {
+IsEnabled Property::isEnabled() const {
     if (!_metaData.isEnablable) {
         throw RuntimeError("Tried to get enabled on a property that is not enablable");
     }

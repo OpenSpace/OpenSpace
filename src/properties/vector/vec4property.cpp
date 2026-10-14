@@ -28,30 +28,9 @@
 
 namespace openspace {
 
-Vec4Property::Vec4Property(PropertyInfo info, glm::vec4 value, glm::vec4 minValue,
-                           glm::vec4 maxValue, glm::vec4 stepValue)
-    : NumericalProperty<glm::vec4>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+Vec4Property::Vec4Property(Vec4PropertyInfo info)
+    : NumericalProperty<glm::vec4>(std::move(info))
 {}
-
-Vec4Property::Vec4Property(PropertyInfo info, IsEnabled isEnabled, glm::vec4 value,
-                           glm::vec4 minValue, glm::vec4 maxValue, glm::vec4 stepValue)
-    : NumericalProperty<glm::vec4>(
-        std::move(info),
-        isEnabled,
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
-{
-    _isEnabled = isEnabled;
-}
 
 std::string_view Vec4Property::className() const {
     return "Vec4Property";

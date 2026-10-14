@@ -46,35 +46,42 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ScreenSpaceTimeVaryingImageOnline";
 
-    constexpr Property::PropertyInfo FileInfo = {
-        "FilePath",
-        "File path",
-        "The file path to the data containing information about when to display which "
-        "image.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo FileInfo = {
+        .identifier = "FilePath",
+        .name = "File path",
+        .description = "The file path to the data containing information about when to "
+            "display which image.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo ShowBeforeInfo = {
-        "ShowBefore",
-        "Show image before first time",
-        "If enabled, the image with the earliest timestamp is shown when the simulation "
-        "time is before the first timestamp specified in the data file.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowBeforeInfo = {
+        .identifier = "ShowBefore",
+        .name = "Show image before first time",
+        .description = "If enabled, the image with the earliest timestamp is shown when "
+            "the simulation time is before the first timestamp specified in the data "
+            "file.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ShowAfterInfo = {
-        "ShowAfter",
-        "Show image after last time",
-        "If enabled, the image with the latest timestamp is shown when the simulation "
-        "time is after the last timestamp specified in the data file.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowAfterInfo = {
+        .identifier = "ShowAfter",
+        .name = "Show image after last time",
+        .description = "If enabled, the image with the latest timestamp is shown when "
+            "the simulation time is after the last timestamp specified in the data file.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo JumpToFirstTimeInfo = {
-        "JumpToFirstTime",
-        "Jump to first time",
-        "Performs a time jump to the first timestamp in the loaded file.",
-        Property::Visibility::NoviceUser
+    constexpr TriggerPropertyInfo JumpToFirstTimeInfo = {
+        .identifier = "JumpToFirstTime",
+        .name = "Jump to first time",
+        .description = "Performs a time jump to the first timestamp in the loaded file.",
+        .visibility = Visibility::NoviceUser
     };
 
     // Displays an image based on the current in-game simulation time. The image shown is
@@ -89,14 +96,11 @@ namespace {
     //   ]
     // }
     struct [[codegen::Dictionary(ScreenSpaceTimeVaryingImageOnline)]] Parameters {
-        // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path filePath;
+        std::filesystem::path filePath [[codegen::Info(FileInfo)]];
 
-        // [[codegen::verbatim(ShowBeforeInfo.description)]]
-        std::optional<bool> showBefore;
+        std::optional<bool> showBefore [[codegen::Info(ShowBeforeInfo)]];
 
-        // [[codegen::verbatim(ShowAfterInfo.description)]]
-        std::optional<bool> showAfter;
+        std::optional<bool> showAfter [[codegen::Info(ShowAfterInfo)]];
     };
 } // namespace
 #include "screenspacetimevaryingimageonline_codegen.cpp"
@@ -113,9 +117,9 @@ Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
 ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
                                                              const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _jsonFilePath(FileInfo, "")
-    , _showBefore(ShowBeforeInfo, false)
-    , _showAfter(ShowAfterInfo, false)
+    , _jsonFilePath(FileInfo)
+    , _showBefore(ShowBeforeInfo)
+    , _showAfter(ShowAfterInfo)
     , _jumpToFirstTime(JumpToFirstTimeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

@@ -981,9 +981,16 @@ TEST_CASE("Removing non-existing asset (ignored)", "[profile]") {
 TEST_CASE("Save settings to profile", "[profile]") {
     PropertyOwner owner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
-    FloatProperty p1(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1({
+        .identifier = "p1",
+        .name = "a",
+        .description = "b",
+        .defaults = {
+            .value = 1.f
+        }
+    });
     owner.addProperty(p1);
-    StringProperty p2(Property::PropertyInfo("p2", "c", "d"));
+    StringProperty p2({ .identifier = "p2", .name = "c", .description = "d" });
     owner.addProperty(p2);
 
     p1 = 2.f;

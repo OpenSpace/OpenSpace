@@ -54,19 +54,23 @@ namespace {
         return glm::radians(rightAscension * 15);
     }
 
-    constexpr Property::PropertyInfo VertexInfo = {
-        "File",
-        "Vertex file path",
-        "A file that contains the vertex locations of the constellations bounds, as RA "
-        "Dec coordinates on the celestial sphere.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo VertexInfo = {
+        .identifier = "File",
+        .name = "Vertex file path",
+        .description = "A file that contains the vertex locations of the constellations "
+            "bounds, as RA Dec coordinates on the celestial sphere.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color of the lines.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color of the lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f, 0.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     // Can be used to draw bounding shapes on the night sky, where each shape encapsulates
@@ -95,11 +99,9 @@ namespace {
     // of the constellation, the text of that label is replaced with the full name from
     // the `NamesFile`.
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
-        // [[codegen::verbatim(VertexInfo.description)]]
-        std::filesystem::path file;
+        std::filesystem::path file [[codegen::Info(VertexInfo)]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
     };
 } // namespace
 #include "renderableconstellationbounds_codegen.cpp"
@@ -116,7 +118,7 @@ Documentation RenderableConstellationBounds::Documentation() {
 RenderableConstellationBounds::RenderableConstellationBounds(const Dictionary& dictionary)
     : RenderableConstellationsBase(dictionary)
     , _vertexFilename(VertexInfo)
-    , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _color(ColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

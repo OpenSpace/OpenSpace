@@ -28,14 +28,17 @@
 #include <openspace/properties/templateproperty.h>
 
 #include <set>
+#include <span>
+#include <string_view>
 
 namespace openspace {
 
-class SelectionProperty : public TemplateProperty<std::set<std::string>> {
+using SelectionPropertyInfo =
+    BasicPropertyInfo<ValueDefaults<std::span<std::string_view>>>;
 
+class SelectionProperty : public TemplateProperty<std::set<std::string>> {
 public:
-    SelectionProperty(PropertyInfo info);
-    SelectionProperty(PropertyInfo info, IsEnabled isEnabled);
+    explicit SelectionProperty(SelectionPropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

@@ -32,17 +32,18 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::vec3> {
+    static constexpr glm::vec3 Min = glm::vec3(std::numeric_limits<float>::lowest());
+    static constexpr glm::vec3 Max = glm::vec3(std::numeric_limits<float>::max());
+    static constexpr glm::vec3 Step = glm::vec3(0.01f);
+};
+
+using Vec3PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::vec3>>;
+
 class Vec3Property : public NumericalProperty<glm::vec3> {
 public:
-    explicit Vec3Property(PropertyInfo info, glm::vec3 value = glm::vec3(0.f),
-        glm::vec3 minValue = glm::vec3(std::numeric_limits<float>::lowest()),
-        glm::vec3 maxValue = glm::vec3(std::numeric_limits<float>::max()),
-        glm::vec3 stepValue = glm::vec3(0.01f));
-    Vec3Property(PropertyInfo info, IsEnabled isEnabled,
-        glm::vec3 value = glm::vec3(0.f),
-        glm::vec3 minValue = glm::vec3(std::numeric_limits<float>::lowest()),
-        glm::vec3 maxValue = glm::vec3(std::numeric_limits<float>::max()),
-        glm::vec3 stepValue = glm::vec3(0.01f));
+    explicit Vec3Property(Vec3PropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

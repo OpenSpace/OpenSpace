@@ -80,94 +80,120 @@ namespace {
         GigaLightyear
     };
 
-    constexpr Property::PropertyInfo BlendModeInfo = {
-        "BlendMode",
-        "Blending mode",
-        "This determines the blending mode that is applied to the renderable.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo BlendModeInfo = {
+        .identifier = "BlendMode",
+        .name = "Blending mode",
+        .description = "This determines the blending mode that is applied.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The label text color.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The label text color.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font size",
-        "The font size (in points) for the label.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo FontSizeInfo = {
+        .identifier = "FontSize",
+        .name = "Font size",
+        .description = "The font size (in points) for the label.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 50.f,
+            .minMax = { 1.f, 100.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
-        "Scales the size of the label, exponentially. The value is used as the exponent "
-        "in a 10^x computation to scale the label size.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size",
+        .description = "Scales the size of the label, exponentially. The value is used "
+            "as the exponent in a 10^x computation to scale the label size.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 8.f,
+            .minMax = { 0.5f, 30.f }
+        }
     };
 
-    constexpr Property::PropertyInfo TextInfo = {
-        "Text",
-        "Text",
-        "The text that will be displayed on screen.",
-        Property::Visibility::NoviceUser
+    constexpr StringPropertyInfo TextInfo = {
+        .identifier = "Text",
+        .name = "Text",
+        .description = "The text that will be displayed on screen.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = ""
+        }
     };
 
-    constexpr Property::PropertyInfo MinMaxSizeInfo = {
-        "MinMaxSize",
-        "Min and max size",
-        "The minimum and maximum size (in pixels) of the label.",
-        Property::Visibility::AdvancedUser
+    constexpr IVec2PropertyInfo MinMaxSizeInfo = {
+        .identifier = "MinMaxSize",
+        .name = "Min and max size",
+        .description = "The minimum and maximum size (in pixels) of the label.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::ivec2(8, 20),
+            .minMax = { glm::ivec2(0), glm::ivec2(100) }
+        }
     };
 
-    constexpr Property::PropertyInfo TransformationMatrixInfo = {
-        "TransformationMatrix",
-        "Transformation matrix",
-        "Transformation matrix to be applied to the label.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo OrientationOptionInfo = {
+        .identifier = "OrientationOption",
+        .name = "Orientation option",
+        .description = "Label orientation rendering mode.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo OrientationOptionInfo = {
-        "OrientationOption",
-        "Orientation option",
-        "Label orientation rendering mode.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo EnableFadingEffectInfo = {
+        .identifier = "EnableFading",
+        .name = "Enable/disable fade-in effect",
+        .description = "Enable/Disable the Fade-in effect.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo EnableFadingEffectInfo = {
-        "EnableFading",
-        "Enable/disable fade-in effect",
-        "Enable/Disable the Fade-in effect.",
-        Property::Visibility::User
+    constexpr Vec2PropertyInfo FadeWidthsInfo = {
+        .identifier = "FadeWidths",
+        .name = "Fade widths",
+        .description = "The distances over which the fading takes place, given in the "
+            "specified unit. The first value is the distance before the closest distance "
+            "and the second the one after the furthest distance. For example, with the "
+            "unit Parsec (pc), a value of {1, 2} will make the label being fully faded "
+            "out 1 Parsec before the closest distance and 2 Parsec away from the "
+            "furthest distance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(1.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(100.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FadeWidthsInfo = {
-        "FadeWidths",
-        "Fade widths",
-        "The distances over which the fading takes place, given in the specified unit. "
-        "The first value is the distance before the closest distance and the second the "
-        "one after the furthest distance. For example, with the unit Parsec (pc), a "
-        "value of {1, 2} will make the label being fully faded out 1 Parsec before the "
-        "closest distance and 2 Parsec away from the furthest distance.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo FadeDistancesInfo = {
+        .identifier = "FadeDistances",
+        .name = "Fade distances",
+        .description = "The distance range in which the labels should be fully opaque, "
+            "specified in the chosen unit. The distance from the position of the label "
+            "to the camera.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(1.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(100.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FadeDistancesInfo = {
-        "FadeDistances",
-        "Fade distances",
-        "The distance range in which the labels should be fully opaque, specified in the "
-        "chosen unit. The distance from the position of the label to the camera.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo FadeUnitOptionInfo = {
-        "FadeUnit",
-        "Fade distance Unit",
-        "Distance unit for fade-in/-out distance calculations. Defaults to \"au\".",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo FadeUnitOptionInfo = {
+        .identifier = "FadeUnit",
+        .name = "Fade distance Unit",
+        .description = "Distance unit for fade-in/-out distance calculations. Defaults "
+            "to \"au\".",
+        .visibility = Visibility::AdvancedUser
     };
 
     // Renders a single text label in 3D space. The label is rendered as a billboard,
@@ -181,36 +207,30 @@ namespace {
             Additive
         };
 
-        // [[codegen::verbatim(BlendModeInfo.description)]]
-        std::optional<BlendMode> blendMode;
+        std::optional<BlendMode> blendMode [[codegen::Info(BlendModeInfo)]];
 
         enum class [[codegen::map(Orientation)]] Orientation {
             ViewDirection [[codegen::key("Camera View Direction")]],
             PositionNormal [[codegen::key("Camera Position Normal")]]
         };
 
-        // [[codegen::verbatim(OrientationOptionInfo.description)]]
-        std::optional<Orientation> orientationOption;
+        std::optional<Orientation> orientationOption
+            [[codegen::Info(OrientationOptionInfo)]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(TextInfo.description)]]
-        std::optional<std::string> text;
+        std::optional<std::string> text [[codegen::Info(TextInfo)]];
 
-        // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize [[codegen::greater(0.f)]];
+        std::optional<float> fontSize
+            [[codegen::Info(FontSizeInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size [[codegen::greaterequal(0.f)]];
+        std::optional<float> size [[codegen::Info(SizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(MinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> minMaxSize;
+        std::optional<glm::ivec2> minMaxSize [[codegen::Info(MinMaxSizeInfo)]];
 
-        // [[codegen::verbatim(EnableFadingEffectInfo.description)]]
-        std::optional<bool> enableFading;
+        std::optional<bool> enableFading [[codegen::Info(EnableFadingEffectInfo)]];
 
-        // [[codegen::verbatim(TransformationMatrixInfo.description)]]
+        // Transformation matrix to be applied to the label.
         std::optional<glm::dmat4x4> transformationMatrix;
 
         enum class [[codegen::map(Unit)]] Unit {
@@ -228,15 +248,13 @@ namespace {
             GigaLightyear [[codegen::key("Gly")]]
         };
 
-        // [[codegen::verbatim(FadeUnitOptionInfo.description)]]
-        std::optional<Unit> fadeUnit;
+        std::optional<Unit> fadeUnit [[codegen::Info(FadeUnitOptionInfo)]];
 
-        // [[codegen::verbatim(FadeDistancesInfo.description)]]
         std::optional<glm::vec2> fadeDistances
-            [[codegen::greaterequal(glm::vec2(0.f))]];
+            [[codegen::Info(FadeDistancesInfo), codegen::greaterequal(glm::vec2(0.f))]];
 
-        // [[codegen::verbatim(FadeWidthsInfo.description)]]
-        std::optional<glm::vec2> fadeWidths [[codegen::greaterequal(glm::vec2(0.f))]];
+        std::optional<glm::vec2> fadeWidths
+            [[codegen::Info(FadeWidthsInfo), codegen::greaterequal(glm::vec2(0.f))]];
     };
 } // namespace
 #include "renderablelabel_codegen.cpp"
@@ -253,14 +271,14 @@ Documentation RenderableLabel::Documentation() {
 RenderableLabel::RenderableLabel(const Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , _blendMode(BlendModeInfo)
-    , _text(TextInfo, "")
-    , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _fontSize(FontSizeInfo, 50.f, 1.f, 100.f)
-    , _size(SizeInfo, 8.f, 0.5f, 30.f)
-    , _minMaxSize(MinMaxSizeInfo, glm::ivec2(8, 20), glm::ivec2(0), glm::ivec2(100))
-    , _enableFadingEffect(EnableFadingEffectInfo, false)
-    , _fadeWidths(FadeWidthsInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
-    , _fadeDistances(FadeDistancesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
+    , _text(TextInfo)
+    , _color(ColorInfo)
+    , _fontSize(FontSizeInfo)
+    , _size(SizeInfo)
+    , _minMaxSize(MinMaxSizeInfo)
+    , _enableFadingEffect(EnableFadingEffectInfo)
+    , _fadeWidths(FadeWidthsInfo)
+    , _fadeDistances(FadeDistancesInfo)
     , _fadeUnitOption(FadeUnitOptionInfo)
     , _orientationOption(OrientationOptionInfo)
 {

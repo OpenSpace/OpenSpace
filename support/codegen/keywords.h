@@ -30,7 +30,6 @@
 
 namespace keywords {
 
-constexpr std::string_view Verbatim = "verbatim";
 constexpr std::string_view Dictionary = "Dictionary";
 constexpr std::string_view Enum = "enum";
 constexpr std::string_view Stringify = "stringify";
@@ -56,6 +55,7 @@ constexpr std::string_view Reference = "reference";
 constexpr std::string_view Unequal = "unequal";
 
 constexpr std::string_view Key = "key";
+constexpr std::string_view Info = "Info";
 
 constexpr std::string_view Private = "private";
 

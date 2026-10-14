@@ -33,36 +33,37 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SourceInfo = {
-        "SourceFrame",
-        "Source",
-        "This value specifies the source frame that is used as the basis for the "
-        "coordinate transformation. This has to be a valid SPICE name.",
-        Property::Visibility::Developer
+    constexpr StringPropertyInfo SourceInfo = {
+        .identifier = "SourceFrame",
+        .name = "Source",
+        .description = "This value specifies the source frame that is used as the basis "
+            "for the coordinate transformation. This has to be a valid SPICE name.",
+        .visibility = Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo DestinationInfo = {
-        "DestinationFrame",
-        "Destination",
-        "This value specifies the destination frame that is used for the coordinate "
-        "transformation. This has to be a valid SPICE name.",
-        Property::Visibility::Developer
+    constexpr StringPropertyInfo DestinationInfo = {
+        .identifier = "DestinationFrame",
+        .name = "Destination",
+        .description = "This value specifies the destination frame that is used for the "
+            "coordinate transformation. This has to be a valid SPICE name.",
+        .visibility = Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo FixedDateInfo = {
-        "FixedDate",
-        "Fixed date",
-        "A time to lock the rotation to. Setting this to an empty string will unlock the "
-        "time and return to rotation based on current simulation time.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FixedDateInfo = {
+        .identifier = "FixedDate",
+        .name = "Fixed date",
+        .description = "A time to lock the rotation to. Setting this to an empty string "
+            "will unlock the time and return to rotation based on current simulation "
+            "time.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TimeOffsetInfo = {
-        "TimeOffset",
-        "Time offset",
-        "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
-        "at which to compute the rotation.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo TimeOffsetInfo = {
+        .identifier = "TimeOffset",
+        .name = "Time offset",
+        .description = "A time offset, in seconds, added to the simulation time (or "
+            "Fixed Date if any), at which to compute the rotation.",
+        .visibility = Visibility::User
     };
 
     // Uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to provide rotation
@@ -76,20 +77,18 @@ namespace {
     // [pxform_c](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/pxform_c.html)
     // function of the SPICE library.
     struct [[codegen::Dictionary(SpiceRotation)]] Parameters {
-        // [[codegen::verbatim(SourceInfo.description)]]
-        std::string sourceFrame
-            [[codegen::annotation("A valid SPICE NAIF name or integer")]];
+        std::string sourceFrame [[codegen::Info(SourceInfo),
+            codegen::annotation("A valid SPICE NAIF name or integer")]];
 
         // This value specifies the destination frame that is used for the coordinate
         // transformation. This has to be a valid SPICE name. If this value is not
         // specified, a reference frame of 'GALACTIC' is used instead.
         std::optional<std::string> destinationFrame;
 
-        // [[codegen::verbatim(FixedDateInfo.description)]]
-        std::optional<std::string> fixedDate [[codegen::datetime()]];
+        std::optional<std::string> fixedDate
+            [[codegen::Info(FixedDateInfo), codegen::datetime()]];
 
-        // [[codegen::verbatim(TimeOffsetInfo.description)]]
-        std::optional<float> timeOffset;
+        std::optional<float> timeOffset [[codegen::Info(TimeOffsetInfo)]];
     };
 } // namespace
 #include "spicerotation_codegen.cpp"

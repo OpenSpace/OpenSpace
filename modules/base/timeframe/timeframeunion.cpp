@@ -35,15 +35,6 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TimeFramesInfo = {
-        "TimeFrames",
-        "Time frames",
-        "A vector of time frames to combine into one. The time frame is active when any "
-        "of the contained time frames are, but not in gaps between contained time "
-        "frames.",
-        Property::Visibility::AdvancedUser
-    };
-
     // This `TimeFrame` class will accept the union of all passed-in TimeFrames. This
     // means that this TimeFrame will be active if at least one of the child TimeFrames is
     // active and it will be inactive if none of the child TimeFrames are active.
@@ -51,7 +42,9 @@ namespace {
     // This can be used to create more complex TimeFrames that are made up of several,
     // simpler TimeFrames themselves.
     struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {
-        // [[codegen::verbatim(TimeFramesInfo.description)]]
+        // A vector of time frames to combine into one. The time frame is active when any
+        // of the contained time frames are, but not in gaps between contained time
+        // frames.
         std::vector<Dictionary> timeFrames [[codegen::reference("core_timeframe")]];
     };
 } // namespace

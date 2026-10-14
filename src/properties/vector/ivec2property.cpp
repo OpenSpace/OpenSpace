@@ -28,28 +28,8 @@
 
 namespace openspace {
 
-IVec2Property::IVec2Property(PropertyInfo info, glm::ivec2 value, glm::ivec2 minValue,
-                             glm::ivec2 maxValue, glm::ivec2 stepValue)
-    : NumericalProperty<glm::ivec2>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
-{}
-
-IVec2Property::IVec2Property(PropertyInfo info, IsEnabled isEnabled, glm::ivec2 value,
-                             glm::ivec2 minValue, glm::ivec2 maxValue,
-                             glm::ivec2 stepValue)
-    : NumericalProperty<glm::ivec2>(
-        std::move(info),
-        isEnabled,
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+IVec2Property::IVec2Property(IVec2PropertyInfo info)
+    : NumericalProperty<glm::ivec2>(std::move(info))
 {}
 
 std::string_view IVec2Property::className() const {

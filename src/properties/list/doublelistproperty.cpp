@@ -29,13 +29,11 @@
 
 namespace openspace {
 
-DoubleListProperty::DoubleListProperty(PropertyInfo info, std::vector<double> values)
-    : ListProperty(std::move(info), std::move(values))
-{}
-
-DoubleListProperty::DoubleListProperty(PropertyInfo info, IsEnabled isEnabled,
-                                       std::vector<double> values)
-    : ListProperty(std::move(info), isEnabled, std::move(values))
+DoubleListProperty::DoubleListProperty(DoubleListPropertyInfo info)
+    : ListProperty(
+        info,
+        std::vector<double>(info.defaults.value.begin(), info.defaults.value.end())
+    )
 {}
 
 std::string_view DoubleListProperty::className() const {

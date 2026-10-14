@@ -28,21 +28,8 @@
 
 namespace openspace {
 
-ShortProperty::ShortProperty(PropertyInfo info, short value, short minValue,
-                             short maxValue, short stepValue)
-    : NumericalProperty<short>(std::move(info), value, minValue, maxValue, stepValue)
-{}
-
-ShortProperty::ShortProperty(PropertyInfo info, IsEnabled isEnabled, short value,
-                             short minValue, short maxValue, short stepValue)
-    : NumericalProperty<short>(
-        std::move(info),
-        isEnabled,
-        value,
-        minValue,
-        maxValue,
-        stepValue
-    )
+ShortProperty::ShortProperty(ShortPropertyInfo info)
+    : NumericalProperty<short>(std::move(info))
 {}
 
 std::string_view ShortProperty::className() const {

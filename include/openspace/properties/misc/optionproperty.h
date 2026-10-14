@@ -29,6 +29,8 @@
 
 namespace openspace {
 
+using OptionPropertyInfo = BasicPropertyInfo<ValueDefaults<int>>;
+
 /**
  * The OptionProperty is a property that provides a number of predefined (using the
  * #addOption method) options consisting of a `description` and a `value`. The available
@@ -53,10 +55,9 @@ public:
      *        information for initializing this Property
      *
      * \pre \p info.identifier must not be empty
-     * \pre \p info.guiName must not be empty
+     * \pre \p info.name must not be empty
      */
-    explicit OptionProperty(PropertyInfo info);
-    OptionProperty(PropertyInfo info, IsEnabled isEnabled);
+    explicit OptionProperty(OptionPropertyInfo info);
 
     /**
      * Returns the name of the class for reflection purposes.

@@ -28,28 +28,8 @@
 
 namespace openspace {
 
-DMat4Property::DMat4Property(PropertyInfo info, glm::dmat4x4 value, glm::dmat4x4 minValue,
-                             glm::dmat4x4 maxValue, glm::dmat4x4 stepValue)
-    : NumericalProperty<glm::dmat4x4>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
-{}
-
-DMat4Property::DMat4Property(PropertyInfo info, IsEnabled isEnabled, glm::dmat4x4 value,
-                             glm::dmat4x4 minValue, glm::dmat4x4 maxValue,
-                             glm::dmat4x4 stepValue)
-    : NumericalProperty<glm::dmat4x4>(
-        std::move(info),
-        isEnabled,
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+DMat4Property::DMat4Property(DMat4PropertyInfo info)
+    : NumericalProperty<glm::dmat4x4>(std::move(info))
 {}
 
 std::string_view DMat4Property::className() const {

@@ -896,7 +896,7 @@ void SchemaFormWidget::addMemberToGrid(QGridLayout* grid, int row, int memberInd
                 .type = QString::fromStdString(member.type),
                 .isOptional = member.isOptional,
                 .description = QString::fromStdString(member.description),
-                .documentation = QString::fromStdString(member.documentation)
+                .documentation = QString::fromStdString(std::string(member.documentation))
             };
             QPushButton* button = new QPushButton("i", labelContainer);
             button->setObjectName("field-info-button");
@@ -1113,7 +1113,7 @@ QWidget* SchemaFormWidget::createTableSection(const SchemaMember& member) {
         !member.isOptional,
         std::pair(
             QString::fromStdString(member.name),
-            QString::fromStdString(member.documentation)
+            QString::fromStdString(std::string(member.documentation))
         ),
         QString::fromStdString(member.name)
     );

@@ -55,77 +55,89 @@ namespace {
     constexpr int RenderOptionViewDirection = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
-    constexpr Property::PropertyInfo TextColorInfo = {
-        "TextColor",
-        "Text color",
-        "The text color for the astronomical object.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo TextColorInfo = {
+        .identifier = "TextColor",
+        .name = "Text color",
+        .description = "The text color for the astronomical object.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo TextOpacityInfo = {
-        "TextOpacity",
-        "Text opacity",
-        "Determines the transparency of the text label, where 1 is completely opaque and "
-        "0 fully transparent.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo TextOpacityInfo = {
+        .identifier = "TextOpacity",
+        .name = "Text opacity",
+        .description = "Determines the transparency of the text label, where 1 is "
+            "completely opaque and 0 fully transparent.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo TextSizeInfo = {
-        "TextSize",
-        "Text size",
-        "The text size for the astronomical object labels.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo TextSizeInfo = {
+        .identifier = "TextSize",
+        .name = "Text size",
+        .description = "The text size for the astronomical object labels.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 8.f,
+            .minMax = { 0.5f, 24.f }
+        }
     };
 
-    constexpr Property::PropertyInfo LabelFileInfo = {
-        "LabelFile",
-        "Label file",
-        "The path to the label file that contains information about the astronomical "
-        "objects being rendered.",
-        Property::Visibility::AdvancedUser
+    constexpr IVec2PropertyInfo LabelMinMaxSizeInfo = {
+        .identifier = "TextMinMaxSize",
+        .name = "Text min/max size",
+        .description = "The minimum and maximum size (in pixels) of the text for the "
+            "labels for the astronomical objects being rendered.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::ivec2(8, 500),
+            .minMax = { glm::ivec2(0), glm::ivec2(1000) }
+        }
     };
 
-    constexpr Property::PropertyInfo LabelMinMaxSizeInfo = {
-        "TextMinMaxSize",
-        "Text min/max size",
-        "The minimum and maximum size (in pixels) of the text for the labels for the "
-        "astronomical objects being rendered.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "If the DU mesh is of wire type, this value determines the width "
+            "of the lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 1.f, 16.f }
+        }
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "If the DU mesh is of wire type, this value determines the width of the lines.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo DrawElementsInfo = {
+        .identifier = "DrawElements",
+        .name = "Draw elements",
+        .description = "Enables/Disables the drawing of the astronomical objects.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo DrawElementsInfo = {
-        "DrawElements",
-        "Draw elements",
-        "Enables/Disables the drawing of the astronomical objects.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo DrawLabelInfo = {
+        .identifier = "DrawLabels",
+        .name = "Draw labels",
+        .description = "Determines whether labels should be drawn or hidden.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo DrawLabelInfo = {
-        "DrawLabels",
-        "Draw labels",
-        "Determines whether labels should be drawn or hidden.",
-        Property::Visibility::NoviceUser
-    };
-
-    constexpr Property::PropertyInfo MeshColorInfo = {
-        "MeshColor",
-        "Meshes colors",
-        "The defined colors for the meshes to be rendered.",
-        Property::Visibility::NoviceUser
-    };
-
-    constexpr Property::PropertyInfo RenderOptionInfo = {
-        "RenderOption",
-        "Render option",
-        "Debug option for rendering of billboards and texts.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo RenderOptionInfo = {
+        .identifier = "RenderOption",
+        .name = "Render option",
+        .description = "Debug option for rendering of billboards and texts.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
@@ -133,8 +145,7 @@ namespace {
         // object being rendered.
         std::filesystem::path file;
 
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
+        std::optional<bool> drawLabels [[codegen::Info(DrawLabelInfo)]];
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
@@ -148,25 +159,23 @@ namespace {
         // The unit used when interpreting the positions in the dataset.
         std::optional<Unit> unit;
 
-        // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor [[codegen::color()]];
+        std::optional<glm::vec3> textColor
+            [[codegen::Info(TextColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(TextOpacityInfo.description)]]
-        std::optional<float> textOpacity;
+        std::optional<float> textOpacity [[codegen::Info(TextOpacityInfo)]];
 
-        // [[codegen::verbatim(TextSizeInfo.description)]]
-        std::optional<float> textSize;
+        std::optional<float> textSize [[codegen::Info(TextSizeInfo)]];
 
-        // [[codegen::verbatim(LabelFileInfo.description)]]
+        // The path to the label file that contains information about the astronomical
+        // objects being rendered.
         std::optional<std::string> labelFile;
 
-        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> textMinMaxSize;
+        std::optional<glm::ivec2> textMinMaxSize [[codegen::Info(LabelMinMaxSizeInfo)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(MeshColorInfo.description)]]
+        // The defined colors for the meshes to be rendered.
         std::optional<std::vector<glm::vec3>> meshColor;
     };
 } // namespace
@@ -183,18 +192,13 @@ Documentation RenderableDUMeshes::Documentation() {
 
 RenderableDUMeshes::RenderableDUMeshes(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
-    , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
-    , _drawElements(DrawElementsInfo, true)
-    , _drawLabels(DrawLabelInfo, false)
-    , _textMinMaxSize(
-        LabelMinMaxSizeInfo,
-        glm::ivec2(8, 500),
-        glm::ivec2(0),
-        glm::ivec2(1000)
-    )
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
+    , _textColor(TextColorInfo)
+    , _textOpacity(TextOpacityInfo)
+    , _textSize(TextSizeInfo)
+    , _drawElements(DrawElementsInfo)
+    , _drawLabels(DrawLabelInfo)
+    , _textMinMaxSize(LabelMinMaxSizeInfo)
+    , _lineWidth(LineWidthInfo)
     , _renderOption(RenderOptionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

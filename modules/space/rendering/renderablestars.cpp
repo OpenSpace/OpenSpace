@@ -83,236 +83,291 @@ namespace {
         float value;
     };
 
-    constexpr Property::PropertyInfo SpeckFileInfo = {
-        "SpeckFile",
-        "SPECK file",
-        "The path to the SPECK file containing the data for rendering these stars.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo SpeckFileInfo = {
+        .identifier = "SpeckFile",
+        .name = "SPECK file",
+        .description = "The path to the SPECK file containing the data for rendering "
+            "these stars.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorTextureInfo = {
-        "ColorMap",
-        "ColorBV texture",
-        "The path to the texture that is used to convert from the B-V value of the star "
-        "to its color. The texture is used as a one dimensional lookup function.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo ColorTextureInfo = {
+        .identifier = "ColorMap",
+        .name = "ColorBV texture",
+        .description = "The path to the texture that is used to convert from the B-V "
+            "value of the star to its color. The texture is used as a one dimensional "
+            "lookup function.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MappingBvInfo = {
-        "MappingBV",
-        "Mapping (bv-color)",
-        "The name of the variable in the SPECK file that is used as the b-v color "
-        "variable.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo MappingBvInfo = {
+        .identifier = "MappingBV",
+        .name = "Mapping (bv-color)",
+        .description = "The name of the variable in the SPECK file that is used as the "
+            "b-v color variable.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MappingLuminanceInfo = {
-        "MappingLuminance",
-        "Mapping (luminance)",
-        "The name of the variable in the SPECK file that is used as the luminance "
-        "variable.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo MappingLuminanceInfo = {
+        .identifier = "MappingLuminance",
+        .name = "Mapping (luminance)",
+        .description = "The name of the variable in the SPECK file that is used as the "
+            "luminance variable.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MappingAbsMagnitudeInfo = {
-        "MappingAbsMagnitude",
-        "Mapping (absolute magnitude)",
-        "The name of the variable in the SPECK file that is used as the absolute "
-        "magnitude variable.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo MappingAbsMagnitudeInfo = {
+        .identifier = "MappingAbsMagnitude",
+        .name = "Mapping (absolute magnitude)",
+        .description = "The name of the variable in the SPECK file that is used as the "
+            "absolute magnitude variable.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MappingVxInfo = {
-        "MappingVx",
-        "Mapping (vx)",
-        "The name of the variable in the SPECK file that is used as the star velocity "
-        "along the x-axis.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo MappingVxInfo = {
+        .identifier = "MappingVx",
+        .name = "Mapping (vx)",
+        .description = "The name of the variable in the SPECK file that is used as the "
+            "star velocity along the x-axis.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MappingVyInfo = {
-        "MappingVy",
-        "Mapping (vy)",
-        "The name of the variable in the SPECK file that is used as the star velocity "
-        "along the y-axis.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo MappingVyInfo = {
+        .identifier = "MappingVy",
+        .name = "Mapping (vy)",
+        .description = "The name of the variable in the SPECK file that is used as the "
+            "star velocity along the y-axis.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MappingVzInfo = {
-        "MappingVz",
-        "Mapping (vz)",
-        "The name of the variable in the SPECK file that is used as the star velocity "
-        "along the z-axis.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo MappingVzInfo = {
+        .identifier = "MappingVz",
+        .name = "Mapping (vz)",
+        .description = "The name of the variable in the SPECK file that is used as the "
+            "star velocity along the z-axis.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MappingSpeedInfo = {
-        "MappingSpeed",
-        "Mapping (speed)",
-        "The name of the variable in the SPECK file that is used as the speed.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo MappingSpeedInfo = {
+        .identifier = "MappingSpeed",
+        .name = "Mapping (speed)",
+        .description = "The name of the variable in the SPECK file that is used as the "
+            "speed.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorOptionInfo = {
-        "ColorOption",
-        "Color option",
-        "This value determines which quantity is used for determining the color of the "
-        "stars.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo ColorOptionInfo = {
+        .identifier = "ColorOption",
+        .name = "Color option",
+        .description = "This value determines which quantity is used for determining the "
+            "color of the stars.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OtherDataOptionInfo = {
-        "OtherData",
-        "Other data column",
-        "The index of the SPECK file data column that is used as the color input.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo OtherDataOptionInfo = {
+        .identifier = "OtherData",
+        .name = "Other data column",
+        .description = "The index of the SPECK file data column that is used as the "
+            "color input.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OtherDataValueRangeInfo = {
-        "OtherDataValueRange",
-        "Range of the other data values",
-        "This value is the min/max value range that is used to normalize the other data "
-        "values so they can be used by the specified color map.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo OtherDataValueRangeInfo = {
+        .identifier = "OtherDataValueRange",
+        .name = "Range of the other data values",
+        .description = "This value is the min/max value range that is used to normalize "
+            "the other data values so they can be used by the specified color map.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f, 1.f),
+            .minMax = { glm::vec2(-10.f, -10.f), glm::vec2(10.f, 10.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FixedColorInfo = {
-        "FixedColorValue",
-        "Color used for fixed star colors",
-        "The color that should be used if the 'Fixed Color' value is used.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo FixedColorInfo = {
+        .identifier = "FixedColorValue",
+        .name = "Color used for fixed star colors",
+        .description = "The color that should be used if the 'Fixed Color' value is "
+            "used.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo OtherDataColorMapInfo = {
-        "OtherDataColorMap",
-        "Other data color map",
-        "The color map that is used if the 'Other Data' rendering method is selected.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo OtherDataColorMapInfo = {
+        .identifier = "OtherDataColorMap",
+        .name = "Other data color map",
+        .description = "The color map that is used if the 'Other Data' rendering method "
+            "is selected.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FilterOutOfRangeInfo = {
-        "FilterOutOfRange",
-        "Filter out of range",
-        "Determines whether other data values outside the value range should be visible "
-        "or filtered away.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo FilterOutOfRangeInfo = {
+        .identifier = "FilterOutOfRange",
+        .name = "Filter out of range",
+        .description = "Determines whether other data values outside the value range "
+            "should be visible or filtered away.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    const PropertyOwner::PropertyOwnerInfo CoreOwnerInfo = {
-        "Core",
-        "Core",
-        "Settings for the central core portion of the star."
+    constexpr PropertyOwner::PropertyOwnerInfo CoreOwnerInfo = {
+        .identifier = "Core",
+        .name = "Core",
+        .description = "Settings for the central core portion of the star."
     };
 
-    const PropertyOwner::PropertyOwnerInfo GlareOwnerInfo = {
-        "Glare",
-        "Glare",
-        "Settings for the glare portion of the star."
+    constexpr PropertyOwner::PropertyOwnerInfo GlareOwnerInfo = {
+        .identifier = "Glare",
+        .name = "Glare",
+        .description = "Settings for the glare portion of the star."
     };
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture path",
-        "The path to the texture that should be used.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture path",
+        .description = "The path to the texture that should be used.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MultiplierInfo = {
-        "Multiplier",
-        "Multiplier",
-        "An individual multiplication factor for this texture component. Using the "
-        "multiplier and gamma values for both components, it is possible to fine tune "
-        "the look of the stars or disable the contributions altogether by setting it to "
-        "0.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo MultiplierInfo = {
+        .identifier = "Multiplier",
+        .name = "Multiplier",
+        .description = "An individual multiplication factor for this texture component. "
+            "Using the multiplier and gamma values for both components, it is possible "
+            "to fine tune the look of the stars or disable the contributions altogether "
+            "by setting it to 0.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 20.f }
+        }
     };
 
-    constexpr Property::PropertyInfo GammaInfo = {
-        "Gamma",
-        "Gamma",
-        "An individual gamma exponent for this texture component. Using the multiplier "
-        "and gamma values for both components, it is possible to finetune the look of "
-        "the stars."
+    constexpr FloatPropertyInfo GammaInfo = {
+        .identifier = "Gamma",
+        .name = "Gamma",
+        .description = "An individual gamma exponent for this texture component. Using "
+            "the multiplier and gamma values for both components, it is possible to "
+            "finetune the look of the stars.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr Property::PropertyInfo MagnitudeExponentInfo = {
-        "MagnitudeExponent",
-        "Magnitude exponent",
-        "Adjust star magnitude by 10^MagnitudeExponent. Stars closer than this distance "
-        "are given full opacity. Farther away, stars dim proportionally to the "
-        "logarithm of their distance.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo MagnitudeExponentInfo = {
+        .identifier = "MagnitudeExponent",
+        .name = "Magnitude exponent",
+        .description = "Adjust star magnitude by 10^MagnitudeExponent. Stars closer than "
+            "this distance are given full opacity. Farther away, stars dim "
+            "proportionally to the logarithm of their distance.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 6.2f,
+            .minMax = { 5.f, 8.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ScaleInfo = {
-        "Scale",
-        "Scale",
-        "A uniform scale factor that determines how much of the total size of the star "
-        "this component is using. If it is 0, it will be hidden. If it is 1, it will "
-        "take the entire size.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ScaleInfo = {
+        .identifier = "Scale",
+        .name = "Scale",
+        .description = "A uniform scale factor that determines how much of the total "
+            "size of the star this component is using. If it is 0, it will be hidden. If "
+            "it is 1, it will take the entire size.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    const PropertyOwner::PropertyOwnerInfo SizeCompositionInfo = {
-        "SizeComposition",
-        "Size Composition",
-        ""
+    constexpr PropertyOwner::PropertyOwnerInfo SizeCompositionInfo = {
+        .identifier = "SizeComposition",
+        .name = "Size Composition",
+        .description = ""
     };
 
-    constexpr Property::PropertyInfo SizeCompositionMethodInfo = {
-        "Method",
-        "Method",
-        "Method to determine the size for the stars.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo SizeCompositionMethodInfo = {
+        .identifier = "Method",
+        .name = "Method",
+        .description = "Method to determine the size for the stars.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LumPercentInfo = {
-        "LumPercent",
-        "Luminosity contribution",
-        "Luminosity Contribution.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo LumPercentInfo = {
+        .identifier = "LumPercent",
+        .name = "Luminosity contribution",
+        .description = "Luminosity Contribution.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 0.f, 3.f }
+        }
     };
 
-    constexpr Property::PropertyInfo RadiusPercentInfo = {
-        "RadiusPercent",
-        "Radius contribution",
-        "Radius Contribution.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo RadiusPercentInfo = {
+        .identifier = "RadiusPercent",
+        .name = "Radius contribution",
+        .description = "Radius Contribution.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 0.f, 3.f }
+        }
     };
 
-    constexpr Property::PropertyInfo FadeInDistancesInfo = {
-        "FadeInDistances",
-        "Fade-in start and end distances",
-        "These values determine the initial and final distances from the center of our "
-        "galaxy from which the astronomical object will start and end fading-in.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo FadeInDistancesInfo = {
+        .identifier = "FadeInDistances",
+        .name = "Fade-in start and end distances",
+        .description = "These values determine the initial and final distances from the "
+            "center of our galaxy from which the astronomical object will start and end "
+            "fading-in.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(100.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo UseProperMotionInfo = {
-        "UseProperMotion",
-        "Enable proper motion of stars",
-        "If this setting is enabled and the loaded data file contains velocity "
-        "information for the stars, that information is used to move the stars' position "
-        "with progressing to show their proper motion through space."
+    constexpr BoolPropertyInfo UseProperMotionInfo = {
+        .identifier = "UseProperMotion",
+        .name = "Enable proper motion of stars",
+        .description = "If this setting is enabled and the loaded data file contains "
+            "velocity information for the stars, that information is used to move the "
+            "stars' position with progressing to show their proper motion through space.",
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ProperMotionEpochInfo = {
-        "ProperMotionEpoch",
-        "Proper motion epoch",
-        "This value defines the epoch for the positions provided in the data file in "
-        "J2000 seconds. This value is only needed if the `ProperMotion` is enabled as "
-        "well, in which case it determines the epoch at which the position of the star "
-        "starts. This means that if the time in the application is at the epoch, the "
-        "stars will be exactly at their determined position without any velocity-based "
-        "offset. If this value is not specified, 2000-01-01 12:00:00 will be used as the "
-        "epoch instead."
+    constexpr DoublePropertyInfo ProperMotionEpochInfo = {
+        .identifier = "ProperMotionEpoch",
+        .name = "Proper motion epoch",
+        .description = "This value defines the epoch for the positions provided in the "
+            "data file in J2000 seconds. This value is only needed if the `ProperMotion` "
+            "is enabled as well, in which case it determines the epoch at which the "
+            "position of the star starts. This means that if the time in the application "
+            "is at the epoch, the stars will be exactly at their determined position "
+            "without any velocity-based offset. If this value is not specified, "
+            "2000-01-01 12:00:00 will be used as the epoch instead.",
+        .defaults = {
+            .value = 0.0
+        }
     };
 
-    constexpr Property::PropertyInfo EnableFadeInInfo = {
-        "EnableFadeIn",
-        "Enable fade-in effect",
-        "Enables/Disables the Fade-in effect.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnableFadeInInfo = {
+        .identifier = "EnableFadeIn",
+        .name = "Enable fade-in effect",
+        .description = "Enables/Disables the Fade-in effect.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // Renders large star catalogs as a point-based star field using data loaded from a
@@ -340,11 +395,10 @@ namespace {
     // field to reflect stellar motion rather than remaining static. This is especially
     // useful for long-timescale astronomical simulations and temporal exploration.
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
-        // [[codegen::verbatim(SpeckFileInfo.description)]]
-        std::filesystem::path speckFile [[codegen::key("File")]];
+        std::filesystem::path speckFile
+            [[codegen::Info(SpeckFileInfo), codegen::key("File")]];
 
-        // [[codegen::verbatim(ColorTextureInfo.description)]]
-        std::filesystem::path colorMap;
+        std::filesystem::path colorMap [[codegen::Info(ColorTextureInfo)]];
 
         enum class ColorOption {
             Color,
@@ -353,17 +407,14 @@ namespace {
             OtherData [[codegen::key("Other Data")]],
             FixedColor [[codegen::key("Fixed Color")]]
         };
-        // [[codegen::verbatim(ColorOptionInfo.description)]]
-        std::optional<ColorOption> colorOption;
+        std::optional<ColorOption> colorOption [[codegen::Info(ColorOptionInfo)]];
 
-        // [[codegen::verbatim(OtherDataOptionInfo.description)]]
-        std::optional<std::string> otherData;
+        std::optional<std::string> otherData [[codegen::Info(OtherDataOptionInfo)]];
 
-        // [[codegen::verbatim(OtherDataColorMapInfo.description)]]
-        std::optional<std::filesystem::path> otherDataColorMap;
+        std::optional<std::filesystem::path> otherDataColorMap
+            [[codegen::Info(OtherDataColorMapInfo)]];
 
-        // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
-        std::optional<bool> filterOutOfRange;
+        std::optional<bool> filterOutOfRange [[codegen::Info(FilterOutOfRangeInfo)]];
 
         // Specifies a value that is always filtered out of the value ranges on load. This
         // can be used to trim the dataset's automatic value range.
@@ -374,27 +425,20 @@ namespace {
         std::optional<float> staticFilterReplacement;
 
         struct Texture {
-            // [[codegen::verbatim(TextureInfo.description)]]
-            std::filesystem::path texture;
+            std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
-            // [[codegen::verbatim(MultiplierInfo.description)]]
-            std::optional<float> multiplier;
+            std::optional<float> multiplier [[codegen::Info(MultiplierInfo)]];
 
-            // [[codegen::verbatim(GammaInfo.description)]]
-            std::optional<float> gamma;
+            std::optional<float> gamma [[codegen::Info(GammaInfo)]];
 
-            // [[codegen::verbatim(ScaleInfo.description)]]
-            std::optional<float> scale;
+            std::optional<float> scale [[codegen::Info(ScaleInfo)]];
         };
 
-        // [[codegen::verbatim(GlareOwnerInfo.description)]]
-        Texture glare;
+        Texture glare [[codegen::Info(GlareOwnerInfo)]];
 
-        // [[codegen::verbatim(CoreOwnerInfo.description)]]
-        std::optional<Texture> core;
+        std::optional<Texture> core [[codegen::Info(CoreOwnerInfo)]];
 
-        // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
-        std::optional<float> magnitudeExponent;
+        std::optional<float> magnitudeExponent [[codegen::Info(MagnitudeExponentInfo)]];
 
         enum class [[codegen::map(SizeComposition)]] SizeComposition {
             DistanceModulus [[codegen::key("Distance Modulus")]],
@@ -404,40 +448,30 @@ namespace {
             AppMagnitude [[codegen::key("App Magnitude")]]
         };
 
-        // [[codegen::verbatim(SizeCompositionMethodInfo.description)]]
-        std::optional<SizeComposition> sizeComposition;
+        std::optional<SizeComposition> sizeComposition
+            [[codegen::Info(SizeCompositionMethodInfo)]];
 
         struct DataMapping {
-            // [[codegen::verbatim(MappingBvInfo.description)]]
-            std::optional<std::string> bv;
-            // [[codegen::verbatim(MappingLuminanceInfo.description)]]
-            std::optional<std::string> luminance;
-            // [[codegen::verbatim(MappingAbsMagnitudeInfo.description)]]
-            std::optional<std::string> absoluteMagnitude;
-            // [[codegen::verbatim(MappingVxInfo.description)]]
-            std::optional<std::string> vx;
-            // [[codegen::verbatim(MappingVyInfo.description)]]
-            std::optional<std::string> vy;
-            // [[codegen::verbatim(MappingVzInfo.description)]]
-            std::optional<std::string> vz;
-            // [[codegen::verbatim(MappingSpeedInfo.description)]]
-            std::optional<std::string> speed;
+            std::optional<std::string> bv [[codegen::Info(MappingBvInfo)]];
+            std::optional<std::string> luminance [[codegen::Info(MappingLuminanceInfo)]];
+            std::optional<std::string> absoluteMagnitude
+                [[codegen::Info(MappingAbsMagnitudeInfo)]];
+            std::optional<std::string> vx [[codegen::Info(MappingVxInfo)]];
+            std::optional<std::string> vy [[codegen::Info(MappingVyInfo)]];
+            std::optional<std::string> vz [[codegen::Info(MappingVzInfo)]];
+            std::optional<std::string> speed [[codegen::Info(MappingSpeedInfo)]];
         };
         // The mappings between data values and the variable names specified in the SPECK
         // file.
         DataMapping dataMapping;
 
-        // [[codegen::verbatim(FadeInDistancesInfo.description)]]
-        std::optional<glm::dvec2> fadeInDistances;
+        std::optional<glm::dvec2> fadeInDistances [[codegen::Info(FadeInDistancesInfo)]];
 
-        // [[codegen::verbatim(UseProperMotionInfo.description)]]
-        std::optional<bool> useProperMotion;
+        std::optional<bool> useProperMotion [[codegen::Info(UseProperMotionInfo)]];
 
-        // [[codegen::verbatim(ProperMotionEpochInfo.description)]]
-        std::optional<double> properMotionEpoch;
+        std::optional<double> properMotionEpoch [[codegen::Info(ProperMotionEpochInfo)]];
 
-        // [[codegen::verbatim(EnableFadeInInfo.description)]]
-        std::optional<bool> enableFadeIn;
+        std::optional<bool> enableFadeIn [[codegen::Info(EnableFadeInInfo)]];
     };
 } // namespace
 #include "renderablestars_codegen.cpp"
@@ -468,44 +502,34 @@ RenderableStars::RenderableStars(const Dictionary& dictionary)
     , _colorOption(ColorOptionInfo)
     , _otherDataOption(OtherDataOptionInfo)
     , _otherDataColorMapPath(OtherDataColorMapInfo)
-    , _otherDataRange(
-        OtherDataValueRangeInfo,
-        glm::vec2(0.f, 1.f),
-        glm::vec2(-10.f, -10.f),
-        glm::vec2(10.f, 10.f)
-    )
-    , _fixedColor(FixedColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _filterOutOfRange(FilterOutOfRangeInfo, false)
+    , _otherDataRange(OtherDataValueRangeInfo)
+    , _fixedColor(FixedColorInfo)
+    , _filterOutOfRange(FilterOutOfRangeInfo)
     , _core {
         .container = PropertyOwner(CoreOwnerInfo),
         .texturePath = StringProperty(TextureInfo),
-        .multiplier = FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
-        .gamma = FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
-        .scale = FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
+        .multiplier = FloatProperty(MultiplierInfo),
+        .gamma = FloatProperty(GammaInfo),
+        .scale = FloatProperty(ScaleInfo)
     }
     , _glare {
         .container = PropertyOwner(GlareOwnerInfo),
         .texturePath = StringProperty(TextureInfo),
-        .multiplier = FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
-        .gamma = FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
-        .scale = FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
+        .multiplier = FloatProperty(MultiplierInfo),
+        .gamma = FloatProperty(GammaInfo),
+        .scale = FloatProperty(ScaleInfo)
     }
     , _parameters {
         .container = PropertyOwner(SizeCompositionInfo),
         .method = OptionProperty(SizeCompositionMethodInfo),
-        .lumCent = FloatProperty(LumPercentInfo, 0.5f, 0.f, 3.f),
-        .radiusCent = FloatProperty(RadiusPercentInfo, 0.5f, 0.f, 3.f)
+        .lumCent = FloatProperty(LumPercentInfo),
+        .radiusCent = FloatProperty(RadiusPercentInfo)
     }
-    , _magnitudeExponent(MagnitudeExponentInfo, 6.2f, 5.f, 8.f)
-    , _fadeInDistances(
-        FadeInDistancesInfo,
-        glm::vec2(0.f),
-        glm::vec2(0.f),
-        glm::vec2(100.f)
-    )
-    , _useProperMotion(UseProperMotionInfo, true)
-    , _properMotionEpoch(ProperMotionEpochInfo, 0.0)
-    , _enableFadeInDistance(EnableFadeInInfo, false)
+    , _magnitudeExponent(MagnitudeExponentInfo)
+    , _fadeInDistances(FadeInDistancesInfo)
+    , _useProperMotion(UseProperMotionInfo)
+    , _properMotionEpoch(ProperMotionEpochInfo)
+    , _enableFadeInDistance(EnableFadeInInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

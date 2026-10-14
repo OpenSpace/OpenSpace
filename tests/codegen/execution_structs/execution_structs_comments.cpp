@@ -104,22 +104,6 @@ namespace {
 
         // What about " second quote " though?
         int twoQuotesInComment;
-
-        // [[codegen::verbatim(Verbatim)]]
-        int verbatimComment;
-
-        // [[codegen::verbatim(Verbatim)]]
-        // direct comment
-        int verbatimAndDirectComment;
-
-        // direct comment
-        // [[codegen::verbatim(Verbatim)]]
-        int directAndVerbatimComment;
-
-        // direct comment 1
-        // [[codegen::verbatim(Verbatim)]]
-        // direct comment 2
-        int sandwichedComment;
     };
 } // namespace
 #include "execution_structs_comments_codegen.cpp"
@@ -129,7 +113,7 @@ TEST_CASE("Execution/Structs/Comments", "[Execution][Structs]") {
     using namespace openspace;
 
     Documentation d = codegen::doc<Parameters>("abc");
-    REQUIRE(d.entries.size() == 14);
+    REQUIRE(d.entries.size() == 10);
     CHECK(d.entries[0].documentation == "multi line commenting");
     CHECK(d.entries[1].documentation == "multi line simple variable def");
     CHECK(
@@ -148,21 +132,5 @@ TEST_CASE("Execution/Structs/Comments", "[Execution][Structs]") {
     CHECK(
         d.entries[9].documentation ==
         "What about \" second quote \" though?"
-    );
-    CHECK(
-        d.entries[10].documentation ==
-        "Verbatim Comment"
-    );
-    CHECK(
-        d.entries[11].documentation ==
-        "Verbatim Comment direct comment"
-    );
-    CHECK(
-        d.entries[12].documentation ==
-        "direct comment Verbatim Comment"
-    );
-    CHECK(
-        d.entries[13].documentation ==
-        "direct comment 1 Verbatim Comment direct comment 2"
     );
 }

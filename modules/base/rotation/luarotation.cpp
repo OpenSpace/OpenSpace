@@ -40,18 +40,18 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ScriptInfo = {
-        "Script",
-        "Script",
-        "This value is the path to the Lua script that will be executed to compute the "
-        "rotation for this transformation. The script needs to define a function "
-        "'rotation' that takes the current simulation time in seconds past the J2000 "
-        "epoch as the first argument, the simulation time in seconds past the J2000 "
-        "epoch of the last frame as the second argument, and the current wall time as "
-        "milliseconds past the J2000 epoch as the third argument. It computes the "
-        "rotation value factors returned as a table containing the 9 values that make up "
-        "the resulting rotation matrix.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo ScriptInfo = {
+        .identifier = "Script",
+        .name = "Script",
+        .description = "This value is the path to the Lua script that will be executed "
+            "to compute the rotation for this transformation. The script needs to define "
+            "a function 'rotation' that takes the current simulation time in seconds "
+            "past the J2000 epoch as the first argument, the simulation time in seconds "
+            "past the J2000 epoch of the last frame as the second argument, and the "
+            "current wall time as milliseconds past the J2000 epoch as the third "
+            "argument. It computes the rotation value factors returned as a table "
+            "containing the 9 values that make up the resulting rotation matrix.",
+        .visibility = Visibility::AdvancedUser
     };
 
     // Generates the rotation for the attached scene graph node by calling the provided
@@ -59,8 +59,7 @@ namespace {
     // returned matrix must be a valid rotation matrix. The script parameter describes in
     // greater detail how the Lua script file should be constructed.
     struct [[codegen::Dictionary(LuaRotation)]] Parameters {
-        // [[codegen::verbatim(ScriptInfo.description)]]
-        std::filesystem::path script;
+        std::filesystem::path script [[codegen::Info(ScriptInfo)]];
     };
 } // namespace
 #include "luarotation_codegen.cpp"

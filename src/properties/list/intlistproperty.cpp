@@ -29,13 +29,11 @@
 
 namespace openspace {
 
-IntListProperty::IntListProperty(PropertyInfo info, std::vector<int> values)
-    : ListProperty(std::move(info), std::move(values))
-{}
-
-IntListProperty::IntListProperty(PropertyInfo info, IsEnabled isEnabled,
-                                 std::vector<int> values)
-    : ListProperty(std::move(info), isEnabled, std::move(values))
+IntListProperty::IntListProperty(IntListPropertyInfo info)
+    : ListProperty(
+        info,
+        std::vector<int>(info.defaults.value.begin(), info.defaults.value.end())
+    )
 {}
 
 std::string_view IntListProperty::className() const {

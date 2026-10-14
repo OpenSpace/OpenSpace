@@ -28,28 +28,8 @@
 
 namespace openspace {
 
-DMat2Property::DMat2Property(PropertyInfo info, glm::dmat2x2 value, glm::dmat2x2 minValue,
-                             glm::dmat2x2 maxValue, glm::dmat2x2 stepValue)
-    : NumericalProperty<glm::dmat2x2>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
-{}
-
-DMat2Property::DMat2Property(PropertyInfo info, IsEnabled isEnabled, glm::dmat2x2 value,
-                             glm::dmat2x2 minValue, glm::dmat2x2 maxValue,
-                             glm::dmat2x2 stepValue)
-    : NumericalProperty<glm::dmat2x2>(
-        std::move(info),
-        isEnabled,
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+DMat2Property::DMat2Property(DMat2PropertyInfo info)
+    : NumericalProperty<glm::dmat2x2>(std::move(info))
 {}
 
 std::string_view DMat2Property::className() const {

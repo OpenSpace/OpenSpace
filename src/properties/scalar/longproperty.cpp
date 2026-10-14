@@ -28,21 +28,8 @@
 
 namespace openspace {
 
-LongProperty::LongProperty(PropertyInfo info, long value, long minValue, long maxValue,
-                           long stepValue)
-    : NumericalProperty<long>(std::move(info), value, minValue, maxValue, stepValue)
-{}
-
-LongProperty::LongProperty(PropertyInfo info, IsEnabled isEnabled, long value,
-                           long minValue, long maxValue, long stepValue)
-    : NumericalProperty<long>(
-        std::move(info),
-        isEnabled,
-        value,
-        minValue,
-        maxValue,
-        stepValue
-    )
+LongProperty::LongProperty(LongPropertyInfo info)
+    : NumericalProperty<long>(std::move(info))
 {}
 
 std::string_view LongProperty::className() const {
