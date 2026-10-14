@@ -301,7 +301,9 @@ print(f"Downloaded {len(moca_associations):,} rows and {len(moca_associations.co
 moca_assoc_lists = (
     moca_associations
     .groupby("moca_oid")["moca_aid"]
-    .agg(lambda s: sorted(s.dropna().unique()))
+    # The default is use commas as separators, but here we explicitly use semicolons to
+    # avoid conflicts with any existing commas in the data
+    .agg(lambda s: ";".join(map(str, sorted(s.dropna().unique()))))
     .rename("moca_aid")
     .reset_index()
 )
