@@ -159,6 +159,7 @@ CastResult SpaceCast::select(float exponent) const {
         mask[i] = f >= 0.f;
     }
 
+    // @TODO Check this component computation. Do we want to keep it? Does it work correctly?
     const Components components = labelComponents(mask, dims);
     const size_t nComponents = components.sizes.size();
     result.nComponents = nComponents;

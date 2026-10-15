@@ -94,7 +94,7 @@ private:
     bool _overrideInternalSelection = false;
 
     bool _useSpatialSelection = false;
-    std::optional<size_t> _savedSpatialSelectionId;
+    std::optional<size_t> _appliedSavedSpatialSelection;
 
     int _nActiveFilters = 0;
 

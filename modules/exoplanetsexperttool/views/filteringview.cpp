@@ -103,16 +103,18 @@ const ColumnKey& FilteringView::rowLimitColumn() const {
 std::string FilteringView::spatialFilterDescription(
                                       const SpatialSelectionView& spatialSelectionView) const
 {
-    if (_savedSpatialSelectionId.has_value()) {
+    if (_appliedSavedSpatialSelection.has_value()) {
         const std::vector<SavedSelection>& saved =
             spatialSelectionView.handler().savedSelections();
+
         const auto it = std::find_if(
             saved.begin(),
             saved.end(),
             [this](const SavedSelection& selection) {
-                return selection.id == *_savedSpatialSelectionId;
+                return selection.id == *_appliedSavedSpatialSelection;
             }
         );
+
         if (it != saved.end()) {
             return it->name;
         }
@@ -195,7 +197,7 @@ bool FilteringView::render(bool* open,
     ImGui::SameLine();
     if (ImGui::Button("Reset spatial")) {
         _useSpatialSelection = false;
-        _savedSpatialSelectionId.reset();
+        _appliedSavedSpatialSelection.reset();
         filterWasChanged = true;
     }
 
@@ -375,25 +377,33 @@ void FilteringView::applySpatialSelection(
     const std::vector<SavedSelection>& saved =
         spatialSelectionView.handler().savedSelections();
 
-    SpatialSelectionQuery query = spatialSelectionView.currentSpatialQuery();
+    std::optional<SpatialSelectionQuery> query;
 
-    if (_savedSpatialSelectionId.has_value()) {
+    if (_appliedSavedSpatialSelection.has_value()) {
         const auto it = std::find_if(
             saved.begin(),
             saved.end(),
             [this](const SavedSelection& selection) {
-                return selection.id == *_savedSpatialSelectionId;
+                return selection.id == *_appliedSavedSpatialSelection;
             }
         );
         if (it != saved.end()) {
             query = it->query;
         }
     }
+    else {
+        // Use current spatial query
+        query = spatialSelectionView.currentSpatialQuery();
+    }
+
+    if (!query.has_value()) {
+        return;
+    }
 
     prefilteredData = spatialSelectionView.handler().select(
         data,
         prefilteredData,
-        query,
+        *query,
         _dataViewer.dataMapping()
     );
 }
@@ -782,23 +792,23 @@ bool FilteringView::renderSpatialFilterSettings(
 
     ImGui::SetNextItemWidth(-1.f);
     if (ImGui::BeginCombo("##SpatialFilterSource", sourceDescription.c_str())) {
-        const bool currentIsSelected = !_savedSpatialSelectionId.has_value() ||
+        const bool currentIsSelected = !_appliedSavedSpatialSelection.has_value() ||
             std::none_of(
                 saved.begin(),
                 saved.end(),
                 [this](const SavedSelection& selection) {
-                    return selection.id == *_savedSpatialSelectionId;
+                    return selection.id == *_appliedSavedSpatialSelection;
                 }
             );
         if (ImGui::Selectable("Current spatial query", currentIsSelected)) {
-            _savedSpatialSelectionId.reset();
+            _appliedSavedSpatialSelection.reset();
             filterWasChanged = true;
         }
 
         for (const SavedSelection& selection : saved) {
-            const bool isSelected = _savedSpatialSelectionId == selection.id;
+            const bool isSelected = _appliedSavedSpatialSelection == selection.id;
             if (ImGui::Selectable(selection.name.c_str(), isSelected)) {
-                _savedSpatialSelectionId = selection.id;
+                _appliedSavedSpatialSelection = selection.id;
                 filterWasChanged = true;
             }
         }

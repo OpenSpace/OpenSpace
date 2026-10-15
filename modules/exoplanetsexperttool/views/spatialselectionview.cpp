@@ -912,17 +912,22 @@ void SpatialSelectionView::updateSkyMapCache() const {
 }
 
 std::vector<size_t> SpatialSelectionView::currentSpatialSelection(
-                                               const std::vector<size_t>& candidates) const
+                                              const std::vector<size_t>& candidates) const
 {
+    std::optional<SpatialSelectionQuery> currentQuery = currentSpatialQuery();
+    if (!currentQuery.has_value()) {
+        return {};
+    }
+
     return handler().select(
         _dataViewer.data(),
         candidates,
-        currentSpatialQuery(),
+        *currentQuery,
         _dataViewer.dataMapping()
     );
 }
 
-SpatialSelectionQuery SpatialSelectionView::currentSpatialQuery() const {
+std::optional<SpatialSelectionQuery> SpatialSelectionView::currentSpatialQuery() const {
     switch (_currentMethod) {
         case SpatialSelectionMethod::Shape3D:
             if (_shape3DType == Shape3DType::Sphere) {
@@ -933,8 +938,8 @@ SpatialSelectionQuery SpatialSelectionView::currentSpatialQuery() const {
             }
         case SpatialSelectionMethod::SkyMap:
             return _skyMapRect;
-        case SpatialSelectionMethod::Density:
-            return _densitySettings;
+        case SpatialSelectionMethod::Lasso:
+            return _generatedVolume;
         default:
             throw std::logic_error("Unknown spatial selection method");
     }
@@ -970,17 +975,7 @@ bool SpatialSelectionView::render(bool* open) {
     bool changed = false;
 
     changed |= renderMethodTabs();
-
-    if (_lassoTabActive) {
-        ImGui::End();
-        return changed;
-    }
-
-    ImGui::Separator();
-
     changed |= renderCurrentSelectionActions();
-    ImGui::Separator();
-
     changed |= renderSavedSelectionsManager();
 
     ImGui::End();
@@ -1002,14 +997,11 @@ bool SpatialSelectionView::renderMethodTabs() {
             changed |= renderSkyMapTab();
             ImGui::EndTabItem();
         }
-        // if (ImGui::BeginTabItem("Density (Future)")) {
-        //     _currentMethod = SpatialSelectionMethod::Density;
-        //     renderDensityTab();
-        //     ImGui::EndTabItem();
-        // }
         if (ImGui::BeginTabItem("Lasso (CAST)")) {
+            changed |= _currentMethod != SpatialSelectionMethod::Lasso;
+            _currentMethod = SpatialSelectionMethod::Lasso;
             _lassoTabActive = true;
-            renderLassoTab();
+            changed |= renderLassoTab();
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -1305,36 +1297,10 @@ bool SpatialSelectionView::renderSkyMapTab() {
     return changed;
 }
 
-void SpatialSelectionView::renderDensityTab() {
-    // Density selection is disabled for now
-    ImGui::TextWrapped(
-        "Density selection is currently disabled."
-    );
-
-    //ImGui::TextWrapped(
-    //    "Density selection selects points located in denser clusters in 3D space. "
-    //    "Configuring neighborhood parameters allows selecting high-density clusters."
-    //);
-    //ImGui::Spacing();
-
-    //bool changed = false;
-    //float r = static_cast<float>(_densitySettings.searchRadius);
-    //if (ImGui::DragFloat("Search Radius (pc)", &r, 0.5f, 0.1f, 1000.f, "%.1f pc")) {
-    //    _densitySettings.searchRadius = std::max(0.1, static_cast<double>(r));
-    //    changed = true;
-    //}
-
-    //if (ImGui::SliderInt("Min Neighbors", &_densitySettings.minNeighbors, 1, 100)) {
-    //    changed = true;
-    //}
-
-    //if (changed && _liveUpdate) {
-    //    applyCurrentSelection();
-    //}
-}
-
-void SpatialSelectionView::renderLassoTab() {
+bool SpatialSelectionView::renderLassoTab() {
+    bool changed = false;
     std::vector<std::string> candidates;
+
     if (global::renderEngine->scene()) {
         for (SceneGraphNode* node : global::renderEngine->scene()->allSceneGraphNodes()) {
             if (dynamic_cast<RenderableDensityPointCloud*>(node->renderable())) {
@@ -1342,9 +1308,11 @@ void SpatialSelectionView::renderLassoTab() {
             }
         }
     }
+
     const bool hasTarget = std::find(
         candidates.begin(), candidates.end(), _lassoTargetNode
     ) != candidates.end();
+
     if (!hasTarget && !candidates.empty()) {
         _lassoTargetNode = candidates.front();
     }
@@ -1393,6 +1361,7 @@ void SpatialSelectionView::renderLassoTab() {
     // The volume is recomputed or destroyed when the renderable is reinitialized
     const bool volumeChanged = _castSelection &&
         (!target || target->densityVolume() != &_castSelection->volume());
+
     if (volumeChanged) {
         _castSelection = nullptr;
         _castResult = CastResult();
@@ -1404,7 +1373,6 @@ void SpatialSelectionView::renderLassoTab() {
         runLassoSelection(target);
     }
 
-    ImGui::Spacing();
     ImGui::Separator();
 
     const bool hasSelection = _castSelection != nullptr;
@@ -1441,8 +1409,7 @@ void SpatialSelectionView::renderLassoTab() {
             "Threshold: %.4g (%.2f%% of max density)", _castResult.threshold, percent
         );
         ImGui::Text(
-            "%zu volume(s) above threshold, %zu particles selected",
-            _castResult.nComponents,
+            "%zu particles selected",
             _castResult.selectedParticles.size()
         );
     }
@@ -1454,10 +1421,12 @@ void SpatialSelectionView::renderLassoTab() {
     ImGui::BeginDisabled(_castResult.selectedParticles.empty());
     if (ImGui::Button("Generate Isosurface")) {
         generateLassoVolume(target, true);
+        changed = true;
     }
     ImGui::SameLine();
     if (ImGui::Button("Generate Convex Hull")) {
         generateLassoVolume(target, false);
+        changed = true;
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
@@ -1465,10 +1434,6 @@ void SpatialSelectionView::renderLassoTab() {
         "Creates a closed volume around the selected regions of the point cloud and "
         "saves it as a spatial selection that selects the exoplanets inside it."
     );
-
-    if (_generatedVolume.has_value()) {
-        ImGui::Text("Generated volume contains %zu items", _nItemsInGeneratedVolume);
-    }
 
     if (!hasSelection) {
         ImGui::EndDisabled();
@@ -1479,6 +1444,8 @@ void SpatialSelectionView::renderLassoTab() {
     }
 
     drawLasso();
+
+    return changed;
 }
 
 RenderableDensityPointCloud* SpatialSelectionView::lassoTarget() const {
@@ -1560,7 +1527,6 @@ void SpatialSelectionView::clearLassoSelection() {
     _castSelection = nullptr;
     _castResult = CastResult();
     _generatedVolume = std::nullopt;
-    _nItemsInGeneratedVolume = 0;
     _lassoStroke.clear();
     _lassoStatus.clear();
     applyLassoSelection();
@@ -1576,15 +1542,15 @@ void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* targ
 
     const glm::dmat4 volumeToWorld = node->modelTransform() *
         glm::scale(glm::dmat4(1.0), glm::dvec3(target->unitToMeter()));
+
     std::optional<SpatialSelectionQuery> generated;
-    std::string summary;
     if (isIsosurface) {
         const auto volume = handler().createIsoSurfaceVolume(
             _castSelection->volume(), _castResult, volumeToWorld
         );
         if (volume) {
             generated = *volume;
-            summary = "Lasso volume (smoothed isosurface)";
+            _lassoVolumeSummary = "Lasso volume (smoothed isosurface)";
         }
     }
     else {
@@ -1593,8 +1559,9 @@ void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* targ
         );
         if (volume) {
             generated = *volume;
-            summary = std::format("Lasso volume ({} convex hull(s))",
-                volume->hulls->size());
+            _lassoVolumeSummary = std::format(
+                "Lasso volume ({} convex hull(s))", volume->hulls->size()
+            );
         }
     }
     if (!generated) {
@@ -1607,16 +1574,18 @@ void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* targ
     // @TODO: Make sure the selected volume is shown also in the dome?
 
     _lassoStatus.clear();
-    const std::vector<size_t> inside = handler().select(
-        _dataViewer.data(),
-        _dataViewer.currentFiltering(),
-        *_generatedVolume,
-        _dataViewer.dataMapping()
-    );
-    _nItemsInGeneratedVolume = inside.size();
 
-    handler().addSavedSelection("", summary, *_generatedVolume);
-    _dataViewer.setSelection(inside);
+    if (_generatedVolume.has_value()) {
+        const std::vector<size_t> inside = handler().select(
+            _dataViewer.data(),
+            _dataViewer.currentFiltering(),
+            *_generatedVolume,
+            _dataViewer.dataMapping()
+        );
+
+        _dataViewer.setSelection(inside);
+    }
+
 }
 
 void SpatialSelectionView::drawLasso() const {
@@ -1640,6 +1609,8 @@ void SpatialSelectionView::drawLasso() const {
 }
 
 bool SpatialSelectionView::renderCurrentSelectionActions() {
+    ImGui::SeparatorText("Current selection:");
+
     std::vector<size_t> currentSel = currentSpatialSelection(
         _dataViewer.currentFiltering()
     );
@@ -1682,6 +1653,12 @@ bool SpatialSelectionView::renderCurrentSelectionActions() {
     ImGui::PopItemWidth();
     ImGui::SameLine();
 
+
+    std::optional<SpatialSelectionQuery> currentQuery = currentSpatialQuery();
+    if (!currentQuery.has_value()) {
+        ImGui::BeginDisabled();
+    }
+
     bool savedSelectionsChanged = false;
     if (ImGui::Button("Save Current Selection")) {
         std::string summary;
@@ -1717,25 +1694,26 @@ bool SpatialSelectionView::renderCurrentSelectionActions() {
                     _skyMapRect.decMax
                 );
                 break;
-            case SpatialSelectionMethod::Density:
-                summary = std::format(
-                    "Density (r={:.0f}pc, min={})",
-                    _densitySettings.searchRadius,
-                    _densitySettings.minNeighbors
-                );
+            case SpatialSelectionMethod::Lasso:
+                summary = _lassoVolumeSummary.empty() ? "Lasso selection" : _lassoVolumeSummary;
                 break;
         }
 
         std::string name = _saveNameBuffer;
-        handler().addSavedSelection(name, summary, currentSpatialQuery());
+        handler().addSavedSelection(name, summary, *currentQuery);
         _saveNameBuffer[0] = '\0'; // reset buffer
         savedSelectionsChanged = true;
     }
+
+    if (!currentQuery.has_value()) {
+        ImGui::EndDisabled();
+    }
+
     return savedSelectionsChanged;
 }
 
 bool SpatialSelectionView::renderSavedSelectionsManager() {
-    ImGui::TextUnformatted("Saved Selections:");
+    ImGui::SeparatorText("Saved selections:");
     ImGui::SameLine();
     view::helper::renderHelpMarker(
         "Save multiple selections, enable/disable individual ones, and apply their "

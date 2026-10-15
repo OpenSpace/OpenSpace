@@ -30,6 +30,7 @@
 #include <modules/exoplanetsexperttool/util/densityvolume.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/misc/assert.h>
 #include <openspace/misc/dictionary.h>
 #include <openspace/misc/dictionaryluaformatter.h>
 #include <openspace/query/query.h>
@@ -190,22 +191,10 @@ std::vector<size_t> SpatialSelectionHandler::selectSkyRect(
     return result;
 }
 
-std::vector<size_t> SpatialSelectionHandler::selectDensity(
-                                    const std::vector<ExoplanetItem>&,
-                                    const std::vector<size_t>&,
-                                    const DensitySelectionSettings&) const
-{
-    // @TODO: Implement density-based selection using spatial partitioning for efficiency.
-    // Use cast-based methods from Tobias and Liyun
-    // Density-based selection is disabled for now pending spatial partitioning
-    // optimization to avoid O(N^2) search on the render thread.
-    return {};
-}
-
 std::vector<size_t> SpatialSelectionHandler::selectMeshVolume(
-                                            const std::vector<ExoplanetItem>& data,
-                                            const std::vector<size_t>& candidates,
-                                            const MeshVolume& volume) const
+                                                  const std::vector<ExoplanetItem>& data,
+                                                   const std::vector<size_t>& candidates,
+                                                          const MeshVolume& volume) const
 {
     std::vector<size_t> result;
     if (!volume.hulls) {
@@ -234,9 +223,9 @@ std::vector<size_t> SpatialSelectionHandler::selectMeshVolume(
 }
 
 std::optional<MeshVolume> SpatialSelectionHandler::createMeshVolume(
-                                                       const DensityVolume& volume,
-                                                       const CastResult& result,
-                                                       const glm::dmat4& volumeToWorld)
+                                                              const DensityVolume& volume,
+                                                                 const CastResult& result,
+                                                          const glm::dmat4& volumeToWorld)
 {
     const std::vector<glm::vec3>& positions = volume.particlePositions();
     const std::vector<uint8_t>& mask = result.nodeMask;
@@ -452,11 +441,7 @@ std::vector<size_t> SpatialSelectionHandler::select(
     if (const IsoSurfaceVolume* volume = std::get_if<IsoSurfaceVolume>(&query)) {
         return selectIsoSurfaceVolume(data, candidates, *volume);
     }
-    return selectDensity(
-        data,
-        candidates,
-        std::get<DensitySelectionSettings>(query)
-    );
+    throw MissingCaseException();
 }
 
 void SpatialSelectionHandler::addSavedSelection(std::string name, std::string summary,
@@ -635,6 +620,7 @@ void SpatialSelectionHandler::updateSelectionVolume(const SpatialSelectionQuery*
         ScriptEngine::ShouldBeLogged::No
     );
     _selectionVolumeIsVisible = isVisible;
+
     if (isVisible) {
         _selectionVolumeParameters = std::move(parameters);
     }

@@ -51,18 +51,15 @@ enum class SpatialSelectionMethod {
     /// 2D celestial sky map rectangle selection
     SkyMap,
 
-    /// Density-based cluster selection
-    Density
+    /// Lasso-based selection
+    Lasso
 };
 
 /**
  * The specific 3D geometric shape type used within the 3D Shape tab.
  */
 enum class Shape3DType {
-    /// 3D spherical volume
     Sphere = 0,
-
-    /// Axis-aligned 3D box volume
     Box
 };
 
@@ -93,12 +90,8 @@ public:
     std::vector<size_t> currentSpatialSelection(
         const std::vector<size_t>& candidates) const;
 
-    SpatialSelectionQuery currentSpatialQuery() const;
+    std::optional<SpatialSelectionQuery> currentSpatialQuery() const;
 
-    /**
-     * Returns true if the Lasso tab is shown, in which case the selection does not apply
-     * to the exoplanet data and #currentSpatialQuery refers to the previous tab.
-     */
     bool isLassoTabActive() const;
 
     bool isDrawingLasso() const;
@@ -121,8 +114,7 @@ private:
     bool renderMethodTabs();
     bool renderShape3DTab();
     bool renderSkyMapTab();
-    void renderDensityTab();
-    void renderLassoTab();
+    bool renderLassoTab();
     bool renderCurrentSelectionActions();
     bool renderSavedSelectionsManager();
 
@@ -161,9 +153,6 @@ private:
 
     /// Parameters for 2D sky map selection
     SkyMapRect _skyMapRect;
-
-    /// Parameters for density-based selection
-    DensitySelectionSettings _densitySettings;
 
     /// Whether changing parameters immediately updates the active selection in DataViewer
     bool _liveUpdate = true;
@@ -205,12 +194,12 @@ private:
     std::vector<glm::vec2> _lassoStroke;
     std::string _lassoTargetNode;
     std::string _lassoStatus;
+    std::string _lassoVolumeSummary;
     CastMethod _castMethod = CastMethod::SpaceCast;
     float _castThresholdExponent = 0.f;
     std::unique_ptr<CastSelection> _castSelection;
     CastResult _castResult;
     std::optional<SpatialSelectionQuery> _generatedVolume;
-    size_t _nItemsInGeneratedVolume = 0;
 };
 
 } // namespace openspace::exoplanets

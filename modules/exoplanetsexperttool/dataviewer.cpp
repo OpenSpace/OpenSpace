@@ -996,17 +996,18 @@ void DataViewer::render() {
         );
     }
 
-    if (_showSpatialSelectionWindow && _spatialSelectionView &&
-        !_spatialSelectionView->isLassoTabActive())
-    {
-        const SpatialSelectionQuery query = _spatialSelectionView->currentSpatialQuery();
-        _spatialSelectionHandler.updateSelectionVolume(&query);
-    }
-    else if (_showSpatialSelectionWindow && _spatialSelectionView &&
-             _spatialSelectionView->generatedVolume().has_value())
-    {
-        const SpatialSelectionQuery query = *_spatialSelectionView->generatedVolume();
-        _spatialSelectionHandler.updateSelectionVolume(&query);
+    // If we're showing the spatial selection view, also update the rendered selection
+    // volume. If not, hide it
+    if (_showSpatialSelectionWindow && _spatialSelectionView) {
+        const std::optional<SpatialSelectionQuery> query =
+            _spatialSelectionView->currentSpatialQuery();
+
+        if (query.has_value()) {
+            _spatialSelectionHandler.updateSelectionVolume(&query.value());
+        }
+        else {
+            _spatialSelectionHandler.updateSelectionVolume(nullptr);
+        }
     }
     else {
         _spatialSelectionHandler.updateSelectionVolume(nullptr);

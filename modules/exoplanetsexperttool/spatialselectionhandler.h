@@ -90,17 +90,6 @@ struct SkyMapRect {
 };
 
 /**
- * Configuration parameters for density-based spatial selection.
- */
-struct DensitySelectionSettings {
-    /// Search radius around each point in Parsecs
-    double searchRadius = 10.0;
-
-    /// Minimum number of neighbors within the search radius
-    int minNeighbors = 5;
-};
-
-/**
  * Selection volume made up of one convex hull per selected clump, in Parsecs.
  */
 struct MeshVolume {
@@ -126,7 +115,6 @@ using SpatialSelectionQuery = std::variant<
     SphereVolume,
     BoxVolume,
     SkyMapRect,
-    DensitySelectionSettings,
     MeshVolume,
     IsoSurfaceVolume
 >;
@@ -195,18 +183,6 @@ public:
     std::vector<size_t> selectSkyRect(const std::vector<ExoplanetItem>& data,
         const std::vector<size_t>& candidates, const SkyMapRect& rect,
         const DataSettings::DataMapping& mapping) const;
-
-    /**
-     * Selects candidate exoplanets located in dense spatial clusters.
-     *
-     * \param data The full dataset of exoplanet items
-     * \param candidates Candidate item indices to test
-     * \param settings Density parameters including search radius and neighbor threshold
-     * \return Indices of exoplanets satisfying the density threshold
-     */
-    std::vector<size_t> selectDensity(const std::vector<ExoplanetItem>& data,
-        const std::vector<size_t>& candidates,
-        const DensitySelectionSettings& settings) const;
 
     /**
      * Selects candidate exoplanets whose 3D position falls within the given volume.
