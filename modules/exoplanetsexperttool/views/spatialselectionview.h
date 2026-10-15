@@ -134,6 +134,7 @@ private:
 
     void applyCurrentSelection();
     void applyCombinedSavedSelections();
+    void loadSavedSelection(const SavedSelection& selection);
     void updateSkyMapCache() const;
 
     /// Reference to the main DataViewer coordinator
@@ -141,6 +142,8 @@ private:
 
     /// Active spatial selection category
     SpatialSelectionMethod _currentMethod = SpatialSelectionMethod::Shape3D;
+
+    std::optional<SpatialSelectionMethod> _requestedTab;
 
     /// Active 3D shape type (Sphere or Box)
     Shape3DType _shape3DType = Shape3DType::Sphere;

@@ -984,24 +984,44 @@ bool SpatialSelectionView::render(bool* open) {
 
 bool SpatialSelectionView::renderMethodTabs() {
     bool changed = false;
+    const std::optional<SpatialSelectionMethod> requestedTab = _requestedTab;
+    const auto tabFlags = [requestedTab](SpatialSelectionMethod method) {
+        return requestedTab == method ?
+            ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
+    };
     if (ImGui::BeginTabBar("SpatialSelectionTabBar")) {
-        if (ImGui::BeginTabItem("3D Shape")) {
-            changed |= _currentMethod != SpatialSelectionMethod::Shape3D;
-            _currentMethod = SpatialSelectionMethod::Shape3D;
-            changed |= renderShape3DTab();
+        if (ImGui::BeginTabItem(
+            "3D Shape", nullptr, tabFlags(SpatialSelectionMethod::Shape3D)))
+        {
+            if (!requestedTab || requestedTab == SpatialSelectionMethod::Shape3D) {
+                _requestedTab.reset();
+                changed |= _currentMethod != SpatialSelectionMethod::Shape3D;
+                _currentMethod = SpatialSelectionMethod::Shape3D;
+                changed |= renderShape3DTab();
+            }
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("2D Sky Map")) {
-            changed |= _currentMethod != SpatialSelectionMethod::SkyMap;
-            _currentMethod = SpatialSelectionMethod::SkyMap;
-            changed |= renderSkyMapTab();
+        if (ImGui::BeginTabItem(
+            "2D Sky Map", nullptr, tabFlags(SpatialSelectionMethod::SkyMap)))
+        {
+            if (!requestedTab || requestedTab == SpatialSelectionMethod::SkyMap) {
+                _requestedTab.reset();
+                changed |= _currentMethod != SpatialSelectionMethod::SkyMap;
+                _currentMethod = SpatialSelectionMethod::SkyMap;
+                changed |= renderSkyMapTab();
+            }
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("Lasso (CAST)")) {
-            changed |= _currentMethod != SpatialSelectionMethod::Lasso;
-            _currentMethod = SpatialSelectionMethod::Lasso;
-            _lassoTabActive = true;
-            changed |= renderLassoTab();
+        if (ImGui::BeginTabItem(
+            "Lasso (CAST)", nullptr, tabFlags(SpatialSelectionMethod::Lasso)))
+        {
+            if (!requestedTab || requestedTab == SpatialSelectionMethod::Lasso) {
+                _requestedTab.reset();
+                changed |= _currentMethod != SpatialSelectionMethod::Lasso;
+                _currentMethod = SpatialSelectionMethod::Lasso;
+                _lassoTabActive = true;
+                changed |= renderLassoTab();
+            }
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -1712,6 +1732,38 @@ bool SpatialSelectionView::renderCurrentSelectionActions() {
     return savedSelectionsChanged;
 }
 
+void SpatialSelectionView::loadSavedSelection(const SavedSelection& selection) {
+    const SpatialSelectionQuery& query = selection.query;
+    if (const SphereVolume* sphere = std::get_if<SphereVolume>(&query)) {
+        _sphereVolume = *sphere;
+        _boxVolume.center = sphere->center;
+        _shape3DType = Shape3DType::Sphere;
+        _currentMethod = SpatialSelectionMethod::Shape3D;
+    }
+    else if (const BoxVolume* box = std::get_if<BoxVolume>(&query)) {
+        _boxVolume = *box;
+        _sphereVolume.center = box->center;
+        _shape3DType = Shape3DType::Box;
+        _currentMethod = SpatialSelectionMethod::Shape3D;
+    }
+    else if (const SkyMapRect* sky = std::get_if<SkyMapRect>(&query)) {
+        _skyMapRect = *sky;
+        _currentMethod = SpatialSelectionMethod::SkyMap;
+    }
+    else {
+        clearLassoSelection();
+        _isDrawingLasso = false;
+        _lassoPending = false;
+        _generatedVolume = query;
+        _lassoVolumeSummary = selection.summary;
+        _currentMethod = SpatialSelectionMethod::Lasso;
+    }
+
+    _requestedTab = _currentMethod;
+    _lassoTabActive = _currentMethod == SpatialSelectionMethod::Lasso;
+    applyCurrentSelection();
+}
+
 bool SpatialSelectionView::renderSavedSelectionsManager() {
     ImGui::SeparatorText("Saved selections:");
     ImGui::SameLine();
@@ -1731,27 +1783,39 @@ bool SpatialSelectionView::renderSavedSelectionsManager() {
     }
     ImGui::SameLine();
     if (ImGui::Button("Clear All Saved")) {
-        handler().clearSavedSelections();
-        return true;
+        ImGui::OpenPopup("Confirm Clear Saved Selections");
+    }
+    if (ImGui::BeginPopupModal(
+            "Confirm Clear Saved Selections",
+            nullptr,
+            ImGuiWindowFlags_AlwaysAutoResize
+        ))
+    {
+        ImGui::TextUnformatted("Clear all saved selections? This cannot be undone.");
+        if (ImGui::Button("Clear All")) {
+            handler().clearSavedSelections();
+            ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+            return true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
     }
 
     ImGui::BeginChild("SavedSelectionsList", ImVec2(0, 150), true);
     size_t toRemove = static_cast<size_t>(-1);
+    bool changed = false;
 
     for (size_t i = 0; i < saved.size(); ++i) {
         ImGui::PushID(static_cast<int>(i));
 
-        const std::vector<size_t> indices = handler().select(
-            _dataViewer.data(),
-            _dataViewer.currentFiltering(),
-            saved[i].query,
-            _dataViewer.dataMapping()
-        );
-
         ImGui::Checkbox("##enabled", &saved[i].isEnabled);
         ImGui::SameLine();
 
-        ImGui::Text("%s (%zu items)", saved[i].name.c_str(), indices.size());
+        ImGui::Text("%s", saved[i].name.c_str());
         if (!saved[i].summary.empty()) {
             ImGui::SameLine();
             ImGui::TextDisabled("[%s]", saved[i].summary.c_str());
@@ -1759,7 +1823,8 @@ bool SpatialSelectionView::renderSavedSelectionsManager() {
 
         ImGui::SameLine(ImGui::GetWindowWidth() - 75);
         if (ImGui::SmallButton("Load")) {
-            _dataViewer.setSelection(indices);
+            loadSavedSelection(saved[i]);
+            changed = true;
         }
         ImGui::SameLine();
         if (ImGui::SmallButton("X")) {
@@ -1774,7 +1839,7 @@ bool SpatialSelectionView::renderSavedSelectionsManager() {
     }
 
     ImGui::EndChild();
-    return toRemove != static_cast<size_t>(-1);
+    return changed || toRemove != static_cast<size_t>(-1);
 }
 
 } // namespace openspace::exoplanets
