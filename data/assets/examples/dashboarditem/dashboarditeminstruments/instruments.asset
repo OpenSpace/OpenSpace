@@ -1,0 +1,18 @@
+-- Basic
+-- This example adds a dashboard item that shows the activity of the currently selected
+-- set of instruments. This is done with the Image Sequencing, which is a component
+-- independent of this dashboard item
+
+local Item = {
+  Identifier = "DashboardItemInstruments_Example",
+  Type = "DashboardItemInstruments"
+}
+
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)
