@@ -41,6 +41,7 @@
 #include <openspace/opengl/programobject.h>
 #include <openspace/opengl/texture.h>
 #include <openspace/opengl/textureunit.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
@@ -668,106 +669,14 @@ void RenderableGaiaStars::deinitializeGL() {
 void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     ZoneScoped;
     TracyGpuZone("RenderableGaiaStars");
-    
-
-    // Wait until camera has stabilized before we traverse the Octree/stream from files
-    if (_firstDrawCalls) {
-        _firstDrawCalls = false;
-        return;
-    }
 
     GLint defaultFbo = 0;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
-    // Update which nodes are stored in memory as the camera moves around (if streaming)
-    if (_fileReaderOption == FileReaderOption::StreamOctree) {
-        ZoneScopedN("Fetch nodes");
-
-        const glm::dvec3 cameraPos = data.camera.position();
-        const size_t chunkSizeBytes = _chunkSize * sizeof(GLfloat);
-        _octreeManager.fetchSurroundingNodes(cameraPos, chunkSizeBytes, _additionalNodes);
-
-        _cpuRamBudgetProperty = static_cast<float>(_octreeManager.cpuRamBudget());
-    }
-
-    // Traverse Octree and build a map with new nodes to render, uses mvp matrix to decide
     const glm::dmat4 model = calcModelTransform(data);
-    const glm::dmat4 modelViewProjMat = calcModelViewProjectionTransform(data, model);
-    const glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
-    int deltaStars = 0;
-    const std::unordered_map<int, std::vector<float>> updateData = _octreeManager.traverseData(
-        modelViewProjMat,
-        screenSize,
-        deltaStars,
-        RenderMode(_renderMode.value()),
-        _lodPixelThreshold
-    );
-
-    // Update number of rendered stars
-    _nStarsToRender += deltaStars;
-    _nRenderedStars = _nStarsToRender;
-
-    // Update GPU Stream Budget property
-    _gpuStreamBudgetProperty = static_cast<float>(_octreeManager.numFreeSpotsInBuffer());
-
+    const glm::vec2 screenSize =
+        static_cast<glm::vec2>(global::renderEngine->renderingResolution());
     const int nChunksToRender = static_cast<int>(_octreeManager.biggestChunkIndexInUse());
-
-    // Update SSBO Index array with accumulated stars in all chunks
-    const int lastValue = _accumulatedIndices.back();
-    _accumulatedIndices.resize(nChunksToRender + 1, lastValue);
-
-    // Update vector with accumulated indices
-    for (const auto& [offset, subData] : updateData) {
-        if (offset >= static_cast<int>(_accumulatedIndices.size()) - 1) {
-            // @TODO(2023-03-08, alebo) We want to redo the whole rendering pipeline
-            // anyway, so right now we just bail out early if we get an invalid index that
-            // would trigger a crash
-            continue;
-        }
-
-        const int newValue =
-            static_cast<int>(subData.size() / _nRenderValuesPerStar) +
-                _accumulatedIndices[offset];
-        const int changeInValue = newValue - _accumulatedIndices[offset + 1];
-        _accumulatedIndices[offset + 1] = newValue;
-        // Propagate change
-        for (int i = offset + 1; i < nChunksToRender; i++) {
-            _accumulatedIndices[i + 1] += changeInValue;
-        }
-    }
-
-    // Fix number of stars rendered if it doesn't correspond to our buffers
-    if (_accumulatedIndices.back() != _nStarsToRender) {
-        _nStarsToRender = _accumulatedIndices.back();
-        _nRenderedStars = _nStarsToRender;
-    }
-
-    const size_t idxBufferSize = _accumulatedIndices.size() * sizeof(GLint);
-
-    // Update SSBO Index (stars per chunk)
-    glNamedBufferData(
-        _ssboIdx,
-        idxBufferSize,
-        _accumulatedIndices.data(),
-        GL_STREAM_DRAW
-    );
-
-    // Use orphaning strategy for data SSBO
-    glNamedBufferData(_ssboData, _maxStreamingBudgetInBytes, nullptr, GL_STREAM_DRAW);
-
-    // Update SSBO with one insert per chunk/node. The key in map holds the offset index
-    for (const auto& [offset, subData] : updateData) {
-        // We don't need to fill chunk with zeros for SSBOs. Just check if we have any
-        // values to update
-        if (!subData.empty()) {
-            glNamedBufferSubData(
-                _ssboData,
-                offset * _chunkSize * sizeof(GLfloat),
-                subData.size() * sizeof(GLfloat),
-                subData.data()
-            );
-        }
-    }
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
@@ -840,12 +749,136 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void RenderableGaiaStars::update(const UpdateData&) {
-    // Don't update anything if we are in the middle of a rebuild
-    if (_octreeManager.isRebuildOngoing()) {
+void RenderableGaiaStars::updateOctreeData(const UpdateData& data) {
+    ZoneScoped;
+
+    if (data.viewProjectionMatrices.empty()) {
         return;
     }
 
+    // Update which nodes are stored in memory as the camera moves around (if streaming)
+    if (_fileReaderOption == FileReaderOption::StreamOctree) {
+        ZoneScopedN("Fetch nodes");
+
+        const glm::dvec3 cameraPos = global::navigationHandler->camera()->position();
+        const size_t chunkSizeBytes = _chunkSize * sizeof(GLfloat);
+        _octreeManager.fetchSurroundingNodes(cameraPos, chunkSizeBytes, _additionalNodes);
+
+        _cpuRamBudgetProperty = static_cast<float>(_octreeManager.cpuRamBudget());
+    }
+
+    // The view-projection matrices from SGCT (including the user position) contain
+    // sgct_projection * sgct_view. The full view matrix that the render pipeline uses
+    // (Camera::combinedViewMatrix) is
+    //   sgct_view * sceneMatrix * viewScale * viewRotation * cameraTranslation
+    // where sceneMatrix includes the global and node rotation. Since the SGCT part is
+    // already in the matrices we get, we only add the OpenSpace specific parts here.
+    // Obs, the scene matrix is set during rendering, so it is up to one frame old
+    const Camera& camera = *global::navigationHandler->camera();
+    const glm::dmat4 sceneMatrix = glm::dmat4(camera.sgctInternal.sceneMatrix());
+    const glm::dmat4 cameraTransform =
+        camera.viewScaleMatrix() *
+        camera.viewRotationMatrix() *
+        glm::inverse(glm::translate(glm::dmat4(1.0), camera.position()));
+    const glm::dmat4 modelMatrix =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
+
+    // Traverse Octree once for all cameras and build a map with new nodes to render
+    std::vector<glm::dmat4> mvps;
+    mvps.reserve(data.viewProjectionMatrices.size());
+    for (const glm::mat4& viewProjection : data.viewProjectionMatrices) {
+        mvps.push_back(
+            glm::dmat4(viewProjection) * sceneMatrix * cameraTransform * modelMatrix
+        );
+    }
+
+    const glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
+    int deltaStars = 0;
+    const std::unordered_map<int, std::vector<float>> updateData =
+        _octreeManager.traverseData(
+            mvps,
+            screenSize,
+            deltaStars,
+            RenderMode(_renderMode.value()),
+            _lodPixelThreshold
+        );
+
+    // Update number of rendered stars
+    _nStarsToRender += deltaStars;
+    _nRenderedStars = _nStarsToRender;
+
+    // Update GPU Stream Budget property
+    _gpuStreamBudgetProperty = static_cast<float>(_octreeManager.numFreeSpotsInBuffer());
+
+    const int nChunksToRender = static_cast<int>(_octreeManager.biggestChunkIndexInUse());
+
+    // Update SSBO Index array with accumulated stars in all chunks
+    const int lastValue = _accumulatedIndices.back();
+    _accumulatedIndices.resize(nChunksToRender + 1, lastValue);
+
+    // Update vector with accumulated indices
+    for (const auto& [offset, subData] : updateData) {
+        if (offset >= static_cast<int>(_accumulatedIndices.size()) - 1) {
+            // @TODO(2023-03-08, alebo) We want to redo the whole rendering pipeline
+            // anyway, so right now we just bail out early if we get an invalid index that
+            // would trigger a crash
+            continue;
+        }
+
+        const int newValue =
+            static_cast<int>(subData.size() / _nRenderValuesPerStar) +
+                _accumulatedIndices[offset];
+        const int changeInValue = newValue - _accumulatedIndices[offset + 1];
+        _accumulatedIndices[offset + 1] = newValue;
+        // Propagate change
+        for (int i = offset + 1; i < nChunksToRender; i++) {
+            _accumulatedIndices[i + 1] += changeInValue;
+        }
+    }
+
+    // Fix number of stars rendered if it doesn't correspond to our buffers
+    if (_accumulatedIndices.back() != _nStarsToRender) {
+        _nStarsToRender = _accumulatedIndices.back();
+        _nRenderedStars = _nStarsToRender;
+    }
+
+    const size_t idxBufferSize = _accumulatedIndices.size() * sizeof(GLint);
+
+    // Update SSBO Index (stars per chunk)
+    glNamedBufferData(
+        _ssboIdx,
+        idxBufferSize,
+        _accumulatedIndices.data(),
+        GL_STREAM_DRAW
+    );
+
+    // Update SSBO with one insert per chunk/node.
+    for (const auto& [offset, subData] : updateData) {
+        // We don't need to fill chunk with zeros for SSBOs. Just check if we have any
+        // values to update
+        if (!subData.empty()) {
+            glNamedBufferSubData(
+                _ssboData,
+                offset * _chunkSize * sizeof(GLfloat),
+                subData.size() * sizeof(GLfloat),
+                subData.data()
+            );
+        }
+    }
+}
+
+void RenderableGaiaStars::update(const UpdateData& data) {
+    // Don't update the resources if we are in the middle of a rebuild. The octree update
+    // must still run though, as that is what progresses and finishes the rebuild
+    if (!_octreeManager.isRebuildOngoing()) {
+        updateResources();
+    }
+    updateOctreeData(data);
+}
+
+void RenderableGaiaStars::updateResources() {
     if (_dataIsDirty) {
         LDEBUG("Regenerating data");
         // Reload data file. This may reconstruct the Octree as well
@@ -937,7 +970,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
         );
         _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
 
-        // Combined SSBO with all data
+        // Combined SSBO with all data. Allocated once here, since the octree update only
+        // uploads nodes that changed and must not discard the already uploaded ones
+        glNamedBufferData(_ssboData, _maxStreamingBudgetInBytes, nullptr, GL_STREAM_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
 
         _ssboDataBinding = std::make_unique<opengl::BufferBinding<

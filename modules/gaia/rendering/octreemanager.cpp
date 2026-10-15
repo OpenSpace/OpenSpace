@@ -675,11 +675,35 @@ void OctreeManager::findAndFetchNeighborNode(unsigned long long firstParentId, i
     }).detach();
 }
 
-std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& mvp,
-                                                              const glm::vec2& screenSize,
-                                                              int& deltaStars,
-                                                              RenderMode mode,
-                                                              float lodPixelThreshold)
+bool OctreeManager::isVisibleInAny(const std::array<glm::dvec4, 8>& corners,
+                                   const std::vector<glm::dmat4>& mvps)
+{
+    for (const glm::dmat4& mvp : mvps) {
+        if (_culler->isVisible(corners, mvp)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+float OctreeManager::maxNodePixels(const std::array<glm::dvec4, 8>& corners,
+                                   const std::vector<glm::dmat4>& mvps,
+                                   const glm::vec2& screenSize)
+{
+    float maxPixels = 0.f;
+    for (const glm::dmat4& mvp : mvps) {
+        const glm::vec2 size = _culler->getNodeSizeInPixels(corners, mvp, screenSize);
+        maxPixels = std::max(maxPixels, size.x * size.y);
+    }
+    return maxPixels;
+}
+
+std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(
+                                                      const std::vector<glm::dmat4>& mvps,
+                                                      const glm::vec2& screenSize,
+                                                      int& deltaStars,
+                                                      RenderMode mode,
+                                                      float lodPixelThreshold)
 {
     ZoneScoped;
 
@@ -731,11 +755,10 @@ std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(const gl
         const glm::dvec3 pos = glm::dvec3(x, y, z) * 1000.0 * distanceconstants::Parsec;
         corners[i] = glm::dvec4(pos, 1.0);
     }
-    if (!_culler->isVisible(corners, mvp)) {
+    if (!isVisibleInAny(corners, mvps)) {
         return renderData;
     }
-    const glm::vec2 nodeSize = _culler->getNodeSizeInPixels(corners, mvp, screenSize);
-    const float totalPixels = nodeSize.x * nodeSize.y;
+    const float totalPixels = maxNodePixels(corners, mvps, screenSize);
     if (totalPixels < _minTotalPixelsLod * 2) {
         // Remove LOD from first layer of children
         for (const std::shared_ptr<OctreeNode>& child : _root->children) {
@@ -755,7 +778,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(const gl
 
         std::unordered_map<int, std::vector<float>> tmpData = checkNodeIntersection(
             *_root->children[i],
-            mvp,
+            mvps,
             screenSize,
             deltaStars,
             mode
@@ -1149,8 +1172,9 @@ bool OctreeManager::insertInNode(OctreeNode& node, const std::vector<float>& sta
     return insertInNode(*node.children[index], starValues, depth + 1);
 }
 
-std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNode& node,
-                                                                    const glm::dmat4& mvp,
+std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
+                                                                         OctreeNode& node,
+                                                      const std::vector<glm::dmat4>& mvps,
                                                               const glm::vec2& screenSize,
                                                                           int& deltaStars,
                                                                           RenderMode mode)
@@ -1174,7 +1198,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
     }
 
     // Check if node is visible from camera. If not then return early
-    if (!_culler->isVisible(corners, mvp)) {
+    if (!isVisibleInAny(corners, mvps)) {
         ZoneScopedN("Not visible");
         // Check if this node or any of its children existed in cache previously. If so,
         // then remove them from cache and add those indices to stack
@@ -1193,10 +1217,9 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
     if (!node.isLeaf) {
         ZoneScopedN("!leaf");
 
-        const glm::vec2 nodeSize = _culler->getNodeSizeInPixels(corners, mvp, screenSize);
-        const float totalPixels = nodeSize.x * nodeSize.y;
+        const float totalPixels = maxNodePixels(corners, mvps, screenSize);
 
-        // Check if we should return any LOD cache data. If we're streaming a big dataset
+        // Check if we should
         // from files and inner node is visible and loaded, then it should be rendered (as
         // long as it doesn't have loaded children because then we should traverse to
         // lowest loaded level and render it instead)
@@ -1264,7 +1287,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
         // tmpData will be ignored! Thus we store the removed keys until next render call
         std::unordered_map<int, std::vector<float>> tmpData = checkNodeIntersection(
             *child,
-            mvp,
+            mvps,
             screenSize,
             deltaStars,
             mode

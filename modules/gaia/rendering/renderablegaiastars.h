@@ -60,6 +60,17 @@ public:
 
 private:
     /**
+     * Fetches/traverses the octree once for all cameras and uploads the resulting data to
+     * the GPU buffers.
+     */
+    void updateOctreeData(const UpdateData& data);
+
+    /**
+     * Reloads data, shaders, buffers and textures if they have been marked as dirty.
+     */
+    void updateResources();
+
+    /**
      * Reads data file in format defined by FileReaderOption.
      *
      * \return `true` if data was successfully read
@@ -161,7 +172,6 @@ private:
     std::vector<int> _accumulatedIndices;
     size_t _nRenderValuesPerStar = 0;
     int _nStarsToRender = 0;
-    bool _firstDrawCalls = true;
     long long _cpuRamBudgetInBytes = 0;
     long long _totalDatasetSizeInBytes = 0;
     long long _gpuMemoryBudgetInBytes = 0;

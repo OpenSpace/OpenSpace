@@ -121,9 +121,9 @@ public:
      * streaming buffer. Calls #checkNodeIntersection for every branch. \p deltaStars
      * keeps track of how many stars that were added/removed this render call.
      */
-    std::unordered_map<int, std::vector<float>> traverseData(const glm::dmat4& mvp,
-        const glm::vec2& screenSize, int& deltaStars, RenderMode mode,
-        float lodPixelThreshold);
+    std::unordered_map<int, std::vector<float>> traverseData(
+        const std::vector<glm::dmat4>& mvps, const glm::vec2& screenSize,
+        int& deltaStars, RenderMode mode, float lodPixelThreshold);
 
     /**
      * Builds full render data structure by traversing all leaves in the Octree.
@@ -216,15 +216,28 @@ private:
      * (if streaming).
      *
      * \param node The node that should be checked
-     * \param mvp The model-view-projection matrix used to check intersection
+     * \param mvps The model-view-projection matrices (one per camera) used to check
+     *        intersection. A node is visible if it is visible in any of them
      * \param screenSize The size of the screen in pixels
      * \param deltaStars Keeps track of how many stars that were added/removed this render
      *        call
      * \param mode The render mode that should be used
      */
     std::unordered_map<int, std::vector<float>> checkNodeIntersection(OctreeNode& node,
-        const glm::dmat4& mvp, const glm::vec2& screenSize, int& deltaStars,
-        RenderMode mode);
+        const std::vector<glm::dmat4>& mvps, const glm::vec2& screenSize,
+        int& deltaStars, RenderMode mode);
+
+    /**
+     * \return `true` if the node described by \p corners is visible in any of \p mvps
+     */
+    bool isVisibleInAny(const std::array<glm::dvec4, 8>& corners,
+        const std::vector<glm::dmat4>& mvps);
+
+    /**
+     * \return The largest size in pixels (area) of the node among all \p mvps
+     */
+    float maxNodePixels(const std::array<glm::dvec4, 8>& corners,
+        const std::vector<glm::dmat4>& mvps, const glm::vec2& screenSize);
 
     /**
      * Checks if specified node existed in cache, and removes it if that's the case. If
