@@ -260,8 +260,10 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
     std::string line;
     bool foundTarget = false;
     openspace::getline(fileStream, line);
-    // First line is just stars (*) no information, skip
-    openspace::getline(fileStream, line);
+    if (line.find_first_not_of('*') == std::string::npos) {
+        // First line is just stars (*) no information, skip
+        openspace::getline(fileStream, line);
+    }
 
     // Valid Target?
     if (fileStream.good() && (line.contains("Revised") || line.contains("JPL"))) {
