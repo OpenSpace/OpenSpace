@@ -1145,7 +1145,23 @@ void setSgctDelegateFunctions() {
     };
 
     sgctDelegate.viewProjectionMatrices = []() {
-        return Engine::instance().thisNode().viewProjectionMatrices();
+        // The `mainRenderFunc` callback applies the user position to the view matrix
+        // before handing it to the `renderEngine`, so apply it here as well to get the
+        // same view-projection
+        glm::vec3 pos;
+        std::memcpy(
+            glm::value_ptr(pos),
+            &Engine::defaultUser().posMono().x,
+            sizeof(vec3)
+        );
+        const glm::mat4 translation = glm::translate(glm::mat4(1.f), pos);
+
+        std::vector<glm::mat4> matrices =
+            Engine::instance().thisNode().viewProjectionMatrices();
+        for (glm::mat4& m : matrices) {
+            m = m * translation;
+        }
+        return matrices;
     };
 }
 
