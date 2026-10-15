@@ -125,7 +125,7 @@ uniform bool hardShadows;
 // Returns whether there is an eclipse in the x component and the strength of the
 // shadowing in the y component
 vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[NumberOfShadows], dvec3 position,
-                bool ground)
+                bool ground, float daylightFactor)
 {
   if (!shadowInfoArray[0].isShadowing) {
     return vec2(0.0, 1.0);
@@ -146,23 +146,26 @@ vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[NumberOfShadows], dvec3 po
     shadowInfoArray[0].rc * (shadowInfoArray[0].xu - lengthPcProj) / shadowInfoArray[0].xu
   );
 
+  float shadowStrength = 1.0;
   if (lengthD < rUmbra) {
     // umbra
     if (hardShadows) {
-      return ground ? vec2(1.0, 0.2) : vec2(1.0, 0.5);
+      shadowStrength = ground ? 0.2 : 0.5;
     }
     else {
       // butterworth function
-      return vec2(1.0, sqrt(rUmbra / (rUmbra + pow(lengthD, 4.0))));
+      shadowStrength = sqrt(rUmbra / (rUmbra + pow(lengthD, 4.0)));
     }
   }
   else if (lengthD < rPenumbra) {
     // penumbra
-    return hardShadows ? vec2(1.0, 0.5) : vec2(1.0, lengthD / rPenumbra);
+    shadowStrength = hardShadows ? 0.5 : lengthD / rPenumbra;
   }
-  else {
-    return vec2(1.0, 1.0);
-  }
+
+  // We don't want a shadow on the antipodal side of the eclipse
+  shadowStrength = mix(1.0, shadowStrength, daylightFactor);
+
+  return vec2(1.0, shadowStrength);
 }
 
 float opticalDepth(float localH, float r, float mu, float d, float rPlanet) {
@@ -634,7 +637,13 @@ void main() {
   pixelDepth -= offset;
 
   dvec3 onATMPos = (modelTransformMatrix * dvec4(x * 1000.0, 1.0)).xyz;
-  vec2 eclipseShadowATM = calcShadow(shadowDataArray, onATMPos, false);
+  // Daylight factor: 1 in full daylight, 0 in full night. Used to gate the
+  // eclipse darkening so it only affects the day side of the planet
+  dvec3 sunDirectionWorld =
+    normalize((modelTransformMatrix * dvec4(sunDirectionObj, 0.0)).xyz);
+  float daylightFactor = float(clamp(
+    dot(normalize(normalWorldSpace.xyz), sunDirectionWorld) * 4.0 + 0.5, 0.0, 1.0));
+  vec2 eclipseShadowATM = calcShadow(shadowDataArray, onATMPos, false, daylightFactor);
   float sunIntensityInscatter = sunRadiance * eclipseShadowATM.y;
 
   float irradianceFactor = 0.0;
@@ -647,7 +656,8 @@ void main() {
     mu, attenuation, groundHit);
   vec3 atmColor = vec3(0.0);
   if (groundHit) {
-    vec2 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
+    vec2 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true,
+      daylightFactor);
     float sunIntensityGround = sunRadiance * eclipseShadowPlanet.y;
     atmColor = groundColor(x, tF, v, s, attenuation, color.rgb, normal.xyz,
       irradianceFactor, normal.w, sunIntensityGround);
