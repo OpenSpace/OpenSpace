@@ -145,7 +145,7 @@ void GuiSpaceTimeComponent::render() {
     }
     int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
 
-    const bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
+    const bool hasChanged = ImGui::Combo("Anchor", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
         const std::string script = std::format(
             "openspace.setPropertyValue('{}', '{}');"
