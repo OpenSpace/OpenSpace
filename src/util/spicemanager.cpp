@@ -1003,7 +1003,8 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
     assert_msg(!observer.empty(), "Observer must not be empty");
     assert_msg(!frame.empty(), "Frame must not be empty");
     assert_msg(!lightSource.empty(), "Light source must not be empty");
-    assert_msg(numberOfTerminatorPoints >= 1, "Terminator points must be >= 1");
+
+    numberOfTerminatorPoints = std::max(0, numberOfTerminatorPoints);
 
     TerminatorEllipseResult res;
 
