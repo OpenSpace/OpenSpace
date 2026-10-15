@@ -18,8 +18,7 @@ def scmConfig = scmGit(
   branches: [[name: "*/${branch}"]],
   extensions: [
     cleanBeforeCheckout(),
-    cloneOption(shallow: true, depth: 1, noTags: true, timeout: 30),
-    submodule(recursiveSubmodules: true, parentCredentials: true, shallow: true, depth: 1, threads: 4, timeout: 60)
+    cloneOption(shallow: true, depth: 1, noTags: true, timeout: 30)
   ]
 )
 

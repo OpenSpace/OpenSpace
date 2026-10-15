@@ -130,7 +130,8 @@ void ShaderObject::rebuildFromFile() {
     std::filesystem::path base;
     if (_shaderName.empty()) {
         base = filename().stem();
-    } else {
+    }
+    else {
         base = _shaderName;
     }
 

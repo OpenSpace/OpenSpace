@@ -225,7 +225,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
 
     opengl::TextureUnit unit;
     unit.bind(*_texture);
-    _shader->setUniform(_uniformCache.texture, unit);
+    _shader->setUniform(_uniformCache.tex, unit);
 
     glDisable(GL_CULL_FACE);
 
