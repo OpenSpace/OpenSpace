@@ -969,11 +969,13 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
                                                                      double ephemerisTime,
                                                              int numberOfTerminatorPoints)
 {
-    ghoul_assert(!target.empty(), "Target must not be empty");
-    ghoul_assert(!observer.empty(), "Observer must not be empty");
-    ghoul_assert(!frame.empty(), "Frame must not be empty");
-    ghoul_assert(!lightSource.empty(), "Light source must not be empty");
-    ghoul_assert(numberOfTerminatorPoints >= 1, "Terminator points must be >= 1");
+    assert_msg(!target.empty(), "Target must not be empty");
+    assert_msg(!observer.empty(), "Observer must not be empty");
+    assert_msg(!frame.empty(), "Frame must not be empty");
+    assert_msg(!lightSource.empty(), "Light source must not be empty");
+    assert_msg(numberOfTerminatorPoints >= 1, "Terminator points must be >= 1");
+
+    numberOfTerminatorPoints = std::max(0, numberOfTerminatorPoints);
 
     TerminatorEllipseResult res;
 

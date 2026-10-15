@@ -469,8 +469,10 @@ void RenderableEclipseCone::createCone(double et) {
         );
 
         // We need to duplicate the first two vertices to close the cylinder at the seam
-        umbralVertices.push_back(umbralVertices[0]);
-        umbralVertices.push_back(umbralVertices[1]);
+        if (umbralVertices.size() > 1) {
+            umbralVertices.push_back(umbralVertices[0]);
+            umbralVertices.push_back(umbralVertices[1]);
+        }
     }
 
 
@@ -494,8 +496,10 @@ void RenderableEclipseCone::createCone(double et) {
         );
 
         // We need to duplicate the first two vertices to close the cylinder at the seam
-        penumbralVertices.push_back(penumbralVertices[0]);
-        penumbralVertices.push_back(penumbralVertices[1]);
+        if (penumbralVertices.size() > 1) {
+            penumbralVertices.push_back(penumbralVertices[0]);
+            penumbralVertices.push_back(penumbralVertices[1]);
+        }
     }
 
 
