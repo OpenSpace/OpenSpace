@@ -1,0 +1,48 @@
+-- Basic
+-- This asset creates a scene graph node that only displays coordinate axes. The
+-- coordinate axes are translated by a value determined through evaluating Keplerian
+-- elements.
+
+local NodeFocus = {
+  Identifier = "KeplerTranslation_Example_Focus",
+  GUI = {
+    Name = "KeplerTranslation - Basic (Focus)",
+    Path = "/Examples"
+  }
+}
+
+local Node = {
+  Identifier = "KeplerTranslation_Example",
+  Parent = NodeFocus.Identifier,
+  Transform = {
+    Translation = {
+      Type = "KeplerTranslation",
+      Eccentricity = 0.1485804637109599,
+      SemiMajorAxis = 367807506.9532451,
+      Inclination = 1.672964962656394,
+      AscendingNode = 292.7632579393455,
+      ArgumentOfPeriapsis = 181.2182746584066,
+      MeanAnomaly = 278.8700083068704,
+      Epoch = "2026 OCT 01 00:00:00",
+      Period = 121659397.81416257
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "KeplerTranslation - Basic",
+    Path = "/Examples"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NodeFocus)
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(NodeFocus)
+end)

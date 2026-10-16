@@ -1,0 +1,18 @@
+-- Basic
+-- This example adds a dashboard item that shows a string of text. The contents of this
+-- text can be controlled at runtime through a property of the dashboard item.
+
+local Item = {
+  Identifier = "DashboardItemText_Example",
+  Type = "DashboardItemText",
+  Text = "This is a dashboard text example text"
+}
+
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

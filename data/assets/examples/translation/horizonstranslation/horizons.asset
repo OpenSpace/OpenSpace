@@ -1,0 +1,46 @@
+-- Basic
+-- This asset creates a scene graph node that only displays coordinate axes. The
+-- coordinate axes are translated by a value determined through evaluating a data file
+-- in the JPL Horizons file format.
+--
+-- ```{literalinclude} moon.hrz
+-- :language: text
+-- :caption: The JPL Horizons file that is used in this example
+-- ```
+
+local NodeFocus = {
+  Identifier = "HorizonsTranslation_Example_Focus",
+  GUI = {
+    Name = "HorizonsTranslation - Basic (Focus)",
+    Path = "/Examples"
+  }
+}
+
+local Node = {
+  Identifier = "HorizonsTranslation_Example",
+  Parent = NodeFocus.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = asset.resource("moon.hrz")
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "HorizonsTranslation - Basic",
+    Path = "/Examples"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NodeFocus)
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(NodeFocus)
+end)

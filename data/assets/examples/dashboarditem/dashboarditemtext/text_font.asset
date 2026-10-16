@@ -1,0 +1,21 @@
+-- Font
+-- This example adds a dashboard item that shows a string of text rendered with a
+-- different font face and a larger font size. The contents of this text can be controlled
+-- at runtime through a property of the dashboard item.
+
+local Item = {
+  Identifier = "DashboardItemText_Font",
+  Type = "DashboardItemText",
+  Text = "This is a dashboard text example text",
+  FontName = "Light",
+  FontSize = 72.0
+}
+
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)
