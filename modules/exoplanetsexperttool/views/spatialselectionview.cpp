@@ -1014,7 +1014,7 @@ bool SpatialSelectionView::renderMethodTabs() {
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem(
-            "Lasso (CAST)", nullptr, tabFlags(SpatialSelectionMethod::Lasso)))
+            "Lasso / Density", nullptr, tabFlags(SpatialSelectionMethod::Lasso)))
         {
             if (!requestedTab || requestedTab == SpatialSelectionMethod::Lasso) {
                 _requestedTab.reset();

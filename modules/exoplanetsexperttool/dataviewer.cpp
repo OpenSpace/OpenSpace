@@ -666,7 +666,7 @@ void DataViewer::render() {
         renderFileMenu();
 
         if (ImGui::BeginMenu("Views")) {
-            ImGui::MenuItem("Table", NULL, &_showTable);
+            ImGui::MenuItem("Table / Search", NULL, &_showTable);
             ImGui::MenuItem("Filters", NULL, &_showFilterSettingsWindow);
             ImGui::MenuItem("Color mapping", NULL, &_showColormapWindow);
             ImGui::MenuItem("Compute data columns", NULL, &_showComputeColumnsWindow);
