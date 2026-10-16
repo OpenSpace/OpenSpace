@@ -133,6 +133,8 @@ protected:
 std::unique_ptr<CastSelection> createCastSelection(CastMethod method,
     const DensityVolume& volume, const CastInput& input);
 
+CastResult selectDensityVolume(const DensityVolume& volume, float exponent);
+
 struct Components {
     /// The component index for each grid node, or -1 if the node is not in the mask
     std::vector<int> labels;

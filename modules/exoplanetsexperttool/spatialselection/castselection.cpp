@@ -92,6 +92,46 @@ std::unique_ptr<CastSelection> createCastSelection(CastMethod method,
     return nullptr;
 }
 
+CastResult selectDensityVolume(const DensityVolume& volume, float exponent) {
+    CastResult result;
+    const std::vector<float>& density = volume.data();
+    result.nodeMask.resize(density.size(), 0);
+    if (density.empty()) {
+        return result;
+    }
+
+    const double mean = std::accumulate(density.begin(), density.end(), 0.0) /
+        static_cast<double>(density.size());
+    result.threshold = std::exp2(exponent) * static_cast<float>(0.2 * mean);
+    if (!std::isfinite(result.threshold) || result.threshold <= 0.f) {
+        return result;
+    }
+
+    for (size_t node = 0; node < density.size(); node++) {
+        result.nodeMask[node] = density[node] >= result.threshold;
+    }
+    Components components = labelComponents(result.nodeMask, volume.dimensions());
+    result.nComponents = components.sizes.size();
+    if (result.nComponents == 0) {
+        return result;
+    }
+    for (int& label : components.labels) {
+        if (label >= 0) {
+            label = 0;
+        }
+    }
+
+    const std::vector<float>& particleDensities = volume.particleDensities();
+    std::vector<uint8_t> candidates(particleDensities.size());
+    for (size_t particle = 0; particle < candidates.size(); particle++) {
+        candidates[particle] = particleDensities[particle] >= result.threshold;
+    }
+    result.selectedParticles = particlesInComponent(
+        volume, components.labels, 0, candidates
+    );
+    return result;
+}
+
 Components labelComponents(const std::vector<uint8_t>& mask, const glm::uvec3& dims) {
     Components result;
     result.labels.assign(mask.size(), -1);

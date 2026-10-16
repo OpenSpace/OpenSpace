@@ -1396,9 +1396,8 @@ bool SpatialSelectionView::renderLassoTab() {
     ImGui::Separator();
 
     const bool hasSelection = _castSelection != nullptr;
-    if (!hasSelection) {
-        ImGui::BeginDisabled();
-    }
+    const bool hasDensityVolume = target && target->densityVolume();
+    ImGui::BeginDisabled(!hasDensityVolume);
 
     const bool thresholdChanged = ImGui::SliderFloat(
         "Density threshold",
@@ -1411,8 +1410,8 @@ bool SpatialSelectionView::renderLassoTab() {
     view::helper::renderHelpMarker(
         "Scales the density threshold used for the selection, relative to the "
         "automatically computed base threshold (20% of the mean density inside the "
-        "lasso). Lower values grow the selection, higher values shrink it to the "
-        "densest cores."
+        "lasso, or across the entire density volume when no lasso exists). "
+        "Lower values grow the selection, higher values shrink it to the densest cores."
     );
     if (thresholdChanged && hasSelection) {
         _castResult = _castSelection->select(_castThresholdExponent);
@@ -1434,11 +1433,13 @@ bool SpatialSelectionView::renderLassoTab() {
         );
     }
 
+    ImGui::BeginDisabled(!hasSelection);
     if (ImGui::Button("Clear selection")) {
         clearLassoSelection();
     }
+    ImGui::EndDisabled();
 
-    ImGui::BeginDisabled(_castResult.selectedParticles.empty());
+    ImGui::BeginDisabled(_castSelection && _castResult.selectedParticles.empty());
     if (ImGui::Button("Generate Isosurface")) {
         generateLassoVolume(target, true);
         changed = true;
@@ -1451,13 +1452,12 @@ bool SpatialSelectionView::renderLassoTab() {
     ImGui::EndDisabled();
     ImGui::SameLine();
     view::helper::renderHelpMarker(
-        "Creates a closed volume around the selected regions of the point cloud and "
-        "saves it as a spatial selection that selects the exoplanets inside it."
+        "Creates a closed volume around the selected regions of the point cloud, "
+        "or density regions across the entire cloud when no lasso exists, and "
+        "selects the exoplanets inside it."
     );
 
-    if (!hasSelection) {
-        ImGui::EndDisabled();
-    }
+    ImGui::EndDisabled();
 
     if (!_lassoStatus.empty()) {
         ImGui::TextColored(ImVec4(1.f, 0.7f, 0.3f, 1.f), "%s", _lassoStatus.c_str());
@@ -1501,7 +1501,9 @@ void SpatialSelectionView::runLassoSelection(RenderableDensityPointCloud* target
             .viewportSize = glm::vec2(displaySize.x, displaySize.y)
         }
     };
+
     _castSelection = createCastSelection(_castMethod, *target->densityVolume(), input);
+
     if (!_castSelection) {
         _castResult = CastResult();
         _lassoStatus = "The selected method is not implemented";
@@ -1556,9 +1558,22 @@ void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* targ
                                                bool isIsosurface)
 {
     SceneGraphNode* node = sceneGraphNode(_lassoTargetNode);
-    if (!target || !node || !_castSelection) {
+    if (!target || !node || !target->densityVolume()) {
         return;
     }
+
+    const DensityVolume& densityVolume = *target->densityVolume();
+
+    const CastResult fullVolumeResult = _castSelection ?
+        CastResult() : selectDensityVolume(densityVolume, _castThresholdExponent);
+
+    const CastResult& result = _castSelection ? _castResult : fullVolumeResult;
+
+    if (result.selectedParticles.empty()) {
+        _lassoStatus = "No particles pass the density threshold; try a lower threshold";
+        return;
+    }
+    const std::string source = _castSelection ? "Lasso volume" : "Density volume";
 
     const glm::dmat4 volumeToWorld = node->modelTransform() *
         glm::scale(glm::dmat4(1.0), glm::dvec3(target->unitToMeter()));
@@ -1566,21 +1581,21 @@ void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* targ
     std::optional<SpatialSelectionQuery> generated;
     if (isIsosurface) {
         const auto volume = handler().createIsoSurfaceVolume(
-            _castSelection->volume(), _castResult, volumeToWorld
+            densityVolume, result, volumeToWorld
         );
         if (volume) {
             generated = *volume;
-            _lassoVolumeSummary = "Lasso volume (smoothed isosurface)";
+            _lassoVolumeSummary = std::format("{} (smoothed isosurface)", source);
         }
     }
     else {
         const auto volume = handler().createMeshVolume(
-            _castSelection->volume(), _castResult, volumeToWorld
+            densityVolume, result, volumeToWorld
         );
         if (volume) {
             generated = *volume;
             _lassoVolumeSummary = std::format(
-                "Lasso volume ({} convex hull(s))", volume->hulls->size()
+                "{} ({} convex hull(s))", source, volume->hulls->size()
             );
         }
     }
