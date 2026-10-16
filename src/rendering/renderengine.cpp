@@ -655,7 +655,7 @@ void RenderEngine::initializeGL() {
         _windows.push_back(std::move(w));
     }
 
-    _renderer.setResolution(renderingResolution());
+    _renderer.setResolution(maxRenderingResolution());
     _renderer.enableFXAA(_enableFXAA);
     _renderer.setHDRExposure(_hdrExposure);
     _renderer.initialize();
@@ -745,14 +745,15 @@ void RenderEngine::updateShaderPrograms() {
 void RenderEngine::updateRenderer() {
     ZoneScoped;
 
-    const bool windowResized = global::windowDelegate->windowHasResized();
+    const bool windowResized = global::windowDelegate->anyWindowHasResized();
 
     if (windowResized) {
-        _renderer.setResolution(renderingResolution());
+        glm::ivec2 res = maxRenderingResolution();
+        _renderer.setResolution(res);
 
         using FR = fontrendering::FontRenderer;
         FR::defaultRenderer().setFramebufferSize(fontResolution());
-        FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
+        FR::defaultProjectionRenderer().setFramebufferSize(res);
         // Override the aspect ratio property value to match that of resized window
         assert_msg(
             global::windowDelegate->nWindows() == _windows.size(),
@@ -798,6 +799,10 @@ void RenderEngine::updateScreenSpaceRenderables() {
 
 glm::ivec2 RenderEngine::renderingResolution() const {
     return global::windowDelegate->currentDrawBufferResolution();
+}
+
+glm::ivec2 RenderEngine::maxRenderingResolution() const {
+    return global::windowDelegate->maxDrawBufferResolution();
 }
 
 glm::ivec2 RenderEngine::fontResolution() const {
