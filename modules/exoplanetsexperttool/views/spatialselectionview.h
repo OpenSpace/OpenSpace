@@ -148,6 +148,9 @@ private:
     /// Active 3D shape type (Sphere or Box)
     Shape3DType _shape3DType = Shape3DType::Sphere;
 
+    bool _centerInIcrs = false;
+    glm::dvec2 _centerAngles = glm::dvec2(0.0);
+
     /// Parameters for 3D sphere selection
     SphereVolume _sphereVolume;
 

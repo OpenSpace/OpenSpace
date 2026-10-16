@@ -39,6 +39,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/coordinateconversion.h>
 #include <implot.h>
 #include <algorithm>
 #include <array>
@@ -1051,26 +1052,109 @@ bool SpatialSelectionView::renderShape3DTab() {
         ? _sphereVolume.center
         : _boxVolume.center;
 
-    float center[3] = {
-        static_cast<float>(centerVec.x),
-        static_cast<float>(centerVec.y),
-        static_cast<float>(centerVec.z)
-    };
-    if (ImGui::DragFloat3("Center (pc)", center, 1.f, -100000.f, 100000.f, "%.1f")) {
-        centerVec = glm::dvec3(center[0], center[1], center[2]);
-        _sphereVolume.center = centerVec;
-        _boxVolume.center = centerVec;
-        changed = true;
+    ImGui::TextUnformatted("Center coordinates:");
+    if (ImGui::RadioButton("XYZ", !_centerInIcrs)) {
+        _centerInIcrs = false;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("RA / Dec / Distance", _centerInIcrs)) {
+        _centerInIcrs = true;
+    }
+
+    if (_centerInIcrs) {
+        const auto normalizeRa = [](double ra) {
+            const double wrapped = std::fmod(ra, 360.0);
+            return wrapped < 0.0 ? wrapped + 360.0 : wrapped;
+        };
+
+        double distance = glm::length(centerVec);
+        if (distance > 0.0 && std::isfinite(distance)) {
+            const glm::dvec3 icrs = galacticCartesianToIcrs(
+                centerVec.x, centerVec.y, centerVec.z
+            );
+            if (std::isfinite(icrs.x) && std::isfinite(icrs.y)) {
+                _centerAngles = glm::dvec2(
+                    normalizeRa(icrs.x), std::clamp(icrs.y, -90.0, 90.0)
+                );
+            }
+        }
+
+        double ra = _centerAngles.x;
+        double dec = _centerAngles.y;
+        constexpr double MinRa = 0.0;
+        constexpr double MaxRa = 360.0;
+        constexpr double MinDec = -90.0;
+        constexpr double MaxDec = 90.0;
+        constexpr double MinDistance = 0.0;
+        constexpr double MaxDistance = 100000.0;
+
+        bool centerChanged = ImGui::DragScalar(
+            "RA (deg, ICRS)", ImGuiDataType_Double, &ra, 0.1f,
+            &MinRa, &MaxRa, "%.4f"
+        );
+        centerChanged |= ImGui::DragScalar(
+            "Dec (deg, ICRS)", ImGuiDataType_Double, &dec, 0.1f,
+            &MinDec, &MaxDec, "%.4f"
+        );
+        centerChanged |= ImGui::DragScalar(
+            "Distance (pc)", ImGuiDataType_Double, &distance, 1.f,
+            &MinDistance, &MaxDistance, "%.1f"
+        );
+
+        if (centerChanged && std::isfinite(ra) && std::isfinite(dec) &&
+            std::isfinite(distance))
+        {
+            ra = normalizeRa(ra);
+            dec = std::clamp(dec, MinDec, MaxDec);
+            distance = std::max(distance, MinDistance);
+            _centerAngles = glm::dvec2(ra, dec);
+            _sphereVolume.center = icrsToGalacticCartesian(ra, dec, distance);
+            _boxVolume.center = _sphereVolume.center;
+            changed = true;
+        }
+    }
+    else {
+        float center[3] = {
+            static_cast<float>(centerVec.x),
+            static_cast<float>(centerVec.y),
+            static_cast<float>(centerVec.z)
+        };
+        if (ImGui::DragFloat3("Center (pc)", center, 1.f, -100000.f, 100000.f, "%.1f")) {
+            centerVec = glm::dvec3(center[0], center[1], center[2]);
+            _sphereVolume.center = centerVec;
+            _boxVolume.center = centerVec;
+            changed = true;
+        }
     }
 
     ImGui::Spacing();
-    ImGui::TextUnformatted("Center Presets:");
 
     const std::vector<size_t>& selection = _dataViewer.selection();
     const bool hasSingleSelection = selection.size() == 1;
     const std::vector<ExoplanetItem>& allData = _dataViewer.data();
     const bool hasValidPos = hasSingleSelection && (selection[0] < allData.size()) &&
         allData[selection[0]].position.has_value();
+
+    if (ImGui::Button("Origin (0,0,0)")) {
+        _sphereVolume.center = glm::dvec3(0.0);
+        _boxVolume.center = glm::dvec3(0.0);
+        changed = true;
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Camera Position")) {
+        if (global::navigationHandler) {
+            const glm::dvec3 camPos = global::navigationHandler->camera()->position();
+            // Convert from meters to parsecs (1 pc approx 3.08567758e16 meters)
+            constexpr double MetersPerParsec = 3.08567758149137e16;
+            _sphereVolume.center = camPos / MetersPerParsec;
+            _boxVolume.center = _sphereVolume.center;
+            changed = true;
+        }
+    }
+
+    ImGui::SameLine();
 
     std::string planetButtonLabel = "Selected item";
     if (hasSingleSelection && (selection[0] < allData.size()) && !allData[selection[0]].name.empty())
@@ -1102,27 +1186,6 @@ bool SpatialSelectionView::renderShape3DTab() {
             else {
                 ImGui::SetTooltip("The selected planet has no 3D position data");
             }
-        }
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Origin (0,0,0)")) {
-        _sphereVolume.center = glm::dvec3(0.0);
-        _boxVolume.center = glm::dvec3(0.0);
-        changed = true;
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Camera Position")) {
-        if (global::navigationHandler) {
-            const glm::dvec3 camPos = global::navigationHandler->camera()->position();
-            // Convert from meters to parsecs (1 pc approx 3.08567758e16 meters)
-            constexpr double MetersPerParsec = 3.08567758149137e16;
-            _sphereVolume.center = camPos / MetersPerParsec;
-            _boxVolume.center = _sphereVolume.center;
-            changed = true;
         }
     }
 
