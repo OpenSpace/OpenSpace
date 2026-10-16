@@ -58,14 +58,18 @@ public:
         std::optional<Bounds> regionOfInterest = std::nullopt);
 
     /**
-     * Loads positions from the columns \p xColumn, \p yColumn, and \p zColumn of the CSV
-     * file at \p path (identified by the header row) and computes the density volume.
-     * Rows with missing or non-numeric values are skipped.
+     * Loads positions from a CSV or SPECK file at \p path using the shared dataloader
+     * and computes the density volume. For CSV, \p xColumn, \p yColumn, and \p zColumn
+     * identify the case-sensitive header names. For SPECK, the first three values are
+     * the position coordinates and the column names are ignored. Entries with
+     * non-finite positions are skipped; other parsing follows the shared dataloader.
      *
-     * \throw RuntimeError If the file cannot be read or a column is missing
+     * \throw RuntimeError If the file cannot be read, fewer than two particles remain,
+     *                     or a dimension is < 2
      */
-    static DensityVolume fromCsv(const std::filesystem::path& path,
-        std::string_view xColumn, std::string_view yColumn, std::string_view zColumn,
+    static DensityVolume fromFile(const std::filesystem::path& path,
+        std::string_view xColumn = "x", std::string_view yColumn = "y",
+        std::string_view zColumn = "z",
         glm::uvec3 dimensions = glm::uvec3(128),
         std::optional<Bounds> regionOfInterest = std::nullopt);
 

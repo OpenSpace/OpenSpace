@@ -135,17 +135,17 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableDensityPointCloud)]] Parameters {
-        // The CSV file containing the particle positions. The first line must contain
-        // the column names.
+        // The CSV or SPECK file containing the particle positions. CSV files must have
+        // a header row; SPECK files use the first three values as position coordinates.
         std::filesystem::path file;
 
-        // The name of the column containing the x coordinate. Defaults to "x".
+        // The CSV column containing the x coordinate. Defaults to "x". Ignored for SPECK.
         std::optional<std::string> xColumn;
 
-        // The name of the column containing the y coordinate. Defaults to "y".
+        // The CSV column containing the y coordinate. Defaults to "y". Ignored for SPECK.
         std::optional<std::string> yColumn;
 
-        // The name of the column containing the z coordinate. Defaults to "z".
+        // The CSV column containing the z coordinate. Defaults to "z". Ignored for SPECK.
         std::optional<std::string> zColumn;
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
@@ -350,7 +350,7 @@ RenderableDensityPointCloud::RenderableDensityPointCloud(const Dictionary& dicti
 RenderableDensityPointCloud::~RenderableDensityPointCloud() = default;
 
 void RenderableDensityPointCloud::initialize() {
-    _volume = std::make_unique<DensityVolume>(DensityVolume::fromCsv(
+    _volume = std::make_unique<DensityVolume>(DensityVolume::fromFile(
         absPath(_file),
         _xColumn,
         _yColumn,

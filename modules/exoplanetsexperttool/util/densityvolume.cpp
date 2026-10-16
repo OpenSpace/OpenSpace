@@ -24,8 +24,8 @@
 
 #include <modules/exoplanetsexperttool/util/densityvolume.h>
 
+#include <openspace/data/dataloader.h>
 #include <openspace/logging/logmanager.h>
-#include <openspace/misc/csvreader.h>
 #include <openspace/misc/exception.h>
 #include <algorithm>
 #include <cmath>
@@ -114,66 +114,39 @@ DensityVolume::DensityVolume(std::vector<glm::vec3> positions, glm::uvec3 dimens
     compute();
 }
 
-DensityVolume DensityVolume::fromCsv(const std::filesystem::path& path,
+DensityVolume DensityVolume::fromFile(const std::filesystem::path& path,
                                      std::string_view xColumn, std::string_view yColumn,
                                      std::string_view zColumn, glm::uvec3 dimensions,
                                      std::optional<Bounds> regionOfInterest)
 {
-    const std::vector<std::vector<std::string>> rows = loadCSVFile(path, true);
-    if (rows.empty()) {
+    dataloader::DataMapping mapping;
+    mapping.xColumnName = std::string(xColumn);
+    mapping.yColumnName = std::string(yColumn);
+    mapping.zColumnName = std::string(zColumn);
+    mapping.isCaseSensitive = true;
+    const dataloader::Dataset dataset = dataloader::data::loadFile(path, mapping);
+    if (dataset.entries.empty()) {
         throw RuntimeError(
-            std::format("CSV file '{}' is empty", path.string()),
+            std::format("No particle positions loaded from '{}'", path.string()),
             std::string(_loggerCat)
         );
     }
 
-    const std::vector<std::string>& header = rows.front();
-    auto columnIndex = [&header, &path](std::string_view name) {
-        auto it = std::find(header.begin(), header.end(), name);
-        if (it == header.end()) {
-            throw RuntimeError(
-                std::format(
-                    "Column '{}' not found in CSV file '{}'", name, path.string()
-                ),
-                std::string(_loggerCat)
-            );
-        }
-        return static_cast<size_t>(std::distance(header.begin(), it));
-    };
-    const size_t xIdx = columnIndex(xColumn);
-    const size_t yIdx = columnIndex(yColumn);
-    const size_t zIdx = columnIndex(zColumn);
-    const size_t minRowSize = std::max({ xIdx, yIdx, zIdx }) + 1;
-
     std::vector<glm::vec3> positions;
-    positions.reserve(rows.size() - 1);
+    positions.reserve(dataset.entries.size());
     size_t nSkipped = 0;
-    for (size_t i = 1; i < rows.size(); i++) {
-        const std::vector<std::string>& row = rows[i];
-        if (row.size() < minRowSize) {
+    for (const dataloader::Dataset::Entry& entry : dataset.entries) {
+        const glm::vec3 p = entry.position;
+        if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.z)) {
             nSkipped++;
             continue;
         }
-        try {
-            const glm::vec3 p = glm::vec3(
-                std::stof(row[xIdx]),
-                std::stof(row[yIdx]),
-                std::stof(row[zIdx])
-            );
-            if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.z)) {
-                nSkipped++;
-                continue;
-            }
-            positions.push_back(p);
-        }
-        catch (const std::exception&) {
-            nSkipped++;
-        }
+        positions.push_back(p);
     }
 
     if (nSkipped > 0) {
         LWARNING(std::format(
-            "Skipped {} rows with missing or invalid positions in '{}'",
+            "Skipped {} entries with non-finite positions in '{}'",
             nSkipped, path.string()
         ));
     }
