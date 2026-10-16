@@ -61,107 +61,147 @@ namespace {
         DoubleSided
     };
 
-    constexpr Property::PropertyInfo JumpToStartInfo = {
-        "JumpToStart",
-        "Jump to start of sequence",
-        "Performs a time jump to the start of the sequence.",
-        Property::Visibility::NoviceUser
+    constexpr TriggerPropertyInfo JumpToStartInfo = {
+        .identifier = "JumpToStart",
+        .name = "Jump to start of sequence",
+        .description = "Performs a time jump to the start of the sequence.",
+        .visibility = Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ActiveInstrumentInfo = {
-        "ActiveInstrument",
-        "Active instrument",
-        "The active instrument of the current spacecraft imagery.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo ActiveInstrumentInfo = {
+        .identifier = "ActiveInstrument",
+        .name = "Active instrument",
+        .description = "The active instrument of the current spacecraft imagery.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo EnableBorderInfo = {
-        "EnableBorder",
-        "Enable border",
-        "Enables border around the current spacecraft imagery.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo EnableBorderInfo = {
+        .identifier = "EnableBorder",
+        .name = "Enable border",
+        .description = "Enables border around the current spacecraft imagery.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo EnableFrustumInfo = {
-        "EnableFrustum",
-        "Enable frustum",
-        "Enables frustum around the current spacecraft imagery.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo EnableFrustumInfo = {
+        .identifier = "EnableFrustum",
+        .name = "Enable frustum",
+        .description = "Enables frustum around the current spacecraft imagery.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo FaceModeInfo = {
-        "FaceMode",
-        "Face Mode",
-        "Specifies how the plane is rendered: front side only, with a solid backside, "
-        "or textured on both sides.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo FaceModeInfo = {
+        .identifier = "FaceMode",
+        .name = "Face Mode",
+        .description = "Specifies how the plane is rendered: front side only, with a "
+            "solid backside, or textured on both sides.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MoveFactorInfo = {
-        "MoveFactor",
-        "Move factor",
-        "Controls how close to the Sun to render the imagery.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo MoveFactorInfo = {
+        .identifier = "MoveFactor",
+        .name = "Move factor",
+        .description = "Controls how close to the Sun to render the imagery.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.0,
+            .minMax = { 0.0, 1.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo DownsamplingLevelInfo = {
-        "DownsamplingLevel",
-        "Downsampling level",
-        "Controls how much to downsample the original data (0 is original resolution).",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo DownsamplingLevelInfo = {
+        .identifier = "DownsamplingLevel",
+        .name = "Downsampling level",
+        .description = "Controls how much to downsample the original data (0 is original "
+            "resolution).",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 2,
+            .minMax = { 0, 5 }
+        }
     };
 
-    constexpr Property::PropertyInfo TimelineDataRangeInfo = {
-        "TimelineDataRange",
-        "Timeline data range",
-        "Displays the earliest and latest available image data for the currently active "
-        "instrument. Note that data may not be continuously available across the entire "
-        "displayed time span.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TimelineDataRangeInfo = {
+        .identifier = "TimelineDataRange",
+        .name = "Timeline data range",
+        .description = "Displays the earliest and latest available image data for the "
+            "currently active instrument. Note that data may not be continuously "
+            "available across the entire displayed time span.",
+        .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo UseAdditiveBlendingInfo = {
-        "UseAdditiveBlending",
-        "Use additive blending",
-        "If enabled, the plane is blended additively with the background. If disabled, "
-        "the plane is rendered fully opaque. Note that this may lead to weird behaviors "
-        "when the plane is rendered with transparency.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseAdditiveBlendingInfo = {
+        .identifier = "UseAdditiveBlending",
+        .name = "Use additive blending",
+        .description = "If enabled, the plane is blended additively with the background. "
+            "If disabled, the plane is rendered fully opaque. Note that this may lead to "
+            "weird behaviors when the plane is rendered with transparency.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ContrastValueInfo = {
-        "ContrastValue",
-        "Contrast",
-        "Contrast of the current spacecraft imagery.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ContrastValueInfo = {
+        .identifier = "ContrastValue",
+        .name = "Contrast",
+        .description = "Contrast of the current spacecraft imagery.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { -15.f, 15.f }
+        }
     };
 
-    constexpr Property::PropertyInfo GammaValueInfo = {
-        "GammaValue",
-        "Gamma",
-        "Gamma of the current spacecraft imagery.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo GammaValueInfo = {
+        .identifier = "GammaValue",
+        .name = "Gamma",
+        .description = "Gamma of the current spacecraft imagery.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.9f,
+            .minMax = { 0.1f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo VerboseModeInfo = {
-        "VerboseMode",
-        "Verbose mode",
-        "Output information about image decoding.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo VerboseModeInfo = {
+        .identifier = "VerboseMode",
+        .name = "Verbose mode",
+        .description = "Output information about image decoding.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo PredictFramesAfterInfo = {
-        "PredictFramesAfter",
-        "Predict frames after",
-        "Determines how many images to pre-fetch after the current image frame.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo PredictFramesAfterInfo = {
+        .identifier = "PredictFramesAfter",
+        .name = "Predict frames after",
+        .description = "Determines how many images to pre-fetch after the current image "
+            "frame.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 10,
+            .minMax = { 0, 20 }
+        }
     };
 
-    constexpr Property::PropertyInfo PredictFramesBeforeInfo = {
-        "PredictFramesBefore",
-        "Predict frames before",
-        "Determines how many images to pre-fetch before the current image frame.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo PredictFramesBeforeInfo = {
+        .identifier = "PredictFramesBefore",
+        .name = "Predict frames before",
+        .description = "Determines how many images to pre-fetch before the current image "
+            "frame.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 2,
+            .minMax = { 0, 20 }
+        }
     };
 
     // A RenderableSolarImagery renders time-sequenced solar observations from spacecraft
@@ -192,11 +232,9 @@ namespace {
         // the first available instrument is used.
         std::optional<std::string> startInstrument;
 
-        // [[codegen::verbatim(EnableBorderInfo.description)]]
-        std::optional<bool> enableBorder;
+        std::optional<bool> enableBorder [[codegen::Info(EnableBorderInfo)]];
 
-        // [[codegen::verbatim(EnableFrustumInfo.description)]]
-        std::optional<bool> enableFrustum;
+        std::optional<bool> enableFrustum [[codegen::Info(EnableFrustumInfo)]];
 
         enum class [[codegen::map(FaceMode)]] FaceMode {
             FrontOnly [[codgen::key("Front Only")]],
@@ -204,32 +242,24 @@ namespace {
             DoubleSided [[codegen::key("Double Sided")]]
         };
 
-        // [[codegen::verbatim(FaceModeInfo.description)]]
-        std::optional<FaceMode> faceMode;
+        std::optional<FaceMode> faceMode [[codegen::Info(FaceModeInfo)]];
 
-        // [[codegen::verbatim(MoveFactorInfo.description)]]
-        std::optional<float> moveFactor;
+        std::optional<float> moveFactor [[codegen::Info(MoveFactorInfo)]];
 
-        // [[codegen::verbatim(DownsamplingLevelInfo.description)]]
-        std::optional<int> downsamplingLevel;
+        std::optional<int> downsamplingLevel [[codegen::Info(DownsamplingLevelInfo)]];
 
-        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
-        std::optional<bool> useAdditiveBlending;
+        std::optional<bool> useAdditiveBlending
+            [[codegen::Info(UseAdditiveBlendingInfo)]];
 
-        // [[codegen::verbatim(ContrastValueInfo.description)]]
-        std::optional<float> contrast;
+        std::optional<float> contrast [[codegen::Info(ContrastValueInfo)]];
 
-        // [[codegen::verbatim(GammaValueInfo.description)]]
-        std::optional<float> gamma;
+        std::optional<float> gamma [[codegen::Info(GammaValueInfo)]];
 
-        // [[codegen::verbatim(VerboseModeInfo.description)]]
-        std::optional<bool> verboseMode;
+        std::optional<bool> verboseMode [[codegen::Info(VerboseModeInfo)]];
 
-        // [[codegen::verbatim(PredictFramesAfterInfo.description)]]
-        std::optional<int> predictFramesAfter;
+        std::optional<int> predictFramesAfter [[codegen::Info(PredictFramesAfterInfo)]];
 
-        // [[codegen::verbatim(PredictFramesBeforeInfo.description)]]
-        std::optional<int> predictFramesBefore;
+        std::optional<int> predictFramesBefore [[codegen::Info(PredictFramesBeforeInfo)]];
     };
 } // namespace
 #include "renderablesolarimagery_codegen.cpp"
@@ -247,18 +277,18 @@ RenderableSolarImagery::RenderableSolarImagery(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _jumpToStart(JumpToStartInfo)
     , _activeInstruments(ActiveInstrumentInfo)
-    , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
-    , _enableBorder(EnableBorderInfo, false)
-    , _enableFrustum(EnableFrustumInfo, false)
+    , _contrastValue(ContrastValueInfo)
+    , _enableBorder(EnableBorderInfo)
+    , _enableFrustum(EnableFrustumInfo)
     , _faceMode(FaceModeInfo)
-    , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
-    , _gammaValue(GammaValueInfo, 0.9f, 0.1f, 10.f)
-    , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
-    , _downsamplingLevel(DownsamplingLevelInfo, 2, 0, 5)
+    , _useAdditiveBlending(UseAdditiveBlendingInfo)
+    , _gammaValue(GammaValueInfo)
+    , _moveFactor(MoveFactorInfo)
+    , _downsamplingLevel(DownsamplingLevelInfo)
     , _timelineDataRangeInfo(TimelineDataRangeInfo)
-    , _verboseMode(VerboseModeInfo, false)
-    , _predictFramesAfter(PredictFramesAfterInfo, 10, 0, 20)
-    , _predictFramesBefore(PredictFramesBeforeInfo, 2, 0, 20)
+    , _verboseMode(VerboseModeInfo)
+    , _predictFramesAfter(PredictFramesAfterInfo)
+    , _predictFramesBefore(PredictFramesBeforeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -356,7 +386,6 @@ RenderableSolarImagery::RenderableSolarImagery(const Dictionary& dictionary)
 
     // Data automatically updates when changing the active instrument
     updateTimelineDataRangeInfo();
-    _timelineDataRangeInfo.setReadOnly(true);
     addProperty(_timelineDataRangeInfo);
 
     _downsamplingLevel = p.downsamplingLevel.value_or(_downsamplingLevel);
@@ -712,7 +741,7 @@ void RenderableSolarImagery::updateImageryTexture() {
         );
 
     if (!keyframe) {
-        // No keyframe avaialble so we clear the texture
+        // No keyframe available so we clear the texture
         if (_currentKeyframe != NoActiveKeyframe) {
             // No need to re-upload an empty image
             _isCoronaGraph = false;

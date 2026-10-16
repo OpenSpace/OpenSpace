@@ -28,16 +28,8 @@
 
 namespace openspace {
 
-UIntProperty::UIntProperty(Property::PropertyInfo info, unsigned int value,
-                           unsigned int minValue, unsigned int maxValue,
-                           unsigned int stepValue)
-    : NumericalProperty<unsigned int>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue
-    )
+UIntProperty::UIntProperty(UIntPropertyInfo info)
+    : NumericalProperty<unsigned int>(std::move(info))
 {}
 
 std::string_view UIntProperty::className() const {

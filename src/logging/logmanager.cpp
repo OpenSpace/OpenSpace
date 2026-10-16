@@ -35,9 +35,9 @@
 namespace {
     using namespace openspace::logging;
 
-    // The always-present console log. Definining it here as we'd otherwise need to
-    // include the ConsoleLog in every file that wants to use the LogManager. Its fine to
-    // do this as the ConsoleLog has a trivial-enough destructor
+    // The always-present console log. Defining it here as we'd otherwise need to include
+    // the ConsoleLog in every file that wants to use the LogManager. Its fine to do this
+    // as the ConsoleLog has a trivial-enough destructor
     ConsoleLog consoleLog;
 } // namespace
 

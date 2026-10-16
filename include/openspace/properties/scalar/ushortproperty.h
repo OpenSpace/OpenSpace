@@ -31,16 +31,22 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<unsigned short> {
+    static constexpr unsigned short Min = std::numeric_limits<unsigned short>::lowest();
+    static constexpr unsigned short Max = std::numeric_limits<unsigned short>::max();
+    static constexpr unsigned short Step = 1;
+};
+
+using UShortPropertyInfo = BasicPropertyInfo<NumericalDefaults<unsigned short>>;
+
 /**
  * This class is a concrete implementation of TemplateProperty with the type
  * `unsigned short`.
  */
 class UShortProperty : public NumericalProperty<unsigned short> {
 public:
-    explicit UShortProperty(PropertyInfo info, unsigned short value = 0,
-        unsigned short minValue = std::numeric_limits<unsigned short>::lowest(),
-        unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
-        unsigned short stepValue = 1);
+    explicit UShortProperty(UShortPropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

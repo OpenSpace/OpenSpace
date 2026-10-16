@@ -52,6 +52,7 @@ target_sources(
     test_luaconversions.cpp
     test_luatodictionary.cpp
     test_lua_createsinglecolorimage.cpp
+    test_lua_factoryconstructors.cpp
     test_lua_property.cpp
     test_lua_propertyvalue.cpp
     test_lua_setpropertyvalue.cpp
@@ -243,6 +244,7 @@ target_sources(
     codegen/parsing_structs/parsing_structs_attributes_vec4.cpp
     codegen/parsing_structs/parsing_structs_enums.cpp
     codegen/parsing_structs/parsing_structs_fail.cpp
+    codegen/parsing_structs/parsing_structs_info.cpp
     codegen/parsing_structs/parsing_structs_map.cpp
     codegen/parsing_structs/parsing_structs_other.cpp
     codegen/parsing_structs/parsing_structs_struct.cpp

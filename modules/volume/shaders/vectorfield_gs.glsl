@@ -27,7 +27,7 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 // The shader expands a single point vertex into an arrow originally pointing along +X
-// direction, it is then rotated to match the direction of the incomming vector.
+// direction, it is then rotated to match the direction of the incoming vector.
 layout (points) in;
 in Data {
   vec3 position;

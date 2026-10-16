@@ -50,125 +50,131 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableKameleonVolume";
 
-    constexpr Property::PropertyInfo DimensionsInfo = {
-        "Dimensions",
-        "Dimensions",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr UVec3PropertyInfo DimensionsInfo = {
+        .identifier = "Dimensions",
+        .name = "Dimensions",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo VariableInfo = {
-        "Variable",
-        "Variable",
-        "", // @TODO Missing documentation
-        Property::Visibility::User
+    constexpr StringPropertyInfo VariableInfo = {
+        .identifier = "Variable",
+        .name = "Variable",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo LowerDomainBoundInfo = {
-        "LowerDomainBound",
-        "Lower domain bound",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo LowerDomainBoundInfo = {
+        .identifier = "LowerDomainBound",
+        .name = "Lower domain bound",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UpperDomainBoundInfo = {
-        "UpperDomainBound",
-        "Upper domain bound",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo UpperDomainBoundInfo = {
+        .identifier = "UpperDomainBound",
+        .name = "Upper domain bound",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DomainScaleInfo = {
-        "DomainScale",
-        "Domain scale",
-        "", // @TODO Missing documentation
-        Property::Visibility::User
+    constexpr Vec3PropertyInfo DomainScaleInfo = {
+        .identifier = "DomainScale",
+        .name = "Domain scale",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(1.f)
+        }
     };
 
-    constexpr Property::PropertyInfo LowerValueBoundInfo = {
-        "LowerValueBound",
-        "Lower value bound",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo LowerValueBoundInfo = {
+        .identifier = "LowerValueBound",
+        .name = "Lower value bound",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo UpperValueBoundInfo = {
-        "UpperValueBound",
-        "Upper value bound",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo UpperValueBoundInfo = {
+        .identifier = "UpperValueBound",
+        .name = "Upper value bound",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.01f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo GridTypeInfo = {
-        "GridType",
-        "Grid type",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr OptionPropertyInfo GridTypeInfo = {
+        .identifier = "GridType",
+        .name = "Grid type",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo StepSizeInfo = {
-        "StepSize",
-        "Step Size",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo StepSizeInfo = {
+        .identifier = "StepSize",
+        .name = "Step Size",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.02f,
+            .minMax = { 0.01f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SourcePathInfo = {
-        "SourcePath",
-        "Source path",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo SourcePathInfo = {
+        .identifier = "SourcePath",
+        .name = "Source path",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TransferFunctionInfo = {
-        "TransferFunctionPath",
-        "Transfer function path",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TransferFunctionInfo = {
+        .identifier = "TransferFunctionPath",
+        .name = "Transfer function path",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo CacheInfo = {
-        "Cache",
-        "Cache",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo CacheInfo = {
+        .identifier = "Cache",
+        .name = "Cache",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RenderableKameleonVolume)]] Parameters {
-        // [[codegen::verbatim(DimensionsInfo.description)]]
-        glm::ivec3 dimensions [[codegen::greater(glm::ivec3(0))]];
+        glm::ivec3 dimensions
+            [[codegen::Info(DimensionsInfo), codegen::greater(glm::ivec3(0))]];
 
-        // [[codegen::verbatim(StepSizeInfo.description)]]
-        float stepSize;
+        float stepSize [[codegen::Info(StepSizeInfo)]];
 
-        // [[codegen::verbatim(TransferFunctionInfo.description)]]
-        std::optional<std::filesystem::path> transferFunction;
+        std::optional<std::filesystem::path> transferFunction
+            [[codegen::Info(TransferFunctionInfo)]];
 
-        // [[codegen::verbatim(SourcePathInfo.description)]]
-        std::optional<std::filesystem::path> source;
+        std::optional<std::filesystem::path> source [[codegen::Info(SourcePathInfo)]];
 
-        // [[codegen::verbatim(VariableInfo.description)]]
-        std::optional<std::string> variable;
+        std::optional<std::string> variable [[codegen::Info(VariableInfo)]];
 
-        // [[codegen::verbatim(LowerDomainBoundInfo.description)]]
-        std::optional<glm::vec3> lowerDomainBound;
+        std::optional<glm::vec3> lowerDomainBound [[codegen::Info(LowerDomainBoundInfo)]];
 
-        // [[codegen::verbatim(UpperDomainBoundInfo.description)]]
-        std::optional<glm::vec3> upperDomainBound;
+        std::optional<glm::vec3> upperDomainBound [[codegen::Info(UpperDomainBoundInfo)]];
 
-        // [[codegen::verbatim(DomainScaleInfo.description)]]
-        std::optional<glm::vec3> domainScale;
+        std::optional<glm::vec3> domainScale [[codegen::Info(DomainScaleInfo)]];
 
-        // [[codegen::verbatim(LowerValueBoundInfo.description)]]
-        std::optional<float> lowerValueBound;
+        std::optional<float> lowerValueBound [[codegen::Info(LowerValueBoundInfo)]];
 
-        // [[codegen::verbatim(UpperValueBoundInfo.description)]]
-        std::optional<float> upperValueBound;
+        std::optional<float> upperValueBound [[codegen::Info(UpperValueBoundInfo)]];
 
         std::optional<Dictionary> clipPlanes;
 
-        // [[codegen::verbatim(CacheInfo.description)]]
-        std::optional<bool> cache;
+        std::optional<bool> cache [[codegen::Info(CacheInfo)]];
 
         enum class GridType {
             Cartesian,
@@ -194,11 +200,11 @@ RenderableKameleonVolume::RenderableKameleonVolume(const Dictionary& dictionary)
     , _variable(VariableInfo)
     , _lowerDomainBound(LowerDomainBoundInfo)
     , _upperDomainBound(UpperDomainBoundInfo)
-    , _domainScale(DomainScaleInfo, glm::vec3(1.f))
-    , _lowerValueBound(LowerValueBoundInfo, 0.f, 0.f, 1.f)
-    , _upperValueBound(UpperValueBoundInfo, 1.f, 0.01f, 1.f)
+    , _domainScale(DomainScaleInfo)
+    , _lowerValueBound(LowerValueBoundInfo)
+    , _upperValueBound(UpperValueBoundInfo)
     , _gridType(GridTypeInfo)
-    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
+    , _stepSize(StepSizeInfo)
     , _sourcePath(SourcePathInfo)
     , _transferFunctionPath(TransferFunctionInfo)
     , _cache(CacheInfo)

@@ -63,7 +63,7 @@ private:
 
     std::unique_ptr<opengl::ProgramObject> _shader;
     UniformCache(modelViewProjection, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, texture) _uniformCache;
+        sunPosition, tex) _uniformCache;
     std::unique_ptr<opengl::Texture> _texture;
     std::unique_ptr<filesystem::File> _textureFile;
 

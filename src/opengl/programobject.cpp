@@ -355,13 +355,13 @@ std::unique_ptr<ProgramObject> ProgramObject::Build(const std::string& name,
         dictionary
     ));
     program->attachObject(std::make_unique<ShaderObject>(
-        ShaderObject::ShaderType::TesselationEvaluation,
+        ShaderObject::ShaderType::TessellationEvaluation,
         tessellationEvaluationShaderPath,
         name + " Tessellation Evaluation",
         dictionary
     ));
     program->attachObject(std::make_unique<ShaderObject>(
-        ShaderObject::ShaderType::TesselationControl,
+        ShaderObject::ShaderType::TessellationControl,
         tessellationControlShaderPath,
         name + " Tessellation Control",
         dictionary

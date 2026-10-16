@@ -42,20 +42,28 @@ namespace {
 
     constexpr std::string_view _loggerCat = "GdalWrapper";
 
-    constexpr Property::PropertyInfo LogGdalErrorInfo = {
-        "LogGdalErrors",
-        "Log GDAL errors",
-        "If this value is enabled, any error that is raised by GDAL will be logged using "
-        "the logmanager. If this value is disabled, any error will be ignored.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo LogGdalErrorInfo = {
+        .identifier = "LogGdalErrors",
+        .name = "Log GDAL errors",
+        .description = "If this value is enabled, any error that is raised by GDAL will "
+            "be logged using the logmanager. If this value is disabled, any error will "
+            "be ignored.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo GdalMaximumCacheInfo = {
-        "GdalMaximumCacheSize",
-        "GDAL maximum cache size",
-        "This function sets the maximum amount of RAM memory in MB that GDAL is "
-        "permitted to use for caching.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo GdalMaximumCacheInfo = {
+        .identifier = "GdalMaximumCacheSize",
+        .name = "GDAL maximum cache size",
+        .description = "This function sets the maximum amount of RAM memory in MB that "
+            "GDAL is permitted to use for caching.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .minMax = { .min = 0 },
+            .stepSize = 1
+        }
     };
 
     void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {
@@ -97,17 +105,15 @@ bool GdalWrapper::logGdalErrors() const {
 
 GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize)
     : PropertyOwner({ "GdalWrapper", "Gdal Wrapper" })
-    , _logGdalErrors(LogGdalErrorInfo, false)
-    , _gdalMaximumCacheSize(
-        GdalMaximumCacheInfo,
-        static_cast<int>(maximumCacheSize / (1024ULL * 1024ULL)), // Default
-        0, // Minimum: No caching
-        static_cast<int>(maximumMaximumCacheSize / (1024ULL * 1024ULL)), // Maximum
-        1 // Step: One MB
-    )
+    , _logGdalErrors(LogGdalErrorInfo)
+    , _gdalMaximumCacheSize(GdalMaximumCacheInfo)
 {
     ZoneScoped;
 
+    _gdalMaximumCacheSize = static_cast<int>(maximumCacheSize / (1024ULL * 1024ULL));
+    _gdalMaximumCacheSize.setMaxValue(
+        static_cast<int>(maximumMaximumCacheSize / (1024ULL * 1024ULL))
+    );
     addProperty(_logGdalErrors);
     addProperty(_gdalMaximumCacheSize);
 

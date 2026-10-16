@@ -513,11 +513,17 @@ namespace {
         return 0;
     }
 
-    template <typename T>
-    void createCustomProperty(Property::PropertyInfo info,
-                              std::optional<std::string> onChange)
-    {
-        T* p = new T(info);
+    void setEnabledCallSingle(Property& prop, bool isEnabled) {
+        if (global::sessionRecordingHandler->isRecording()) {
+            global::sessionRecordingHandler->savePropertyEnabledBaseline(prop);
+        }
+
+        prop.setIsEnabled(IsEnabled(isEnabled));
+    }
+
+    template <typename T, typename Info>
+    void createCustomProperty(Info info, std::optional<std::string> onChange) {
+        T* p = new T(std::move(info));
         if (onChange.has_value() && !onChange->empty()) {
             p->onChange(
                 [p, script = *onChange]() {
@@ -533,8 +539,8 @@ namespace {
     }
 
     template <>
-    void createCustomProperty<TriggerProperty>(Property::PropertyInfo info,
-                                               std::optional<std::string> onChange)
+    void createCustomProperty<TriggerProperty, PropertyInfo>(PropertyInfo info,
+                                                      std::optional<std::string> onChange)
     {
         TriggerProperty* p = new TriggerProperty(info);
         if (onChange.has_value() && !onChange->empty()) {
@@ -552,7 +558,7 @@ namespace {
 
 namespace openspace::luascriptfunctions {
 
-template <bool optimization>
+template <bool hasSingleUri>
 int propertySetValue(lua_State* L) {
     ZoneScoped;
 
@@ -646,7 +652,7 @@ int propertySetValue(lua_State* L) {
 
     defer { lua_settop(L, 0); };
 
-    if constexpr (optimization) {
+    if constexpr (hasSingleUri) {
         Property* prop = property(uriOrRegex);
         if (!prop) {
             LERRORC(
@@ -689,6 +695,81 @@ int propertySetValue(lua_State* L) {
     return 0;
 }
 
+template <bool hasSingleUri>
+int setPropertyEnabled(lua_State* L) {
+    ZoneScoped;
+
+    lua::checkArgumentsAndThrow(L, 2, "lua::setPropertyEnabled");
+
+    auto [uriOrRegex, isEnabled] = lua::values<std::string, bool>(L);
+
+    if constexpr (hasSingleUri) {
+        Property* prop = property(uriOrRegex);
+        if (!prop) {
+            LERRORC(
+                "setPropertyEnabled",
+                std::format(
+                    "{}: Property with URI '{}' was not found",
+                    lua::errorLocation(L), uriOrRegex
+                )
+            );
+            return 0;
+        }
+
+        if (!prop->isEnablable()) {
+            LERRORC(
+                "setPropertyEnabled",
+                std::format(
+                    "{}: Property with URI '{}' is not enablable",
+                    lua::errorLocation(L), uriOrRegex
+                )
+            );
+            return 0;
+        }
+
+        setEnabledCallSingle(*prop, isEnabled);
+        return 0;
+    }
+    else {
+        std::string tag = groupTag(uriOrRegex);
+        if (!tag.empty()) {
+            // Remove group tag from start of regex and replace with '*'
+            uriOrRegex = removeGroupTagFromUri(uriOrRegex);
+        }
+
+        //
+        // 1. Retrieve all properties that match the regex
+        std::vector<Property*> matchingProps = findMatchesInAllProperties(
+            uriOrRegex,
+            tag
+        );
+
+        //
+        // 2. Remove all properties that are not enablable
+        std::erase_if(
+            matchingProps,
+            [](Property* prop) { return !prop->isEnablable(); }
+        );
+
+        if (matchingProps.empty()) [[unlikely]] {
+            LERRORC(
+                "property_setPropertyEnabled",
+                std::format(
+                    "{}: No property matched the requested URI '{}'",
+                    lua::errorLocation(L), uriOrRegex
+                )
+            );
+            return 0;
+        }
+
+        for (Property* prop : matchingProps) {
+            setEnabledCallSingle(*prop, isEnabled);
+        }
+
+        return 0;
+    }
+}
+
 int propertyGetValue(lua_State* L) {
     lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetValue");
     const std::string uri = lua::value<std::string>(L);
@@ -708,6 +789,51 @@ int propertyGetValue(lua_State* L) {
     prop->getLuaValue(L);
     return 1;
 }
+
+int propertyGetEnabled(lua_State* L) {
+    lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetEnabled");
+    const std::string uri = lua::value<std::string>(L);
+
+    Property* prop = property(uri);
+    if (!prop) {
+        LERRORC(
+            "propertyGetEnabled",
+            std::format(
+                "{}: Property with URI '{}' was not found",
+                lua::errorLocation(L), uri
+            )
+        );
+        return 0;
+    }
+
+    bool isEnabled = prop->isEnabled();
+    lua::push(L, isEnabled);
+
+    return 1;
+}
+
+int propertyGetEnablable(lua_State* L) {
+    lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetEnablable");
+    const std::string uri = lua::value<std::string>(L);
+
+    Property* prop = property(uri);
+    if (!prop) {
+        LERRORC(
+            "propertyGetEnablable",
+            std::format(
+                "{}: Property with URI '{}' was not found",
+                lua::errorLocation(L), uri
+            )
+        );
+        return 0;
+    }
+
+    bool isEnablable = prop->isEnablable();
+    lua::push(L, isEnablable);
+
+    return 1;
+}
+
 } // namespace openspace::luascriptfunctions
 
 namespace {
@@ -1350,101 +1476,205 @@ enum class [[codegen::enum]] CustomPropertyType {
         guiName->c_str() :
         identifier.c_str();
 
-    Property::PropertyInfo info = {
-        identifier.c_str(),
-        gui,
-        description.has_value() ? description->c_str() : ""
+    
+    auto toType = []<typename T>(PropertyInfo info) -> T {
+        return {
+            .identifier = info.identifier,
+            .name = info.name,
+            .description = info.description,
+            .visibility = info.visibility,
+            .isEnablable = info.isEnablable,
+            .needsConfirmation = info.needsConfirmation,
+            .isReadOnly = info.isReadOnly,
+            .defaults = { .isEnabled = info.defaults.isEnabled }
+        };
+    };
+
+    PropertyInfo info = {
+        .identifier = identifier.c_str(),
+        .name = gui,
+        .description = description.has_value() ? description->c_str() : ""
     };
     switch (type) {
         case CustomPropertyType::BoolProperty:
-            createCustomProperty<BoolProperty>(info, std::move(onChange));
+            createCustomProperty<BoolProperty>(
+                toType.template operator()<BoolPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DMat2Property:
-            createCustomProperty<DMat2Property>(info, std::move(onChange));
+            createCustomProperty<DMat2Property>(
+                toType.template operator()<DMat2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DMat3Property:
-            createCustomProperty<DMat3Property>(info, std::move(onChange));
+            createCustomProperty<DMat3Property>(
+                toType.template operator()<DMat3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DMat4Property:
-            createCustomProperty<DMat4Property>(info, std::move(onChange));
+            createCustomProperty<DMat4Property>(
+                toType.template operator()<DMat4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DoubleProperty:
-            createCustomProperty<DoubleProperty>(info, std::move(onChange));
+            createCustomProperty<DoubleProperty>(
+                toType.template operator()<DoublePropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DVec2Property:
-            createCustomProperty<DVec2Property>(info, std::move(onChange));
+            createCustomProperty<DVec2Property>(
+                toType.template operator()<DVec2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DVec3Property:
-            createCustomProperty<DVec3Property>(info, std::move(onChange));
+            createCustomProperty<DVec3Property>(
+                toType.template operator()<DVec3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DVec4Property:
-            createCustomProperty<DVec4Property>(info, std::move(onChange));
+            createCustomProperty<DVec4Property>(
+                toType.template operator()<DVec4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::FloatProperty:
-            createCustomProperty<FloatProperty>(info, std::move(onChange));
+            createCustomProperty<FloatProperty>(
+                toType.template operator()<FloatPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::IntProperty:
-            createCustomProperty<IntProperty>(info, std::move(onChange));
+            createCustomProperty<IntProperty>(
+                toType.template operator()<IntPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::IVec2Property:
-            createCustomProperty<IVec2Property>(info, std::move(onChange));
+            createCustomProperty<IVec2Property>(
+                toType.template operator()<IVec2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::IVec3Property:
-            createCustomProperty<IVec3Property>(info, std::move(onChange));
+            createCustomProperty<IVec3Property>(
+                toType.template operator()<IVec3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::IVec4Property:
-            createCustomProperty<IVec4Property>(info, std::move(onChange));
+            createCustomProperty<IVec4Property>(
+                toType.template operator()<IVec4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::LongProperty:
-            createCustomProperty<LongProperty>(info, std::move(onChange));
+            createCustomProperty<LongProperty>(
+                toType.template operator()<LongPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Mat2Property:
-            createCustomProperty<Mat2Property>(info, std::move(onChange));
+            createCustomProperty<Mat2Property>(
+                toType.template operator()<Mat2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Mat3Property:
-            createCustomProperty<Mat3Property>(info, std::move(onChange));
+            createCustomProperty<Mat3Property>(
+                toType.template operator()<Mat3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Mat4Property:
-            createCustomProperty<Mat4Property>(info, std::move(onChange));
+            createCustomProperty<Mat4Property>(
+                toType.template operator()<Mat4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::ShortProperty:
-            createCustomProperty<ShortProperty>(info, std::move(onChange));
+            createCustomProperty<ShortProperty>(
+                toType.template operator()<ShortPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::StringProperty:
-            createCustomProperty<StringProperty>(info, std::move(onChange));
+            createCustomProperty<StringProperty>(
+                toType.template operator()<StringPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::StringListProperty:
-            createCustomProperty<StringListProperty>(info, std::move(onChange));
+            createCustomProperty<StringListProperty>(
+                toType.template operator()<StringListPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::TriggerProperty:
-            createCustomProperty<TriggerProperty>(info, std::move(onChange));
+            createCustomProperty<TriggerProperty>(
+                toType.template operator()<TriggerPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::UIntProperty:
-            createCustomProperty<UIntProperty>(info, std::move(onChange));
+            createCustomProperty<UIntProperty>(
+                toType.template operator()<UIntPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::ULongProperty:
-            createCustomProperty<ULongProperty>(info, std::move(onChange));
+            createCustomProperty<ULongProperty>(
+                toType.template operator()<ULongPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::UShortProperty:
-            createCustomProperty<UShortProperty>(info, std::move(onChange));
+            createCustomProperty<UShortProperty>(
+                toType.template operator()<UShortPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::UVec2Property:
-            createCustomProperty<UVec2Property>(info, std::move(onChange));
+            createCustomProperty<UVec2Property>(
+                toType.template operator()<UVec2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::UVec3Property:
-            createCustomProperty<UVec3Property>(info, std::move(onChange));
+            createCustomProperty<UVec3Property>(
+                toType.template operator()<UVec3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::UVec4Property:
-            createCustomProperty<UVec4Property>(info, std::move(onChange));
+            createCustomProperty<UVec4Property>(
+                toType.template operator()<UVec4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Vec2Property:
-            createCustomProperty<Vec2Property>(info, std::move(onChange));
+            createCustomProperty<Vec2Property>(
+                toType.template operator()<Vec2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Vec3Property:
-            createCustomProperty<Vec3Property>(info, std::move(onChange));
+            createCustomProperty<Vec3Property>(
+                toType.template operator()<Vec3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Vec4Property:
-            createCustomProperty<Vec4Property>(info, std::move(onChange));
+            createCustomProperty<Vec4Property>(
+                toType.template operator()<Vec4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
     }
     throw std::runtime_error("Missing case label");

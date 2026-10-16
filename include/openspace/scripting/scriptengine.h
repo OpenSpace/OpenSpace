@@ -169,7 +169,7 @@ private:
     std::vector<std::string> _scriptsToSync;
 
     struct RepeatedScriptInfo {
-        /// This script is run everytime `timeout` seconds have passed
+        /// This script is run every time `timeout` seconds have passed
         std::string script;
 
         /// This script is run when the repeated script is unregistered

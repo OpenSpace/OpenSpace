@@ -260,8 +260,10 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
     std::string line;
     bool foundTarget = false;
     openspace::getline(fileStream, line);
-    // First line is just stars (*) no information, skip
-    openspace::getline(fileStream, line);
+    if (line.find_first_not_of('*') == std::string::npos) {
+        // First line is just stars (*) no information, skip
+        openspace::getline(fileStream, line);
+    }
 
     // Valid Target?
     if (fileStream.good() && (line.contains("Revised") || line.contains("JPL"))) {
@@ -277,7 +279,7 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
             return HorizonsResultCode::ErrorSize;
         }
 
-        // Selected time range too big for avalable time span?
+        // Selected time range too big for available time span?
         if (line.contains("STEP_SIZE too big")) {
             return HorizonsResultCode::ErrorSpan;
         }
@@ -470,7 +472,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
             break;
         }
         case HorizonsResultCode::UnknownError:
-            LERROR("An unknown error occured");
+            LERROR("An unknown error occurred");
             break;
         default:
             LERROR("Unknown result type");

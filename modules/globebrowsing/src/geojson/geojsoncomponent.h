@@ -79,7 +79,7 @@ public:
 private:
     /**
      * Small helper class whose purpose is to encapsulate properties related to a specific
-     * geomoetry feature, and allow things like flying to or fadin out individual
+     * geometry feature, and allow things like flying to or fadin out individual
      * subfeatures.
      */
     class SubFeatureProps : public PropertyOwner, public Fadeable {

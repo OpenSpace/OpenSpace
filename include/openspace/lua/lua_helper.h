@@ -223,7 +223,7 @@ void loadDictionaryFromString(const std::string& script, Dictionary& dictionary,
  * Loads a Lua state into the given #Dictionary, extending the passed in dictionary with
  * numeric keys based on the stack indices. This method will overwrite values with the
  * same keys, but will not remove any other keys from the dictionary. The script contained
- * in the string may return mulitple values which will be included into the #Dictionary.
+ * in the string may return multiple values which will be included into the #Dictionary.
  *
  * \param script The source code of the script that is executed
  * \param dictionary The #Dictionary into which the values from the script are added
@@ -265,7 +265,7 @@ Dictionary loadDictionaryFromString(const std::string& script,
 /**
  * Loads a Lua state and returns it as a #Dictionary, extending the passed in dictionary
  * with numeric keys based on the stack indices. The script contained in the string may
- * return mulitple values which will be included into the #Dictionary.
+ * return multiple values which will be included into the #Dictionary.
  *
  * \param script The source code of the script that is executed
  * \param state If this is set to a valid lua_State, this state is used instead of
@@ -542,7 +542,7 @@ constexpr std::tuple<Ts...> values(lua_State* L, int location = 1,
 
 /**
  * Extracts a userdata pointer of the specified type T from the Lua state and returns it
- * to the caller. The value will be returned as the specfied type and it is up to the
+ * to the caller. The value will be returned as the specified type and it is up to the
  * caller to verify that the user data is, in fact, of the correct type, or else a pointer
  * that is invalid will be returned from this function.
  *

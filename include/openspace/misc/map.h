@@ -31,7 +31,7 @@
 
 // The contents of this file define `transparent_string_hash` which is a type that can be
 // used for unordered containers to make them capable of heterogeneous lookup. This
-// follows the implementatoin of P0917 and P1690 that have been added into C++20.
+// follows the implementation of P0917 and P1690 that have been added into C++20.
 //
 // To use this, you would defined a container like such:
 //

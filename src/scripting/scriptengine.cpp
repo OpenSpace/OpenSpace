@@ -37,7 +37,9 @@
 #include <openspace/misc/dictionary.h>
 #include <openspace/misc/exception.h>
 #include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/network/astrocast.h>
+#include <openspace/util/factorymanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <algorithm>
 #include <fstream>
@@ -82,6 +84,74 @@ namespace {
         }
 
         return result;
+    }
+
+    // Must match the check in the documentation engine, which writes the LuaLS stubs for
+    // the factory constructor tables
+    bool isLuaIdentifier(std::string_view name) {
+        if (name.empty() || ::isdigit(static_cast<unsigned char>(name.front()))) {
+            return false;
+        }
+        return std::all_of(
+            name.begin(),
+            name.end(),
+            [](char c) { return ::isalnum(static_cast<unsigned char>(c)) || c == '_'; }
+        );
+    }
+
+    // Constructor for factory objects, e.g. `Renderable.RenderableGlobe()`. The registered
+    // class name is the first upvalue. Returns a new table with only the `Type` key set
+    int createFactoryObject(lua_State* L) {
+        const char* type = lua_tostring(L, lua_upvalueindex(1));
+        if (lua_gettop(L) != 0) {
+            lua::luaError(L, std::format("'{}' does not take any parameters", type));
+        }
+
+        lua_newtable(L);
+        lua_pushstring(L, type);
+        lua_setfield(L, -2, "Type");
+        return 1;
+    }
+
+    // Creates one global table per factory (e.g. `Renderable`) that contains a
+    // constructor function for each registered class (e.g. `Renderable.RenderableGlobe`)
+    void registerFactoryConstructors(lua_State* state) {
+        if (!FactoryManager::isInitialized()) {
+            return;
+        }
+
+        for (const FactoryManager::FactoryInfo& info : FactoryManager::ref().factories()) {
+            if (!isLuaIdentifier(info.name)) {
+                continue;
+            }
+
+            lua_newtable(state);
+            for (const std::string& c : info.factory->registeredClasses()) {
+                if (!isLuaIdentifier(c)) {
+                    continue;
+                }
+                lua_pushstring(state, c.c_str());
+                lua_pushcclosure(state, createFactoryObject, 1);
+                lua_setfield(state, -2, c.c_str());
+            }
+            lua_setglobal(state, info.name.c_str());
+        }
+    }
+
+    // `SceneGraphNode()` returns an empty table. It only exists so that the LuaLS stubs
+    // written by the documentation engine can mark the result as a `SceneGraphNode`
+    void registerSceneGraphNodeConstructor(lua_State* state) {
+        lua_pushcfunction(
+            state,
+            [](lua_State* L) {
+                if (lua_gettop(L) != 0) {
+                    lua::luaError(L, "'SceneGraphNode' does not take any parameters");
+                }
+                lua_newtable(L);
+                return 1;
+            }
+        );
+        lua_setglobal(state, "SceneGraphNode");
     }
 } // namespace
 #include "scriptengine_codegen.cpp"
@@ -137,6 +207,10 @@ void ScriptEngine::initializeLuaState(lua_State* state) {
 
     lua_newtable(state);
     lua_setglobal(state, OpenSpaceLibraryName.data());
+
+    LDEBUG("Add factory constructors");
+    registerFactoryConstructors(state);
+    registerSceneGraphNodeConstructor(state);
 
     LDEBUG("Add OpenSpace modules");
     for (LuaLibrary& lib : _registeredLibraries) {

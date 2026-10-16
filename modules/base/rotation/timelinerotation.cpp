@@ -35,12 +35,16 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ShouldInterpolateInfo = {
-        "ShouldInterpolate",
-        "Should interpolate",
-        "If this value is set to 'true', an interpolation is applied between the given "
-        "keyframes. If this value is set to 'false', the interpolation is not applied.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShouldInterpolateInfo = {
+        .identifier = "ShouldInterpolate",
+        .name = "Should interpolate",
+        .description = "If this value is set to 'true', an interpolation is applied "
+            "between the given keyframes. If this value is set to 'false', the "
+            "interpolation is not applied.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     // Uses a timeline of other `Rotation` classes to calculate the final rotation for the
@@ -53,8 +57,7 @@ namespace {
         std::map<std::string, Dictionary> keyframes
             [[codegen::reference("core_rotation")]];
 
-        // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
-        std::optional<bool> shouldInterpolate;
+        std::optional<bool> shouldInterpolate [[codegen::Info(ShouldInterpolateInfo)]];
     };
 } // namespace
 #include "timelinerotation_codegen.cpp"
@@ -70,7 +73,7 @@ Documentation TimelineRotation::Documentation() {
 
 TimelineRotation::TimelineRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
-    , _shouldInterpolate(ShouldInterpolateInfo, true)
+    , _shouldInterpolate(ShouldInterpolateInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

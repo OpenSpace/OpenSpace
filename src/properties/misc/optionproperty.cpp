@@ -26,6 +26,7 @@
 
 #include <openspace/logging/logmanager.h>
 #include <openspace/lua/lua_helper.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 namespace {
     using namespace openspace;
@@ -53,18 +54,31 @@ namespace {
         options.push_back(std::move(option));
         return true;
     }
+
+    IntPropertyInfo convert(OptionPropertyInfo info) {
+        return {
+            .identifier = info.identifier,
+            .name = info.name,
+            .description = info.description,
+            .visibility = info.visibility,
+            .isEnablable = info.isEnablable,
+            .needsConfirmation = info.needsConfirmation,
+            .isReadOnly = info.isReadOnly,
+            .defaults = {
+                .isEnabled = info.defaults.isEnabled,
+                .value = info.defaults.value,
+                .minMax = { 0, std::numeric_limits<int>::max() },
+                .stepSize = 1
+            }
+        };
+    }
+
 } // namespace
 
 namespace openspace {
 
-OptionProperty::OptionProperty(PropertyInfo info)
-    : NumericalProperty<int>(
-        std::move(info),
-        0,
-        std::numeric_limits<int>::lowest(),
-        std::numeric_limits<int>::max(),
-        1
-    )
+OptionProperty::OptionProperty(OptionPropertyInfo info)
+    : NumericalProperty<int>(convert(info))
 {}
 
 std::string_view OptionProperty::className() const {

@@ -46,71 +46,72 @@ namespace {
     constexpr std::string_view KeyDesc = "Description";
     constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
 
-    constexpr Property::PropertyInfo TypeInfo = {
-        "Type",
-        "Type",
-        "The type of this Layer. This value is a read-only property and thus cannot be "
-        "changed.",
-        Property::Visibility::Developer
+    constexpr OptionPropertyInfo TypeInfo = {
+        .identifier = "Type",
+        .name = "Type",
+        .description = "The type of this Layer. This value is a read-only property and "
+            "thus cannot be changed.",
+        .visibility = Visibility::Developer,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo BlendModeInfo = {
-        "BlendMode",
-        "Blend mode",
-        "This value specifies the blend mode that is applied to this layer. The blend "
-        "mode determines how this layer is added to the underlying layers beneath.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo BlendModeInfo = {
+        .identifier = "BlendMode",
+        .name = "Blend mode",
+        .description = "This value specifies the blend mode that is applied to this "
+            "layer. The blend mode determines how this layer is added to the underlying "
+            "layers beneath.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "If this value is enabled, the layer will be used for the final composition of "
-        "the planet. If this value is disabled, the layer will be ignored in the "
-        "composition.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "If this value is enabled, the layer will be used for the final "
+            "composition of the planet. If this value is disabled, the layer will be "
+            "ignored in the composition.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ResetInfo = {
-        "Reset",
-        "Reset",
-        "If this value is triggered, this layer will be reset. This will delete the "
-        "local cache for this layer and will trigger a fresh load of all tiles.",
-        Property::Visibility::User
+    constexpr TriggerPropertyInfo ResetInfo = {
+        .identifier = "Reset",
+        .name = "Reset",
+        .description = "If this value is triggered, this layer will be reset. This will "
+            "delete the local cache for this layer and will trigger a fresh load of all "
+            "tiles.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo RemoveInfo = {
-        "Remove",
-        "Remove",
-        "If this value is triggered, a script will be executed that will remove this "
-        "layer before the next frame.",
-        Property::Visibility::User,
-        Property::NeedsConfirmation::Yes
+    constexpr TriggerPropertyInfo RemoveInfo = {
+        .identifier = "Remove",
+        .name = "Remove",
+        .description = "If this value is triggered, a script will be executed that will "
+            "remove this layer before the next frame.",
+        .visibility = Visibility::User,
+        .needsConfirmation = NeedsConfirmation::Yes
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "If the 'Type' of this layer is a solid color, this value determines what this "
-        "solid color is.",
-        Property::Visibility::User
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "If the 'Type' of this layer is a solid color, this value "
+            "determines what this solid color is.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ZIndexInfo = {
-        "ZIndex",
-        "Z-Index",
-        "Determines where the layer is placed in the list of available layers. Layers "
-        "are applied in the order of their Z indices, with higher indices obscuring "
-        "layers with lower values.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo GuiDescriptionInfo = {
-        "GuiDescription",
-        "Gui description",
-        "This is the description for the scene graph node to be shown in the GUI. "
-        "Example: Earth is a special place.",
-        Property::Visibility::Hidden
+    constexpr StringPropertyInfo GuiDescriptionInfo = {
+        .identifier = "GuiDescription",
+        .name = "Gui description",
+        .description = "This is the description for the scene graph node to be shown in "
+            "the GUI. Example: Earth is a special place.",
+        .visibility = Visibility::Hidden
     };
 
     struct [[codegen::Dictionary(Layer), codegen::noexhaustive()]] Parameters {
@@ -125,8 +126,7 @@ namespace {
         // presented to the user.
         std::optional<std::string> description;
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
         // Specifies the type of layer that is to be added. If this value is not
         // specified, the layer is a DefaultTileProvider.
@@ -140,7 +140,9 @@ namespace {
         // the layer is disabled.
         std::optional<bool> enabled;
 
-        // [[codegen::verbatim(ZIndexInfo.description)]]
+        // Determines where the layer is placed in the list of available layers. Layers
+        // are applied in the order of their Z indices, with higher indices obscuring
+        // layers with lower values.
         std::optional<int> zIndex [[codegen::greater(0)]];
 
         // The opacity value of the layer.
@@ -193,11 +195,11 @@ Layer::Layer(layers::Group::ID id, const Dictionary& layerDict, LayerGroup& pare
     , _parent(parent)
     , _typeOption(TypeInfo)
     , _blendModeOption(BlendModeInfo)
-    , _enabled(EnabledInfo, false)
+    , _enabled(EnabledInfo)
     , _reset(ResetInfo)
     , _remove(RemoveInfo)
     , _guiDescription(GuiDescriptionInfo)
-    , _solidColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _solidColor(ColorInfo)
     , _layerGroupId(id)
 {
     const Parameters p = codegen::bake<Parameters>(layerDict);
@@ -365,9 +367,6 @@ Layer::Layer(layers::Group::ID id, const Dictionary& layerDict, LayerGroup& pare
         }
     });
 
-    _typeOption.setReadOnly(true);
-
-    // Add the properties
     addProperty(_typeOption);
     addProperty(_blendModeOption);
     addProperty(_enabled);

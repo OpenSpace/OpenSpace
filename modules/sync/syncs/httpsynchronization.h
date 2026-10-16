@@ -82,7 +82,7 @@ public:
 
     /**
      * Starts the synchronization for this ResourceSynchronization by first trying to find
-     * a synchronization respository that replies to the request, parsing the result and
+     * a synchronization repository that replies to the request, parsing the result and
      * then downloading each of the files that are provided in that result.
      */
     void start() override;
@@ -130,7 +130,7 @@ private:
     /// The file version for the requested files
     int _version = -1;
 
-    bool _unzipFiles = false;
+    bool _shouldUnzipFiles = false;
     std::optional<std::string> _unzipFilesDestination = std::nullopt;
 
     /// The list of all repositories that we'll try to sync from

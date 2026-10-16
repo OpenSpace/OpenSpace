@@ -38,7 +38,7 @@
     },
     {
       "name": "spout2",
-      "platform": "windows"
+      "platform": "windows & !arm64"
     },
     {
       "name": "vulkan",

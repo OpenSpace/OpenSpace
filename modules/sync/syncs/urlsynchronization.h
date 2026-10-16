@@ -55,7 +55,7 @@ public:
         std::filesystem::path synchronizationRoot);
 
     /**
-     * Contructor that will terminate the synchronization thread if it is still running.
+     * Constructor that will terminate the synchronization thread if it is still running.
      */
     ~UrlSynchronization() override;
 
@@ -114,6 +114,9 @@ private:
 
     /// Contains a flag whether the current transfer should be cancelled
     std::atomic_bool _shouldCancel = false;
+
+    bool _shouldUnzipFiles = false;
+    std::optional<std::string> _unzipFilesDestination = std::nullopt;
 
     /// The thread that will be doing the synchronization
     std::thread _syncThread;

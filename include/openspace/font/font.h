@@ -160,7 +160,7 @@ public:
     float pointSize() const;
 
     /**
-     * Returns the line seperator for this Font. This is the vertical length that
+     * Returns the line separator for this Font. This is the vertical length that
      * separates two consecutive lines.
      *
      * \return The vertical line separation
@@ -175,7 +175,7 @@ public:
     bool hasOutline() const;
 
     /**
-     * Computes and retures the bounding box for the passed string with the settings of
+     * Computes and returns the bounding box for the passed string with the settings of
      * this Font. The value returned is in pixel values and provides the width and the
      * height of the text if it were to be rendered.
      *
@@ -187,7 +187,7 @@ public:
     glm::vec2 boundingBox(std::string_view text);
 
     /**
-     * Returns the Glyph that representes the passed \p character. The first call to this
+     * Returns the Glyph that represents the passed \p character. The first call to this
      * function for each character creates and caches the Glyph before returning it.
      *
      * \param character The character for which the Glyph should be returned

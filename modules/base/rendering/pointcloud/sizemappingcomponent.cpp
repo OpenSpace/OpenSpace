@@ -37,47 +37,63 @@ namespace {
 
     constexpr std::string_view _loggerCat = "SizeMapping";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Size mapping enabled",
-        "If this value is set to 'true' and at least one column was loaded as an option "
-        "for size mapping, the chosen data column will be used to scale the size of the "
-        "points. The first option in the list is selected per default.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Size mapping enabled",
+        .description = "If this value is set to 'true' and at least one column was "
+            "loaded as an option for size mapping, the chosen data column will be used "
+            "to scale the size of the points. The first option in the list is selected "
+            "per default.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo OptionInfo = {
-        "Parameter",
-        "Parameter option",
-        "This value determines which parameter is used for scaling of the point. The "
-        "parameter value will be used as a multiplicative factor to scale the size of "
-        "the points. Note that they may however still be scaled by max size adjustment "
-        "effects.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo OptionInfo = {
+        .identifier = "Parameter",
+        .name = "Parameter option",
+        .description = "This value determines which parameter is used for scaling of the "
+            "point. The parameter value will be used as a multiplicative factor to scale "
+            "the size of the points. Note that they may however still be scaled by max "
+            "size adjustment effects.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScaleFactorInfo = {
-        "ScaleFactor",
-        "Scale factor",
-        "This value is a multiplicative factor that is applied to the data values that "
-        "are used to scale the points, when size mapping is applied.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ScaleFactorInfo = {
+        .identifier = "ScaleFactor",
+        .name = "Scale factor",
+        .description = "This value is a multiplicative factor that is applied to the "
+            "data values that are used to scale the points, when size mapping is "
+            "applied.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1000.f }
+        }
     };
 
-    constexpr Property::PropertyInfo IsRadiusInfo = {
-        "IsRadius",
-        "Size is radius",
-        "If true, the size value in the data is interpreted as the radius of the points. "
-        "Otherwise, it is interpreted as the diameter.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo IsRadiusInfo = {
+        .identifier = "IsRadius",
+        .name = "Size is radius",
+        .description = "If true, the size value in the data is interpreted as the radius "
+            "of the points. Otherwise, it is interpreted as the diameter.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo InvertScaleInfo = {
-        "InvertScale",
-        "Invert scale",
-        "If true, the points will be scaled based on the inverse of the data value "
-        "(1/value), so that larger values result in a smaller scale, and vice versa.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo InvertScaleInfo = {
+        .identifier = "InvertScale",
+        .name = "Invert scale",
+        .description = "If true, the points will be scaled based on the inverse of the "
+            "data value (1/value), so that larger values result in a smaller scale, and "
+            "vice versa.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // A reusable component for point-cloud rendering that controls how per-point data
@@ -104,17 +120,14 @@ namespace {
     // or diameter. This allows it to adapt to differing dataset conventions without
     // requiring the source data to be reformatted.
     struct [[codegen::Dictionary(SizeMappingComponent)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
         // A list specifying all parameters that may be used for size mapping, i.e.
         // scaling the points based on the provided data columns.
         std::optional<std::vector<std::string>> parameterOptions;
 
-        // [[codegen::verbatim(OptionInfo.description)]]
-        std::optional<std::string> parameter;
+        std::optional<std::string> parameter [[codegen::Info(OptionInfo)]];
 
-        // [[codegen::verbatim(ScaleFactorInfo.description)]]
         enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
             Nanometer,
             Micrometer,
@@ -143,11 +156,9 @@ namespace {
         // <code>ScaleFactor = 1000.0</code>.
         std::optional<std::variant<ScaleUnit, double>> scaleFactor;
 
-        // [[codegen::verbatim(IsRadiusInfo.description)]]
-        std::optional<bool> isRadius;
+        std::optional<bool> isRadius [[codegen::Info(IsRadiusInfo)]];
 
-        // [[codegen::verbatim(InvertScaleInfo.description)]]
-        std::optional<bool> invertScale;
+        std::optional<bool> invertScale [[codegen::Info(InvertScaleInfo)]];
     };
 } // namespace
 #include "sizemappingcomponent_codegen.cpp"
@@ -160,11 +171,11 @@ Documentation SizeMappingComponent::Documentation() {
 
 SizeMappingComponent::SizeMappingComponent()
     : PropertyOwner({ "SizeMapping", "Size Mapping", "" })
-    , enabled(EnabledInfo, true)
+    , enabled(EnabledInfo)
     , parameterOption(OptionInfo)
-    , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)
-    , isRadius(IsRadiusInfo, false)
-    , invertScale(InvertScaleInfo, false)
+    , scaleFactor(ScaleFactorInfo)
+    , isRadius(IsRadiusInfo)
+    , invertScale(InvertScaleInfo)
 {
     addProperty(enabled);
     addProperty(parameterOption);

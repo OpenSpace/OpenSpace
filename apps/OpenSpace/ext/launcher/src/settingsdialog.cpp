@@ -233,7 +233,6 @@ void SettingsDialog::createWidgets() {
             _propertyVisibility,
             &QComboBox::textActivated,
             [this](const QString& value) {
-                using Visibility = Property::Visibility;
                 if (value == "Novice User") {
                     _currentEdit.visibility = Visibility::NoviceUser;
                 }
@@ -262,7 +261,7 @@ void SettingsDialog::createWidgets() {
             "<html><div style=\"width: 300px;\">"
             "If this value is selected, the Launcher will no longer be shown at startup. "
             "Note that this also means that it will not be easy to get back to this "
-            "setting to reenable the Launcher either."
+            "setting to re-enable the Launcher either."
             "</div></html>"
         );
         connect(
@@ -428,7 +427,6 @@ void SettingsDialog::loadFromSettings(const Settings& settings) {
     }
 
     if (settings.visibility.has_value()) {
-        using Visibility = Property::Visibility;
         const Visibility vis = *settings.visibility;
         switch (vis) {
             case Visibility::NoviceUser:

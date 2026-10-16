@@ -52,154 +52,216 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Determines whether this sceen space object will be rendered or not.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Determines whether this screen space object will be rendered or "
+            "not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo TypeInfo = {
-        "Type",
-        "Type",
-        "The type of the screenspace renderable.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TypeInfo = {
+        .identifier = "Type",
+        .name = "Type",
+        .description = "The type of the screenspace renderable.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    const PropertyOwner::PropertyOwnerInfo PlacementInfo = {
-        "Placement",
-        "Placement",
-        "Properties to determine where the screen space object will be placed on the "
-        "screen."
+    constexpr PropertyOwner::PropertyOwnerInfo PlacementInfo = {
+        .identifier = "Placement",
+        .name = "Placement",
+        .description = "Properties to determine where the screen space object will be "
+            "placed on the screen."
     };
 
-    constexpr Property::PropertyInfo UseRadiusAzimuthElevationInfo = {
-        "UseRadiusAzimuthElevation",
-        "Use radius azimuth and elevation",
-        "Determines whether the location of this screen space plane will be specified "
-        "using radius, azimuth and elevation (if 'true') or using Cartesian coordinates. "
-        "The Cartesian coordinate system is useful if a regular rendering is applied, "
-        "whereas the radius azimuth elevation are most useful in a planetarium "
-        "environment.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo UseRadiusAzimuthElevationInfo = {
+        .identifier = "UseRadiusAzimuthElevation",
+        .name = "Use radius azimuth and elevation",
+        .description = "Determines whether the location of this screen space plane will "
+            "be specified using radius, azimuth and elevation (if 'true') or using "
+            "Cartesian coordinates. The Cartesian coordinate system is useful if a "
+            "regular rendering is applied, whereas the radius azimuth elevation are most "
+            "useful in a planetarium environment.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo CartesianPositionInfo = {
-        "CartesianPosition",
-        "Cartesian coordinates",
-        "Determines the position of this screen space plane in Cartesian "
-        "three-dimensional coordinates (meters).",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo CartesianPositionInfo = {
+        .identifier = "CartesianPosition",
+        .name = "Cartesian coordinates",
+        .description = "Determines the position of this screen space plane in Cartesian "
+            "three-dimensional coordinates (meters).",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 0.f, -2.f),
+            .minMax = { glm::vec3(-4.f, -4.f, -10.f), glm::vec3(4.f, 4.f, 0.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo RadiusAzimuthElevationInfo = {
-        "RadiusAzimuthElevation",
-        "Radius azimuth elevation",
-        "Determines the position of this screen space plane in a coordinate system based "
-        "on radius (meters), azimuth (radians), and elevation (radians).",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo RadiusAzimuthElevationInfo = {
+        .identifier = "RadiusAzimuthElevation",
+        .name = "Radius azimuth elevation",
+        .description = "Determines the position of this screen space plane in a "
+            "coordinate system based on radius (meters), azimuth (radians), and "
+            "elevation (radians).",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(2.f, 0.f, 0.f),
+            .minMax = {
+                glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
+                glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
+            }
+        }
     };
 
-    const PropertyOwner::PropertyOwnerInfo BorderInfo = {
-        "Border",
-        "Border",
-        "Properties to control the look of the border surrounding the screen space "
-        "object."
+    constexpr PropertyOwner::PropertyOwnerInfo BorderInfo = {
+        .identifier = "Border",
+        .name = "Border",
+        .description = "Properties to control the look of the border surrounding the "
+            "screen space object."
     };
 
-    constexpr Property::PropertyInfo BorderWidthInfo = {
-        "Width",
-        "Border width",
-        "The width of the border.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo BorderWidthInfo = {
+        .identifier = "Width",
+        .name = "Border width",
+        .description = "The width of the border.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1000.f }
+        }
     };
 
-    constexpr Property::PropertyInfo BorderColorInfo = {
-        "Color",
-        "Border color",
-        "The color of the border.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo BorderColorInfo = {
+        .identifier = "Color",
+        .name = "Border color",
+        .description = "The color of the border.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo BorderFeatherInfo = {
-        "Feather",
-        "Feather",
-        "If this value is enabled and a border width is set, the border will be rendered "
-        "as a feathered border rather than a hard corner."
+    constexpr BoolPropertyInfo BorderFeatherInfo = {
+        .identifier = "Feather",
+        .name = "Feather",
+        .description = "If this value is enabled and a border width is set, the border "
+            "will be rendered as a feathered border rather than a hard corner.",
+        .defaults = {
+            .value = false
+        }
     };
 
-    const PropertyOwner::PropertyOwnerInfo StyleInfo = {
-        "Style",
-        "Style",
-        "Properties to control the visual style of the screen space object, such as "
-        "gamma settings, borders, and background colors."
+    constexpr PropertyOwner::PropertyOwnerInfo StyleInfo = {
+        .identifier = "Style",
+        .name = "Style",
+        .description = "Properties to control the visual style of the screen space "
+            "object, such as gamma settings, borders, and background colors."
     };
 
-    constexpr Property::PropertyInfo MultiplyColorInfo = {
-        "MultiplyColor",
-        "Multiply color",
-        "If set, the plane's texture is multiplied with this color. Useful for applying "
-        "a color to grayscale images.",
-        Property::Visibility::User
+    constexpr Vec3PropertyInfo MultiplyColorInfo = {
+        .identifier = "MultiplyColor",
+        .name = "Multiply color",
+        .description = "If set, the plane's texture is multiplied with this color. "
+            "Useful for applying a color to grayscale images.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo BackgroundColorInfo = {
-        "BackgroundColor",
-        "Background color",
-        "A fixed color that is combined with the screen space renderable to create the "
-        "final color. The actual color of the screen space renderable is alpha-blended "
-        "with the background color to produce the final result.",
-        Property::Visibility::User
+    constexpr Vec4PropertyInfo BackgroundColorInfo = {
+        .identifier = "BackgroundColor",
+        .name = "Background color",
+        .description = "A fixed color that is combined with the screen space renderable "
+            "to create the final color. The actual color of the screen space renderable "
+            "is alpha-blended with the background color to produce the final result.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec4(0.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo GammaOffsetInfo = {
-        "GammaOffset",
-        "Gamma correction offset",
-        "Sets the gamma correction of the texture that is applied in addition to the "
-        "global gamma value.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo GammaOffsetInfo = {
+        .identifier = "GammaOffset",
+        .name = "Gamma correction offset",
+        .description = "Sets the gamma correction of the texture that is applied in "
+            "addition to the global gamma value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { -1.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo RenderDuringBlackoutInfo = {
-        "RenderDuringBlackout",
-        "Render during blackout",
-        "If true, this screen space renderable is going to ignore the global blackout "
-        "factor from the Render Engine and will always render at full opacity. If false, "
-        "it will adhere to the factor and fade out like the rest of the 3D rendering.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo RenderDuringBlackoutInfo = {
+        .identifier = "RenderDuringBlackout",
+        .name = "Render during blackout",
+        .description = "If true, this screen space renderable is going to ignore the "
+            "global blackout factor from the Render Engine and will always render at "
+            "full opacity. If false, it will adhere to the factor and fade out like the "
+            "rest of the 3D rendering.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ScaleInfo = {
-        "Scale",
-        "Scale",
-        "A scale factor for the plane that can be used to increase or decrease the "
-        "visual size. The default size is determined separately for each screen space "
-        "renderable type and may for example be affected by the size of an image being "
-        "displayed.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo ScaleInfo = {
+        .identifier = "Scale",
+        .name = "Scale",
+        .description = "A scale factor for the plane that can be used to increase or "
+            "decrease the visual size. The default size is determined separately for "
+            "each screen space renderable type and may for example be affected by the "
+            "size of an image being displayed.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 0.25f,
+            .minMax = { 0.f, 2.f }
+        }
     };
 
-    constexpr Property::PropertyInfo LocalRotationInfo = {
-        "Rotation",
-        "Local rotation",
-        "An Euler rotation (roll, pitch, yaw) to apply to the screen space object.",
-        Property::Visibility::User
+    constexpr Vec3PropertyInfo LocalRotationInfo = {
+        .identifier = "Rotation",
+        .name = "Local rotation",
+        .description = "An Euler rotation (roll, pitch, yaw) to apply to the screen "
+            "space object.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(-glm::pi<float>()), glm::vec3(glm::pi<float>()) }
+        }
     };
 
-    constexpr Property::PropertyInfo FaceCameraInfo = {
-        "FaceCamera",
-        "Face camera",
-        "If enabled, the object will be rotated to face the camera position. Any local "
-        "rotation is then applied after this rotation.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo FaceCameraInfo = {
+        .identifier = "FaceCamera",
+        .name = "Face camera",
+        .description = "If enabled, the object will be rotated to face the camera "
+            "position. Any local rotation is then applied after this rotation.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo GuiIsHiddenInfo = {
-        "GuiHidden",
-        "GUI Hidden",
-        "If this value is set to `true`, this ScreenSpaceRenderable will indicate to the "
-        "user interface that it should not be shown.",
-        Property::Visibility::Hidden
+    constexpr BoolPropertyInfo GuiIsHiddenInfo = {
+        .identifier = "GuiHidden",
+        .name = "GUI Hidden",
+        .description = "If this value is set to `true`, this ScreenSpaceRenderable will "
+            "indicate to the user interface that it should not be shown.",
+        .visibility = Visibility::Hidden,
+        .defaults = {
+            .value = false
+        }
     };
 
     float wrap(float value, float min, float max) {
@@ -231,74 +293,64 @@ namespace {
         // amongst all existing screen space nodes that have been added to the scene.
         std::optional<std::string> identifier [[codegen::identifier()]];
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
-        // [[codegen::verbatim(RenderDuringBlackoutInfo.description)]]
-        std::optional<bool> renderDuringBlackout;
+        std::optional<bool> renderDuringBlackout
+            [[codegen::Info(RenderDuringBlackoutInfo)]];
 
         // The opacity of the screen space object. If 1, the object is completely opaque.
         // If 0, the object is completely transparent.
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
         struct Placement {
-            // [[codegen::verbatim(UseRadiusAzimuthElevationInfo.description)]]
-            std::optional<bool> useRadiusAzimuthElevation;
+            std::optional<bool> useRadiusAzimuthElevation
+                [[codegen::Info(UseRadiusAzimuthElevationInfo)]];
 
-            // [[codegen::verbatim(FaceCameraInfo.description)]]
-            std::optional<bool> faceCamera;
+            std::optional<bool> faceCamera [[codegen::Info(FaceCameraInfo)]];
 
-            // [[codegen::verbatim(CartesianPositionInfo.description)]]
-            std::optional<glm::vec3> cartesianPosition;
+            std::optional<glm::vec3> cartesianPosition
+                [[codegen::Info(CartesianPositionInfo)]];
 
-            // [[codegen::verbatim(RadiusAzimuthElevationInfo.description)]]
-            std::optional<glm::vec3> radiusAzimuthElevation;
+            std::optional<glm::vec3> radiusAzimuthElevation
+                [[codegen::Info(RadiusAzimuthElevationInfo)]];
 
-            // [[codegen::verbatim(ScaleInfo.description)]]
-            std::optional<float> scale;
+            std::optional<float> scale [[codegen::Info(ScaleInfo)]];
 
-            // [[codegen::verbatim(LocalRotationInfo.description)]]
-            std::optional<glm::vec3> rotation;
+            std::optional<glm::vec3> rotation [[codegen::Info(LocalRotationInfo)]];
         };
 
-        // [[codegen::verbatim(PlacementInfo.description)]]
-        std::optional<Placement> placement;
+        std::optional<Placement> placement [[codegen::Info(PlacementInfo)]];
 
         struct Style {
-            // [[codegen::verbatim(GammaOffsetInfo.description)]]
-            std::optional<float> gammaOffset;
+            std::optional<float> gammaOffset [[codegen::Info(GammaOffsetInfo)]];
 
-            // [[codegen::verbatim(MultiplyColorInfo.description)]]
-            std::optional<glm::vec3> multiplyColor [[codegen::color()]];
+            std::optional<glm::vec3> multiplyColor
+                [[codegen::Info(MultiplyColorInfo), codegen::color()]];
 
-            // [[codegen::verbatim(BackgroundColorInfo.description)]]
-            std::optional<glm::vec4> backgroundColor [[codegen::color()]];
+            std::optional<glm::vec4> backgroundColor
+                [[codegen::Info(BackgroundColorInfo), codegen::color()]];
 
             struct Border {
-                // [[codegen::verbatim(BorderWidthInfo.description)]]
-                std::optional<float> width [[codegen::greater(0.0)]];
+                std::optional<float> width
+                    [[codegen::Info(BorderWidthInfo), codegen::greater(0.0)]];
 
-                // [[codegen::verbatim(BorderColorInfo.description)]]
-                std::optional<glm::vec3> color [[codegen::color()]];
+                std::optional<glm::vec3> color
+                    [[codegen::Info(BorderColorInfo), codegen::color()]];
 
-                // [[codegen::verbatim(BorderFeatherInfo.description)]]
-                std::optional<bool> feather;
+                std::optional<bool> feather [[codegen::Info(BorderFeatherInfo)]];
             };
 
-            // [[codegen::verbatim(BorderInfo.description)]]
-            std::optional<Border> border;
+            std::optional<Border> border [[codegen::Info(BorderInfo)]];
         };
 
-        // [[codegen::verbatim(StyleInfo.description)]]
-        std::optional<Style> style;
+        std::optional<Style> style [[codegen::Info(StyleInfo)]];
 
         // Defines either a single or multiple tags that apply to this
         // `ScreenSpaceRenderable`, thus making it possible to address multiple, separate
         // Renderables with a single property change.
         std::optional<std::variant<std::string, std::vector<std::string>>> tag;
 
-        // [[codegen::verbatim(GuiIsHiddenInfo.description)]]
-        std::optional<bool> hidden;
+        std::optional<bool> hidden [[codegen::Info(GuiIsHiddenInfo)]];
     };
 } // namespace
 #include "screenspacerenderable_codegen.cpp"
@@ -347,61 +399,31 @@ std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const Dictionary& dictionary)
     : PropertyOwner({ "" })
-    , _enabled(EnabledInfo, true)
+    , _enabled(EnabledInfo)
     , _renderableType(TypeInfo)
     , _placement {
         .owner = PropertyOwner(PlacementInfo),
-        .useRadiusAzimuthElevation = BoolProperty(UseRadiusAzimuthElevationInfo, false),
-        .cartesian = Vec3Property(
-            CartesianPositionInfo,
-            glm::vec3(0.f, 0.f, -2.f),
-            glm::vec3(-4.f, -4.f, -10.f),
-            glm::vec3(4.f, 4.f, 0.f)
-        ),
-        .rae = Vec3Property(
-            RadiusAzimuthElevationInfo,
-            glm::vec3(2.f, 0.f, 0.f),
-            glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
-            glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
-        ),
-        .scale = FloatProperty(ScaleInfo, 0.25f, 0.f, 2.f),
-        .localRotation = Vec3Property(
-            LocalRotationInfo,
-            glm::vec3(0.f),
-            glm::vec3(-glm::pi<float>()),
-            glm::vec3(glm::pi<float>())
-        ),
-        .faceCamera = BoolProperty(FaceCameraInfo, true)
+        .useRadiusAzimuthElevation = BoolProperty(UseRadiusAzimuthElevationInfo),
+        .cartesian = Vec3Property(CartesianPositionInfo),
+        .rae = Vec3Property(RadiusAzimuthElevationInfo),
+        .scale = FloatProperty(ScaleInfo),
+        .localRotation = Vec3Property(LocalRotationInfo),
+        .faceCamera = BoolProperty(FaceCameraInfo)
     }
     , _style {
         .owner = PropertyOwner(StyleInfo),
-        .multiplyColor = Vec3Property(
-            MultiplyColorInfo,
-            glm::vec3(1.f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .backgroundColor = Vec4Property(
-            BackgroundColorInfo,
-            glm::vec4(0.f),
-            glm::vec4(0.f),
-            glm::vec4(1.f)
-        ),
-        .gammaOffset = FloatProperty(GammaOffsetInfo, 0.f, -1.f, 10.f),
+        .multiplyColor = Vec3Property(MultiplyColorInfo),
+        .backgroundColor = Vec4Property(BackgroundColorInfo),
+        .gammaOffset = FloatProperty(GammaOffsetInfo),
         .border = {
             .owner = PropertyOwner(BorderInfo),
-            .width = FloatProperty(BorderWidthInfo, 0.f, 0.f, 1000.f),
-            .color = Vec3Property(
-                BorderColorInfo,
-                glm::vec3(0.f),
-                glm::vec3(0.f),
-                glm::vec3(1.f)
-            ),
-            .feather = BoolProperty(BorderFeatherInfo, false)
+            .width = FloatProperty(BorderWidthInfo),
+            .color = Vec3Property(BorderColorInfo),
+            .feather = BoolProperty(BorderFeatherInfo)
         }
     }
-    , _renderDuringBlackout(RenderDuringBlackoutInfo, false)
-    , _guiIsHidden(GuiIsHiddenInfo, false)
+    , _renderDuringBlackout(RenderDuringBlackoutInfo)
+    , _guiIsHidden(GuiIsHiddenInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -415,7 +437,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const Dictionary& dictionary)
 
     // Type for UI
     _renderableType = p.type;
-    _renderableType.setReadOnly(true);
     addProperty(_renderableType);
 
     _enabled = p.enabled.value_or(_enabled);
@@ -809,7 +830,7 @@ glm::vec3 ScreenSpaceRenderable::raeToSpherical(const glm::vec3& rae) const {
     // Polar angle, theta, is elevation + pi/2
     const float theta = rae.z + glm::half_pi<float>();
 
-    // Azimuth in ISO spherical coordiantes (phi) is angle from x, as opposed to from
+    // Azimuth in ISO spherical coordinates (phi) is angle from x, as opposed to from
     // negative y on screen
     const float phi = rae.y - glm::half_pi<float>();
 

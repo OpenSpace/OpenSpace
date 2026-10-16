@@ -49,12 +49,15 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo PerformShadingInfo = {
-        "PerformShading",
-        "Perform shading",
-        "If true, the model will be shaded based on the location of the Sun. If false, "
-        "shading is disabled and the model is fully illuminated.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo PerformShadingInfo = {
+        .identifier = "PerformShading",
+        .name = "Perform shading",
+        .description = "If true, the model will be shaded based on the location of the "
+            "Sun. If false, shading is disabled and the model is fully illuminated.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     // A 3D model that acts as a projection target for spacecraft instrument images,
@@ -100,8 +103,7 @@ namespace {
         Dictionary projection
             [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 
-        // [[codegen::verbatim(PerformShadingInfo.description)]]
-        std::optional<bool> performShading;
+        std::optional<bool> performShading [[codegen::Info(PerformShadingInfo)]];
     };
 } // namespace
 #include "renderablemodelprojection_codegen.cpp"
@@ -117,7 +119,7 @@ Documentation RenderableModelProjection::Documentation() {
 
 RenderableModelProjection::RenderableModelProjection(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _performShading(PerformShadingInfo, true)
+    , _performShading(PerformShadingInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

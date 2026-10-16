@@ -22,10 +22,20 @@ vcpkg_check_features(
     scalable   SGCT_SCALABLE_SUPPORT
 )
 
+# Spout's SDK is x86-only, which is why the manifest gates spout2 on 'windows & !arm64'.
+# SGCT defaults SGCT_SPOUT_SUPPORT the same way from the target architecture, but it is
+# passed explicitly so the port never depends on that detection succeeding
+if (VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
+  set(SPOUT_OPTION -DSGCT_SPOUT_SUPPORT=ON)
+else ()
+  set(SPOUT_OPTION -DSGCT_SPOUT_SUPPORT=OFF)
+endif ()
+
 vcpkg_cmake_configure(
   SOURCE_PATH "${SOURCE_PATH}"
   OPTIONS
     ${FEATURE_OPTIONS}
+    ${SPOUT_OPTION}
     -DSGCT_BUILD_TESTS=OFF
     -DSGCT_ENABLE_EDIT_CONTINUE=OFF
   # Only the release calibrator is shipped, so building it a second time is wasted work.

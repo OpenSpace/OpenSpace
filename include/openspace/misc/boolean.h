@@ -39,11 +39,11 @@ namespace openspace {
  *
  * void foo(std::string value, AllowOverride override = AllowOverride::Yes);
  * ```
- * Though it is more verbal, it elimiates ambiguity regarding parameters. This class is
+ * Though it is more verbal, it eliminates ambiguity regarding parameters. This class is
  * implicitly convertible to `bool`, but not the other way around. Furthermore,
  * it supports the `==`, `!=`, and `!` operators.
  *
- * When using the Boolean class, also consider the BooleanType defintion to create a
+ * When using the Boolean class, also consider the BooleanType definition to create a
  * typesafe version of the usage describe above.
  */
 struct Boolean {

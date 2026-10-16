@@ -64,99 +64,132 @@ namespace {
         AngularFisheye
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
-        "Size",
-        "Size (in meters)",
-        "The radius of the sphere in meters.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size (in meters)",
+        .description = "The radius of the sphere in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1e25f }
+        }
     };
 
-    constexpr Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Number of segments",
-        "The number of segments that the sphere is split into.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo SegmentsInfo = {
+        .identifier = "Segments",
+        .name = "Number of segments",
+        .description = "The number of segments that the sphere is split into.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 16,
+            .minMax = { 4, 1000 }
+        }
     };
 
-    constexpr Property::PropertyInfo OrientationInfo = {
-        "Orientation",
-        "Orientation",
-        "Specifies whether the texture is applied to the inside of the sphere, the "
-        "outside of the sphere, or both.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo OrientationInfo = {
+        .identifier = "Orientation",
+        .name = "Orientation",
+        .description = "Specifies whether the texture is applied to the inside of the "
+            "sphere, the outside of the sphere, or both.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo MirrorTextureInfo = {
-        "MirrorTexture",
-        "Mirror texture",
-        "If true, mirror the texture along the x-axis.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo MirrorTextureInfo = {
+        .identifier = "MirrorTexture",
+        .name = "Mirror texture",
+        .description = "If true, mirror the texture along the x-axis.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo TextureProjectionInfo = {
-        "TextureProjection",
-        "Texture Projection",
-        "Specifies the projection mapping to use for any texture loaded onto the sphere "
-        "(assumes Equirectangular per default). Note that for \"Angular Fisheye\" only "
-        "half the sphere will be textured - the hemisphere centered around the z-axis.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo TextureProjectionInfo = {
+        .identifier = "TextureProjection",
+        .name = "Texture Projection",
+        .description = "Specifies the projection mapping to use for any texture loaded "
+            "onto the sphere (assumes Equirectangular per default). Note that for "
+            "\"Angular Fisheye\" only half the sphere will be textured - the hemisphere "
+            "centered around the z-axis.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DisableFadeInOutInfo = {
-        "DisableFadeInOut",
-        "Disable fade-in/fade-out effects",
-        "Enables/Disables the fade in and out effects.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo DisableFadeInOutInfo = {
+        .identifier = "DisableFadeInOut",
+        .name = "Disable fade-in/fade-out effects",
+        .description = "Enables/Disables the fade in and out effects.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo FadeInThresholdInfo = {
-        "FadeInThreshold",
-        "Fade-in threshold",
-        "The distance from the center of the Milky Way at which the sphere should start "
-        "to fade in, given as a percentage of the size of the object. A value of zero "
-        "means that no fading in will happen.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FadeInThresholdInfo = {
+        .identifier = "FadeInThreshold",
+        .name = "Fade-in threshold",
+        .description = "The distance from the center of the Milky Way at which the "
+            "sphere should start to fade in, given as a percentage of the size of the "
+            "object. A value of zero means that no fading in will happen.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f },
+            .stepSize = 0.001f
+        }
     };
 
-    constexpr Property::PropertyInfo FadeOutThresholdInfo = {
-        "FadeOutThreshold",
-        "Fade-out threshold",
-        "A threshold for when the sphere should start fading out, given as a percentage "
-        "of how much of the sphere that is visible before the fading should start. A "
-        "value of zero means that no fading out will happen.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FadeOutThresholdInfo = {
+        .identifier = "FadeOutThreshold",
+        .name = "Fade-out threshold",
+        .description = "A threshold for when the sphere should start fading out, given "
+            "as a percentage of how much of the sphere that is visible before the fading "
+            "should start. A value of zero means that no fading out will happen.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f },
+            .stepSize = 0.001f
+        }
     };
 
-    constexpr Property::PropertyInfo UseColorMapInfo = {
-        "UseColorMap",
-        "Use color map",
-        "Used to toggle color map on or off for the sphere. Mainly used to transform "
-        "grayscale textures from data into color images.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseColorMapInfo = {
+        .identifier = "UseColorMap",
+        .name = "Use color map",
+        .description = "Used to toggle color map on or off for the sphere. Mainly used "
+            "to transform grayscale textures from data into color images.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ColorMapInfo = {
-        "ColorMap",
-        "Transfer function (color map) path",
-        "Color map / Transfer function to use if `UseColorMap` is enabled.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo ColorMapInfo = {
+        .identifier = "ColorMap",
+        .name = "Transfer function (color map) path",
+        .description = "Color map / Transfer function to use if `UseColorMap` is "
+            "enabled.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BlendingOptionInfo = {
-        "BlendingOption",
-        "Blending options",
-        "Controls the blending function used to calculate the colors of the sphere with "
-        "respect to the opacity.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo BlendingOptionInfo = {
+        .identifier = "BlendingOption",
+        .name = "Blending options",
+        .description = "Controls the blending function used to calculate the colors of "
+            "the sphere with respect to the opacity.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DisableDepthInfo = {
-        "DisableDepth",
-        "Disable depth",
-        "If disabled, no depth values are taken into account for this sphere, meaning "
-        "that depth values are neither written or tested against during the rendering. "
-        "This can be useful for spheres that represent a background image.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo DisableDepthInfo = {
+        .identifier = "DisableDepth",
+        .name = "Disable depth",
+        .description = "If disabled, no depth values are taken into account for this "
+            "sphere, meaning that depth values are neither written or tested against "
+            "during the rendering. This can be useful for spheres that represent a "
+            "background image.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // Creates a simple sphere textured with an image. Per default, the sphere uses an
@@ -165,11 +198,10 @@ namespace {
     // The `Orientation` parameter determines whether the provided image is shown on
     // the inside, outside, or both sides of the sphere.
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size [[codegen::greater(0.f)]];
+        std::optional<float> size [[codegen::Info(SizeInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(SegmentsInfo.description)]]
-        std::optional<int> segments [[codegen::greaterequal(4)]];
+        std::optional<int> segments
+            [[codegen::Info(SegmentsInfo), codegen::greaterequal(4)]];
 
         enum class [[codegen::map(Orientation)]] Orientation {
             Outside,
@@ -177,34 +209,29 @@ namespace {
             Both
         };
 
-        // [[codegen::verbatim(OrientationInfo.description)]]
-        std::optional<Orientation> orientation;
+        std::optional<Orientation> orientation [[codegen::Info(OrientationInfo)]];
 
-        // [[codegen::verbatim(MirrorTextureInfo.description)]]
-        std::optional<bool> mirrorTexture;
+        std::optional<bool> mirrorTexture [[codegen::Info(MirrorTextureInfo)]];
 
         enum class [[codegen::map(TextureProjection)]] TextureProjection {
             Equirectangular,
             AngularFisheye [[codegen::key("Angular Fisheye")]]
         };
 
-        // [[codegen::verbatim(TextureProjectionInfo.description)]]
-        std::optional<TextureProjection> textureProjection;
+        std::optional<TextureProjection> textureProjection
+            [[codegen::Info(TextureProjectionInfo)]];
 
-        // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
-        std::optional<bool> disableFadeInOut;
+        std::optional<bool> disableFadeInOut [[codegen::Info(DisableFadeInOutInfo)]];
 
-        // [[codegen::verbatim(FadeInThresholdInfo.description)]]
-        std::optional<float> fadeInThreshold [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> fadeInThreshold
+            [[codegen::Info(FadeInThresholdInfo), codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
-        std::optional<float> fadeOutThreshold [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> fadeOutThreshold
+            [[codegen::Info(FadeOutThresholdInfo), codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(ColorMapInfo.description)]]
-        std::optional<std::filesystem::path> colorMap;
+        std::optional<std::filesystem::path> colorMap [[codegen::Info(ColorMapInfo)]];
 
-        // [[codegen::verbatim(UseColorMapInfo.description)]]
-        std::optional<bool> useColorMap;
+        std::optional<bool> useColorMap [[codegen::Info(UseColorMapInfo)]];
 
         enum class Blending {
             Default,
@@ -213,11 +240,9 @@ namespace {
             ColorAdding [[codegen::key("Color Adding")]]
         };
 
-        // [[codegen::verbatim(BlendingOptionInfo.description)]]
-        std::optional<Blending> blendingOption;
+        std::optional<Blending> blendingOption [[codegen::Info(BlendingOptionInfo)]];
 
-        // [[codegen::verbatim(DisableDepthInfo.description)]]
-        std::optional<bool> disableDepth;
+        std::optional<bool> disableDepth [[codegen::Info(DisableDepthInfo)]];
     };
 } // namespace
 #include "renderablesphere_codegen.cpp"
@@ -234,17 +259,17 @@ Documentation RenderableSphere::Documentation() {
 RenderableSphere::RenderableSphere(const Dictionary& dictionary,
                                    RenderableSettings settings)
     : Renderable(dictionary, std::move(settings))
-    , _size(SizeInfo, 1.f, 0.f, 1e25f)
-    , _segments(SegmentsInfo, 16, 4, 1000)
+    , _size(SizeInfo)
+    , _segments(SegmentsInfo)
     , _orientation(OrientationInfo)
-    , _mirrorTexture(MirrorTextureInfo, false)
+    , _mirrorTexture(MirrorTextureInfo)
     , _textureProjection(TextureProjectionInfo)
-    , _disableFadeInDistance(DisableFadeInOutInfo, false)
-    , _fadeInThreshold(FadeInThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
-    , _fadeOutThreshold(FadeOutThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
+    , _disableFadeInDistance(DisableFadeInOutInfo)
+    , _fadeInThreshold(FadeInThresholdInfo)
+    , _fadeOutThreshold(FadeOutThresholdInfo)
     , _blendingFuncOption(BlendingOptionInfo)
-    , _disableDepth(DisableDepthInfo, false)
-    , _useColorMap(UseColorMapInfo, false)
+    , _disableDepth(DisableDepthInfo)
+    , _useColorMap(UseColorMapInfo)
     , _colorMap(ColorMapInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

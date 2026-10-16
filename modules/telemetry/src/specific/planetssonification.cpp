@@ -77,160 +77,201 @@ namespace {
     constexpr int MoonsIndex = 4;
     constexpr int RingsIndex = 5;
 
-    static const PropertyOwner::PropertyOwnerInfo PlanetsSonificationInfo = {
-        "PlanetsSonification",
-        "Planets Sonification",
-        "Sonification of the planets in the solar system."
+    constexpr PropertyOwner::PropertyOwnerInfo PlanetsSonificationInfo = {
+        .identifier = "PlanetsSonification",
+        .name = "Planets Sonification",
+        .description = "Sonification of the planets in the solar system."
     };
 
-    constexpr Property::PropertyInfo ToggleAllInfo = {
-        "ToggleAll",
-        "Toggle all",
-        "Toggle all sonifications for all planets.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ToggleAllInfo = {
+        .identifier = "ToggleAll",
+        .name = "Toggle all",
+        .description = "Toggle all sonifications for all planets.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    static const PropertyOwner::PropertyOwnerInfo MercuryInfo = {
-        "Mercury",
-        "Mercury",
-        "Settings for the sonification of Mercury."
+    constexpr PropertyOwner::PropertyOwnerInfo MercuryInfo = {
+        .identifier = "Mercury",
+        .name = "Mercury",
+        .description = "Settings for the sonification of Mercury."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo VenusInfo = {
-        "Venus",
-        "Venus",
-        "Settings for the sonification of Venus."
+    constexpr PropertyOwner::PropertyOwnerInfo VenusInfo = {
+        .identifier = "Venus",
+        .name = "Venus",
+        .description = "Settings for the sonification of Venus."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo EarthInfo = {
-        "Earth",
-        "Earth",
-        "Settings for the sonification of Earth."
+    constexpr PropertyOwner::PropertyOwnerInfo EarthInfo = {
+        .identifier = "Earth",
+        .name = "Earth",
+        .description = "Settings for the sonification of Earth."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo MarsInfo = {
-        "Mars",
-        "Mars",
-        "Settings for the sonification of Mars."
+    constexpr PropertyOwner::PropertyOwnerInfo MarsInfo = {
+        .identifier = "Mars",
+        .name = "Mars",
+        .description = "Settings for the sonification of Mars."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo JupiterInfo = {
-        "Jupiter",
-        "Jupiter",
-        "Settings for the sonification of Jupiter."
+    constexpr PropertyOwner::PropertyOwnerInfo JupiterInfo = {
+        .identifier = "Jupiter",
+        .name = "Jupiter",
+        .description = "Settings for the sonification of Jupiter."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo SaturnInfo = {
-        "Saturn",
-        "Saturn",
-        "Settings for the sonification of Saturn."
+    constexpr PropertyOwner::PropertyOwnerInfo SaturnInfo = {
+        .identifier = "Saturn",
+        .name = "Saturn",
+        .description = "Settings for the sonification of Saturn."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo UranusInfo = {
-        "Uranus",
-        "Uranus",
-        "Settings for the sonification of Uranus."
+    constexpr PropertyOwner::PropertyOwnerInfo UranusInfo = {
+        .identifier = "Uranus",
+        .name = "Uranus",
+        .description = "Settings for the sonification of Uranus."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo NeptuneInfo = {
-        "Neptune",
-        "Neptune",
-        "Settings for the sonification of Neptune."
+    constexpr PropertyOwner::PropertyOwnerInfo NeptuneInfo = {
+        .identifier = "Neptune",
+        .name = "Neptune",
+        .description = "Settings for the sonification of Neptune."
     };
 
-    constexpr Property::PropertyInfo PlanetToggleAllInfo = {
-        "ToggleAll",
-        "Toggle All",
-        "Toggle all sonifications for the planet.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo PlanetToggleAllInfo = {
+        .identifier = "ToggleAll",
+        .name = "Toggle All",
+        .description = "Toggle all sonifications for the planet.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo SizeDayInfo = {
-        "SizeDay",
-        "Size/Day",
-        "Toggle the size/day sonification for the planet.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo SizeDayInfo = {
+        .identifier = "SizeDay",
+        .name = "Size/Day",
+        .description = "Toggle the size/day sonification for the planet.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo GravityInfo = {
-        "Gravity",
-        "Gravity",
-        "Toggle the gravity sonification for the planet.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo GravityInfo = {
+        .identifier = "Gravity",
+        .name = "Gravity",
+        .description = "Toggle the gravity sonification for the planet.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo TemperatureInfo = {
-        "Temperature",
-        "Temperature",
-        "Toggle the temperature sonification for the planet.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo TemperatureInfo = {
+        .identifier = "Temperature",
+        .name = "Temperature",
+        .description = "Toggle the temperature sonification for the planet.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AtmosphereInfo = {
-        "Atmosphere",
-        "Atmosphere",
-        "Toggle the atmosphere sonification for the planet.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo AtmosphereInfo = {
+        .identifier = "Atmosphere",
+        .name = "Atmosphere",
+        .description = "Toggle the atmosphere sonification for the planet.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo MoonsInfo = {
-        "Moons",
-        "Moons",
-        "Toggle the moons sonification for the planet.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo MoonsInfo = {
+        .identifier = "Moons",
+        .name = "Moons",
+        .description = "Toggle the moons sonification for the planet.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo RingsInfo = {
-        "Rings",
-        "Rings",
-        "Toggle the rings sonification for the planet.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo RingsInfo = {
+        .identifier = "Rings",
+        .name = "Rings",
+        .description = "Toggle the rings sonification for the planet.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
-        "Precision",
-        "Precision",
-        "Settings for the distance and angle precision of the planets sonification."
+    constexpr PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+        .identifier = "Precision",
+        .name = "Precision",
+        .description = "Settings for the distance and angle precision of the planets "
+            "sonification."
     };
 
-    constexpr Property::PropertyInfo LowDistancePrecisionInfo = {
-        "LowDistancePrecision",
-        "Distance precision (low)",
-        "The precision in meters used to determine when to send updated distance data "
-        "to the Open Sound Control receiver. This is the low precision value (low level "
-        "of detail) that is used for objects that are not the current focus, saving "
-        "performance.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo LowDistancePrecisionInfo = {
+        .identifier = "LowDistancePrecision",
+        .name = "Distance precision (low)",
+        .description = "The precision in meters used to determine when to send updated "
+            "distance data to the Open Sound Control receiver. This is the low precision "
+            "value (low level of detail) that is used for objects that are not the "
+            "current focus, saving performance.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 10000.0,
+            .minMax = { 0.0, 1.0e+25 }
+        }
     };
 
-    constexpr Property::PropertyInfo HighDistancePrecisionInfo = {
-        "HighDistancePrecision",
-        "Distance Precision (high)",
-        "The precision in meters used to determine when to send updated distance data "
-        "to the Open Sound Control receiver. This is the high precision value (high "
-        "level of detail) that is used when the monitored object is the current focus, "
-        "providing more accurate data.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo HighDistancePrecisionInfo = {
+        .identifier = "HighDistancePrecision",
+        .name = "Distance Precision (high)",
+        .description = "The precision in meters used to determine when to send updated "
+            "distance data to the Open Sound Control receiver. This is the high "
+            "precision value (high level of detail) that is used when the monitored "
+            "object is the current focus, providing more accurate data.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1000.0,
+            .minMax = { 0.0, 1.0e+25 }
+        }
     };
 
-    constexpr Property::PropertyInfo LowAnglePrecisionInfo = {
-        "LowAnglePrecision",
-        "Angle precision (low)",
-        "The precision in radians used to determine when to send updated angle data "
-        "to the Open Sound Control receiver. This is the low precision value (low level "
-        "of detail) that is used for objects that are not the current focus, saving "
-        "performance.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo LowAnglePrecisionInfo = {
+        .identifier = "LowAnglePrecision",
+        .name = "Angle precision (low)",
+        .description = "The precision in radians used to determine when to send updated "
+            "angle data to the Open Sound Control receiver. This is the low precision "
+            "value (low level of detail) that is used for objects that are not the "
+            "current focus, saving performance.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.1,
+            .minMax = { 0.0, 10.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo HighAnglePrecisionInfo = {
-        "HighAnglePrecision",
-        "Angle precision (high)",
-        "The precision in radians used to determine when to send updated angle data "
-        "to the Open Sound Control receiver. This is the high precision value (high "
-        "level of detail) that is used when the monitored object is the current focus, "
-        "providing more accurate data.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo HighAnglePrecisionInfo = {
+        .identifier = "HighAnglePrecision",
+        .name = "Angle precision (high)",
+        .description = "The precision in radians used to determine when to send updated "
+            "angle data to the Open Sound Control receiver. This is the high precision "
+            "value (high level of detail) that is used when the monitored object is the "
+            "current focus, providing more accurate data.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.05,
+            .minMax = { 0.0, 10.0 }
+        }
     };
 
     struct [[codegen::Dictionary(PlanetsSonification)]] Parameters {
@@ -247,7 +288,7 @@ namespace openspace {
 
 PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     : TelemetryBase(PlanetsSonificationInfo, ip, port)
-    , _toggleAll(ToggleAllInfo, false)
+    , _toggleAll(ToggleAllInfo)
     , _mercuryProperty(PlanetsSonification::PlanetProperties(MercuryInfo))
     , _venusProperty(PlanetsSonification::PlanetProperties(VenusInfo))
     , _earthProperty(PlanetsSonification::PlanetProperties(EarthInfo))
@@ -353,13 +394,13 @@ PlanetsSonification::DataBody::DataBody(std::string inName)
 PlanetsSonification::PlanetProperties::PlanetProperties(
                                               PropertyOwner::PropertyOwnerInfo planetInfo)
     : PropertyOwner(planetInfo)
-    , toggleAll(PlanetToggleAllInfo, false)
-    , sizeDayEnabled(SizeDayInfo, false)
-    , gravityEnabled(GravityInfo, false)
-    , temperatureEnabled(TemperatureInfo, false)
-    , atmosphereEnabled(AtmosphereInfo, false)
-    , moonsEnabled(MoonsInfo, false)
-    , ringsEnabled(RingsInfo, false)
+    , toggleAll(PlanetToggleAllInfo)
+    , sizeDayEnabled(SizeDayInfo)
+    , gravityEnabled(GravityInfo)
+    , temperatureEnabled(TemperatureInfo)
+    , atmosphereEnabled(AtmosphereInfo)
+    , moonsEnabled(MoonsInfo)
+    , ringsEnabled(RingsInfo)
 {
     // Add the common settings
     addProperty(toggleAll);
@@ -372,15 +413,15 @@ PlanetsSonification::PlanetProperties::PlanetProperties(
 
     // Not all planets have all features, set them as read only if they do not exist
     // Mercury is the only planet that does not have any form of atmosphere
-    if (planetInfo.guiName == "Mercury") {
+    if (planetInfo.name == "Mercury") {
         atmosphereEnabled.setReadOnly(true);
     }
     // Mercury and Venus are the only planets that does not have any moon
-    if (planetInfo.guiName == "Mercury" || planetInfo.guiName == "Venus") {
+    if (planetInfo.name == "Mercury" || planetInfo.name == "Venus") {
         moonsEnabled.setReadOnly(true);
     }
     // Saturn is the only planet with rings (visible in OpenSpace)
-    if (planetInfo.guiName != "Saturn") {
+    if (planetInfo.name != "Saturn") {
         ringsEnabled.setReadOnly(true);
     }
 }
@@ -388,10 +429,10 @@ PlanetsSonification::PlanetProperties::PlanetProperties(
 PlanetsSonification::PrecisionProperties::PrecisionProperties(
                                            PropertyOwner::PropertyOwnerInfo precisionInfo)
     : PropertyOwner(precisionInfo)
-    , lowDistancePrecision(LowDistancePrecisionInfo, 10000.0, 0.0, 1.0e+25)
-    , highDistancePrecision(HighDistancePrecisionInfo, 1000.0, 0.0, 1.0e+25)
-    , lowAnglePrecision(LowAnglePrecisionInfo, 0.1, 0.0, 10.0)
-    , highAnglePrecision(HighAnglePrecisionInfo, 0.05, 0.0, 10.0)
+    , lowDistancePrecision(LowDistancePrecisionInfo)
+    , highDistancePrecision(HighDistancePrecisionInfo)
+    , lowAnglePrecision(LowAnglePrecisionInfo)
+    , highAnglePrecision(HighAnglePrecisionInfo)
 {
     addProperty(lowDistancePrecision);
     lowDistancePrecision.setExponent(20.f);

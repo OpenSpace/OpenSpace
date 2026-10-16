@@ -41,48 +41,70 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color used for the grid lines.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color used for the grid lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.5f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo GridSegmentsInfo = {
-        "GridSegments",
-        "Number of grid segments",
-        "Specifies the number of segments for the grid, in the radial and angular "
-        "direction respectively.",
-        Property::Visibility::User
+    constexpr IVec2PropertyInfo GridSegmentsInfo = {
+        .identifier = "GridSegments",
+        .name = "Number of grid segments",
+        .description = "Specifies the number of segments for the grid, in the radial and "
+            "angular direction respectively.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::ivec2(10),
+            .minMax = { glm::ivec2(1), glm::ivec2(200) }
+        }
     };
 
-    constexpr Property::PropertyInfo CircleSegmentsInfo = {
-        "CircleSegments",
-        "Number of circle segments",
-        "The number of segments that is used to render each circle in the grid.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo CircleSegmentsInfo = {
+        .identifier = "CircleSegments",
+        .name = "Number of circle segments",
+        .description = "The number of segments that is used to render each circle in the "
+            "grid.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 36,
+            .minMax = { 4, 200 }
+        }
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the grid lines. The larger number, the thicker the lines.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the grid lines. The larger number, the thicker the "
+            "lines.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr Property::PropertyInfo RadiiInfo = {
-        "Radii",
-        "Inner and outer radius",
-        "The radii values that determine the size of the circular grid. The first value "
-        "is the radius of the inmost ring and the second is the radius of the outmost "
-        "ring.",
-        Property::Visibility::User
+    constexpr Vec2PropertyInfo RadiiInfo = {
+        .identifier = "Radii",
+        .name = "Inner and outer radius",
+        .description = "The radii values that determine the size of the circular grid. "
+            "The first value is the radius of the inmost ring and the second is the "
+            "radius of the outmost ring.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec2(0.f, 1.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(20.f) }
+        }
     };
 
-    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
-        "Labels",
-        "Labels",
-        "The labels for the grid."
+    constexpr PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        .identifier = "Labels",
+        .name = "Labels",
+        .description = "The labels for the grid."
     };
 
     // Creates a planar circular grid with a given size. Optionally, it may have a hole in
@@ -92,23 +114,21 @@ namespace {
     // hole in the center. The second (outer) radius defines the full grid size. To create
     // a solid circle that connects at the center, set the inner radius to zero (default).
     struct [[codegen::Dictionary(RenderableRadialGrid)]] Parameters {
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(GridSegmentsInfo.description)]]
-        std::optional<glm::ivec2> gridSegments [[codegen::greaterequal(glm::ivec2(1))]];
+        std::optional<glm::ivec2> gridSegments
+            [[codegen::Info(GridSegmentsInfo), codegen::greaterequal(glm::ivec2(1))]];
 
-        // [[codegen::verbatim(CircleSegmentsInfo.description)]]
-        std::optional<int> circleSegments;
+        std::optional<int> circleSegments [[codegen::Info(CircleSegmentsInfo)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(RadiiInfo.description)]]
-        std::optional<glm::vec2> radii [[codegen::greaterequal(glm::vec2(0.f))]];
+        std::optional<glm::vec2> radii
+            [[codegen::Info(RadiiInfo), codegen::greaterequal(glm::vec2(0.f))]];
 
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels
+            [[codegen::Info(LabelsInfo), codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderableradialgrid_codegen.cpp"
@@ -124,11 +144,11 @@ Documentation RenderableRadialGrid::Documentation() {
 
 RenderableRadialGrid::RenderableRadialGrid(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _gridSegments(GridSegmentsInfo, glm::ivec2(10), glm::ivec2(1), glm::ivec2(200))
-    , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
-    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
-    , _radii(RadiiInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(20.f))
+    , _color(ColorInfo)
+    , _gridSegments(GridSegmentsInfo)
+    , _circleSegments(CircleSegmentsInfo)
+    , _lineWidth(LineWidthInfo)
+    , _radii(RadiiInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

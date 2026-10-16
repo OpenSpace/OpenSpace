@@ -48,100 +48,133 @@ namespace {
 
     constexpr std::string_view NoImageText = "No Image";
 
-    constexpr Property::PropertyInfo ColorTexturePathsInfo = {
-        "ColorTexturePaths",
-        "Color texture",
-        "The texture path selected in this property is used as the base texture that is "
-        "applied to the planet prior to any image projections. This menu always contains "
-        "an empty option for not using a color map. If this value is specified in an "
-        "asset, the last texture is used.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo ColorTexturePathsInfo = {
+        .identifier = "ColorTexturePaths",
+        .name = "Color texture",
+        .description = "The texture path selected in this property is used as the base "
+            "texture that is applied to the planet prior to any image projections. This "
+            "menu always contains an empty option for not using a color map. If this "
+            "value is specified in an asset, the last texture is used.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AddColorTextureInfo = {
-        "AddColorTexture",
-        "Add color base texture",
-        "Adds a new base color texture to the list of selectable base maps used prior to "
-        "any image projection.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo AddColorTextureInfo = {
+        .identifier = "AddColorTexture",
+        .name = "Add color base texture",
+        .description = "Adds a new base color texture to the list of selectable base "
+            "maps used prior to any image projection.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HeightTexturePathsInfo = {
-        "HeightTexturePaths",
-        "Heightmap texture",
-        "The texture path selected in this property is used as the height map on the "
-        "planet. This menu always contains an empty option for not using a heightmap. If "
-        "this value is specified in an asset, the last texture is used.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo HeightTexturePathsInfo = {
+        .identifier = "HeightTexturePaths",
+        .name = "Heightmap texture",
+        .description = "The texture path selected in this property is used as the height "
+            "map on the planet. This menu always contains an empty option for not using "
+            "a heightmap. If this value is specified in an asset, the last texture is "
+            "used.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AddHeightTextureInfo = {
-        "AddHeightTexture",
-        "Add heightmap texture",
-        "Adds a new height map texture to the list of selectable height maps used.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo AddHeightTextureInfo = {
+        .identifier = "AddHeightTexture",
+        .name = "Add heightmap texture",
+        .description = "Adds a new height map texture to the list of selectable height "
+            "maps used.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HeightExaggerationInfo = {
-        "HeightExaggeration",
-        "Height exaggeration",
-        "This value determines the level of height exaggeration that is applied to a "
-        "potential height field. A value of '0' inhibits the height field, whereas a "
-        "value of '1' uses the measured height field.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo HeightExaggerationInfo = {
+        .identifier = "HeightExaggeration",
+        .name = "Height exaggeration",
+        .description = "This value determines the level of height exaggeration that is "
+            "applied to a potential height field. A value of '0' inhibits the height "
+            "field, whereas a value of '1' uses the measured height field.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1e6f },
+            .stepSize = 1.f
+        }
     };
 
-    constexpr Property::PropertyInfo MeridianShiftInfo = {
-        "MeridianShift",
-        "Meridian shift",
-        "If this value is enabled, a shift of the meridian by 180 degrees is performed. "
-        "This is a fix especially for Pluto height maps, where the definition of the "
-        "meridian has changed through the New Horizons mission and this requires this "
-        "shift.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo MeridianShiftInfo = {
+        .identifier = "MeridianShift",
+        .name = "Meridian shift",
+        .description = "If this value is enabled, a shift of the meridian by 180 degrees "
+            "is performed. This is a fix especially for Pluto height maps, where the "
+            "definition of the meridian has changed through the New Horizons mission and "
+            "this requires this shift.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AmbientBrightnessInfo = {
-        "AmbientBrightness",
-        "Ambient brightness",
-        "This value determines the ambient brightness of the dark side of the planet.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo AmbientBrightnessInfo = {
+        .identifier = "AmbientBrightness",
+        .name = "Ambient brightness",
+        .description = "This value determines the ambient brightness of the dark side of "
+            "the planet.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.075f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo MaxProjectionsPerFrameInfo = {
-        "MaxProjectionsPerFrame",
-        "Max projections per frame",
-        "The maximum number of image projections to perform per frame. Useful to avoid "
-        "freezing the system for large delta times.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo MaxProjectionsPerFrameInfo = {
+        .identifier = "MaxProjectionsPerFrame",
+        .name = "Max projections per frame",
+        .description = "The maximum number of image projections to perform per frame. "
+            "Useful to avoid freezing the system for large delta times.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 3,
+            .minMax = { 1, 64 }
+        }
     };
 
-    constexpr Property::PropertyInfo ProjectionsInBufferInfo = {
-        "ProjectionsInBuffer",
-        "Projections in buffer",
-        "(Read only) The number of images that are currently waiting to be projected.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo ProjectionsInBufferInfo = {
+        .identifier = "ProjectionsInBuffer",
+        .name = "Projections in buffer",
+        .description = "The number of images that are currently waiting to be projected.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 0,
+            .minMax = { 1, 32 }
+        }
     };
 
-    constexpr Property::PropertyInfo ClearProjectionBufferInfo = {
-        "ClearProjectionBuffer",
-        "Clear projection buffer",
-        "Remove all pending projections from the buffer.",
-        Property::Visibility::AdvancedUser
+    constexpr TriggerPropertyInfo ClearProjectionBufferInfo = {
+        .identifier = "ClearProjectionBuffer",
+        .name = "Clear projection buffer",
+        .description = "Remove all pending projections from the buffer.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RadiusInfo = {
-        "Radius",
-        "Radius",
-        "This value specifies the radius of this sphere in meters.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo RadiusInfo = {
+        .identifier = "Radius",
+        .name = "Radius",
+        .description = "This value specifies the radius of this sphere in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1e20f) }
+        }
     };
 
-    constexpr Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Segments",
-        "This value specifies the number of segments that this sphere is split into.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo SegmentsInfo = {
+        .identifier = "Segments",
+        .name = "Segments",
+        .description = "This value specifies the number of segments that this sphere is "
+            "split into.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 20,
+            .minMax = { 1, 5000 }
+        }
     };
 
     // Serves as a potential target for images projected from a spacecraft's instrument,
@@ -155,29 +188,24 @@ namespace {
         Dictionary projection
             [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 
-        // [[codegen::verbatim(ColorTexturePathsInfo.description)]]
-        std::vector<std::string> colorTexturePaths;
+        std::vector<std::string> colorTexturePaths
+            [[codegen::Info(ColorTexturePathsInfo)]];
 
-        // [[codegen::verbatim(HeightTexturePathsInfo.description)]]
-        std::vector<std::string> heightTexturePaths;
+        std::vector<std::string> heightTexturePaths
+            [[codegen::Info(HeightTexturePathsInfo)]];
 
-        // [[codegen::verbatim(HeightExaggerationInfo.description)]]
-        std::optional<float> heightExaggeration;
+        std::optional<float> heightExaggeration [[codegen::Info(HeightExaggerationInfo)]];
 
-        // [[codegen::verbatim(MeridianShiftInfo.description)]]
-        std::optional<bool> meridianShift;
+        std::optional<bool> meridianShift [[codegen::Info(MeridianShiftInfo)]];
 
-        // [[codegen::verbatim(AmbientBrightnessInfo.description)]]
-        std::optional<double> ambientBrightness;
+        std::optional<double> ambientBrightness [[codegen::Info(AmbientBrightnessInfo)]];
 
-        // [[codegen::verbatim(MaxProjectionsPerFrameInfo.description)]]
-        std::optional<int> maxProjectionsPerFrame;
+        std::optional<int> maxProjectionsPerFrame
+            [[codegen::Info(MaxProjectionsPerFrameInfo)]];
 
-        // [[codegen::verbatim(RadiusInfo.description)]]
-        std::variant<float, glm::vec3> radius;
+        std::variant<float, glm::vec3> radius [[codegen::Info(RadiusInfo)]];
 
-        // [[codegen::verbatim(SegmentsInfo.description)]]
-        int segments;
+        int segments [[codegen::Info(SegmentsInfo)]];
     };
 } // namespace
 #include "renderableplanetprojection_codegen.cpp"
@@ -197,14 +225,14 @@ RenderablePlanetProjection::RenderablePlanetProjection(const Dictionary& dict)
     , _addColorTexturePath(AddColorTextureInfo)
     , _heightMapTexturePaths(HeightTexturePathsInfo)
     , _addHeightMapTexturePath(AddHeightTextureInfo)
-    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 1e6f, 1.f)
-    , _meridianShift(MeridianShiftInfo, false)
-    , _ambientBrightness(AmbientBrightnessInfo, 0.075f, 0.f, 1.f)
-    , _maxProjectionsPerFrame(MaxProjectionsPerFrameInfo, 3, 1, 64)
-    , _projectionsInBuffer(ProjectionsInBufferInfo, 0, 1, 32)
+    , _heightExaggeration(HeightExaggerationInfo)
+    , _meridianShift(MeridianShiftInfo)
+    , _ambientBrightness(AmbientBrightnessInfo)
+    , _maxProjectionsPerFrame(MaxProjectionsPerFrameInfo)
+    , _projectionsInBuffer(ProjectionsInBufferInfo)
     , _clearProjectionBuffer(ClearProjectionBufferInfo)
-    , _radius(RadiusInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(std::pow(10.f, 20.f)))
-    , _segments(SegmentsInfo, 20, 1, 5000)
+    , _radius(RadiusInfo)
+    , _segments(SegmentsInfo)
     , _sphere(nullptr)
 {
     const Parameters p = codegen::bake<Parameters>(dict);

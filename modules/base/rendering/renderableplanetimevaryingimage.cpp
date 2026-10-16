@@ -43,17 +43,17 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";
 
-    constexpr Property::PropertyInfo SourceFolderInfo = {
-        "SourceFolder",
-        "Source folder",
-        "An image directory that is loaded from disk and contains the textures to use "
-        "for this plane.",
-       Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo SourceFolderInfo = {
+        .identifier = "SourceFolder",
+        .name = "Source folder",
+        .description = "An image directory that is loaded from disk and contains the "
+            "textures to use for this plane.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
-        // [[codegen::verbatim(SourceFolderInfo.description)]]
-        std::filesystem::path sourceFolder [[codegen::directory()]];
+        std::filesystem::path sourceFolder
+            [[codegen::Info(SourceFolderInfo), codegen::directory()]];
 
         // If set to `true` the images are only loaded when it is about to be shown
         // instead of preloading them.
@@ -204,7 +204,7 @@ void RenderablePlaneTimeVaryingImage::render(const RenderData& data, RendererTas
     }
 }
 
-// Requires time to be formated as such: 'YYYY-MM-DDTHH-MM-SS-XXX'
+// Requires time to be formatted as such: 'YYYY-MM-DDTHH-MM-SS-XXX'
 void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {
     for (const std::filesystem::path& filePath : _sourceFiles) {
         // Extract the filename from the path (without extension)

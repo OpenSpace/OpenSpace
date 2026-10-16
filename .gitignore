@@ -41,7 +41,7 @@ GPUCache/
 # Customization is not supposed to be committed
 customization.lua
 
-# The COMMIT info is generated everytime CMake is run
+# The COMMIT info is generated every time CMake is run
 COMMIT.md
 *_codegen.cpp
 

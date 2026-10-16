@@ -18,8 +18,7 @@
     {
       "name": "msvc",
       "hidden": true,
-      "generator": "Visual Studio 18 2026",
-      "architecture": "x64"
+      "generator": "Visual Studio 18 2026"
     },
     {
       "name": "ninja",
@@ -42,9 +41,44 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
+      }
+    },
+    {
+      "$comment": "PROCESSOR_ARCHITEW6432 is also checked because it is set to ARM64 when an x64 process (e.g. an x64 cmake.exe) runs under emulation on an ARM64 host, whereas PROCESSOR_ARCHITECTURE would report AMD64 in that case",
+      "name": "windows-x64",
+      "hidden": true,
+      "inherits": [ "windows" ],
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+          { "type": "not", "condition": { "type": "equals", "lhs": "$env{PROCESSOR_ARCHITECTURE}", "rhs": "ARM64" } },
+          { "type": "not", "condition": { "type": "equals", "lhs": "$env{PROCESSOR_ARCHITEW6432}", "rhs": "ARM64" } }
+        ]
       },
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+      }
+    },
+    {
+      "name": "windows-arm64",
+      "hidden": true,
+      "inherits": [ "windows" ],
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+          {
+            "type": "anyOf",
+            "conditions": [
+              { "type": "equals", "lhs": "$env{PROCESSOR_ARCHITECTURE}", "rhs": "ARM64" },
+              { "type": "equals", "lhs": "$env{PROCESSOR_ARCHITEW6432}", "rhs": "ARM64" }
+            ]
+          }
+        ]
+      },
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "arm64-windows-static-md"
       }
     },
     {
@@ -62,14 +96,22 @@
     },
 
     {
+      "$comment": "The architecture is pinned instead of left to the Visual Studio generator's default, which would be the architecture of the cmake.exe that is running. An x64 cmake.exe used on an ARM64 host would otherwise build x64 binaries against the arm64 dependencies selected by VCPKG_TARGET_TRIPLET",
       "name": "windows-msvc",
       "displayName": "Windows MSVC",
-      "inherits": [ "vcpkg", "build", "windows", "msvc" ]
+      "inherits": [ "vcpkg", "build", "windows-x64", "msvc" ],
+      "architecture": "x64"
+    },
+    {
+      "name": "windows-msvc-arm64",
+      "displayName": "Windows MSVC (ARM64)",
+      "inherits": [ "vcpkg", "build", "windows-arm64", "msvc" ],
+      "architecture": "ARM64"
     },
     {
       "name": "windows-ninja-debug",
       "displayName": "Windows Ninja Debug",
-      "inherits": [ "vcpkg", "build", "windows", "ninja" ],
+      "inherits": [ "vcpkg", "build", "windows-x64", "ninja" ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       },
@@ -80,12 +122,34 @@
     {
       "name": "windows-ninja-release",
       "displayName": "Windows Ninja Release",
-      "inherits": [ "vcpkg", "build", "windows", "ninja" ],
+      "inherits": [ "vcpkg", "build", "windows-x64", "ninja" ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       },
       "environment": {
         "PKG_CONFIG_PATH": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows-static-md/lib/pkgconfig"
+      }
+    },
+    {
+      "name": "windows-ninja-debug-arm64",
+      "displayName": "Windows Ninja Debug (ARM64)",
+      "inherits": [ "vcpkg", "build", "windows-arm64", "ninja" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "environment": {
+        "PKG_CONFIG_PATH": "${sourceDir}/build/${presetName}/vcpkg_installed/arm64-windows-static-md/debug/lib/pkgconfig"
+      }
+    },
+    {
+      "name": "windows-ninja-release-arm64",
+      "displayName": "Windows Ninja Release (ARM64)",
+      "inherits": [ "vcpkg", "build", "windows-arm64", "ninja" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "environment": {
+        "PKG_CONFIG_PATH": "${sourceDir}/build/${presetName}/vcpkg_installed/arm64-windows-static-md/lib/pkgconfig"
       }
     },
     {
@@ -194,6 +258,29 @@
       "configuration": "Release"
     },
     {
+      "name": "windows-msvc-arm64-debug",
+      "displayName": "Windows MSVC ARM64 (Debug)",
+      "configurePreset": "windows-msvc-arm64",
+      "configuration": "Debug"
+    },
+    {
+      "$comment": "Defining it to keep the same name as the configuration preset",
+      "name": "windows-msvc-arm64",
+      "inherits": "windows-msvc-arm64-debug"
+    },
+    {
+      "name": "windows-msvc-arm64-relwithdebinfo",
+      "displayName": "Windows MSVC ARM64 (RelWithDebInfo)",
+      "configurePreset": "windows-msvc-arm64",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "windows-msvc-arm64-release",
+      "displayName": "Windows MSVC ARM64 (Release)",
+      "configurePreset": "windows-msvc-arm64",
+      "configuration": "Release"
+    },
+    {
       "name": "windows-ninja-debug",
       "displayName": "Windows Ninja (Debug)",
       "configurePreset": "windows-ninja-debug"
@@ -202,6 +289,16 @@
       "name": "windows-ninja-release",
       "displayName": "Windows Ninja (Release)",
       "configurePreset": "windows-ninja-release"
+    },
+    {
+      "name": "windows-ninja-debug-arm64",
+      "displayName": "Windows Ninja (Debug, ARM64)",
+      "configurePreset": "windows-ninja-debug-arm64"
+    },
+    {
+      "name": "windows-ninja-release-arm64",
+      "displayName": "Windows Ninja (Release, ARM64)",
+      "configurePreset": "windows-ninja-release-arm64"
     },
     {
       "name": "linux-makefiles-debug",
@@ -247,6 +344,27 @@
       }
     },
     {
+      "name": "windows-msvc-arm64-debug",
+      "configurePreset": "windows-msvc-arm64",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "$comment": "Defining it to keep the same name as the configuration preset",
+      "name": "windows-msvc-arm64",
+      "inherits": "windows-msvc-arm64-debug"
+    },
+    {
+      "name": "windows-msvc-arm64-relwithdebinfo",
+      "configurePreset": "windows-msvc-arm64",
+      "configuration": "RelWithDebInfo",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
       "name": "windows-ninja-debug",
       "configurePreset": "windows-ninja-debug",
       "output": {
@@ -256,6 +374,20 @@
     {
       "name": "windows-ninja-release",
       "configurePreset": "windows-ninja-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-ninja-debug-arm64",
+      "configurePreset": "windows-ninja-debug-arm64",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-ninja-release-arm64",
+      "configurePreset": "windows-ninja-release-arm64",
       "output": {
         "outputOnFailure": true
       }

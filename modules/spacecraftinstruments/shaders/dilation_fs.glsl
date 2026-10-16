@@ -33,7 +33,8 @@ out vec4 out_color;
 uniform sampler2D tex;
 uniform sampler2D stencil;
 
-// We conside the 8-neighborhood of a texel, so going a stepsize of '1' in both directions
+// We consider the 8-neighborhood of a texel, so going a stepsize of '1' in both
+// directions
 vec2 offsets[8] = vec2[](
   vec2(-1.0, -1.0),
   vec2(-1.0,  0.0),

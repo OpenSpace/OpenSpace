@@ -46,12 +46,13 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ModuleEngine";
 
-    constexpr Property::PropertyInfo AllModulesInfo = {
-        "AllModules",
-        "All modules",
-        "The list of all modules that were compiled for this version of OpenSpace in the "
-        "same order in which they were initialized.",
-        Property::Visibility::AdvancedUser
+    constexpr StringListPropertyInfo AllModulesInfo = {
+        .identifier = "AllModules",
+        .name = "All modules",
+        .description = "The list of all modules that were compiled for this version of "
+            "OpenSpace in the same order in which they were initialized.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 } // namespace
 
@@ -61,7 +62,6 @@ ModuleEngine::ModuleEngine()
     : PropertyOwner({ "Modules" })
     , _allModules(AllModulesInfo)
 {
-    _allModules.setReadOnly(true);
     addProperty(_allModules);
 }
 

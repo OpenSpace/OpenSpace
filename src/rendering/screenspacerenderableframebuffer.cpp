@@ -35,11 +35,16 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
-        "This value explicitly specifies the size of the screen space plane.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size",
+        .description = "This value explicitly specifies the size of the screen space "
+            "plane.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(16.f),
+            .minMax = { glm::vec2(16.f), glm::vec2(16384.f) }
+        }
     };
 
     struct [[codegen::Dictionary(ScreenSpaceRenderableFramebuffer)]] Parameters {};
@@ -58,7 +63,7 @@ Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
 ScreenSpaceRenderableFramebuffer::ScreenSpaceRenderableFramebuffer(
                                                              const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _size(SizeInfo, glm::vec2(16.f), glm::vec2(16.f), glm::vec2(16384.f))
+    , _size(SizeInfo)
 {
     testSpecificationAndThrow(Documentation(), dictionary, "ScreenSpaceFramebuffer");
 

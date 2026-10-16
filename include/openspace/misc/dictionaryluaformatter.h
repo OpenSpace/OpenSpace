@@ -47,8 +47,8 @@ BooleanType(PrettyPrint);
     * Converts the passed \p dictionary into a Lua string representation.
     *
     * \param dictionary The Dictionary that should be converted
-    * \param prettyPrint Determines if the returned representation of the Dictionay should
-    *        be formatted for human consumption
+    * \param prettyPrint Determines if the returned representation of the Dictionary
+    *        should be formatted for human consumption
     * \param indentation If doing a pretty printing, this is the indentation per level
     *        that is used
     * \return A Lua string representing the Dictionary

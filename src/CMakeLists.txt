@@ -84,6 +84,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/openspace/designpattern/synchronousevent.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/core_registration.h
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentation.h
+    ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentation.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/documentationengine.h
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/schema.h
     ${PROJECT_SOURCE_DIR}/include/openspace/documentation/verifier.h
@@ -242,6 +243,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/numericalproperty.h
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/numericalproperty.inl
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/property.h
+    ${PROJECT_SOURCE_DIR}/include/openspace/properties/propertyinfo.h
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/propertyowner.h
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/templateproperty.h
     ${PROJECT_SOURCE_DIR}/include/openspace/properties/templateproperty.inl
@@ -890,7 +892,9 @@ configure_file(
 )
 
 if (WIN32)
-  target_link_libraries(openspace-core PUBLIC "pdh")
+  # Dbghelp is used to resolve the stack trace of a crash from the context that the
+  # unhandled exception filter is handed
+  target_link_libraries(openspace-core PUBLIC "pdh" "Dbghelp")
 endif ()
 
 set_openspace_compile_settings(openspace-core)

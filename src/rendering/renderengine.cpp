@@ -86,252 +86,353 @@ namespace {
     constexpr std::string_view KeyFontMono = "Mono";
     constexpr std::string_view KeyFontLight = "Light";
 
-    constexpr Property::PropertyInfo ShowOverlayClientsInfo = {
-        "ShowOverlayOnClients",
-        "Show overlay information on clients",
-        "If this value is enabled, the overlay information text is also automatically "
-        "rendered on client nodes. This values is disabled by default.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShowOverlayClientsInfo = {
+        .identifier = "ShowOverlayOnClients",
+        .name = "Show overlay information on clients",
+        .description = "If this value is enabled, the overlay information text is also "
+            "automatically rendered on client nodes.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ShowLogInfo = {
-        "ShowLog",
-        "Show the on-screen log",
-        "This value determines whether the on-screen log will be shown or hidden. Even "
-        "if it is shown, all 'Debug' and 'Trace' level messages are omitted from this "
-        "log.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowLogInfo = {
+        .identifier = "ShowLog",
+        .name = "Show the on-screen log",
+        .description = "This value determines whether the on-screen log will be shown or "
+            "hidden. Even if it is shown, all 'Debug' and 'Trace' level messages are "
+            "omitted from this log.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo VerticalLogOffsetInfo = {
-        "VerticalLogOffset",
-        "Vertical log offset",
-        "The vertical offset for the on-screen log in [0,1] coordinates, a factor that "
-        "is scaled with the vertical resolution.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo VerticalLogOffsetInfo = {
+        .identifier = "VerticalLogOffset",
+        .name = "Vertical log offset",
+        .description = "The vertical offset for the on-screen log in [0,1] coordinates, "
+            "a factor that is scaled with the vertical resolution.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ShowVersionInfo = {
-        "ShowVersion",
-        "Shows the version on-screen information",
-        "This value determines whether the Git version information (branch and commit) "
-        "hash are shown on the screen.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowVersionInfo = {
+        .identifier = "ShowVersion",
+        .name = "Shows the version on-screen information",
+        .description = "This value determines whether the Git version information "
+            "(branch and commit) hash are shown on the screen.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ShowCameraInfo = {
-        "ShowCamera",
-        "Shows camera information",
-        "This value determines whether the information about the current camera state is "
-        "shown on the screen.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowCameraInfo = {
+        .identifier = "ShowCamera",
+        .name = "Shows camera information",
+        .description = "This value determines whether the information about the current "
+            "camera state is shown on the screen.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ScreenshotWindowIdsInfo = {
-        "ScreenshotWindowId",
-        "Screenshow window ids",
-        "The list of window identifiers whose screenshot will be taken the next time "
-        "anyone triggers a screenshot. If this list is empty (the default), all windows "
-        "will have their screenshot taken. Id's that do not exist are silently ignored.",
-        Property::Visibility::AdvancedUser
+    constexpr IntListPropertyInfo ScreenshotWindowIdsInfo = {
+        .identifier = "ScreenshotWindowId",
+        .name = "Screenshow window ids",
+        .description = "The list of window identifiers whose screenshot will be taken "
+            "the next time anyone triggers a screenshot. If this list is empty (the "
+            "default), all windows will have their screenshot taken. Id's that do not "
+            "exist are silently ignored.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ApplyWarpingInfo = {
-        "ApplyWarpingScreenshot",
-        "Apply warping to screenshots",
-        "This value determines whether a warping should be applied before taking a "
-        "screenshot. If it is enabled, all post processing is applied as well, which "
-        "includes everything rendered on top of the rendering, such as the user "
-        "interface.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ApplyWarpingInfo = {
+        .identifier = "ApplyWarpingScreenshot",
+        .name = "Apply warping to screenshots",
+        .description = "This value determines whether a warping should be applied before "
+            "taking a screenshot. If it is enabled, all post processing is applied as "
+            "well, which includes everything rendered on top of the rendering, such as "
+            "the user interface.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo UseNewScreenshotFolderInfo = {
-        "UseNewScreenshotFolder",
-        "Use New Screenshot Folder",
-        "If this property is triggered, a new screenshot folder is created and the "
-        "numbering for screenshots is reset to start at 0. Note, this property only does "
-        "something if `ScreenshotUseDateTime` is set to `true`.",
-        Property::Visibility::AdvancedUser
+    constexpr TriggerPropertyInfo UseNewScreenshotFolderInfo = {
+        .identifier = "UseNewScreenshotFolder",
+        .name = "Use New Screenshot Folder",
+        .description = "If this property is triggered, a new screenshot folder is "
+            "created and the numbering for screenshots is reset to start at 0. Note, "
+            "this property only does something if `ScreenshotUseDateTime` is set to "
+            "`true`.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScreenshotUseDateTimeInfo = {
-        "ScreenshotUseDateTime",
-        "Screenshot folder uses datetime",
-        "If this value is set to 'true', screenshots will be saved to a folder that "
-        "contains the time at which this value was enabled.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ScreenshotUseDateTimeInfo = {
+        .identifier = "ScreenshotUseDateTime",
+        .name = "Screenshot folder uses datetime",
+        .description = "If this value is set to 'true', screenshots will be saved to a "
+            "folder that contains the time at which this value was enabled.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo DisableMasterInfo = {
-        "DisableMasterRendering",
-        "Disable master rendering",
-        "If this value is enabled, the rendering on the master node will be disabled. "
-        "Every other aspect of the application will be unaffected by this and it will "
-        "still respond to user input. This setting is reasonably only useful in the case "
-        "of multi-pipeline environments, such as planetariums, where the output of the "
-        "master node is not required and performance can be gained by disabling it.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo DisableMasterInfo = {
+        .identifier = "DisableMasterRendering",
+        .name = "Disable master rendering",
+        .description = "If this value is enabled, the rendering on the master node will "
+            "be disabled. Every other aspect of the application will be unaffected by "
+            "this and it will still respond to user input. This setting is reasonably "
+            "only useful in the case of multi-pipeline environments, such as "
+            "planetariums, where the output of the master node is not required and "
+            "performance can be gained by disabling it.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo GlobalRotationInfo = {
-        "GlobalRotation",
-        "Global rotation",
-        "Applies a global view rotation. Use this to rotate the position of the focus "
-        "node away from the default location on the screen. This setting persists even "
-        "when a new focus node is selected. Defined using pitch, yaw, roll in radians.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo GlobalRotationInfo = {
+        .identifier = "GlobalRotation",
+        .name = "Global rotation",
+        .description = "Applies a global view rotation. Use this to rotate the position "
+            "of the focus node away from the default location on the screen. This "
+            "setting persists even when a new focus node is selected. Defined using "
+            "pitch, yaw, roll in radians.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(-glm::pi<float>()), glm::vec3(glm::pi<float>()) }
+        }
     };
 
-    constexpr Property::PropertyInfo ScreenSpaceRotationInfo = {
-        "ScreenSpaceRotation",
-        "Screen space rotation",
-        "Applies a rotation to all screen space renderables. Defined using pitch, yaw, "
-        "roll in radians.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ScreenSpaceRotationInfo = {
+        .identifier = "ScreenSpaceRotation",
+        .name = "Screen space rotation",
+        .description = "Applies a rotation to all screen space renderables. Defined "
+            "using pitch, yaw, roll in radians.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(-glm::pi<float>()), glm::vec3(glm::pi<float>()) }
+        }
     };
 
-    constexpr Property::PropertyInfo MasterRotationInfo = {
-        "MasterRotation",
-        "Master rotation",
-        "Applies a view rotation for only the master node, defined using pitch, yaw, "
-        "roll in radians.This can be used to compensate the master view direction for "
-        "tilted display systems in clustered immersive environments.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo MasterRotationInfo = {
+        .identifier = "MasterRotation",
+        .name = "Master rotation",
+        .description = "Applies a view rotation for only the master node, defined using "
+            "pitch, yaw, roll in radians.This can be used to compensate the master view "
+            "direction for tilted display systems in clustered immersive environments.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(-glm::pi<float>()), glm::vec3(glm::pi<float>()) }
+        }
     };
 
-    constexpr Property::PropertyInfo DisableHDRPipelineInfo = {
-        "DisableHDRPipeline",
-        "Disable HDR rendering",
-        "If this value is enabled, the rendering will disable the HDR color handling and "
-        "the LDR color pipeline will be used. Be aware of possible over exposure in the "
-        "final colors.",
-        Property::Visibility::Hidden
+    constexpr BoolPropertyInfo DisableHDRPipelineInfo = {
+        .identifier = "DisableHDRPipeline",
+        .name = "Disable HDR rendering",
+        .description = "If this value is enabled, the rendering will disable the HDR "
+            "color handling and the LDR color pipeline will be used. Be aware of "
+            "possible over exposure in the final colors.",
+        .visibility = Visibility::Hidden,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo HDRExposureInfo = {
-        "HDRExposure",
-        "HDR exposure",
-        "This value determines the amount of light per unit area reaching the equivalent "
-        "of an electronic image sensor.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo HDRExposureInfo = {
+        .identifier = "HDRExposure",
+        .name = "HDR exposure",
+        .description = "This value determines the amount of light per unit area reaching "
+            "the equivalent of an electronic image sensor.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 3.7f,
+            .minMax = { 0.01f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo GammaInfo = {
-        "Gamma",
-        "Gamma correction",
-        "Gamma, is the nonlinear operation used to encode and decode luminance or "
-        "tristimulus values in the image.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo GammaInfo = {
+        .identifier = "Gamma",
+        .name = "Gamma correction",
+        .description = "Gamma, is the nonlinear operation used to encode and decode "
+            "luminance or tristimulus values in the image.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.95f,
+            .minMax = { 0.01f, 5.f }
+        }
     };
 
-    constexpr Property::PropertyInfo HueInfo = {
-        "Hue",
-        "Hue",
-        "Hue.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo HueInfo = {
+        .identifier = "Hue",
+        .name = "Hue",
+        .description = "Hue.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 360.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SaturationInfo = {
-        "Saturation",
-        "Saturation",
-        "Saturation.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo SaturationInfo = {
+        .identifier = "Saturation",
+        .name = "Saturation",
+        .description = "Saturation.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 2.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ValueInfo = {
-        "Value",
-        "Value",
-        "Value.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo ValueInfo = {
+        .identifier = "Value",
+        .name = "Value",
+        .description = "Value.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 2.f }
+        }
     };
 
-    constexpr Property::PropertyInfo FramerateLimitInfo = {
-        "FramerateLimit",
-        "Framerate limit",
-        "If set to a value bigger than 0, the framerate will be limited to that many "
-        "frames per second without using V-Sync.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo FramerateLimitInfo = {
+        .identifier = "FramerateLimit",
+        .name = "Framerate limit",
+        .description = "If set to a value bigger than 0, the framerate will be limited "
+            "to that many frames per second without using V-Sync.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 500 }
+        }
     };
 
-    constexpr Property::PropertyInfo HorizFieldOfViewInfo = {
-        "HorizFieldOfView",
-        "Horizontal field of view",
-        "Adjusts the degrees of the horizontal field of view. The vertical field of view "
-        "will be automatically adjusted to match, according to the current aspect ratio.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo HorizFieldOfViewInfo = {
+        .identifier = "HorizFieldOfView",
+        .name = "Horizontal field of view",
+        .description = "Adjusts the degrees of the horizontal field of view. The "
+            "vertical field of view will be automatically adjusted to match, according "
+            "to the current aspect ratio.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 80.f,
+            .minMax = { 1.f, 179.f }
+        }
     };
 
-    constexpr Property::PropertyInfo GlobalBlackoutFactorInfo = {
-        "Factor",
-        "Factor",
-        "The blackout factor of the rendering. This can be used for fading in or out the "
-        "rendering window.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo GlobalBlackoutFactorInfo = {
+        .identifier = "Factor",
+        .name = "Factor",
+        .description = "The blackout factor of the rendering. This can be used for "
+            "fading in or out the rendering window.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo GlobalBlackoutColorInfo = {
-        "Color",
-        "Color",
-        "The color used for the blackout of the rendering. This can be used for fading "
-        "in or out the rendering window.",
-        Property::Visibility::User
+    constexpr Vec4PropertyInfo GlobalBlackoutColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color used for the blackout of the rendering. This can be "
+            "used for fading in or out the rendering window.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec4(0.f, 0.f, 0.f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo GlobalBlackoutImageFactorInfo = {
-        "ImageFactor",
-        "Image factor",
-        "Determines the visibility of the image provided by the `Blackout.Image`, if no "
-        "such image has been loaded, this value does nothing.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo GlobalBlackoutImageFactorInfo = {
+        .identifier = "ImageFactor",
+        .name = "Image factor",
+        .description = "Determines the visibility of the image provided by the "
+            "`Blackout.Image`, if no such image has been loaded, this value does "
+            "nothing.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo GlobalBlackoutImageInfo = {
-        "ImagePath",
-        "Image Path",
-        "The path to an image that is used when the blackout rendering is enabled. "
-        "Whether the image is shown or not is controlled by the alpha component of the "
-        "`Blackout.Color` property. It also determines the color shown if the selected "
-        "image has transparency or does not have the same aspect ratio as the render "
-        "window.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo GlobalBlackoutImageInfo = {
+        .identifier = "ImagePath",
+        .name = "Image Path",
+        .description = "The path to an image that is used when the blackout rendering is "
+            "enabled. Whether the image is shown or not is controlled by the alpha "
+            "component of the `Blackout.Color` property. It also determines the color "
+            "shown if the selected image has transparency or does not have the same "
+            "aspect ratio as the render window.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo ApplyBlackoutToMasterInfo = {
-        "ApplyMaster",
-        "Apply to master",
-        "If this value is 'true', the blackout factor is applied to the master node. "
-        "Regardless of this value, the clients will always adhere to the factor.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ApplyBlackoutToMasterInfo = {
+        .identifier = "ApplyMaster",
+        .name = "Apply to master",
+        .description = "If this value is 'true', the blackout factor is applied to the "
+            "master node. Regardless of this value, the clients will always adhere to "
+            "the factor.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo FXAAInfo = {
-        "FXAA",
-        "Enable FXAA",
-        "Enable FXAA.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo FXAAInfo = {
+        .identifier = "FXAA",
+        .name = "Enable FXAA",
+        .description = "Enable FXAA.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo EnabledFontColorInfo = {
-        "EnabledFontColor",
-        "Enabled font color",
-        "The font color used for enabled options.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec4PropertyInfo EnabledFontColorInfo = {
+        .identifier = "EnabledFontColor",
+        .name = "Enabled font color",
+        .description = "The font color used for enabled options.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec4(0.2f, 0.75f, 0.2f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo DisabledFontColorInfo = {
-        "DisabledFontColor",
-        "Disabled font color",
-        "The font color used for disabled options.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec4PropertyInfo DisabledFontColorInfo = {
+        .identifier = "DisabledFontColor",
+        .name = "Disabled font color",
+        .description = "The font color used for disabled options.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec4(0.55f, 0.2f, 0.2f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    const PropertyOwner::PropertyOwnerInfo WindowingInfo = {
-        "Windowing",
-        "Windowing",
-        "Contains properties that concern the specific rendering settings of individual "
-        "windows. Note that the number of properties in this owner are determined by the "
-        "configuration file and might be different from run to run."
+    constexpr PropertyOwner::PropertyOwnerInfo WindowingInfo = {
+        .identifier = "Windowing",
+        .name = "Windowing",
+        .description = "Contains properties that concern the specific rendering settings "
+            "of individual windows. Note that the number of properties in this owner are "
+            "determined by the configuration file and might be different from run to run."
     };
 } // namespace
 
@@ -339,7 +440,7 @@ namespace openspace {
 
 RenderEngine::Window::Window(PropertyOwnerInfo info, size_t id)
     : PropertyOwner(info)
-    , horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
+    , horizFieldOfView(HorizFieldOfViewInfo)
 {
     horizFieldOfView.onChange([this, id]() {
         if (global::windowDelegate->isMaster()) {
@@ -351,70 +452,40 @@ RenderEngine::Window::Window(PropertyOwnerInfo info, size_t id)
 
 RenderEngine::RenderEngine()
     : PropertyOwner({ "RenderEngine", "Render Engine" })
-    , _showOverlayOnClients(ShowOverlayClientsInfo, false)
-    , _showLog(ShowLogInfo, true)
-    , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
-    , _showVersionInfo(ShowVersionInfo, true)
-    , _showCameraInfo(ShowCameraInfo, true)
+    , _showOverlayOnClients(ShowOverlayClientsInfo)
+    , _showLog(ShowLogInfo)
+    , _verticalLogOffset(VerticalLogOffsetInfo)
+    , _showVersionInfo(ShowVersionInfo)
+    , _showCameraInfo(ShowCameraInfo)
     , _screenshotWindowIds(ScreenshotWindowIdsInfo)
-    , _applyWarping(ApplyWarpingInfo, false)
+    , _applyWarping(ApplyWarpingInfo)
     , _useNewScreenfolder(UseNewScreenshotFolderInfo)
-    , _screenshotUseDateTime(ScreenshotUseDateTimeInfo, false)
-    , _disableMasterRendering(DisableMasterInfo, false)
+    , _screenshotUseDateTime(ScreenshotUseDateTimeInfo)
+    , _disableMasterRendering(DisableMasterInfo)
     , _globalBlackout {
         .owner = PropertyOwner(
             { "GlobalBlackout", "Global Blackout", "Blackout settings" }
         ),
-        .factor = FloatProperty(GlobalBlackoutFactorInfo, 0.f, 0.f, 1.f),
-        .color = Vec4Property(
-            GlobalBlackoutColorInfo,
-            glm::vec4(0.f, 0.f, 0.f, 1.f),
-            glm::vec4(0.f),
-            glm::vec4(1.f)
-        ),
-        .imageFactor = FloatProperty(GlobalBlackoutImageFactorInfo, 1.f, 0.f, 1.f),
+        .factor = FloatProperty(GlobalBlackoutFactorInfo),
+        .color = Vec4Property(GlobalBlackoutColorInfo),
+        .imageFactor = FloatProperty(GlobalBlackoutImageFactorInfo),
         .imagePath = StringProperty(GlobalBlackoutImageInfo),
-        .applyToMaster = BoolProperty(ApplyBlackoutToMasterInfo, true)
+        .applyToMaster = BoolProperty(ApplyBlackoutToMasterInfo)
     }
-    , _enableFXAA(FXAAInfo, true)
-    , _disableHDRPipeline(DisableHDRPipelineInfo, false)
-    , _hdrExposure(HDRExposureInfo, 3.7f, 0.01f, 10.f)
-    , _gamma(GammaInfo, 0.95f, 0.01f, 5.f)
-    , _hue(HueInfo, 0.f, 0.f, 360.f)
-    , _saturation(SaturationInfo, 1.f, 0.f, 2.f)
-    , _value(ValueInfo, 1.f, 0.f, 2.f)
-    , _framerateLimit(FramerateLimitInfo, 0, 0, 500)
+    , _enableFXAA(FXAAInfo)
+    , _disableHDRPipeline(DisableHDRPipelineInfo)
+    , _hdrExposure(HDRExposureInfo)
+    , _gamma(GammaInfo)
+    , _hue(HueInfo)
+    , _saturation(SaturationInfo)
+    , _value(ValueInfo)
+    , _framerateLimit(FramerateLimitInfo)
     , _windowing(WindowingInfo)
-    , _globalRotation(
-        GlobalRotationInfo,
-        glm::vec3(0.f),
-        glm::vec3(-glm::pi<float>()),
-        glm::vec3(glm::pi<float>())
-    )
-    , _screenSpaceRotation(
-        ScreenSpaceRotationInfo,
-        glm::vec3(0.f),
-        glm::vec3(-glm::pi<float>()),
-        glm::vec3(glm::pi<float>())
-    )
-    , _masterRotation(
-        MasterRotationInfo,
-        glm::vec3(0.f),
-        glm::vec3(-glm::pi<float>()),
-        glm::vec3(glm::pi<float>())
-    )
-    , _enabledFontColor(
-        EnabledFontColorInfo,
-        glm::vec4(0.2f, 0.75f, 0.2f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _disabledFontColor(
-        DisabledFontColorInfo,
-        glm::vec4(0.55f, 0.2f, 0.2f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _globalRotation(GlobalRotationInfo)
+    , _screenSpaceRotation(ScreenSpaceRotationInfo)
+    , _masterRotation(MasterRotationInfo)
+    , _enabledFontColor(EnabledFontColorInfo)
+    , _disabledFontColor(DisabledFontColorInfo)
 {
     addProperty(_showOverlayOnClients);
     addProperty(_showLog);
@@ -571,9 +642,13 @@ void RenderEngine::initializeGL() {
 
     for (size_t i = 0; i < global::windowDelegate->nWindows(); i++) {
         std::string name = global::windowDelegate->nameForWindow(i);
+        if (name.empty()) {
+            name = std::format("Window {}", i);
+        }
+        const std::string identifier = std::format("Window_{}", i);
         PropertyOwner::PropertyOwnerInfo info = {
-            .identifier = std::format("Window_{}", i),
-            .guiName = name.empty() ? std::format("Window {}", i) : name
+            .identifier = identifier,
+            .name = name
         };
         auto w = std::make_unique<Window>(info, i);
         _windowing.addPropertySubOwner(w.get());
@@ -1179,8 +1254,8 @@ void RenderEngine::setResolveData(Dictionary resolveData) {
 
 void RenderEngine::takeScreenshot() {
     // We only create the directory here, as we don't want to spam the users screenshot
-    // folder everytime we start OpenSpace even when we are not taking any screenshots. So
-    // the first time we actually take one, we create the folder
+    // folder every time we start OpenSpace even when we are not taking any screenshots.
+    // So the first time we actually take one, we create the folder
 
     if (!std::filesystem::is_directory(absPath("${SCREENSHOTS}"))) {
         std::filesystem::create_directories(absPath("${SCREENSHOTS}"));

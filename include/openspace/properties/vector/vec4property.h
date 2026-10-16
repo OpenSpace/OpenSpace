@@ -32,12 +32,18 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::vec4> {
+    static constexpr glm::vec4 Min = glm::vec4(std::numeric_limits<float>::lowest());
+    static constexpr glm::vec4 Max = glm::vec4(std::numeric_limits<float>::max());
+    static constexpr glm::vec4 Step = glm::vec4(0.01f);
+};
+
+using Vec4PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::vec4>>;
+
 class Vec4Property : public NumericalProperty<glm::vec4> {
 public:
-    explicit Vec4Property(PropertyInfo info, glm::vec4 value = glm::vec4(0.f),
-        glm::vec4 minValue = glm::vec4(std::numeric_limits<float>::lowest()),
-        glm::vec4 maxValue = glm::vec4(std::numeric_limits<float>::max()),
-        glm::vec4 stepValue = glm::vec4(0.01f));
+    explicit Vec4Property(Vec4PropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

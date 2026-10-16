@@ -84,11 +84,11 @@ public:
      * passed text. In addition the initial size of the rendering window has to be passed.
      * The inputs for the ProgramObject are as follows:
      *
-     * The **vertex shader** recieves three `vec2` for each vertex: The `Position`
+     * The **vertex shader** receives three `vec2` for each vertex: The `Position`
      * (location 0) in pixel screen space coordinates, the `Base Texture Coordinates`
      * (location 1) which provides the texture coordinates for the base font layer, and
      * the `Outline Texture Coordinates` (location 2) which provides the texture
-     * coordinates for the outline font layer. Furhermore, the following uniforms are
+     * coordinates for the outline font layer. Furthermore, the following uniforms are
      * provided: The `projection` (`mat4`) contains the projection matrix that is derived
      * using the provided window size and maps the pixel coordinates to normalized device
      * coordinates, the `tex` (`sampler2D`) is the TextureAtlas that contains all glyphs

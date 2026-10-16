@@ -36,17 +36,16 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo FilePathInfo = {
-        "FilePath",
-        "File path",
-        "The file path that is used for this image provider. The file must point to an "
-        "image that is then loaded and used for all tiles.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo FilePathInfo = {
+        .identifier = "FilePath",
+        .name = "File path",
+        .description = "The file path that is used for this image provider. The file "
+            "must point to an image that is then loaded and used for all tiles.",
+        .visibility = Visibility::User
     };
 
     struct [[codegen::Dictionary(SingleImageProvider)]] Parameters {
-        // [[codegen::verbatim(FilePathInfo.description)]]
-        std::filesystem::path filePath;
+        std::filesystem::path filePath [[codegen::Info(FilePathInfo)]];
     };
 } // namespace
 #include "singleimagetileprovider_codegen.cpp"

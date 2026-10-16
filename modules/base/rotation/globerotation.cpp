@@ -42,57 +42,76 @@ namespace {
 
     constexpr std::string_view _loggerCat = "GlobeRotation";
 
-    constexpr Property::PropertyInfo GlobeInfo = {
-        "Globe",
-        "Attached globe",
-        "The node on which the longitude/latitude is specified. If the node is a globe, "
-        "the correct height information for the globe is used. Otherwise, the position "
-        "is specified based on the longitude and latitude on the node's interaction "
-        "sphere.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo GlobeInfo = {
+        .identifier = "Globe",
+        .name = "Attached globe",
+        .description = "The node on which the longitude/latitude is specified. If the "
+            "node is a globe, the correct height information for the globe is used. "
+            "Otherwise, the position is specified based on the longitude and latitude on "
+            "the node's interaction sphere.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo LatitudeInfo = {
-        "Latitude",
-        "Latitude",
-        "The latitude of the location on the globe's surface. The value can range from "
-        "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo LatitudeInfo = {
+        .identifier = "Latitude",
+        .name = "Latitude",
+        .description = "The latitude of the location on the globe's surface. The value "
+            "can range from -90 to 90, with negative values representing the southern "
+            "hemisphere of the globe.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { -90.0, 90.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo LongitudeInfo = {
-        "Longitude",
-        "Longitude",
-        "The longitude of the location on the globe's surface. The value can range from "
-        "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo LongitudeInfo = {
+        .identifier = "Longitude",
+        .name = "Longitude",
+        .description = "The longitude of the location on the globe's surface. The value "
+            "can range from -180 to 180, with negative values representing the western "
+            "hemisphere of the globe.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { -180.0, 180.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo AngleInfo = {
-        "Angle",
-        "Angle",
-        "A rotation angle (in degrees) that can be used to rotate the object around its "
-        "own y-axis, which will be pointing out of the globe's surface.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo AngleInfo = {
+        .identifier = "Angle",
+        .name = "Angle",
+        .description = "A rotation angle (in degrees) that can be used to rotate the "
+            "object around its own y-axis, which will be pointing out of the globe's "
+            "surface.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { 0.0, 360.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo UseHeightmapInfo = {
-        "UseHeightmap",
-        "Use heightmap",
-        "If set to true, the heightmap will be used when computing the surface normal. "
-        "This means that the object will be rotated to lay flat on the surface at the "
-        "given coordinate and follow the shape of the landscape.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo UseHeightmapInfo = {
+        .identifier = "UseHeightmap",
+        .name = "Use heightmap",
+        .description = "If set to true, the heightmap will be used when computing the "
+            "surface normal. This means that the object will be rotated to lay flat on "
+            "the surface at the given coordinate and follow the shape of the landscape.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo UseCameraInfo = {
-        "UseCamera",
-        "Use camera",
-        "If this value is 'true', the latitute and longitude are updated each frame "
-        "to match the location of the camera.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseCameraInfo = {
+        .identifier = "UseCamera",
+        .name = "Use camera",
+        .description = "If this value is 'true', the latitude and longitude are updated "
+            "each frame to match the location of the camera.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // Orients the scene graph node in such a way that the y-axis points away from the
@@ -101,23 +120,19 @@ namespace {
     // [GlobeTranslation](#base_translation_globe) to place the scene graph node at the
     // same position for which the rotation is calculated.
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
-        // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe [[codegen::identifier()]];
+        std::string globe [[codegen::Info(GlobeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(LatitudeInfo.description)]]
-        double latitude [[codegen::inrange(-90.0, 90.0)]];
+        double latitude [[codegen::Info(LatitudeInfo), codegen::inrange(-90.0, 90.0)]];
 
-        // [[codegen::verbatim(LongitudeInfo.description)]]
-        double longitude [[codegen::inrange(-180.0, 180.0)]];
+        double longitude
+            [[codegen::Info(LongitudeInfo), codegen::inrange(-180.0, 180.0)]];
 
-        // [[codegen::verbatim(AngleInfo.description)]]
-        std::optional<double> angle [[codegein::inrange(0.0, 360.0)]];
+        std::optional<double> angle
+            [[codegen::Info(AngleInfo), codegein::inrange(0.0, 360.0)]];
 
-        // [[codegen::verbatim(UseHeightmapInfo.description)]]
-        std::optional<bool> useHeightmap;
+        std::optional<bool> useHeightmap [[codegen::Info(UseHeightmapInfo)]];
 
-        // [[codegen::verbatim(UseCameraInfo.description)]]
-        std::optional<bool> useCamera;
+        std::optional<bool> useCamera [[codegen::Info(UseCameraInfo)]];
     };
 } // namespace
 #include "globerotation_codegen.cpp"
@@ -134,11 +149,11 @@ Documentation GlobeRotation::Documentation() {
 GlobeRotation::GlobeRotation(const Dictionary& dictionary)
     : Rotation(dictionary)
     , _sceneGraphNode(GlobeInfo)
-    , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
-    , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
-    , _angle(AngleInfo, 0.0, 0.0, 360.0)
-    , _useHeightmap(UseHeightmapInfo, false)
-    , _useCamera(UseCameraInfo, false)
+    , _latitude(LatitudeInfo)
+    , _longitude(LongitudeInfo)
+    , _angle(AngleInfo)
+    , _useHeightmap(UseHeightmapInfo)
+    , _useCamera(UseCameraInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

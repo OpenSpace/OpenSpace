@@ -42,7 +42,7 @@ namespace openspace {
  * 2. We want to be able to decode directly into our buffer without having to go through
  *    the opj_image_t object.
  *    See: https://github.com/uclouvain/openjpeg/issues/837
- * 3. Decoding precison is always 32-bits integers, meaning conversion has to be done if
+ * 3. Decoding precision is always 32-bits integers, meaning conversion has to be done if
  *    8-bytes are preferred.
  *    See: https://github.com/uclouvain/openjpeg/issues/836
  */

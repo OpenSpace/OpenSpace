@@ -162,7 +162,7 @@ void ReadFileJob::execute() {
             pmdec[i] = 0.f;
         }
 
-        // Convert Proper Motion from ICRS [Ra,Dec] to Galactic Tanget Vector [l,b]
+        // Convert Proper Motion from ICRS [Ra,Dec] to Galactic Tangent Vector [l,b]
         const glm::vec3 uICRS = glm::vec3(
             -std::sin(glm::radians(ra[i])) * pmra[i] -
                 std::cos(glm::radians(ra[i])) * std::sin(glm::radians(dec[i])) * pmdec[i],

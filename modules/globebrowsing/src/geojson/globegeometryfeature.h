@@ -51,7 +51,7 @@ struct RenderData;
 class RenderableGlobe;
 
 /**
- * This class is responsible for rendering the geomoetry features of globes, created e.g.
+ * This class is responsible for rendering the geometry features of globes, created e.g.
  * from GeoJson files.
  */
 class GlobeGeometryFeature {

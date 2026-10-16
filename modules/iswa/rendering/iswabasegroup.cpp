@@ -33,25 +33,32 @@ namespace {
 
     constexpr std::string_view _loggerCat = "IswaBaseGroup";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "", // @TODO Missing documentation
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo AlphaInfo = {
-        "Alpha",
-        "Alpha",
-        "", // @TODO Missing documentation
-        Property::Visibility::User
+    constexpr FloatPropertyInfo AlphaInfo = {
+        .identifier = "Alpha",
+        .name = "Alpha",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.9f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DeleteInfo = {
-        "Delete",
-        "Delete",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr TriggerPropertyInfo DeleteInfo = {
+        .identifier = "Delete",
+        .name = "Delete",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer
     };
 } // namespace
 
@@ -59,8 +66,8 @@ namespace openspace {
 
 IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     : PropertyOwner({ std::move(name) })
-    , _enabled(EnabledInfo, true)
-    , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
+    , _enabled(EnabledInfo)
+    , _alpha(AlphaInfo)
     , _delete(DeleteInfo)
     , _iswaType(std::move(type))
 {

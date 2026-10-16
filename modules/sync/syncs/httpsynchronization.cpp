@@ -67,7 +67,7 @@ namespace {
 
         // The destination for the unzipping. If this value is specified, all zip files
         // contained in the synchronization will be unzipped into the same specified
-        // folder. If this value is specified, but 'unzipFiles' is false, no extaction
+        // folder. If this value is specified, but 'unzipFiles' is false, no extraction
         // will be performed.
         std::optional<std::string> unzipFilesDestination;
     };
@@ -91,7 +91,7 @@ HttpSynchronization::HttpSynchronization(const Dictionary& dict,
 
     _identifier = p.identifier;
     _version = p.version;
-    _unzipFiles = p.unzipFiles.value_or(_unzipFiles);
+    _shouldUnzipFiles = p.unzipFiles.value_or(_shouldUnzipFiles);
     if (p.unzipFilesDestination.has_value()) {
         _unzipFilesDestination = *p.unzipFilesDestination;
     }
@@ -427,7 +427,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             failed = true;
         }
 
-        if (_unzipFiles && originalName.extension() == ".zip") {
+        if (_shouldUnzipFiles && originalName.extension() == ".zip") {
             std::string source = originalName.string();
             const std::string dest =
                 _unzipFilesDestination.has_value() ?

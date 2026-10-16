@@ -485,7 +485,7 @@ def check_inline_file(file, component):
       print(file, '\t', 'Line length exceeded: ', line_length)
 
     if (not '_doc.inl' in file and not '_lua.inl'):
-      # The _doc.inl files are allowed to use using namespace as they are inclued
+      # The _doc.inl files are allowed to use using namespace as they are included
       # from the cpp files and thus don't leak it
       using_namespaces = check_using_namespace(lines)
       if using_namespaces:

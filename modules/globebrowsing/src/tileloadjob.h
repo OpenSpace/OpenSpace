@@ -57,7 +57,7 @@ struct TileLoadJob : public Job<RawTile> {
     void execute() override;
 
     /**
-     * Marks the job as finised and releases ownership of the data. Unless the job is
+     * Marks the job as finished and releases ownership of the data. Unless the job is
      * marked as finished, the pixel data will be deallocated when the job is deleted.
      */
     RawTile product() override;

@@ -61,94 +61,118 @@ namespace {
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    constexpr Property::PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
-        "This value determines the RGB main color for the lines and points of the trail.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo LineColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "This value determines the RGB main color for the lines and "
+            "points of the trail.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo EnableFadeInfo = {
-        "EnableFade",
-        "Enable line fading of old points",
-        "Toggles whether the trail should fade older points out. If this value is true, "
-        "the 'Fade' parameter determines the speed of fading. If this value is false, "
-        "the entire trail is rendered at full opacity and color.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo EnableFadeInfo = {
+        .identifier = "EnableFade",
+        .name = "Enable line fading of old points",
+        .description = "Toggles whether the trail should fade older points out. If this "
+            "value is true, the 'Fade' parameter determines the speed of fading. If this "
+            "value is false, the entire trail is rendered at full opacity and color.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo LineLengthInfo = {
-        "LineLength",
-        "Line length",
-        "The extent of the rendered trail. A value of 0 will result in no trail and a "
-        "value of 1 will result in a trail that covers the entire extent. The setting "
-        "only applies if 'EnableFade' is true. If it is false, this setting has no "
-        "effect.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo LineLengthInfo = {
+        .identifier = "LineLength",
+        .name = "Line length",
+        .description = "The extent of the rendered trail. A value of 0 will result in no "
+            "trail and a value of 1 will result in a trail that covers the entire "
+            "extent. The setting only applies if 'EnableFade' is true. If it is false, "
+            "this setting has no effect.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo LineFadeAmountInfo = {
-        "LineFadeAmount",
-        "Line fade amount",
-        "The amount of the trail that should be faded. If the value is 0 then the trail "
-        "will have no fading applied. A value of 0.6 will result in a trail where 60% of "
-        "the extent of the trail will have fading applied to it. In other words, the 40% "
-        "closest to the head of the trail will be solid and the rest will fade until "
-        "completely transparent at the end of the trail. A value of 1 will result in a "
-        "trail that starts fading immediately, becoming fully transparent by the end of "
-        "the trail.This setting only applies if the 'EnableFade' value is true. If it is "
-        "false, this setting has no effect.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo LineFadeAmountInfo = {
+        .identifier = "LineFadeAmount",
+        .name = "Line fade amount",
+        .description = "The amount of the trail that should be faded. If the value is 0 "
+            "then the trail will have no fading applied. A value of 0.6 will result in a "
+            "trail where 60% of the extent of the trail will have fading applied to it. "
+            "In other words, the 40% closest to the head of the trail will be solid and "
+            "the rest will fade until completely transparent at the end of the trail. A "
+            "value of 1 will result in a trail that starts fading immediately, becoming "
+            "fully transparent by the end of the trail.This setting only applies if the "
+            "'EnableFade' value is true. If it is false, this setting has no effect.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "Specifies the line width of the trail lines, if the selected rendering method "
-        "includes lines. If the rendering mode is Points, this value is ignored.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "Specifies the line width of the trail lines, if the selected "
+            "rendering method includes lines. If the rendering mode is Points, this "
+            "value is ignored.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 10.f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr Property::PropertyInfo PointSizeInfo = {
-        "PointSize",
-        "Point size",
-        "Specifies the base size of the points along the line, if the selected rendering "
-        "method includes points. If the rendering mode is Lines, this value is ignored. "
-        "If a subsampling of the values is performed, the subsampled values are half "
-        "this size.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo PointSizeInfo = {
+        .identifier = "PointSize",
+        .name = "Point size",
+        .description = "Specifies the base size of the points along the line, if the "
+            "selected rendering method includes points. If the rendering mode is Lines, "
+            "this value is ignored. If a subsampling of the values is performed, the "
+            "subsampled values are half this size.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1,
+            .minMax = { 1, 64 }
+        }
     };
 
-    constexpr Property::PropertyInfo RenderingModeInfo = {
-        "Rendering",
-        "Rendering mode",
-        "Determines how the trail should be rendered. If 'Lines' is selected, only the "
-        "line part is visible, if 'Points' is selected, only the corresponding points "
-        "(and subpoints) are shown. 'Lines+Points' shows both parts.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo RenderingModeInfo = {
+        .identifier = "Rendering",
+        .name = "Rendering mode",
+        .description = "Determines how the trail should be rendered. If 'Lines' is "
+            "selected, only the line part is visible, if 'Points' is selected, only the "
+            "corresponding points (and subpoints) are shown. 'Lines+Points' shows both "
+            "parts.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
         // A translation used to compute locations along the path.
         Dictionary translation [[codegen::reference("core_translation")]];
 
-        // [[codegen::verbatim(LineColorInfo.description)]]
-        glm::vec3 color [[codegen::color()]];
+        glm::vec3 color [[codegen::Info(LineColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(EnableFadeInfo.description)]]
-        std::optional<bool> enableFade;
+        std::optional<bool> enableFade [[codegen::Info(EnableFadeInfo)]];
 
-        // [[codegen::verbatim(LineLengthInfo.description)]]
-        std::optional<float> lineLength [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> lineLength
+            [[codegen::Info(LineLengthInfo), codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(LineFadeAmountInfo.description)]]
-        std::optional<float> lineFadeAmount [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> lineFadeAmount
+            [[codegen::Info(LineFadeAmountInfo), codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(PointSizeInfo.description)]]
-        std::optional<int> pointSize [[codegen::greaterequal(0)]];
+        std::optional<int> pointSize
+            [[codegen::Info(PointSizeInfo), codegen::greaterequal(0)]];
 
         enum class RenderingMode {
             Lines,
@@ -156,8 +180,8 @@ namespace {
             LinesPoints [[codegen::key("Lines+Points")]],
             PointsLines [[codegen::key("Lines+Points")]]
         };
-        // [[codegen::verbatim(RenderingModeInfo.description)]]
-        std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
+        std::optional<RenderingMode> renderingMode
+            [[codegen::Info(RenderingModeInfo), codegen::key("Rendering")]];
     };
 } // namespace
 #include "renderabletrail_codegen.cpp"
@@ -177,13 +201,13 @@ RenderableTrail::Appearance::Appearance()
         "Appearance",
         "The appearance of the trail"
     })
-    , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , useLineFade(EnableFadeInfo, true)
-    , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
-    , pointSize(PointSizeInfo, 1, 1, 64)
+    , lineColor(LineColorInfo)
+    , useLineFade(EnableFadeInfo)
+    , lineWidth(LineWidthInfo)
+    , pointSize(PointSizeInfo)
     , renderingModes(RenderingModeInfo)
-    , lineLength(LineLengthInfo, 1.f, 0.f, 1.f)
-    , lineFadeAmount(LineFadeAmountInfo, 1.f, 0.f, 1.f)
+    , lineLength(LineLengthInfo)
+    , lineFadeAmount(LineFadeAmountInfo)
 {
     renderingModes.addOptions({
         { RenderingModeLines, "Lines" },

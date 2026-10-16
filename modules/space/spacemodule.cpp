@@ -59,17 +59,19 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SpiceExceptionInfo = {
-        "ShowExceptions",
-        "Show exceptions",
-        "If enabled, errors from SPICE will be thrown and show up in the log. If "
-        "disabled, the errors will be ignored silently.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo SpiceExceptionInfo = {
+        .identifier = "ShowExceptions",
+        .name = "Show exceptions",
+        .description = "If enabled, errors from SPICE will be thrown and show up in the "
+            "log. If disabled, the errors will be ignored silently.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = true
+        }
     };
 
     struct [[codegen::Dictionary(SpaceModule)]] Parameters {
-        // [[codegen::verbatim(SpiceExceptionInfo.description)]]
-        std::optional<bool> showExceptions;
+        std::optional<bool> showExceptions [[codegen::Info(SpiceExceptionInfo)]];
     };
 } // namespace
 #include "spacemodule_codegen.cpp"
@@ -84,7 +86,7 @@ Documentation SpaceModule::Documentation() {
 
 SpaceModule::SpaceModule()
     : OpenSpaceModule(Name)
-    , _showSpiceExceptions(SpiceExceptionInfo, true)
+    , _showSpiceExceptions(SpiceExceptionInfo)
 {
     _showSpiceExceptions.onChange([&t = _showSpiceExceptions](){
         SpiceManager::ref().setExceptionHandling(SpiceManager::UseException(t));

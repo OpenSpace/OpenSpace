@@ -56,7 +56,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
                                const void* buffer, int w, int h)
 {
     // This should never happen - if accelerated rendering is on the OnAcceleratePaint
-    // method should be called. But we instatiate the web render handler and the browser
+    // method should be called. But we instantiate the web render handler and the browser
     // instance in different places so room for error
     assert_msg(!_acceleratedRendering, "Accelerated rendering flag is turned on");
 
@@ -116,8 +116,8 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser>,
                                           const CefAcceleratedPaintInfo& info)
 {
     // This should never happen - if accelerated rendering is off the OnPaint method
-    // should be called. But we instatiate the web render handler and the browser instance
-    // in different places so there is room for error
+    // should be called. But we instantiate the web render handler and the browser
+    // instance in different places so there is room for error
     assert_msg(_acceleratedRendering, "Accelerated rendering flag is turned off");
 
     if (dirtyRects.empty()) {

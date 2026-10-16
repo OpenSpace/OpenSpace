@@ -42,7 +42,7 @@ std::vector<std::string> DataProcessorText::readMetadata(const std::string& data
         return std::vector<std::string>();
     }
 
-    // The intresting part of the file looks like this:
+    // The interesting part of the file looks like this:
     //
     // # Output data: field with 61x61=3721 elements
     // # x           y           z           N           V_x         B_x
@@ -97,7 +97,7 @@ void DataProcessorText::addDataValues(const std::string& data,
     std::string line;
     std::stringstream memorystream = std::stringstream(data);
 
-    // For standard diviation in the add() function
+    // For standard deviation in the add() function
     std::vector<float> sum(numOptions, 0.f);
     std::vector<std::vector<float>> optionValues(numOptions);
 

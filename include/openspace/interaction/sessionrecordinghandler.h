@@ -239,6 +239,15 @@ public:
      */
     void savePropertyBaseline(Property& prop);
 
+    /**
+     * Same as #savePropertyBaseline, but for the enabled state of an enablable property.
+     * The initial enabled state is stored as a set enabled command at the beginning of
+     * the recording file, to be applied when playback starts.
+     *
+     * \param prop The enablable property whose enabled state is being set
+     */
+    void savePropertyEnabledBaseline(Property& prop);
+
 private:
     void tickPlayback(double dt);
     void tickRecording(double dt);

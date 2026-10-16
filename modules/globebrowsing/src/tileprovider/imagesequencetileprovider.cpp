@@ -35,43 +35,52 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo IndexInfo = {
-        "Index",
-        "Index",
-        "The index into the list of images that is used to pick the currently displayed "
-        "image.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo IndexInfo = {
+        .identifier = "Index",
+        .name = "Index",
+        .description = "The index into the list of images that is used to pick the "
+            "currently displayed image.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0 }
+        }
     };
 
-    constexpr Property::PropertyInfo NumImagesInfo = {
-        "NumberImages",
-        "Number of images",
-        "The number of images that can be shown. The 'Index' value must be between 0 and "
-        "this value - 1.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo NumImagesInfo = {
+        .identifier = "NumberImages",
+        .name = "Number of images",
+        .description = "The number of images that can be shown. The 'Index' value must "
+            "be between 0 and this value - 1.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0 }
+        }
     };
 
-    constexpr Property::PropertyInfo CurrentImageInfo = {
-        "CurrentImage",
-        "Current image",
-        "The read-only value of the currently selected image.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo CurrentImageInfo = {
+        .identifier = "CurrentImage",
+        .name = "Current image",
+        .description = "The read-only value of the currently selected image.",
+        .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo FolderPathInfo = {
-        "FolderPath",
-        "Folder path",
-        "The path that is used to look for images for this image provider. The path must "
-        "point to an existing folder that contains images.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FolderPathInfo = {
+        .identifier = "FolderPath",
+        .name = "Folder path",
+        .description = "The path that is used to look for images for this image "
+            "provider. The path must point to an existing folder that contains images.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ImageSequenceTileProvider)]] Parameters {
-        // [[codegen::verbatim(IndexInfo.description)]]
-        std::optional<int> index;
+        std::optional<int> index [[codegen::Info(IndexInfo)]];
 
-        // [[codegen::verbatim(FolderPathInfo.description)]]
-        std::filesystem::path folderPath [[codegen::directory()]];
+        std::filesystem::path folderPath
+            [[codegen::Info(FolderPathInfo), codegen::directory()]];
     };
 } // namespace
 #include "imagesequencetileprovider_codegen.cpp"
@@ -83,8 +92,8 @@ Documentation ImageSequenceTileProvider::Documentation() {
 }
 
 ImageSequenceTileProvider::ImageSequenceTileProvider(const Dictionary& dictionary)
-    : _index(IndexInfo, 0, 0)
-    , _nImages(NumImagesInfo, 0, 0)
+    : _index(IndexInfo)
+    , _nImages(NumImagesInfo)
     , _currentImage(CurrentImageInfo)
     , _folderPath(FolderPathInfo)
     , _initDict(dictionary)
@@ -97,10 +106,7 @@ ImageSequenceTileProvider::ImageSequenceTileProvider(const Dictionary& dictionar
     _index.onChange([this]() { _isImageDirty = true; });
     addProperty(_index);
 
-    _nImages.setReadOnly(true);
     addProperty(_nImages);
-
-    _currentImage.setReadOnly(true);
     addProperty(_currentImage);
 
     _folderPath = p.folderPath.string();

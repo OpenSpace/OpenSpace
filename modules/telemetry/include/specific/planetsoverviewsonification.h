@@ -54,7 +54,7 @@ private:
 
     /**
      * For this sonification, this implementiation is empty since the GUI properties keep
-     * track of tha data with the `onChange` function.
+     * track of the data with the `onChange` function.
      *
      * \param camera The camera in the scene (not used in this case)
      * \return `true` if the data was updated, otherwise `false`

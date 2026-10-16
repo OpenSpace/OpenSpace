@@ -73,58 +73,83 @@ namespace {
     // Determines at which speed the console opens
     constexpr float ConsoleOpenSpeed = 2.5;
 
-    constexpr Property::PropertyInfo VisibleInfo = {
-        "IsVisible",
-        "Is visible",
-        "Determines whether the Lua console is shown on the screen or not. Toggling it "
-        "will fade the console in and out.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo VisibleInfo = {
+        .identifier = "IsVisible",
+        .name = "Is visible",
+        .description = "Determines whether the Lua console is shown on the screen or "
+            "not. Toggling it will fade the console in and out.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ShouldBeSynchronizedInfo = {
-       "ShouldBeSynchronized",
-       "Should be synchronized",
-       "Determines whether the entered commands will only be executed locally (if this "
-       "is disabled), or whether they will be send to other connected nodes, for "
-       "example in a cluster environment.",
-       Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShouldBeSynchronizedInfo = {
+        .identifier = "ShouldBeSynchronized",
+        .name = "Should be synchronized",
+        .description = "Determines whether the entered commands will only be executed "
+            "locally (if this is disabled), or whether they will be send to other "
+            "connected nodes, for example in a cluster environment.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ShouldSendToRemoteInfo = {
-        "ShouldSendToRemote",
-        "Should send to remote",
-        "Determines whether the entered commands will only be executed locally (if this "
-        "is disabled), or whether they will be send to connected remote instances (other "
-        "peers through an astrocast connection).",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShouldSendToRemoteInfo = {
+        .identifier = "ShouldSendToRemote",
+        .name = "Should send to remote",
+        .description = "Determines whether the entered commands will only be executed "
+            "locally (if this is disabled), or whether they will be send to connected "
+            "remote instances (other peers through an astrocast connection).",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo BackgroundColorInfo = {
-        "BackgroundColor",
-        "Background color",
-        "Sets the background color of the console.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec4PropertyInfo BackgroundColorInfo = {
+        .identifier = "BackgroundColor",
+        .name = "Background color",
+        .description = "Sets the background color of the console.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec4(21.f / 255.f, 23.f / 255.f, 28.f / 255.f, 0.8f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo EntryTextColorInfo = {
-        "EntryTextColor",
-        "Entry text color",
-        "Sets the text color of the entry area of the console.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec4PropertyInfo EntryTextColorInfo = {
+        .identifier = "EntryTextColor",
+        .name = "Entry text color",
+        .description = "Sets the text color of the entry area of the console.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec4(1.f, 1.f, 1.f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo HistoryTextColorInfo = {
-        "HistoryTextColor",
-        "History text color",
-        "Sets the text color of the history area of the console.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec4PropertyInfo HistoryTextColorInfo = {
+        .identifier = "HistoryTextColor",
+        .name = "History text color",
+        .description = "Sets the text color of the history area of the console.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec4(1.f, 1.f, 1.f, 0.65f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo HistoryLengthInfo = {
-        "HistoryLength",
-        "History length",
-        "Determines the length of the history in number of lines.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo HistoryLengthInfo = {
+        .identifier = "HistoryLength",
+        .name = "History length",
+        .description = "Determines the length of the history in number of lines.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 13,
+            .minMax = { 0, 100 }
+        }
     };
 
     std::string sanitizeInput(std::string str) {
@@ -160,28 +185,13 @@ namespace openspace {
 
 LuaConsole::LuaConsole()
     : PropertyOwner({ "LuaConsole", "Lua Console" })
-    , _isVisible(VisibleInfo, false)
-    , _shouldBeSynchronized(ShouldBeSynchronizedInfo, true)
-    , _shouldSendToRemote(ShouldSendToRemoteInfo, false)
-    , _backgroundColor(
-        BackgroundColorInfo,
-        glm::vec4(21.f / 255.f, 23.f / 255.f, 28.f / 255.f, 0.8f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _entryTextColor(
-        EntryTextColorInfo,
-        glm::vec4(1.f, 1.f, 1.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _historyTextColor(
-        HistoryTextColorInfo,
-        glm::vec4(1.f, 1.f, 1.f, 0.65f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _historyLength(HistoryLengthInfo, 13, 0, 100)
+    , _isVisible(VisibleInfo)
+    , _shouldBeSynchronized(ShouldBeSynchronizedInfo)
+    , _shouldSendToRemote(ShouldSendToRemoteInfo)
+    , _backgroundColor(BackgroundColorInfo)
+    , _entryTextColor(EntryTextColorInfo)
+    , _historyTextColor(HistoryTextColorInfo)
+    , _historyLength(HistoryLengthInfo)
     , _autoCompleteState{}
 {
     addProperty(_isVisible);
@@ -506,7 +516,7 @@ void LuaConsole::render() {
     // for the '> ' characters in the beginning of the command
     const size_t totalCommandSize = 2 + currentCommand.size() +
         _autoCompleteState.suggestion.size();
-    // Scalefactor 0.925f chosen arbitraily to fit characters on screen with some margin
+    // Scalefactor 0.925f chosen arbitrarily to fit characters on screen with some margin
     const size_t nCharactersPerRow = std::max(
         static_cast<size_t>(1),
         static_cast<size_t>(res.x * 0.925f / static_cast<float>(_font->glyph('m')->width))
@@ -514,7 +524,7 @@ void LuaConsole::render() {
     size_t nCommandRows = static_cast<size_t>(
         std::ceil(static_cast<double>(totalCommandSize) / nCharactersPerRow)
     );
-    // We're intrested in the zero based index when computing the input position.
+    // We're interested in the zero based index when computing the input position.
     // If the characters fit on one line we should not add any extra rows
     nCommandRows = nCommandRows > 1 ? nCommandRows - 1 : 0;
 
@@ -664,7 +674,7 @@ void LuaConsole::render() {
         const glm::vec4 Yellow(1.0f, 1.0f, 0.f, 1.f);
 
         const std::string masterOnlyExecutionText =
-            "Master only script execution (Nodes and Peers will not recieve scripts)";
+            "Master only script execution (Nodes and Peers will not receive scripts)";
         const glm::vec2 loc = locationForRightJustifiedText(masterOnlyExecutionText);
         RenderFont(*_font, loc, masterOnlyExecutionText, Yellow);
     }
@@ -689,7 +699,7 @@ void LuaConsole::render() {
         const glm::vec4 LightBlue(0.4f, 0.4f, 1.f, 1.f);
 
         const std::string localExecutionText =
-            "Local script execution (Peers will not recieve scripts)";
+            "Local script execution (Peers will not receive scripts)";
         const glm::vec2 loc = locationForRightJustifiedText(localExecutionText);
         RenderFont(*_font, loc, localExecutionText, LightBlue);
     }
@@ -1148,7 +1158,7 @@ bool LuaConsole::gatherPathSuggestions(size_t contextStart) {
     _autoCompleteState.input = userTypedPath;
 
     if (pathEnd != std::string::npos) {
-        // There is something after the path so we want to insert inbetween
+        // There is something after the path so we want to insert in between
         _autoCompleteState.insertPosition = contextStart + pathEnd;
     }
     else {
@@ -1174,7 +1184,7 @@ void LuaConsole::gatherFunctionSuggestions(size_t contextStart) {
     _autoCompleteState.input = possibleFunction.substr(0, functionEnd);
 
     if (functionEnd != std::string::npos) {
-        // There is something after the function so we want to insert inbetween
+        // There is something after the function so we want to insert in between
         _autoCompleteState.insertPosition = contextStart + functionEnd;
     }
     else {
@@ -1273,7 +1283,7 @@ void LuaConsole::applySuggestion() {
     if (_autoCompleteState.context == Context::Function &&
         !_autoCompleteState.suggestion.ends_with('.'))
     {
-        // We're in a leaf function => add parantheses
+        // We're in a leaf function => add parentheses
         currentCommand.insert(_inputPosition, "()");
         // Set the cursor position to be between the brackets
         _inputPosition++;

@@ -32,14 +32,20 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::dmat2x2> {
+    static constexpr glm::dmat2x2 Min =
+        createFillMat2x2<double>(std::numeric_limits<double>::lowest());
+    static constexpr glm::dmat2x2 Max =
+        createFillMat2x2<double>(std::numeric_limits<double>::max());
+    static constexpr glm::dmat2x2 Step = createFillMat2x2<double>(0.01);
+};
+
+using DMat2PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::dmat2x2>>;
+
 class DMat2Property : public NumericalProperty<glm::dmat2x2> {
 public:
-    explicit DMat2Property(PropertyInfo info, glm::dmat2x2 value = glm::dmat2x2(0.0),
-        glm::dmat2x2 minValue =
-            createFillMat2x2<double>(std::numeric_limits<double>::lowest()),
-        glm::dmat2x2 maxValue =
-            createFillMat2x2<double>(std::numeric_limits<double>::max()),
-        glm::dmat2x2 stepValue = createFillMat2x2<double>(0.01));
+    explicit DMat2Property(DMat2PropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

@@ -37,7 +37,7 @@ namespace {
         const float zScoreMin = normalizationValues.x;
         const float zScoreMax = normalizationValues.y;
         const float standardScore = (value - mean) / sd;
-        // Clamp intresting values
+        // Clamp interesting values
         const float clampStandardScore = std::clamp(standardScore, -zScoreMin, zScoreMax);
         // Return and normalize
         return (clampStandardScore + zScoreMin) / (zScoreMin + zScoreMax);

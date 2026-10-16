@@ -72,7 +72,7 @@ namespace {
         // The directory to store the output files in.
         std::string outputDirectory [[codegen::annotation("A valid filepath")]];
 
-        // The name of the .bin file to export data into, inluding the .bin extension,
+        // The name of the .bin file to export data into, including the .bin extension,
         // e.g. 'exoplanets.bin'.
         std::string outputBIN [[codegen::annotation("A valid filename")]];
 

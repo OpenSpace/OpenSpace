@@ -51,7 +51,14 @@ TEST_CASE("Property: Basic", "[property]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty({
+        .identifier = "p1",
+        .name = "a",
+        .description = "b",
+        .defaults = {
+            .value = 1.f
+        }
+    });
     owner.addProperty(p1);
 
     {
@@ -81,7 +88,14 @@ TEST_CASE("Property: Empty", "[property]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty({
+        .identifier = "p1",
+        .name = "a",
+        .description = "b",
+        .defaults = {
+            .value = 1.f
+        }
+    });
     owner.addProperty(p1);
 
     {
@@ -125,9 +139,23 @@ TEST_CASE("Property: Multiple", "[property]") {
     PropertyOwner owner = PropertyOwner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner); };
-    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty({
+        .identifier = "p1",
+        .name = "a",
+        .description = "b",
+        .defaults = {
+            .value = 1.f
+        }
+    });
     owner.addProperty(p1);
-    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty({
+        .identifier = "p2",
+        .name = "a",
+        .description = "b",
+        .defaults = {
+            .value = 1.f
+        }
+    });
     owner.addProperty(p2);
 
     {
@@ -172,17 +200,45 @@ TEST_CASE("Property: Multiple/2", "[property]") {
     PropertyOwner owner1 = PropertyOwner({ "base1" });
     global::rootPropertyOwner->addPropertySubOwner(owner1);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner1); };
-    FloatProperty p1 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1 = FloatProperty({
+        .identifier = "p1",
+        .name = "a",
+        .description = "b",
+        .defaults = {
+            .value = 1.f
+        }
+    });
     owner1.addProperty(p1);
-    FloatProperty p2 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p2 = FloatProperty({
+        .identifier = "p2",
+        .name = "a",
+        .description = "b",
+        .defaults = {
+            .value = 1.f
+        }
+    });
     owner1.addProperty(p2);
 
     PropertyOwner owner2 = PropertyOwner({ "base2" });
     global::rootPropertyOwner->addPropertySubOwner(owner2);
     defer { global::rootPropertyOwner->removePropertySubOwner(owner2); };
-    FloatProperty p21 = FloatProperty(Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p21 = FloatProperty({
+        .identifier = "p1",
+        .name = "a",
+        .description = "b",
+        .defaults = {
+            .value = 1.f
+        }
+    });
     owner2.addProperty(p21);
-    FloatProperty p22 = FloatProperty(Property::PropertyInfo("p2", "a", "b"), 1.f);
+    FloatProperty p22 = FloatProperty({
+        .identifier = "p2",
+        .name = "a",
+        .description = "b",
+        .defaults = {
+            .value = 1.f
+        }
+    });
     owner2.addProperty(p22);
 
     {

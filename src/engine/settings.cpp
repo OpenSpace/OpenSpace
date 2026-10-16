@@ -65,16 +65,16 @@ namespace version1 {
         std::optional<std::string> visibility = get_to<std::string>(json, "visibility");
         if (visibility.has_value()) {
             if (*visibility == "NoviceUser") {
-                settings.visibility = Property::Visibility::NoviceUser;
+                settings.visibility = Visibility::NoviceUser;
             }
             else if (*visibility == "User") {
-                settings.visibility = Property::Visibility::User;
+                settings.visibility = Visibility::User;
             }
             else if (*visibility == "AdvancedUser") {
-                settings.visibility = Property::Visibility::AdvancedUser;
+                settings.visibility = Visibility::AdvancedUser;
             }
             else if (*visibility == "Developer") {
-                settings.visibility = Property::Visibility::Developer;
+                settings.visibility = Visibility::Developer;
             }
             else {
                 throw RuntimeError(std::format(
@@ -173,16 +173,16 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
     }
     if (settings.visibility.has_value()) {
         switch (*settings.visibility) {
-            case Property::Visibility::NoviceUser:
+            case Visibility::NoviceUser:
                 json["visibility"] = "NoviceUser";
                 break;
-            case Property::Visibility::User:
+            case Visibility::User:
                 json["visibility"] = "User";
                 break;
-            case Property::Visibility::AdvancedUser:
+            case Visibility::AdvancedUser:
                 json["visibility"] = "AdvancedUser";
                 break;
-            case Property::Visibility::Developer:
+            case Visibility::Developer:
                 json["visibility"] = "Developer";
                 break;
             default:

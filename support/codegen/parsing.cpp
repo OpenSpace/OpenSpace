@@ -277,7 +277,7 @@ namespace {
             // bad
             if (const size_t end = block.find(')');  end != std::string_view::npos) {
                 throw CodegenError(std::format(
-                    "Attribute parameter parantheses unbalanced\n{}", block
+                    "Attribute parameter parentheses unbalanced\n{}", block
                 ));
             }
 
@@ -357,6 +357,14 @@ namespace {
         const std::vector<ParseResult> attributes = parseAttribute(line);
         for (const ParseResult& p : attributes) {
             if (p.key == keywords::Key)               { res.key = p.value; }
+            else if (p.key == keywords::Info) {
+                if (p.value.empty()) {
+                    throw CodegenError(std::format(
+                        "codegen::Info requires a non-empty argument\n{}", line
+                    ));
+                }
+                res.info = p.value;
+            }
             else if (p.key == keywords::Reference)    { res.reference = p.value; }
             else if (p.key == keywords::InRange)      { res.inrange = p.value; }
             else if (p.key == keywords::NotInRange)   { res.notinrange = p.value; }
@@ -776,9 +784,9 @@ namespace {
         size_t cursor = code.find(']', start) + 1;
 
         // We have to iterate until we find the first { character that is not contained in
-        // any parantheses. { } pairs in parantheses might be used for default
+        // any parentheses. { } pairs in parentheses might be used for default
         // initializing a function parameter
-        int nParantheses = 0;
+        int nParentheses = 0;
         while (true) {
             if (cursor >= code.size()) {
                 throw CodegenError(std::format(
@@ -787,13 +795,13 @@ namespace {
             }
 
             if (code[cursor] == '(') {
-                nParantheses += 1;
+                nParentheses += 1;
             }
             if (code[cursor] == ')') {
-                nParantheses -= 1;
+                nParentheses -= 1;
             }
 
-            if (code[cursor] == '{' && nParantheses == 0) {
+            if (code[cursor] == '{' && nParentheses == 0) {
                 break;
             }
 
@@ -1436,7 +1444,7 @@ namespace {
                     }
                     if (content[cursor] == ')') {
                         if (nOpenParans == 0) {
-                            // There are no open parantheses left, so we are done as this
+                            // There are no open parentheses left, so we are done as this
                             // closing parantheis is the end of the function declaration.
                             // There can't be any open curlys left or the code would be
                             // illformed C++
@@ -1447,7 +1455,7 @@ namespace {
                         }
                     }
                     if (content[cursor] == ',' && nOpenParans == 0) {
-                        // No open parantheses or curlies means that this command is the
+                        // No open parentheses or curlies means that this command is the
                         // separator to the next argument
                         break;
                     }

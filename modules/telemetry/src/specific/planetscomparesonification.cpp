@@ -46,7 +46,7 @@ namespace {
     constexpr int SecondPlanetIndex = 1;
     constexpr int SettingsIndex = 2;
 
-    // Indicies for the GUI settings
+    // Indices for the GUI settings
     constexpr int NumSettings = 6;
     constexpr int SizeDayIndex = 0;
     constexpr int GravityIndex = 1;
@@ -61,93 +61,126 @@ namespace {
         "Uranus", "Neptune"
     };
 
-    static const PropertyOwner::PropertyOwnerInfo PlanetsCompareSonificationInfo = {
-        "PlanetsCompareSonification",
-        "Planets Compare Sonification",
-        "Sonification that compares two different planets to each other in a variety of "
-        "aspects."
+    constexpr PropertyOwner::PropertyOwnerInfo PlanetsCompareSonificationInfo = {
+        .identifier = "PlanetsCompareSonification",
+        .name = "Planets Compare Sonification",
+        .description = "Sonification that compares two different planets to each other "
+            "in a variety of aspects."
     };
 
-    constexpr Property::PropertyInfo SelectedUpscaleInfo = {
-        "SelectedUpscale",
-        "Selected planet upscale multiplier",
-        "When a planet is selected to be compared, it is also upscaled as a visual "
-        "indicator of which planets are currently being compared. This property "
-        "determines how much the planet is scaled up as a multiplier of the original "
-        "size.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo SelectedUpscaleInfo = {
+        .identifier = "SelectedUpscale",
+        .name = "Selected planet upscale multiplier",
+        .description = "When a planet is selected to be compared, it is also upscaled as "
+            "a visual indicator of which planets are currently being compared. This "
+            "property determines how much the planet is scaled up as a multiplier of the "
+            "original size.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 2000.0,
+            .minMax = { 0.0, 1.0e+20 }
+        }
     };
 
-    constexpr Property::PropertyInfo SelectedScaleInterpolationTimeInfo = {
-        "SelectedScaleInterpolationTimeInfo",
-        "Selected planet scale interpolation time",
-        "When a planet is selected to be compared, it is also upscaled as a visual "
-        "indicator of which planets are currently being compared. This property "
-        "determines over how many seconds the scaling animation should play.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo SelectedScaleInterpolationTimeInfo = {
+        .identifier = "SelectedScaleInterpolationTimeInfo",
+        .name = "Selected planet scale interpolation time",
+        .description = "When a planet is selected to be compared, it is also upscaled as "
+            "a visual indicator of which planets are currently being compared. This "
+            "property determines over how many seconds the scaling animation should "
+            "play.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.0,
+            .minMax = { 0.0, 60.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo FirstOptionInfo = {
-        "FirstOption",
-        "Choose a planet to compare",
-        "Choose a planet in the list to compare to the other selected planet.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo FirstOptionInfo = {
+        .identifier = "FirstOption",
+        .name = "Choose a planet to compare",
+        .description = "Choose a planet in the list to compare to the other selected "
+            "planet.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo SecondOptionInfo = {
-        "SecondOption",
-        "Choose another planet to compare",
-        "Choose another planet in the list to compare to the other selected planet.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo SecondOptionInfo = {
+        .identifier = "SecondOption",
+        .name = "Choose another planet to compare",
+        .description = "Choose another planet in the list to compare to the other "
+            "selected planet.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo ToggleAllInfo = {
-        "ToggleAll",
-        "All",
-        "Toggle all comparing sonification varieties for both selected planets.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ToggleAllInfo = {
+        .identifier = "ToggleAll",
+        .name = "All",
+        .description = "Toggle all comparing sonification varieties for both selected "
+            "planets.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo SizeDayInfo = {
-        "SizeDay",
-        "Size/day",
-        "Toggle size/day sonification for both selected planets.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo SizeDayInfo = {
+        .identifier = "SizeDay",
+        .name = "Size/day",
+        .description = "Toggle size/day sonification for both selected planets.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo GravityInfo = {
-        "Gravity",
-        "Gravity",
-        "Toggle gravity sonification for both selected planets.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo GravityInfo = {
+        .identifier = "Gravity",
+        .name = "Gravity",
+        .description = "Toggle gravity sonification for both selected planets.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo TemperatureInfo = {
-        "Temperature",
-        "Temperature",
-        "Toggle temperature sonification for both selected planets.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo TemperatureInfo = {
+        .identifier = "Temperature",
+        .name = "Temperature",
+        .description = "Toggle temperature sonification for both selected planets.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AtmosphereInfo = {
-        "Atmosphere",
-        "Atmosphere",
-        "Toggle atmosphere sonification for both selected planets.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo AtmosphereInfo = {
+        .identifier = "Atmosphere",
+        .name = "Atmosphere",
+        .description = "Toggle atmosphere sonification for both selected planets.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo MoonsInfo = {
-        "Moons",
-        "Moons",
-        "Toggle moons sonification for both selected planets.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo MoonsInfo = {
+        .identifier = "Moons",
+        .name = "Moons",
+        .description = "Toggle moons sonification for both selected planets.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo RingsInfo = {
-        "Rings",
-        "Rings",
-        "Toggle rings sonification for both selected planets.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo RingsInfo = {
+        .identifier = "Rings",
+        .name = "Rings",
+        .description = "Toggle rings sonification for both selected planets.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 } // namespace
 
@@ -155,17 +188,17 @@ namespace openspace {
 
 PlanetsCompareSonification::PlanetsCompareSonification(const std::string& ip, int port)
     : TelemetryBase(PlanetsCompareSonificationInfo, ip, port)
-    , _selectedUpscale(SelectedUpscaleInfo, 2000.0, 0.0, 1.0e+20)
-    , _selectedScaleInterpolationTime(SelectedScaleInterpolationTimeInfo, 1.0, 0.0, 60.0)
+    , _selectedUpscale(SelectedUpscaleInfo)
+    , _selectedScaleInterpolationTime(SelectedScaleInterpolationTimeInfo)
     , _firstPlanet(FirstOptionInfo)
     , _secondPlanet(SecondOptionInfo)
-    , _toggleAll(ToggleAllInfo, false)
-    , _sizeDayEnabled(SizeDayInfo, false)
-    , _gravityEnabled(GravityInfo, false)
-    , _temperatureEnabled(TemperatureInfo, false)
-    , _atmosphereEnabled(AtmosphereInfo, false)
-    , _moonsEnabled(MoonsInfo, false)
-    , _ringsEnabled(RingsInfo, false)
+    , _toggleAll(ToggleAllInfo)
+    , _sizeDayEnabled(SizeDayInfo)
+    , _gravityEnabled(GravityInfo)
+    , _temperatureEnabled(TemperatureInfo)
+    , _atmosphereEnabled(AtmosphereInfo)
+    , _moonsEnabled(MoonsInfo)
+    , _ringsEnabled(RingsInfo)
 {
     // Scaling animation properties
     _selectedUpscale.setExponent(15.f);

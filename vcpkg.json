@@ -57,7 +57,10 @@
     "kubazip",
     "lua",
     "lz4",
-    "mold",
+    {
+      "name": "mold",
+      "platform": "!arm64"
+    },
     "nlohmann-json",
     "openjpeg",
     "oscpack",
@@ -72,12 +75,11 @@
     "spice",
     {
       "name": "spout2",
-      "platform": "windows"
+      "platform": "windows & !arm64"
     },
     "stbimage",
     "tiny-process-library",
     "tinyxml2",
-    "tracy",
     "tuio",
     {
       "name": "vcpkg-cmake",

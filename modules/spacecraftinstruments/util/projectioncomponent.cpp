@@ -53,47 +53,60 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ProjectionComponent";
 
-    constexpr Property::PropertyInfo ProjectionInfo = {
-        "PerformProjection",
-        "Perform projections",
-        "If this value is enabled, this ProjectionComponent will perform projections. If "
-        "it is disabled, projections will be ignored.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ProjectionInfo = {
+        .identifier = "PerformProjection",
+        .name = "Perform projections",
+        .description = "If this value is enabled, this ProjectionComponent will perform "
+            "projections. If it is disabled, projections will be ignored.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ClearProjectionInfo = {
-        "ClearAllProjections",
-        "Clear projections",
-        "If this property is triggered, it will remove all the projections that have "
-        "already been applied.",
-        Property::Visibility::User
+    constexpr TriggerPropertyInfo ClearProjectionInfo = {
+        .identifier = "ClearAllProjections",
+        .name = "Clear projections",
+        .description = "If this property is triggered, it will remove all the "
+            "projections that have already been applied.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo FadingInfo = {
-        "ProjectionFading",
-        "Projection fading",
-        "This value fades the previously performed projections in or out. If this value "
-        "is equal to '1', the projections are fully visible, if the value is equal to "
-        "'0', the performed projections are completely invisible.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo FadingInfo = {
+        .identifier = "ProjectionFading",
+        .name = "Projection fading",
+        .description = "This value fades the previously performed projections in or out. "
+            "If this value is equal to 1, the projections are fully visible, if the "
+            "value is equal to 0, the performed projections are completely invisible.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo TextureSizeInfo = {
-        "TextureSize",
-        "Texture size",
-        "This value determines the size of the texture into which the images are "
-        "projected and thus provides the limit to the resolution of projections that can "
-        "be applied. Changing this value will not cause the texture to be automatically "
-        "updated, but triggering the 'ApplyTextureSize' property is required.",
-        Property::Visibility::AdvancedUser
+    constexpr IVec2PropertyInfo TextureSizeInfo = {
+        .identifier = "TextureSize",
+        .name = "Texture size",
+        .description = "This value determines the size of the texture into which the "
+            "images are projected and thus provides the limit to the resolution of "
+            "projections that can be applied. Changing this value will not cause the "
+            "texture to be automatically updated, but triggering the 'ApplyTextureSize' "
+            "property is required.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::ivec2(16),
+            .minMax = { glm::ivec2(16), glm::ivec2(32768) }
+        }
     };
 
-    constexpr Property::PropertyInfo ApplyTextureSizeInfo = {
-        "ApplyTextureSize",
-        "Apply texture size",
-        "Triggering this property applies a new size to the underlying projection "
-        "texture. The old texture is resized and interpolated to fit the new size.",
-        Property::Visibility::AdvancedUser
+    constexpr TriggerPropertyInfo ApplyTextureSizeInfo = {
+        .identifier = "ApplyTextureSize",
+        .name = "Apply texture size",
+        .description = "Triggering this property applies a new size to the underlying "
+            "projection texture. The old texture is resized and interpolated to fit the "
+            "new size.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ProjectionComponent)]] Parameters {
@@ -181,10 +194,10 @@ Documentation ProjectionComponent::Documentation() {
 
 ProjectionComponent::ProjectionComponent()
     : PropertyOwner({ "ProjectionComponent", "Projection Component" })
-    , _performProjection(ProjectionInfo, true)
+    , _performProjection(ProjectionInfo)
     , _clearAllProjections(ClearProjectionInfo)
-    , _projectionFading(FadingInfo, 1.f, 0.f, 1.f)
-    , _textureSize(TextureSizeInfo, glm::ivec2(16), glm::ivec2(16), glm::ivec2(32768))
+    , _projectionFading(FadingInfo)
+    , _textureSize(TextureSizeInfo)
     , _applyTextureSize(ApplyTextureSizeInfo)
 {
     addProperty(_performProjection);

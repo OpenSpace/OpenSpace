@@ -97,31 +97,43 @@ namespace {
 
     constexpr std::string_view _loggerCat = "GlobeBrowsingModule";
 
-    constexpr Property::PropertyInfo TileCacheSizeInfo = {
-        "TileCacheSize",
-        "Tile cache size",
-        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU.",
-        Property::Visibility::AdvancedUser
+    constexpr UIntPropertyInfo TileCacheSizeInfo = {
+        .identifier = "TileCacheSize",
+        .name = "Tile cache size",
+        .description = "The maximum size of the MemoryAwareTileCache, on the CPU and "
+            "GPU.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1024
+        }
     };
 
-    constexpr Property::PropertyInfo DefaultGeoPointTextureInfo = {
-        "DefaultGeoPointTexture",
-        "Default geo point texture",
-        "A path to a texture to use as default for GeoJson points."
+    constexpr StringPropertyInfo DefaultGeoPointTextureInfo = {
+        .identifier = "DefaultGeoPointTexture",
+        .name = "Default geo point texture",
+        .description = "A path to a texture to use as default for GeoJson points."
     };
 
-    constexpr Property::PropertyInfo MRFCacheEnabledInfo = {
-        "MRFCacheEnabled",
-        "MRF cache enabled",
-        "Determines whether automatic caching of globe browsing data is enabled.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo MRFCacheEnabledInfo = {
+        .identifier = "MRFCacheEnabled",
+        .name = "MRF cache enabled",
+        .description = "Determines whether automatic caching of globe browsing data is "
+            "enabled.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo MRFCacheLocationInfo = {
-        "MRFCacheLocation",
-        "MRF cache location",
-        "The location of the root folder for the MRF cache of globe browsing data.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo MRFCacheLocationInfo = {
+        .identifier = "MRFCacheLocation",
+        .name = "MRF cache location",
+        .description = "The location of the root folder for the MRF cache of globe "
+            "browsing data.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "${BASE}/cache_mrf"
+        }
     };
 
     GlobeBrowsingModule::Capabilities parseSubDatasets(char** subDatasets,
@@ -180,17 +192,16 @@ namespace {
     }
 
     struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
-        // [[codegen::verbatim(TileCacheSizeInfo.description)]]
-        std::optional<int> tileCacheSize;
+        std::optional<int> tileCacheSize [[codegen::Info(TileCacheSizeInfo)]];
 
-        // [[codegen::verbatim(DefaultGeoPointTextureInfo.description)]]
-        std::optional<std::string> defaultGeoPointTexture;
+        std::optional<std::string> defaultGeoPointTexture
+            [[codegen::Info(DefaultGeoPointTextureInfo)]];
 
-        // [[codegen::verbatim(MRFCacheEnabledInfo.description)]]
-        std::optional<bool> mrfCacheEnabled [[codegen::key("MRFCacheEnabled")]];
+        std::optional<bool> mrfCacheEnabled
+            [[codegen::Info(MRFCacheEnabledInfo), codegen::key("MRFCacheEnabled")]];
 
-        // [[codegen::verbatim(MRFCacheLocationInfo.description)]]
-        std::optional<std::string> mrfCacheLocation [[codegen::key("MRFCacheLocation")]];
+        std::optional<std::string> mrfCacheLocation
+            [[codegen::Info(MRFCacheLocationInfo), codegen::key("MRFCacheLocation")]];
     };
 } // namespace
 #include "globebrowsingmodule_codegen.cpp"
@@ -203,10 +214,10 @@ Documentation GlobeBrowsingModule::Documentation() {
 
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(Name)
-    , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
+    , _tileCacheSizeMB(TileCacheSizeInfo)
     , _defaultGeoPointTexturePath(DefaultGeoPointTextureInfo)
-    , _mrfCacheEnabled(MRFCacheEnabledInfo, false)
-    , _mrfCacheLocation(MRFCacheLocationInfo, "${BASE}/cache_mrf")
+    , _mrfCacheEnabled(MRFCacheEnabledInfo)
+    , _mrfCacheLocation(MRFCacheLocationInfo)
 {
     addProperty(_tileCacheSizeMB);
 
@@ -451,7 +462,7 @@ void GlobeBrowsingModule::removeWMSServer(const std::string& name) {
         _capabilitiesMap.erase(capIt);
     }
 
-    // Then remove the calues from the globe server list
+    // Then remove the values from the globe server list
     for (auto it = _urlList.begin(); it != _urlList.end();) {
         // We have to increment first because the erase will invalidate the iterator
         const auto eraseIt = it++;

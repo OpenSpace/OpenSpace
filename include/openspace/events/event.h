@@ -152,7 +152,7 @@ struct EventActionRemoved : public Event {
 
 /**
  * This event is created whenever some information about the application shutdown sequence
- * changes. This can either be that the seqeuence started, was aborted, or is finished,
+ * changes. This can either be that the sequence started, was aborted, or is finished,
  * which means that OpenSpace is just about the shutdown.
  */
 struct EventApplicationShutdown : public Event {

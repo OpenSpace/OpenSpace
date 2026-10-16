@@ -212,7 +212,7 @@ protected:
     /// reusable (#resetBuffer)
     MemoryExhaustedCallback _callback;
 
-    /// This variable is `true` if this BufferLog has had its callback trigged in the
+    /// This variable is `true` if this BufferLog has had its callback triggered in the
     /// current callstack. It forces some methods to ignore the `atomic_lock` to ensure
     /// that no deadlock can happen
     bool _inCallbackStack = false;

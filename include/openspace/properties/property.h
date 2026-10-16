@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_CORE___PROPERTY___H__
 #define __OPENSPACE_CORE___PROPERTY___H__
 
+#include <openspace/lua/lua_types.h>
 #include <openspace/misc/boolean.h>
 #include <openspace/misc/easing.h>
-#include <openspace/lua/lua_types.h>
+#include <openspace/properties/propertyinfo.h>
 #include <openspace/util/json_helper.h>
 #include <cstdint>
 #include <functional>
@@ -70,69 +71,6 @@ class PropertyOwner;
  */
 class Property {
 public:
-    BooleanType(NeedsConfirmation);
-
-    /**
-     * The visibility classes for Property%s. The classes are strictly ordered as
-     * Hidden > Developer > AdvancedUser > User > NoviceUser > Always
-     */
-    enum class Visibility {
-        /// Never visible
-        Hidden = 5,
-        /// Visible in Developer mode
-        Developer = 4,
-        /// Visible in Advanced User mode
-        AdvancedUser = 3,
-        /// Visible in User mode
-        User = 2,
-        /// Visible in Novice User mode
-        NoviceUser = 1,
-        /// Visible for all types, no matter what
-        Always = 0,
-
-        /// The default visibility for properties
-        Default = Always
-    };
-
-    /**
-     * This structure is passed to the constructor of a Property and contains the unique
-     * identifier, a GUI name and descriptive text that are both user facing.
-     */
-    struct PropertyInfo {
-        /**
-         * GCC requires an explicit constructor here, as it does not handle the default
-         * argument for the struct initialization.
-         */
-        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
-            : identifier(ident)
-            , guiName(gui)
-            , description(desc)
-            , needsConfirmation(needsConfirmation_)
-        {}
-
-        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                               Visibility vis,
-                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
-            : identifier(ident)
-            , guiName(gui)
-            , description(desc)
-            , visibility(vis)
-            , needsConfirmation(needsConfirmation_)
-        {}
-
-        /// The unique identifier that is part of the fully qualified URI of this Property
-        const char* identifier;
-        /// The name that is displayed in the user interface
-        const char* guiName;
-        /// The user facing description of this Property
-        const char* description;
-        /// Determines the visibility of this Property in the user interface
-        Visibility visibility = Visibility::Default;
-        /// Determines if the Property require confirmation upon value change
-        NeedsConfirmation needsConfirmation = NeedsConfirmation::No;
-    };
-
     /// An OnChangeHandle is returned by the onChange method to uniquely identify an
     /// onChange callback
     using OnChangeHandle = uint32_t;
@@ -158,16 +96,18 @@ public:
     /**
      * The constructor for the property. The \p info (see PropertyInfo) contains
      * necessary information for this Property. PropertyInfo::identifier needs to be
-     * unique for each PropertyOwner. The PropertyInfo::guiName will be stored in the
-     * metaData to be accessed by the GUI elements using the PropertyInfo::guiName key.
+     * unique for each PropertyOwner. The PropertyInfo::name will be stored in the
+     * metaData to be accessed by the GUI elements using the PropertyInfo::name key.
      * The default visibility settings is Visibility::Always, whereas the default
      * read-only state is `false`.
      *
      * \param info The PropertyInfo structure that contains all the required static
      *        information for initializing this Property
+     * \param isEnabled Whether this Property should be enabled. This setting is only used
+     *        if the Property is also enablable
      *
      * \pre \p info.identifier must not be empty
-     * \pre \p info.guiName must not be empty
+     * \pre \p info.name must not be empty
      */
     explicit Property(PropertyInfo info);
 
@@ -181,7 +121,7 @@ public:
 
     /**
      * This method returns the class name of the Property. The method is used by the
-     * TemplateFactory to create new instances of Propertys. The returned value is almost
+     * TemplateFactory to create new instances of Property%s. The returned value is almost
      * always identical to the C++ class name of the derived class.
      *
      * \return The class name of the Property
@@ -380,8 +320,8 @@ public:
     void setGroupIdentifier(std::string groupId);
 
     /**
-     * Returns the group idenfier that this Property belongs to, or `""` if it belongs to
-     * no group.
+     * Returns the group identifier that this Property belongs to, or `""` if it belongs
+     * to no group.
      *
      * \return The group identifier that this Property belongs to
      */
@@ -467,6 +407,32 @@ public:
     bool viewOption(const std::string& option, bool defaultValue = false) const;
 
     /**
+     * Returns whether this Property can be enabled and disabled independently of its
+     * value. This is static metadata that is set through the PropertyInfo.
+     *
+     * \return `IsEnablable::Yes` if the Property is enablable, else `IsEnablable::No`
+     */
+    IsEnablable isEnablable() const;
+
+    /**
+     * Returns whether this Property is currently enabled. The result is only meaningful
+     * if the Property is enablable, see #isEnablable.
+     *
+     * \return `IsEnabled::Yes` if the Property is enabled, else `IsEnabled::No`
+     */
+    IsEnabled isEnabled() const;
+
+    /**
+     * Sets the enabled state of this Property and notifies the change listeners. This
+     * only works for Property%s that are enablable, see #isEnablable.
+     *
+     * \param isEnabled The new enabled state
+     *
+     * \throw RuntimeError If the Property is not enablable
+     */
+    void setIsEnabled(IsEnabled isEnabled);
+
+    /**
      * Get a valid JSON formatted representation of the Property's value.
      *
      * \return The value in a JSON compatible format
@@ -549,14 +515,18 @@ protected:
     /// The user-facing description of this Property
     std::string _description;
 
+    /// If this property is enablable, this will tell if it is enabled or not
+    IsEnabled _isEnabled = IsEnabled::No;
+
     /**
      * The meta data necessary for external applications.
      */
     struct {
         std::optional<std::string> group;
-        Visibility visibility = Visibility::Default;
+        Visibility visibility = Visibility::Always;
         std::optional<bool> readOnly;
         bool needsConfirmation = false;
+        bool isEnablable = false;
         std::unordered_map<std::string, bool> viewOptions;
     } _metaData;
 
