@@ -52,7 +52,7 @@ void GaiaModule::internalInitialize(const Dictionary&) {
     fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
 
     TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    assert_msg(fRenderable, "No task factory existed");
+    assert_msg(fTask, "No task factory existed");
     fTask->registerClass<ReadFitsTask>("ReadFitsTask");
     fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
     fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
