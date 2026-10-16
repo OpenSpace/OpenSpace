@@ -17,6 +17,11 @@ local Node ={
       Enabled = true
     },
     Opacity = 0.5
+  },
+  GUI = {
+    Name = "Gaia Test 1 (GCNS_EDR100pc)",
+    Description = "Density points representing the Gaia Test 1 (GCNS_EDR100pc) dataset.",
+    Path = "/ExoplanetExplorer/Density Points"
   }
 }
 
