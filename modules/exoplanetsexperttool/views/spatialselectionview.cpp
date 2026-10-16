@@ -1397,6 +1397,7 @@ bool SpatialSelectionView::renderLassoTab() {
     ) != candidates.end();
 
     if (!hasTarget && !candidates.empty()) {
+        clearLassoSelection();
         _lassoTargetNode = candidates.front();
     }
 
@@ -1442,13 +1443,14 @@ bool SpatialSelectionView::renderLassoTab() {
     RenderableDensityPointCloud* target = lassoTarget();
 
     // The volume is recomputed or destroyed when the renderable is reinitialized
-    const bool volumeChanged = _castSelection &&
-        (!target || target->densityVolume() != &_castSelection->volume());
+    const bool volumeChanged =
+        (_castSelection &&
+            (!target || target->densityVolume() != &_castSelection->volume())) ||
+        (_densityPreviewVolume &&
+            (!target || target->densityVolume() != _densityPreviewVolume));
 
     if (volumeChanged) {
-        _castSelection = nullptr;
-        _castResult = CastResult();
-        _generatedVolume = std::nullopt;
+        clearLassoSelection();
     }
 
     if (_lassoPending) {
@@ -1476,13 +1478,17 @@ bool SpatialSelectionView::renderLassoTab() {
         "lasso, or across the entire density volume when no lasso exists). "
         "Lower values grow the selection, higher values shrink it to the densest cores."
     );
-    if (thresholdChanged && hasSelection) {
-        _castResult = _castSelection->select(_castThresholdExponent);
+    if (thresholdChanged && hasDensityVolume) {
+        _castResult = hasSelection ?
+            _castSelection->select(_castThresholdExponent) :
+            selectDensityVolume(*target->densityVolume(), _castThresholdExponent);
+        _densityPreviewVolume = hasSelection ? nullptr : target->densityVolume();
+        _lassoStatus.clear();
         applyLassoSelection();
     }
 
-    if (hasSelection) {
-        const float maxDensity = _castSelection->volume().maxDensity();
+    if (hasDensityVolume && (hasSelection || _densityPreviewVolume)) {
+        const float maxDensity = target->densityVolume()->maxDensity();
         const float percent = maxDensity > 0.f ?
             100.f * _castResult.threshold / maxDensity :
             0.f;
@@ -1496,7 +1502,7 @@ bool SpatialSelectionView::renderLassoTab() {
         );
     }
 
-    ImGui::BeginDisabled(!hasSelection);
+    ImGui::BeginDisabled(!hasSelection && !_densityPreviewVolume);
     if (ImGui::Button("Clear selection")) {
         clearLassoSelection();
     }
@@ -1565,6 +1571,7 @@ void SpatialSelectionView::runLassoSelection(RenderableDensityPointCloud* target
         }
     };
 
+    _densityPreviewVolume = nullptr;
     _castSelection = createCastSelection(_castMethod, *target->densityVolume(), input);
 
     if (!_castSelection) {
@@ -1587,7 +1594,7 @@ void SpatialSelectionView::runLassoSelection(RenderableDensityPointCloud* target
 }
 
 void SpatialSelectionView::applyLassoSelection() const {
-    if (_lassoTargetNode.empty()) {
+    if (!lassoTarget()) {
         return;
     }
 
@@ -1611,6 +1618,7 @@ void SpatialSelectionView::applyLassoSelection() const {
 void SpatialSelectionView::clearLassoSelection() {
     _castSelection = nullptr;
     _castResult = CastResult();
+    _densityPreviewVolume = nullptr;
     _generatedVolume = std::nullopt;
     _lassoStroke.clear();
     _lassoStatus.clear();

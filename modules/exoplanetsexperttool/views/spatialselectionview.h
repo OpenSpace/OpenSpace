@@ -205,6 +205,7 @@ private:
     float _castThresholdExponent = 0.f;
     std::unique_ptr<CastSelection> _castSelection;
     CastResult _castResult;
+    const DensityVolume* _densityPreviewVolume = nullptr;
     std::optional<SpatialSelectionQuery> _generatedVolume;
 };
 
