@@ -100,7 +100,7 @@ namespace {
             "outside the range are clamped.",
         .visibility = Visibility::AdvancedUser,
         .defaults = {
-            .value = glm::vec2(0.4f, 2.f),
+            .value = glm::vec2(-0.4f, 2.f),
             .minMax = { glm::vec2(-5.f), glm::vec2(10.f) }
         }
     };
