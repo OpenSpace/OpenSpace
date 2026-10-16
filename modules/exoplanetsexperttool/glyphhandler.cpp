@@ -54,14 +54,18 @@ namespace {
 
     void setStarGlyphsEnabled(bool enabled) {
         global::scriptEngine->queueScript(std::format(
-            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Enabled', {})",
+            "if openspace.hasSceneGraphNode('{}') then "
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Enabled', {}) end",
+            exoplanets::GlyphHandler::HostCloudIdentifier,
             exoplanets::GlyphHandler::HostCloudIdentifier, enabled
         ));
     }
 
     void setPlanetGlyphsEnabled(bool enabled) {
         global::scriptEngine->queueScript(std::format(
-            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Enabled', {})",
+            "if openspace.hasSceneGraphNode('{}') then "
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Enabled', {}) end",
+            exoplanets::GlyphHandler::GlyphCloudIdentifier,
             exoplanets::GlyphHandler::GlyphCloudIdentifier, enabled
         ));
     }
@@ -189,6 +193,49 @@ void GlyphHandler::setGlyphScale(float scale) {
     ));
 }
 
+bool GlyphHandler::beginTemporaryVisibility() {
+    if (!_temporaryVisibility) {
+        const SceneGraphNode* planets = sceneGraphNode(GlyphCloudIdentifier);
+        const SceneGraphNode* stars = sceneGraphNode(HostCloudIdentifier);
+        _planetVisible = planets && planets->renderable() &&
+            planets->renderable()->isEnabled();
+        _starVisible = stars && stars->renderable() && stars->renderable()->isEnabled();
+        _restorePlanetVisible = _planetVisible;
+        _restoreStarVisible = _starVisible;
+        _glyphsVisible = _planetVisible || _starVisible;
+        _temporaryVisibility = true;
+    }
+    return _glyphsVisible;
+}
+
+void GlyphHandler::setTemporaryVisibility(bool visible) {
+    if (!_temporaryVisibility || _glyphsVisible == visible) {
+        return;
+    }
+    _glyphsVisible = visible;
+    if (visible && !_planetVisible && !_starVisible) {
+        _planetVisible = _mode != GlyphMode::Star;
+        _starVisible = _mode == GlyphMode::Star || _mode == GlyphMode::InclinationAndStar;
+    }
+    applyVisibility();
+}
+
+void GlyphHandler::endTemporaryVisibility() {
+    if (!_temporaryVisibility) {
+        return;
+    }
+    _temporaryVisibility = false;
+    _planetVisible = _restorePlanetVisible;
+    _starVisible = _restoreStarVisible;
+    applyVisibility();
+}
+
+void GlyphHandler::applyVisibility() {
+    const bool visible = !_temporaryVisibility || _glyphsVisible;
+    setPlanetGlyphsEnabled(visible && _planetVisible);
+    setStarGlyphsEnabled(visible && _starVisible);
+}
+
 void GlyphHandler::setGlyphMode(GlyphMode mode) {
     if (_mode == mode) {
         return;
@@ -203,24 +250,16 @@ void GlyphHandler::setGlyphMode(GlyphMode mode) {
 
     switch (mode) {
         case GlyphMode::Rings:
-            setStarGlyphsEnabled(false);
-            setPlanetGlyphsEnabled(true);
             setPlanetMode("Rings");
             break;
         case GlyphMode::Inclination:
-            setStarGlyphsEnabled(false);
-            setPlanetGlyphsEnabled(true);
             setPlanetMode("Inclination");
             break;
         case GlyphMode::Star:
-            setStarGlyphsEnabled(true);
             setBoolProperty(HostCloudIdentifier, "UseSecondMappedColor", false);
-            setPlanetGlyphsEnabled(false);
             break;
         case GlyphMode::InclinationAndStar:
-            setStarGlyphsEnabled(true);
             setBoolProperty(HostCloudIdentifier, "UseSecondMappedColor", true);
-            setPlanetGlyphsEnabled(true);
             setPlanetMode("Inclination");
 
             // TODO: Warn about having to add an extra color mapping for the star,
@@ -231,6 +270,13 @@ void GlyphHandler::setGlyphMode(GlyphMode mode) {
     }
 
     _mode = mode;
+    _planetVisible = mode != GlyphMode::Star;
+    _starVisible = mode == GlyphMode::Star || mode == GlyphMode::InclinationAndStar;
+    if (_temporaryVisibility) {
+        _restorePlanetVisible = _planetVisible;
+        _restoreStarVisible = _starVisible;
+    }
+    applyVisibility();
 }
 
 void GlyphHandler::renderModeSpecificSettings() {

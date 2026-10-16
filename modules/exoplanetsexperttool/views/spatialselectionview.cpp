@@ -951,25 +951,18 @@ void SpatialSelectionView::applyCurrentSelection() {
     _dataViewer.setSelection(sel);
 }
 
-void SpatialSelectionView::applyCombinedSavedSelections() {
-    std::vector<size_t> combined = handler().combinedSavedSelections(
-        _dataViewer.data(),
-        _dataViewer.currentFiltering(),
-        _dataViewer.dataMapping()
-    );
-    _dataViewer.setSelection(combined);
-}
-
 bool SpatialSelectionView::render(bool* open) {
     _lassoTabActive = false;
 
     if (!open || !*open) {
+        endLassoSession();
         return false;
     }
 
     ImGui::SetNextWindowSize(ImVec2(520, 640), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Spatial Selection", open)) {
         ImGui::End();
+        endLassoSession();
         return false;
     }
 
@@ -977,11 +970,68 @@ bool SpatialSelectionView::render(bool* open) {
 
     changed |= renderMethodTabs();
     changed |= renderCurrentSelectionActions();
-    renderSpatialFilterActions();
     changed |= renderSavedSelectionsManager();
 
     ImGui::End();
+    if (!_lassoTabActive || !*open) {
+        endLassoSession();
+    }
     return changed;
+}
+
+void SpatialSelectionView::setDensityCloudEnabled(const std::string& identifier,
+                                                 bool enabled) const
+{
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node || !dynamic_cast<RenderableDensityPointCloud*>(node->renderable())) {
+        return;
+    }
+    global::scriptEngine->queueScript(std::format(
+        "if openspace.hasSceneGraphNode('{}') then "
+        "openspace.setPropertyValueSingle('Scene.{}.Renderable.Enabled', {}) end",
+        identifier, identifier, enabled
+    ));
+}
+
+void SpatialSelectionView::updateLassoCloudVisibility(
+                                            const std::vector<std::string>& candidates)
+{
+    std::erase_if(_lassoCloudVisibility, [&candidates](const auto& entry) {
+        return std::find(candidates.begin(), candidates.end(), entry.first) ==
+            candidates.end();
+    });
+
+    for (const std::string& identifier : candidates) {
+        const SceneGraphNode* node = sceneGraphNode(identifier);
+        if (!node || !node->renderable()) {
+            continue;
+        }
+        const bool enabled = node->renderable()->isEnabled();
+        auto entry = _lassoCloudVisibility.try_emplace(
+            identifier, CloudVisibility{ enabled, enabled }
+        ).first;
+        const bool selected = identifier == _lassoTargetNode;
+        if (entry->second.requested != selected) {
+            setDensityCloudEnabled(identifier, selected);
+            entry->second.requested = selected;
+        }
+    }
+}
+
+void SpatialSelectionView::endLassoSession() {
+    _lassoTabActive = false;
+    _isDrawingLasso = false;
+    _lassoPending = false;
+    _lassoStroke.clear();
+    if (!_lassoVisibilityActive) {
+        return;
+    }
+    for (const auto& entry : _lassoCloudVisibility) {
+        setDensityCloudEnabled(entry.first, false);
+    }
+    _lassoCloudVisibility.clear();
+    _dataViewer.endLassoGlyphVisibility();
+    _lassoVisibilityActive = false;
 }
 
 bool SpatialSelectionView::renderMethodTabs() {
@@ -1401,6 +1451,15 @@ bool SpatialSelectionView::renderLassoTab() {
         clearLassoSelection();
         _lassoTargetNode = candidates.front();
     }
+    else if (candidates.empty() && !_lassoTargetNode.empty()) {
+        clearLassoSelection();
+        _lassoTargetNode.clear();
+    }
+
+    if (!_lassoVisibilityActive) {
+        _showLassoGlyphs = _dataViewer.beginLassoGlyphVisibility();
+        _lassoVisibilityActive = true;
+    }
 
     ImGui::TextWrapped(
         "Do a spatial selectionbased on the density of points in another point cloud."
@@ -1421,25 +1480,35 @@ bool SpatialSelectionView::renderLassoTab() {
         }
         ImGui::EndCombo();
     }
+    updateLassoCloudVisibility(candidates);
+    if (ImGui::Checkbox("Show glyphs", &_showLassoGlyphs)) {
+        _dataViewer.setLassoGlyphVisibility(_showLassoGlyphs);
+    }
+    ImGui::SameLine();
+    view::helper::renderHelpMarker(
+        "Toggle the visibility of exoplanet glyphs. Disable them to better show the "
+        "selected point cloud. The visibility will be restored when leaving this panel."
+    );
     if (candidates.empty()) {
         ImGui::TextDisabled("No RenderableDensityPointCloud in the scene");
     }
 
-    constexpr std::array<const char*, 3> MethodNames = {
-        "SpaceCast", "TraceCast (not implemented)", "PointCast (not implemented)"
-    };
-    const int methodIndex = static_cast<int>(_castMethod);
-    if (ImGui::BeginCombo("Method", MethodNames[methodIndex])) {
-        for (int i = 0; i < static_cast<int>(MethodNames.size()); i++) {
-            const ImGuiSelectableFlags flags = i == static_cast<int>(CastMethod::SpaceCast) ?
-                ImGuiSelectableFlags_None :
-                ImGuiSelectableFlags_Disabled;
-            if (ImGui::Selectable(MethodNames[i], i == methodIndex, flags)) {
-                _castMethod = static_cast<CastMethod>(i);
-            }
-        }
-        ImGui::EndCombo();
-    }
+    // @TODO (2026-10-16, emmbr) bring back when we're implementingthe other cast methods
+    //constexpr std::array<const char*, 3> MethodNames = {
+    //    "SpaceCast", "TraceCast (not implemented)", "PointCast (not implemented)"
+    //};
+    //const int methodIndex = static_cast<int>(_castMethod);
+    //if (ImGui::BeginCombo("Method", MethodNames[methodIndex])) {
+    //    for (int i = 0; i < static_cast<int>(MethodNames.size()); i++) {
+    //        const ImGuiSelectableFlags flags = i == static_cast<int>(CastMethod::SpaceCast) ?
+    //            ImGuiSelectableFlags_None :
+    //            ImGuiSelectableFlags_Disabled;
+    //        if (ImGui::Selectable(MethodNames[i], i == methodIndex, flags)) {
+    //            _castMethod = static_cast<CastMethod>(i);
+    //        }
+    //    }
+    //    ImGui::EndCombo();
+    //}
 
     RenderableDensityPointCloud* target = lassoTarget();
 
@@ -1734,11 +1803,25 @@ bool SpatialSelectionView::renderCurrentSelectionActions() {
         pct
     );
 
-    ImGui::Checkbox("Live Update", &_liveUpdate);
+    bool useSpatialFilter = _dataViewer.isUsingSpatialFiltering();
+    ImGui::BeginDisabled(!useSpatialFilter && !currentSpatialQuery().has_value());
+    if (ImGui::Checkbox("Use current query as spatial filter", &useSpatialFilter)) {
+        if (useSpatialFilter) {
+            _dataViewer.applyCurrentSpatialQueryAsFilter();
+        }
+        else {
+            _dataViewer.disableSpatialFiltering();
+        }
+    }
+    ImGui::EndDisabled();
+
+    ImGui::BeginDisabled(useSpatialFilter && currentSpatialQuery().has_value());
+    ImGui::Checkbox("Live update highlighted points", &_liveUpdate);
+    ImGui::EndDisabled();
     ImGui::SameLine();
     view::helper::renderHelpMarker(
         "When enabled, moving spatial sliders or dragging on the sky map immediately "
-        "updates the active selection."
+        "updates the active selection. Only relevant when spatial filterin is not done"
     );
 
     if (ImGui::Button("Apply to Active Selection")) {
@@ -1767,7 +1850,7 @@ bool SpatialSelectionView::renderCurrentSelectionActions() {
     }
 
     bool savedSelectionsChanged = false;
-    if (ImGui::Button("Save Current Selection")) {
+    if (ImGui::Button("Save Current Volume")) {
         std::string summary;
         switch (_currentMethod) {
             case SpatialSelectionMethod::Shape3D:
@@ -1819,22 +1902,6 @@ bool SpatialSelectionView::renderCurrentSelectionActions() {
     return savedSelectionsChanged;
 }
 
-void SpatialSelectionView::renderSpatialFilterActions() {
-    ImGui::SeparatorText("Spatial filter:");
-
-    bool useSpatialFilter = _dataViewer.isUsingSpatialFiltering();
-    ImGui::BeginDisabled(!useSpatialFilter && !currentSpatialQuery().has_value());
-    if (ImGui::Checkbox("Use current query as spatial filter", &useSpatialFilter)) {
-        if (useSpatialFilter) {
-            _dataViewer.applyCurrentSpatialQueryAsFilter();
-        }
-        else {
-            _dataViewer.disableSpatialFiltering();
-        }
-    }
-    ImGui::EndDisabled();
-}
-
 void SpatialSelectionView::loadSavedSelection(const SavedSelection& selection) {
     const SpatialSelectionQuery& query = selection.query;
     if (const SphereVolume* sphere = std::get_if<SphereVolume>(&query)) {
@@ -1869,43 +1936,11 @@ void SpatialSelectionView::loadSavedSelection(const SavedSelection& selection) {
 
 bool SpatialSelectionView::renderSavedSelectionsManager() {
     ImGui::SeparatorText("Saved selections:");
-    ImGui::SameLine();
-    view::helper::renderHelpMarker(
-        "Save multiple selections, enable/disable individual ones, and apply their "
-        "combination at once."
-    );
 
     std::vector<SavedSelection>& saved = handler().savedSelections();
     if (saved.empty()) {
         ImGui::TextDisabled("No saved selections yet.");
         return false;
-    }
-
-    if (ImGui::Button("Apply Enabled Selections")) {
-        applyCombinedSavedSelections();
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Clear All Saved")) {
-        ImGui::OpenPopup("Confirm Clear Saved Selections");
-    }
-    if (ImGui::BeginPopupModal(
-            "Confirm Clear Saved Selections",
-            nullptr,
-            ImGuiWindowFlags_AlwaysAutoResize
-        ))
-    {
-        ImGui::TextUnformatted("Clear all saved selections? This cannot be undone.");
-        if (ImGui::Button("Clear All")) {
-            handler().clearSavedSelections();
-            ImGui::CloseCurrentPopup();
-            ImGui::EndPopup();
-            return true;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Cancel")) {
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
     }
 
     ImGui::BeginChild("SavedSelectionsList", ImVec2(0, 150), true);
@@ -1914,9 +1949,6 @@ bool SpatialSelectionView::renderSavedSelectionsManager() {
 
     for (size_t i = 0; i < saved.size(); ++i) {
         ImGui::PushID(static_cast<int>(i));
-
-        ImGui::Checkbox("##enabled", &saved[i].isEnabled);
-        ImGui::SameLine();
 
         ImGui::Text("%s", saved[i].name.c_str());
         if (!saved[i].summary.empty()) {
@@ -1935,6 +1967,30 @@ bool SpatialSelectionView::renderSavedSelectionsManager() {
         }
 
         ImGui::PopID();
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Clear All Saved")) {
+        ImGui::OpenPopup("Confirm Clear Saved Selections");
+    }
+    if (ImGui::BeginPopupModal(
+        "Confirm Clear Saved Selections",
+        nullptr,
+        ImGuiWindowFlags_AlwaysAutoResize
+    ))
+    {
+        ImGui::TextUnformatted("Clear all saved selections? This cannot be undone.");
+        if (ImGui::Button("Clear All")) {
+            handler().clearSavedSelections();
+            ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+            return true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
     }
 
     if (toRemove != static_cast<size_t>(-1)) {

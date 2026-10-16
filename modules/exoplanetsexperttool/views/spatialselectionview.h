@@ -32,6 +32,7 @@
 #include <openspace/glm.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <map>
 #include <optional>
 #include <string>
 #include <vector>
@@ -80,6 +81,7 @@ public:
      * \param open Pointer to the boolean controlling window visibility
      */
     bool render(bool* open);
+    void endLassoSession();
 
     /**
      * Evaluates the current spatial query against the provided candidate rows.
@@ -120,6 +122,8 @@ private:
     bool renderSavedSelectionsManager();
 
     RenderableDensityPointCloud* lassoTarget() const;
+    void updateLassoCloudVisibility(const std::vector<std::string>& candidates);
+    void setDensityCloudEnabled(const std::string& identifier, bool enabled) const;
     void runLassoSelection(RenderableDensityPointCloud* target);
     void applyLassoSelection() const;
     void clearLassoSelection();
@@ -134,7 +138,6 @@ private:
     void initConstellationLines() const;
 
     void applyCurrentSelection();
-    void applyCombinedSavedSelections();
     void loadSavedSelection(const SavedSelection& selection);
     void updateSkyMapCache() const;
 
@@ -195,6 +198,13 @@ private:
     mutable bool _skyMapCacheDirty = true;
 
     bool _lassoTabActive = false;
+    bool _lassoVisibilityActive = false;
+    bool _showLassoGlyphs = true;
+    struct CloudVisibility {
+        bool original = false;
+        bool requested = false;
+    };
+    std::map<std::string, CloudVisibility> _lassoCloudVisibility;
     bool _isDrawingLasso = false;
     // Set when a stroke is finished; the selection runs in the next GUI frame
     bool _lassoPending = false;

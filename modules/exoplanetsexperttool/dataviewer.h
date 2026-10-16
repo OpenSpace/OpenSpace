@@ -58,6 +58,10 @@ public:
     void initializeGL();
     void hideSelectionVolume();
 
+    bool beginLassoGlyphVisibility();
+    void setLassoGlyphVisibility(bool visible);
+    void endLassoGlyphVisibility();
+
     // Accessors and functions that are needed for the other views
 
     std::filesystem::path currentDataFile() const;

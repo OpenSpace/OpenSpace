@@ -255,16 +255,6 @@ public:
     std::vector<SavedSelection>& savedSelections();
     const std::vector<SavedSelection>& savedSelections() const;
 
-    /**
-     * Combines all currently enabled saved selections into a single deduplicated list.
-     *
-     * \return Sorted vector of unique indices from all enabled saved selections
-     */
-    std::vector<size_t> combinedSavedSelections(
-        const std::vector<ExoplanetItem>& data,
-        const std::vector<size_t>& candidates,
-        const DataSettings::DataMapping& mapping) const;
-
     void initializeRenderables();
 
     void updateSelectionVolume(const SpatialSelectionQuery* query);

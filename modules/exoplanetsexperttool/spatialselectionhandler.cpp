@@ -477,32 +477,6 @@ const std::vector<SavedSelection>& SpatialSelectionHandler::savedSelections() co
     return _savedSelections;
 }
 
-std::vector<size_t> SpatialSelectionHandler::combinedSavedSelections(
-                                      const std::vector<ExoplanetItem>& data,
-                                      const std::vector<size_t>& candidates,
-                                      const DataSettings::DataMapping& mapping) const
-{
-    std::unordered_set<size_t> combinedSet;
-    for (const SavedSelection& sel : _savedSelections) {
-        if (sel.isEnabled) {
-            const std::vector<size_t> indices = select(
-                data,
-                candidates,
-                sel.query,
-                mapping
-            );
-            for (size_t idx : indices) {
-                combinedSet.insert(idx);
-            }
-        }
-    }
-
-    std::vector<size_t> result(combinedSet.begin(), combinedSet.end());
-    std::sort(result.begin(), result.end());
-    return result;
-}
-
-
 void SpatialSelectionHandler::initializeRenderables() {
     using namespace std::string_literals;
 

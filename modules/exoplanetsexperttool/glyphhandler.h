@@ -59,10 +59,22 @@ public:
     void setGlyphScale(float scale);
     void setGlyphMode(GlyphMode mode);
 
+    bool beginTemporaryVisibility();
+    void setTemporaryVisibility(bool visible);
+    void endTemporaryVisibility();
+
     void renderModeSpecificSettings();
 
 private:
+    void applyVisibility();
+
     GlyphMode _mode = GlyphMode::Rings;
+    bool _temporaryVisibility = false;
+    bool _glyphsVisible = true;
+    bool _planetVisible = true;
+    bool _starVisible = false;
+    bool _restorePlanetVisible = true;
+    bool _restoreStarVisible = false;
 
     DataViewer& _dataViewer;
 };

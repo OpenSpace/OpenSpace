@@ -263,7 +263,22 @@ void DataViewer::initializeGL() {
 }
 
 void DataViewer::hideSelectionVolume() {
+    if (_spatialSelectionView) {
+        _spatialSelectionView->endLassoSession();
+    }
     _spatialSelectionHandler.hideSelectionVolume();
+}
+
+bool DataViewer::beginLassoGlyphVisibility() {
+    return _glyphHandler.beginTemporaryVisibility();
+}
+
+void DataViewer::setLassoGlyphVisibility(bool visible) {
+    _glyphHandler.setTemporaryVisibility(visible);
+}
+
+void DataViewer::endLassoGlyphVisibility() {
+    _glyphHandler.endTemporaryVisibility();
 }
 
 std::filesystem::path DataViewer::currentDataFile() const {
@@ -1008,7 +1023,7 @@ void DataViewer::render() {
     // Windows
 
     bool spatialSelectionChanged = false;
-    if (_showSpatialSelectionWindow && _spatialSelectionView) {
+    if (_spatialSelectionView) {
         spatialSelectionChanged = _spatialSelectionView->render(
             &_showSpatialSelectionWindow
         );
