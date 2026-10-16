@@ -75,6 +75,20 @@ bool FilteringView::isUsingSpatialFiltering() const {
     return _useSpatialSelection;
 }
 
+bool FilteringView::useCurrentSpatialQueryAsFilter() {
+    const bool changed = !_useSpatialSelection ||
+        _appliedSavedSpatialSelection.has_value();
+    _useSpatialSelection = true;
+    _appliedSavedSpatialSelection.reset();
+    return changed;
+}
+
+bool FilteringView::disableSpatialFiltering() {
+    const bool changed = _useSpatialSelection;
+    _useSpatialSelection = false;
+    return changed;
+}
+
 int FilteringView::activeFilters() const {
     return _nActiveFilters;
 }

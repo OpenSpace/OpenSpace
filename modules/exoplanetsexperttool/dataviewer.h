@@ -98,6 +98,11 @@ public:
     TableView* tableView();
     SpatialSelectionView* spatialSelectionView();
 
+    void applyCurrentSpatialQueryAsFilter();
+    void disableSpatialFiltering();
+    bool isUsingSpatialFiltering() const;
+    std::string spatialFilterDescription() const;
+
     SpatialSelectionHandler& spatialSelectionHandler();
     const SpatialSelectionHandler& spatialSelectionHandler() const;
 

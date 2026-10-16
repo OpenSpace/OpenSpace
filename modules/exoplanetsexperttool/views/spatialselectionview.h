@@ -116,6 +116,7 @@ private:
     bool renderSkyMapTab();
     bool renderLassoTab();
     bool renderCurrentSelectionActions();
+    void renderSpatialFilterActions();
     bool renderSavedSelectionsManager();
 
     RenderableDensityPointCloud* lassoTarget() const;

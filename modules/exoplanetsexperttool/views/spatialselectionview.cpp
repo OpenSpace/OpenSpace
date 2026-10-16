@@ -977,6 +977,7 @@ bool SpatialSelectionView::render(bool* open) {
 
     changed |= renderMethodTabs();
     changed |= renderCurrentSelectionActions();
+    renderSpatialFilterActions();
     changed |= renderSavedSelectionsManager();
 
     ImGui::End();
@@ -1816,6 +1817,22 @@ bool SpatialSelectionView::renderCurrentSelectionActions() {
     }
 
     return savedSelectionsChanged;
+}
+
+void SpatialSelectionView::renderSpatialFilterActions() {
+    ImGui::SeparatorText("Spatial filter:");
+
+    bool useSpatialFilter = _dataViewer.isUsingSpatialFiltering();
+    ImGui::BeginDisabled(!useSpatialFilter && !currentSpatialQuery().has_value());
+    if (ImGui::Checkbox("Use current query as spatial filter", &useSpatialFilter)) {
+        if (useSpatialFilter) {
+            _dataViewer.applyCurrentSpatialQueryAsFilter();
+        }
+        else {
+            _dataViewer.disableSpatialFiltering();
+        }
+    }
+    ImGui::EndDisabled();
 }
 
 void SpatialSelectionView::loadSavedSelection(const SavedSelection& selection) {

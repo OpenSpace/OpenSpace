@@ -456,6 +456,24 @@ SpatialSelectionView* DataViewer::spatialSelectionView() {
     return _spatialSelectionView.get();
 }
 
+void DataViewer::applyCurrentSpatialQueryAsFilter() {
+    if (_spatialSelectionView->currentSpatialQuery().has_value()) {
+        _filterChanged |= _filteringView->useCurrentSpatialQueryAsFilter();
+    }
+}
+
+void DataViewer::disableSpatialFiltering() {
+    _filterChanged |= _filteringView->disableSpatialFiltering();
+}
+
+bool DataViewer::isUsingSpatialFiltering() const {
+    return _filteringView->isUsingSpatialFiltering();
+}
+
+std::string DataViewer::spatialFilterDescription() const {
+    return _filteringView->spatialFilterDescription(*_spatialSelectionView);
+}
+
 SpatialSelectionHandler& DataViewer::spatialSelectionHandler() {
     return _spatialSelectionHandler;
 }
@@ -1014,7 +1032,7 @@ void DataViewer::render() {
     }
 
     if (_showFilterSettingsWindow) {
-        _filterChanged = _filteringView->render(
+        _filterChanged |= _filteringView->render(
             &_showFilterSettingsWindow,
             *_spatialSelectionView
         );

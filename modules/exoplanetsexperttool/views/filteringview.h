@@ -42,6 +42,8 @@ public:
     bool isUsingRowFiltering() const;
     bool isUsingExternalFiltering() const;
     bool isUsingSpatialFiltering() const;
+    bool useCurrentSpatialQueryAsFilter();
+    bool disableSpatialFiltering();
 
     int activeFilters() const;
     std::string rowLimitDescription() const;
