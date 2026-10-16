@@ -105,19 +105,6 @@ namespace {
         }
     };
 
-    constexpr FloatPropertyInfo CutOffThresholdInfo = {
-        .identifier = "CutOffThreshold",
-        .name = "Cut off threshold",
-        .description = "Set threshold for when to cut off star rendering. Stars closer "
-            "than this threshold are given full opacity. Farther away, stars dim "
-            "proportionally to the 4-logarithm of their distance.",
-        .visibility = Visibility::User,
-        .defaults = {
-            .value = 38.f,
-            .minMax = { 0.f, 50.f }
-        }
-    };
-
     constexpr IntPropertyInfo TmPointFilterSizeInfo = {
         .identifier = "FilterSize",
         .name = "Filter size [px]",
@@ -166,7 +153,8 @@ namespace {
         .visibility = Visibility::AdvancedUser,
         .defaults = {
             .value = 0.001f,
-            .minMax = { 0.000001f, 0.01f }
+            .minMax = { 0.000001f, 0.01f },
+            .stepSize = 0.000001f
         }
     };
 
@@ -279,86 +267,6 @@ namespace {
         }
     };
 
-    constexpr Vec2PropertyInfo FilterPosXInfo = {
-        .identifier = "FilterPosX",
-        .name = "PosX threshold",
-        .description = "If defined then only stars with Position X values between [min, "
-            "max] will be rendered (if min is set to 0.0 it is read as -Inf, if max is "
-            "set to 0.0 it is read as +Inf). Measured in KiloParsec.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = glm::vec2(0.f),
-            .minMax = { glm::vec2(-10.f), glm::vec2(10.f) }
-        }
-    };
-
-    constexpr Vec2PropertyInfo FilterPosYInfo = {
-        .identifier = "FilterPosY",
-        .name = "PosY threshold",
-        .description = "If defined then only stars with Position Y values between [min, "
-            "max] will be rendered (if min is set to 0.0 it is read as -Inf, if max is "
-            "set to 0.0 it is read as +Inf). Measured in KiloParsec.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = glm::vec2(0.f),
-            .minMax = { glm::vec2(-10.f), glm::vec2(10.f) }
-        }
-    };
-
-    constexpr Vec2PropertyInfo FilterPosZInfo = {
-        .identifier = "FilterPosZ",
-        .name = "PosZ threshold",
-        .description = "If defined then only stars with Position Z values between [min, "
-            "max] will be rendered (if min is set to 0.0 it is read as -Inf, if max is "
-            "set to 0.0 it is read as +Inf). Measured in KiloParsec.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = glm::vec2(0.f),
-            .minMax = { glm::vec2(-10.f), glm::vec2(10.f) }
-        }
-    };
-
-    constexpr Vec2PropertyInfo FilterGMagInfo = {
-        .identifier = "FilterGMag",
-        .name = "GMag threshold",
-        .description = "If defined then only stars with G mean magnitude values between "
-            "[min, max] will be rendered (if min is set to 20.0 it is read as -Inf, if "
-            "max is set to 20.0 it is read as +Inf). If min = max then all values equal "
-            "min|max will be filtered away.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = glm::vec2(20.f),
-            .minMax = { glm::vec2(-10.f), glm::vec2(30.f) }
-        }
-    };
-
-    constexpr Vec2PropertyInfo FilterBpRpInfo = {
-        .identifier = "FilterBpRp",
-        .name = "Bp-Rp threshold",
-        .description = "If defined then only stars with Bp-Rp color values between [min, "
-            "max] will be rendered (if min is set to 0.0 it is read as -Inf, if max is "
-            "set to 0.0 it is read as +Inf). If min = max then all values equal min|max "
-            "will be filtered away.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = glm::vec2(0.f),
-            .minMax = { glm::vec2(-10.f), glm::vec2(30.f) }
-        }
-    };
-
-    constexpr Vec2PropertyInfo FilterDistInfo = {
-        .identifier = "FilterDist",
-        .name = "Dist threshold",
-        .description = "If defined then only stars with Distances values between [min, "
-            "max] will be rendered (if min is set to 0.0 it is read as -Inf, if max is "
-            "set to 0.0 it is read as +Inf). Measured in KiloParsec.",
-        .visibility = Visibility::AdvancedUser,
-        .defaults = {
-            .value = glm::vec2(0.f),
-            .minMax = { glm::vec2(0.f), glm::vec2(100.f) }
-        }
-    };
-
     struct [[codegen::Dictionary(RenderableGaiaStars)]] Parameters {
         std::string file [[codegen::Info(FilePathInfo)]];
 
@@ -382,8 +290,6 @@ namespace {
 
         std::optional<float> luminosityMultiplier
             [[codegen::Info(LuminosityMultiplierInfo)]];
-
-        std::optional<float> cutOffThreshold [[codegen::Info(CutOffThresholdInfo)]];
 
         std::optional<int> filterSize [[codegen::Info(TmPointFilterSizeInfo)]];
 
@@ -410,18 +316,6 @@ namespace {
 
         std::optional<float> maxCpuMemoryPercent
             [[codegen::Info(MaxCpuMemoryPercentInfo)]];
-
-        std::optional<glm::vec2> filterPosX [[codegen::Info(FilterPosXInfo)]];
-
-        std::optional<glm::vec2> filterPosY [[codegen::Info(FilterPosYInfo)]];
-
-        std::optional<glm::vec2> filterPosZ [[codegen::Info(FilterPosZInfo)]];
-
-        std::optional<glm::vec2> filterGMag [[codegen::Info(FilterGMagInfo)]];
-
-        std::optional<glm::vec2> filterBpRp [[codegen::Info(FilterBpRpInfo)]];
-
-        std::optional<glm::vec2> filterDist [[codegen::Info(FilterDistInfo)]];
     };
 } // namespace
 #include "renderablegaiastars_codegen.cpp"
@@ -440,18 +334,11 @@ RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
     , _filePath(FilePathInfo)
     , _colorTexturePath(ColorTextureInfo)
     , _luminosityMultiplier(LuminosityMultiplierInfo)
-    , _cutOffThreshold(CutOffThresholdInfo)
     , _tmPointFilterSize(TmPointFilterSizeInfo)
     , _tmPointSigma(TmPointSigmaInfo)
     , _additionalNodes(AdditionalNodesInfo)
     , _tmPointPixelWeightThreshold(TmPointPxThresholdInfo)
     , _lodPixelThreshold(LodPixelThresholdInfo)
-    , _posXThreshold(FilterPosXInfo)
-    , _posYThreshold(FilterPosYInfo)
-    , _posZThreshold(FilterPosZInfo)
-    , _gMagThreshold(FilterGMagInfo)
-    , _bpRpThreshold(FilterBpRpInfo)
-    , _distThreshold(FilterDistInfo)
     , _firstRow(FirstRowInfo)
     , _lastRow(LastRowInfo)
     , _fileReaderOption(FileReaderOptionInfo)
@@ -510,9 +397,6 @@ RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
     _luminosityMultiplier = p.luminosityMultiplier.value_or(_luminosityMultiplier);
     addProperty(_luminosityMultiplier);
 
-    _cutOffThreshold = p.cutOffThreshold.value_or(_cutOffThreshold);
-    addProperty(_cutOffThreshold);
-
     _tmPointFilterSize = p.filterSize.value_or(_tmPointFilterSize);
     addProperty(_tmPointFilterSize);
 
@@ -557,24 +441,6 @@ RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
     addProperty(_maxGpuMemoryPercent);
 
     _maxCpuMemoryPercent = p.maxCpuMemoryPercent.value_or(_maxCpuMemoryPercent);
-
-    _posXThreshold = p.filterPosX.value_or(_posXThreshold);
-    addProperty(_posXThreshold);
-
-    _posYThreshold = p.filterPosY.value_or(_posYThreshold);
-    addProperty(_posYThreshold);
-
-    _posZThreshold = p.filterPosZ.value_or(_posZThreshold);
-    addProperty(_posZThreshold);
-
-    _gMagThreshold = p.filterGMag.value_or(_gMagThreshold);
-    addProperty(_gMagThreshold);
-
-    _bpRpThreshold = p.filterBpRp.value_or(_bpRpThreshold);
-    addProperty(_bpRpThreshold);
-
-    _distThreshold = p.filterDist.value_or(_distThreshold);
-    addProperty(_distThreshold);
 
     // Only add properties correlated to fits files if we're reading from a FITS file
     if (_fileReaderOption == FileReaderOption::Fits) {
@@ -751,15 +617,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     );
     _program->setUniform(_uniformCache.renderOption, _renderMode);
     _program->setUniform(_uniformCache.viewScaling, data.camera.scaling());
-    _program->setUniform(_uniformCache.cutOffThreshold, _cutOffThreshold);
     _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
-
-    _program->setUniform(_uniformCache.posXThreshold, _posXThreshold);
-    _program->setUniform(_uniformCache.posYThreshold, _posYThreshold);
-    _program->setUniform(_uniformCache.posZThreshold, _posZThreshold);
-    _program->setUniform(_uniformCache.gMagThreshold, _gMagThreshold);
-    _program->setUniform(_uniformCache.bpRpThreshold, _bpRpThreshold);
-    _program->setUniform(_uniformCache.distThreshold, _distThreshold);
 
     opengl::TextureUnit colorUnit;
     if (_colorTexture) {

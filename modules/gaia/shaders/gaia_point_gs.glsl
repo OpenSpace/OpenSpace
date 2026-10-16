@@ -45,7 +45,6 @@ out Data {
 
 uniform dmat4 view;
 uniform float viewScaling;
-uniform float cutOffThreshold;
 
 const float Eps = 1e-5;
 
@@ -58,11 +57,9 @@ void main() {
   vec4 viewPosition = vec4(view * in_data[0].gPosition);
 
   out_data.observedDist = safeLength(viewPosition / viewScaling);
-  float distThreshold = cutOffThreshold - log(out_data.observedDist) / log(4.0);
 
-  // Discard geometry if star has no position (but wasn't a nullArray).
-  // Or if observed distance is above threshold set by cutOffThreshold
-  if (length(gl_in[0].gl_Position) < Eps || distThreshold <= 0.0) {
+  // Discard geometry if star has no position (but wasn't a nullArray)
+  if (length(gl_in[0].gl_Position) < Eps) {
     return;
   }
 

@@ -121,19 +121,11 @@ private:
     std::unique_ptr<filesystem::File> _colorTextureFile;
 
     FloatProperty _luminosityMultiplier;
-    FloatProperty _cutOffThreshold;
     IntProperty _tmPointFilterSize;
     FloatProperty _tmPointSigma;
     IVec2Property _additionalNodes;
     FloatProperty _tmPointPixelWeightThreshold;
     FloatProperty _lodPixelThreshold;
-
-    Vec2Property _posXThreshold;
-    Vec2Property _posYThreshold;
-    Vec2Property _posZThreshold;
-    Vec2Property _gMagThreshold;
-    Vec2Property _bpRpThreshold;
-    Vec2Property _distThreshold;
 
     IntProperty _firstRow;
     IntProperty _lastRow;
@@ -149,9 +141,8 @@ private:
 
     std::unique_ptr<opengl::ProgramObject> _program;
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
-        cutOffThreshold, time, colorTexture, nChunksToRender, valuesPerStar,
-        maxStarsPerNode, posXThreshold, posYThreshold, posZThreshold, gMagThreshold,
-        bpRpThreshold, distThreshold, opacity)
+        time, colorTexture, nChunksToRender, valuesPerStar,
+        maxStarsPerNode, opacity)
         _uniformCache;
 
     std::unique_ptr<opengl::ProgramObject> _programTM;
