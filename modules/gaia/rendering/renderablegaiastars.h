@@ -121,6 +121,7 @@ private:
     std::unique_ptr<filesystem::File> _colorTextureFile;
 
     FloatProperty _luminosityMultiplier;
+    Vec2Property _colorRange;
     IntProperty _tmPointFilterSize;
     FloatProperty _tmPointSigma;
     IVec2Property _additionalNodes;
@@ -139,9 +140,9 @@ private:
     FloatProperty _maxCpuMemoryPercent;
 
     std::unique_ptr<opengl::ProgramObject> _program;
-    UniformCache(model, view, viewScaling, projection, luminosityMultiplier,
-        time, colorTexture, nChunksToRender, valuesPerStar,
-        maxStarsPerNode, opacity)
+    UniformCache(model, view, viewScaling, projection, luminosityMultiplier, time,
+        colorTexture, colorRange, nChunksToRender, valuesPerStar, maxStarsPerNode,
+        opacity)
         _uniformCache;
 
     std::unique_ptr<opengl::ProgramObject> _programTM;

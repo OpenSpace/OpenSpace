@@ -38,6 +38,7 @@ layout (location = 0) out vec4 out_color;
 
 uniform sampler1D colorTexture;
 uniform float luminosityMultiplier;
+uniform vec2 colorRange;
 uniform float viewScaling;
 uniform float opacity;
 const float Parsec = 3.08567758e16; // 1 Parsec
@@ -45,8 +46,7 @@ const float LumLowerCap = 0.01;
 
 
 vec3 color2rgb(float color) {
-  // BV is [-0.4, 2.0]
-  float st = (color + 0.4) / (2.0 + 0.4);
+  float st = clamp((color - colorRange.x) / (colorRange.y - colorRange.x), 0.0, 1.0);
   return texture(colorTexture, st).rgb;
 }
 

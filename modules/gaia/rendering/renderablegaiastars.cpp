@@ -92,6 +92,19 @@ namespace {
         }
     };
 
+    constexpr Vec2PropertyInfo ColorRangeInfo = {
+        .identifier = "ColorRange",
+        .name = "Color range",
+        .description = "The range of color (BV) values that is mapped to the color map. "
+            "The first value is the minimum and the second is the maximum. Values "
+            "outside the range are clamped.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.4f, 2.f),
+            .minMax = { glm::vec2(-5.f), glm::vec2(10.f) }
+        }
+    };
+
     constexpr IntPropertyInfo TmPointFilterSizeInfo = {
         .identifier = "FilterSize",
         .name = "Filter size [px]",
@@ -271,6 +284,8 @@ namespace {
         std::optional<float> luminosityMultiplier
             [[codegen::Info(LuminosityMultiplierInfo)]];
 
+        std::optional<glm::vec2> colorRange [[codegen::Info(ColorRangeInfo)]];
+
         std::optional<int> filterSize [[codegen::Info(TmPointFilterSizeInfo)]];
 
         std::optional<float> sigma [[codegen::Info(TmPointSigmaInfo)]];
@@ -314,6 +329,7 @@ RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
     , _filePath(FilePathInfo)
     , _colorTexturePath(ColorTextureInfo)
     , _luminosityMultiplier(LuminosityMultiplierInfo)
+    , _colorRange(ColorRangeInfo)
     , _tmPointFilterSize(TmPointFilterSizeInfo)
     , _tmPointSigma(TmPointSigmaInfo)
     , _additionalNodes(AdditionalNodesInfo)
@@ -364,6 +380,9 @@ RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
 
     _luminosityMultiplier = p.luminosityMultiplier.value_or(_luminosityMultiplier);
     addProperty(_luminosityMultiplier);
+
+    _colorRange = p.colorRange.value_or(_colorRange);
+    addProperty(_colorRange);
 
     _tmPointFilterSize = p.filterSize.value_or(_tmPointFilterSize);
     addProperty(_tmPointFilterSize);
@@ -585,6 +604,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     );
     _program->setUniform(_uniformCache.viewScaling, data.camera.scaling());
     _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
+    _program->setUniform(_uniformCache.colorRange, _colorRange);
 
     opengl::TextureUnit colorUnit;
     if (_colorTexture) {
@@ -868,7 +888,11 @@ void RenderableGaiaStars::updateResources() {
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
             _colorTexture = dataloader::colormap::loadColorMapTexture(
-                absPath(_colorTexturePath)
+                absPath(_colorTexturePath),
+                opengl::Texture::SamplerInit {
+                    .filter = opengl::Texture::FilterMode::Linear,
+                    .wrapping = opengl::Texture::WrappingMode::ClampToEdge
+                }
             );
             LDEBUG(std::format("Loaded texture from '{}'", _colorTexturePath.value()));
 
