@@ -78,6 +78,10 @@ asset.onInitialize(function()
   directories[#directories + 1] = "assets/maps"
   directories[#directories + 1] = maps
 
+  -- Serve the log files (log.html, ScriptLog.txt)
+  directories[#directories + 1] = "logs"
+  directories[#directories + 1] = openspace.absPath("${LOGS}")
+
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "gui")
   openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", enabled)
