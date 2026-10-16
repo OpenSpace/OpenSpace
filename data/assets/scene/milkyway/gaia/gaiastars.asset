@@ -34,7 +34,6 @@ local GaiaStars = {
     Type = "RenderableGaiaStars",
     File = starsFolder,
     FileReaderOption = "StreamOctree",
-    RenderMode = "Motion",
     ColorMap = colormaps .. "colorbv.cmap",
     LuminosityMultiplier = 35,
     LodPixelThreshold = 0,

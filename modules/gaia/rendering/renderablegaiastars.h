@@ -131,7 +131,6 @@ private:
     IntProperty _lastRow;
     std::vector<std::string> _columnNames;
     OptionProperty _fileReaderOption;
-    OptionProperty _renderMode;
     IntProperty _nRenderedStars;
     // LongLongProperty doesn't show up in menu, use FloatProperty instead
     FloatProperty _cpuRamBudgetProperty;
@@ -140,7 +139,7 @@ private:
     FloatProperty _maxCpuMemoryPercent;
 
     std::unique_ptr<opengl::ProgramObject> _program;
-    UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
+    UniformCache(model, view, viewScaling, projection, luminosityMultiplier,
         time, colorTexture, nChunksToRender, valuesPerStar,
         maxStarsPerNode, opacity)
         _uniformCache;
@@ -161,7 +160,6 @@ private:
     bool _colorTextureIsDirty = true;
 
     std::vector<int> _accumulatedIndices;
-    size_t _nRenderValuesPerStar = 0;
     int _nStarsToRender = 0;
     long long _cpuRamBudgetInBytes = 0;
     long long _totalDatasetSizeInBytes = 0;

@@ -45,15 +45,10 @@ uniform dmat4 model;
 uniform dmat4 view;
 uniform mat4 projection;
 uniform float time;
-uniform int renderOption;
 uniform int maxStarsPerNode;
 uniform int valuesPerStar;
 uniform int nChunksToRender;
 
-// Keep in sync with gaiaoptions.h:RenderOption enum
-const int RenderOptionStatic = 0;
-const int RenderOptionColor = 1;
-const int RenderOptionMotion = 2;
 const float Eps = 1e-5;
 const float Parsec = 3.0856776e16;
 
@@ -101,17 +96,11 @@ void main() {
   int idxPos = firstStarInChunk + placeInChunk * 3;
   vec3 position = vec3(allData[idxPos], allData[idxPos + 1], allData[idxPos + 2]);
 
-  vec2 brightness = vec2(0.0);
-  vec3 velocity = vec3(0.0);
-  if (renderOption != RenderOptionStatic) {
-    int idxCol = firstStarInChunk + nStarsInChunk * 3 + placeInChunk * 2;
-    brightness = vec2(allData[idxCol], allData[idxCol + 1]);
+  int idxCol = firstStarInChunk + nStarsInChunk * 3 + placeInChunk * 2;
+  vec2 brightness = vec2(allData[idxCol], allData[idxCol + 1]);
 
-    if (renderOption == RenderOptionMotion) {
-      int idxVel = firstStarInChunk + nStarsInChunk * 5 + placeInChunk * 3;
-      velocity = vec3(allData[idxVel], allData[idxVel + 1], allData[idxVel + 2]);
-    }
-  }
+  int idxVel = firstStarInChunk + nStarsInChunk * 5 + placeInChunk * 3;
+  vec3 velocity = vec3(allData[idxVel], allData[idxVel + 1], allData[idxVel + 2]);
   out_data.brightness = brightness;
 
   // Convert kiloParsec to meter

@@ -123,12 +123,12 @@ public:
      */
     std::unordered_map<int, std::vector<float>> traverseData(
         const std::vector<glm::dmat4>& mvps, const glm::vec2& screenSize,
-        int& deltaStars, RenderMode mode, float lodPixelThreshold);
+        int& deltaStars, float lodPixelThreshold);
 
     /**
      * Builds full render data structure by traversing all leaves in the Octree.
      */
-    std::vector<float> getAllData(RenderMode mode);
+    std::vector<float> getAllData();
 
     /**
      * Removes all data from Octree, or only from a specific branch if specified.
@@ -221,11 +221,10 @@ private:
      * \param screenSize The size of the screen in pixels
      * \param deltaStars Keeps track of how many stars that were added/removed this render
      *        call
-     * \param mode The render mode that should be used
      */
     std::unordered_map<int, std::vector<float>> checkNodeIntersection(OctreeNode& node,
         const std::vector<glm::dmat4>& mvps, const glm::vec2& screenSize,
-        int& deltaStars, RenderMode mode);
+        int& deltaStars);
 
     /**
      * \return `true` if the node described by \p corners is visible in any of \p mvps

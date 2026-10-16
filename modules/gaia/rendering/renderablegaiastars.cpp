@@ -58,9 +58,7 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableGaiaStars";
 
-    constexpr size_t PositionSize = 3;
-    constexpr size_t ColorSize = 2;
-    constexpr size_t VelocitySize = 3;
+    constexpr size_t RenderValuesPerStar = 8;
 
     constexpr StringPropertyInfo FilePathInfo = {
         .identifier = "File",
@@ -83,21 +81,10 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    constexpr OptionPropertyInfo RenderModeInfo = {
-        .identifier = "RenderMode",
-        .name = "Render mode",
-        .description = "This value determines which predefined columns to use in "
-            "rendering. If 'Static' only the position of the stars is used. 'Color' uses "
-            "position + color parameters and 'Motion' uses pos, color as well as "
-            "velocity for the stars.",
-        .visibility = Visibility::AdvancedUser
-    };
-
     constexpr FloatPropertyInfo LuminosityMultiplierInfo = {
         .identifier = "LuminosityMultiplier",
         .name = "Luminosity multiplier",
-        .description = "Factor by which to multiply the luminosity with. [Works in Color "
-            "and Motion modes].",
+        .description = "Factor by which to multiply the luminosity with.",
         .visibility = Visibility::User,
         .defaults = {
             .value = 35.f,
@@ -279,13 +266,6 @@ namespace {
         };
         FileReader fileReaderOption [[codegen::Info(FileReaderOptionInfo)]];
 
-        enum class [[codegen::map(openspace::RenderMode)]] RenderMode {
-            Static,
-            Color,
-            Motion
-        };
-        std::optional<RenderMode> renderMode [[codegen::Info(RenderModeInfo)]];
-
         std::string colorMap [[codegen::Info(ColorTextureInfo)]];
 
         std::optional<float> luminosityMultiplier
@@ -342,7 +322,6 @@ RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
     , _firstRow(FirstRowInfo)
     , _lastRow(LastRowInfo)
     , _fileReaderOption(FileReaderOptionInfo)
-    , _renderMode(RenderModeInfo)
     , _nRenderedStars(NumRenderedStarsInfo)
     , _cpuRamBudgetProperty(CpuRamBudgetInfo)
     , _gpuStreamBudgetProperty(GpuStreamBudgetInfo)
@@ -376,17 +355,6 @@ RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
         { FileReaderOption::StreamOctree, "StreamOctree" }
     });
     _fileReaderOption = codegen::map<FileReaderOption>(p.fileReaderOption);
-
-    _renderMode.addOptions({
-        { RenderMode::Static, "Static" },
-        { RenderMode::Color, "Color" },
-        { RenderMode::Motion, "Motion" }
-    });
-    if (p.renderMode.has_value()) {
-        _renderMode = codegen::map<RenderMode>(*p.renderMode);
-    }
-    _renderMode.onChange([this]() { _buffersAreDirty = true; });
-    addProperty(_renderMode);
 
     _colorTextureFile = std::make_unique<filesystem::File>(p.colorMap);
     _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
@@ -615,7 +583,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         _uniformCache.time,
         static_cast<float>(data.time.j2000Seconds())
     );
-    _program->setUniform(_uniformCache.renderOption, _renderMode);
     _program->setUniform(_uniformCache.viewScaling, data.camera.scaling());
     _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
 
@@ -627,8 +594,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     const int maxStarsPerNode = static_cast<int>(_octreeManager.maxStarsPerNode());
     _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
-    const int valuesPerStar = static_cast<int>(_nRenderValuesPerStar);
-    _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
+    _program->setUniform(
+        _uniformCache.valuesPerStar,
+        static_cast<int>(RenderValuesPerStar)
+    );
     _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
@@ -718,7 +687,6 @@ void RenderableGaiaStars::updateOctreeData(const UpdateData& data) {
             mvps,
             screenSize,
             deltaStars,
-            RenderMode(_renderMode.value()),
             _lodPixelThreshold
         );
 
@@ -745,7 +713,7 @@ void RenderableGaiaStars::updateOctreeData(const UpdateData& data) {
         }
 
         const int newValue =
-            static_cast<int>(subData.size() / _nRenderValuesPerStar) +
+            static_cast<int>(subData.size() / RenderValuesPerStar) +
                 _accumulatedIndices[offset];
         const int changeInValue = newValue - _accumulatedIndices[offset + 1];
         _accumulatedIndices[offset + 1] = newValue;
@@ -836,20 +804,8 @@ void RenderableGaiaStars::updateResources() {
     if (_buffersAreDirty) {
         LDEBUG("Regenerating buffers");
 
-        // Set values per star slice depending on render option
-        if (_renderMode == RenderMode::Static) {
-            _nRenderValuesPerStar = PositionSize;
-        }
-        else if (_renderMode == RenderMode::Color) {
-            _nRenderValuesPerStar = PositionSize + ColorSize;
-        }
-        else {
-            // (renderOption == RenderOption::Motion)
-            _nRenderValuesPerStar = PositionSize + ColorSize + VelocitySize;
-        }
-
         // Calculate memory budgets
-        _chunkSize = _octreeManager.maxStarsPerNode() * _nRenderValuesPerStar;
+        _chunkSize = _octreeManager.maxStarsPerNode() * RenderValuesPerStar;
         const long long totalChunkSizeInBytes =
             _octreeManager.totalNodes() * _chunkSize * sizeof(GLfloat);
         _maxStreamingBudgetInBytes = std::min(
@@ -984,7 +940,8 @@ bool RenderableGaiaStars::readDataFile() {
 
     _nRenderedStars.setMaxValue(nReadStars);
     LINFO(std::format("Dataset contains a total of {} stars", nReadStars));
-    _totalDatasetSizeInBytes = nReadStars * (PositionSize + ColorSize + VelocitySize) * 4;
+    _totalDatasetSizeInBytes =
+        nReadStars * static_cast<long long>(RenderValuesPerStar * sizeof(float));
     return nReadStars > 0;
 }
 

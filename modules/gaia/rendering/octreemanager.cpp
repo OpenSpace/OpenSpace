@@ -91,12 +91,11 @@ namespace {
      * Node should be inserted into stream.
      *
      * \param node The node that should be inserted
-     * \param mode The render mode that should be used
      * \param deltaStars Keeps track of how many stars that were added
      * \return The data to be inserted
      */
     std::vector<float> constructInsertData(const OctreeManager::OctreeNode& node,
-                                           RenderMode mode, int& deltaStars)
+                                           int& deltaStars)
     {
         ZoneScoped;
 
@@ -105,15 +104,10 @@ namespace {
             return std::vector<float>();
         }
 
-        // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
-        // And more importantly so our attribute pointers knows where to read
+        // Build one contiguous chunk per node: positions, then colors, then velocities
         std::vector<float> data = node.posData;
-        if (mode != RenderMode::Static) {
-            data.insert(data.end(), node.colData.begin(), node.colData.end());
-            if (mode == RenderMode::Motion) {
-                data.insert(data.end(), node.velData.begin(), node.velData.end());
-            }
-        }
+        data.insert(data.end(), node.colData.begin(), node.colData.end());
+        data.insert(data.end(), node.velData.begin(), node.velData.end());
 
         // Update deltaStars
         deltaStars += static_cast<int>(node.numStars);
@@ -123,17 +117,17 @@ namespace {
     /**
      * Get data in node and its descendants regardless if they are visible or not.
      */
-    std::vector<float> nodeData(const OctreeManager::OctreeNode& node, RenderMode mode) {
+    std::vector<float> nodeData(const OctreeManager::OctreeNode& node) {
         // Return node data if node is a leaf
         if (node.isLeaf) {
             int dStars = 0;
-            return constructInsertData(node, mode, dStars);
+            return constructInsertData(node, dStars);
         }
 
         // If we're not in a leaf, get data from all children recursively
         std::vector<float> data;
         for (const std::shared_ptr<OctreeManager::OctreeNode>& child : node.children) {
-            std::vector<float> tmpData = nodeData(*child, mode);
+            std::vector<float> tmpData = nodeData(*child);
             data.insert(data.end(), tmpData.begin(), tmpData.end());
         }
         return data;
@@ -702,7 +696,6 @@ std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(
                                                       const std::vector<glm::dmat4>& mvps,
                                                       const glm::vec2& screenSize,
                                                       int& deltaStars,
-                                                      RenderMode mode,
                                                       float lodPixelThreshold)
 {
     ZoneScoped;
@@ -780,12 +773,11 @@ std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(
             *_root->children[i],
             mvps,
             screenSize,
-            deltaStars,
-            mode
+            deltaStars
         );
 
-        // Avoid freezing when switching render mode for large datasets by only fetching
-        // one branch at a time when rebuilding buffer
+        // Avoid freezing for large datasets by only fetching one branch at a time
+        // when rebuilding the buffer
         if (_rebuildBuffer) {
             _traversedBranchesInRenderCall++;
         }
@@ -818,11 +810,11 @@ std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(
     return renderData;
 }
 
-std::vector<float> OctreeManager::getAllData(RenderMode mode) {
+std::vector<float> OctreeManager::getAllData() {
     std::vector<float> fullData;
 
     for (const std::shared_ptr<OctreeNode>& child : _root->children) {
-        std::vector<float> tmpData = nodeData(*child, mode);
+        std::vector<float> tmpData = nodeData(*child);
         fullData.insert(fullData.end(), tmpData.begin(), tmpData.end());
     }
     return fullData;
@@ -1176,8 +1168,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
                                                                          OctreeNode& node,
                                                       const std::vector<glm::dmat4>& mvps,
                                                               const glm::vec2& screenSize,
-                                                                          int& deltaStars,
-                                                                          RenderMode mode)
+                                                                          int& deltaStars)
 {
     ZoneScoped;
 
@@ -1250,7 +1241,6 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
             // Insert data and adjust stars added in this frame
             fetchedData[node.bufferIndex] = constructInsertData(
                 node,
-                mode,
                 deltaStars
             );
             return fetchedData;
@@ -1269,7 +1259,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
             }
 
             // Insert data and adjust stars added in this frame
-            fetchedData[node.bufferIndex] = constructInsertData(node, mode, deltaStars);
+            fetchedData[node.bufferIndex] = constructInsertData(node, deltaStars);
         }
         return fetchedData;
     }
@@ -1289,8 +1279,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
             *child,
             mvps,
             screenSize,
-            deltaStars,
-            mode
+            deltaStars
         );
         fetchedData.insert(tmpData.begin(), tmpData.end());
     }
@@ -1304,8 +1293,6 @@ std::unordered_map<int, std::vector<float>> OctreeManager::removeNodeFromCache(O
     ZoneScoped;
 
     std::unordered_map<int, std::vector<float>> keysToRemove;
-
-    // If we're in rebuilding mode then there is no need to remove any nodes
 
     // Check if this node was rendered == had a specified index
     if (node.bufferIndex != OctreeNode::DefaultIndex) {

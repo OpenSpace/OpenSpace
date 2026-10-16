@@ -38,14 +38,8 @@ layout (location = 0) out vec4 out_color;
 
 uniform sampler1D colorTexture;
 uniform float luminosityMultiplier;
-uniform int renderOption;
 uniform float viewScaling;
 uniform float opacity;
-
-// Keep in sync with gaiaoptions.h:RenderOption enum
-const int RenderOptionStatic = 0;
-const int RenderOptionColor = 1;
-const int RenderOptionMotion = 2;
 const float Parsec = 3.08567758e16; // 1 Parsec
 const float LumLowerCap = 0.01;
 
@@ -58,25 +52,18 @@ vec3 color2rgb(float color) {
 
 
 void main() {
-  // Assume all stars has equal luminosity as the Sun when no magnitude is loaded
-  float luminosity = 0.05;
-  vec3 color = vec3(luminosity);
+  vec3 color = color2rgb(in_data.brightness.y);
 
-  // Calculate the color and luminosity if we have the magnitude and B-V color
-  if (renderOption != RenderOptionStatic) {
-    color = color2rgb(in_data.brightness.y);
+  // Absolute magnitude is brightness a star would have at 10 pc away
+  float absoluteMagnitude = in_data.brightness.x;
 
-    // Absolute magnitude is brightness a star would have at 10 pc away
-    float absoluteMagnitude = in_data.brightness.x;
+  // From formula: MagSun - MagStar = 2.5*log(LumStar / LumSun), it gives that:
+  // LumStar = 10^(1.89 - 0.4*Magstar) , if LumSun = 1 and MagSun = 4.72
+  float luminosity = pow(10.0, 1.89 - 0.4 * absoluteMagnitude);
 
-    // From formula: MagSun - MagStar = 2.5*log(LumStar / LumSun), it gives that:
-    // LumStar = 10^(1.89 - 0.4*Magstar) , if LumSun = 1 and MagSun = 4.72
-    luminosity = pow(10.0, 1.89 - 0.4 * absoluteMagnitude);
-
-    // If luminosity is really really small then set it to a static low number
-    if (luminosity < LumLowerCap) {
-      luminosity = LumLowerCap;
-    }
+  // If luminosity is really really small then set it to a static low number
+  if (luminosity < LumLowerCap) {
+    luminosity = LumLowerCap;
   }
 
   // Luminosity decrease by {squared} distance [measured in Pc]
