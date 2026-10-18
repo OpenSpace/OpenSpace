@@ -13,7 +13,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO scanberg/mdlib
     REF 00bb2e118f8113a0b223c0a588fa29a7dae4c305
-    SHA512 cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
+    SHA512 13edaf0b94d2fc418544bc4cc338d925cb8dc6dda01ef448e5c329cde80fac050914df12711a3fb92f847e1d0b08a05678d6e1d80e86addd9682470ce16cf553
     HEAD_REF master
     PATCHES
         add-install-rules.patch
