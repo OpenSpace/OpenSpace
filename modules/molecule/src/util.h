@@ -27,13 +27,16 @@
 
 #include <modules/molecule/src/def.h>
 #include <openspace/glm.h>
+#include <core/md_bitset.h>
+#include <md_gl.h>
+#include <md_types.h>
 
-struct md_bitfield_t;
-struct md_gl_representation_t;
-struct md_molecule_t;
-struct md_trajectory_i;
+struct md_system_t;
+struct md_system_state_t;
 
 namespace molecule {
+
+struct Trajectory;
 
 enum class InterpolationType {
     Nearest,
@@ -41,15 +44,16 @@ enum class InterpolationType {
     Cubic
 };
 
-void updateRepType(md_gl_representation_t& rep, molecule::rep::Type type, float scale);
-void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
-    molecule::rep::Color color, const md_bitfield_t& mask,
-    const glm::vec4& uniformColor = glm::vec4(0));
+void setDrawOpTypeAndArgs(md_gl_draw_op_t& op, rep::Type type, float scale);
 
-// ensure_pbc enforces that atoms are wrapped properly within the given simulation box
-// after interpolation. This operation can be quite heavy as it attempts to keep residues
-// and chains within the same period
-void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
+void updateRepColor(md_gl_rep_t rep, const md_system_t& sys,
+    rep::Color color, const md_bitmask_t& mask,
+    const glm::vec4& uniformColor = glm::vec4(0),
+    const md_secondary_structure_t* ss = nullptr);
+
+// ensure_pbc enforces that atoms are unwrapped properly within the given simulation box
+// after interpolation.
+void interpolateFrame(md_system_state_t& state, const Trajectory* traj,
     InterpolationType interp, double frame, bool ensurePbc = false);
 
 } // namespace molecule

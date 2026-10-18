@@ -83,10 +83,4 @@ begin_dependency("mold")
 find_package(mold CONFIG REQUIRED)
 target_link_libraries(${molecule_module} PRIVATE mold::mdlib)
 
-# mold's OpenGL backend compiles its GLSL at runtime and, per the overlay port's
-# runtime-shader-path.patch, looks for it at <exe_dir>/../modules/molecule/shaders/mold
-# (or one level further up for a Windows multi-config build tree). The shaders ship inside
-# the vcpkg package, so copy them into that location. This is a configure-time copy rather
-# than a build step because the source is an immutable installed package.
-file(COPY "${MOLD_SHADER_DIR}/" DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/shaders/mold")
 end_dependency("mold")

@@ -58,11 +58,6 @@
 #include <openspace/opengl/texture.h>
 #include <openspace/opengl/textureunit.h>
 #include <openspace/opengl/uniformcache.h>
-#include <core/md_allocator.h>
-#include <core/md_str.h>
-#include <core/md_log.h>
-#include <core/md_str_builder.h>
-#include <core/md_vec_math.h>
 #include <cfloat>
 #include <cstdio>
 #include <cstring>
