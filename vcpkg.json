@@ -57,10 +57,7 @@
     "kubazip",
     "lua",
     "lz4",
-    {
-      "name": "mold",
-      "platform": "!arm64"
-    },
+    "mold",
     "nlohmann-json",
     "openjpeg",
     "oscpack",
