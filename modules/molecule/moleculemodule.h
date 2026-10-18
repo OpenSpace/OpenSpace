@@ -32,7 +32,8 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/threadpool.h>
-#include <md_gl.h>
+
+struct md_gl_shaders_t;
 
 namespace openspace {
 
