@@ -316,9 +316,13 @@ target_include_directories(${webbrowser_module} SYSTEM PUBLIC ${CEF_ROOT})
 set_modules_dependency_on_cef_libraries(${webbrowser_module})
 
 set(deps "")
-foreach (i ${CEF_BINARY_FILES})
-  list(APPEND deps "${CEF_BINARY_DIR}/${i}")
-endforeach()
+if (WIN32)
+  # On Linux the executables find libcef.so in the CEF folder through their RUNPATH, so
+  # only the resource files have to be copied next to them
+  foreach (i ${CEF_BINARY_FILES})
+    list(APPEND deps "${CEF_BINARY_DIR}/${i}")
+  endforeach()
+endif ()
 foreach (j ${CEF_RESOURCE_FILES})
   list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
 endforeach()
