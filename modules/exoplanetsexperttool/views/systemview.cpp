@@ -61,6 +61,12 @@ namespace {
         return std::format("System: {}", host);
     }
 
+    // Format string for object window name (i.e. when there is no host star, or the data
+    // does not represent a system)
+    std::string objectWindowName(const exoplanets::ExoplanetItem& item, size_t rowIndex) {
+        return std::format("Object: {} (row {})##Object{}", item.name, rowIndex + 1, rowIndex);
+    }
+
     // Set increased reach factors of all exoplanet renderables, to trigger fading out of
     // glyph cloud
     void setIncreasedReachfactors() {
@@ -138,7 +144,7 @@ SystemViewer::SystemViewer(DataViewer& dataViewer)
 {}
 
 void SystemViewer::renderAllSystemViews() {
-    if (_shownPlanetSystemWindows.empty()) {
+    if (_shownPlanetSystemWindows.empty() && _shownObjectWindows.empty()) {
         return;
     }
 
@@ -147,10 +153,11 @@ void SystemViewer::renderAllSystemViews() {
         bool isOpen = true;
 
         ImGui::SetNextWindowSize(ImVec2(0.f, 0.f), ImGuiCond_Appearing);
-        if (ImGui::Begin(systemWindowName(host).c_str(), &isOpen)) {
+        const bool visible = ImGui::Begin(systemWindowName(host).c_str(), &isOpen);
+        if (visible) {
             renderSystemViewContent(host);
-            ImGui::End();
         }
+        ImGui::End();
 
         if (!isOpen) {
             // was closed => remove from list
@@ -160,6 +167,29 @@ void SystemViewer::renderAllSystemViews() {
 
     for (const std::string& host : hostsToRemove) {
         _shownPlanetSystemWindows.remove(host);
+    }
+
+    std::vector<size_t> objectsToRemove;
+    for (const size_t rowIndex : _shownObjectWindows) {
+        if (rowIndex >= _dataViewer.data().size()) {
+            objectsToRemove.push_back(rowIndex);
+            continue;
+        }
+
+        bool isOpen = true;
+        ImGui::SetNextWindowSize(ImVec2(0.f, 0.f), ImGuiCond_Appearing);
+        const ExoplanetItem& item = _dataViewer.data()[rowIndex];
+        const bool visible = ImGui::Begin(objectWindowName(item, rowIndex).c_str(), &isOpen);
+        if (visible) {
+            renderObjectViewContent(rowIndex);
+        }
+        ImGui::End();
+        if (!isOpen) {
+            objectsToRemove.push_back(rowIndex);
+        }
+    }
+    for (const size_t rowIndex : objectsToRemove) {
+        _shownObjectWindows.remove(rowIndex);
     }
 }
 
@@ -225,6 +255,20 @@ void SystemViewer::showSystemView(const std::string& host) {
     else {
         // Bring window to front
         ImGui::SetWindowFocus(systemWindowName(host).c_str());
+    }
+}
+
+void SystemViewer::showObjectView(size_t rowIndex) {
+    if (rowIndex >= _dataViewer.data().size()) {
+        return;
+    }
+    auto it = std::find(_shownObjectWindows.begin(), _shownObjectWindows.end(), rowIndex);
+    if (it == _shownObjectWindows.end()) {
+        _shownObjectWindows.push_back(rowIndex);
+    }
+    else {
+        const ExoplanetItem& item = _dataViewer.data()[rowIndex];
+        ImGui::SetWindowFocus(objectWindowName(item, rowIndex).c_str());
     }
 }
 
@@ -418,6 +462,30 @@ void SystemViewer::renderSystemViewContent(const std::string& host) {
         }
 
         ImGui::EndTabBar();
+    }
+}
+
+void SystemViewer::renderObjectViewContent(size_t rowIndex) {
+    if (rowIndex >= _dataViewer.data().size()) {
+        return;
+    }
+
+    const ExoplanetItem& item = _dataViewer.data()[rowIndex];
+    ImGui::Text("Object details");
+    ImGui::Separator();
+
+    for (const ColumnKey& key : _dataViewer.columns()) {
+        if (!_dataViewer.hasColumn(key)) {
+            continue;
+        }
+        ImGui::Text("%s:", _dataViewer.columnName(key));
+        ImGui::SameLine();
+        _dataViewer.renderColumnValue(key, item);
+        _dataViewer.renderUncertaintyIndicator(key, item);
+        if (_dataViewer.hasColumnDescription(key)) {
+            ImGui::SameLine();
+            view::helper::renderHelpMarker(_dataViewer.columnDescription(key));
+        }
     }
 }
 

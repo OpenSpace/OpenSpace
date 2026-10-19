@@ -40,6 +40,7 @@ public:
 
     const std::list<std::string>& showSystemViews() const;
     void showSystemView(const std::string& host);
+    void showObjectView(size_t rowIndex);
 
     bool systemCanBeAdded(const std::string& host) const;
     bool hasSystemBeenAdded(const std::string& host) const;
@@ -54,6 +55,7 @@ public:
 
 private:
     void renderSystemViewContent(const std::string& host);
+    void renderObjectViewContent(size_t rowIndex);
 
     void renderVisualsTabContent(const std::string& host,
         const std::vector<size_t>& planetIndices);
@@ -63,6 +65,7 @@ private:
     DataViewer& _dataViewer;
 
     std::list<std::string> _shownPlanetSystemWindows;
+    std::list<size_t> _shownObjectWindows;
     std::vector<std::string> _addedHostStars;
 
     bool _shouldColorOrbits = false;

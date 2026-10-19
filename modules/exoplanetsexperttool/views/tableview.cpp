@@ -305,7 +305,17 @@ void TableView::renderTable(const std::string& tableId, std::vector<size_t>& dat
                             }
 
                             ImGui::Separator();
-                            _dataViewer.systemViewer()->renderSystemViewQuickControls(item.hostName);
+                            if (!_dataViewer.dataMapping().hostName.empty() &&
+                                !item.hostName.empty())
+                            {
+                                _dataViewer.systemViewer()->renderSystemViewQuickControls(
+                                    item.hostName
+                                );
+                            }
+                            else if (ImGui::Button("Show object view")) {
+                                _dataViewer.systemViewer()->showObjectView(index);
+                                ImGui::CloseCurrentPopup();
+                            }
 
                             ImGui::EndPopup();
                         }
@@ -314,14 +324,15 @@ void TableView::renderTable(const std::string& tableId, std::vector<size_t>& dat
                         // Check double click, left mouse button
                         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
                             LINFO(std::format("Double click: {}", item.name));
-                            bool isPlanetSystem = !item.hostName.empty();
+                            bool isPlanetSystem = !_dataViewer.dataMapping().hostName.empty() &&
+                                !item.hostName.empty();
 
                             if (isPlanetSystem) {
                                 _dataViewer.systemViewer()->addOrTargetPlanet(item);
                                 _dataViewer.systemViewer()->showSystemView(item.hostName);
                             }
                             else {
-                                LINFO("Can't add a non-exoplanet object, yet!");
+                                _dataViewer.systemViewer()->showObjectView(index);
                             }
                         }
 

@@ -150,6 +150,9 @@ public:
 
 private:
     bool initializeData(DataSettings settings);
+    bool prepareDataLoad(DataSettings settings, bool showMappingPrompt = false);
+    bool commitPendingDataLoad();
+    void renderPendingDataMappings();
 
     void renderStartupInfo();
     bool _shouldOpenInfoWindow = true;
@@ -183,6 +186,11 @@ private:
     void computeMeanForColumn(const ColumnKey& key);
 
     DataSettings _dataSettings;
+    std::optional<DataSettings> _pendingDataSettings;
+    std::vector<std::string> _pendingDataColumns;
+    std::string _pendingDataError;
+    bool _isGLInitialized = false;
+    bool _pendingUseRowIndexForName = false;
     ColumnSelectionView _columnSelectionView;
     std::unique_ptr<ColorMappingView> _colorMappingView;
     std::unique_ptr<FilteringView> _filteringView;
@@ -200,6 +208,7 @@ private:
     bool _showColormapWindow = false;
     bool _showComputeColumnsWindow = false;
     bool _showSpatialSelectionWindow = false;
+    bool _showOpenCsvModal = false;
 
     bool _showColormapOverviewWindow = false;
 

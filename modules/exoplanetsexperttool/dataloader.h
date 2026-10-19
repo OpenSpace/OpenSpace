@@ -36,6 +36,8 @@ public:
     DataLoader();
 
     static DataSettings loadDataSettingsFromJson();
+    static DataSettings loadDataSettingsFromJson(const std::filesystem::path& path);
+    static std::vector<std::string> csvColumnNames(const std::filesystem::path& path);
     static std::vector<ExoplanetItem> loadData(const DataSettings& settings);
 
     /**

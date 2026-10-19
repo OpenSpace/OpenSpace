@@ -850,12 +850,6 @@ void SpatialSelectionView::updateSkyMapCache() const {
 
     const std::vector<ExoplanetItem>& data = _dataViewer.data();
     const std::vector<size_t>& filtered = _dataViewer.currentFiltering();
-    const DataSettings::DataMapping& mapping = _dataViewer.dataMapping();
-
-    if (mapping.positionRa.empty() || mapping.positionDec.empty()) {
-        _skyMapCacheDirty = false;
-        return;
-    }
 
     _cachedRa.reserve(filtered.size());
     _cachedDec.reserve(filtered.size());
@@ -875,37 +869,26 @@ void SpatialSelectionView::updateSkyMapCache() const {
             continue;
         }
         const ExoplanetItem& item = data[idx];
-        const bool hasRaDec = item.dataColumns.contains(mapping.positionRa) &&
-            item.dataColumns.contains(mapping.positionDec);
+        if (!item.skyCoordinates.has_value()) {
+            continue;
+        }
 
-        if (hasRaDec) {
-            const std::variant<std::string, float>& raVal =
-                item.dataColumns.at(mapping.positionRa);
+        _cachedRa.push_back(static_cast<float>(item.skyCoordinates->x));
+        _cachedDec.push_back(static_cast<float>(item.skyCoordinates->y));
 
-            const std::variant<std::string, float>& decVal =
-                item.dataColumns.at(mapping.positionDec);
-
-            if (std::holds_alternative<float>(raVal) &&
-                std::holds_alternative<float>(decVal))
-            {
-                _cachedRa.push_back(std::get<float>(raVal));
-                _cachedDec.push_back(std::get<float>(decVal));
-
-                if (primaryCmap) {
-                    const glm::vec4 color = colormapView->colorFromColormap(
-                        item,
-                        *primaryCmap
-                    );
-                    const ImVec4 imCol = view::helper::toImVec4(color);
-                    _cachedColors.push_back(ImGui::ColorConvertFloat4ToU32(imCol));
-                }
-                else {
-                    const ImVec4 defaultColor = { 0.2f, 0.8f, 1.f, 1.f };
-                    _cachedColors.push_back(
-                        ImGui::ColorConvertFloat4ToU32(defaultColor)
-                    );
-                }
-            }
+        if (primaryCmap) {
+            const glm::vec4 color = colormapView->colorFromColormap(
+                item,
+                *primaryCmap
+            );
+            const ImVec4 imCol = view::helper::toImVec4(color);
+            _cachedColors.push_back(ImGui::ColorConvertFloat4ToU32(imCol));
+        }
+        else {
+            const ImVec4 defaultColor = { 0.2f, 0.8f, 1.f, 1.f };
+            _cachedColors.push_back(
+                ImGui::ColorConvertFloat4ToU32(defaultColor)
+            );
         }
     }
 
@@ -923,8 +906,7 @@ std::vector<size_t> SpatialSelectionView::currentSpatialSelection(
     return handler().select(
         _dataViewer.data(),
         candidates,
-        *currentQuery,
-        _dataViewer.dataMapping()
+        *currentQuery
     );
 }
 
@@ -1755,8 +1737,7 @@ void SpatialSelectionView::generateLassoVolume(RenderableDensityPointCloud* targ
         const std::vector<size_t> inside = handler().select(
             _dataViewer.data(),
             _dataViewer.currentFiltering(),
-            *_generatedVolume,
-            _dataViewer.dataMapping()
+            *_generatedVolume
         );
 
         _dataViewer.setSelection(inside);

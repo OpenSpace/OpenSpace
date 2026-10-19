@@ -123,8 +123,7 @@ std::vector<size_t> SpatialSelectionHandler::selectBox(
 std::vector<size_t> SpatialSelectionHandler::selectSkyRect(
                                             const std::vector<ExoplanetItem>& data,
                                             const std::vector<size_t>& candidates,
-                                            const SkyMapRect& rect,
-                                            const DataSettings::DataMapping& mapping) const
+                                            const SkyMapRect& rect) const
 {
     std::vector<size_t> result;
     result.reserve(candidates.size());
@@ -137,30 +136,12 @@ std::vector<size_t> SpatialSelectionHandler::selectSkyRect(
             continue;
         }
         const ExoplanetItem& item = data[idx];
-
-        const bool hasRaDecColumns = !mapping.positionRa.empty() &&
-            !mapping.positionDec.empty() &&
-            item.dataColumns.contains(mapping.positionRa) &&
-            item.dataColumns.contains(mapping.positionDec);
-
-        if (!hasRaDecColumns) {
+        if (!item.skyCoordinates.has_value()) {
             continue;
         }
 
-        const std::variant<std::string, float>& raVal =
-            item.dataColumns.at(mapping.positionRa);
-        const std::variant<std::string, float>& decVal =
-            item.dataColumns.at(mapping.positionDec);
-
-        const bool areNumericValues = std::holds_alternative<float>(raVal) &&
-            std::holds_alternative<float>(decVal);
-
-        if (!areNumericValues) {
-            continue;
-        }
-
-        const double ra = static_cast<double>(std::get<float>(raVal));
-        const double dec = static_cast<double>(std::get<float>(decVal));
+        const double ra = item.skyCoordinates->x;
+        const double dec = item.skyCoordinates->y;
 
         const bool isInDecRange = (dec >= decMin) && (dec <= decMax);
         const bool isInAngularArea = isRaInRange(ra, rect.raMin, rect.raMax) &&
@@ -171,17 +152,9 @@ std::vector<size_t> SpatialSelectionHandler::selectSkyRect(
         }
 
         if (rect.useDistanceFilter) {
-            const bool hasDistColumn = !mapping.positionDistance.empty() &&
-                item.dataColumns.contains(mapping.positionDistance);
-            if (hasDistColumn) {
-                const std::variant<std::string, float>& distVal =
-                    item.dataColumns.at(mapping.positionDistance);
-                if (std::holds_alternative<float>(distVal)) {
-                    const double dist = static_cast<double>(std::get<float>(distVal));
-                    if ((dist < rect.distMin) || (dist > rect.distMax)) {
-                        continue;
-                    }
-                }
+            const double distance = item.skyCoordinates->z;
+            if ((distance < rect.distMin) || (distance > rect.distMax)) {
+                continue;
             }
         }
 
@@ -423,8 +396,7 @@ std::vector<size_t> SpatialSelectionHandler::selectIsoSurfaceVolume(
 std::vector<size_t> SpatialSelectionHandler::select(
                                       const std::vector<ExoplanetItem>& data,
                                       const std::vector<size_t>& candidates,
-                                      const SpatialSelectionQuery& query,
-                                      const DataSettings::DataMapping& mapping) const
+                                      const SpatialSelectionQuery& query) const
 {
     if (const SphereVolume* sphere = std::get_if<SphereVolume>(&query)) {
         return selectSphere(data, candidates, *sphere);
@@ -433,7 +405,7 @@ std::vector<size_t> SpatialSelectionHandler::select(
         return selectBox(data, candidates, *box);
     }
     if (const SkyMapRect* rect = std::get_if<SkyMapRect>(&query)) {
-        return selectSkyRect(data, candidates, *rect, mapping);
+        return selectSkyRect(data, candidates, *rect);
     }
     if (const MeshVolume* volume = std::get_if<MeshVolume>(&query)) {
         return selectMeshVolume(data, candidates, *volume);

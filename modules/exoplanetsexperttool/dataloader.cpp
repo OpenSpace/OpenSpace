@@ -40,10 +40,13 @@
 #include <openspace/util/progressbar.h>
 
 #include <cmath>
+#include <array>
 #include <fstream>
 #include <limits>
+#include <set>
 #include <string>
 #include <string_view>
+#include <stdexcept>
 #include <variant>
 
 namespace {
@@ -61,45 +64,80 @@ namespace {
         using namespace openspace;
         using namespace openspace::exoplanets;
 
-        try {
+        if (!j.is_object()) {
+            throw std::invalid_argument("Dataset settings must be a JSON object");
+        }
+        if (j.contains("datafile")) {
             std::string file;
             j.at("datafile").get_to(file);
-            s.dataFile = absPath(file);
+            s.dataFile = file.find("${") == std::string::npos ?
+                std::filesystem::path(file) : absPath(file);
+        }
 
-            const nlohmann::json dataMapping = j.at("data_mapping");
-            dataMapping.at("position_ra").get_to(s.dataMapping.positionRa);
-            dataMapping.at("position_dec").get_to(s.dataMapping.positionDec);
-            dataMapping.at("position_distance").get_to(s.dataMapping.positionDistance);
-
-            if (dataMapping.contains("name")) {
-                dataMapping.at("name").get_to(s.dataMapping.name);
+        nlohmann::json dataMapping = nlohmann::json::object();
+        if (j.contains("data_mapping")) {
+            dataMapping = j.at("data_mapping");
+            if (!dataMapping.is_object()) {
+                throw std::invalid_argument("'data_mapping' must be a JSON object");
             }
-            if (dataMapping.contains("hostName")) {
-               dataMapping.at("hostName").get_to(s.dataMapping.hostName);
+        }
+        auto readMapping = [&dataMapping](std::string_view key, ColumnKey& value) {
+            if (dataMapping.contains(key)) {
+                dataMapping.at(key).get_to(value);
             }
-            if (dataMapping.contains("ring_size")) {
-                dataMapping.at("ring_size").get_to(s.dataMapping.ringSize);
+        };
+        readMapping("position_ra", s.dataMapping.positionRa);
+        readMapping("position_dec", s.dataMapping.positionDec);
+        readMapping("position_distance", s.dataMapping.positionDistance);
+        readMapping("position_x", s.dataMapping.positionX);
+        readMapping("position_y", s.dataMapping.positionY);
+        readMapping("position_z", s.dataMapping.positionZ);
+        if (dataMapping.contains("position_type")) {
+            const std::string positionType = dataMapping.at("position_type").get<std::string>();
+            if (positionType == "equatorial") {
+                s.dataMapping.positionType = DataSettings::DataMapping::PositionType::Equatorial;
             }
-            if (dataMapping.contains("reference_name")) {
-                dataMapping.at("reference_name").get_to(s.dataMapping.referenceName);
+            else if (positionType == "galactic_cartesian") {
+                s.dataMapping.positionType =
+                    DataSettings::DataMapping::PositionType::GalacticCartesian;
             }
-            if (dataMapping.contains("reference_link")) {
-                dataMapping.at("reference_link").get_to(s.dataMapping.referenceLink);
+            else {
+                throw std::invalid_argument(std::format(
+                    "Invalid position_type '{}'; expected 'equatorial' or 'galactic_cartesian'",
+                    positionType
+                ));
             }
-            if (dataMapping.contains("metallicity_ratio")) {
-                dataMapping.at("metallicity_ratio").get_to(s.dataMapping.metallicityRatio);
+        }
+        if (dataMapping.contains("position_unit")) {
+            const std::string unit = dataMapping.at("position_unit").get<std::string>();
+            bool foundUnit = false;
+            for (DistanceUnit candidate : DistanceUnits) {
+                const DistanceUnitName unitName =
+                    DistanceUnitNames[static_cast<int>(candidate)];
+                if (unit == unitName.singular || unit == unitName.plural ||
+                    unit == unitName.abbreviation)
+                {
+                    s.dataMapping.positionUnit = candidate;
+                    foundUnit = true;
+                    break;
+                }
             }
-            if (dataMapping.contains("discovery_method")) {
-                dataMapping.at("discovery_method").get_to(s.dataMapping.discoveryMethod);
+            if (!foundUnit) {
+                throw std::invalid_argument(std::format(
+                    "Invalid position_unit '{}'; use a supported distance unit name or abbreviation",
+                    unit
+                ));
             }
-            if (dataMapping.contains("inclination")) {
-                dataMapping.at("inclination").get_to(s.dataMapping.inclination);
-            }
-            if (dataMapping.contains("stellar_inclination")) {
-                dataMapping.at("stellar_inclination").get_to(
-                    s.dataMapping.stellarInclination
-                );
-            }
+        }
+        readMapping("name", s.dataMapping.name);
+        readMapping("hostName", s.dataMapping.hostName);
+        readMapping("ring_size", s.dataMapping.ringSize);
+        readMapping("reference_name", s.dataMapping.referenceName);
+        readMapping("reference_link", s.dataMapping.referenceLink);
+        readMapping("metallicity_ratio", s.dataMapping.metallicityRatio);
+        readMapping("discovery_method", s.dataMapping.discoveryMethod);
+        readMapping("inclination", s.dataMapping.inclination);
+        readMapping("stellar_inclination", s.dataMapping.stellarInclination);
 
             if (j.contains("system_view")) {
                 const nlohmann::json systemView = j.at("system_view");
@@ -125,7 +163,13 @@ namespace {
                 }
             }
 
-            const nlohmann::json columnInfo = j.at("column_info");
+            const nlohmann::json columnInfo = j.value(
+                "column_info",
+                nlohmann::json::object()
+            );
+            if (!columnInfo.is_object()) {
+                throw std::invalid_argument("'column_info' must be a JSON object");
+            }
             for (auto& [key, value] : columnInfo.items()) {
                 DataSettings::ColumnInfo info;
                 value.at("name").get_to(info.name);
@@ -143,8 +187,10 @@ namespace {
                 s.columnInfo[key] = info;
             }
 
-            const std::vector<nlohmann::json> quickFilterGroups =
-                j.at("quick_filters").get<std::vector<nlohmann::json>>();
+            const std::vector<nlohmann::json> quickFilterGroups = j.value(
+                "quick_filters",
+                std::vector<nlohmann::json>()
+            );
             s.quickFilterGroups.reserve(quickFilterGroups.size());
 
             for (const nlohmann::json& groupInfo : quickFilterGroups) {
@@ -206,10 +252,6 @@ namespace {
 
                 s.quickFilterGroups.push_back(group);
             }
-        }
-        catch (const nlohmann::json::out_of_range& e) {
-            LERROR(std::format("When reading data settings .json: {}", e.what()));
-        }
     }
 
 } // namespace
@@ -218,28 +260,70 @@ namespace openspace::exoplanets {
 
 DataLoader::DataLoader() {}
 
+std::vector<std::string> DataLoader::csvColumnNames(const std::filesystem::path& path) {
+    if (!std::filesystem::is_regular_file(path)) {
+        throw std::runtime_error(std::format("Could not find input data file '{}'", path));
+    }
+    std::ifstream csvFile(path);
+    if (!csvFile.good()) {
+        throw std::runtime_error(std::format("Failed to open input data file '{}'", path));
+    }
+
+    const std::vector<std::vector<std::string>> csvContent = loadCSVFile(path, true);
+    if (csvContent.empty() || csvContent.front().empty()) {
+        throw std::runtime_error(std::format("CSV '{}' has no header row", path));
+    }
+
+    const std::vector<std::string>& columns = csvContent.front();
+    std::set<std::string> uniqueColumns;
+    for (const std::string& column : columns) {
+        if (column.empty()) {
+            throw std::runtime_error(std::format("CSV '{}' contains an empty column name", path));
+        }
+        if (!uniqueColumns.insert(column).second) {
+            throw std::runtime_error(std::format(
+                "CSV '{}' contains duplicate column name '{}'", path, column
+            ));
+        }
+    }
+
+    for (size_t row = 1; row < csvContent.size(); row++) {
+        if (csvContent[row].size() != columns.size()) {
+            throw std::runtime_error(std::format(
+                "CSV '{}' row {} has {} fields; expected {}",
+                path,
+                row + 1,
+                csvContent[row].size(),
+                columns.size()
+            ));
+        }
+    }
+
+    return columns;
+}
+
 DataSettings DataLoader::loadDataSettingsFromJson() {
     auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
-    std::filesystem::path settingsPath = absPath(mod->dataConfigFile());
+    const std::filesystem::path settingsPath = absPath(mod->dataConfigFile());
 
     if (settingsPath.empty()) {
-        LERROR("No dataset settings (.json) file was provided.");
-        return DataSettings();
+        throw std::runtime_error("No dataset settings (.json) file was provided");
     }
-    else if (!std::filesystem::is_regular_file(settingsPath)) {
-        LERROR(std::format(
-            "Could not find dataset settings (.json) file: '{}'", settingsPath
-        ));
-        return DataSettings();
-    }
+    return loadDataSettingsFromJson(settingsPath);
+}
 
+DataSettings DataLoader::loadDataSettingsFromJson(const std::filesystem::path& path) {
+    const std::filesystem::path settingsPath = absPath(path.string());
+    if (!std::filesystem::is_regular_file(settingsPath)) {
+        throw std::runtime_error(std::format(
+            "Could not find dataset settings (.json) file '{}'", settingsPath
+        ));
+    }
     std::ifstream datasetConfigFile(settingsPath);
-
     if (!datasetConfigFile.good()) {
-        LERROR(std::format(
-            "Failed reading dataset settings file: '{}'", settingsPath
+        throw std::runtime_error(std::format(
+            "Failed reading dataset settings file '{}'", settingsPath
         ));
-        return DataSettings();
     }
 
     LINFO(std::format("Loading settings from file: '{}'", settingsPath));
@@ -248,13 +332,17 @@ DataSettings DataLoader::loadDataSettingsFromJson() {
         const nlohmann::json j = nlohmann::json::parse(datasetConfigFile);
         DataSettings settings;
         from_json(j, settings);
+        if (!settings.dataFile.empty() && settings.dataFile.is_relative() &&
+            settings.dataFile.string().find("${") == std::string::npos)
+        {
+            settings.dataFile = settingsPath.parent_path() / settings.dataFile;
+        }
         return settings;
     }
-    catch (...) {
-        LERROR(std::format(
-            "Failed parsing dataset settings file: '{}'", settingsPath
+    catch (const std::exception& e) {
+        throw std::runtime_error(std::format(
+            "Failed parsing dataset settings file '{}': {}", settingsPath, e.what()
         ));
-        return DataSettings();
     }
 }
 
@@ -290,18 +378,150 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
 
     // Write exoplanet records to file
     std::vector<std::string> columns = csvContent[0];
+    const DataSettings::DataMapping& mapping = settings.dataMapping;
+
+    const std::set<std::string> availableColumns(columns.begin(), columns.end());
+    std::set<std::string> uniqueColumns;
+    for (const std::string& column : columns) {
+        if (column.empty()) {
+            throw std::runtime_error(std::format(
+                "CSV '{}' contains an empty column name", csvFilePath
+            ));
+        }
+        if (!uniqueColumns.insert(column).second) {
+            throw std::runtime_error(std::format(
+                "CSV '{}' contains duplicate column name '{}'", csvFilePath, column
+            ));
+        }
+    }
+    auto requireColumn = [&availableColumns, &csvFilePath, &columns](
+        const ColumnKey& key,
+        std::string_view role
+    ) {
+        if (key.empty()) {
+            throw std::invalid_argument(std::format(
+                "No CSV column is mapped for {}", role
+            ));
+        }
+        if (!availableColumns.contains(key)) {
+            throw std::invalid_argument(std::format(
+                "Mapped {} column '{}' is not present in '{}', available columns: {}",
+                role,
+                key,
+                csvFilePath,
+                join(columns, ", ")
+            ));
+        }
+    };
+    const bool isEquatorial = mapping.positionType ==
+        DataSettings::DataMapping::PositionType::Equatorial;
+    if (isEquatorial) {
+        requireColumn(mapping.positionRa, "right ascension");
+        requireColumn(mapping.positionDec, "declination");
+        requireColumn(mapping.positionDistance, "distance");
+    }
+    else {
+        requireColumn(mapping.positionX, "Galactic X");
+        requireColumn(mapping.positionY, "Galactic Y");
+        requireColumn(mapping.positionZ, "Galactic Z");
+    }
+
+    if (!settings.dataMapping.nameFromRowIndex && !settings.dataMapping.name.empty() &&
+        !availableColumns.contains(settings.dataMapping.name))
+    {
+        throw std::invalid_argument(std::format(
+            "Mapped object-name column '{}' is not present in '{}', available columns: {}",
+            settings.dataMapping.name,
+            csvFilePath,
+            join(columns, ", ")
+        ));
+    }
+
+    const std::array<std::pair<const ColumnKey*, std::string_view>, 8> optionalMappings = {{
+        { &mapping.hostName, "host name" },
+        { &mapping.ringSize, "ring size" },
+        { &mapping.referenceName, "reference name" },
+        { &mapping.referenceLink, "reference link" },
+        { &mapping.metallicityRatio, "metallicity ratio" },
+        { &mapping.discoveryMethod, "discovery method" },
+        { &mapping.inclination, "inclination" },
+        { &mapping.stellarInclination, "stellar inclination" }
+    }};
+    for (const auto& [key, role] : optionalMappings) {
+        if (!key->empty() && !availableColumns.contains(*key)) {
+            LWARNING(std::format(
+                "Ignoring missing {} column '{}' in '{}'", role, *key, csvFilePath
+            ));
+        }
+    }
 
     const int nRows = static_cast<int>(csvContent.size());
+    if (nRows < 2) {
+        throw std::runtime_error(std::format("CSV '{}' contains a header but no data rows", csvFilePath));
+    }
+    for (int row = 1; row < nRows; row++) {
+        if (csvContent[row].size() != columns.size()) {
+            throw std::runtime_error(std::format(
+                "CSV '{}' row {} has {} fields; expected {}",
+                csvFilePath,
+                row + 1,
+                csvContent[row].size(),
+                columns.size()
+            ));
+        }
+    }
 
     std::vector<ExoplanetItem> planets;
     planets.reserve(nRows);
+
+    std::vector<bool> columnIsNumeric(columns.size(), false);
+    for (size_t col = 0; col < columns.size(); col++) {
+        const std::string& column = columns[col];
+        const bool isPositionColumn = isEquatorial ?
+            (column == mapping.positionRa || column == mapping.positionDec ||
+             column == mapping.positionDistance) :
+            (column == mapping.positionX || column == mapping.positionY ||
+             column == mapping.positionZ);
+        const bool isIdentifierColumn = column == mapping.name ||
+            column == mapping.hostName || column == mapping.referenceName ||
+            column == mapping.referenceLink;
+        const bool forceText = !isPositionColumn && (isIdentifierColumn ||
+            (settings.columnInfo.contains(column) &&
+             settings.columnInfo.at(column).isText.value_or(false)));
+
+        if (isPositionColumn) {
+            columnIsNumeric[col] = true;
+            continue;
+        }
+        if (forceText) {
+            continue;
+        }
+
+        bool sawValue = false;
+        bool allValuesNumeric = true;
+        for (int row = 1; row < nRows; row++) {
+            const std::string& value = csvContent[row][col];
+            if (isNan(value)) {
+                continue;
+            }
+            sawValue = true;
+            if (!std::isfinite(data::parseFloatData(value))) {
+                allValuesNumeric = false;
+                break;
+            }
+        }
+        const bool explicitlyNumeric = settings.columnInfo.contains(column) &&
+            settings.columnInfo.at(column).isText.has_value() &&
+            !*settings.columnInfo.at(column).isText;
+        columnIsNumeric[col] = allValuesNumeric && (sawValue || explicitlyNumeric);
+    }
 
     ProgressBar progressBar(100);
     auto printProgress = [&progressBar](float progress) {
         progressBar.print(static_cast<int>(progress * 100.f));
     };
 
-    int nDataColumns = -1;
+    bool hasUsablePosition = false;
 
     printProgress(0.f);
 
@@ -310,83 +530,122 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
 
         p.id = row - 1;
 
-        DataPoint ra;
-        DataPoint dec;
-        DataPoint distance;
+        DataPoint coordinate1;
+        DataPoint coordinate2;
+        DataPoint coordinate3;
 
-        if (settings.dataMapping.name.empty()) {
-            p.name = std::format("Item {}", row);
-            p.dataColumns["name"] = p.name;
+        if (settings.dataMapping.nameFromRowIndex) {
+            if (settings.dataMapping.name.empty() || availableColumns.contains(settings.dataMapping.name)) {
+                throw std::invalid_argument(
+                    "Index-based object names require a generated column key not present in the CSV"
+                );
+            }
+            p.name = std::to_string(row);
+            p.dataColumns[settings.dataMapping.name] = p.name;
+        }
+        else if (settings.dataMapping.name.empty()) {
+            throw std::invalid_argument(
+                "No object-name column was selected; select a CSV column or use row index"
+            );
         }
 
         for (int col = 0; col < columns.size(); col++) {
             const std::string& column = columns[col];
             const std::string& data = csvContent[row][col];
 
-            // Get special values first
-            if (column == settings.dataMapping.name) {
+            // Extract mapped values independently, since mappings may share a source column.
+            if (!settings.dataMapping.nameFromRowIndex &&
+                column == settings.dataMapping.name)
+            {
                 p.name = data;
             }
-            else if (column == settings.dataMapping.hostName) {
-                p.hostName = data;
+            if (column == settings.dataMapping.hostName && !column.empty()) {
+                p.hostName = isNan(data) ? "" : data;
             }
-            else if (column == settings.dataMapping.ringSize) {
+            if (column == settings.dataMapping.ringSize && !column.empty()) {
                 p.sizeValue = data::parseFloatData(data);
             }
-            else if (column == settings.dataMapping.positionRa) {
-                ra.value = data::parseFloatData(data);
+            if (isEquatorial) {
+                if (column == mapping.positionRa) {
+                    coordinate1.value = data::parseFloatData(data);
+                }
+                if (column == mapping.positionDec) {
+                    coordinate2.value = data::parseFloatData(data);
+                }
+                if (column == mapping.positionDistance) {
+                    coordinate3.value = data::parseFloatData(data);
+                }
             }
-            else if (column == settings.dataMapping.positionDec) {
-                dec.value = data::parseFloatData(data);
+            else {
+                if (column == mapping.positionX) {
+                    coordinate1.value = data::parseFloatData(data);
+                }
+                if (column == mapping.positionY) {
+                    coordinate2.value = data::parseFloatData(data);
+                }
+                if (column == mapping.positionZ) {
+                    coordinate3.value = data::parseFloatData(data);
+                }
             }
-            else if (column == settings.dataMapping.positionDistance) {
-                distance.value = data::parseFloatData(data);
-            }
-            else if (column == settings.dataMapping.referenceName) {
+            if (column == settings.dataMapping.referenceName && !column.empty()) {
                 p.referenceName = data;
             }
-            else if (column == settings.dataMapping.referenceLink) {
+            if (column == settings.dataMapping.referenceLink && !column.empty()) {
                 p.referenceUrl= data;
             }
 
-            // Parse data column values
-
-            float parsedNumeric = data::parseFloatData(data);
-
-            bool hasIsTextInfo = settings.columnInfo.contains(column) &&
-                settings.columnInfo.at(column).isText.has_value();
-
-            bool shouldEnforceString =
-                hasIsTextInfo ? *settings.columnInfo.at(column).isText : false;
-
-            if (data.empty() && isNan(data)) {
-                // All columns should have empty string for missing values
-                p.dataColumns[column] = "";
-            }
-            else if (!std::isnan(parsedNumeric) && !shouldEnforceString) {
-                p.dataColumns[column] = parsedNumeric;
+            const float parsedNumeric = data::parseFloatData(data);
+            if (columnIsNumeric[col]) {
+                p.dataColumns[column] = std::isfinite(parsedNumeric) ?
+                    parsedNumeric : std::numeric_limits<float>::quiet_NaN();
             }
             else {
-                // Non empty string value
                 p.dataColumns[column] = isNan(data) ? "" : data;
             }
         }
 
         // Compute galactic position of item
-        bool hasPos = ra.hasValue() && dec.hasValue() && distance.hasValue();
+        const bool hasPos = std::isfinite(coordinate1.value) &&
+            std::isfinite(coordinate2.value) && std::isfinite(coordinate3.value);
         if (hasPos) {
-            p.position = icrsToGalacticCartesian(ra.value, dec.value, distance.value);
-        }
-
-        // Verification related to "other columns". All rows should have the same number
-        // of columns
-        if (nDataColumns == -1) {
-            nDataColumns = static_cast<int>(p.dataColumns.size());
-        }
-        else {
-            if (p.dataColumns.size() != nDataColumns) {
-                throw; // TODO: throw something meaningful
+            if (isEquatorial) {
+                const double distanceParsecs = convertDistance(
+                    coordinate3.value,
+                    mapping.positionUnit,
+                    DistanceUnit::Parsec
+                );
+                p.position = icrsToGalacticCartesian(
+                    coordinate1.value,
+                    coordinate2.value,
+                    distanceParsecs
+                );
+                double ra = std::fmod(coordinate1.value, 360.0);
+                if (ra < 0.0) {
+                    ra += 360.0;
+                }
+                p.skyCoordinates = glm::dvec3(ra, coordinate2.value, distanceParsecs);
             }
+            else {
+                p.position = glm::dvec3(
+                    convertDistance(coordinate1.value, mapping.positionUnit, DistanceUnit::Parsec),
+                    convertDistance(coordinate2.value, mapping.positionUnit, DistanceUnit::Parsec),
+                    convertDistance(coordinate3.value, mapping.positionUnit, DistanceUnit::Parsec)
+                );
+                const double distanceParsecs = glm::length(*p.position);
+                if (distanceParsecs > 0.0 && std::isfinite(distanceParsecs)) {
+                    glm::dvec3 icrs = galacticCartesianToIcrs(
+                        p.position->x,
+                        p.position->y,
+                        p.position->z
+                    );
+                    icrs.x = std::fmod(icrs.x, 360.0);
+                    if (icrs.x < 0.0) {
+                        icrs.x += 360.0;
+                    }
+                    p.skyCoordinates = icrs;
+                }
+            }
+            hasUsablePosition = true;
         }
 
         planets.push_back(p);
@@ -400,52 +659,19 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
         return planets;
     }
 
-    // Handle missing values
-
-    LINFO("Modifing data based on missing values and detecting column data types...");
-
-    std::map<std::string, bool> colIsNumeric;
-    auto firstDataValues = planets.front().dataColumns;
-
-    // Determine column types and replace missing values in numeric columns in one pass
-    for (const auto& [key, _] : firstDataValues) {
-        // Default is text
-        bool isNumeric = false;
-
-        // Find first entry with a value to determine type
-        for (ExoplanetItem& p : planets) {
-            std::variant<std::string, float>& value = p.dataColumns[key];
-            if (std::holds_alternative<std::string>(value) &&
-                std::get<std::string>(value).empty())
-            {
-                continue;
-            }
-            else {
-                isNumeric = std::holds_alternative<float>(value);
-                break;
-            }
-        }
-
-        colIsNumeric[key] = isNumeric;
-
-        // If numeric, replace all empty string values with NaN
-        if (isNumeric) {
-            for (ExoplanetItem& p : planets) {
-                std::variant<std::string, float>& value = p.dataColumns[key];
-                if (std::holds_alternative<std::string>(value) &&
-                    std::get<std::string>(value).empty())
-                {
-                    p.dataColumns[key] = std::numeric_limits<float>::quiet_NaN();
-                }
-            }
-        }
+    if (!hasUsablePosition) {
+        throw std::runtime_error(std::format(
+            "CSV '{}' has no rows with valid numeric coordinates for the selected position type",
+            csvFilePath
+        ));
     }
-    // At this stage all values in the data columns should have the correct type
 
     if (!settings.dataMapping.hostName.empty()) {
         std::map<std::string, std::vector<size_t>> hostIdToPlanetsMap;
         for (int i = 0; i < planets.size(); i++) {
-            hostIdToPlanetsMap[makeIdentifier(planets[i].hostName)].push_back(i);
+            if (!planets[i].hostName.empty()) {
+                hostIdToPlanetsMap[makeIdentifier(planets[i].hostName)].push_back(i);
+            }
         }
 
         // Fill planets internal indices in system (based on whatever column is used for size)

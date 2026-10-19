@@ -29,6 +29,7 @@
 #include <limits>
 #include <map>
 #include <optional>
+#include <openspace/util/distanceconversion.h>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -91,6 +92,8 @@ struct ExoplanetItem {
     int id; // Id used for UI (same as row number in data file)
 
     std::optional<glm::dvec3> position = std::nullopt; // in Parsec
+    // ICRS right ascension and declination in degrees, and distance in parsecs.
+    std::optional<glm::dvec3> skyCoordinates = std::nullopt;
 
     std::string name;
     std::string hostName;
@@ -118,10 +121,16 @@ struct DataSettings {
         ColumnKey positionDistance;
 
         ColumnKey name = "";
+        bool nameFromRowIndex = false;
         ColumnKey hostName = "";
         ColumnKey ringSize = "";
         ColumnKey referenceName = "";
         ColumnKey referenceLink = "";
+
+        enum class PositionType {
+            Equatorial,
+            GalacticCartesian
+        } positionType = PositionType::Equatorial;
 
         // Rendered on the same line as the metallicity value, in the system view
         ColumnKey metallicityRatio = "";
@@ -132,6 +141,10 @@ struct DataSettings {
         ColumnKey inclination = "";
         // Stellar inclination (rotation axis to line of sight), in degrees
         ColumnKey stellarInclination = "";
+        ColumnKey positionX;
+        ColumnKey positionY;
+        ColumnKey positionZ;
+        DistanceUnit positionUnit = DistanceUnit::Parsec;
     } dataMapping;
 
     // The columns to show in the overview tab of the system view
@@ -177,7 +190,7 @@ struct DataSettings {
         enum class Type {
             And = 0,
             Or
-        } type;
+        } type = Type::And;
 
         // Filter checkboxes to show per line (-1 or unset means no limitation)
         int itemsPerLine = -1;

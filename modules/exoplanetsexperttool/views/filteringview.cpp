@@ -417,8 +417,7 @@ void FilteringView::applySpatialSelection(
     prefilteredData = spatialSelectionView.handler().select(
         data,
         prefilteredData,
-        *query,
-        _dataViewer.dataMapping()
+        *query
     );
 }
 

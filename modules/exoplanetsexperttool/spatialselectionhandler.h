@@ -177,12 +177,10 @@ public:
      * \param data The full dataset of exoplanet items
      * \param candidates Candidate item indices to test
      * \param rect The celestial rectangle bounds in degrees
-     * \param mapping Column mapping used to look up RA, Dec, and distance
      * \return Indices of exoplanets located inside the sky rectangle
      */
     std::vector<size_t> selectSkyRect(const std::vector<ExoplanetItem>& data,
-        const std::vector<size_t>& candidates, const SkyMapRect& rect,
-        const DataSettings::DataMapping& mapping) const;
+        const std::vector<size_t>& candidates, const SkyMapRect& rect) const;
 
     /**
      * Selects candidate exoplanets whose 3D position falls within the given volume.
@@ -236,8 +234,7 @@ public:
      * Evaluates a spatial query against the provided candidate rows.
      */
     std::vector<size_t> select(const std::vector<ExoplanetItem>& data,
-        const std::vector<size_t>& candidates, const SpatialSelectionQuery& query,
-        const DataSettings::DataMapping& mapping) const;
+        const std::vector<size_t>& candidates, const SpatialSelectionQuery& query) const;
 
     /**
      * Adds a new saved selection to the list.

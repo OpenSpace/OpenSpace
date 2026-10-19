@@ -237,9 +237,14 @@ ColorMappingView::ColorMappingView(DataViewer& dataViewer,
             break;
         }
     }
+    if (_firstNumericColumn.empty() && !_dataViewer.columns().empty()) {
+        _firstNumericColumn = _dataViewer.columns().front();
+    }
 
     ColorMappedVariable newVariable = { .column = _firstNumericColumn };
-    if (dataSettings.defaultColormapping.has_value()) {
+    if (dataSettings.defaultColormapping.has_value() &&
+        _dataViewer.hasColumn(dataSettings.defaultColormapping->column))
+    {
         DataSettings::CmapInfo info = *dataSettings.defaultColormapping;
         newVariable = {
             .column = info.column,
@@ -303,10 +308,18 @@ void ColorMappingView::initializeGL() {
         ImVec4(0.f, 1.f,         0.5f,        1.f)
     };
 
-    ImPlot::AddColormap("Autumn", autumn, 8, false);
-    ImPlot::AddColormap("Spring", spring, 8, false);
-    ImPlot::AddColormap("Summer", summer, 8, false);
-    ImPlot::AddColormap("Winter", winter, 8, false);
+    if (ImPlot::GetColormapIndex("Autumn") < 0) {
+        ImPlot::AddColormap("Autumn", autumn, 8, false);
+    }
+    if (ImPlot::GetColormapIndex("Spring") < 0) {
+        ImPlot::AddColormap("Spring", spring, 8, false);
+    }
+    if (ImPlot::GetColormapIndex("Summer") < 0) {
+        ImPlot::AddColormap("Summer", summer, 8, false);
+    }
+    if (ImPlot::GetColormapIndex("Winter") < 0) {
+        ImPlot::AddColormap("Winter", winter, 8, false);
+    }
 }
 
 const std::vector<ColorMappingView::ColorMappedVariable>&

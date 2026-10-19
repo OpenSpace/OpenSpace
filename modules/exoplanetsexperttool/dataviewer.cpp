@@ -48,6 +48,8 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <set>
+#include <stdexcept>
 #include <string_view>
 
 #include <chrono>
@@ -161,15 +163,300 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
 void DataViewer::initializeData() {
     LDEBUG("Initializing dataset from files specified in module");
 
-    // Load things related to the dataset. We need to do this on initialize rather than
-    // construction since we need the module to exist first (to access its settings)
-    _isInitialized = initializeData(DataLoader::loadDataSettingsFromJson());
+    try {
+        DataSettings settings = DataLoader::loadDataSettingsFromJson();
+        if (settings.dataFile.empty()) {
+            throw std::runtime_error("The dataset settings file does not specify a datafile");
+        }
+        prepareDataLoad(std::move(settings));
+    }
+    catch (const std::exception& e) {
+        _pendingDataError = e.what();
+        LERROR(std::format("Failed to prepare dataset: {}", e.what()));
+    }
 }
 
 bool DataViewer::loadCsvFile(std::filesystem::path path) {
     DataSettings settings = _dataSettings;
     settings.dataFile = std::move(path);
-    return initializeData(std::move(settings));
+    settings.dataMapping.nameFromRowIndex = false;
+    try {
+        return prepareDataLoad(std::move(settings)) && !_pendingDataSettings;
+    }
+    catch (const std::exception& e) {
+        _pendingDataError = e.what();
+        LERROR(std::format("Failed to prepare dataset: {}", e.what()));
+        return false;
+    }
+}
+
+bool DataViewer::prepareDataLoad(DataSettings settings, bool showMappingPrompt) {
+    if (settings.dataFile.empty()) {
+        throw std::invalid_argument("No CSV file was selected");
+    }
+
+    _pendingDataError.clear();
+
+    const std::vector<std::string> columns = DataLoader::csvColumnNames(settings.dataFile);
+
+    const std::set<std::string> availableColumns(columns.begin(), columns.end());
+
+    // Warn about configured columns that aren't available, then clear them so they won't be used.
+    auto clearMissing = [&availableColumns](ColumnKey& key, std::string_view role) {
+        if (!key.empty() && !availableColumns.contains(key)) {
+            LWARNING(std::format("Ignoring missing {} column '{}'", role, key));
+            key.clear();
+        }
+    };
+
+    DataSettings::DataMapping& mapping = settings.dataMapping;
+    clearMissing(mapping.positionRa, "right ascension");
+    clearMissing(mapping.positionDec, "declination");
+    clearMissing(mapping.positionDistance, "distance");
+    clearMissing(mapping.positionX, "Galactic X");
+    clearMissing(mapping.positionY, "Galactic Y");
+    clearMissing(mapping.positionZ, "Galactic Z");
+    if (!mapping.nameFromRowIndex) {
+        clearMissing(mapping.name, "object name");
+    }
+    clearMissing(mapping.hostName, "host name");
+    clearMissing(mapping.ringSize, "ring size");
+    clearMissing(mapping.referenceName, "reference name");
+    clearMissing(mapping.referenceLink, "reference link");
+    clearMissing(mapping.metallicityRatio, "metallicity ratio");
+    clearMissing(mapping.discoveryMethod, "discovery method");
+    clearMissing(mapping.inclination, "inclination");
+    clearMissing(mapping.stellarInclination, "stellar inclination");
+
+    if (mapping.nameFromRowIndex) {
+        std::string generatedName = "name";
+        size_t suffix = 1;
+        while (availableColumns.contains(generatedName)) {
+            generatedName = std::format("name_{}", suffix++);
+        }
+        mapping.name = generatedName;
+    }
+
+    std::erase_if(settings.columnInfo, [&availableColumns](const auto& item) {
+        return !availableColumns.contains(item.first);
+    });
+
+    auto removeMissingColumns = [&availableColumns](std::vector<ColumnKey>& keys) {
+        std::erase_if(keys, [&availableColumns](const ColumnKey& key) {
+            return !availableColumns.contains(key);
+        });
+    };
+
+    removeMissingColumns(settings.systemView.systemColumns);
+    removeMissingColumns(settings.systemView.starColumns);
+    removeMissingColumns(settings.systemView.planetColumns);
+
+    if (settings.defaultColormapping.has_value() &&
+        !availableColumns.contains(settings.defaultColormapping->column))
+    {
+        settings.defaultColormapping.reset();
+    }
+
+    std::erase_if(settings.quickFilterGroups, [&availableColumns](
+        const DataSettings::QuickFilterGroup& group
+    ) {
+        for (const DataSettings::QuickFilter& filter : group.quickFilters) {
+            for (const DataSettings::QuickFilter::Filter& clause : filter.filters) {
+                if (!availableColumns.contains(clause.column)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    });
+
+    _pendingDataColumns = columns;
+    _pendingDataSettings = std::move(settings);
+    _pendingUseRowIndexForName = _pendingDataSettings->dataMapping.nameFromRowIndex;
+
+    const DataSettings::DataMapping& pendingMapping = _pendingDataSettings->dataMapping;
+
+    const bool hasRequiredMappings = pendingMapping.positionType ==
+        DataSettings::DataMapping::PositionType::Equatorial ?
+        (!pendingMapping.positionRa.empty() && !pendingMapping.positionDec.empty() &&
+         !pendingMapping.positionDistance.empty()) :
+        (!pendingMapping.positionX.empty() && !pendingMapping.positionY.empty() &&
+         !pendingMapping.positionZ.empty());
+
+    const bool hasName = pendingMapping.nameFromRowIndex || !pendingMapping.name.empty();
+
+    return showMappingPrompt || !hasRequiredMappings || !hasName || commitPendingDataLoad();
+}
+
+bool DataViewer::commitPendingDataLoad() {
+    if (!_pendingDataSettings) {
+        return false;
+    }
+
+    const DataSettings::DataMapping& mapping = _pendingDataSettings->dataMapping;
+    const bool hasPositionMappings = mapping.positionType ==
+        DataSettings::DataMapping::PositionType::Equatorial ?
+        (!mapping.positionRa.empty() && !mapping.positionDec.empty() &&
+         !mapping.positionDistance.empty()) :
+        (!mapping.positionX.empty() && !mapping.positionY.empty() &&
+         !mapping.positionZ.empty());
+    if (!hasPositionMappings) {
+        _pendingDataError = mapping.positionType ==
+            DataSettings::DataMapping::PositionType::Equatorial ?
+            "Select right ascension, declination, and distance columns." :
+            "Select Galactic X, Galactic Y, and Galactic Z columns.";
+        return false;
+    }
+    if (!mapping.nameFromRowIndex && mapping.name.empty()) {
+        _pendingDataError = "Select an object-name column or enable row-index names.";
+        return false;
+    }
+
+    DataSettings settings = *_pendingDataSettings;
+    if (!initializeData(std::move(settings))) {
+        return false;
+    }
+    _pendingDataSettings.reset();
+    _pendingDataColumns.clear();
+    _pendingDataError.clear();
+    return true;
+}
+
+void DataViewer::renderPendingDataMappings() {
+    if (!_pendingDataSettings) {
+        return;
+    }
+
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(
+        viewport->GetCenter(),
+        ImGuiCond_Always,
+        ImVec2(0.5f, 0.5f)
+    );
+    ImGui::SetNextWindowSize(ImVec2(460.f, 0.f), ImGuiCond_Always);
+    if (!ImGui::Begin("Map dataset columns", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::End();
+        return;
+    }
+
+    DataSettings::DataMapping& mapping = _pendingDataSettings->dataMapping;
+    const char* coordinateTypes[] = { "RA / Dec / Distance", "Galactic X / Y / Z" };
+    int coordinateType = mapping.positionType ==
+        DataSettings::DataMapping::PositionType::Equatorial ? 0 : 1;
+    if (ImGui::Combo("Position coordinates", &coordinateType, coordinateTypes,
+                     IM_ARRAYSIZE(coordinateTypes)))
+    {
+        mapping.positionType = coordinateType == 0 ?
+            DataSettings::DataMapping::PositionType::Equatorial :
+            DataSettings::DataMapping::PositionType::GalacticCartesian;
+    }
+
+    auto renderColumnCombo = [this](const char* label, ColumnKey& selected) {
+        const char* preview = selected.empty() ? "Select a column" : selected.c_str();
+        bool changed = false;
+        if (ImGui::BeginCombo(label, preview)) {
+            for (const std::string& column : _pendingDataColumns) {
+                const bool isSelected = selected == column;
+                if (ImGui::Selectable(column.c_str(), isSelected)) {
+                    selected = column;
+                    changed = true;
+                }
+                if (isSelected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+        return changed;
+    };
+
+    if (ImGui::Checkbox("Use row index for object name", &_pendingUseRowIndexForName)) {
+        mapping.nameFromRowIndex = _pendingUseRowIndexForName;
+        if (mapping.nameFromRowIndex) {
+            std::set<std::string> availableColumns(
+                _pendingDataColumns.begin(), _pendingDataColumns.end()
+            );
+            std::string generatedName = "name";
+            size_t suffix = 1;
+            while (availableColumns.contains(generatedName)) {
+                generatedName = std::format("name_{}", suffix++);
+            }
+            mapping.name = generatedName;
+        }
+        else {
+            mapping.name.clear();
+        }
+    }
+    if (!_pendingUseRowIndexForName) {
+        mapping.nameFromRowIndex = false;
+        renderColumnCombo("Object name", mapping.name);
+    }
+
+    if (mapping.positionType == DataSettings::DataMapping::PositionType::Equatorial) {
+        renderColumnCombo("Right ascension", mapping.positionRa);
+        renderColumnCombo("Declination", mapping.positionDec);
+        renderColumnCombo("Distance", mapping.positionDistance);
+    }
+    else {
+        renderColumnCombo("Galactic X", mapping.positionX);
+        renderColumnCombo("Galactic Y", mapping.positionY);
+        renderColumnCombo("Galactic Z", mapping.positionZ);
+    }
+
+    const std::string unitPreview = std::format(
+        "{} ({})",
+        nameForDistanceUnit(mapping.positionUnit),
+        abbreviationForDistanceUnit(mapping.positionUnit)
+    );
+    if (ImGui::BeginCombo("Position distance unit", unitPreview.c_str())) {
+        for (DistanceUnit unit : DistanceUnits) {
+            const std::string unitName = std::format(
+                "{} ({})",
+                nameForDistanceUnit(unit),
+                abbreviationForDistanceUnit(unit)
+            );
+            const bool selected = unit == mapping.positionUnit;
+            if (ImGui::Selectable(unitName.c_str(), selected)) {
+                mapping.positionUnit = unit;
+            }
+            if (selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    if (!_pendingDataError.empty()) {
+        ImGui::TextColored(
+            view::helper::toImVec4(view::colors::Error),
+            "%s",
+            _pendingDataError.c_str()
+        );
+    }
+
+    const bool hasPositionMappings = mapping.positionType ==
+        DataSettings::DataMapping::PositionType::Equatorial ?
+        (!mapping.positionRa.empty() && !mapping.positionDec.empty() &&
+         !mapping.positionDistance.empty()) :
+        (!mapping.positionX.empty() && !mapping.positionY.empty() &&
+         !mapping.positionZ.empty());
+
+    const bool ready = (mapping.nameFromRowIndex || !mapping.name.empty()) &&
+        hasPositionMappings;
+
+    if (ImGui::Button("Load", ImVec2(100.f, 0.f)) && ready) {
+        if (!commitPendingDataLoad() && _pendingDataError.empty()) {
+            _pendingDataError = "The dataset could not be loaded; check the selected columns.";
+        }
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel", ImVec2(100.f, 0.f))) {
+        _pendingDataSettings.reset();
+        _pendingDataColumns.clear();
+        _pendingDataError.clear();
+    }
+
+    ImGui::End();
 }
 
 bool DataViewer::initializeData(DataSettings settings) {
@@ -180,11 +467,13 @@ bool DataViewer::initializeData(DataSettings settings) {
         data = DataLoader::loadData(settings);
     }
     catch (const std::exception& e) {
+        _pendingDataError = e.what();
         LERROR(std::format("Failed to load data: {}", e.what()));
         return false;
     }
 
     if (data.empty()) {
+        _pendingDataError = "No data rows were loaded from the CSV file.";
         LERROR("No data was loaded!");
         return false;
     }
@@ -198,10 +487,12 @@ bool DataViewer::initializeData(DataSettings settings) {
 
     // Set the inclination column to use in the regular exoplanet module to be the same
     // as the one specified in the data settings
-    global::scriptEngine->queueScript(std::format(
-        "openspace.setPropertyValueSingle('Modules.Exoplanets.StellarInclinationColumn', '{}')",
-        _dataSettings.dataMapping.stellarInclination
-    ));
+    if (!_dataSettings.dataMapping.stellarInclination.empty()) {
+        global::scriptEngine->queueScript(std::format(
+            "openspace.setPropertyValueSingle('Modules.Exoplanets.StellarInclinationColumn', '{}')",
+            _dataSettings.dataMapping.stellarInclination
+        ));
+    }
 
     _data = std::move(data);
     _computedColumns.clear();
@@ -216,7 +507,7 @@ bool DataViewer::initializeData(DataSettings settings) {
     for (size_t i = 0; i < _data.size(); i++) {
         _filteredData.push_back(i);
 
-        if (!_dataSettings.dataMapping.hostName.empty()) {
+        if (!_dataSettings.dataMapping.hostName.empty() && !_data[i].hostName.empty()) {
             _hostIdToPlanetsMap[makeIdentifier(_data[i].hostName)].push_back(i);
         }
     }
@@ -233,6 +524,9 @@ bool DataViewer::initializeData(DataSettings settings) {
     );
     _computeColumnsView = std::make_unique<ComputeColumnsView>(*this);
     _spatialSelectionView = std::make_unique<SpatialSelectionView>(*this);
+    if (_isGLInitialized) {
+        _colorMappingView->initializeGL();
+    }
 
     _currentlyTargettedSystem = std::nullopt;
 
@@ -249,6 +543,8 @@ bool DataViewer::initializeData(DataSettings settings) {
     _colormapWasChanged = true;
     _filterChanged = true;
     _selectionChanged = true;
+    _filterChanged = true;
+    _isInitialized = true;
 
     return true;
 }
@@ -259,7 +555,10 @@ void DataViewer::initializeGL() {
 
     initializeCallbacks();
 
-    _colorMappingView->initializeGL();
+    _isGLInitialized = true;
+    if (_colorMappingView) {
+        _colorMappingView->initializeGL();
+    }
 }
 
 void DataViewer::hideSelectionVolume() {
@@ -563,7 +862,7 @@ bool DataViewer::compareColumnValues(const ColumnKey& key, const ExoplanetItem& 
 void DataViewer::renderStartupInfo() {
     // Always center this window when appearing
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
 
@@ -640,41 +939,29 @@ void DataViewer::render() {
         return;
     }
 
-    // Don't render if the different views aren't initialized (which happens if
-    // data loading fails)
-    static bool noDatasetPopupOpened = false;
     if (!_isInitialized) {
-        if (!noDatasetPopupOpened) {
-            ImGui::OpenPopup("No dataset loaded");
-            noDatasetPopupOpened = true;
+        if (ImGui::BeginMainMenuBar()) {
+            renderFileMenu();
+            ImGui::EndMainMenuBar();
         }
-
-        ImGui::SetNextWindowSize(ImVec2(350.f, 0.f), ImGuiCond_Always);
-        if (ImGui::BeginPopupModal(
-            "No dataset loaded",
-            nullptr,
-            ImGuiWindowFlags_AlwaysAutoResize
-        )) {
-            ImGui::TextWrapped(
-                "No dataset was loaded, so the ExoplanetExplorer could not start."
-            );
-            ImGui::Spacing();
-            ImGui::TextWrapped(
-                "Run the datapreparation.py script to prepare the dataset, then start "
-                "the application."
-            );
-            ImGui::Spacing();
-
-
-            if (ImGui::Button("Close")) {
-                ImGui::CloseCurrentPopup();
+        renderPendingDataMappings();
+        ImGui::SetNextWindowSize(ImVec2(360.f, 0.f), ImGuiCond_Always);
+        if (ImGui::Begin("No dataset loaded", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::TextWrapped("No dataset is loaded.");
+            if (!_pendingDataError.empty()) {
+                ImGui::TextColored(
+                    view::helper::toImVec4(view::colors::Error),
+                    "%s",
+                    _pendingDataError.c_str()
+                );
             }
-
-            ImGui::EndPopup();
+            if (ImGui::Button("Open CSV")) {
+                _showOpenCsvModal = true;
+            }
         }
+        ImGui::End();
         return;
     }
-    noDatasetPopupOpened = false;
 
     // Tooltip for hovered planets. Only do the (potentially expensive, since it may
     // trigger GPU picking) hover computation when the mouse is not currently captured
@@ -1018,7 +1305,7 @@ void DataViewer::render() {
         ImGui::EndMainMenuBar();
     }
 
-    _filterChanged = false;
+    renderPendingDataMappings();
 
     // Windows
 
@@ -1354,7 +1641,12 @@ void DataViewer::handleDoubleClickHoveredPlanet(int index) {
     const ExoplanetItem& item = _data[index];
 
     if (ImGui::IsMouseDoubleClicked(0)) {
-        _systemViewer->showSystemView(item.hostName);
+        if (!_dataSettings.dataMapping.hostName.empty() && !item.hostName.empty()) {
+            _systemViewer->showSystemView(item.hostName);
+        }
+        else {
+            _systemViewer->showObjectView(static_cast<size_t>(index));
+        }
 
         // Select planet, if not already selected
         auto found = std::find(_selection.begin(), _selection.end(), index);
@@ -1404,9 +1696,9 @@ void DataViewer::updateFilteredRowsProperty(std::optional<std::vector<size_t>> c
 }
 
 void DataViewer::renderFileMenu() {
-    static bool showOpenCsvModal = false;
     static bool showSaveCsvModal = false;
     static char csvPath[1024] = "";
+    static char settingsJsonPath[1024] = "";
     static std::string openCsvError;
 
     // Menu
@@ -1415,12 +1707,14 @@ void DataViewer::renderFileMenu() {
             // TODO: Create a settings.json file
         }
         if (ImGui::MenuItem("Open CSV")) {
-            showOpenCsvModal = true;
+            _showOpenCsvModal = true;
             openCsvError.clear();
         }
-        ImGui::MenuItem("Save CSV", NULL, &showSaveCsvModal);
-        ImGui::SameLine();
-        view::helper::renderHelpMarker("Save the current filtered data items as a CSV file");
+        if (_isInitialized) {
+            ImGui::MenuItem("Save CSV", NULL, &showSaveCsvModal);
+            ImGui::SameLine();
+            view::helper::renderHelpMarker("Save the current filtered data items as a CSV file");
+        }
         if (ImGui::MenuItem("Save filters", NULL, false, false)) {
             // TODO: Menu to save the current set of filters.
             // To a settings .json file? Or a completely new file format?
@@ -1440,14 +1734,20 @@ void DataViewer::renderFileMenu() {
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
 
-    if (showOpenCsvModal) {
+    if (_showOpenCsvModal) {
         ImGui::OpenPopup("Open CSV");
         if (ImGui::BeginPopupModal("Open CSV", NULL, flags)) {
             ImGui::TextUnformatted(
-                "Load a CSV using the column mappings from the current dataset."
+                "Load a CSV and optionally provide its dataset settings JSON."
             );
             ImGui::SetNextItemWidth(520.f);
             ImGui::InputText("CSV path", csvPath, IM_ARRAYSIZE(csvPath));
+            ImGui::SetNextItemWidth(520.f);
+            ImGui::InputText(
+                "Settings JSON (optional)",
+                settingsJsonPath,
+                IM_ARRAYSIZE(settingsJsonPath)
+            );
 
             if (!openCsvError.empty()) {
                 ImGui::TextColored(
@@ -1459,20 +1759,32 @@ void DataViewer::renderFileMenu() {
 
             if (ImGui::Button("Cancel") || ImGui::IsKeyPressed(ImGuiKey_Escape)) {
                 ImGui::CloseCurrentPopup();
-                showOpenCsvModal = false;
+                _showOpenCsvModal = false;
                 openCsvError.clear();
             }
             ImGui::SameLine();
             if (ImGui::Button("Open") || ImGui::IsKeyPressed(ImGuiKey_Enter)) {
-                const std::filesystem::path path = csvPath;
-                if (loadCsvFile(path)) {
-                    csvPath[0] = '\0';
-                    ImGui::CloseCurrentPopup();
-                    showOpenCsvModal = false;
-                    openCsvError.clear();
+                try {
+                    DataSettings settings;
+                    if (settingsJsonPath[0] != '\0') {
+                        settings = DataLoader::loadDataSettingsFromJson(settingsJsonPath);
+                    }
+                    settings.dataFile = std::filesystem::path(csvPath);
+                    const bool prepared = prepareDataLoad(std::move(settings), true);
+                    if (prepared || _pendingDataSettings.has_value()) {
+                        csvPath[0] = '\0';
+                        settingsJsonPath[0] = '\0';
+                        ImGui::CloseCurrentPopup();
+                        _showOpenCsvModal = false;
+                        openCsvError.clear();
+                    }
+                    else {
+                        openCsvError = _pendingDataError.empty() ?
+                            "Could not load the CSV file" : _pendingDataError;
+                    }
                 }
-                else {
-                    openCsvError = "Could not load the CSV file";
+                catch (const std::exception& e) {
+                    openCsvError = e.what();
                 }
             }
             ImGui::SetItemDefaultFocus();
