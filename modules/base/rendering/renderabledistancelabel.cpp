@@ -151,6 +151,14 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         return;
     }
 
+    if (_precision < 0) [[unlikely]] {
+        _precision = 0;
+        LERROR(
+            "Precision value was negative, but only 0 or positive values are allowed. "
+            "Setting value to 0"
+        );
+    }
+
     Scene* scene = global::renderEngine->scene();
     SceneGraphNode* nodelineNode = scene->sceneGraphNode(_nodelineId);
     if (!nodelineNode) {

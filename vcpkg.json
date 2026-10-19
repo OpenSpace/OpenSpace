@@ -2,9 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "openspace",
   "version-string": "0.22.0-dev",
-  "description": [
-    "OpenSpace."
-  ],
+  "description": ["OpenSpace."],
   "homepage": "https://www.openspaceproject.com",
   "license": "MIT",
   "supports": "!(osx | uwp | android)",
@@ -13,27 +11,19 @@
       "kind": "builtin",
       "baseline": "04a9d8e5212d01ee1dd9478eadd9caade4f8b0d4"
     },
-    "overlay-ports": [
-      "./support/vcpkg/ports"
-    ],
-    "overlay-triplets": [
-      "./support/vcpkg/triplets"
-    ]
+    "overlay-ports": ["./support/vcpkg/ports"],
+    "overlay-triplets": ["./support/vcpkg/triplets"]
   },
   "dependencies": [
     {
       "name": "assimp",
-      "features": [
-        "draco"
-      ]
+      "features": ["draco"]
     },
     "catch2",
     "ccfits",
     {
       "name": "cfitsio",
-      "features": [
-        "curl"
-      ]
+      "features": ["curl"]
     },
     "curl",
     {
@@ -67,9 +57,7 @@
     "scnlib",
     {
       "name": "sgct",
-      "features": [
-        "calibrator"
-      ]
+      "features": ["calibrator"]
     },
     "soloud",
     "spice",
@@ -98,23 +86,12 @@
         {
           "name": "qtbase",
           "default-features": false,
-          "features": [
-            "gui",
-            "widgets",
-            "network",
-            "png",
-            "freetype",
-            "harfbuzz"
-          ]
+          "features": ["gui", "widgets", "network", "png", "freetype", "harfbuzz"]
         },
         {
           "name": "qtbase",
           "default-features": false,
-          "features": [
-            "xcb",
-            "wayland",
-            "fontconfig"
-          ],
+          "features": ["xcb", "wayland", "fontconfig"],
           "platform": "linux"
         },
         {
@@ -125,21 +102,21 @@
     },
     "tests": {
       "description": "Build the unit tests",
-      "dependencies": [
-        "catch2"
-      ]
+      "dependencies": ["catch2"]
     },
     "profiling": {
       "description": "Enable profiling support through Tracy",
       "dependencies": [
-        "tracy"
+        "tracy",
+        {
+          "name": "sgct",
+          "features": ["tracy"]
+        }
       ]
     },
     "openvr": {
       "description": "Build the OpenSpace application with OpenVR/SteamVR support",
-      "dependencies": [
-        "openvr"
-      ]
+      "dependencies": ["openvr"]
     }
   }
 }

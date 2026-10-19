@@ -808,7 +808,7 @@ target_include_directories(
   openspace-core SYSTEM PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/renderdoc>
 )
 
-if (TRACY_ENABLE)
+if (OPENSPACE_ENABLE_TRACY)
   find_package(Tracy CONFIG REQUIRED)
   target_link_libraries(openspace-core PUBLIC Tracy::TracyClient)
   target_compile_definitions(openspace-core PUBLIC "TRACY_ENABLE")
