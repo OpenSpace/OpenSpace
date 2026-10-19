@@ -42,13 +42,37 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/updatestructures.h>
 
+#include <functional>
 #include <optional>
 #include <string_view>
+#include <unordered_set>
 
 namespace {
     using namespace openspace;
 
     constexpr std::string_view _loggerCat = "HostCloud";
+
+
+    struct PositionHash {
+        size_t operator()(const glm::vec3& position) const noexcept {
+            size_t seed = 0;
+            const auto combine = [&seed](float value) {
+                seed ^= std::hash<float>{}(value)+
+                    size_t(0x9e3779b9) + (seed << 6) + (seed >> 2);
+                };
+
+            combine(position.x);
+            combine(position.y);
+            combine(position.z);
+            return seed;
+        }
+    };
+
+    struct PositionEqual {
+        bool operator()(const glm::vec3& a, const glm::vec3& b) const noexcept {
+            return a.x == b.x && a.y == b.y && a.z == b.z;
+        }
+    };
 
     enum OrientationRenderOption {
         ViewDirection = 0,
@@ -633,70 +657,55 @@ void RenderableHostCloud::updateDataIfChanged() {
     using GlyphRenderData = ExoplanetsExpertToolModule::GlyphRenderData;
     GlyphRenderData syncedData = mod->glyphRenderData();
 
-    // Check if timestamp was updated, to avoid unnecessary updates. But always update
-    // if the glyph mode changed, since the data needs to be reprocessed for the new mode
     if (syncedData.timeStamp <= _lastDataTimeStamp) {
-        return; // No update
+        return;
     }
 
-    LDEBUG("Got new data. Updating data for rendering");
+    const size_t nPoints = syncedData.items.size();
 
-    _lastDataTimeStamp = syncedData.timeStamp;
+    std::vector<GlyphData> glyphData;
+    std::vector<size_t> glyphIndices;
+    glyphData.reserve(nPoints);
+    glyphIndices.reserve(nPoints);
 
-    _glyphData.clear();
-    _glyphIndices.clear();
-
-    // Read number of data points
-    size_t nPoints = syncedData.items.size();
-
-    _glyphData.reserve(nPoints);
-    _glyphIndices.reserve(nPoints);
-    int maxIndex = -1;
-
-    std::vector<glm::vec3> uniquePositions;
+    std::unordered_set<glm::vec3, PositionHash, PositionEqual> uniquePositions;
     uniquePositions.reserve(nPoints);
 
-    for (const GlyphRenderData::Item& item : syncedData.items) {
-        GlyphData d;
+    int maxIndex = -1;
 
-        // Position is given in parsec
-        d.position = glm::vec3(item.position * distanceconstants::Parsec);
+    for (const GlyphRenderData::Item& item : syncedData.items) {
+        GlyphData glyph;
+        glyph.position = glm::vec3(item.position * distanceconstants::Parsec);
 
         // Just store the first planet for a given position, to avoid overlapped rendering
-        if (std::find(uniquePositions.begin(), uniquePositions.end(), d.position) !=
-            uniquePositions.end())
-        {
+        if (!uniquePositions.insert(glyph.position).second) {
             continue;
         }
-        uniquePositions.push_back(d.position);
 
-        d.component = static_cast<float>(item.component);
+        glyph.component = static_cast<float>(item.component);
 
         // Increase by one to avoid having 0 as a valid index, since we use 0 in the
         // shader to indicate "no point"
-        d.index = item.index + 1;
+        glyph.index = item.index + 1;
 
-        // Clear all color slots first (defensive programming)
-        d.colors[0] = glm::vec4(0.0f);
-        d.colors[1] = glm::vec4(0.0f); // TODO: Use some other dafult color, bades on data?
+        glyph.colors[0] = glm::vec4(0.f);
+        glyph.colors[1] = glm::vec4(0.f);
 
-        size_t nColors = item.colors.size();
-
-        // Limit the number of colors to the maximum supported by the shader
-        for (size_t j = 0; j < std::min(nColors, size_t(2)); j++) {
-            d.colors[j] = item.colors[j];
+        const size_t nColors = std::min(item.colors.size(), size_t(2));
+        for (size_t j = 0; j < nColors; ++j) {
+            glyph.colors[j] = item.colors[j];
         }
 
-        if (static_cast<int>(d.index) > maxIndex) {
-            maxIndex = static_cast<int>(d.index);
-        }
+        maxIndex = std::max(maxIndex, static_cast<int>(glyph.index));
 
-        _glyphData.push_back(std::move(d));
-        _glyphIndices.push_back(item.index);
+        glyphData.push_back(std::move(glyph));
+        glyphIndices.push_back(item.index);
     }
 
+    _glyphData = std::move(glyphData);
+    _glyphIndices = std::move(glyphIndices);
     _maxIndex = maxIndex;
-
+    _lastDataTimeStamp = syncedData.timeStamp;
     _renderDataIsDirty = true;
 }
 
