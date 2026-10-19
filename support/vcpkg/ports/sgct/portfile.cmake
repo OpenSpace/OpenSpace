@@ -20,6 +20,7 @@ vcpkg_check_features(
     calibrator SGCT_BUILD_CALIBRATOR
     ndi        SGCT_NDI_SUPPORT
     scalable   SGCT_SCALABLE_SUPPORT
+    tracy      SGCT_TRACY_SUPPORT
 )
 
 # Spout's SDK is x86-only, which is why the manifest gates spout2 on 'windows & !arm64'.
