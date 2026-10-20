@@ -32,8 +32,11 @@ namespace {
 
 namespace openspace {
 
-SpatioTemporalNode::SpatioTemporalNode()
+SpatioTemporalNode::SpatioTemporalNode(SpatioTemporalNode* parent, const std::pair<int, int>& xRange,
+    const std::pair<int, int>& yRange, const std::pair<int, int>& timeRange)
+    : _parent(parent), _xRange(xRange), _yRange(yRange), _timeRange(timeRange)
 {
+
 }
 
 } // namespace openspace

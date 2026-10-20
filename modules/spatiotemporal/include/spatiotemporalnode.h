@@ -25,15 +25,26 @@
 #ifndef __OPENSPACE_MODULE_SPATIOTEMPORAL___SPATIOTEMPORALNODE___H__
 #define __OPENSPACE_MODULE_SPATIOTEMPORAL___SPATIOTEMPORALNODE___H__
 
+#include <openspace/glm.h>
+#include <utility>
+#include <vector>
 
 namespace openspace {
 
 class SpatioTemporalNode {
 public:
-    SpatioTemporalNode();
+    SpatioTemporalNode(SpatioTemporalNode* parent, const std::pair<int, int>& xRange,
+        const std::pair<int, int>& yRange, const std::pair<int, int>& timeRange);
+
+    ~SpatioTemporalNode() = default;
 
 private:
-    
+    SpatioTemporalNode* _parent;
+    std::vector<SpatioTemporalNode*> _children;
+
+    std::pair<int, int> _xRange;
+    std::pair<int, int> _yRange;
+    std::pair<int, int> _timeRange;
 };
 
    

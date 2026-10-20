@@ -27,6 +27,11 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/spatiotemporal/include/spatiotemporaltree.h>
+#include <openspace/opengl/texture.h>
+#include <filesystem>
+#include <vector>
+
 namespace openspace {
     class RenderableSpatioTemporal : public Renderable {
     public:
@@ -43,7 +48,17 @@ namespace openspace {
         static openspace::Documentation Documentation();
 
     private:
+        struct DataSlice{
+            std::unique_ptr<opengl::Texture> texture;
+            double time;
+        };
+
+        SpatioTemporalTree buildTreeFromDataSlices(const std::vector<DataSlice>& slices);
+
         std::filesystem::path _directory;
+        glm::ivec2 _texturesDimensions = glm::ivec2(0);
+        std::vector<DataSlice> _dataSlices;
+        SpatioTemporalTree _tree;
     };
 
 } // namespace openspace

@@ -25,7 +25,11 @@
 #include <modules/spatiotemporal/include/renderablespatiotemporal.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/glm.h>
+#include <openspace/io/texture/texturereader.h>
 #include <openspace/logging/logmanager.h>
+#include <openspace/util/spicemanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableSpatioTemporalTree";
@@ -55,14 +59,46 @@ RenderableSpatioTemporal::RenderableSpatioTemporal(const Dictionary& dictionary)
 
     addProperty(Fadeable::_opacity);
 
-    _directory = p.directory;
+    _directory = absPath(p.directory);
 }
 
 void RenderableSpatioTemporal::initialize()
 {}
 
-void RenderableSpatioTemporal::initializeGL()
-{}
+void RenderableSpatioTemporal::initializeGL() {
+    glm::uvec3 prevDimensions = glm::uvec3(0);
+
+    for (const auto& entry : std::filesystem::directory_iterator(_directory)) {
+        if (entry.is_regular_file())
+        {
+            DataSlice slice;
+
+            // Load the image file and create a texture
+            std::unique_ptr<opengl::Texture> texture =
+                io::texture::loadTexture(entry.path(), 2);
+
+            // Check that the dimensions of the texture are consistent with previous textures
+            glm::uvec3 dimensions = texture->dimensions();
+            if (prevDimensions != glm::uvec3(0)) {
+                if (dimensions != prevDimensions) {
+                    throw std::runtime_error("Inconsistent texture dimensions");
+                }
+            }
+            prevDimensions = texture->dimensions();
+
+            slice.texture = std::move(texture);
+
+            // Convert the filename to a time value
+            slice.time = SpiceManager::ref().ephemerisTimeFromDate(
+                entry.path().filename().string()
+            );
+
+            _dataSlices.push_back(std::move(slice));
+        }
+    }
+
+    _tree = buildTreeFromDataSlices(_dataSlices);
+}
 
 void RenderableSpatioTemporal::deinitializeGL()
 {}
@@ -72,5 +108,17 @@ void RenderableSpatioTemporal::render(const RenderData& data, RendererTasks& ren
 
 void RenderableSpatioTemporal::update(const UpdateData& data)
 {}
+
+SpatioTemporalTree RenderableSpatioTemporal::buildTreeFromDataSlices(
+                                                     const std::vector<DataSlice>& slices)
+{
+    if (slices.empty()) {
+        throw std::runtime_error("No data slices provided");
+    }
+
+    glm::uvec2 dimensions = slices.front().texture->dimensions();
+    int nSlices = static_cast<int>(slices.size());
+    return SpatioTemporalTree(dimensions, nSlices);
+}
 
 } // namespace openspace

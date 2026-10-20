@@ -33,7 +33,91 @@ namespace {
 namespace openspace {
 
 SpatioTemporalTree::SpatioTemporalTree()
+    : _root(nullptr)
+{}
+
+SpatioTemporalTree::SpatioTemporalTree(glm::uvec2 dimensions, int nTimes) {
+    _root = buildTreeRecursive(
+        nullptr,
+        std::make_pair(0, static_cast<int>(dimensions.x)),
+        std::make_pair(0, static_cast<int>(dimensions.y)),
+        std::make_pair(0, nTimes - 1)
+    );
+}
+
+SpatioTemporalTree::~SpatioTemporalTree() {
+    
+}
+
+SpatioTemporalNode* SpatioTemporalTree::buildTreeRecursive(SpatioTemporalNode* parent,
+                                                        const std::pair<int, int>& xRange,
+                                                        const std::pair<int, int>& yRange,
+                                                        const std::pair<int, int>& timeRange)
 {
+    int halfX = (xRange.second - xRange.first) / 2.0 ;
+    int halfY = (yRange.second - yRange.first) / 2.0;
+    int halfTime = (timeRange.second - timeRange.first) / 2.0;
+
+    // Base case: if the ranges are small enough, create a leaf node
+    if (halfX <= 1 || halfY <= 1 || halfTime <= 1)
+    {
+        return new SpatioTemporalNode(parent, xRange, yRange, timeRange);
+    }
+
+    SpatioTemporalNode* node = new SpatioTemporalNode(parent, xRange, yRange, timeRange);
+
+    // Divide x and y into 4 quadrants, and time into 2 halves, creating 8 children
+    buildTreeRecursive(
+        node,
+        std::make_pair(xRange.first, xRange.first + halfX),
+        std::make_pair(yRange.first, yRange.first + halfY),
+        std::make_pair(timeRange.first, timeRange.first + halfTime)
+    );
+    buildTreeRecursive(
+        node,
+        std::make_pair(halfX, xRange.second),
+        std::make_pair(yRange.first, yRange.first + halfY),
+        std::make_pair(timeRange.first, timeRange.first + halfTime)
+    );
+    buildTreeRecursive(
+        node,
+        std::make_pair(xRange.first, xRange.first + halfX),
+        std::make_pair(halfY, yRange.second),
+        std::make_pair(timeRange.first, timeRange.first + halfTime)
+    );
+    buildTreeRecursive(
+        node,
+        std::make_pair(halfX, xRange.second),
+        std::make_pair(halfY, yRange.second),
+        std::make_pair(timeRange.first, timeRange.first + halfTime)
+    );
+
+    buildTreeRecursive(
+        node,
+        std::make_pair(xRange.first, xRange.first + halfX),
+        std::make_pair(yRange.first, yRange.first + halfY),
+        std::make_pair(halfTime, timeRange.second)
+    );
+    buildTreeRecursive(
+        node,
+        std::make_pair(halfX, xRange.second),
+        std::make_pair(yRange.first, yRange.first + halfY),
+        std::make_pair(halfTime, timeRange.second)
+    );
+    buildTreeRecursive(
+        node,
+        std::make_pair(xRange.first, xRange.first + halfX),
+        std::make_pair(halfY, yRange.second),
+        std::make_pair(halfTime, timeRange.second)
+    );
+    buildTreeRecursive(
+        node,
+        std::make_pair(halfX, xRange.second),
+        std::make_pair(halfY, yRange.second),
+        std::make_pair(halfTime, timeRange.second)
+    );
+
+    return node;
 }
 
 } // namespace openspace

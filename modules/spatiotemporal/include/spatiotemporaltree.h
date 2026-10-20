@@ -25,15 +25,22 @@
 #ifndef __OPENSPACE_MODULE_SPATIOTEMPORAL___SPATIOTEMPORALTREE___H__
 #define __OPENSPACE_MODULE_SPATIOTEMPORAL___SPATIOTEMPORALTREE___H__
 
+#include <modules/spatiotemporal/include/spatiotemporalnode.h>
 
 namespace openspace {
 
 class SpatioTemporalTree {
 public:
     SpatioTemporalTree();
+    explicit SpatioTemporalTree(glm::uvec2 dimensions, int nTimes);
+    ~SpatioTemporalTree();
 
 private:
-    
+    SpatioTemporalNode* buildTreeRecursive(SpatioTemporalNode* parent,
+        const std::pair<int, int>& xRange, const std::pair<int, int>& yRange,
+        const std::pair<int, int>& timeRange);
+
+    SpatioTemporalNode* _root;
 };
 
    
