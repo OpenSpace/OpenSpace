@@ -210,7 +210,7 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
-  image: url(:/images/dropdown-arrow.svg);
+  image: url(:/images/dropdown-arrow.png);
   width: 10px;
   height: 6px;
 }
@@ -409,8 +409,6 @@ QLabel#accordion-title {
 }
 
 QLabel#accordion-chevron {
-  color: #909090;
-  font-size: 9pt;
   background-color: transparent;
 }
 
@@ -462,14 +460,11 @@ QPushButton#search-dropdown-chevron {
   border-left-style: solid;
   border-left-color: #474747;
   border-radius: 0;
-  color: #909090;
-  font-size: 9pt;
   padding: 0;
 }
 
 QPushButton#search-dropdown-chevron:hover {
   background-color: #4a4a4a;
-  color: #e8e8e8;
 }
 
 QFrame#search-dropdown-popup {
