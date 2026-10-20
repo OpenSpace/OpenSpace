@@ -37,6 +37,19 @@ asset.require("actions/default_actions")
 asset.onInitialize(function ()
   -- Reset dpi scaling from base_blank asset
   openspace.setPropertyValueSingle("Modules.CefWebGui.GuiScale", 1.0)
+
+  -- Host the data in the data folder
+
+  local directories = openspace.propertyValue("Modules.WebGui.Directories")
+
+  -- Add asset folders (first the endpoint, and then the path to the hosted files)
+  directories[#directories + 1] = "exoplanetexplorer/data"
+  directories[#directories + 1] = openspace.absPath("${BASE}/modules/exoplanetsexperttool/data")
+
+  directories[#directories + 1] = "exoplanetexplorer/web"
+  directories[#directories + 1] = openspace.absPath("${BASE}/modules/exoplanetsexperttool/webpage")
+
+  openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
 end)
 
 asset.onDeinitialize(function ()

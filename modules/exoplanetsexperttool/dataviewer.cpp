@@ -70,7 +70,10 @@
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataViewer";
 
-    constexpr char WebpageLink[] = "https://research.openspaceproject.com/exoplanetexplorer/1/";
+    // @TODO (2026-10-19, emmbr) Use a web-hosted webpage, once we've figured how to host
+    // the data over HTTPS. For now, let OpenSpace host the webpage
+    //constexpr char WebpageLink[] = "https://research.openspaceproject.com/exoplanetexplorer/1/";
+    constexpr char WebpageLink[] = "http://localhost:4680/exoplanetexplorer/web/";
 
     constexpr std::string_view AboutTheTool =
         "This is a research tool under development and we are currently \n"
