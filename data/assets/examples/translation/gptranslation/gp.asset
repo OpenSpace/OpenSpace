@@ -1,7 +1,6 @@
 -- Basic
--- This asset creates a scene graph node that only displays coordinate axes. The
--- coordinate axes are translated by a value determined through evaluating a general
--- pertubation file (in this case a CSV file).
+-- This asset creates a set of coordinate axes that are translated by a value determined 
+-- through evaluating a general perturbation file (in this case a CSV file).
 --
 -- ```{literalinclude} iss.csv
 -- :language: csv
