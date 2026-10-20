@@ -173,9 +173,7 @@ void FilteringView::renderAppliedColumnFilters() const {
     }
 }
 
-bool FilteringView::render(bool* open,
-                           const SpatialSelectionView& spatialSelectionView)
-{
+bool FilteringView::render(bool* open, const SpatialSelectionView& spatialSelectionView) {
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Filters", open)) {
         ImGui::End();
@@ -184,7 +182,10 @@ bool FilteringView::render(bool* open,
 
     bool filterWasChanged = false;
 
-    if (ImGui::Button("Reset internal")) {
+    ImGui::Text("Reset:");
+
+    ImGui::SameLine();
+    if (ImGui::Button("Internal")) {
         _columnFilters.clear();
 
         _quickFilterFlags.reserve(_quickFilterGroups.size());
@@ -196,20 +197,20 @@ bool FilteringView::render(bool* open,
     }
 
     ImGui::SameLine();
-    if (ImGui::Button("Reset row limit")) {
+    if (ImGui::Button("Row limit##RessetRowLimit")) {
         _limitNumberOfRows = false;
         filterWasChanged = true;
     }
 
     ImGui::SameLine();
-    if (ImGui::Button("Reset external")) {
+    if (ImGui::Button("External")) {
         _useExternalSelection = false;
         _overrideInternalSelection = false;
         filterWasChanged = true;
     }
 
     ImGui::SameLine();
-    if (ImGui::Button("Reset spatial")) {
+    if (ImGui::Button("Spatial")) {
         _useSpatialSelection = false;
         _appliedSavedSpatialSelection.reset();
         filterWasChanged = true;
