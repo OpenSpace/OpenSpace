@@ -1,7 +1,6 @@
 -- Basic
--- This asset creates a scene graph node that only displays coordinate axes. The
--- coordinate axes are translated by a value determined through evaluating Keplerian
--- elements.
+-- This asset creates a set of coordinate axes translated according to values derived 
+-- from Keplerian elements.
 
 local NodeFocus = {
   Identifier = "KeplerTranslation_Example_Focus",
