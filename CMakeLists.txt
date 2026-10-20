@@ -213,6 +213,14 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # find CEF to initialize it properly.
   list(APPEND CMAKE_MODULE_PATH "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
+
+  # The CEF helper's vcpkg z-applocal post-build step reads the CEF DLLs from the output
+  # directory. Those files are copied there by the openspace_copy_external_dependencies
+  # target, which runs in parallel on a fresh build. Without this we end up with a race
+  # condition and the build might fail
+  if (TARGET openspace_copy_external_dependencies)
+    add_dependencies(${CEF_HELPER_TARGET} openspace_copy_external_dependencies)
+  endif ()
 else ()
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
