@@ -124,6 +124,15 @@ if (WIN32)
   target_compile_options(libcef_dll_wrapper PRIVATE "/W0")
 elseif (UNIX)
   target_compile_options(libcef_dll_wrapper PRIVATE "-w")
+  # Chromium changes the stack canary in forked subprocesses (--change-stack-guard-on-fork)
+  # so `CefExecuteProcess`, which is on the stack at that point, must not be protected
+  set_source_files_properties(
+    "${CEF_LIBCEF_DLL_WRAPPER_PATH}/wrapper/libcef_dll_wrapper.cc"
+    TARGET_DIRECTORY libcef_dll_wrapper
+    PROPERTIES
+      COMPILE_OPTIONS "-fno-stack-protector"
+      SKIP_PRECOMPILE_HEADERS ON
+  )
 endif ()
 
 target_precompile_headers(libcef_dll_wrapper PRIVATE
