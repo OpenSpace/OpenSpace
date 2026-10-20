@@ -127,9 +127,9 @@ public:
     bool compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
         const ExoplanetItem& right) const;
 
-    // Updates the property in the module so that it matches the filtered rows in the UI,
-    // unless a specific list of indices is specified. This property is used by the
-    // external webpage to decide what planets to show.
+    // Updates the property in the module so that it matches the filtered rows without
+    // external selection, unless a specific list of indices is specified. This property
+    // is used by the external webpage to decide what planets to show.
     void updateFilteredRowsProperty(
         std::optional<std::vector<size_t>> customIndices = std::nullopt);
 
@@ -214,6 +214,7 @@ private:
 
     std::vector<ExoplanetItem> _data;
     std::vector<size_t> _filteredData;  // The indices of the items which will be rendered
+    std::vector<size_t> _filteredDataWithoutExternalSelection;
     std::vector<size_t> _selection;     // Indices of selected data points
 
     std::unordered_map<std::string, std::vector<size_t>> _hostIdToPlanetsMap;

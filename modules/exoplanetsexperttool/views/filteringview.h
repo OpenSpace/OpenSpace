@@ -58,7 +58,8 @@ public:
     // Return the rows matching the current filtering
     std::vector<size_t> applyFiltering(const std::vector<ExoplanetItem>& data,
         const std::vector<int>& externalSelection,
-        const SpatialSelectionView& spatialSelectionView);
+        const SpatialSelectionView& spatialSelectionView,
+        std::vector<size_t>& rowsWithoutExternalSelection);
 
 private:
     const ColumnKey& rowLimitColumn() const;

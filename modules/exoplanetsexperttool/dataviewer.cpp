@@ -1349,7 +1349,8 @@ void DataViewer::render() {
         _filteredData = _filteringView->applyFiltering(
             _data,
             _externalSelection.value(),
-            *_spatialSelectionView
+            *_spatialSelectionView,
+            _filteredDataWithoutExternalSelection
         );
 
         updateFilteredRowsProperty();
@@ -1675,9 +1676,10 @@ void DataViewer::updateFilteredRowsProperty(std::optional<std::vector<size_t>> c
             );
         }
         else {
-            indices.reserve(_filteredData.size());
+            indices.reserve(_filteredDataWithoutExternalSelection.size());
             std::transform(
-                _filteredData.begin(), _filteredData.end(), std::back_inserter(indices),
+                _filteredDataWithoutExternalSelection.begin(),
+                _filteredDataWithoutExternalSelection.end(), std::back_inserter(indices),
                 [](size_t i) { return std::to_string(static_cast<int>(i)); }
             );
         }

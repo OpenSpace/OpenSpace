@@ -66,7 +66,7 @@ namespace {
         "FilteredDataRows",
         "Filtered Data Rows",
         "Contains the indices of the rows in the data file that are currently being "
-        "shown in the tool.",
+        "shown in the tool, excluding the external selection (from the website).",
         Property::Visibility::Hidden
     };
 

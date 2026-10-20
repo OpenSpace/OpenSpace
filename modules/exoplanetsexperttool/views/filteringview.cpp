@@ -227,7 +227,8 @@ bool FilteringView::render(bool* open,
 
 std::vector<size_t> FilteringView::applyFiltering(const std::vector<ExoplanetItem>& data,
                                                const std::vector<int>& externalSelection,
-                                               const SpatialSelectionView& spatialSelectionView)
+                                               const SpatialSelectionView& spatialSelectionView,
+                                               std::vector<size_t>& rowsWithoutExternalSelection)
 {
     std::vector<size_t> filteredData;
     filteredData.reserve(data.size());
@@ -316,6 +317,9 @@ std::vector<size_t> FilteringView::applyFiltering(const std::vector<ExoplanetIte
     filteredData.shrink_to_fit();
 
     applyRowLimit(data, filteredData);
+    rowsWithoutExternalSelection = filteredData;
+    applySpatialSelection(data, spatialSelectionView, rowsWithoutExternalSelection);
+
     applyExternalSelection(externalSelection, filteredData);
     applySpatialSelection(data, spatialSelectionView, filteredData);
 
