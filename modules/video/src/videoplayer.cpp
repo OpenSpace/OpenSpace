@@ -437,6 +437,11 @@ void VideoPlayer::initializeMpv() {
     // https://mpv.io/manual/master/#options-gpu-api
     setPropertyStringMpv("gpu-api", "opengl");
 
+    // Render through the render API into our own FBO. Newer versions of mpv no longer
+    // probe this video output first and would otherwise create their own window
+    // https://mpv.io/manual/master/#video-output-drivers-libmpv
+    setPropertyStringMpv("vo", "libmpv");
+
     // Keep open the file. Even when we reach EOF we want to keep the video player
     // running, in case the user starts the video from the beginning again
     // https://mpv.io/manual/stable/#options-keep-open
@@ -465,8 +470,12 @@ void VideoPlayer::initializeMpv() {
     // Starting MPV in a paused state seems to reduce problems with initialization
     setPropertyStringMpv("pause", "");
 
-    // Allow alpha channels
-    setPropertyStringMpv("alpha", "yes");
+    // Allow alpha channels. Newer versions of mpv replaced the `alpha` option with
+    // `background=none`. Older versions only know `alpha` and treat `background` as a
+    // color
+    if (mpv_set_property_string(_mpvHandle, "background", "none") < 0) {
+        setPropertyStringMpv("alpha", "yes");
+    }
 
     // Verbose mode for debug purposes
     // setPropertyStringMpv("msg-level", "all=v");
