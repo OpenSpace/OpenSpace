@@ -1,7 +1,6 @@
 -- Basic
--- This asset creates a scene graph node that only displays coordinate axes. The
--- coordinate axes are translated by a value determined through evaluating a data file
--- in the JPL Horizons file format.
+-- This asset creates a set of coordinate axes translated according to data from a JPL 
+-- Horizons-format file.
 --
 -- ```{literalinclude} moon.hrz
 -- :language: text
