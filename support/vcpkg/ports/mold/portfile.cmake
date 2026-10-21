@@ -1,39 +1,22 @@
-# Overlay port. mdlib ("mold") has no registry port, and upstream (scanberg/mdlib,
-# previously vendored as the modules/molecule/ext/mold git submodule) ships no install
-# rules at all, so find_package(mold CONFIG REQUIRED) cannot succeed against it as-is.
-# add-install-rules.patch adds the install(TARGETS ...)/install(EXPORT ...) machinery and a
-# generated moldConfig.cmake, producing a mold::mdlib target and matching the
+# Overlay port. mdlib ("mold") has no registry port, and upstream (scanberg/mdlib)
+# ships no install rules at all, so find_package(mold CONFIG REQUIRED) cannot succeed
+# against it as-is. add-install-rules.patch adds the install(TARGETS ...)/install(EXPORT ...)
+# machinery and a generated moldConfig.cmake, producing a mold::mdlib target and matching the
 # find_package(<pkg> CONFIG REQUIRED) + namespaced-target pattern used by every other
-# dependency in this project's vcpkg migration.
+# dependency in OpenSpace.
 #
-# The next three patches are the OpenSpace-local changes that used to live as
-# pathpatch_[123]_*.patch next to modules/molecule/CMakeLists.txt and were applied to the
-# submodule working tree by a git-apply step during configure:
-#   md-path-exe-dir-decl.patch / md-path-exe-dir-impl.patch  add md_path_exe_dir()
-#   runtime-shader-path.patch                                makes md_gl.c resolve its GLSL
-#                                                            relative to the executable
-# Upstream bakes the absolute build-time shader directory into the library through the
-# MD_SHADER_DIR define, which is useless once the library is a redistributable package.
-#
-# opaque-file-handle.patch turns the unused `FILE handle` member of md_file_o into a
-# pointer. Embedding a FILE by value needs the definition of `struct _IO_FILE`, which
-# glibc exposes but musl does not, so the port does not compile on Alpine without it.
-#
-# REF is pinned to the commit the submodule pointed at; the OpenSpace patches were written
-# against that revision.
+# Upstream mdlib now natively supports ARM64 (NEON via SIMDe abstraction) in addition to
+# x86-64. Shaders are precompiled into C byte arrays (gl_shaders.inl) and linked directly
+# into mdlib, eliminating the runtime shader path dependency.
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO scanberg/mdlib
-    REF 70a27a285029f1606cd540a99edd8ec14af23a38
-    SHA512 2febcff5de5d358b28e6031d903e932ba3de25832a3bff06d864966b12d7814677d09a630d77ea65bd5dedd95c5deb98717892a3b2d2c0267b6d2fa626c26897
+    REF 00bb2e118f8113a0b223c0a588fa29a7dae4c305
+    SHA512 13edaf0b94d2fc418544bc4cc338d925cb8dc6dda01ef448e5c329cde80fac050914df12711a3fb92f847e1d0b08a05678d6e1d80e86addd9682470ce16cf553
     HEAD_REF master
     PATCHES
-        md-path-exe-dir-decl.patch
-        md-path-exe-dir-impl.patch
-        runtime-shader-path.patch
         add-install-rules.patch
-        opaque-file-handle.patch
 )
 
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/moldConfig.cmake.in" DESTINATION "${SOURCE_PATH}")
@@ -47,27 +30,27 @@ else ()
     set(LINK_STDLIB_STATIC OFF)
 endif ()
 
-# mdlib uses AVX2 intrinsics unconditionally. Without an explicit arch flag, GCC/Clang
-# reject them at compile time, which is what breaks the build inside a Docker container.
-# Match the blanket AVX2/x86-64-v3 baseline the rest of the project compiles with (see
-# common-compile-settings).
-if (VCPKG_TARGET_IS_WINDOWS)
-    set(VCPKG_C_FLAGS "${VCPKG_C_FLAGS} /arch:AVX2")
-    set(VCPKG_CXX_FLAGS "${VCPKG_CXX_FLAGS} /arch:AVX2")
-else ()
-    set(VCPKG_C_FLAGS "${VCPKG_C_FLAGS} -march=x86-64-v3")
-    set(VCPKG_CXX_FLAGS "${VCPKG_CXX_FLAGS} -march=x86-64-v3")
+# On x86/x64, mdlib uses AVX2 intrinsics. Match the AVX2 baseline for x86 architectures.
+# On ARM64 (including ARM64 Windows), mdlib uses SIMDe/NEON and does not use /arch:AVX2.
+if (VCPKG_TARGET_ARCHITECTURE STREQUAL "x64" OR VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
+    if (VCPKG_TARGET_IS_WINDOWS)
+        set(VCPKG_C_FLAGS "${VCPKG_C_FLAGS} /arch:AVX2")
+        set(VCPKG_CXX_FLAGS "${VCPKG_CXX_FLAGS} /arch:AVX2")
+    else ()
+        set(VCPKG_C_FLAGS "${VCPKG_C_FLAGS} -march=x86-64-v3")
+        set(VCPKG_CXX_FLAGS "${VCPKG_CXX_FLAGS} -march=x86-64-v3")
+    endif ()
 endif ()
+
+set(VCPKG_BUILD_TYPE release)
 
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
         -DMD_UNITTEST=OFF
         -DMD_BENCHMARK=OFF
-        # Upstream's "relative resource path" mode copies the GLSL next to the build
-        # output; runtime-shader-path.patch removes every use of the resulting
-        # MD_SHADER_DIR, and the shaders are installed into share/mold/shaders instead.
-        -DMD_USE_RELATIVE_RESOURCE_PATH=OFF
+        -DMD_ENABLE_GPU=OFF
+        -DMD_ENABLE_HDF5=OFF
         -DMD_LINK_STDLIB_STATIC=${LINK_STDLIB_STATIC}
 )
 
@@ -78,8 +61,6 @@ vcpkg_cmake_config_fixup(CONFIG_PATH share/mold)
 vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
 file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
 
-# The GLSL is installed into share/mold/shaders for both configurations; only the release
-# copy is of any use.
 file(REMOVE_RECURSE
     "${CURRENT_PACKAGES_DIR}/debug/include"
     "${CURRENT_PACKAGES_DIR}/debug/share"

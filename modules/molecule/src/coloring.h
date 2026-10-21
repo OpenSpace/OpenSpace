@@ -25,22 +25,24 @@
 #ifndef __OPENSPACE_MODULE_MOLECULE___COLORING___H__
 #define __OPENSPACE_MODULE_MOLECULE___COLORING___H__
 
+#include <md_types.h>
 #include <stdint.h>
 
-struct md_bitfield_t;
-struct md_molecule_t;
+struct md_bitmask_t;
+struct md_system_t;
 
 namespace molecule {
 
 void uniform(uint32_t* colors, int64_t count, uint32_t rgba,
-    const md_bitfield_t* mask = nullptr);
-void cpk(uint32_t* colors, int64_t count, const md_molecule_t& mol);
-void idx(uint32_t* colors, int64_t count, const md_molecule_t&);
-void residueId(uint32_t* colors, int64_t count, const md_molecule_t& mol);
-void residueIndex(uint32_t* colors, int64_t count, const md_molecule_t& mol);
-void chainId(uint32_t* colors, int64_t count, const md_molecule_t& mol);
-void chainIndex(uint32_t* colors, int64_t count, const md_molecule_t& mol);
-void secondaryStructure(uint32_t* colors, int64_t count, const md_molecule_t& mol);
+    const md_bitmask_t* mask = nullptr);
+void cpk(uint32_t* colors, int64_t count, const md_system_t& sys);
+void idx(uint32_t* colors, int64_t count, const md_system_t&);
+void residueId(uint32_t* colors, int64_t count, const md_system_t& sys);
+void residueIndex(uint32_t* colors, int64_t count, const md_system_t& sys);
+void chainId(uint32_t* colors, int64_t count, const md_system_t& sys);
+void chainIndex(uint32_t* colors, int64_t count, const md_system_t& sys);
+void secondaryStructure(uint32_t* colors, int64_t count, const md_system_t& sys,
+    const md_secondary_structure_t* ss = nullptr);
 
 } // namespace molecule
 
