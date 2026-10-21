@@ -1113,12 +1113,14 @@ void DataViewer::render() {
         if (ImGui::BeginMenu("Webpage")) {
             ImGui::TextLinkOpenURL(WebpageLink);
 
-            ImGui::Text(
-                "Opens an interactive webpage for further interaction and \n"
+            ImGui::TextWrapped(
+                "Opens an interactive webpage for further interaction and "
                 "visualization of the dataset. \n \n"
-                "The webpage can be used to control the selection, as well \n"
-                "as visualizing the current planet selection. Click a button \n"
-                "to open in your selected browser."
+                "The webpage can be used to control the selection, as well "
+                "as visualizing the current planet selection. \n \n"
+                "To use the selection from the webpage, click the send to "
+                "OpenSpace button on the page and enable external filters in "
+                "the Filters window."
             );
 
             ImGui::EndMenu();
