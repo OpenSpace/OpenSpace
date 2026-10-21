@@ -70,6 +70,13 @@ namespace {
         Property::Visibility::Hidden
     };
 
+    constexpr Property::PropertyInfo HoveredIndexInfo = {
+        "HoveredIndex",
+        "Hovered Indes",
+        "The index of the currently hovered object.",
+        Property::Visibility::Developer
+    };
+
     struct [[codegen::Dictionary(ExoplanetsExpertToolModule)]] Parameters {
         // [[codegen::verbatim(DataConfigFileInfo.description)]]
         std::optional<std::filesystem::path> dataConfigFile;
@@ -92,6 +99,7 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     , _enabled(EnabledInfo)
     , _showInfoWindowAtStartup(ShowInfoAtStartupInfo)
     , _filteredRows(FilteredDataRowsInfo)
+    , _hoveredIndex(HoveredIndexInfo)
     , _dataConfigFile(DataConfigFileInfo)
     , _gui("ExoplanetsToolGui")
 {
@@ -112,6 +120,9 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
 
     _filteredRows.setReadOnly(true);
     addProperty(_filteredRows);
+
+    _hoveredIndex.setReadOnly(true);
+    addProperty(_hoveredIndex);
 
     // TODO: Renderables are initialized even if modules is disabled
 

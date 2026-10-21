@@ -972,9 +972,15 @@ void DataViewer::render() {
     // frame, which was especially noticeable (and costly) while holding CTRL, since
     // that is when the picking-based hovering is actually enabled in the renderables.
     ImGuiIO& mainIo = ImGui::GetIO();
-    int hoveredPlanet = mainIo.WantCaptureMouse ? -1 : _glyphHandler.getHoveredPlanetIndex();
-    renderPlanetTooltip(hoveredPlanet);
-    handleDoubleClickHoveredPlanet(hoveredPlanet);
+    int hoveredIndex = mainIo.WantCaptureMouse ? -1 : _glyphHandler.getHoveredPlanetIndex();
+    renderPlanetTooltip(hoveredIndex);
+    handleDoubleClickHoveredPlanet(hoveredIndex);
+
+    std::string_view uri = "Modules.ExoplanetsExpertTool.HoveredIndex";
+    global::scriptEngine->queueScript(
+        std::format("openspace.setPropertyValueSingle('{}', {})", uri, hoveredIndex),
+        ScriptEngine::ShouldBeLogged::No
+    );
 
     // Add vertical spacing before the menus, to account for main OpenSpace UI
     float offset = 20.f; //px
@@ -1687,14 +1693,12 @@ void DataViewer::updateFilteredRowsProperty(std::optional<std::vector<size_t>> c
             );
         }
 
-        const std::string script = std::format(
-            "openspace.setPropertyValueSingle('{}', {{{}}})",
-            filteredRowsProperty->uri(),
-            join(indices, ",")
-        );
-
         global::scriptEngine->queueScript(
-            script,
+            std::format(
+                "openspace.setPropertyValueSingle('{}', {{{}}})",
+                filteredRowsProperty->uri(),
+                join(indices, ",")
+            ),
             ScriptEngine::ShouldBeLogged::No
         );
     }

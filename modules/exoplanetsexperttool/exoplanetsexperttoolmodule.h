@@ -32,6 +32,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <mutex>
 #include <string_view>
@@ -83,6 +84,7 @@ protected:
     BoolProperty _enabled;
     BoolProperty _showInfoWindowAtStartup;
     IntListProperty _filteredRows;
+    IntProperty _hoveredIndex;
     StringProperty _dataConfigFile;
 
     exoplanets::gui::Gui _gui;
