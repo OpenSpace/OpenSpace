@@ -87,9 +87,12 @@ set(SHADER_FILES
   shaders/keplertrails_vs.glsl
   shaders/rings_vs.glsl
   shaders/rings_fs.glsl
+  shaders/df64.glsl
   shaders/star_fs.glsl
   shaders/star_gs.glsl
+  shaders/star_gs_float.glsl
   shaders/star_vs.glsl
+  shaders/star_vs_float.glsl
   shaders/travelspeed_fs.glsl
   shaders/travelspeed_vs.glsl
 )

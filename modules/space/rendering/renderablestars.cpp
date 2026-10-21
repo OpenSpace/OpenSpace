@@ -44,6 +44,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstdlib>
 #include <filesystem>
 #include <limits>
 
@@ -51,6 +52,34 @@ namespace {
     using namespace openspace;
 
     constexpr std::string_view _loggerCat = "RenderableStars";
+
+    struct EnvCheckResult {
+        bool enabled = false;
+        std::string varName;
+        std::string value;
+    };
+
+    EnvCheckResult checkNoGpuDoubleEnv() {
+        for (const char* varName : { "NO_GPU_DOUBLE", "NO_DOUBLE", "OPENSPACE_NO_GPU_DOUBLE" }) {
+            const char* val = std::getenv(varName);
+            if (val) {
+                std::string_view sv(val);
+                while (!sv.empty() && (sv.front() == ' ' || sv.front() == '\t')) {
+                    sv.remove_prefix(1);
+                }
+                while (!sv.empty() && (sv.back() == ' ' || sv.back() == '\t' || sv.back() == '\r' || sv.back() == '\n')) {
+                    sv.remove_suffix(1);
+                }
+                if (!sv.empty() && sv != "0" && sv != "false" && sv != "FALSE" && sv != "False") {
+                    return { true, varName, std::string(sv) };
+                }
+                else {
+                    return { false, varName, std::string(sv) };
+                }
+            }
+        }
+        return { false, "", "" };
+    }
 
     enum SizeComposition {
         DistanceModulus = 0,
@@ -712,15 +741,61 @@ RenderableStars::RenderableStars(const Dictionary& dictionary)
     _staticFilterValue = p.staticFilter;
     _staticFilterReplacementValue =
         p.staticFilterReplacement.value_or(_staticFilterReplacementValue);
+
+    _gpuSupportsDouble = !checkNoGpuDoubleEnv().enabled;
+}
+
+std::pair<glm::mat4, glm::mat4> RenderableStars::splitDmat4(const glm::dmat4& m) {
+    glm::mat4 hi;
+    glm::mat4 lo;
+    for (int col = 0; col < 4; ++col) {
+        for (int row = 0; row < 4; ++row) {
+            const double val = m[col][row];
+            const float h = static_cast<float>(val);
+            const float l = static_cast<float>(val - static_cast<double>(h));
+            hi[col][row] = h;
+            lo[col][row] = l;
+        }
+    }
+    return { hi, lo };
 }
 
 void RenderableStars::initializeGL() {
-    _program = global::renderEngine->buildRenderProgram(
-        "Star",
-        absPath("${MODULE_SPACE}/shaders/star_vs.glsl"),
-        absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
-        absPath("${MODULE_SPACE}/shaders/star_gs.glsl")
-    );
+    const EnvCheckResult env = checkNoGpuDoubleEnv();
+    _gpuSupportsDouble = !env.enabled;
+
+    if (_gpuSupportsDouble) {
+        if (!env.varName.empty()) {
+            LINFO(std::format(
+                "Environment variable {}='{}' detected (disabled). "
+                "RenderableStars will use original double-precision shaders (star_vs.glsl, star_gs.glsl).",
+                env.varName, env.value
+            ));
+        }
+        else {
+            LINFO("NO_GPU_DOUBLE environment variable is not set. "
+                  "RenderableStars will use original double-precision shaders (star_vs.glsl, star_gs.glsl).");
+        }
+        _program = global::renderEngine->buildRenderProgram(
+            "Star",
+            absPath("${MODULE_SPACE}/shaders/star_vs.glsl"),
+            absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
+            absPath("${MODULE_SPACE}/shaders/star_gs.glsl")
+        );
+    }
+    else {
+        LINFO(std::format(
+            "Environment variable {}='{}' detected. "
+            "RenderableStars will use float workaround shaders (star_vs_float.glsl, star_gs_float.glsl).",
+            env.varName, env.value
+        ));
+        _program = global::renderEngine->buildRenderProgram(
+            "Star",
+            absPath("${MODULE_SPACE}/shaders/star_vs_float.glsl"),
+            absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
+            absPath("${MODULE_SPACE}/shaders/star_gs_float.glsl")
+        );
+    }
 
     glCreateBuffers(1, &_baseVbo);
     glCreateBuffers(1, &_velocityVbo);
@@ -765,7 +840,13 @@ void RenderableStars::initializeGL() {
     glVertexArrayAttribFormat(_vao, otherDataAttrib, 1, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, otherDataAttrib, 3);
 
-    opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCacheCommon);
+    if (_gpuSupportsDouble) {
+        opengl::updateUniformLocations(*_program, _uniformCacheDouble);
+    }
+    else {
+        opengl::updateUniformLocations(*_program, _uniformCacheFloat);
+    }
 
     loadData();
 
@@ -844,41 +925,56 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     _program->activate();
 
-    const glm::dvec3 eyePosition = glm::dvec3(
-        glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
-    );
-    _program->setUniform(_uniformCache.eyePosition, eyePosition);
-
-    const glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
-    _program->setUniform(_uniformCache.cameraUp, cameraUp);
-
     const glm::dmat4 modelMatrix = calcModelTransform(data);
-    _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
 
-    const glm::dmat4 viewProjectionMatrix =
-        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
-    _program->setUniform(_uniformCache.cameraViewProjectionMatrix, viewProjectionMatrix);
+    if (_gpuSupportsDouble) {
+        const glm::dvec3 eyePosition = glm::dvec3(
+            glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+        );
+        _program->setUniform(_uniformCacheDouble.eyePosition, eyePosition);
 
-    _program->setUniform(_uniformCache.useProperMotion, _useProperMotion);
+        const glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+        _program->setUniform(_uniformCacheDouble.cameraUp, cameraUp);
+
+        _program->setUniform(_uniformCacheDouble.modelMatrix, modelMatrix);
+
+        const glm::dmat4 viewProjectionMatrix =
+            glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
+        _program->setUniform(_uniformCacheDouble.cameraViewProjectionMatrix, viewProjectionMatrix);
+    }
+    else {
+        const glm::dmat4 modelViewMatrix =
+            data.camera.combinedViewMatrix() * modelMatrix;
+        auto [mv_hi, mv_lo] = splitDmat4(modelViewMatrix);
+        _program->setUniform(_uniformCacheFloat.modelViewMatrix_hi, mv_hi);
+        _program->setUniform(_uniformCacheFloat.modelViewMatrix_lo, mv_lo);
+
+        const glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+        _program->setUniform(_uniformCacheFloat.projectionMatrix, projectionMatrix);
+
+        _program->setUniform(_uniformCacheFloat.viewScaling, data.camera.scaling());
+    }
+
+    _program->setUniform(_uniformCacheCommon.useProperMotion, _useProperMotion);
     if (_useProperMotion) {
         const double epoch = _properMotionEpoch;
         const double curr = static_cast<double>(data.time.j2000Seconds());
         const double diffTime = curr - epoch;
-        _program->setUniform(_uniformCache.diffTime, static_cast<float>(diffTime));
+        _program->setUniform(_uniformCacheCommon.diffTime, static_cast<float>(diffTime));
     }
 
-    _program->setUniform(_uniformCache.colorOption, _colorOption);
-    _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
+    _program->setUniform(_uniformCacheCommon.colorOption, _colorOption);
+    _program->setUniform(_uniformCacheCommon.magnitudeExponent, _magnitudeExponent);
 
-    _program->setUniform(_uniformCache.sizeComposition, _parameters.method.value());
-    _program->setUniform(_uniformCache.lumCent, _parameters.lumCent);
-    _program->setUniform(_uniformCache.radiusCent, _parameters.radiusCent);
+    _program->setUniform(_uniformCacheCommon.sizeComposition, _parameters.method.value());
+    _program->setUniform(_uniformCacheCommon.lumCent, _parameters.lumCent);
+    _program->setUniform(_uniformCacheCommon.radiusCent, _parameters.radiusCent);
 
     if (_colorOption == ColorOption::FixedColor) {
-        if (_uniformCache.fixedColor == -1) {
-            _uniformCache.fixedColor = _program->uniformLocation("fixedColor");
+        if (_uniformCacheCommon.fixedColor == -1) {
+            _uniformCacheCommon.fixedColor = _program->uniformLocation("fixedColor");
         }
-        _program->setUniform(_uniformCache.fixedColor, _fixedColor);
+        _program->setUniform(_uniformCacheCommon.fixedColor, _fixedColor);
     }
 
     if (_enableFadeInDistance) {
@@ -889,48 +985,48 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         const float funcValue = static_cast<float>(a * distCam + b);
         const float fadeInValue = std::min(funcValue, 1.f);
 
-        _program->setUniform(_uniformCache.opacity, opacity() * fadeInValue);
+        _program->setUniform(_uniformCacheCommon.opacity, opacity() * fadeInValue);
     }
     else {
-        _program->setUniform(_uniformCache.opacity, opacity());
+        _program->setUniform(_uniformCacheCommon.opacity, opacity());
     }
 
     opengl::TextureUnit glareUnit;
     glareUnit.bind(*_glare.texture);
-    _program->setUniform(_uniformCache.glareTexture, glareUnit);
-    _program->setUniform(_uniformCache.glareMultiplier, _glare.multiplier);
-    _program->setUniform(_uniformCache.glareGamma, _glare.gamma);
-    _program->setUniform(_uniformCache.glareScale, _glare.scale);
+    _program->setUniform(_uniformCacheCommon.glareTexture, glareUnit);
+    _program->setUniform(_uniformCacheCommon.glareMultiplier, _glare.multiplier);
+    _program->setUniform(_uniformCacheCommon.glareGamma, _glare.gamma);
+    _program->setUniform(_uniformCacheCommon.glareScale, _glare.scale);
 
     opengl::TextureUnit coreUnit;
     if (_core.texture) {
         coreUnit.bind(*_core.texture);
-        _program->setUniform(_uniformCache.coreTexture, coreUnit);
-        _program->setUniform(_uniformCache.coreMultiplier, _core.multiplier);
-        _program->setUniform(_uniformCache.coreGamma, _core.gamma);
-        _program->setUniform(_uniformCache.coreScale, _core.scale);
+        _program->setUniform(_uniformCacheCommon.coreTexture, coreUnit);
+        _program->setUniform(_uniformCacheCommon.coreMultiplier, _core.multiplier);
+        _program->setUniform(_uniformCacheCommon.coreGamma, _core.gamma);
+        _program->setUniform(_uniformCacheCommon.coreScale, _core.scale);
     }
-    _program->setUniform(_uniformCache.hasCore, _core.texture != nullptr);
+    _program->setUniform(_uniformCacheCommon.hasCore, _core.texture != nullptr);
 
     opengl::TextureUnit colorUnit;
     if (_colorTexture) {
         colorUnit.bind(*_colorTexture);
-        _program->setUniform(_uniformCache.colorTexture, colorUnit);
+        _program->setUniform(_uniformCacheCommon.colorTexture, colorUnit);
     }
 
     opengl::TextureUnit otherDataUnit;
     if (_colorOption == ColorOption::OtherData && _otherDataColorMapTexture) {
         otherDataUnit.bind(*_otherDataColorMapTexture);
-        _program->setUniform(_uniformCache.otherDataTexture, otherDataUnit);
+        _program->setUniform(_uniformCacheCommon.otherDataTexture, otherDataUnit);
     }
     else {
         // We need to set the uniform to something, or the shader doesn't work
-        _program->setUniform(_uniformCache.otherDataTexture, colorUnit);
+        _program->setUniform(_uniformCacheCommon.otherDataTexture, colorUnit);
     }
     // Same here, if we don't set this value, the rendering disappears even if we don't
     // use this color mode --- abock 2018-11-19
-    _program->setUniform(_uniformCache.otherDataRange, _otherDataRange);
-    _program->setUniform(_uniformCache.filterOutOfRange, _filterOutOfRange);
+    _program->setUniform(_uniformCacheCommon.otherDataRange, _otherDataRange);
+    _program->setUniform(_uniformCacheCommon.filterOutOfRange, _filterOutOfRange);
 
 
     glBindVertexArray(_vao);
@@ -999,7 +1095,13 @@ void RenderableStars::update(const UpdateData&) {
 
     if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
-        opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCacheCommon);
+        if (_gpuSupportsDouble) {
+            opengl::updateUniformLocations(*_program, _uniformCacheDouble);
+        }
+        else {
+            opengl::updateUniformLocations(*_program, _uniformCacheFloat);
+        }
     }
 }
 
