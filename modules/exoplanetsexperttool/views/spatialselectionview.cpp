@@ -1554,7 +1554,7 @@ bool SpatialSelectionView::renderLassoTab() {
         );
     }
 
-    ImGui::BeginDisabled(!hasSelection && !_densityPreviewVolume);
+    ImGui::BeginDisabled(!hasSelection && !hasDensityVolume);
     if (ImGui::Button("Clear selection")) {
         clearLassoSelection();
     }
