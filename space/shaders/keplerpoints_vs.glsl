@@ -1,0 +1,56 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#version __CONTEXT__
+
+layout (location = 0) in vec3 in_vertexData; // 1: x, 2: y, 3: z
+layout (location = 1) in dvec3 in_orbitData; // 1: timeOffset, 2: epoch, 3: period
+
+out Data {
+  flat float currentRevolutionFraction;
+  flat float vertexRevolutionFraction;
+} out_data;
+
+uniform double inGameTime;
+
+
+void main() {
+  double timeOffset = in_orbitData.x;
+  double epoch = in_orbitData.y;
+  double period = in_orbitData.z;
+
+  // calculate nr of periods, get fractional part to know where the vertex closest to the
+  // debris part is right now
+  double numOfRevolutions = (inGameTime - epoch) / period;
+  out_data.currentRevolutionFraction =
+    float(numOfRevolutions - double(int(numOfRevolutions)));
+  if (out_data.currentRevolutionFraction < 0.0) {
+    out_data.currentRevolutionFraction += 1.0;
+  }
+
+  // Same procedure for the current vertex
+  out_data.vertexRevolutionFraction = float(timeOffset / period);
+
+  gl_Position = vec4(in_vertexData, 1.0);
+}

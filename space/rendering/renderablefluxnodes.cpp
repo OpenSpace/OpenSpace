@@ -1,0 +1,933 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <modules/space/rendering/renderablefluxnodes.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
+#include <algorithm>
+#include <array>
+#include <fstream>
+#include <iterator>
+#include <limits>
+#include <sstream>
+
+namespace {
+    using namespace openspace;
+
+    constexpr std::string_view _loggerCat = "RenderableFluxNodes";
+
+    constexpr OptionPropertyInfo GoesEnergyBinsInfo = {
+        .identifier = "GoesEnergy",
+        .name = "GOES energy",
+        .description = "Select which energy bin you want to show. GOES = Geostationary "
+            "Operational Environmental Satellites. Emin01 is values > 10 MeV, Default is "
+            "Emin03 where values > 100 MeV.",
+        .visibility = Visibility::AdvancedUser
+    };
+
+    constexpr OptionPropertyInfo ColorModeInfo = {
+        .identifier = "ColorMode",
+        .name = "Color mode",
+        .description = "Color lines uniformly or using color tables based on specific "
+            "values on nodes, for examples flux values.",
+        .visibility = Visibility::User
+    };
+
+    constexpr StringPropertyInfo ColorTablePathInfo = {
+        .identifier = "ColorTablePath",
+        .name = "Path to color table",
+        .description = "Color Table/Transfer Function to use for 'By Flux Value' "
+            "coloring.",
+        .visibility = Visibility::AdvancedUser
+    };
+
+    constexpr Vec4PropertyInfo StreamColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "Color of particles.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
+    };
+
+    constexpr FloatPropertyInfo NodeSizeInfo = {
+        .identifier = "NodeSize",
+        .name = "Size of nodes",
+        .description = "Change the size of the rendered points of the nodes.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 1.f, 10.f }
+        }
+    };
+
+    constexpr FloatPropertyInfo ThresholdFluxInfo = {
+        .identifier = "ThresholdFlux",
+        .name = "Threshold flux value",
+        .description = "This value specifies the threshold that will be changed with the "
+            "flux value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = -1.5f,
+            .minMax = { -50.f, 10.f }
+        }
+    };
+
+    constexpr FloatPropertyInfo FilteringInfo = {
+        .identifier = "FilterLower",
+        .name = "Filtering lower value in AU",
+        .description = "Use filtering to show nodes within a given range.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 5.f }
+        }
+    };
+
+    constexpr FloatPropertyInfo FilteringUpperInfo = {
+        .identifier = "FilterUpper",
+        .name = "Filtering upper value in AU",
+        .description = "Use filtering to show nodes within a given range.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 5.f,
+            .minMax = { 0.f, 5.f }
+        }
+    };
+
+    constexpr IntPropertyInfo AmountofNodesInfo = {
+        .identifier = "AmountOfNodes",
+        .name = "Every nth node to render in",
+        .description = "Show only every nth node.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1,
+            .minMax = { 1, 100 }
+        }
+    };
+
+    constexpr IntPropertyInfo DefaultNodeSkipInfo = {
+        .identifier = "NodeSkip",
+        .name = "Every nth node to render default",
+        .description = "Show only every nth node outside of skippingmethod.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1,
+            .minMax = { 1, 100 }
+        }
+    };
+
+    constexpr IntPropertyInfo EarthNodeSkipInfo = {
+        .identifier = "NodeSkipEarth",
+        .name = "Every nth node to render close to Earth",
+        .description = "Show only every nth node outside of skippingmethod.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1,
+            .minMax = { 1, 100 }
+        }
+    };
+
+    constexpr OptionPropertyInfo ScalingMethodInfo = {
+        .identifier = "ScalingFlux",
+        .name = "Scale the flux value with color table",
+        .description = "Use scaling to color nodes with a given method.",
+        .visibility = Visibility::AdvancedUser
+    };
+
+    constexpr OptionPropertyInfo NodeskipMethodInfo = {
+        .identifier = "SkippingNodes",
+        .name = "How to select nodes to skip",
+        .description = "Methods to select nodes to skip.",
+        .visibility = Visibility::AdvancedUser
+    };
+
+    constexpr Vec2PropertyInfo ColorTableRangeInfo = {
+        .identifier = "ColorTableRange",
+        .name = "Color table range",
+        .description = "Valid range for the color table as the exponent, with base 10, "
+            "of flux values. [Min, Max].",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(-2.f, 4.f),
+            .minMax = { glm::vec2(-8.f), glm::vec2(8.f) }
+        }
+    };
+
+    constexpr Vec2PropertyInfo DomainZInfo = {
+        .identifier = "ZLimit",
+        .name = "Z-limits",
+        .description = "Valid range along the Z-axis. [Min, Max].",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(-2.5f, 2.5f),
+            .minMax = { glm::vec2(-2.5f, -2.5f), glm::vec2(2.5f, 2.5f) }
+        }
+    };
+
+    constexpr FloatPropertyInfo FluxColorAlphaInfo = {
+        .identifier = "FluxColorAlpha",
+        .name = "Flux color alpha",
+        .description = "The value of alpha for the flux color mode.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
+    };
+
+    constexpr FloatPropertyInfo FluxNodeskipThresholdInfo = {
+        .identifier = "SkippingNodesByFlux",
+        .name = "Skipping nodes by flux",
+        .description = "Select nodes to skip depending on flux value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { -20.f, 10.f }
+        }
+    };
+
+    constexpr FloatPropertyInfo RadiusNodeSkipThresholdInfo = {
+        .identifier = "SkippingNodesByRadius",
+        .name = "Skipping nodes by radius",
+        .description = "Select nodes to skip depending on Radius.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 5.f }
+        }
+    };
+
+    constexpr FloatPropertyInfo DistanceThresholdInfo = {
+        .identifier = "DistancePlanetThreshold",
+        .name = "Threshold for distance between planet",
+        .description = "Changes threshold distance for highlighting nodes close to "
+            "Earth.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
+    };
+
+    constexpr FloatPropertyInfo ProximityNodesSizeInfo = {
+        .identifier = "ProximityNodesSize",
+        .name = "Earths proximity nodes size",
+        .description = "Changes size of nodes only close to Earth.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 100.f }
+        }
+    };
+
+    constexpr FloatPropertyInfo MaxNodeDistanceSizeInfo = {
+        .identifier = "MaxNodeDistanceSize",
+        .name = "Max node distance size",
+        .description = "The maximum size of the nodes at a certain distance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 10.f }
+        }
+    };
+
+    constexpr BoolPropertyInfo CameraPerspectiveEnabledInfo = {
+        .identifier = "CameraPerspectiveEnabled",
+        .name = "Use camera perspective",
+        .description = "Camera perspective changes the size of the nodes dependent on "
+            "the distance from camera.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
+    };
+
+    constexpr BoolPropertyInfo DrawingCirclesInfo = {
+        .identifier = "RenderingCircles",
+        .name = "Render as circles",
+        .description = "Using fragment shader to draw nodes as circles instead of "
+            "squares.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
+    };
+
+    constexpr BoolPropertyInfo DrawingHollowInfo = {
+        .identifier = "RenderingHollowCircles",
+        .name = "Render as hollow circles",
+        .description = "Using fragment shader to draw nodes as hollow circles.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
+    };
+
+    constexpr BoolPropertyInfo GaussiandAlphaFilterInfo = {
+        .identifier = "RenderingGaussianAlphaFilter",
+        .name = "Alpha by gaussian",
+        .description = "Using fragment shader to draw nodes with Gaussian filter for "
+            "alpha value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
+    };
+
+    constexpr FloatPropertyInfo PerspectiveDistanceFactorInfo = {
+        .identifier = "PerspectiveDistanceFactor",
+        .name = "Perspective distance factor",
+        .description = "This value decides how far away the camera must be to start "
+            "impacting the node size.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 2.67f,
+            .minMax = { 1.f, 20.f }
+        }
+    };
+
+    constexpr Vec2PropertyInfo MinMaxNodeSizeInfo = {
+        .identifier = "MinMaxNodeSize",
+        .name = "Min & max node size",
+        .description = "The minimum and maximum node size.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(2.f, 30.f),
+            .minMax = { glm::vec2(1.f), glm::vec2(10.f, 200.f) }
+        }
+    };
+
+    constexpr BoolPropertyInfo pulseEnabledInfo = {
+        .identifier = "PulseEnabled",
+        .name = "Nodes close to Earth pulsate",
+        .description = "Toggles the pulse for nodes close to Earth.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
+    };
+
+    constexpr BoolPropertyInfo gaussianPulseEnabledInfo = {
+        .identifier = "GaussianPulseEnabled",
+        .name = "Nodes close to Earth pulsate with alpha by gaussian",
+        .description = "Toggles the pulse with alpha by gaussian for nodes close to "
+            "Earth.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
+    };
+
+    struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {
+        // Path to a source folder with the three binary files in it.
+        std::filesystem::path sourceFolder [[codegen::directory()]];
+
+        std::filesystem::path colorTablePath [[codegen::Info(ColorTablePathInfo)]];
+
+        std::optional<int> energyBin [[codegen::Info(GoesEnergyBinsInfo)]];
+
+        std::optional<glm::vec2> colorTableRange [[codegen::Info(ColorTableRangeInfo)]];
+    };
+} // namespace
+#include "renderablefluxnodes_codegen.cpp"
+
+namespace openspace {
+
+Documentation RenderableFluxNodes::Documentation() {
+    return codegen::doc<Parameters>(
+        "space_renderable_fluxnodes",
+        Renderable::Documentation()
+    );
+}
+
+RenderableFluxNodes::RenderableFluxNodes(const Dictionary& dictionary)
+    : Renderable(dictionary)
+    , _earthdistGroup({ "Earthfocus" })
+    , _goesEnergyBins(GoesEnergyBinsInfo)
+    , _styleGroup({ "Style" })
+    , _colorMode(ColorModeInfo)
+    , _streamColor(StreamColorInfo)
+    , _colorTablePath(ColorTablePathInfo)
+    , _colorTableRange(ColorTableRangeInfo)
+    , _fluxColorAlpha(FluxColorAlphaInfo)
+    , _streamGroup({ "Streams" })
+    , _scalingMethod(ScalingMethodInfo)
+    , _nodesAmountGroup({ "NodeGroup" })
+    , _nodeSize(NodeSizeInfo)
+    , _distanceThreshold(DistanceThresholdInfo)
+    , _proximityNodesSize(ProximityNodesSizeInfo)
+    , _maxNodeDistanceSize(MaxNodeDistanceSizeInfo)
+    , _minMaxNodeSize(MinMaxNodeSizeInfo)
+    , _domainZ(DomainZInfo)
+    , _thresholdFlux(ThresholdFluxInfo)
+    , _filteringLower(FilteringInfo)
+    , _filteringUpper(FilteringUpperInfo)
+    , _amountofNodes(AmountofNodesInfo)
+    , _nodeskipMethod(NodeskipMethodInfo)
+    , _defaultNodeSkip(DefaultNodeSkipInfo)
+    , _fluxNodeskipThreshold(FluxNodeskipThresholdInfo)
+    , _earthNodeSkip(EarthNodeSkipInfo)
+    , _radiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo)
+    , _cameraPerspectiveGroup({ "CameraPerspective" })
+    , _cameraPerspectiveEnabled(CameraPerspectiveEnabledInfo)
+    , _drawingCircles(DrawingCirclesInfo)
+    , _drawingHollow(DrawingHollowInfo)
+    , _gaussianAlphaFilter(GaussiandAlphaFilterInfo)
+    , _perspectiveDistanceFactor(PerspectiveDistanceFactorInfo)
+    , _pulseEnabled(pulseEnabledInfo)
+    , _gaussianPulseEnabled(gaussianPulseEnabledInfo)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _colorTablePath = p.colorTablePath.string();
+    _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.value());
+    _colorTableRange = p.colorTableRange.value_or(_colorTableRange);
+
+    _binarySourceFolderPath = p.sourceFolder;
+    // Extract all file paths from the provided folder
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::directory_iterator(_binarySourceFolderPath)) {
+        if (e.is_regular_file()) {
+            _binarySourceFiles.push_back(e.path());
+        }
+    }
+    std::sort(_binarySourceFiles.begin(), _binarySourceFiles.end());
+
+    // Ensure that there are available and valid source files left
+    if (_binarySourceFiles.empty()) {
+        LERROR(std::format("'{}' contains no files", _binarySourceFolderPath));
+    }
+
+    _goesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
+    _goesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin03), "Emin03");
+    _colorMode.addOption(static_cast<int>(ColorMethod::ByFluxValue), "By Flux Value");
+    _colorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
+
+    _scalingMethod.addOption(static_cast<int>(ScalingMethod::Flux), "Flux");
+    _scalingMethod.addOption(static_cast<int>(ScalingMethod::RFlux), "Radius * Flux");
+    _scalingMethod.addOption(static_cast<int>(ScalingMethod::R2Flux), "Radius^2 * Flux");
+    _scalingMethod.addOption(
+        static_cast<int>(ScalingMethod::Log10RFlux), "log10(r) * Flux"
+    );
+    _scalingMethod.addOption(static_cast<int>(ScalingMethod::LnRFlux), "ln(r) * Flux");
+
+    _nodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Uniform), "Uniform");
+    _nodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Flux), "Flux");
+    _nodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Radius), "Radius");
+
+    if (p.energyBin.has_value()) {
+        _goesEnergyBins.setValue(p.energyBin.value());
+    }
+    else {
+        // Default int 1 == Emin03 == MeV>100
+        LINFO("Assuming default value 1, meaning Emin03");
+        _goesEnergyBins.setValue(1);
+    }
+    setupProperties();
+}
+
+void RenderableFluxNodes::initialize() {
+    populateStartTimes();
+    loadNodeData(_goesEnergyBins.option().value);
+    computeSequenceEndTime();
+}
+
+void RenderableFluxNodes::initializeGL() {
+    _shaderProgram = global::renderEngine->buildRenderProgram(
+        "Fluxnodes",
+        absPath("${MODULE_SPACE}/shaders/fluxnodes_vs.glsl"),
+        absPath("${MODULE_SPACE}/shaders/fluxnodes_fs.glsl")
+    );
+
+    _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");
+    _uniformCache.nodeSize = _shaderProgram->uniformLocation("nodeSize");
+    _uniformCache.thresholdFlux = _shaderProgram->uniformLocation("thresholdFlux");
+
+    opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
+
+    glCreateBuffers(1, &_vboPosition);
+    glCreateBuffers(1, &_vboColor);
+    glCreateBuffers(1, &_vboFilter);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vboPosition, 0, sizeof(glm::vec3));
+    glVertexArrayVertexBuffer(_vao, 1, _vboColor, 0, sizeof(float));
+    glVertexArrayVertexBuffer(_vao, 2, _vboFilter, 0, sizeof(float));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 1, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 1, 1);
+
+    glEnableVertexArrayAttrib(_vao, 2);
+    glVertexArrayAttribFormat(_vao, 2, 1, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 2, 2);
+
+    // Needed for alpha transparency
+    setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+}
+
+void RenderableFluxNodes::definePropertyCallbackFunctions() {
+    // Add Property Callback Functions
+    _goesEnergyBins.onChange([this] {
+        loadNodeData(_goesEnergyBins.option().value);
+    });
+    _colorTablePath.onChange([this]() {
+        _transferFunction->setPath(_colorTablePath.value());
+    });
+}
+
+void RenderableFluxNodes::loadNodeData(int energybinOption) {
+    LDEBUG("Loading in binary files directly from sync folder");
+
+    std::string energybin;
+    switch (energybinOption) {
+        case 0:
+            energybin = "_emin01";
+            break;
+        case 1:
+            energybin = "_emin03";
+            break;
+    }
+
+    const std::string file = std::format(
+        "{}/positions{}", _binarySourceFolderPath, energybin
+    );
+    const std::string file2 = std::format(
+        "{}/fluxes{}", _binarySourceFolderPath, energybin
+    );
+    const std::string file3 = std::format(
+        "{}/radiuses{}", _binarySourceFolderPath, energybin
+    );
+
+    std::ifstream fileStream = std::ifstream(file, std::ifstream::binary);
+    std::ifstream fileStream2 = std::ifstream(file2, std::ifstream::binary);
+    std::ifstream fileStream3 = std::ifstream(file3, std::ifstream::binary);
+
+    if (!fileStream.good()) {
+        LERROR(std::format("Could not read file '{}'", file));
+        return;
+    }
+
+    uint32_t nNodesPerTimestep = 0;
+    fileStream.read(reinterpret_cast<char*>(&nNodesPerTimestep), sizeof(uint32_t));
+
+    uint32_t nTimeSteps = 0;
+    fileStream.read(reinterpret_cast<char*>(&nTimeSteps), sizeof(uint32_t));
+    _nStates = nTimeSteps;
+
+    if (_nStates != _startTimes.size()) {
+        LERROR(
+            "Number of states, _nStates, and number of start times, _startTimes, do not "
+            "match"
+        );
+        return;
+    }
+
+    _statesColor.clear();
+    _statesPos.clear();
+    _statesRadius.clear();
+
+    for (unsigned int i = 0; i < _nStates; i++) {
+        _vertexPositions.resize(nNodesPerTimestep);
+        fileStream.read(
+            reinterpret_cast<char*>(_vertexPositions.data()),
+            nNodesPerTimestep * sizeof(glm::vec3)
+        );
+
+        _statesPos.push_back(_vertexPositions);
+        _vertexPositions.clear();
+    }
+    for (unsigned int i = 0; i < _nStates; i++) {
+        _vertexColor.resize(nNodesPerTimestep);
+        fileStream2.read(
+            reinterpret_cast<char*>(_vertexColor.data()),
+            nNodesPerTimestep * sizeof(float)
+        );
+
+        _statesColor.push_back(_vertexColor);
+        _vertexColor.clear();
+    }
+    for (unsigned int i = 0; i < _nStates; i++) {
+        _vertexRadius.resize(nNodesPerTimestep);
+        fileStream3.read(
+            reinterpret_cast<char*>(_vertexRadius.data()),
+            nNodesPerTimestep * sizeof(float)
+        );
+
+        _statesRadius.push_back(_vertexRadius);
+        _vertexRadius.clear();
+    }
+}
+
+void RenderableFluxNodes::setupProperties() {
+    addProperty(_goesEnergyBins);
+
+    addPropertySubOwner(_styleGroup);
+    addPropertySubOwner(_streamGroup);
+    addPropertySubOwner(_nodesAmountGroup);
+    addPropertySubOwner(_earthdistGroup);
+    addPropertySubOwner(_cameraPerspectiveGroup);
+
+    _cameraPerspectiveGroup.addProperty(_cameraPerspectiveEnabled);
+    _cameraPerspectiveGroup.addProperty(_perspectiveDistanceFactor);
+    _minMaxNodeSize.setViewOption(Property::ViewOptions::MinMaxRange);
+    _cameraPerspectiveGroup.addProperty(_minMaxNodeSize);
+
+    _earthdistGroup.addProperty(_distanceThreshold);
+    _earthdistGroup.addProperty(_proximityNodesSize);
+    _earthdistGroup.addProperty(_pulseEnabled);
+    _earthdistGroup.addProperty(_gaussianPulseEnabled);
+
+    _nodesAmountGroup.addProperty(_nodeskipMethod);
+    _nodesAmountGroup.addProperty(_amountofNodes);
+    _nodesAmountGroup.addProperty(_defaultNodeSkip);
+    _nodesAmountGroup.addProperty(_earthNodeSkip);
+    _nodesAmountGroup.addProperty(_nodeSize);
+    _nodesAmountGroup.addProperty(_fluxNodeskipThreshold);
+    _nodesAmountGroup.addProperty(_radiusNodeSkipThreshold);
+    _nodesAmountGroup.addProperty(_maxNodeDistanceSize);
+
+    _streamGroup.addProperty(_thresholdFlux);
+    _streamGroup.addProperty(_filteringLower);
+    _streamGroup.addProperty(_filteringUpper);
+    _streamGroup.addProperty(_domainZ);
+
+    _styleGroup.addProperty(_drawingCircles);
+    _styleGroup.addProperty(_drawingHollow);
+    _styleGroup.addProperty(_gaussianAlphaFilter);
+    _styleGroup.addProperty(_colorMode);
+    _styleGroup.addProperty(_scalingMethod);
+    _colorTableRange.setViewOption(Property::ViewOptions::MinMaxRange);
+    _styleGroup.addProperty(_colorTableRange);
+    _styleGroup.addProperty(_colorTablePath);
+    _styleGroup.addProperty(_streamColor);
+    _styleGroup.addProperty(_fluxColorAlpha);
+
+    definePropertyCallbackFunctions();
+}
+
+void RenderableFluxNodes::deinitializeGL() {
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vboPosition);
+    glDeleteBuffers(1, &_vboColor);
+    glDeleteBuffers(1, &_vboFilter);
+
+    if (_shaderProgram) {
+        global::renderEngine->removeRenderProgram(_shaderProgram.get());
+        _shaderProgram = nullptr;
+    }
+}
+
+void RenderableFluxNodes::populateStartTimes() {
+    std::filesystem::path timeFile;
+    for (const std::filesystem::path& filePath : _binarySourceFiles) {
+        if (filePath.extension() == ".csv" || filePath.extension() == ".dat" ||
+            filePath.extension() == ".txt")
+        {
+            timeFile = filePath;
+            break;
+        }
+
+        const std::string f = filePath.filename().string();
+        // If no file extension but word "time" in file name
+        if (f.contains("time") && !f.contains('.')) {
+            timeFile = filePath;
+            break;
+        }
+    }
+
+    if (timeFile.empty()) {
+        LERROR(
+            "Could not find a metadata file with time steps, such as a csv, dat, txt or "
+            "no file extension with 'time' in filename"
+        );
+    }
+
+    // Time filestream
+    std::ifstream tfs = std::ifstream(timeFile);
+    if (!tfs.is_open()) {
+        throw RuntimeError("Could not open file");
+    }
+
+    std::string line;
+    // Gets only first line to "remove" header
+    openspace::getline(tfs, line);
+    std::stringstream s;
+    s << line;
+
+    int nColumns = 0;
+    std::string columnName;
+    // Loops through the names/columns in first line/header
+    while (s >> columnName) {
+        nColumns++;
+    }
+    while (openspace::getline(tfs, line)) {
+        std::istringstream iss(line);
+        for (int i = 0; i < nColumns; i++) {
+            std::string columnValue;
+            iss >> columnValue;
+            if (i != nColumns - 1) {
+                // Last column
+                continue;
+            }
+            if (columnValue.length() == 23) {
+                // Ensure the separators are correct
+                columnValue.replace(4, 1, "-");
+                columnValue.replace(7, 1, "-");
+                columnValue.replace(13, 1, ":");
+                columnValue.replace(16, 1, ":");
+                columnValue.replace(19, 1, ".");
+                const double triggerTime = Time::convertTime(columnValue);
+                _startTimes.push_back(triggerTime);
+            }
+            else {
+                LERROR(std::format(
+                    "Error in file formatting. Last column in file '{}' is not on UTC "
+                    "ISO8601 format", timeFile
+                ));
+            }
+        }
+    }
+}
+
+void RenderableFluxNodes::updateActiveTriggerTimeIndex(double currentTime) {
+    auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
+    if (iter != _startTimes.end()) {
+        if (iter != _startTimes.begin()) {
+            const std::ptrdiff_t idx = std::distance(_startTimes.begin(), iter);
+            _activeTriggerTimeIndex = static_cast<int>(idx) - 1;
+        }
+        else {
+            _activeTriggerTimeIndex = 0;
+        }
+    }
+    else {
+        _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
+    }
+}
+
+void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
+    if (_activeTriggerTimeIndex == -1) {
+        return;
+    }
+    _shaderProgram->activate();
+
+    // Calculate Model View MatrixProjection
+    const glm::dmat4 rotationTransform = glm::dmat4(data.modelTransform.rotation);
+    const glm::dmat4 modelTransform = calcModelTransform(
+        data,
+        { .rotation = rotationTransform }
+    );
+
+    _shaderProgram->setUniform(
+        "modelViewProjection",
+        glm::mat4(calcModelViewProjectionTransform(data, modelTransform))
+    );
+
+    SceneGraphNode* earthNode = sceneGraphNode("Earth");
+    if (!earthNode) {
+        LWARNING("Could not find scene graph node 'Earth'");
+        return;
+    }
+    const glm::vec3 earthPos = glm::vec3(
+        earthNode->worldPosition() * data.modelTransform.rotation
+    );
+
+    _shaderProgram->setUniform(_uniformCache.streamColor, _streamColor);
+    _shaderProgram->setUniform(_uniformCache.nodeSize, _nodeSize);
+    _shaderProgram->setUniform(_uniformCache.thresholdFlux, _thresholdFlux);
+    _shaderProgram->setUniform(_uniformCache.colorMode, _colorMode);
+    _shaderProgram->setUniform(_uniformCache.filterLower, _filteringLower);
+    _shaderProgram->setUniform(_uniformCache.filterUpper, _filteringUpper);
+    _shaderProgram->setUniform(_uniformCache.scalingMode, _scalingMethod);
+    _shaderProgram->setUniform(_uniformCache.colorTableRange, _colorTableRange);
+    _shaderProgram->setUniform(_uniformCache.domainLimZ, _domainZ);
+    _shaderProgram->setUniform(_uniformCache.nodeSkip, _amountofNodes);
+    _shaderProgram->setUniform(_uniformCache.nodeSkipDefault, _defaultNodeSkip);
+    _shaderProgram->setUniform(_uniformCache.nodeSkipEarth, _earthNodeSkip);
+    _shaderProgram->setUniform(_uniformCache.nodeSkipMethod, _nodeskipMethod);
+    _shaderProgram->setUniform(
+        _uniformCache.nodeSkipFluxThreshold,
+        _fluxNodeskipThreshold
+    );
+    _shaderProgram->setUniform(
+        _uniformCache.nodeSkipRadiusThreshold,
+        _radiusNodeSkipThreshold
+    );
+    _shaderProgram->setUniform(_uniformCache.fluxColorAlpha, _fluxColorAlpha);
+
+    _shaderProgram->setUniform(_uniformCache.earthPos, earthPos);
+    _shaderProgram->setUniform(_uniformCache.distanceThreshold, _distanceThreshold);
+    _shaderProgram->setUniform(_uniformCache.proximityNodesSize, _proximityNodesSize);
+    _shaderProgram->setUniform(
+        _uniformCache.time,
+        global::windowDelegate->applicationTime()
+    );
+    _shaderProgram->setUniform(_uniformCache.maxNodeDistanceSize, _maxNodeDistanceSize);
+    _shaderProgram->setUniform(
+        _uniformCache.usingCameraPerspective,
+        _cameraPerspectiveEnabled
+    );
+    _shaderProgram->setUniform(_uniformCache.drawCircles, _drawingCircles);
+    _shaderProgram->setUniform(_uniformCache.drawHollow, _drawingHollow);
+    _shaderProgram->setUniform(_uniformCache.useGaussian, _gaussianAlphaFilter);
+
+    _shaderProgram->setUniform(
+        _uniformCache.perspectiveDistanceFactor,
+        _perspectiveDistanceFactor
+    );
+    _shaderProgram->setUniform(_uniformCache.minMaxNodeSize, _minMaxNodeSize);
+    _shaderProgram->setUniform(_uniformCache.usingPulse, _pulseEnabled);
+    _shaderProgram->setUniform(_uniformCache.usingGaussianPulse, _gaussianPulseEnabled);
+
+    const glm::vec3 cameraPos = data.camera.position() * data.modelTransform.rotation;
+    _shaderProgram->setUniform("cameraPos", cameraPos);
+
+    if (_colorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
+        _transferFunction->update();
+        opengl::TextureUnit textureUnit;
+        textureUnit.bind(_transferFunction->texture());
+        _shaderProgram->setUniform("colorTable", textureUnit);
+    }
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexPositions.size()));
+    glBindVertexArray(0);
+    _shaderProgram->deactivate();
+}
+
+void RenderableFluxNodes::computeSequenceEndTime() {
+    if (_nStates > 1) {
+        const double lastTriggerTime = _startTimes[_nStates - 1];
+        const double sequenceDuration = lastTriggerTime - _startTimes[0];
+        const double averageStateDuration = sequenceDuration /
+            (static_cast<double>(_nStates) - 1.0);
+        _sequenceEndTime = lastTriggerTime + averageStateDuration;
+    }
+    else if (_nStates == 1) {
+        // If there's just one state it should never disappear
+        _sequenceEndTime = std::numeric_limits<double>::max();
+    }
+    else {
+        LERROR("No states were found. The position file include this data");
+    }
+}
+
+void RenderableFluxNodes::update(const UpdateData& data) {
+    if (!_enabled) {
+        return;
+    }
+    if (_shaderProgram->isDirty()) {
+        _shaderProgram->rebuildFromFile();
+    }
+    bool needsUpdate = true;
+    // Everything below is for updating depending on time
+    const double currentTime = data.time.j2000Seconds();
+    const bool isInInterval = (currentTime >= _startTimes[0]) &&
+            (currentTime < _sequenceEndTime);
+    if (isInInterval) {
+        const size_t nextIdx = _activeTriggerTimeIndex + 1;
+        if (
+            // true => we were not in an interval the previous frame but now we are
+            _activeTriggerTimeIndex == -1 ||
+            // true => We stepped back to a time represented by another state
+            currentTime < _startTimes[_activeTriggerTimeIndex] ||
+            // true => We stepped forward to a time represented by another state
+            (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
+        {
+            updateActiveTriggerTimeIndex(currentTime);
+        }
+    }
+    else {
+        _activeTriggerTimeIndex = -1;
+        needsUpdate = false;
+    }
+
+    if (needsUpdate && !_statesPos[_activeTriggerTimeIndex].empty()) {
+        _vertexPositions = _statesPos[_activeTriggerTimeIndex];
+        _vertexColor = _statesColor[_activeTriggerTimeIndex];
+        _vertexRadius = _statesRadius[_activeTriggerTimeIndex];
+        updatePositionBuffer();
+        updateVertexColorBuffer();
+        updateVertexFilteringBuffer();
+    }
+
+    if (_shaderProgram->isDirty()) {
+        _shaderProgram->rebuildFromFile();
+        opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
+    }
+}
+
+void RenderableFluxNodes::updatePositionBuffer() {
+    glNamedBufferData(
+        _vboPosition,
+        _vertexPositions.size() * sizeof(glm::vec3),
+        _vertexPositions.data(),
+        GL_STATIC_DRAW
+    );
+}
+
+void RenderableFluxNodes::updateVertexColorBuffer() {
+    glNamedBufferData(
+        _vboColor,
+        _vertexColor.size() * sizeof(float),
+        _vertexColor.data(),
+        GL_STATIC_DRAW
+    );
+}
+
+void RenderableFluxNodes::updateVertexFilteringBuffer() {
+    glNamedBufferData(
+        _vboFilter,
+        _vertexRadius.size() * sizeof(float),
+        _vertexRadius.data(),
+        GL_STATIC_DRAW
+    );
+}
+
+} // namespace openspace

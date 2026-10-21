@@ -1,0 +1,248 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <modules/space/rendering/renderableconstellationsbase.h>
+
+#include <openspace/data/dataloader.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/util/updatestructures.h>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <utility>
+
+namespace {
+    using namespace openspace;
+
+    constexpr std::string_view _loggerCat = "RenderableConstellationsBase";
+
+    constexpr StringPropertyInfo NamesFileInfo = {
+        .identifier = "NamesFile",
+        .name = "Constellation names file path",
+        .description = "Specifies the file that contains the mapping between "
+            "constellation abbreviations and full names of the constellations. If this "
+            "value is empty, the abbreviations are used as the full names.",
+        .visibility = Visibility::AdvancedUser
+    };
+
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The line width used for the constellation shape.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 1.f, 16.f }
+        }
+    };
+
+    constexpr SelectionPropertyInfo SelectionInfo = {
+        .identifier = "ConstellationSelection",
+        .name = "Constellation selection",
+        .description = "The selected constellations are displayed on the celestial "
+            "sphere.",
+        .visibility = Visibility::NoviceUser
+    };
+
+    constexpr PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        .identifier = "Labels",
+        .name = "Labels",
+        .description = "The labels for the constellations."
+    };
+
+    struct [[codegen::Dictionary(RenderableConstellationsBase)]] Parameters {
+        std::optional<std::filesystem::path> namesFile [[codegen::Info(NamesFileInfo)]];
+
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greater(0.f)]];
+
+        // A list of constellations (given as abbreviations) to show. If empty or
+        // excluded, all constellations will be shown.
+        std::optional<std::vector<std::string>> selection;
+
+        std::optional<Dictionary> labels
+            [[codegen::Info(LabelsInfo), codegen::reference("core_labelscomponent")]];
+    };
+} // namespace
+#include "renderableconstellationsbase_codegen.cpp"
+
+namespace openspace {
+
+Documentation RenderableConstellationsBase::Documentation() {
+    return codegen::doc<Parameters>(
+        "space_renderable_constellationsbase",
+        Renderable::Documentation()
+    );
+}
+
+RenderableConstellationsBase::RenderableConstellationsBase(const Dictionary& dictionary)
+    : Renderable(dictionary)
+    , _lineWidth(LineWidthInfo)
+    , _selection(SelectionInfo)
+    , _namesFilename(NamesFileInfo)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_opacity);
+
+    // Avoid reading files here, instead do it in multithreaded initialize()
+    if (p.namesFile.has_value()) {
+        _namesFilename = p.namesFile->string();
+    }
+    _namesFilename.onChange([this]() { loadConstellationFile(); });
+    addProperty(_namesFilename);
+
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
+    addProperty(_lineWidth);
+
+    if (p.labels.has_value()) {
+        _labels = std::make_unique<LabelsComponent>(*p.labels);
+        _hasLabels = true;
+        addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
+    }
+
+    _selection.onChange([this]() { selectionPropertyHasChanged(); });
+    addProperty(_selection);
+
+    _assetSelection = p.selection.value_or(_assetSelection);
+}
+
+std::string RenderableConstellationsBase::constellationFullName(
+                                                      const std::string& identifier) const
+{
+    if (_namesTranslation.empty() || identifier.empty()) {
+        LWARNING("List of constellations or the given identifier was empty");
+        return "";
+    }
+
+    if (_namesTranslation.contains(identifier)) {
+        return _namesTranslation.at(identifier);
+    }
+
+    throw RuntimeError(std::format(
+        "Identifier '{}' could not be found in list of constellations", identifier
+    ));
+}
+
+void RenderableConstellationsBase::loadConstellationFile() {
+    if (_namesFilename.value().empty()) {
+        return;
+    }
+
+    // Reset
+    _selection.clearOptions();
+    _namesTranslation.clear();
+
+    // Load the constellation names file
+    std::ifstream file;
+    file.exceptions(std::ifstream::goodbit);
+    file.open(_namesFilename);
+
+    std::string line;
+    while (file.good()) {
+        openspace::getline(file, line);
+        if (line.empty()) {
+            continue;
+        }
+
+        std::string abbreviation;
+        std::stringstream s(line);
+        s >> abbreviation;
+
+        std::string fullName;
+        openspace::getline(s, fullName);
+        trimWhitespace(fullName);
+        _namesTranslation[abbreviation] = fullName;
+    }
+
+    fillSelectionProperty();
+}
+
+void RenderableConstellationsBase::fillSelectionProperty() {
+    for (const std::pair<const std::string, std::string>& pair : _namesTranslation) {
+        _selection.addOption(pair.second);
+    }
+}
+
+void RenderableConstellationsBase::initialize() {
+    loadConstellationFile();
+
+    if (!_hasLabels) {
+        return;
+    }
+
+    _labels->initialize();
+
+    for (dataloader::Labelset::Entry& entry : _labels->labelSet().entries) {
+        if (!entry.identifier.empty()) {
+            std::string fullName = constellationFullName(entry.identifier);
+            if (!fullName.empty()) {
+                entry.text = std::move(fullName);
+            }
+        }
+    }
+}
+
+void RenderableConstellationsBase::render(const RenderData& data, RendererTasks&) {
+    if (!_hasLabels || !_labels->enabled()) {
+        return;
+    }
+
+    const glm::dmat4 modelTransform = calcModelTransform(data);
+    const glm::dmat4 modelViewProjectionTransform =
+        calcModelViewProjectionTransform(data, modelTransform);
+
+    const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
+    const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
+    glm::vec3 right = glm::cross(viewDirection, lookup);
+    const glm::vec3 up = glm::cross(right, viewDirection);
+
+    const glm::dmat4 worldToModelTransform = glm::inverse(modelTransform);
+    glm::vec3 orthoRight = glm::normalize(
+        glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
+    );
+
+    if (orthoRight == glm::vec3(0.f)) {
+        const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+        right = glm::cross(viewDirection, otherVector);
+        orthoRight = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
+        );
+    }
+
+    const glm::vec3 orthoUp = glm::normalize(
+        glm::vec3(worldToModelTransform * glm::dvec4(up, 0.f))
+    );
+    _labels->render(data, modelViewProjectionTransform, orthoRight, orthoUp);
+}
+
+} // namespace openspace
