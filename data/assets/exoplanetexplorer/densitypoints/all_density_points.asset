@@ -1,0 +1,15 @@
+asset.require("./gaia_GNCS_EDR100pc", false)
+asset.require("./gaia_random_sample_3kpc_385kpoints", false)
+asset.require("./gaia_random_sample_3kpc_770kpoints", false)
+asset.require("./radcliffe_wave", false)
+
+asset.meta = {
+  Name = "All Density Points",
+  Description = [[
+    Asset providing all density point datasets for the Exoplanet Explorer, disabled at
+    startup by default.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,11 +1,19 @@
 
 local colormaps = asset.require("util/default_colormaps")
 
+local data = asset.resource({
+  Name = "Radcliffe Wave Stellar Clusters CSV Data",
+  Type = "UrlSynchronization",
+  Identifier = "radcliffe_wave_stellar_clusters_csv_data",
+  Url = "https://data.openspaceproject.com/testing/exoplanetexplorer_data/Radcliffe_Wave_stellar_clusters_Konietzka2023.csv"
+})
+
 local Node ={
   Identifier = "CastDensityPoints_RadcliffeWave",
   Renderable = {
+    Enabled = asset.enabled,
     Type = "RenderableDensityPointCloud",
-    File = "D:/Exoplanets Experts Paper/PointCloudData/Radcliffe_Wave_stellar_clusters_Konietzka2023.csv",
+    File = data .. "Radcliffe_Wave_stellar_clusters_Konietzka2023.csv",
     XColumn = "x", YColumn = "y", ZColumn = "z",
     Unit = "pc",
     GridDimensions = { 128, 128, 128 },

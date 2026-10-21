@@ -16,6 +16,7 @@
     "exoplanetexplorer/base",
     "exoplanetexplorer/actions/dome_setup",
     "exoplanetexplorer/actions/fade_glyphs",
+    "exoplanetexplorer/densitypoints/all_density_points",
     "exoplanetexplorer/events/fade_glyphs",
     "exoplanetexplorer/kepler_prism",
     "exoplanetexplorer/milkyway_center_line",

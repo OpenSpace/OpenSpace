@@ -1,11 +1,19 @@
 
 local colormaps = asset.require("util/default_colormaps")
 
+local data = asset.resource({
+  Name = "Gaia DR3 Random Sample 3kpc 385k Points CSV Data",
+  Type = "UrlSynchronization",
+  Identifier = "gaia_dr3_random_sample_3kpc_385kpoints_csv_data",
+  Url = "https://data.openspaceproject.com/testing/exoplanetexplorer_data/gaia_dr3_random_sample_3kpc_385kpoints_galactic_xyz.csv"
+})
+
 local Node ={
   Identifier = "CastDensityPoints_GaiaRandomSample_3kpc_385kpoints",
   Renderable = {
+    Enabled = asset.enabled,
     Type = "RenderableDensityPointCloud",
-    File = "D:/Exoplanets Experts Paper/PointCloudData/gaia_dr3_random_sample_3kpc_385kpoints_galactic_xyz.csv",
+    File = data .. "gaia_dr3_random_sample_3kpc_385kpoints_galactic_xyz.csv",
     XColumn = "x", YColumn = "y", ZColumn = "z",
     Unit = "pc",
     GridDimensions = { 128, 128, 128 },
