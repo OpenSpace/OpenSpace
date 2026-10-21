@@ -22,6 +22,7 @@
     "exoplanetexplorer/milkyway_center_line",
     "exoplanetexplorer/size_indicators",
     "exoplanetexplorer/show_info_at_startup",
+    "exoplanetexplorer/screenspace_plots",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/layers/default_layers"
   ],

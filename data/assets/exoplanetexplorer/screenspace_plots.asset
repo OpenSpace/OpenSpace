@@ -1,0 +1,65 @@
+
+local baseUrl = "http://localhost:4680/exoplanetexplorer/web/"
+
+local Scatter = {
+  Enabled = false,
+  Type = "ScreenSpaceBrowser",
+  Identifier = "ScreenSpaceBrowser_ScatterPlotMatrix",
+  Url = baseUrl .. "?chart=scatterplotmatrix&host=localhost&port=4682&autosync=true&hidetopbar=true",
+  -- @TODO: Decide columns
+  -- Url = baseUrl .. "?chart=scatterplotmatrix&columns=pl_bmasse%2Cpl_rade%2Cpl_orbper%2Cpl_orbeccen%2Cpl_orbsmax%2Cpl_eqt%2Cst_met%2Cst_age&host=localhost&port=4682&autosync=true&hidetopbar=true",
+  Name = "Live Chart - Scatter Plot Matrix",
+  Placement = {
+    UseRadiusAzimuthElevation = true,
+    FaceCamera = false,
+    RadiusAzimuthElevation = { 2.0, 0.55, -0.2057 }
+  }
+}
+
+local ParallelCoordinates = {
+  Enabled = false,
+  Type = "ScreenSpaceBrowser",
+  Identifier = "ScreenSpaceBrowser_ParallelCoordinates",
+  -- @TODO: Decide columns for parallel coordinates chart
+  Url = baseUrl .. "?chart=parallelcoordinates&autosync=true&hidetopbar=true",
+  Name = "Live Chart - Parallel Coordinates",
+  Placement = {
+    UseRadiusAzimuthElevation = true,
+    FaceCamera = false,
+    RadiusAzimuthElevation = { 2.0, -0.55, -0.2057 }
+  }
+}
+
+local TogglePlots = {
+  Identifier = "os.exoplanetexplorer_toggle_live_charts",
+  Name = "Toggle Live Charts",
+  Command = [[
+    -- Start by reloading the browsers, since the will not have loaded correctly on
+    -- startup (due to OpenSpace hosting the page...)
+    openspace.setPropertyValueSingle("ScreenSpace.]] .. Scatter.Identifier .. [[.Reload", nil)
+    openspace.setPropertyValueSingle("ScreenSpace.]] .. ParallelCoordinates.Identifier .. [[.Reload", nil)
+
+    openspace.toggleFade("ScreenSpace.]] .. Scatter.Identifier .. [[")
+    openspace.toggleFade("ScreenSpace.]] .. ParallelCoordinates.Identifier .. [[")
+  ]],
+  Documentation = [[
+    Toggles the visibility of screen space live charts in the Exoplanet Explorer.
+  ]],
+  GuiPath = "/ExoplanetExplorer",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Scatter)
+  openspace.addScreenSpaceRenderable(ParallelCoordinates)
+
+  openspace.action.registerAction(TogglePlots)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Scatter)
+  openspace.removeScreenSpaceRenderable(ParallelCoordinates)
+
+  openspace.action.removeAction(TogglePlots)
+end)
