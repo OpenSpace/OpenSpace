@@ -35,6 +35,7 @@
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/assert.h>
 #include <openspace/misc/profiling.h>
+#include <include/cef_request_context_handler.h>
 #include <cmath>
 #include <filesystem>
 #include <string_view>
@@ -47,7 +48,8 @@ namespace {
 namespace openspace {
 
 BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
-                                 WebKeyboardHandler* keyboardHandler)
+                                 WebKeyboardHandler* keyboardHandler,
+                                 UseIsolatedContext useIsolatedContext)
     : _renderHandler(renderer)
     , _keyboardHandler(keyboardHandler)
     , _client(new BrowserClient(_renderHandler.get(), _keyboardHandler.get()))
@@ -67,13 +69,19 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     browserSettings.windowless_frame_rate = 60;
     browserSettings.webgl = cef_state_t::STATE_ENABLED;
 
+    // An empty cache path in the settings creates an in-memory context
+    const CefRefPtr<CefRequestContext> requestContext =
+        useIsolatedContext ?
+        CefRequestContext::CreateContext(CefRequestContextSettings(), nullptr) :
+        nullptr;
+
     _browser = CefBrowserHost::CreateBrowserSync(
         windowInfo,
         _client.get(),
         "",
         browserSettings,
         nullptr,
-        nullptr
+        requestContext
     );
 
     if (!_browser) {
@@ -127,9 +135,6 @@ void BrowserInstance::draw() {
     ZoneScoped;
     TracyGpuZone("CEF Draw");
 
-    if (_zoomLevel != _browser->GetHost()->GetZoomLevel()) {
-        _browser->GetHost()->SetZoomLevel(_zoomLevel);
-    }
     _renderHandler->draw();
 }
 
@@ -185,8 +190,9 @@ void BrowserInstance::setZoom(float ratio) {
 
     // Zooming in CEF is non-linear according to this:
     // https://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11491
-    _zoomLevel = std::log(ratio * dpiScaling) / glm::log(1.2);
-    _browser->GetHost()->SetZoomLevel(_zoomLevel);
+    const double zoomLevel = std::log(ratio * dpiScaling) / glm::log(1.2);
+    _client->setZoomLevel(zoomLevel);
+    _browser->GetHost()->SetZoomLevel(zoomLevel);
 }
 
 void BrowserInstance::reloadBrowser() {
