@@ -206,7 +206,7 @@ std::optional<MeshVolume> SpatialSelectionHandler::createMeshVolume(
                                                           const glm::dmat4& volumeToWorld)
 {
     const std::vector<glm::vec3>& positions = volume.particlePositions();
-    const std::vector<uint8_t>& mask = result.nodeMask;
+    const std::vector<uint8_t>& mask = result.selectedVoxelMask;
 
     // Nothing selected, or the node mask doesn't match the volume's voxel count
     if (result.selectedParticles.empty() || mask.size() != volume.data().size()) {
@@ -307,7 +307,7 @@ SpatialSelectionHandler::createIsoSurfaceVolume(const DensityVolume& volume,
     // Generate a smooth scalar field/surface around the selection, using the
     // node mask and the selected points (in grid coordinates)
     std::optional<IsoSurface> field = smoothSelectionSurface(
-        volume.dimensions(), result.nodeMask, points
+        volume.dimensions(), result.selectedVoxelMask, points
     );
     if (!field) {
         return std::nullopt;

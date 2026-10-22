@@ -44,11 +44,11 @@ public:
 private:
     Lasso _lasso;
 
-    std::vector<glm::vec2> _nodeScreen;
+    std::vector<glm::vec2> _cellScreen;
     // Clip space w, i.e. the distance to the eye; <= 0 behind the camera
-    std::vector<float> _nodeDepth;
+    std::vector<float> _cellDepth;
     // Signed lasso distance divided by the lasso diameter
-    std::vector<float> _nodeDelta;
+    std::vector<float> _cellDelta;
     std::vector<uint8_t> _particleInside;
 
     // Approximate on-screen size of a grid cell is _cellFootprint / depth pixels

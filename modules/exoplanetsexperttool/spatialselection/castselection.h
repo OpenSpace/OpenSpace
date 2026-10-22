@@ -77,8 +77,8 @@ struct CastInput {
 struct CastResult {
     /// Indices of the selected particles in DensityVolume::particlePositions
     std::vector<int> selectedParticles;
-    /// 1 for every grid node that is part of the selected volume
-    std::vector<uint8_t> nodeMask;
+    /// 1 for every grid voxel that is part of the selected volume
+    std::vector<uint8_t> selectedVoxelMask;
     /// The density threshold that was used
     float threshold = 0.f;
     /// The number of disjoint volumes that passed the threshold
@@ -136,21 +136,21 @@ std::unique_ptr<CastSelection> createCastSelection(CastMethod method,
 CastResult selectDensityVolume(const DensityVolume& volume, float exponent);
 
 struct Components {
-    /// The component index for each grid node, or -1 if the node is not in the mask
+    /// The component index for each grid cell, or -1 if the cell is not in the mask
     std::vector<int> labels;
-    /// The number of nodes in each component
+    /// The number of voxels in each component
     std::vector<size_t> sizes;
 };
 
 /**
- * Splits the nonzero nodes of \p mask into 6-connected components. The mask uses the
+ * Splits the nonzero voxels of \p mask into 6-connected components. The mask uses the
  * same layout as DensityVolume (x varies fastest, then y, then z).
  */
 Components labelComponents(const std::vector<uint8_t>& mask, const glm::uvec3& dims);
 
 /**
  * Returns the indices of the particles for which \p candidates is nonzero and that lie
- * in a grid cell with at least one corner node labeled \p label.
+ * in a grid cell with at least one corner cell labeled \p label.
  */
 std::vector<int> particlesInComponent(const DensityVolume& volume,
     const std::vector<int>& labels, int label, const std::vector<uint8_t>& candidates);

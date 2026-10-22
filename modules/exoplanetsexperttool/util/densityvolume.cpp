@@ -163,6 +163,7 @@ void DensityVolume::compute() {
     for (int k = 0; k < 3; k++) {
         const float spread =
             percentile(_positions, k, 0.8) - percentile(_positions, k, 0.2);
+
         length[k] = spread > 0.f ?
             static_cast<float>(2.0 * spread / std::log(nParticles)) :
             _spacing[k];
@@ -172,6 +173,7 @@ void DensityVolume::compute() {
     const float pilotWeight = static_cast<float>(
         KernelNorm / (nParticles * length.x * length.y * length.z)
     );
+
     const std::vector<float> pilot = splat(
         std::vector<glm::vec3>(n, length),
         std::vector<float>(n, pilotWeight)
@@ -243,8 +245,10 @@ void DensityVolume::compute() {
 std::vector<float> DensityVolume::splat(const std::vector<glm::vec3>& lengths,
                                         const std::vector<float>& weights) const
 {
-    const size_t nNodes = static_cast<size_t>(_dimensions.x) * _dimensions.y *
-        _dimensions.z;
+    const size_t nCells = static_cast<size_t>(
+        _dimensions.x * _dimensions.y * _dimensions.z
+    );
+
     const size_t nParticles = _positions.size();
 
     // Chunked splatting: the points are divided into chunks (up to the number of CPU
@@ -256,7 +260,7 @@ std::vector<float> DensityVolume::splat(const std::vector<glm::vec3>& lengths,
         std::max<size_t>(nParticles / 1024, 1)
     );
     std::vector<std::vector<float>> partial(nChunks);
-    const glm::ivec3 maxNode = glm::ivec3(_dimensions) - glm::ivec3(1);
+    const glm::ivec3 maxCell = glm::ivec3(_dimensions) - glm::ivec3(1);
 
     const std::vector<size_t> chunks = indices(nChunks);
     std::for_each(
@@ -264,7 +268,7 @@ std::vector<float> DensityVolume::splat(const std::vector<glm::vec3>& lengths,
         chunks.begin(), chunks.end(),
         [&](size_t chunk) {
             std::vector<float>& grid = partial[chunk];
-            grid.assign(nNodes, 0.f);
+            grid.assign(nCells, 0.f);
 
             // Determine the range of particles this chunk will process
             const size_t begin = chunk * nParticles / nChunks;
@@ -277,20 +281,20 @@ std::vector<float> DensityVolume::splat(const std::vector<glm::vec3>& lengths,
                 const float w = weights[i]; // Peak height of the kernel
 
                 // Compute the axis-aligned bounding box of the ellipsoid in grid
-                // coordinates. Clamp it to the valid range of node indices
+                // coordinates. Clamp it to the valid range of cell indices
                 const glm::ivec3 low = glm::max(
                     glm::ivec3(glm::ceil((p - l - _min) / _spacing)),
                     glm::ivec3(0)
                 );
                 const glm::ivec3 high = glm::min(
                     glm::ivec3(glm::floor((p + l - _min) / _spacing)),
-                    maxNode
+                    maxCell
                 );
 
-                // Add this particle's contribution to every grid node inside its
+                // Add this particle's contribution to every grid cell inside its
                 // bounding box. The kernel is an ellipsoid (Epanechnikov) centered on
-                // the particle, with radii l.x, l.y and l.z. A node at normalized
-                // squared distance r2 receives w * (1 - r2), and nodes with r2 >= 1
+                // the particle, with radii l.x, l.y and l.z. A cell at normalized
+                // squared distance r2 receives w * (1 - r2), and cells with r2 >= 1
                 // lie outside the ellipsoid and receive nothing.
                 for (int z = low.z; z <= high.z; z++) {
                     // Normalized offset from the particle along z (1.0 = ellipsoid edge)
@@ -308,10 +312,10 @@ std::vector<float> DensityVolume::splat(const std::vector<glm::vec3>& lengths,
                         if (dyz2 >= 1.f) {
                             continue;
                         }
-                        // Flat array index of the first node (x = 0) in this row. The
-                        // grid is stored with x changing fastest, so node x in the row
+                        // Flat array index of the first cell (x = 0) in this row. The
+                        // grid is stored with x changing fastest, so cell x in the row
                         // is at row + x
-                        const size_t row = nodeIndex(glm::uvec3(0, y, z));
+                        const size_t row = cellIndex(glm::uvec3(0, y, z));
                         for (int x = low.x; x <= high.x; x++) {
                             const float dx = (_min.x + x * _spacing.x - p.x) / l.x;
                             // Full squared normalized distance to the particle
@@ -354,7 +358,7 @@ float DensityVolume::interpolate(const std::vector<float>& grid,
     const glm::vec3 t = glm::clamp(f - glm::vec3(i0), 0.f, 1.f);
 
     auto at = [this, &grid, &i0](unsigned int dx, unsigned int dy, unsigned int dz) {
-        return grid[nodeIndex(i0 + glm::uvec3(dx, dy, dz))];
+        return grid[cellIndex(i0 + glm::uvec3(dx, dy, dz))];
     };
 
     const float c00 = glm::mix(at(0, 0, 0), at(1, 0, 0), t.x);
@@ -406,13 +410,13 @@ const std::vector<float>& DensityVolume::particleDensities() const {
     return _particleDensities;
 }
 
-size_t DensityVolume::nodeIndex(const glm::uvec3& node) const {
-    return node.x + static_cast<size_t>(_dimensions.x) *
-        (node.y + static_cast<size_t>(_dimensions.y) * node.z);
+size_t DensityVolume::cellIndex(const glm::uvec3& cell) const {
+    return cell.x + static_cast<size_t>(_dimensions.x) *
+        (cell.y + static_cast<size_t>(_dimensions.y) * cell.z);
 }
 
-glm::vec3 DensityVolume::nodePosition(const glm::uvec3& node) const {
-    return _min + glm::vec3(node) * _spacing;
+glm::vec3 DensityVolume::cellPosition(const glm::uvec3& cell) const {
+    return _min + glm::vec3(cell) * _spacing;
 }
 
 } // namespace openspace::exoplanets

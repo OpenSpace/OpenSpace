@@ -53,6 +53,7 @@ float ScreenProjection::cellFootprint(const glm::vec3& spacing) const {
             modelToClip[k][0] * 0.5 * viewportSize.x,
             modelToClip[k][1] * 0.5 * viewportSize.y
         ) * static_cast<double>(spacing[k]);
+
         footprint = std::max(footprint, static_cast<float>(glm::length(axis)));
     }
     return footprint;
@@ -95,26 +96,30 @@ std::unique_ptr<CastSelection> createCastSelection(CastMethod method,
 CastResult selectDensityVolume(const DensityVolume& volume, float exponent) {
     CastResult result;
     const std::vector<float>& density = volume.data();
-    result.nodeMask.resize(density.size(), 0);
+    result.selectedVoxelMask.resize(density.size(), 0);
+
     if (density.empty()) {
         return result;
     }
 
     const double mean = std::accumulate(density.begin(), density.end(), 0.0) /
         static_cast<double>(density.size());
+
     result.threshold = std::exp2(exponent) * static_cast<float>(0.2 * mean);
+
     if (!std::isfinite(result.threshold) || result.threshold <= 0.f) {
         return result;
     }
 
-    for (size_t node = 0; node < density.size(); node++) {
-        result.nodeMask[node] = density[node] >= result.threshold;
+    for (size_t cell = 0; cell < density.size(); cell++) {
+        result.selectedVoxelMask[cell] = density[cell] >= result.threshold;
     }
-    Components components = labelComponents(result.nodeMask, volume.dimensions());
+    Components components = labelComponents(result.selectedVoxelMask, volume.dimensions());
     result.nComponents = components.sizes.size();
     if (result.nComponents == 0) {
         return result;
     }
+
     for (int& label : components.labels) {
         if (label >= 0) {
             label = 0;
@@ -126,9 +131,11 @@ CastResult selectDensityVolume(const DensityVolume& volume, float exponent) {
     for (size_t particle = 0; particle < candidates.size(); particle++) {
         candidates[particle] = particleDensities[particle] >= result.threshold;
     }
+
     result.selectedParticles = particlesInComponent(
         volume, components.labels, 0, candidates
     );
+
     return result;
 }
 
@@ -204,7 +211,7 @@ std::vector<int> particlesInComponent(const DensityVolume& volume,
             );
             for (int c = 0; c < 8; c++) {
                 const glm::ivec3 corner = cell + glm::ivec3(c & 1, (c >> 1) & 1, c >> 2);
-                if (labels[volume.nodeIndex(glm::uvec3(corner))] == label) {
+                if (labels[volume.cellIndex(glm::uvec3(corner))] == label) {
                     selected[i] = 1;
                     return;
                 }

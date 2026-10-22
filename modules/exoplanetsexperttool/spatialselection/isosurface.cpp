@@ -40,7 +40,7 @@ namespace {
     }
 
     // Inverse of IsoSurface::index: converts a linear node index into a 3D position
-    glm::ivec3 nodePosition(size_t node, const glm::uvec3& dimensions) {
+    glm::ivec3 cellPosition(size_t node, const glm::uvec3& dimensions) {
         return glm::ivec3(
             node % dimensions.x,
             (node / dimensions.x) % dimensions.y,
@@ -65,7 +65,7 @@ namespace {
         for (int axis = 0; axis < 3; ++axis) {
             const int extent = static_cast<int>(surface.dimensions[axis]);
             for (size_t node = 0; node < surface.values.size(); ++node) {
-                const glm::ivec3 position = nodePosition(node, surface.dimensions);
+                const glm::ivec3 position = cellPosition(node, surface.dimensions);
                 double sample = 0.0;
                 for (int offset = -KernelRadius; offset <= KernelRadius; ++offset) {
                     glm::ivec3 neighbor = position;
@@ -273,7 +273,7 @@ std::optional<IsoSurface> smoothSelectionSurface(const glm::uvec3& dimensions,
 
     for (size_t node = 0; node < count; ++node) {
         if (mask[node]) {
-            const glm::ivec3 position = nodePosition(node, dimensions);
+            const glm::ivec3 position = cellPosition(node, dimensions);
             minimum = glm::min(minimum, position);
             maximum = glm::max(maximum, position);
         }
@@ -301,7 +301,7 @@ std::optional<IsoSurface> smoothSelectionSurface(const glm::uvec3& dimensions,
     // Mark the masked nodes and all corners of the cells containing a point
     for (size_t node = 0; node < count; ++node) {
         if (mask[node]) {
-            const glm::ivec3 position = nodePosition(node, dimensions);
+            const glm::ivec3 position = cellPosition(node, dimensions);
             surface.values[surface.index(glm::uvec3(position - surface.origin))] = 1.f;
         }
     }

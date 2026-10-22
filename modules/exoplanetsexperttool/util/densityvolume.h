@@ -91,8 +91,8 @@ public:
     const std::vector<glm::vec3>& particlePositions() const;
     const std::vector<float>& particleDensities() const;
 
-    size_t nodeIndex(const glm::uvec3& node) const;
-    glm::vec3 nodePosition(const glm::uvec3& node) const;
+    size_t cellIndex(const glm::uvec3& node) const;
+    glm::vec3 cellPosition(const glm::uvec3& node) const;
 
 private:
     void compute();
