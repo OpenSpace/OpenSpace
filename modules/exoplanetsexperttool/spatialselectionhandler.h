@@ -30,6 +30,7 @@
 #include <modules/exoplanetsexperttool/spatialselection/isosurface.h>
 
 #include <openspace/glm.h>
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <string>
@@ -243,10 +244,22 @@ public:
      * \param summary Text summary of selection parameters
       * \param query Reusable spatial query definition
      */
-    void addSavedSelection(std::string name, std::string summary,
+    size_t addSavedSelection(std::string name, std::string summary,
           SpatialSelectionQuery query);
 
     void removeSavedSelection(size_t index);
+
+    /**
+     * Writes the given selections to a JSON file. Throws on failure.
+     */
+    static void saveSelectionsToFile(const std::filesystem::path& path,
+        const std::vector<SavedSelection>& selections);
+
+    /**
+     * Adds all selections in the JSON file as saved selections and returns their new
+     * ids, in file order. Throws on failure, in which case nothing is added.
+     */
+    std::vector<size_t> loadSelectionsFromFile(const std::filesystem::path& path);
 
     void clearSavedSelections();
     std::vector<SavedSelection>& savedSelections();

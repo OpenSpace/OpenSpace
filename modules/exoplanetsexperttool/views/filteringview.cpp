@@ -29,7 +29,40 @@
 #include <modules/exoplanetsexperttool/views/spatialselectionview.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/json.h>
 #include <implot.h>
+#include <algorithm>
+#include <fstream>
+#include <stdexcept>
+
+namespace {
+    constexpr int FilterFileVersion = 1;
+    constexpr std::string_view SpatialFileSuffix = ".spatial.json";
+
+    std::filesystem::path defaultFilterDirectory() {
+        return absPath("${MODULE_EXOPLANETSEXPERTTOOL}/data/filters");
+    }
+
+    std::vector<std::filesystem::path> savedFilterFiles() {
+        std::vector<std::filesystem::path> files;
+        std::error_code ec;
+        const std::filesystem::path dir = defaultFilterDirectory();
+        if (!std::filesystem::is_directory(dir, ec)) {
+            return files;
+        }
+        for (const auto& entry : std::filesystem::directory_iterator(dir, ec)) {
+            const std::filesystem::path& p = entry.path();
+            if (entry.is_regular_file(ec) && p.extension() == ".json" &&
+                !p.filename().string().ends_with(SpatialFileSuffix))
+            {
+                files.push_back(p);
+            }
+        }
+        std::sort(files.begin(), files.end());
+        return files;
+    }
+} // namespace
 
 namespace openspace::exoplanets {
 
@@ -117,23 +150,24 @@ const ColumnKey& FilteringView::rowLimitColumn() const {
 std::string FilteringView::spatialFilterDescription(
                                       const SpatialSelectionView& spatialSelectionView) const
 {
-    if (_appliedSavedSpatialSelection.has_value()) {
-        const std::vector<SavedSelection>& saved =
-            spatialSelectionView.handler().savedSelections();
+    const SavedSelection* applied = appliedSavedSelection(spatialSelectionView);
+    return applied ? applied->name : "Current spatial query";
+}
 
-        const auto it = std::find_if(
-            saved.begin(),
-            saved.end(),
-            [this](const SavedSelection& selection) {
-                return selection.id == *_appliedSavedSpatialSelection;
-            }
-        );
-
-        if (it != saved.end()) {
-            return it->name;
-        }
+const SavedSelection* FilteringView::appliedSavedSelection(
+                                      const SpatialSelectionView& spatialSelectionView) const
+{
+    if (!_appliedSavedSpatialSelection.has_value()) {
+        return nullptr;
     }
-    return "Current spatial query";
+    const std::vector<SavedSelection>& saved =
+        spatialSelectionView.handler().savedSelections();
+    const auto it = std::find_if(
+        saved.begin(),
+        saved.end(),
+        [this](const SavedSelection& s) { return s.id == *_appliedSavedSpatialSelection; }
+    );
+    return it != saved.end() ? &*it : nullptr;
 }
 
 void FilteringView::renderAppliedColumnFilters() const {
@@ -175,24 +209,40 @@ void FilteringView::renderAppliedColumnFilters() const {
 
 bool FilteringView::render(bool* open, const SpatialSelectionView& spatialSelectionView) {
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Filters", open)) {
+    if (!ImGui::Begin("Filters", open, ImGuiWindowFlags_MenuBar)) {
         ImGui::End();
         return false;
     }
 
     bool filterWasChanged = false;
 
+    filterWasChanged |= renderMenuBar();
+    filterWasChanged |= renderSaveLoadPopups(spatialSelectionView);
+
+    if (!_statusMessage.empty()) {
+        const ImVec4 color = _statusIsError ?
+            ImVec4(1.f, 0.4f, 0.4f, 1.f) : ImVec4(0.6f, 0.9f, 0.6f, 1.f);
+        if (ImGui::SmallButton("x##DismissStatus")) {
+            _statusMessage.clear();
+            _statusWarning.clear();
+        }
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, color);
+        ImGui::TextWrapped("%s", _statusMessage.c_str());
+        ImGui::PopStyleColor();
+        if (!_statusWarning.empty()) {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.7f, 0.3f, 1.f));
+            ImGui::TextWrapped("%s", _statusWarning.c_str());
+            ImGui::PopStyleColor();
+        }
+        ImGui::Separator();
+    }
+
     ImGui::Text("Reset:");
 
     ImGui::SameLine();
     if (ImGui::Button("Internal")) {
-        _columnFilters.clear();
-
-        _quickFilterFlags.reserve(_quickFilterGroups.size());
-        for (size_t i = 0; i < _quickFilterGroups.size(); ++i) {
-            _quickFilterFlags[i].assign(_quickFilterFlags[i].size(), false);
-        }
-
+        resetInternalFilters();
         filterWasChanged = true;
     }
 
@@ -222,6 +272,412 @@ bool FilteringView::render(bool* open, const SpatialSelectionView& spatialSelect
     filterWasChanged |= renderExternalFilterSettings();
 
     ImGui::End();
+
+    return filterWasChanged;
+}
+
+void FilteringView::resetInternalFilters() {
+    _columnFilters.clear();
+    _editingFilterIndex = -1;
+    for (std::vector<bool>& flags : _quickFilterFlags) {
+        flags.assign(flags.size(), false);
+    }
+    updateActiveFilterCount();
+}
+
+void FilteringView::updateActiveFilterCount() {
+    _nActiveFilters = 0;
+    for (const ColumnFilterEntry& f : _columnFilters) {
+        if (f.enabled && _dataViewer.hasColumn(f.column)) {
+            ++_nActiveFilters;
+        }
+    }
+    for (const std::vector<bool>& group : _quickFilterFlags) {
+        _nActiveFilters += static_cast<int>(std::count(group.begin(), group.end(), true));
+    }
+}
+
+void FilteringView::setStatus(std::string message, bool isError, std::string warning) {
+    _statusMessage = std::move(message);
+    _statusIsError = isError;
+    _statusWarning = std::move(warning);
+}
+
+void FilteringView::saveToFile(const std::filesystem::path& path,
+                               const SpatialSelectionView& spatialSelectionView)
+{
+    nlohmann::json columnFilters = nlohmann::json::array();
+    for (const ColumnFilterEntry& f : _columnFilters) {
+        columnFilters.push_back({
+            { "column", f.column },
+            { "query", f.filter.query() },
+            { "enabled", f.enabled }
+        });
+    }
+
+    nlohmann::json quickFilters = nlohmann::json::array();
+    for (size_t groupId = 0; groupId < _quickFilterFlags.size(); ++groupId) {
+        const DataSettings::QuickFilterGroup& group = _quickFilterGroups[groupId];
+        for (size_t i = 0; i < _quickFilterFlags[groupId].size(); ++i) {
+            if (_quickFilterFlags[groupId][i]) {
+                quickFilters.push_back({
+                    { "group", group.title },
+                    { "name", group.quickFilters[i].name }
+                });
+            }
+        }
+    }
+
+    nlohmann::json json = {
+        { "version", FilterFileVersion },
+        { "dataFile", _dataViewer.currentDataFile().filename().string() },
+        { "columnFilters", columnFilters },
+        { "quickFilters", quickFilters },
+        { "rowLimit", {
+            { "enabled", _limitNumberOfRows },
+            { "nRows", _nRows },
+            { "useHighest", _useHighestValue },
+            { "column", _rowLimitColumn }
+        }}
+    };
+
+    std::filesystem::create_directories(path.parent_path());
+
+    std::string spatialWarning;
+    if (_useSpatialSelection) {
+        std::optional<SavedSelection> selection;
+        if (_appliedSavedSpatialSelection.has_value()) {
+            if (const SavedSelection* s = appliedSavedSelection(spatialSelectionView)) {
+                selection = *s;
+            }
+        }
+        else if (auto query = spatialSelectionView.currentSpatialQuery(); query) {
+            selection = SavedSelection{
+                .name = std::format("{} (spatial)", path.stem().string()),
+                .summary = "Saved with filters",
+                .query = std::move(*query)
+            };
+        }
+
+        if (selection.has_value()) {
+            const std::string spatialFile =
+                path.stem().string() + std::string(SpatialFileSuffix);
+            SpatialSelectionHandler::saveSelectionsToFile(
+                path.parent_path() / spatialFile,
+                { *selection }
+            );
+            json["spatialFile"] = spatialFile;
+        }
+        else {
+            spatialWarning = " (no spatial query to save)";
+        }
+    }
+
+    std::ofstream file(path, std::ofstream::trunc);
+    if (!file.good()) {
+        throw std::runtime_error(std::format("Could not write to '{}'", path.string()));
+    }
+    file << json.dump(2);
+
+    setStatus(std::format("Saved filters to '{}'{}", path.string(), spatialWarning));
+}
+
+void FilteringView::loadFromFile(const std::filesystem::path& path, bool merge) {
+    std::ifstream file(path);
+    if (!file.good()) {
+        throw std::runtime_error(std::format("Could not open '{}'", path.string()));
+    }
+    const nlohmann::json json = nlohmann::json::parse(file);
+    if (json.value("version", 1) > FilterFileVersion) {
+        throw std::runtime_error("Filter file is from a newer version");
+    }
+
+    // Parse and validate everything before touching the current filtering state
+    std::string warnings;
+    auto warn = [&warnings](const std::string& message) {
+        warnings += (warnings.empty() ? "Warnings: " : "; ") + message;
+    };
+
+    std::vector<ColumnFilterEntry> loadedFilters;
+    for (const nlohmann::json& entry : json.value("columnFilters", nlohmann::json::array())) {
+        const ColumnKey column = entry.at("column").get<std::string>();
+        const std::string query = entry.value("query", "");
+        if (!_dataViewer.hasColumn(column)) {
+            warn(std::format("column '{}' not found", column));
+            continue;
+        }
+        // Type comes from the current dataset, not the file
+        const ColumnFilter filter = ColumnFilter(
+            query,
+            _dataViewer.isNumericColumn(column) ?
+                ColumnFilter::Type::Numeric : ColumnFilter::Type::Text
+        );
+        if (!filter.isValid()) {
+            warn(std::format("invalid query '{}' for '{}'", query, column));
+            continue;
+        }
+        loadedFilters.push_back({ column, filter, entry.value("enabled", true) });
+    }
+
+    std::vector<std::vector<bool>> quickFlags = _quickFilterFlags;
+    if (!merge) {
+        for (std::vector<bool>& flags : quickFlags) {
+            flags.assign(flags.size(), false);
+        }
+    }
+    for (const nlohmann::json& entry : json.value("quickFilters", nlohmann::json::array())) {
+        const std::string groupTitle = entry.value("group", "");
+        const std::string name = entry.at("name").get<std::string>();
+        bool found = false;
+        for (size_t groupId = 0; groupId < _quickFilterGroups.size() && !found; ++groupId) {
+            const DataSettings::QuickFilterGroup& group = _quickFilterGroups[groupId];
+            if (group.title != groupTitle) {
+                continue;
+            }
+            for (size_t i = 0; i < group.quickFilters.size(); ++i) {
+                if (group.quickFilters[i].name == name) {
+                    quickFlags[groupId][i] = true;
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if (!found) {
+            warn(std::format("quick filter '{}' not found", name));
+        }
+    }
+
+    const bool hasRowLimit = json.contains("rowLimit");
+    bool rowLimitEnabled = false;
+    int nRows = _nRows;
+    bool useHighest = _useHighestValue;
+    ColumnKey rowLimitCol = _rowLimitColumn;
+    if (hasRowLimit) {
+        const nlohmann::json& r = json.at("rowLimit");
+        rowLimitEnabled = r.value("enabled", false);
+        nRows = r.value("nRows", nRows);
+        useHighest = r.value("useHighest", useHighest);
+        rowLimitCol = r.value("column", rowLimitCol);
+        if (rowLimitEnabled && !_dataViewer.hasColumn(rowLimitCol)) {
+            warn(std::format("row limit column '{}' not found", rowLimitCol));
+        }
+    }
+
+    // Done last since it adds saved selections; nothing below may throw
+    std::optional<size_t> spatialId;
+    if (json.contains("spatialFile")) {
+        // Only a file name is accepted, so the companion file must sit next to the preset
+        const std::filesystem::path spatialFile = path.parent_path() /
+            std::filesystem::path(json.at("spatialFile").get<std::string>()).filename();
+        const std::vector<size_t> ids =
+            _dataViewer.spatialSelectionHandler().loadSelectionsFromFile(spatialFile);
+        if (ids.empty()) {
+            throw std::runtime_error("Spatial selection file contains no selections");
+        }
+        spatialId = ids.front();
+    }
+
+    if (!merge) {
+        _columnFilters.clear();
+    }
+    for (ColumnFilterEntry& loaded : loadedFilters) {
+        const bool isDuplicate = std::any_of(
+            _columnFilters.begin(),
+            _columnFilters.end(),
+            [&loaded](const ColumnFilterEntry& f) {
+                return f.column == loaded.column &&
+                    f.filter.query() == loaded.filter.query();
+            }
+        );
+        if (!isDuplicate) {
+            _columnFilters.push_back(std::move(loaded));
+        }
+    }
+    _quickFilterFlags = std::move(quickFlags);
+
+    if (hasRowLimit && (!merge || rowLimitEnabled)) {
+        _limitNumberOfRows = rowLimitEnabled;
+        _nRows = nRows;
+        _useHighestValue = useHighest;
+        _rowLimitColumn = rowLimitCol;
+    }
+
+    if (spatialId.has_value()) {
+        _useSpatialSelection = true;
+        _appliedSavedSpatialSelection = spatialId;
+    }
+    else if (!merge) {
+        _useSpatialSelection = false;
+        _appliedSavedSpatialSelection.reset();
+    }
+
+    _editingFilterIndex = -1;
+    updateActiveFilterCount();
+
+    const std::string savedDataFile = json.value("dataFile", "");
+    if (!savedDataFile.empty() &&
+        savedDataFile != _dataViewer.currentDataFile().filename().string())
+    {
+        warn(std::format("saved for dataset '{}'", savedDataFile));
+    }
+
+    setStatus(
+        std::format("{} '{}'", merge ? "Merged" : "Loaded", path.filename().string()),
+        false,
+        std::move(warnings)
+    );
+}
+
+bool FilteringView::tryLoadFromFile(const std::filesystem::path& path, bool merge) {
+    try {
+        loadFromFile(path, merge);
+        return true;
+    }
+    catch (const std::exception& e) {
+        setStatus(std::format("Failed to load '{}': {}", path.string(), e.what()), true);
+        return false;
+    }
+}
+
+bool FilteringView::renderMenuBar() {
+    if (!ImGui::BeginMenuBar()) {
+        return false;
+    }
+
+    bool filterWasChanged = false;
+    if (ImGui::BeginMenu("File")) {
+        if (ImGui::MenuItem("Save filters...")) {
+            _openSavePopup = true;
+        }
+
+        ImGui::Separator();
+
+        auto renderFileList = [this, &filterWasChanged](bool merge) {
+            const std::vector<std::filesystem::path> files = savedFilterFiles();
+            if (files.empty()) {
+                ImGui::MenuItem("No saved filters", nullptr, false, false);
+            }
+            for (const std::filesystem::path& f : files) {
+                if (ImGui::MenuItem(f.stem().string().c_str())) {
+                    filterWasChanged |= tryLoadFromFile(f, merge);
+                }
+            }
+        };
+
+        if (ImGui::BeginMenu("Load (replace)")) {
+            renderFileList(false);
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Load (merge)")) {
+            renderFileList(true);
+            ImGui::EndMenu();
+        }
+        if (ImGui::MenuItem("Load from path...")) {
+            _openLoadPathPopup = true;
+        }
+        ImGui::EndMenu();
+    }
+
+    ImGui::EndMenuBar();
+    return filterWasChanged;
+}
+
+bool FilteringView::renderSaveLoadPopups(const SpatialSelectionView& spatialSelectionView)
+{
+    bool filterWasChanged = false;
+
+    // Popups must be opened outside the menu bar's ID scope
+    if (_openSavePopup) {
+        ImGui::OpenPopup("Save filters");
+        _openSavePopup = false;
+    }
+    if (_openLoadPathPopup) {
+        ImGui::OpenPopup("Load filters");
+        _openLoadPathPopup = false;
+    }
+
+    const ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize;
+
+    if (ImGui::BeginPopupModal("Save filters", nullptr, flags)) {
+        static char name[128] = "";
+        static char dir[256] = "";
+
+        ImGui::InputText("Filename (.json)", name, IM_ARRAYSIZE(name));
+
+        const std::string defaultDir = defaultFilterDirectory().string();
+        ImGui::SetNextItemWidth(ImGui::CalcTextSize(defaultDir.c_str()).x * 1.3f);
+        ImGui::InputTextWithHint("Directory", defaultDir.c_str(), dir, IM_ARRAYSIZE(dir));
+
+        const bool hasName = name[0] != '\0';
+        std::filesystem::path filePath =
+            std::filesystem::path(dir[0] == '\0' ? defaultDir : dir) / name;
+        if (filePath.extension() != ".json") {
+            filePath += ".json";
+        }
+        std::error_code ec;
+        const bool exists = hasName && std::filesystem::exists(filePath, ec);
+
+        if (_useSpatialSelection) {
+            view::helper::renderDescriptiveText(std::format(
+                "The spatial filter is saved to '{}{}'",
+                filePath.stem().string(), SpatialFileSuffix
+            ).c_str());
+        }
+        if (exists) {
+            ImGui::TextColored(
+                ImVec4(1.f, 0.7f, 0.3f, 1.f),
+                "A file with this name exists and will be overwritten"
+            );
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::Button("Cancel") || ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!hasName);
+        if (ImGui::Button(exists ? "Overwrite" : "Save") ||
+            (hasName && ImGui::IsKeyPressed(ImGuiKey_Enter)))
+        {
+            try {
+                saveToFile(filePath, spatialSelectionView);
+                name[0] = '\0';
+            }
+            catch (const std::exception& e) {
+                setStatus(std::format("Failed to save filters: {}", e.what()), true);
+            }
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndDisabled();
+        ImGui::EndPopup();
+    }
+
+    if (ImGui::BeginPopupModal("Load filters", nullptr, flags)) {
+        static char path[512] = "";
+        static int mode = 0;
+
+        ImGui::SetNextItemWidth(400.f);
+        ImGui::InputTextWithHint("File path", "path/to/filters.json", path, IM_ARRAYSIZE(path));
+        ImGui::RadioButton("Replace current filters", &mode, 0);
+        ImGui::SameLine();
+        ImGui::RadioButton("Merge with current filters", &mode, 1);
+
+        ImGui::Separator();
+
+        if (ImGui::Button("Cancel") || ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        const bool hasPath = path[0] != '\0';
+        ImGui::BeginDisabled(!hasPath);
+        if (ImGui::Button("Load") || (hasPath && ImGui::IsKeyPressed(ImGuiKey_Enter))) {
+            filterWasChanged |= tryLoadFromFile(std::filesystem::path(path), mode == 1);
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndDisabled();
+        ImGui::EndPopup();
+    }
 
     return filterWasChanged;
 }
@@ -393,21 +849,11 @@ void FilteringView::applySpatialSelection(
         return;
     }
 
-    const std::vector<SavedSelection>& saved =
-        spatialSelectionView.handler().savedSelections();
-
     std::optional<SpatialSelectionQuery> query;
 
     if (_appliedSavedSpatialSelection.has_value()) {
-        const auto it = std::find_if(
-            saved.begin(),
-            saved.end(),
-            [this](const SavedSelection& selection) {
-                return selection.id == *_appliedSavedSpatialSelection;
-            }
-        );
-        if (it != saved.end()) {
-            query = it->query;
+        if (const SavedSelection* s = appliedSavedSelection(spatialSelectionView)) {
+            query = s->query;
         }
     }
     else {
@@ -545,7 +991,6 @@ bool FilteringView::renderColumnFilterSettings() {
 
             const ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg;
 
-            static int editingColumn = -1;
             static char editingColumnText[128] = "";
 
             if (ImGui::BeginTable("filtersTable", nColumns, flags)) {
@@ -555,7 +1000,7 @@ bool FilteringView::renderColumnFilterSettings() {
                         continue;
                     }
                     const std::string queryString = f.filter.query();
-                    bool isEditingColumn = (editingColumn == i);
+                    bool isEditingColumn = (_editingFilterIndex == i);
                     ImGui::TableNextRow();
 
                     ImGui::PushID(std::format("FilterColEnabled-{}", i).c_str());
@@ -589,7 +1034,7 @@ bool FilteringView::renderColumnFilterSettings() {
                                 ColumnFilter(editingColumnText, ColumnFilter::Type::Text);
 
                             if (filter.isValid()) {
-                                editingColumn = -1;
+                                _editingFilterIndex = -1;
                                 f.filter = filter;
                                 filterWasChanged = true;
                             }
@@ -603,13 +1048,13 @@ bool FilteringView::renderColumnFilterSettings() {
                     ImGui::PushID(std::format("EditFilter_{}", i).c_str());
                     if (!isEditingColumn) {
                         if (ImGui::SmallButton("Edit")) {
-                            editingColumn = i;
+                            _editingFilterIndex = i;
                             strcpy(editingColumnText, queryString.data());
                         }
                     }
                     else {
                         if (ImGui::SmallButton("Abort Edit")) {
-                            editingColumn = -1;
+                            _editingFilterIndex = -1;
                         }
                     }
                     ImGui::PopID();
@@ -625,6 +1070,7 @@ bool FilteringView::renderColumnFilterSettings() {
 
                 if (indexToErase != -1) {
                     _columnFilters.erase(_columnFilters.begin() + indexToErase);
+                    _editingFilterIndex = -1;
                     filterWasChanged = true;
                 }
 
@@ -675,20 +1121,8 @@ bool FilteringView::renderColumnFilterSettings() {
     ImGui::Spacing();
 
     if (filterWasChanged) {
-        _nActiveFilters = 0;
-        for (const ColumnFilterEntry& f : _columnFilters) {
-            if (f.enabled && _dataViewer.hasColumn(f.column)) {
-                ++_nActiveFilters;
-            }
-        }
-        for (const auto& group : _quickFilterFlags) {
-            for (bool isChecked : group) {
-                if (isChecked) {
-                    ++_nActiveFilters;
-                }
-            }
-        }
-    };
+        updateActiveFilterCount();
+    }
 
     return filterWasChanged;
 }
@@ -725,7 +1159,7 @@ bool FilteringView::renderRowLimitFilterSettings() {
     ImGui::SameLine();
 
     const char* highOrLowChoices[] = { "highest", "lowest" };
-    static int highOrLowIndex = 0; // highest
+    int highOrLowIndex = _useHighestValue ? 0 : 1;
 
     ImGui::SetNextItemWidth(80);
     bool highLowChanged = ImGui::Combo(
@@ -735,10 +1169,9 @@ bool FilteringView::renderRowLimitFilterSettings() {
         IM_ARRAYSIZE(highOrLowChoices)
     );
     if (highLowChanged) {
+        _useHighestValue = highOrLowIndex == 0;
         filterWasChanged = true;
-    };
-
-    _useHighestValue = std::string(highOrLowChoices[highOrLowIndex]) == "highest";
+    }
 
     ImGui::SameLine();
 
@@ -810,14 +1243,8 @@ bool FilteringView::renderSpatialFilterSettings(
 
     ImGui::SetNextItemWidth(-1.f);
     if (ImGui::BeginCombo("##SpatialFilterSource", sourceDescription.c_str())) {
-        const bool currentIsSelected = !_appliedSavedSpatialSelection.has_value() ||
-            std::none_of(
-                saved.begin(),
-                saved.end(),
-                [this](const SavedSelection& selection) {
-                    return selection.id == *_appliedSavedSpatialSelection;
-                }
-            );
+        const bool currentIsSelected =
+            appliedSavedSelection(spatialSelectionView) == nullptr;
         if (ImGui::Selectable("Current spatial query", currentIsSelected)) {
             _appliedSavedSpatialSelection.reset();
             filterWasChanged = true;

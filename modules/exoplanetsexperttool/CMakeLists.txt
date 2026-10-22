@@ -41,6 +41,7 @@ set(HEADER_FILES
     spatialselection/convexhull.h
     spatialselection/isosurface.h
     spatialselection/lasso.h
+    spatialselection/selectionserialization.h
     spatialselection/spacecast.h
     util/columnfilter.h
     util/datahelper.h
@@ -73,6 +74,7 @@ set(SOURCE_FILES
     spatialselection/convexhull.cpp
     spatialselection/isosurface.cpp
     spatialselection/lasso.cpp
+    spatialselection/selectionserialization.cpp
     spatialselection/spacecast.cpp
     util/columnfilter.cpp
     util/datahelper.cpp

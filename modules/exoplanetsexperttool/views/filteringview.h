@@ -27,6 +27,7 @@
 
 #include <modules/exoplanetsexperttool/datastructures.h>
 #include <modules/exoplanetsexperttool/util/columnfilter.h>
+#include <filesystem>
 #include <optional>
 #include <string>
 
@@ -34,6 +35,7 @@ namespace openspace::exoplanets {
 
 class DataViewer;
 class SpatialSelectionView;
+struct SavedSelection;
 
 class FilteringView {
 public:
@@ -63,6 +65,23 @@ public:
 
 private:
     const ColumnKey& rowLimitColumn() const;
+    const SavedSelection* appliedSavedSelection(
+        const SpatialSelectionView& spatialSelectionView) const;
+
+    void resetInternalFilters();
+    void updateActiveFilterCount();
+    void setStatus(std::string message, bool isError = false, std::string warning = "");
+
+    // Spatial filter, if enabled, is written to a companion "<stem>.spatial.json" file
+    void saveToFile(const std::filesystem::path& path,
+        const SpatialSelectionView& spatialSelectionView);
+    // Throws and leaves the current filtering untouched if the file can't be applied
+    void loadFromFile(const std::filesystem::path& path, bool merge);
+    // Returns true if the filtering was changed
+    bool tryLoadFromFile(const std::filesystem::path& path, bool merge);
+
+    bool renderMenuBar();
+    bool renderSaveLoadPopups(const SpatialSelectionView& spatialSelectionView);
 
     bool renderColumnFilterSettings();
     bool renderRowLimitFilterSettings();
@@ -86,6 +105,7 @@ private:
     std::vector<ColumnFilterEntry> _columnFilters;
     ColumnKey _newFilterColumn;
     std::vector<std::vector<bool>> _quickFilterFlags;
+    int _editingFilterIndex = -1;
 
     bool _limitNumberOfRows = false;
     int _nRows = 100;
@@ -100,6 +120,12 @@ private:
     std::optional<size_t> _appliedSavedSpatialSelection;
 
     int _nActiveFilters = 0;
+
+    bool _openSavePopup = false;
+    bool _openLoadPathPopup = false;
+    std::string _statusMessage;
+    std::string _statusWarning;
+    bool _statusIsError = false;
 
     DataViewer& _dataViewer;
     const std::vector<DataSettings::QuickFilterGroup>& _quickFilterGroups;

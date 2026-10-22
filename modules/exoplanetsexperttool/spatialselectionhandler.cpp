@@ -27,6 +27,7 @@
 #include <modules/exoplanetsexperttool/rendering/renderablespatialselectionvolume.h>
 #include <modules/exoplanetsexperttool/rendering/selectionvolumemesh.h>
 #include <modules/exoplanetsexperttool/spatialselection/castselection.h>
+#include <modules/exoplanetsexperttool/spatialselection/selectionserialization.h>
 #include <modules/exoplanetsexperttool/util/densityvolume.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -40,9 +41,13 @@
 #include <algorithm>
 #include <cmath>
 #include <format>
+#include <fstream>
+#include <stdexcept>
 #include <unordered_set>
 
 namespace {
+    constexpr int SelectionFileVersion = 1;
+
     bool isPointInsideSphere(const glm::dvec3& point, const glm::dvec3& center,
                              double radius)
     {
@@ -416,19 +421,75 @@ std::vector<size_t> SpatialSelectionHandler::select(
     throw MissingCaseException();
 }
 
-void SpatialSelectionHandler::addSavedSelection(std::string name, std::string summary,
-                                                SpatialSelectionQuery query)
+size_t SpatialSelectionHandler::addSavedSelection(std::string name, std::string summary,
+                                                  SpatialSelectionQuery query)
 {
     if (name.empty()) {
         name = std::format("Selection {}", _savedSelections.size() + 1);
     }
+    const size_t id = _nextSavedSelectionId++;
     _savedSelections.push_back(SavedSelection{
-        .id = _nextSavedSelectionId++,
+        .id = id,
         .name = std::move(name),
         .summary = std::move(summary),
         .query = std::move(query),
         .isEnabled = true
     });
+    return id;
+}
+
+void SpatialSelectionHandler::saveSelectionsToFile(const std::filesystem::path& path,
+                                       const std::vector<SavedSelection>& selections)
+{
+    nlohmann::json json = nlohmann::json::array();
+    for (const SavedSelection& selection : selections) {
+        json.push_back({
+            { "name", selection.name },
+            { "summary", selection.summary },
+            { "query", spatialQueryToJson(selection.query) }
+        });
+    }
+
+    std::ofstream file(path, std::ofstream::trunc);
+    if (!file.good()) {
+        throw std::runtime_error(std::format("Could not write to '{}'", path.string()));
+    }
+    file << nlohmann::json({
+        { "version", SelectionFileVersion },
+        { "selections", json }
+    }).dump(2);
+}
+
+std::vector<size_t> SpatialSelectionHandler::loadSelectionsFromFile(
+                                                       const std::filesystem::path& path)
+{
+    std::ifstream file(path);
+    if (!file.good()) {
+        throw std::runtime_error(std::format("Could not open '{}'", path.string()));
+    }
+    const nlohmann::json json = nlohmann::json::parse(file);
+    if (json.value("version", 1) > SelectionFileVersion) {
+        throw std::runtime_error("Spatial selection file is from a newer version");
+    }
+
+    // Parse everything before adding anything, so a bad entry leaves the list untouched
+    std::vector<SavedSelection> parsed;
+    for (const nlohmann::json& entry : json.at("selections")) {
+        parsed.push_back({
+            .name = entry.value("name", ""),
+            .summary = entry.value("summary", ""),
+            .query = spatialQueryFromJson(entry.at("query"), _nextMeshVolumeId++)
+        });
+    }
+
+    std::vector<size_t> ids;
+    ids.reserve(parsed.size());
+    for (SavedSelection& s : parsed) {
+        ids.push_back(
+            addSavedSelection(std::move(s.name), std::move(s.summary), std::move(s.query))
+        );
+    }
+    return ids;
 }
 
 void SpatialSelectionHandler::removeSavedSelection(size_t index) {
