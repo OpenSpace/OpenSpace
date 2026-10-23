@@ -11,7 +11,7 @@ local Scatter = {
   Name = "Live Chart - Scatter Plot Matrix",
   Placement = {
     UseRadiusAzimuthElevation = true,
-    FaceCamera = false,
+    FaceCamera = true,
     RadiusAzimuthElevation = { 2.0, 0.55, -0.2057 }
   }
 }
@@ -25,7 +25,7 @@ local ParallelCoordinates = {
   Name = "Live Chart - Parallel Coordinates",
   Placement = {
     UseRadiusAzimuthElevation = true,
-    FaceCamera = false,
+    FaceCamera = true,
     RadiusAzimuthElevation = { 2.0, -0.55, -0.2057 }
   }
 }
