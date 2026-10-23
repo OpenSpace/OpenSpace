@@ -323,8 +323,10 @@ std::optional<IsoSurface> smoothSelectionSurface(const glm::uvec3& dimensions,
         minimumValue = std::min(minimumValue, surface.valueAt(local));
     }
     // Capped at 0.5, where a large flat selection's surface ends up after blurring the
-    // 0/1 mask. The 0.95 factor is a margin so rounding can't push a point outside
-    surface.threshold = std::min(0.5, 0.95 * minimumValue);
+    // 0/1 mask. The 0.99 factor is a small margin so rounding can't push a point
+    // outside, while keeping the resulting volume as tight as possible around the
+    // selected points
+    surface.threshold = std::min(0.5, 0.99 * minimumValue);
 
     // A threshold of zero or less means a point has no blurred value, so no surface
     // can include all points. The negated comparison also rejects NaN
