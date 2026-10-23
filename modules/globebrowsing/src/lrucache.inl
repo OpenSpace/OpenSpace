@@ -64,7 +64,7 @@ bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
     const auto it = _itemMap.find(key);
     if (it != _itemMap.end()) {
         // @TODO (abock, 2020-08-14) Instead of removing the iterator from the previous
-        // position and then readding it at the front, it might make more sense to move
+        // position and then re-adding it at the front, it might make more sense to move
         // them around?  That would prevent the dynamic memoray allocation that is
         // happening here
 

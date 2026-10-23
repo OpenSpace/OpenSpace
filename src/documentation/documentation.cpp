@@ -107,25 +107,25 @@ void logError(const SpecificationError& error, std::string component) {
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
-                                       Optional opt, Private priv, std::string doc)
+                                       Optional opt, Private priv, std::string_view doc)
     : key(std::move(k))
     , verifier(std::move(v))
     , optional(opt)
     , isPrivate(priv)
-    , documentation(std::move(doc))
+    , documentation(doc)
 {
     assert_msg(!key.empty(), "Key must not be empty");
     assert_msg(verifier, "Verifier must not be nullptr");
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
-                                       Private priv, std::string doc)
+                                       Private priv, std::string_view doc)
     : DocumentationEntry(
         std::move(k),
         std::shared_ptr<Verifier>(v),
         opt,
         priv,
-        std::move(doc)
+        doc
     )
 {}
 

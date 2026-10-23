@@ -53,7 +53,7 @@ private:
      *
      * \param teff The effective temperature of the star, in Kelvin
      * \param luminosity The luminosity of the star, in solar luminosities
-     * \return A vec4 with the boundaries in atronomical units, in the order: optimistic
+     * \return A vec4 with the boundaries in astronomical units, in the order: optimistic
      *         inner, conservative inner, conservative outer, optimistic outer
      *
      * \sa https://arxiv.org/abs/1404.5292

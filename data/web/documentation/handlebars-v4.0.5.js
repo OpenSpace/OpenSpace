@@ -2252,7 +2252,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      omitLeft(lastInverse.body, null, true);
 	    }
 
-	    // Find standalone else statments
+	    // Find standalone else statements
 	    if (!this.options.ignoreStandalone && isPrevWhitespace(program.body) && isNextWhitespace(firstInverse.body)) {
 	      omitLeft(program.body);
 	      omitRight(firstInverse.body);
@@ -2316,7 +2316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	//
 	// If i is undefined, then the first child will be marked as such.
 	//
-	// If mulitple is truthy then all whitespace will be stripped out until non-whitespace
+	// If multiple is truthy then all whitespace will be stripped out until non-whitespace
 	// content is met.
 	function omitRight(body, i, multiple) {
 	  var current = body[i == null ? 0 : i + 1];
@@ -2334,7 +2334,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	//
 	// If i is undefined then the last child will be marked as such.
 	//
-	// If mulitple is truthy then all whitespace will be stripped out until non-whitespace
+	// If multiple is truthy then all whitespace will be stripped out until non-whitespace
 	// content is met.
 	function omitLeft(body, i, multiple) {
 	  var current = body[i == null ? body.length - 1 : i - 1];

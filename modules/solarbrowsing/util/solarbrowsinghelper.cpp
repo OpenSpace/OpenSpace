@@ -221,7 +221,7 @@ namespace {
         }
         else {
             LERROR(std::format(
-                "Recieved unknown spacecraft image '{}'. Supported spacecrafts are {}, "
+                "Received unknown spacecraft image '{}'. Supported spacecrafts are {}, "
                 "{}, {}", *telescop, "SOHO", "SDO", "STEREO"
             ));
             return std::nullopt;

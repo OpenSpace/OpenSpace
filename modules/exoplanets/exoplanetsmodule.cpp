@@ -43,127 +43,152 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo DataFolderInfo = {
-        "DataFolder",
-        "Data folder",
-        "The path to the folder containing the exoplanets data and lookup table.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo DataFolderInfo = {
+        .identifier = "DataFolder",
+        .name = "Data folder",
+        .description = "The path to the folder containing the exoplanets data and lookup "
+            "table.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo BvColorMapInfo = {
-        "BvColormap",
-        "B-V colormap",
-        "The path to a cmap file that maps a B-V color index to an RGB color.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo BvColorMapInfo = {
+        .identifier = "BvColormap",
+        .name = "B-V colormap",
+        .description = "The path to a cmap file that maps a B-V color index to an RGB "
+            "color.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StarTextureInfo = {
-        "StarTexture",
-        "Star texture",
-        "The path to a grayscale image that is used for the host star surfaces.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo StarTextureInfo = {
+        .identifier = "StarTexture",
+        .name = "Star texture",
+        .description = "The path to a grayscale image that is used for the host star "
+            "surfaces.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo StarGlareTextureInfo = {
-        "StarGlareTexture",
-        "Star glare texture",
-        "The path to a grayscale image that is used for the glare effect of the host "
-        "stars.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo StarGlareTextureInfo = {
+        .identifier = "StarGlareTexture",
+        .name = "Star glare texture",
+        .description = "The path to a grayscale image that is used for the glare effect "
+            "of the host stars.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NoDataTextureInfo = {
-        "NoDataTexture",
-        "No data star texture",
-        "A path to a texture that is used to represent that there is missing data about "
-        "the star. For example no color information.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo NoDataTextureInfo = {
+        .identifier = "NoDataTexture",
+        .name = "No data star texture",
+        .description = "A path to a texture that is used to represent that there is "
+            "missing data about the star. For example no color information.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PlanetDefaultTextureInfo = {
-        "PlanetDefaultTexture",
-        "Planet default texture",
-        "The path to an image that should be used by default for the planets in all "
-        "added exoplanet systems. If not specified, the planets are rendered without a "
-        "texture when added.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo PlanetDefaultTextureInfo = {
+        .identifier = "PlanetDefaultTexture",
+        .name = "Planet default texture",
+        .description = "The path to an image that should be used by default for the "
+            "planets in all added exoplanet systems. If not specified, the planets are "
+            "rendered without a texture when added.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo OrbitDiscTextureInfo = {
-        "OrbitDiscTexture",
-        "Orbit disc texture",
-        "A path to a 1-dimensional image used as a transfer function for the exoplanets' "
-        "orbit uncertainty disc.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo OrbitDiscTextureInfo = {
+        .identifier = "OrbitDiscTexture",
+        .name = "Orbit disc texture",
+        .description = "A path to a 1-dimensional image used as a transfer function for "
+            "the exoplanets' orbit uncertainty disc.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HabitableZoneTextureInfo = {
-        "HabitableZoneTexture",
-        "Habitable zone texture",
-        "A path to a 1-dimensional image used as a transfer function for the habitable "
-        "zone disc.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo HabitableZoneTextureInfo = {
+        .identifier = "HabitableZoneTexture",
+        .name = "Habitable zone texture",
+        .description = "A path to a 1-dimensional image used as a transfer function for "
+            "the habitable zone disc.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ComparisonCircleColorInfo = {
-        "ComparisonCircleColor",
-        "Comparison circle color",
-        "Decides the color of the 1 AU size comparison circles that are generated as "
-        "part of an exoplanet system. Changing the color will not modify already "
-        "existing circles.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ComparisonCircleColorInfo = {
+        .identifier = "ComparisonCircleColor",
+        .name = "Comparison circle color",
+        .description = "Decides the color of the 1 AU size comparison circles that are "
+            "generated as part of an exoplanet system. Changing the color will not "
+            "modify already existing circles.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 0.8f, 0.8f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ShowComparisonCircleInfo = {
-        "ShowComparisonCircle",
-        "Show comparison circle",
-        "If true, the 1 AU size comparison circle is enabled per default when an "
-        "exoplanet system is created.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo ShowComparisonCircleInfo = {
+        .identifier = "ShowComparisonCircle",
+        .name = "Show comparison circle",
+        .description = "If true, the 1 AU size comparison circle is enabled per default "
+            "when an exoplanet system is created.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ShowOrbitUncertaintyInfo = {
-        "ShowOrbitUncertainty",
-        "Show orbit uncertainty",
-        "If true, a disc showing the uncertainty for each planetary orbit is enabled per "
-        "default when an exoplanet system is created.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowOrbitUncertaintyInfo = {
+        .identifier = "ShowOrbitUncertainty",
+        .name = "Show orbit uncertainty",
+        .description = "If true, a disc showing the uncertainty for each planetary orbit "
+            "is enabled per default when an exoplanet system is created.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ShowHabitableZoneInfo = {
-        "ShowHabitableZone",
-        "Show habitable zone",
-        "If true, the habitable zone disc is enabled per default when an exoplanet "
-        "system is created.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowHabitableZoneInfo = {
+        .identifier = "ShowHabitableZone",
+        .name = "Show habitable zone",
+        .description = "If true, the habitable zone disc is enabled per default when an "
+            "exoplanet system is created.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo UseOptimisticZoneInfo = {
-        "UseOptimisticZone",
-        "Use optimistic zone boundaries",
-        "If true, the habitable zone is computed with optimistic boundaries per default "
-        "when an exoplanet system is created.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo UseOptimisticZoneInfo = {
+        .identifier = "UseOptimisticZone",
+        .name = "Use optimistic zone boundaries",
+        .description = "If true, the habitable zone is computed with optimistic "
+            "boundaries per default when an exoplanet system is created.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo HabitableZoneOpacityInfo = {
-        "HabitableZoneOpacity",
-        "Habitable zone opacity",
-        "The opacity value used for the habitable zone renderable for a created "
-        "exoplanet system.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo HabitableZoneOpacityInfo = {
+        .identifier = "HabitableZoneOpacity",
+        .name = "Habitable zone opacity",
+        .description = "The opacity value used for the habitable zone renderable for a "
+            "created exoplanet system.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 0.1f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo StellarInclinationColumnInfo = {
-        "StellarInclinationColumn",
-        "Stellar inclination column",
-        "The name of a column in the exoplanet CSV dataset that contains the stellar "
-        "inclination, in degrees. Uncertainties are read from the columns with the same "
-        "name followed by 'err1' (upper) and 'err2' (lower). If a value exists, it is "
-        "used instead of computing the inclination from the vsini, rotation period and "
-        "radius of the star. If empty, the inclination is always computed. Used both "
-        "when loading data from a CSV at runtime and in the data preparation task.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo StellarInclinationColumnInfo = {
+        .identifier = "StellarInclinationColumn",
+        .name = "Stellar inclination column",
+        .description = "The name of a column in the exoplanet CSV dataset that contains "
+            "the stellar inclination, in degrees. Uncertainties are read from the "
+            "columns with the same name followed by 'err1' (upper) and 'err2' (lower). "
+            "If a value exists, it is used instead of computing the inclination from the "
+            "vsini, rotation period and radius of the star. If empty, the inclination is "
+            "always computed. Used both when loading data from a CSV at runtime and in "
+            "the data preparation task.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr std::string_view ExoplanetsDataFileName = "exoplanets_data.bin";
@@ -171,50 +196,47 @@ namespace {
     constexpr std::string_view TeffToBvConversionFileName = "teff_bv.txt";
 
     struct [[codegen::Dictionary(ExoplanetsModule)]] Parameters {
-        // [[codegen::verbatim(DataFolderInfo.description)]]
-        std::optional<std::filesystem::path> dataFolder [[codegen::directory()]];
+        std::optional<std::filesystem::path> dataFolder
+            [[codegen::Info(DataFolderInfo), codegen::directory()]];
 
-        // [[codegen::verbatim(BvColorMapInfo.description)]]
-        std::optional<std::filesystem::path> bvColormap;
+        std::optional<std::filesystem::path> bvColormap [[codegen::Info(BvColorMapInfo)]];
 
-        // [[codegen::verbatim(StarTextureInfo.description)]]
-        std::optional<std::filesystem::path> starTexture;
+        std::optional<std::filesystem::path> starTexture
+            [[codegen::Info(StarTextureInfo)]];
 
-        // [[codegen::verbatim(StarGlareTextureInfo.description)]]
-        std::optional<std::filesystem::path> starGlareTexture;
+        std::optional<std::filesystem::path> starGlareTexture
+            [[codegen::Info(StarGlareTextureInfo)]];
 
-        // [[codegen::verbatim(NoDataTextureInfo.description)]]
-        std::optional<std::filesystem::path> noDataTexture;
+        std::optional<std::filesystem::path> noDataTexture
+            [[codegen::Info(NoDataTextureInfo)]];
 
-        // [[codegen::verbatim(PlanetDefaultTextureInfo.description)]]
-        std::optional<std::filesystem::path> planetDefaultTexture;
+        std::optional<std::filesystem::path> planetDefaultTexture
+            [[codegen::Info(PlanetDefaultTextureInfo)]];
 
-        // [[codegen::verbatim(OrbitDiscTextureInfo.description)]]
-        std::optional<std::filesystem::path> orbitDiscTexture;
+        std::optional<std::filesystem::path> orbitDiscTexture
+            [[codegen::Info(OrbitDiscTextureInfo)]];
 
-        // [[codegen::verbatim(HabitableZoneTextureInfo.description)]]
-        std::optional<std::filesystem::path> habitableZoneTexture;
+        std::optional<std::filesystem::path> habitableZoneTexture
+            [[codegen::Info(HabitableZoneTextureInfo)]];
 
-        // [[codegen::verbatim(ComparisonCircleColorInfo.description)]]
-        std::optional<glm::vec3> comparisonCircleColor [[codegen::color()]];
+        std::optional<glm::vec3> comparisonCircleColor
+            [[codegen::Info(ComparisonCircleColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(ShowComparisonCircleInfo.description)]]
-        std::optional<bool> showComparisonCircle;
+        std::optional<bool> showComparisonCircle
+            [[codegen::Info(ShowComparisonCircleInfo)]];
 
-        // [[codegen::verbatim(ShowOrbitUncertaintyInfo.description)]]
-        std::optional<bool> showOrbitUncertainty;
+        std::optional<bool> showOrbitUncertainty
+            [[codegen::Info(ShowOrbitUncertaintyInfo)]];
 
-        // [[codegen::verbatim(ShowHabitableZoneInfo.description)]]
-        std::optional<bool> showHabitableZone;
+        std::optional<bool> showHabitableZone [[codegen::Info(ShowHabitableZoneInfo)]];
 
-        // [[codegen::verbatim(UseOptimisticZoneInfo.description)]]
-        std::optional<bool> useOptimisticZone;
+        std::optional<bool> useOptimisticZone [[codegen::Info(UseOptimisticZoneInfo)]];
 
-        // [[codegen::verbatim(HabitableZoneOpacityInfo.description)]]
-        std::optional<float> habitableZoneOpacity [[codegen::inrange(0, 1)]];
+        std::optional<float> habitableZoneOpacity
+            [[codegen::Info(HabitableZoneOpacityInfo), codegen::inrange(0, 1)]];
 
-        // [[codegen::verbatim(StellarInclinationColumnInfo.description)]]
-        std::optional<std::string> stellarInclinationColumn;
+        std::optional<std::string> stellarInclinationColumn
+            [[codegen::Info(StellarInclinationColumnInfo)]];
     };
 } // namespace
 #include "exoplanetsmodule_codegen.cpp"
@@ -235,21 +257,14 @@ ExoplanetsModule::ExoplanetsModule()
     , _planetDefaultTexturePath(PlanetDefaultTextureInfo)
     , _orbitDiscTexturePath(OrbitDiscTextureInfo)
     , _habitableZoneTexturePath(HabitableZoneTextureInfo)
-    , _comparisonCircleColor(
-        ComparisonCircleColorInfo,
-        glm::vec3(0.f, 0.8f, 0.8f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
-    , _showComparisonCircle(ShowComparisonCircleInfo, false)
-    , _showOrbitUncertainty(ShowOrbitUncertaintyInfo, true)
-    , _showHabitableZone(ShowHabitableZoneInfo, true)
-    , _useOptimisticZone(UseOptimisticZoneInfo, true)
-    , _habitableZoneOpacity(HabitableZoneOpacityInfo, 0.1f, 0.f, 1.f)
+    , _comparisonCircleColor(ComparisonCircleColorInfo)
+    , _showComparisonCircle(ShowComparisonCircleInfo)
+    , _showOrbitUncertainty(ShowOrbitUncertaintyInfo)
+    , _showHabitableZone(ShowHabitableZoneInfo)
+    , _useOptimisticZone(UseOptimisticZoneInfo)
+    , _habitableZoneOpacity(HabitableZoneOpacityInfo)
     , _stellarInclinationColumn(StellarInclinationColumnInfo)
 {
-    _exoplanetsDataFolder.setReadOnly(true);
-
     _exoplanetsDataFolder.onChange([this]() {
         std::filesystem::path f = _exoplanetsDataFolder.value();
        if (!std::filesystem::is_directory(f)) {

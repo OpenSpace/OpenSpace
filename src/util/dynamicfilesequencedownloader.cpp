@@ -91,7 +91,7 @@ namespace {
 
         return std::format("{}{}&time.min={}&time.max={}", baseUrl, dataID, min, max);
     }
-} // namepace
+} // namespace
 
 namespace openspace {
 
@@ -186,7 +186,7 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
     {
         std::ofstream file(_trackSynced, std::ios::app);
     }
-    // Delete the files in the folder whos file name is not in the _trackSynced file
+    // Delete the files in the folder whose file name is not in the _trackSynced file
     std::unordered_set<std::string> keepFiles;
     std::ifstream listFile = std::ifstream(_trackSynced);
     std::string filename;

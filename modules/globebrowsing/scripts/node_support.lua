@@ -48,7 +48,7 @@ registerFunction(
   {
     Name = "setNodePositionFromCamera",
     Arguments = {
-      { "nodeIdentifer", "String" },
+      { "nodeIdentifier", "String" },
       { "useAltitude", "Boolean?" }
     },
     Documentation = [[

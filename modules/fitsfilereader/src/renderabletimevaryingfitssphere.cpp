@@ -92,42 +92,40 @@ namespace {
         return Time::convertTime(res);
     }
 
-    constexpr Property::PropertyInfo TextureSourceInfo = {
-        "TextureSource",
-        "Texture source",
-        "A directory on disk from which to load the texture files for the sphere.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureSourceInfo = {
+        .identifier = "TextureSource",
+        .name = "Texture source",
+        .description = "A directory on disk from which to load the texture files for the "
+            "sphere.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo FitsLayerInfo = {
-        "FitsLayer",
-        "Texture layer",
-        "The index, a whole positive number, of the layer in the FITS file to use as "
-        "texture. If not specified, the first layer in the data will be used regardless. "
-        "When specified, that data layer will be the option used.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo FitsLayerNameInfo = {
+        .identifier = "LayerNames",
+        .name = "Texture layer options",
+        .description = "This value specifies which name of the fits layer to use as "
+            "texture.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FitsLayerNameInfo = {
-        "LayerNames",
-        "Texture layer options",
-        "This value specifies which name of the fits layer to use as texture.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo TextureFilterInfo = {
+        .identifier = "TextureFilter",
+        .name = "Texture filter",
+        .description = "Option to choose nearest neighbor or linear filtering for the "
+            "texture.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TextureFilterInfo = {
-        "TextureFilter",
-        "Texture filter",
-        "Option to choose nearest neighbor or linear filtering for the texture.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo SaveDownloadsOnShutdown = {
-        "SaveDownloadsOnShutdown",
-        "Save downloads on shutdown",
-        "This is an option for if dynamically downloaded files should be saved for the "
-        "next run or not.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo SaveDownloadsOnShutdown = {
+        .identifier = "SaveDownloadsOnShutdown",
+        .name = "Save downloads on shutdown",
+        .description = "This is an option for if dynamically downloaded files should be "
+            "saved for the next run or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // Reads a data sequence from specifically FITS files, makes textures from them, and
@@ -156,8 +154,8 @@ namespace {
     // layers in `LayerNames` and `LayerMinMaxCapValues`. `CacheData` and `showAtAllTimes`
     // are two other optional parameters.
     struct [[codegen::Dictionary(RenderableTimeVaryingFitsSphere)]] Parameters {
-        // [[codegen::verbatim(TextureSourceInfo.description)]]
-        std::optional<std::filesystem::path> textureSource;
+        std::optional<std::filesystem::path> textureSource
+            [[codegen::Info(TextureSourceInfo)]];
 
         enum class [[codegen::map(
             openspace::RenderableTimeVaryingFitsSphere::LoadingType)]] LoadingType
@@ -178,17 +176,18 @@ namespace {
         // A data ID that corresponds to what dataset to use if using dynamic downloading.
         std::optional<int> dataID;
 
-        // A URL that returns a JSON formated page with metadata needed for the dataURL.
+        // A URL that returns a JSON formatted page with metadata needed for the dataURL.
         std::optional<std::string> infoURL;
 
-        // A URL that returns a JSON formated page with a list of each available file.
+        // A URL that returns a JSON formatted page with a list of each available file.
         std::optional<std::string> dataURL;
 
-        // [[codegen::verbatim(FitsLayerInfo.description)]]
+        // The index, a whole positive number, of the layer in the FITS file to use as
+        // texture. If not specified, the first layer in the data will be used regardless.
+        // When specified, that data layer will be the option used.
         std::optional<int> fitsLayer;
 
-        // [[codegen::verbatim(FitsLayerNameInfo.description)]]
-        std::optional<Dictionary> layerNames;
+        std::optional<Dictionary> layerNames [[codegen::Info(FitsLayerNameInfo)]];
 
         // A range per layer to be used to cap where the color range will lie. Values
         // outside of range will be overexposed, i.e. data values below the min or above
@@ -221,7 +220,7 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                                                              const Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _fitsLayerName(FitsLayerNameInfo)
-    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
+    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown)
     , _textureFilterProperty(TextureFilterInfo)
     , _textureSource(TextureSourceInfo)
 {
@@ -231,7 +230,6 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
         _textureSource = p.textureSource->string();
     }
 
-    _textureSource.setReadOnly(true);
     addProperty(_textureSource);
 
     _loadingType = codegen::map<LoadingType>(
@@ -672,8 +670,8 @@ void RenderableTimeVaryingFitsSphere::computeSequenceEndTime() {
     else if (_files.size() == 1) {
         _sequenceEndTime = _files[0].time + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
-            // TODO (2025-06-10, Elon) Alternativly check at construction and throw
-            // exeption
+            // TODO (2025-06-10, Elon) Alternatively check at construction and throw
+            // exception
             LWARNING(
                 "Only one file in data set, but ShowAtAllTimes set to false. "
                 "Using arbitrary 2 hours to visualize data file instead"
@@ -715,7 +713,7 @@ void RenderableTimeVaryingFitsSphere::trackOldest(File& file) {
         {
             File* oldest = _loadedFiles.front();
             // The edge case of when queue just got full and user jumped back to where
-            // they started which would make the oldes file in queue to be the active
+            // they started which would make the oldest file in queue to be the active
             // file. In that case we need to make sure we do not unload it
             if (oldest == &file) {
                 return;

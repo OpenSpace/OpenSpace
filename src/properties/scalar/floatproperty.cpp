@@ -28,9 +28,8 @@
 
 namespace openspace {
 
-FloatProperty::FloatProperty(PropertyInfo info, float value, float minValue,
-                             float maxValue, float stepValue)
-    : NumericalProperty<float>(std::move(info), value, minValue, maxValue, stepValue)
+FloatProperty::FloatProperty(FloatPropertyInfo info)
+    : NumericalProperty<float>(std::move(info))
 {}
 
 std::string_view FloatProperty::className() const {

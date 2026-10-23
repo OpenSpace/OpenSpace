@@ -142,69 +142,79 @@ namespace {
         setClipboardText(strCorners + strTop + strRight + strBottom + strLeft);
     }
 
-    constexpr Property::PropertyInfo CopyToClipboardInfo = {
-        "CopyToClipboard",
-        "Copy to clipboard",
-        "Copies the current configuration to the clipboard so that it can be pasted "
-        "into the asset file.",
-        Property::Visibility::User
+    constexpr TriggerPropertyInfo CopyToClipboardInfo = {
+        .identifier = "CopyToClipboard",
+        .name = "Copy to clipboard",
+        .description = "Copies the current configuration to the clipboard so that it can "
+            "be pasted into the asset file.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo CalibrationPatternInfo = {
-        "EnableCalibrationPattern",
-        "Enable calibration pattern",
-        "Enables the calibration pattern. The calibration can be used to find which "
-        "values to use when setting up the blackout shape.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo CalibrationPatternInfo = {
+        .identifier = "EnableCalibrationPattern",
+        .name = "Enable calibration pattern",
+        .description = "Enables the calibration pattern. The calibration can be used to "
+            "find which values to use when setting up the blackout shape.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo CalibrationColorInfo = {
-        "EnableCalibrationColor",
-        "Enable calibration color",
-        "Set Blackout Shape to a bright color for easier calibration.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo CalibrationColorInfo = {
+        .identifier = "EnableCalibrationColor",
+        .name = "Enable calibration color",
+        .description = "Set Blackout Shape to a bright color for easier calibration.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AddControlPointInfo = {
-        "AddControlPoint",
-        "Add control point",
-        "Adds a new control point to the spline.",
-        Property::Visibility::User
+    constexpr TriggerPropertyInfo AddControlPointInfo = {
+        .identifier = "AddControlPoint",
+        .name = "Add control point",
+        .description = "Adds a new control point to the spline.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo RemoveControlPointInfo = {
-        "RemoveControlPoint",
-        "Remove control point",
-        "Removes the selected control point from the spline.",
-        Property::Visibility::User
+    constexpr TriggerPropertyInfo RemoveControlPointInfo = {
+        .identifier = "RemoveControlPoint",
+        .name = "Remove control point",
+        .description = "Removes the selected control point from the spline.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo RemoveSelectorInfo = {
-        "RemoveSelector",
-        "Select point to remove",
-        "Removes the selected control point.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo RemoveSelectorInfo = {
+        .identifier = "RemoveSelector",
+        .name = "Select point to remove",
+        .description = "Removes the selected control point.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo AddSelectorInfo = {
-        "AddSelector",
-        "Select where to add",
-        "Select where to add a new point.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo AddSelectorInfo = {
+        .identifier = "AddSelector",
+        .name = "Select where to add",
+        .description = "Select where to add a new point.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo NewPointPositionInfo = {
-        "NewPointPosition",
-        "Point position",
-        "X and Y coordinates for where to add the new control point.",
-        Property::Visibility::User
+    constexpr Vec2PropertyInfo NewPointPositionInfo = {
+        .identifier = "NewPointPosition",
+        .name = "Point position",
+        .description = "X and Y coordinates for where to add the new control point.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo CalibrationTextureInfo = {
-        "CalibrationTexture",
-        "Calibration texture",
-        "Texture used as calibration pattern.",
-        Property::Visibility::Developer
+    constexpr StringPropertyInfo CalibrationTextureInfo = {
+        .identifier = "CalibrationTexture",
+        .name = "Calibration texture",
+        .description = "Texture used as calibration pattern.",
+        .visibility = Visibility::Developer
     };
 
     // Renders a screen-space shape used to black out part of the rendering. This can be
@@ -247,8 +257,8 @@ namespace {
             // calibration grid.
             std::optional<std::filesystem::path> calibrationTexturePath;
 
-            // [[codegen::verbatim(CalibrationPatternInfo.description)]]
-            std::optional<bool> enableCalibrationPattern;
+            std::optional<bool> enableCalibrationPattern
+                [[codegen::Info(CalibrationPatternInfo)]];
         };
         BlackoutShape blackoutshape;
     };
@@ -268,22 +278,19 @@ ScreenSpaceInsetBlackout::BlackoutShape::Point::Point(glm::vec2& inData,
                                                       std::string identifier,
                                                       std::string guiName)
 {
-    // Creates PropertyInfo used to create Property
-    propInfo = std::make_unique<Property::PropertyInfo>(
-        identifier.c_str(),
-        guiName.c_str(),
-        "Position (x,y) for where the control point is located."
-    );
-
     // Stores pointer to data and creates Vec2Property for the given position
     dataptr = &inData;
-    prop = std::make_unique<Vec2Property>(
-        *propInfo,
-        *dataptr,
-        glm::vec2(0.f),
-        glm::vec2(1.f),
-        glm::vec2(0.01f)
-    );
+    const Vec2PropertyInfo info = {
+        .identifier = identifier,
+        .name = guiName,
+        .description = "Position (x,y) for where the control point is located.",
+        .defaults = {
+            .value = inData,
+            .minMax = { glm::vec2(0.f), glm::vec2(1.f) },
+            .stepSize = glm::vec2(0.01f)
+        }
+    };
+    prop = std::make_unique<Vec2Property>(info);
 }
 
 void ScreenSpaceInsetBlackout::BlackoutShape::Point::updateData() {
@@ -294,12 +301,7 @@ ScreenSpaceInsetBlackout::BlackoutShape::Spline::Spline(std::vector<glm::vec2>& 
                                                         std::string baseString)
     : PropertyOwner({ baseString , baseString, "" })
     , data(inData)
-    , newPointPosition(
-        NewPointPositionInfo,
-        glm::vec2(0.f),
-        glm::vec2(0.f),
-        glm::vec2(1.f)
-    )
+    , newPointPosition(NewPointPositionInfo)
     , addSelector(AddSelectorInfo)
     , addButton(AddControlPointInfo)
     , removeSelector(RemoveSelectorInfo)
@@ -388,8 +390,8 @@ ScreenSpaceInsetBlackout::BlackoutShape::Corners::Corners(std::vector<glm::vec2>
 
 ScreenSpaceInsetBlackout::BlackoutShape::BlackoutShape(const Dictionary& dictionary)
     : PropertyOwner({ "BlackoutShape", "Blackout Shape", "" })
-    , enableCalibrationColor(CalibrationColorInfo, false)
-    , enableCalibrationPattern(CalibrationPatternInfo, false)
+    , enableCalibrationColor(CalibrationColorInfo)
+    , enableCalibrationPattern(CalibrationPatternInfo)
     , calibrationTexturePath(CalibrationTextureInfo)
     , copyToClipboardTrigger(CopyToClipboardInfo)
 {

@@ -140,7 +140,7 @@ Fragment getFragment() {
     }
     frag.gNormal = vec4(normal, 0.0);
 
-    // Could be seperated into ambient, diffuse and specular and passed in as uniforms
+    // Could be separated into ambient, diffuse and specular and passed in as uniforms
     const vec3 LightColor = vec3(1.0);
 
     // Ambient light

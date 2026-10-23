@@ -34,32 +34,40 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ReferenceDateInfo = {
-        "ReferenceDate",
-        "Reference date",
-        "The date at which this scale will be 0. The current value of the scale is "
-        "computed by taking the difference between the current time and the reference "
-        "date and multiplying it by the speed. This field must be formatted as: "
-        "YYYY-MM-DDThh:mm:ss.uuu  where h is a 24h clock and u microseconds.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo ReferenceDateInfo = {
+        .identifier = "ReferenceDate",
+        .name = "Reference date",
+        .description = "The date at which this scale will be 0. The current value of the "
+            "scale is computed by taking the difference between the current time and the "
+            "reference date and multiplying it by the speed. This field must be "
+            "formatted as: YYYY-MM-DDThh:mm:ss.uuu  where h is a 24h clock and u "
+            "microseconds.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo SpeedInfo = {
-        "Speed",
-        "Speed",
-        "The speed at which the value grows or shrinks. The units for this are meters "
-        "per second. The default value is 1 m/s.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo SpeedInfo = {
+        .identifier = "Speed",
+        .name = "Speed",
+        .description = "The speed at which the value grows or shrinks. The units for "
+            "this are meters per second.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.0,
+            .minMax = { 0.0, 1e12 }
+        }
     };
 
-    constexpr Property::PropertyInfo ClampToPositiveInfo = {
-        "ClampToPositive",
-        "Clamp to positive",
-        "If this value is true, the velocity computation will be clamped to a positive "
-        "value if the current simulation time is before the `ReferenceDate`. This is "
-        "useful for instantaneous events that only propagate forwards in time. The "
-        "default value is 'true'.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ClampToPositiveInfo = {
+        .identifier = "ClampToPositive",
+        .name = "Clamp to positive",
+        .description = "If this value is true, the velocity computation will be clamped "
+            "to a positive value if the current simulation time is before the "
+            "`ReferenceDate`. This is useful for instantaneous events that only "
+            "propagate forwards in time.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     // Provides the ability to scale an object dynamically as time in the simulation
@@ -71,14 +79,13 @@ namespace {
     // A common use-case for this Scale type would be to represent the Radiosphere, which
     // grows at the speed of light.
     struct [[codegen::Dictionary(TimeDependentScale)]] Parameters {
-        // [[codegen::verbatim(ReferenceDateInfo.description)]]
-        std::string referenceDate [[codegen::datetime()]];
+        std::string referenceDate
+            [[codegen::Info(ReferenceDateInfo), codegen::datetime()]];
 
-        // [[codegen::verbatim(SpeedInfo.description)]]
-        std::optional<double> speed [[codegen::greaterequal(0.0)]];
+        std::optional<double> speed
+            [[codegen::Info(SpeedInfo), codegen::greaterequal(0.0)]];
 
-        // [[codegen::verbatim(ClampToPositiveInfo.description)]]
-        std::optional<bool> clampToPositive;
+        std::optional<bool> clampToPositive [[codegen::Info(ClampToPositiveInfo)]];
     };
 } // namespace
 #include "timedependentscale_codegen.cpp"
@@ -94,9 +101,9 @@ Documentation TimeDependentScale::Documentation() {
 
 TimeDependentScale::TimeDependentScale(const Dictionary& dictionary)
     : Scale(dictionary)
-    , _referenceDate(ReferenceDateInfo, "")
-    , _speed(SpeedInfo, 1.0, 0.0, 1e12)
-    , _clampToPositive(ClampToPositiveInfo, true)
+    , _referenceDate(ReferenceDateInfo)
+    , _speed(SpeedInfo)
+    , _clampToPositive(ClampToPositiveInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

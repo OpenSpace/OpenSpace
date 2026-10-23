@@ -31,16 +31,15 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextInfo = {
-        "Text",
-        "Text",
-        "The text to be displayed.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TextInfo = {
+        .identifier = "Text",
+        .name = "Text",
+        .description = "The text to be displayed.",
+        .visibility = Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
-        // [[codegen::verbatim(TextInfo.description)]]
-        std::optional<std::string> text;
+        std::optional<std::string> text [[codegen::Info(TextInfo)]];
     };
 } // namespace
 #include "dashboarditemtext_codegen.cpp"
@@ -56,7 +55,7 @@ Documentation DashboardItemText::Documentation() {
 
 DashboardItemText::DashboardItemText(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _text(TextInfo, "")
+    , _text(TextInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _text = p.text.value_or(_text);

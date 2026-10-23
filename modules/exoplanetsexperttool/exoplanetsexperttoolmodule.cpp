@@ -41,51 +41,51 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ExoplanetsExpertToolModule";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Decides if the GUI for this module should be enabled."
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Decides if the GUI for this module should be enabled."
     };
 
-    constexpr Property::PropertyInfo ShowInfoAtStartupInfo = {
-        "ShowInfoAtStartup",
-        "Show Info at Startup",
-        "If true, an info window is shown when starting the application, containing "
-        "information about the research projecs and contact info for feedback."
+    constexpr BoolPropertyInfo ShowInfoAtStartupInfo = {
+        .identifier = "ShowInfoAtStartup",
+        .name = "Show Info at Startup",
+        .description = "If true, an info window is shown when starting the application, "
+            "containing information about the research projecs and contact info for "
+            "feedback."
     };
 
-    constexpr Property::PropertyInfo DataConfigFileInfo = {
-        "DataConfigFile",
-        "Data Config File",
-        "The path to a file that dictates which dataset to load, what columns to use for "
-        "position, and optional names and descriptions for columns and pre-defined "
-        "filters."
+    constexpr StringPropertyInfo DataConfigFileInfo = {
+        .identifier = "DataConfigFile",
+        .name = "Data Config File",
+        .description = "The path to a file that dictates which dataset to load, what "
+            "columns to use for position, and optional names and descriptions for "
+            "columns and pre-defined filters."
     };
 
-    constexpr Property::PropertyInfo FilteredDataRowsInfo = {
-        "FilteredDataRows",
-        "Filtered Data Rows",
-        "Contains the indices of the rows in the data file that are currently being "
-        "shown in the tool, excluding the external selection (from the website).",
-        Property::Visibility::Hidden
+    constexpr IntListPropertyInfo FilteredDataRowsInfo = {
+        .identifier = "FilteredDataRows",
+        .name = "Filtered Data Rows",
+        .description = "Contains the indices of the rows in the data file that are "
+            "currently being shown in the tool, excluding the external selection (from "
+            "the website).",
+        .visibility = Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo HoveredIndexInfo = {
-        "HoveredIndex",
-        "Hovered Indes",
-        "The index of the currently hovered object.",
-        Property::Visibility::Developer
+    constexpr IntPropertyInfo HoveredIndexInfo = {
+        .identifier = "HoveredIndex",
+        .name = "Hovered Index",
+        .description = "The index of the currently hovered object.",
+        .visibility = Visibility::Developer
     };
 
     struct [[codegen::Dictionary(ExoplanetsExpertToolModule)]] Parameters {
-        // [[codegen::verbatim(DataConfigFileInfo.description)]]
-        std::optional<std::filesystem::path> dataConfigFile;
+        std::optional<std::filesystem::path> dataConfigFile
+            [[codegen::Info(DataConfigFileInfo)]];
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
-        // [[codegen::verbatim(ShowInfoAtStartupInfo.description)]]
-        std::optional<bool> showInfoAtStartup;
+        std::optional<bool> showInfoAtStartup [[codegen::Info(ShowInfoAtStartupInfo)]];
     };
 #include "exoplanetsexperttoolmodule_codegen.cpp"
 } // namespace

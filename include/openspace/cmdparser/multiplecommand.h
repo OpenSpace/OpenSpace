@@ -36,7 +36,7 @@ class MultipleCommand : public CommandlineCommand {};
  * This class represents a command that can called multiple times in a given commandline
  * and has a single argument of respective type \p T. Each time the command is called, the
  * converted value is appended to a vector that has been passed in the constructor. The
- * template class \p T must be convertable using an `std::stringstream`.
+ * template class \p T must be convertible using an `std::stringstream`.
  *
  * \tparam T The typename of the first argument type
  *
@@ -91,7 +91,7 @@ protected:
  * This class represents a command that can called multiple times in a given commandline
  * and has 2 arguments of respective types \p T and \p U. Each time the command is called,
  * the converted value is appended to a vector that has been passed in the constructor.
- * The template classes \p T, \p U, \p V, and \p U must be convertable using an
+ * The template classes \p T, \p U, \p V, and \p U must be convertible using an
  * `std::stringstream`.
  *
  * \tparam T The typename of the first argument type
@@ -152,7 +152,7 @@ protected:
  * This class represents a command that can called multiple times in a given commandline
  * and has 3 arguments of respective types \p T, \p U, and \p V. Each time the command is
  * called, the converted value is appended to a vector that has been passed in the
- * constructor. The template classes \p T, \p U, \p V, and \p U must be convertable using
+ * constructor. The template classes \p T, \p U, \p V, and \p U must be convertible using
  * an `std::stringstream`.
  *
  * \tparam T The typename of the first argument type
@@ -217,7 +217,7 @@ protected:
  * This class represents a command that can called multiple times in a given commandline
  * and has 4 arguments of respective types \p T, \p U, \p V, and \p U. Each time the
  * command is called, the converted value is appended to a vector that has been passed in
- * the constructor. The template classes \p T, \p U, \p V, and \p U must be convertable
+ * the constructor. The template classes \p T, \p U, \p V, and \p U must be convertible
  * using an `std::stringstream`.
  *
  * \tparam T The typename of the first argument type

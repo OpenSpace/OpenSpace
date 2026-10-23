@@ -124,6 +124,15 @@ if (WIN32)
   target_compile_options(libcef_dll_wrapper PRIVATE "/W0")
 elseif (UNIX)
   target_compile_options(libcef_dll_wrapper PRIVATE "-w")
+  # Chromium changes the stack canary in forked subprocesses (--change-stack-guard-on-fork)
+  # so `CefExecuteProcess`, which is on the stack at that point, must not be protected
+  set_source_files_properties(
+    "${CEF_LIBCEF_DLL_WRAPPER_PATH}/wrapper/libcef_dll_wrapper.cc"
+    TARGET_DIRECTORY libcef_dll_wrapper
+    PROPERTIES
+      COMPILE_OPTIONS "-fno-stack-protector"
+      SKIP_PRECOMPILE_HEADERS ON
+  )
 endif ()
 
 target_precompile_headers(libcef_dll_wrapper PRIVATE
@@ -316,9 +325,13 @@ target_include_directories(${webbrowser_module} SYSTEM PUBLIC ${CEF_ROOT})
 set_modules_dependency_on_cef_libraries(${webbrowser_module})
 
 set(deps "")
-foreach (i ${CEF_BINARY_FILES})
-  list(APPEND deps "${CEF_BINARY_DIR}/${i}")
-endforeach()
+if (WIN32)
+  # On Linux the executables find libcef.so in the CEF folder through their RUNPATH, so
+  # only the resource files have to be copied next to them
+  foreach (i ${CEF_BINARY_FILES})
+    list(APPEND deps "${CEF_BINARY_DIR}/${i}")
+  endforeach()
+endif ()
 foreach (j ${CEF_RESOURCE_FILES})
   list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
 endforeach()

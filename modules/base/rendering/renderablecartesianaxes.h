@@ -60,6 +60,6 @@ protected:
     GLuint _ibo = 0;
 };
 
-}// namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___RENDERABLECARTESIANAXES___H__

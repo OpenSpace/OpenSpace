@@ -29,8 +29,8 @@
 
 namespace openspace {
 
-BoolProperty::BoolProperty(PropertyInfo info, bool value)
-    : TemplateProperty<bool>(std::move(info), value)
+BoolProperty::BoolProperty(BoolPropertyInfo info)
+    : TemplateProperty<bool>(info, info.defaults.value)
 {}
 
 std::string_view BoolProperty::className() const {

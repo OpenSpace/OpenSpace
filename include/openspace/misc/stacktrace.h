@@ -43,6 +43,23 @@ namespace openspace {
  */
 #ifdef WIN32
 std::vector<std::string> stackTrace(std::stacktrace trace = std::stacktrace::current());
+
+/**
+ * Returns the stack trace that is described by the passed \p context. The regular
+ * #stackTrace function cannot be used for this as it can only capture the stack of its
+ * own calling site. Inside an unhandled exception filter that is the filter itself
+ * rather than the code that raised the exception, which is why the crash handler has to
+ * unwind the context it is handed instead.
+ *
+ * \param context The thread context from which to start unwinding, which is usually the
+ *        `ContextRecord` of the `EXCEPTION_POINTERS` that an unhandled exception filter
+ *        receives. It is a `const CONTEXT*` that is passed as a `const void*` so that
+ *        this header does not have to include `Windows.h`. If it is `nullptr`, an empty
+ *        list is returned
+ * 
+ * \return A list of the full stack trace described by \p context
+ */
+std::vector<std::string> stackTraceFromContext(const void* context);
 #else // ^^^^ WIN32 // !WIN32 vvvv
 std::vector<std::string> stackTrace();
 #endif // WIN32

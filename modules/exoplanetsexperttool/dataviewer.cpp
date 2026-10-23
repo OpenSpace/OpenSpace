@@ -68,6 +68,8 @@
 #define SHOW_IMGUI_HELPERS
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ExoplanetsDataViewer";
 
     // @TODO (2026-10-19, emmbr) Use a web-hosted webpage, once we've figured how to host
@@ -115,12 +117,12 @@ namespace {
 #endif
     }
 
-    constexpr const openspace::Property::PropertyInfo ExternalSelectionInfo = {
-        "ExternalSelection",
-        "External Selection from Webpage",
-        "Contains the indices of the rows in the data file that should be included, "
-        "based on the filtering on the external webpage.",
-        openspace::Property::Visibility::Hidden
+    constexpr const IntListPropertyInfo ExternalSelectionInfo = {
+        .identifier = "ExternalSelection",
+        .name = "External Selection from Webpage",
+        .description = "Contains the indices of the rows in the data file that should be "
+            "included, based on the filtering on the external webpage.",
+        .visibility = Visibility::Hidden
     };
 }
 

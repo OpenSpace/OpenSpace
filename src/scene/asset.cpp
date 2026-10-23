@@ -281,7 +281,7 @@ void Asset::unload() {
 
         child->_parentAssets.erase(parentIt);
 
-        // We only want to deinitialize the child if noone is keeping track of it, which
+        // We only want to deinitialize the child if no one is keeping track of it, which
         // is either a still initialized parent or that it is loaded as a root
         if (!child->hasInitializedParent() && !_manager.isRootAsset(child)) {
             child->deinitialize();
@@ -369,7 +369,7 @@ void Asset::deinitialize() {
 
     // 1. Deinitialize unwanted requirements
     for (Asset* dependency : _requiredAssets) {
-        // We only want to deinitialize the dependency if noone is keeping track of it,
+        // We only want to deinitialize the dependency if no one is keeping track of it,
         // which is either a still initialized parent or that it is loaded as a root
         if (!dependency->hasInitializedParent() && !_manager.isRootAsset(dependency)) {
             dependency->deinitialize();

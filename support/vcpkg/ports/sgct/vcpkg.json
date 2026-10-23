@@ -24,21 +24,16 @@
     "zlib",
     {
       "name": "glad",
-      "features": [
-        "extensions",
-        "loader"
-      ]
+      "features": ["extensions", "loader"]
     },
     {
       "name": "glad",
-      "features": [
-        "wgl"
-      ],
+      "features": ["wgl"],
       "platform": "windows"
     },
     {
       "name": "spout2",
-      "platform": "windows"
+      "platform": "windows & !arm64"
     },
     {
       "name": "vulkan",
@@ -64,6 +59,10 @@
     "scalable": {
       "description": "Build SGCT with Scalable SDK support. Proprietary SDK, the resulting package cannot be redistributed",
       "supports": "windows"
+    },
+    "tracy": {
+      "description": "Build SGCT with Tracy profiling support",
+      "dependencies": ["tracy"]
     }
   }
 }

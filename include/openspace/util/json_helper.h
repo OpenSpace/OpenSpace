@@ -38,7 +38,7 @@ class Dictionary;
  * want in its strings.
  *
  * \param text The text that is to be escaped
- * \return The same text with all required characteres escaped
+ * \return The same text with all required characters escaped
  */
 std::string escapedJson(const std::string& text);
 
@@ -47,7 +47,7 @@ std::string escapedJson(const std::string& text);
  * does not want in its strings.
  *
  * \param list The list of text that is to be escaped
- * \return The same text with all required characteres escaped
+ * \return The same text with all required characters escaped
  */
 std::string escapedJson(const std::vector<std::string>& list);
 

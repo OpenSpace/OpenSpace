@@ -52,60 +52,71 @@ namespace {
         Camera
     };
 
-    constexpr Property::PropertyInfo SourceTypeInfo = {
-        "SourceType",
-        "Source type",
-        "The type of position that is used as the source to calculate the distance.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo SourceTypeInfo = {
+        .identifier = "SourceType",
+        .name = "Source type",
+        .description = "The type of position that is used as the source to calculate the "
+            "distance.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo SourceNodeIdentifierInfo = {
-        "SourceNodeIdentifier",
-        "Source node identifier",
-        "If a scene graph node is selected as type, this value specifies the identifier "
-        "of the node that is to be used as the source for computing the distance.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo SourceNodeIdentifierInfo = {
+        .identifier = "SourceNodeIdentifier",
+        .name = "Source node identifier",
+        .description = "If a scene graph node is selected as type, this value specifies "
+            "the identifier of the node that is to be used as the source for computing "
+            "the distance.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo DestinationTypeInfo = {
-        "DestinationType",
-        "Destination type",
-        "The type of position that is used as the destination to calculate the distance.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo DestinationTypeInfo = {
+        .identifier = "DestinationType",
+        .name = "Destination type",
+        .description = "The type of position that is used as the destination to "
+            "calculate the distance.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo DestinationNodeIdentifierInfo = {
-        "DestinationNodeIdentifier",
-        "Destination node identifier",
-        "If a scene graph node is selected as type, this value specifies the identifier "
-        "of the node that is to be used as the destination for computing the distance.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo DestinationNodeIdentifierInfo = {
+        .identifier = "DestinationNodeIdentifier",
+        .name = "Destination node identifier",
+        .description = "If a scene graph node is selected as type, this value specifies "
+            "the identifier of the node that is to be used as the destination for "
+            "computing the distance.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo SimplificationInfo = {
-        "Simplification",
-        "Simplification",
-        "If this value is enabled, the distance is displayed in nuanced units, such as "
-        "km, AU, light years, parsecs, etc. If this value is disabled, the unit can be "
-        "explicitly requested.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo SimplificationInfo = {
+        .identifier = "Simplification",
+        .name = "Simplification",
+        .description = "If this value is enabled, the distance is displayed in nuanced "
+            "units, such as km, AU, light years, parsecs, etc. If this value is "
+            "disabled, the unit can be explicitly requested.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo RequestedUnitInfo = {
-        "RequestedUnit",
-        "Requested unit",
-        "If the simplification is disabled, this distance unit is used as a destination "
-        "to convert the meters into.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo RequestedUnitInfo = {
+        .identifier = "RequestedUnit",
+        .name = "Requested unit",
+        .description = "If the simplification is disabled, this distance unit is used as "
+            "a destination to convert the meters into.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FormatStringInfo = {
-        "FormatString",
-        "Format string",
-        "The format string that is used for formatting the distance string.  This format "
-        "receives four parameters:  The name of the source, the name of the destination "
-        "the value of the distance and the unit of the distance.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FormatStringInfo = {
+        .identifier = "FormatString",
+        .name = "Format string",
+        .description = "The format string that is used for formatting the distance "
+            "string. This format receives four parameters: The name of the source, the "
+            "name of the destination the value of the distance and the unit of the "
+            "distance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "Distance from {} to {}: {:f} {}"
+        }
     };
 
     // Displays the distance between two points. The points can be defined either by the
@@ -115,7 +126,7 @@ namespace {
     // positions.
     //
     // The resulting text can be formatted in the `FormatString` and the measurement unit
-    // is chosed by changing the `Simplification` and `RequestedUnit` parameters.
+    // is chosen by changing the `Simplification` and `RequestedUnit` parameters.
     struct [[codegen::Dictionary(DashboardItemDistance)]] Parameters {
         enum class [[codegen::map(Type)]] TypeInfo {
             Node,
@@ -124,27 +135,22 @@ namespace {
             Camera
         };
 
-        // [[codegen::verbatim(SourceTypeInfo.description)]]
-        TypeInfo sourceType;
+        TypeInfo sourceType [[codegen::Info(SourceTypeInfo)]];
 
-        // [[codegen::verbatim(SourceNodeIdentifierInfo.description)]]
-        std::optional<std::string> sourceNodeIdentifier [[codegen::identifier()]];
+        std::optional<std::string> sourceNodeIdentifier
+            [[codegen::Info(SourceNodeIdentifierInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(DestinationTypeInfo.description)]]
-        TypeInfo destinationType;
+        TypeInfo destinationType [[codegen::Info(DestinationTypeInfo)]];
 
-        // [[codegen::verbatim(DestinationNodeIdentifierInfo.description)]]
-        std::optional<std::string> destinationNodeIdentifier [[codegen::identifier()]];
+        std::optional<std::string> destinationNodeIdentifier
+            [[codegen::Info(DestinationNodeIdentifierInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(SimplificationInfo.description)]]
-        std::optional<bool> simplification;
+        std::optional<bool> simplification [[codegen::Info(SimplificationInfo)]];
 
-        // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit
-            [[codegen::inlist(openspace::distanceUnitList())]];
+        std::optional<std::string> requestedUnit [[codegen::Info(RequestedUnitInfo),
+            codegen::inlist(openspace::distanceUnitList())]];
 
-        // [[codegen::verbatim(FormatStringInfo.description)]]
-        std::optional<std::string> formatString;
+        std::optional<std::string> formatString [[codegen::Info(FormatStringInfo)]];
     };
 } // namespace
 #include "dashboarditemdistance_codegen.cpp"
@@ -160,9 +166,9 @@ Documentation DashboardItemDistance::Documentation() {
 
 DashboardItemDistance::DashboardItemDistance(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _doSimplification(SimplificationInfo, true)
+    , _doSimplification(SimplificationInfo)
     , _requestedUnit(RequestedUnitInfo)
-    , _formatString(FormatStringInfo, "Distance from {} to {}: {:f} {}")
+    , _formatString(FormatStringInfo)
     , _source{
         OptionProperty(SourceTypeInfo),
         StringProperty(SourceNodeIdentifierInfo),
@@ -184,7 +190,7 @@ DashboardItemDistance::DashboardItemDistance(const Dictionary& dictionary)
     });
     _source.type.onChange([this]() {
         _source.nodeIdentifier.setVisibility(
-            Property::Visibility(
+            Visibility(
                 _source.type == Type::Node || _source.type == Type::NodeSurface
             )
         );
@@ -211,7 +217,7 @@ DashboardItemDistance::DashboardItemDistance(const Dictionary& dictionary)
     });
     _destination.type.onChange([this]() {
         _destination.nodeIdentifier.setVisibility(
-            Property::Visibility(
+            Visibility(
                 _source.type == Type::Node || _source.type == Type::NodeSurface
             )
         );
@@ -247,8 +253,6 @@ DashboardItemDistance::DashboardItemDistance(const Dictionary& dictionary)
 
     _formatString = p.formatString.value_or(_formatString);
     addProperty(_formatString);
-
-    _localBuffer.resize(256);
 }
 
 std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
@@ -347,7 +351,6 @@ void DashboardItemDistance::update() {
                 dist.second
             )
         );
-
         _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
     }
     catch (const std::format_error&) {

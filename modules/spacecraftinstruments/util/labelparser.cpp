@@ -182,7 +182,7 @@ bool LabelParser::create() {
 
             constexpr std::string_view ErrorMsg =
                 "Unrecognized '{}' in line {} in file {}. The 'Convert' table must "
-                "contain the identity tranformation for all values encountered in the "
+                "contain the identity transformation for all values encountered in the "
                 "label files, for example: ROSETTA = {{ \"ROSETTA\" }}";
 
             // Add more

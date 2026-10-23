@@ -54,25 +54,33 @@ namespace {
 
     constexpr std::string_view _loggerCat = "KameleonPlane";
 
-    constexpr Property::PropertyInfo FieldLineSeedsInfo = {
-        "FieldlineSeedsIndexFile",
-        "Fieldline seedpoints",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr SelectionPropertyInfo FieldLineSeedsInfo = {
+        .identifier = "FieldlineSeedsIndexFile",
+        .name = "Fieldline seedpoints",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo ResolutionInfo = {
-        "Resolution",
-        "Resolution%",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ResolutionInfo = {
+        .identifier = "Resolution",
+        .name = "Resolution%",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 100.f,
+            .minMax = { 10.f, 200.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SliceInfo = {
-        "Slice",
-        "Slice",
-        "", // @TODO Missing documentation
-        Property::Visibility::User
+    constexpr FloatPropertyInfo SliceInfo = {
+        .identifier = "Slice",
+        .name = "Slice",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableKameleonPlane)]] Parameters {
@@ -102,8 +110,8 @@ Documentation RenderableKameleonPlane::Documentation() {
 RenderableKameleonPlane::RenderableKameleonPlane(const Dictionary& dictionary)
     : RenderableDataCygnet(dictionary)
     , _fieldlines(FieldLineSeedsInfo)
-    , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
-    , _slice(SliceInfo, 0.f, 0.f, 1.f)
+    , _resolution(ResolutionInfo)
+    , _slice(SliceInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -182,11 +190,11 @@ void RenderableKameleonPlane::initializeGL() {
             // unregister backgroundvalues property
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(Property::Visibility::Hidden);
+                _backgroundValues.setVisibility(Visibility::Hidden);
             }
             else {
                 // Else if autofilter is turned off, register backgroundValues
-                _backgroundValues.setVisibility(Property::Visibility::Always);
+                _backgroundValues.setVisibility(Visibility::Always);
             }
         });
     }

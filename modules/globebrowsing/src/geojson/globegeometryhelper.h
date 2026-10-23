@@ -69,7 +69,7 @@ std::vector<rendering::VertexXYZNormal> createExtrudedGeometryVertices(
 double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& globe);
 
 /**
- * Compute model space cordinate from geodetic coordinate, and account for lat, long
+ * Compute model space coordinate from geodetic coordinate, and account for lat, long
  * offsets.
  */
 glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
@@ -82,7 +82,7 @@ struct PosHeightPair {
 };
 
 /**
- * Subdivide line between position v0 and v1 so that it fullfils the maxDistance criteria.
+ * Subdivide line between position v0 and v1 so that it fulfils the maxDistance criteria.
  * Interpolate the height value from * h0 to h1, as well as add the given offset and
  * account for the height map if that should be done.
  *
@@ -93,7 +93,7 @@ std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3&
 
 /**
  * Subdivide triangle consisting of vertex positions v0, v1 and v2, with height values
- * h0, h1 and h2 into smaller triangles. maxDistance specifies tha maximum distance
+ * h0, h1 and h2 into smaller triangles. maxDistance specifies the maximum distance
  * between two vertices in the subdivided mesh.
  */
 std::vector<rendering::VertexXYZNormal> subdivideTriangle(

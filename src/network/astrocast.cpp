@@ -214,78 +214,91 @@ namespace {
         );
     }
 
-    constexpr Property::PropertyInfo PasswordInfo = {
-        "Password",
-        "Password",
-        "The general password that allows this OpenSpace instance access to the Wormhole "
-        "server.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo PasswordInfo = {
+        .identifier = "Password",
+        .name = "Password",
+        .description = "The general password that allows this OpenSpace instance access "
+            "to the Wormhole server.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HostPasswordInfo = {
-        "HostPassword",
-        "Host password",
-        "The password that is required to take control of the joint session and thus "
-        "send all commands to connected clients.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo HostPasswordInfo = {
+        .identifier = "HostPassword",
+        .name = "Host password",
+        .description = "The password that is required to take control of the joint "
+            "session and thus send all commands to connected clients.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PortInfo = {
-        "Port",
-        "Port",
-        "The port on which the Wormhole server is listening to connections from "
-        "OpenSpace.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo PortInfo = {
+        .identifier = "Port",
+        .name = "Port",
+        .description = "The port on which the Wormhole server is listening to "
+            "connections from OpenSpace.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AddressInfo = {
-        "Address",
-        "Address",
-        "The address of the Wormhole server either as a DNS name or an IP address.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo AddressInfo = {
+        .identifier = "Address",
+        .name = "Address",
+        .description = "The address of the Wormhole server either as a DNS name or an IP "
+            "address.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NameInfo = {
-        "Name",
-        "Connection name",
-        "The name of this OpenSpace instance that will be potentially broadcast to other "
-        "connected instances.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo NameInfo = {
+        .identifier = "Name",
+        .name = "Connection name",
+        .description = "The name of this OpenSpace instance that will be potentially "
+            "broadcast to other connected instances.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ServerNameInfo = {
-        "ServerName",
-        "Server name",
-        "The name of the server instance to join.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo ServerNameInfo = {
+        .identifier = "ServerName",
+        .name = "Server name",
+        .description = "The name of the server instance to join.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BufferTimeInfo = {
-        "BufferTime",
-        "Buffer time",
-        "This is the number of seconds that received keyframes are buffered before they "
-        "get applied to the rendering. A higher value leads to smoother rendering, "
-        "particularly when the internet connection is unstable, but also leads to higher "
-        "delay.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo BufferTimeInfo = {
+        .identifier = "BufferTime",
+        .name = "Buffer time",
+        .description = "This is the number of seconds that received keyframes are "
+            "buffered before they get applied to the rendering. A higher value leads to "
+            "smoother rendering, particularly when the internet connection is unstable, "
+            "but also leads to higher delay.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.2f,
+            .minMax = { 0.01f, 5.0f }
+        }
     };
 
-    constexpr Property::PropertyInfo TimeKeyFrameInfo = {
-        "TimeKeyframeInterval",
-        "Time keyframe interval",
-        "Determines how often the information about the simulation time is sent (in "
-        "seconds). Lower values mean more accurate representation of the time, but also "
-        "require higher internet bandwidth.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo TimeKeyFrameInfo = {
+        .identifier = "TimeKeyframeInterval",
+        .name = "Time keyframe interval",
+        .description = "Determines how often the information about the simulation time "
+            "is sent (in seconds). Lower values mean more accurate representation of the "
+            "time, but also require higher internet bandwidth.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.1f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo CameraKeyFrameInfo = {
-        "CameraKeyframeInterval",
-        "Camera keyframe interval",
-        "Determines how often the information about the camera position and orientation "
-        "is sent (in seconds). Lower values mean more accurate representation of the "
-        "time, but also more internet traffic.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo CameraKeyFrameInfo = {
+        .identifier = "CameraKeyframeInterval",
+        .name = "Camera keyframe interval",
+        .description = "Determines how often the information about the camera position "
+            "and orientation is sent (in seconds). Lower values mean more accurate "
+            "representation of the time, but also more internet traffic.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.1f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 } // namespace
 
@@ -299,9 +312,9 @@ Astrocast::Astrocast()
     , _port(PortInfo)
     , _address(AddressInfo)
     , _name(NameInfo)
-    , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
-    , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
-    , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
+    , _bufferTime(BufferTimeInfo)
+    , _timeKeyframeInterval(TimeKeyFrameInfo)
+    , _cameraKeyframeInterval(CameraKeyFrameInfo)
     , _connectionEvent(std::make_shared<SynchronousEvent<>>())
 {
     addProperty(_name);
@@ -553,7 +566,7 @@ void Astrocast::dataMessageReceived(const std::vector<char>& message) {
             datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
 
-            // No send because this has already been recived by a peer, don't send it
+            // No send because this has already been received by a peer, don't send it
             // back again
             global::scriptEngine->queueScript({
                 .code = sm._script,

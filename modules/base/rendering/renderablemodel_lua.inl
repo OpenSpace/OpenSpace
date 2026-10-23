@@ -68,8 +68,12 @@ namespace {
         typedReader = &dynamic_cast<io::ModelReaderAssimp&>(*reader);
     }
     catch (std::exception& e) {
-        LERRORC("RenderableModel", std::format("Cannot find a suitable reader to print "
-            "the model tree for model {}", filepath)
+        LERRORC(
+            "RenderableModel",
+            std::format(
+                "Cannot find a suitable reader to print the model tree for model {}. {}",
+                filepath, e.what()
+            )
         );
         return;
     }

@@ -35,51 +35,54 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TargetInfo = {
-        "Target",
-        "Target",
-        "This is the SPICE name for the body whose translation is to be computed by the "
-        "SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') or "
-        "a NAIF integer id code (such as '399'). The resulting translation will be a "
-        "vector leading from the `Target` to the `Observer`.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TargetInfo = {
+        .identifier = "Target",
+        .name = "Target",
+        .description = "This is the SPICE name for the body whose translation is to be "
+            "computed by the SpiceTranslation. It can either be a fully qualified name "
+            "(such as 'EARTH') or a NAIF integer id code (such as '399'). The resulting "
+            "translation will be a vector leading from the `Target` to the `Observer`.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ObserverInfo = {
-        "Observer",
-        "Observer",
-        "This is the SPICE name for the parent of the body whose translation is to be "
-        "computed by the SpiceTranslation. It can either be a fully qualified name (such "
-        "as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0'). The "
-        "resulting translation will be a vector leading from the `Target` to the "
-        "`Observer`.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo ObserverInfo = {
+        .identifier = "Observer",
+        .name = "Observer",
+        .description = "This is the SPICE name for the parent of the body whose "
+            "translation is to be computed by the SpiceTranslation. It can either be a "
+            "fully qualified name (such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer "
+            "id code (such as '0'). The resulting translation will be a vector leading "
+            "from the `Target` to the `Observer`.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FrameInfo = {
-        "Frame",
-        "Reference frame",
-        "This is the SPICE name of the reference frame in which the position should be "
-        "calculated. The default value is GALACTIC.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FrameInfo = {
+        .identifier = "Frame",
+        .name = "Reference frame",
+        .description = "This is the SPICE name of the reference frame in which the "
+            "position should be calculated.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "GALACTIC"
+        }
     };
 
-    constexpr Property::PropertyInfo FixedDateInfo = {
-        "FixedDate",
-        "Fixed date",
-        "If this value is specified, the position will be locked to a specific time "
-        "rather than following the in-game in the system. Setting this to an empty "
-        "string will unlock the time and return to position based on current simulation "
-        "time.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo FixedDateInfo = {
+        .identifier = "FixedDate",
+        .name = "Fixed date",
+        .description = "If this value is specified, the position will be locked to a "
+            "specific time rather than following the in-game in the system. Setting this "
+            "to an empty string will unlock the time and return to position based on "
+            "current simulation time.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo TimeOffsetInfo = {
-        "TimeOffset",
-        "Time offset",
-        "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
-        "at which to compute the rotation.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo TimeOffsetInfo = {
+        .identifier = "TimeOffset",
+        .name = "Time offset",
+        .description = "A time offset, in seconds, added to the simulation time (or "
+            "Fixed Date if any), at which to compute the rotation.",
+        .visibility = Visibility::User
     };
 
     // Uses [SPICE](https://naif.jpl.nasa.gov/naif/) kernels to provide translational
@@ -93,20 +96,17 @@ namespace {
     // [spkpos_c](https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html)
     // function of the SPICE library.
     struct [[codegen::Dictionary(SpiceTranslation)]] Parameters {
-        // [[codegen::verbatim(TargetInfo.description)]]
-        std::variant<std::string, int> target;
+        std::variant<std::string, int> target [[codegen::Info(TargetInfo)]];
 
-        // [[codegen::verbatim(ObserverInfo.description)]]
-        std::variant<std::string, int> observer;
+        std::variant<std::string, int> observer [[codegen::Info(ObserverInfo)]];
 
         std::optional<std::string> frame
             [[codegen::annotation("A valid SPICE NAIF name for a reference frame")]];
 
-        // [[codegen::verbatim(FixedDateInfo.description)]]
-        std::optional<std::string> fixedDate [[codegen::datetime()]];
+        std::optional<std::string> fixedDate
+            [[codegen::Info(FixedDateInfo), codegen::datetime()]];
 
-        // [[codegen::verbatim(TimeOffsetInfo.description)]]
-        std::optional<float> timeOffset;
+        std::optional<float> timeOffset [[codegen::Info(TimeOffsetInfo)]];
     };
 } // namespace
 #include "spicetranslation_codegen.cpp"
@@ -124,7 +124,7 @@ SpiceTranslation::SpiceTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
     , _target(TargetInfo)
     , _observer(ObserverInfo)
-    , _frame(FrameInfo, "GALACTIC")
+    , _frame(FrameInfo)
     , _fixedDate(FixedDateInfo)
     , _timeOffset(TimeOffsetInfo)
     , _cachedFrame("GALACTIC")

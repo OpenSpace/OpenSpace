@@ -40,25 +40,37 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo XColorInfo = {
-        "XColor",
-        "X color",
-        "The color of the x-axis.",
-        Property::Visibility::NoviceUser
+    constexpr Vec4PropertyInfo XColorInfo = {
+        .identifier = "XColor",
+        .name = "X color",
+        .description = "The color of the x-axis.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec4(1.f, 0.f, 0.f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo YColorInfo = {
-        "YColor",
-        "Y color",
-        "The color of the y-axis.",
-        Property::Visibility::NoviceUser
+    constexpr Vec4PropertyInfo YColorInfo = {
+        .identifier = "YColor",
+        .name = "Y color",
+        .description = "The color of the y-axis.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec4(0.f, 1.f, 0.f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ZColorInfo = {
-        "ZColor",
-        "Z color",
-        "The color of the z-axis.",
-        Property::Visibility::NoviceUser
+    constexpr Vec4PropertyInfo ZColorInfo = {
+        .identifier = "ZColor",
+        .name = "Z color",
+        .description = "The color of the z-axis.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec4(0.f, 0.f, 1.f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
     // Can be used to render the local Cartesian coordinate system, or reference frame,
@@ -71,14 +83,11 @@ namespace {
     // be scaled to match the parent object for the axes to be visible in the scene, for
     // example using a [StaticScale](#base_scale_static).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
-        // [[codegen::verbatim(XColorInfo.description)]]
-        std::optional<glm::vec4> xColor [[codegen::color()]];
+        std::optional<glm::vec4> xColor [[codegen::Info(XColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(YColorInfo.description)]]
-        std::optional<glm::vec4> yColor [[codegen::color()]];
+        std::optional<glm::vec4> yColor [[codegen::Info(YColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(ZColorInfo.description)]]
-        std::optional<glm::vec4> zColor [[codegen::color()]];
+        std::optional<glm::vec4> zColor [[codegen::Info(ZColorInfo), codegen::color()]];
     };
 } // namespace
 #include "renderablecartesianaxes_codegen.cpp"
@@ -95,9 +104,9 @@ Documentation RenderableCartesianAxes::Documentation() {
 RenderableCartesianAxes::RenderableCartesianAxes(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _program(nullptr)
-    , _xColor(XColorInfo, glm::vec4(1.f, 0.f, 0.f, 1.f), glm::vec4(0.f), glm::vec4(1.f))
-    , _yColor(YColorInfo, glm::vec4(0.f, 1.f, 0.f, 1.f), glm::vec4(0.f), glm::vec4(1.f))
-    , _zColor(ZColorInfo, glm::vec4(0.f, 0.f, 1.f, 1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _xColor(XColorInfo)
+    , _yColor(YColorInfo)
+    , _zColor(ZColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

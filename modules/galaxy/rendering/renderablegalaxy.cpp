@@ -68,85 +68,122 @@ namespace {
         Billboards
     };
 
-    constexpr Property::PropertyInfo VolumeRenderingEnabledInfo = {
-        "VolumeRenderingEnabled",
-        "Volume rendering",
-        "Decides whether the volume rendering component of the galaxy rendering should "
-        "be enabled or not. If disabled, the volume rendering is skipped.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo VolumeRenderingEnabledInfo = {
+        .identifier = "VolumeRenderingEnabled",
+        .name = "Volume rendering",
+        .description = "Decides whether the volume rendering component of the galaxy "
+            "rendering should be enabled or not. If disabled, the volume rendering is "
+            "skipped.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo StarRenderingEnabledInfo = {
-        "StarRenderingEnabled",
-        "Star rendering",
-        "Decides whether the point-based star rendering component of the galaxy "
-        "rendering should be enabled or not. If disabled, the point-based star rendering "
-        "is skipped.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo StarRenderingEnabledInfo = {
+        .identifier = "StarRenderingEnabled",
+        .name = "Star rendering",
+        .description = "Decides whether the point-based star rendering component of the "
+            "galaxy rendering should be enabled or not. If disabled, the point-based "
+            "star rendering is skipped.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo StepSizeInfo = {
-        "StepSize",
-        "Step size",
-        "Determines the distance between steps taken in the volume rendering. The lower "
-        "the number is, the better the rendering looks, but also takes more "
-        "computational resources to render.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo StepSizeInfo = {
+        .identifier = "StepSize",
+        .name = "Step size",
+        .description = "Determines the distance between steps taken in the volume "
+            "rendering. The lower the number is, the better the rendering looks, but "
+            "also takes more computational resources to render.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.01f,
+            .minMax = { 0.001f, 0.05f },
+            .stepSize = 0.001f
+        }
     };
 
-    constexpr Property::PropertyInfo AbsorptionMultiplyInfo = {
-        "AbsorptionMultiply",
-        "Absorption multiplier",
-        "A unit-less scale factor for the probability of dust absorbing a light "
-        "particle. The amount of absorption determines the spectrum of the light that is "
-        "emitted from the galaxy.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo AbsorptionMultiplyInfo = {
+        .identifier = "AbsorptionMultiply",
+        .name = "Absorption multiplier",
+        .description = "A unit-less scale factor for the probability of dust absorbing a "
+            "light particle. The amount of absorption determines the spectrum of the "
+            "light that is emitted from the galaxy.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 40.f,
+            .minMax = { 0.f, 200.f }
+        }
     };
 
-    constexpr Property::PropertyInfo EmissionMultiplyInfo = {
-        "EmissionMultiply",
-        "Emission multiplier",
-        "A unit-less scale factor for the amount of light being emitted by dust in the "
-        "galaxy.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo EmissionMultiplyInfo = {
+        .identifier = "EmissionMultiply",
+        .name = "Emission multiplier",
+        .description = "A unit-less scale factor for the amount of light being emitted "
+            "by dust in the galaxy.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 200.f,
+            .minMax = { 0.f, 1000.f }
+        }
     };
 
-    constexpr Property::PropertyInfo RotationInfo = {
-        "Rotation",
-        "Euler rotation",
-        "The internal rotation of the volume rendering in Euler angles.",
-        Property::Visibility::Developer
+    constexpr Vec3PropertyInfo RotationInfo = {
+        .identifier = "Rotation",
+        .name = "Euler rotation",
+        .description = "The internal rotation of the volume rendering in Euler angles.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(glm::two_pi<float>()) }
+        }
     };
 
-    constexpr Property::PropertyInfo StarRenderingMethodInfo = {
-        "StarRenderingMethod",
-        "Star rendering method",
-        "The rendering method used for visualizing the stars.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo StarRenderingMethodInfo = {
+        .identifier = "StarRenderingMethod",
+        .name = "Star rendering method",
+        .description = "The rendering method used for visualizing the stars.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EnabledPointsRatioInfo = {
-        "EnabledPointsRatio",
-        "Enabled points",
-        "The ratio of point-like stars that are rendered to produce the overall galaxy "
-        "image. At a value of 0, no stars are rendered, at a value of 1 all points "
-        "contained in the dataset are rendered. The specific value chosen is a "
-        "compromise between image fidelity and rendering performance.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo EnabledPointsRatioInfo = {
+        .identifier = "EnabledPointsRatio",
+        .name = "Enabled points",
+        .description = "The ratio of point-like stars that are rendered to produce the "
+            "overall galaxy image. At a value of 0, no stars are rendered, at a value of "
+            "1 all points contained in the dataset are rendered. The specific value "
+            "chosen is a compromise between image fidelity and rendering performance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 0.01f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DownscaleVolumeRenderingInfo = {
-        "Downscale",
-        "Downscale factor volume rendering",
-        "The downscaling factor used when rendering the volume.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo DownscaleVolumeRenderingInfo = {
+        .identifier = "Downscale",
+        .name = "Downscale factor volume rendering",
+        .description = "The downscaling factor used when rendering the volume.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.1f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo NumberOfRayCastingStepsInfo = {
-        "Steps",
-        "Number of raycasting steps",
-        "The number of integration steps used during the raycasting procedure.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo NumberOfRayCastingStepsInfo = {
+        .identifier = "Steps",
+        .name = "Number of raycasting steps",
+        .description = "The number of integration steps used during the raycasting "
+            "procedure.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1000.f,
+            .minMax = { 1.f, 1000.f }
+        }
     };
 
     void saveCachedFile(const std::filesystem::path& file,
@@ -186,20 +223,17 @@ namespace {
     }
 
     struct [[codegen::Dictionary(RenderableGalaxy)]] Parameters {
-        // [[codegen::verbatim(VolumeRenderingEnabledInfo.description)]]
-        std::optional<bool> volumeRenderingEnabled;
+        std::optional<bool> volumeRenderingEnabled
+            [[codegen::Info(VolumeRenderingEnabledInfo)]];
 
-        // [[codegen::verbatim(StarRenderingEnabledInfo.description)]]
-        std::optional<bool> starRenderingEnabled;
+        std::optional<bool> starRenderingEnabled
+            [[codegen::Info(StarRenderingEnabledInfo)]];
 
-        // [[codegen::verbatim(StepSizeInfo.description)]]
-        std::optional<float> stepSizeInfo;
+        std::optional<float> stepSizeInfo [[codegen::Info(StepSizeInfo)]];
 
-        // [[codegen::verbatim(AbsorptionMultiplyInfo.description)]]
-        std::optional<float> absorptionMultiply;
+        std::optional<float> absorptionMultiply [[codegen::Info(AbsorptionMultiplyInfo)]];
 
-        // [[codegen::verbatim(EmissionMultiplyInfo.description)]]
-        std::optional<float> emissionMultiply;
+        std::optional<float> emissionMultiply [[codegen::Info(EmissionMultiplyInfo)]];
 
         // If specified, the default raycasting shader is overwritten and the shader at
         // this location is used instead.
@@ -209,22 +243,21 @@ namespace {
             Points,
             Billboards
         };
-        // [[codegen::verbatim(StarRenderingMethodInfo.description)]]
-        std::optional<StarRenderingMethod> starRenderingMethod;
+        std::optional<StarRenderingMethod> starRenderingMethod
+            [[codegen::Info(StarRenderingMethodInfo)]];
 
-        // [[codegen::verbatim(RotationInfo.description)]]
-        std::optional<glm::vec3> rotation;
+        std::optional<glm::vec3> rotation [[codegen::Info(RotationInfo)]];
 
         struct Volume {
             std::filesystem::path filename;
             glm::ivec3 dimensions;
             glm::vec3 size;
 
-            // [[codegen::verbatim(NumberOfRayCastingStepsInfo.description)]]
-            std::optional<float> steps [[codegen::greater(0.f)]];
+            std::optional<float> steps
+                [[codegen::Info(NumberOfRayCastingStepsInfo), codegen::greater(0.f)]];
 
-            // [[codegen::verbatim(DownscaleVolumeRenderingInfo.description)]]
-            std::optional<float> downscale [[codegen::inrange(0.f, 1.f)]];
+            std::optional<float> downscale [[codegen::Info(DownscaleVolumeRenderingInfo),
+                codegen::inrange(0.f, 1.f)]];
         };
         Volume volume;
 
@@ -232,8 +265,8 @@ namespace {
             std::filesystem::path filename;
             std::filesystem::path texture;
 
-            // [[codegen::verbatim(EnabledPointsRatioInfo.description)]]
-            std::optional<float> enabledPointsRatio;
+            std::optional<float> enabledPointsRatio
+                [[codegen::Info(EnabledPointsRatioInfo)]];
         };
         Points points;
     };
@@ -251,21 +284,16 @@ Documentation RenderableGalaxy::Documentation() {
 
 RenderableGalaxy::RenderableGalaxy(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
-    , _starRenderingEnabled(StarRenderingEnabledInfo, true)
-    , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.05f, 0.001f)
-    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.f, 200.f)
-    , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.f, 1000.f)
+    , _volumeRenderingEnabled(VolumeRenderingEnabledInfo)
+    , _starRenderingEnabled(StarRenderingEnabledInfo)
+    , _stepSize(StepSizeInfo)
+    , _absorptionMultiply(AbsorptionMultiplyInfo)
+    , _emissionMultiply(EmissionMultiplyInfo)
     , _starRenderingMethod(StarRenderingMethodInfo)
-    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.f)
-    , _rotation(
-        RotationInfo,
-        glm::vec3(0.f),
-        glm::vec3(0.f),
-        glm::vec3(glm::two_pi<float>())
-    )
-    , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
-    , _numberOfRayCastingSteps(NumberOfRayCastingStepsInfo, 1000.f, 1.f, 1000.f)
+    , _enabledPointsRatio(EnabledPointsRatioInfo)
+    , _rotation(RotationInfo)
+    , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo)
+    , _numberOfRayCastingSteps(NumberOfRayCastingStepsInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -319,7 +347,7 @@ RenderableGalaxy::RenderableGalaxy(const Dictionary& dictionary)
     addProperty(_starRenderingMethod);
     addProperty(_enabledPointsRatio);
     addProperty(_rotation);
-    _downScaleVolumeRendering.setVisibility(Property::Visibility::Developer);
+    _downScaleVolumeRendering.setVisibility(Visibility::Developer);
     addProperty(_downScaleVolumeRendering);
     addProperty(_numberOfRayCastingSteps);
 

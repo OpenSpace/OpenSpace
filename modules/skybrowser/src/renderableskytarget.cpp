@@ -46,62 +46,81 @@ namespace {
         Additive
     };
 
-    constexpr Property::PropertyInfo crossHairSizeInfo = {
-        "CrosshairSize",
-        "Crosshair size",
-        "The size of the crosshair given as a field of view (in degrees).",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo crossHairSizeInfo = {
+        .identifier = "CrosshairSize",
+        .name = "Crosshair size",
+        .description = "The size of the crosshair given as a field of view (in degrees).",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 1.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo RectangleThresholdInfo = {
-        "RectangleThreshold",
-        "Rectangle threshold",
-        "A threshold value for the vertical field of view, in degrees, that decides when "
-        "a rectangle will be used to visualize the target in addition to the crosshair. "
-        "When the field of view is smaller than this value, only the crosshair will be "
-        "shown.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo RectangleThresholdInfo = {
+        .identifier = "RectangleThreshold",
+        .name = "Rectangle threshold",
+        .description = "A threshold value for the vertical field of view, in degrees, "
+            "that decides when a rectangle will be used to visualize the target in "
+            "addition to the crosshair. When the field of view is smaller than this "
+            "value, only the crosshair will be shown.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 5.f,
+            .minMax = { 0.1f, 70.f }
+        }
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The thickness of the line of the target. The larger number, the thicker line.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The thickness of the line of the target. The larger number, the "
+            "thicker line.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 13.f,
+            .minMax = { 1.f, 100.f }
+        }
     };
 
-    constexpr Property::PropertyInfo VerticalFovInfo = {
-        "VerticalFov",
-        "Vertical field of view",
-        "The vertical field of view of the target.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo VerticalFovInfo = {
+        .identifier = "VerticalFov",
+        .name = "Vertical field of view",
+        .description = "The vertical field of view of the target.",
+        .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 10.0,
+            .minMax = { 0.00000000001, 70.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo ApplyRollInfo = {
-       "ApplyRoll",
-       "Apply roll",
-       "If true, always rotate the target to have its up direction aligned with the up "
-       "direction of the camera.",
-       Property::Visibility::User
+    constexpr BoolPropertyInfo ApplyRollInfo = {
+        .identifier = "ApplyRoll",
+        .name = "Apply roll",
+        .description = "If true, always rotate the target to have its up direction "
+            "aligned with the up direction of the camera.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
     // This is a utility renderable used by the SkyBrowser module to visualize a
     // crosshair-like target in the sky.
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {
-        // [[codegen::verbatim(crossHairSizeInfo.description)]]
-        std::optional<float> crossHairSize [[codegen::greaterequal(0.f)]];
+        std::optional<float> crossHairSize
+            [[codegen::Info(crossHairSizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(RectangleThresholdInfo.description)]]
-        std::optional<float> rectangleThreshold [[codegen::greaterequal(0.f)]];
+        std::optional<float> rectangleThreshold
+            [[codegen::Info(RectangleThresholdInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(VerticalFovInfo.description)]]
-        std::optional<double> verticalFov;
+        std::optional<double> verticalFov [[codegen::Info(VerticalFovInfo)]];
 
-        // [[codegen::verbatim(ApplyRollInfo.description)]]
-        std::optional<bool> applyRoll;
+        std::optional<bool> applyRoll [[codegen::Info(ApplyRollInfo)]];
     };
 } // namespace
 #include "renderableskytarget_codegen.cpp"
@@ -117,11 +136,11 @@ Documentation RenderableSkyTarget::Documentation() {
 
 RenderableSkyTarget::RenderableSkyTarget(const Dictionary& dictionary)
     : RenderablePlane(dictionary)
-    , _crossHairSize(crossHairSizeInfo, 2.f, 1.f, 10.f)
-    , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
-    , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
-    , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
-    , _applyRoll(ApplyRollInfo, true)
+    , _crossHairSize(crossHairSizeInfo)
+    , _showRectangleThreshold(RectangleThresholdInfo)
+    , _lineWidth(LineWidthInfo)
+    , _verticalFov(VerticalFovInfo)
+    , _applyRoll(ApplyRollInfo)
 {
     // Handle target dimension property
     _autoScale = false;
@@ -138,7 +157,6 @@ RenderableSkyTarget::RenderableSkyTarget(const Dictionary& dictionary)
     addProperty(_lineWidth);
 
     _verticalFov = p.verticalFov.value_or(_verticalFov);
-    _verticalFov.setReadOnly(true);
     addProperty(_verticalFov);
 
     addProperty(_applyRoll);

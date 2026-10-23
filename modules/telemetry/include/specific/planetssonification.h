@@ -106,7 +106,7 @@ private:
     /**
      * For this sonification, a more advanced custom updateData function is needed with
      * additional arguments. Therefore, this implementation is left empty and the update
-     * function is overriden to use the custom updateData function instead.
+     * function is overridden to use the custom updateData function instead.
      *
      * \param camera The camera in the scene (not used in this case)
      * \return Always return `false` (this function is empty)
@@ -116,7 +116,7 @@ private:
     /**
      * For this sonification, a more advanced custom sendData function is needed with
      * additional arguments. Therefore, this implementation is left empty and the update
-     * function is overriden to use the custom updateData function instead.
+     * function is overridden to use the custom updateData function instead.
      */
     void sendData() override;
 

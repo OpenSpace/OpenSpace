@@ -31,14 +31,21 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<int> {
+    static constexpr int Min = std::numeric_limits<int>::lowest();
+    static constexpr int Max = std::numeric_limits<int>::max();
+    static constexpr int Step = 1;
+};
+
+using IntPropertyInfo = BasicPropertyInfo<NumericalDefaults<int>>;
+
 /**
  * This class is a concrete implementation of TemplateProperty with the type `int`.
  */
 class IntProperty : public NumericalProperty<int> {
 public:
-    explicit IntProperty(PropertyInfo info, int value = 0,
-        int minValue = std::numeric_limits<int>::lowest(),
-        int maxValue = std::numeric_limits<int>::max(), int stepValue = 1);
+    explicit IntProperty(IntPropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

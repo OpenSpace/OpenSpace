@@ -26,10 +26,6 @@
 
 #include <openspace/documentation/schema.h>
 
-namespace {
-    constexpr std::string_view _loggerCat = "PropertyTreeTopic";
-} // namespace
-
 using nlohmann::json;
 
 namespace openspace {

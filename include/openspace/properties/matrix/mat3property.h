@@ -32,14 +32,20 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::mat3x3> {
+    static constexpr glm::mat3x3 Min =
+        createFillMat3x3<float>(std::numeric_limits<float>::lowest());
+    static constexpr glm::mat3x3 Max =
+        createFillMat3x3<float>(std::numeric_limits<float>::max());
+    static constexpr glm::mat3x3 Step = createFillMat3x3<float>(0.01f);
+};
+
+using Mat3PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::mat3x3>>;
+
 class Mat3Property : public NumericalProperty<glm::mat3x3> {
 public:
-    explicit Mat3Property(PropertyInfo info, glm::mat3x3 value = glm::mat3x3(0.f),
-        glm::mat3x3 minValue =
-            createFillMat3x3<float>(std::numeric_limits<float>::lowest()),
-        glm::mat3x3 maxValue =
-            createFillMat3x3<float>(std::numeric_limits<float>::max()),
-        glm::mat3x3 stepValue = createFillMat3x3<float>(0.01f));
+    explicit Mat3Property(Mat3PropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

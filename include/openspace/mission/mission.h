@@ -150,7 +150,7 @@ public:
     Trace phaseTrace(double time, int maxDepth = -1) const;
 
     /**
-     * Returns the Documentation that describes the Dictionarty that this MissionPhase can
+     * Returns the Documentation that describes the Dictionary that this MissionPhase can
      * be constructed from.
      *
      * \return The Documentation that describes the required structure for a Dictionary

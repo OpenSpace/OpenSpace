@@ -199,14 +199,14 @@ void AvoidCollisionCurve::removeCollisions(int step) {
                 break;
             }
 
-            // To avoid collision, take a step in an orhtogonal direction of the collision
+            // To avoid collision, take a step in an orthogonal direction of the collision
             // point and add a new point
             const glm::dvec3 lineDirection = glm::normalize(lineEnd - lineStart);
             const glm::dvec3 nodeCenter = node->worldPosition();
             const glm::dvec3 collisionPointToCenter = nodeCenter - collisionPoint;
 
-            const glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDirection);
-            const glm::dvec3 orthogonal = collisionPointToCenter - parallell;
+            const glm::dvec3 parallel = glm::proj(collisionPointToCenter, lineDirection);
+            const glm::dvec3 orthogonal = collisionPointToCenter - parallel;
 
             const double avoidCollisionDistance =
                 AvoidCollisionDistanceRadiusMultiplier * radius;

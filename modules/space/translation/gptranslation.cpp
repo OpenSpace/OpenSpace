@@ -42,7 +42,7 @@ namespace {
     // that case, a specific entry can be selected, allowing a single file to serve as a
     // source for multiple orbiting objects or multiple records of the same kind.
     struct [[codegen::Dictionary(GPTranslation)]] Parameters {
-        // Specifies the filename of the general pertubation file.
+        // Specifies the filename of the general perturbation file.
         std::filesystem::path file;
 
         enum class [[codegen::map(openspace::kepler::Format)]] Format {
@@ -59,7 +59,7 @@ namespace {
         Format format;
 
         // Specifies the element within the file that should be used in case the file
-        // provides multiple general pertubation elements. Defaults to 1.
+        // provides multiple general perturbation elements. Defaults to 1.
         std::optional<int> element [[codegen::greater(0)]];
     };
 } // namespace

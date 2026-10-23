@@ -65,42 +65,65 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 }
 )";
 
-    constexpr Property::PropertyInfo SSAOEnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Determines whether this SSAO pass should be enabled or not."
+    constexpr BoolPropertyInfo SSAOEnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Determines whether this SSAO pass should be enabled or not.",
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo SSAOIntensityInfo = {
-        "Intensity",
-        "Intensity",
-        "Controls the strength of the ambient occlusion effect. Higher values darken "
-        "occluded areas more strongly."
+    constexpr FloatPropertyInfo SSAOIntensityInfo = {
+        .identifier = "Intensity",
+        .name = "Intensity",
+        .description = "Controls the strength of the ambient occlusion effect. Higher "
+            "values darken occluded areas more strongly.",
+        .defaults = {
+            .value = 7.5f,
+            .minMax = { 0.f, 100.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SSAORadiusInfo = {
-        "Radius",
-        "Radius",
-        "Sets the sampling radius for occlusion. Larger values produce broader, smoother "
-        "shading, while smaller values create tighter shadows."
+    constexpr FloatPropertyInfo SSAORadiusInfo = {
+        .identifier = "Radius",
+        .name = "Radius",
+        .description = "Sets the sampling radius for occlusion. Larger values produce "
+            "broader, smoother shading, while smaller values create tighter shadows.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.1f, 1000.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SSAOBiasInfo = {
-        "HorizonBias",
-        "Horizon Bias",
-        "" // @TODO Missing documentation
+    constexpr FloatPropertyInfo SSAOBiasInfo = {
+        .identifier = "HorizonBias",
+        .name = "Horizon Bias",
+        .description = "", // @TODO Missing documentation
+        .defaults = {
+            .value = 0.1f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SSAONormalBiasInfo = {
-        "NormalBias",
-        "Normal Bias",
-        "" // @TODO Missing documentation
+    constexpr FloatPropertyInfo SSAONormalBiasInfo = {
+        .identifier = "NormalBias",
+        .name = "Normal Bias",
+        .description = "", // @TODO Missing documentation
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ExposureInfo = {
-        "Exposure",
-        "Exposure",
-        "Controls the Exposure setting for the tonemap."
+    constexpr FloatPropertyInfo ExposureInfo = {
+        .identifier = "Exposure",
+        .name = "Exposure",
+        .description = "Controls the Exposure setting for the tonemap.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.1f, 10.f }
+        }
     };
 } // namespace
 
@@ -108,11 +131,11 @@ namespace openspace {
 
 MoleculeModule::SSAO::SSAO(PropertyOwner::PropertyOwnerInfo info)
     : PropertyOwner(info)
-    , enabled(SSAOEnabledInfo, true)
-    , intensity(SSAOIntensityInfo, 7.5f, 0.f, 100.f)
-    , radius(SSAORadiusInfo, 1.f, 0.1f, 1000.f)
-    , horizonBias(SSAOBiasInfo, 0.1f, 0.f, 1.f)
-    , normalBias(SSAONormalBiasInfo, 1.f, 0.f, 1.f)
+    , enabled(SSAOEnabledInfo)
+    , intensity(SSAOIntensityInfo)
+    , radius(SSAORadiusInfo)
+    , horizonBias(SSAOBiasInfo)
+    , normalBias(SSAONormalBiasInfo)
 {
     addProperty(enabled);
     addProperty(intensity);
@@ -125,7 +148,7 @@ MoleculeModule::MoleculeModule()
     : OpenSpaceModule(Name)
     , _ssao({ "SSAO", "SSAO", "First SSAO pass" })
     , _ssao2({ "SSAO2", "SSAO 2", "Second SSAO pass" })
-    , _exposure(ExposureInfo, 1.f, 0.1f, 10.f)
+    , _exposure(ExposureInfo)
     , _threadPool(std::max(1U, std::thread::hardware_concurrency() - 1))
 {
     // @TODO (2026-02-11, abock) These settings should be made configurable from the cfg

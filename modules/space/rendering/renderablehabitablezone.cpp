@@ -40,38 +40,54 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EffectiveTemperatureInfo = {
-        "EffectiveTemperature",
-        "Effective temperature",
-        "The effective temperature of the corresponding star, in Kelvin. Used to compute "
-        "the width and size of the disc.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo EffectiveTemperatureInfo = {
+        .identifier = "EffectiveTemperature",
+        .name = "Effective temperature",
+        .description = "The effective temperature of the corresponding star, in Kelvin. "
+            "Used to compute the width and size of the disc.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 5780.f,
+            .minMax = { 0.f, 7.5e4f }
+        }
     };
 
-    constexpr Property::PropertyInfo LuminosityInfo = {
-        "Luminosity",
-        "Luminosity",
-        "The luminosity of the corresponding star, in units of solar luminosities. Used "
-        "to compute the width and size of the disc.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo LuminosityInfo = {
+        .identifier = "Luminosity",
+        .name = "Luminosity",
+        .description = "The luminosity of the corresponding star, in units of solar "
+            "luminosities. Used to compute the width and size of the disc.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1e8f }
+        }
     };
 
-    constexpr Property::PropertyInfo OptimisticInfo = {
-        "Optimistic",
-        "Optimistic" ,
-        "If true, the habitable zone disc is rendered with the optimistic boundaries "
-        "rather than the conservative ones.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo OptimisticInfo = {
+        .identifier = "Optimistic",
+        .name = "Optimistic",
+        .description = "If true, the habitable zone disc is rendered with the optimistic "
+            "boundaries rather than the conservative ones.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo KopparapuTeffIntervalInfo = {
-        "KopparapuTeffInterval",
-        "Kopparapu TEFF",
-        "The effective temperature interval for which Kopparapu's formula is used for "
-        "the habitable zone computation. For stars with temperatures outside the range, "
-        "a simpler method by Tom E. Harris is used. This method only uses the star "
-        "luminosity and does not include computation of the optimistic boundaries.",
-        Property::Visibility::User
+    constexpr Vec2PropertyInfo KopparapuTeffIntervalInfo = {
+        .identifier = "KopparapuTeffInterval",
+        .name = "Kopparapu TEFF",
+        .description = "The effective temperature interval for which Kopparapu's formula "
+            "is used for the habitable zone computation. For stars with temperatures "
+            "outside the range, a simpler method by Tom E. Harris is used. This method "
+            "only uses the star luminosity and does not include computation of the "
+            "optimistic boundaries.",
+        .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = glm::vec2(1000.f, 10000.f)
+        }
     };
 
     // Represents a star's habitable zone, with boundaries computed from its effective
@@ -94,17 +110,15 @@ namespace {
     // the optimistic inner zone, and the last part the optimistic outer zone (furthest
     // from the star).
     struct [[codegen::Dictionary(RenderableHabitableZone)]] Parameters {
-        // [[codegen::verbatim(EffectiveTemperatureInfo.description)]]
-        float effectiveTemperature [[codegen::greaterequal(0.f)]];
+        float effectiveTemperature
+            [[codegen::Info(EffectiveTemperatureInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(LuminosityInfo.description)]]
-        float luminosity [[codegen::greaterequal(0.f)]];
+        float luminosity [[codegen::Info(LuminosityInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(OptimisticInfo.description)]]
-        std::optional<bool> optimistic;
+        std::optional<bool> optimistic [[codegen::Info(OptimisticInfo)]];
 
-        // [[codegen::verbatim(KopparapuTeffIntervalInfo.description)]]
-        std::optional<glm::vec2> kopparapuTeffInterval;
+        std::optional<glm::vec2> kopparapuTeffInterval
+            [[codegen::Info(KopparapuTeffIntervalInfo)]];
     };
 } // namespace
 #include "renderablehabitablezone_codegen.cpp"
@@ -120,10 +134,10 @@ Documentation RenderableHabitableZone::Documentation() {
 
 RenderableHabitableZone::RenderableHabitableZone(const Dictionary& dictionary)
     : RenderableDisc(dictionary)
-    , _teff(EffectiveTemperatureInfo, 5780.f, 0.f, 7.5e4f)
-    , _luminosity(LuminosityInfo, 1.f, 0.f, 1e8f)
-    , _showOptimistic(OptimisticInfo, false)
-    , _kopparapuTeffInterval(KopparapuTeffIntervalInfo, glm::vec2(1000.f, 10000.f))
+    , _teff(EffectiveTemperatureInfo)
+    , _luminosity(LuminosityInfo)
+    , _showOptimistic(OptimisticInfo)
+    , _kopparapuTeffInterval(KopparapuTeffIntervalInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -140,9 +154,8 @@ RenderableHabitableZone::RenderableHabitableZone(const Dictionary& dictionary)
 
     // The user should not be able to change this property. It's just used to communicate
     // the different rendering that happens outside of this interval
-    addProperty(_kopparapuTeffInterval);
     _kopparapuTeffInterval.setViewOption(Property::ViewOptions::MinMaxRange);
-    _kopparapuTeffInterval.setReadOnly(true);
+    addProperty(_kopparapuTeffInterval);
 
     // Make parent's size related properties read only. We want to set them based on the
     // given temperature and luminosity

@@ -31,14 +31,21 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<float> {
+    static constexpr float Min = std::numeric_limits<float>::lowest();
+    static constexpr float Max = std::numeric_limits<float>::max();
+    static constexpr float Step = 0.01f;
+};
+
+using FloatPropertyInfo = BasicPropertyInfo<NumericalDefaults<float>>;
+
 /**
  * This class is a concrete implementation of TemplateProperty with the type `float`.
  */
 class FloatProperty : public NumericalProperty<float> {
 public:
-    explicit FloatProperty(PropertyInfo info, float value = 0.f,
-        float minValue = std::numeric_limits<float>::lowest(),
-        float maxValue = std::numeric_limits<float>::max(), float stepValue = 0.01f);
+    explicit FloatProperty(FloatPropertyInfo info);
 
     std::string_view className() const override final;
     lua::LuaTypes typeLua() const override final;

@@ -64,22 +64,29 @@ namespace {
 
     constexpr std::string_view _loggerCat = "NavigationHandler";
 
-    constexpr Property::PropertyInfo FrameInfo = {
-        "UseKeyFrameInteraction",
-        "Use keyframe interaction",
-        "If this is set to 'true' the entire interaction is based off key frames rather "
-        "than using the mouse interaction.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo FrameInfo = {
+        .identifier = "UseKeyFrameInteraction",
+        .name = "Use keyframe interaction",
+        .description = "If this is set to 'true' the entire interaction is based off key "
+            "frames rather than using the mouse interaction.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo JumpToFadeDurationInfo = {
-        "JumpToFadeDuration",
-        "Jump to fade duration",
-        "The number of seconds the fading of the rendering should take per default when "
-        "navigating through a 'jump' transition. This is when the rendering is first "
-        "faded to black, then the camera is moved, and then the rendering fades in "
-        "again.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo JumpToFadeDurationInfo = {
+        .identifier = "JumpToFadeDuration",
+        .name = "Jump to fade duration",
+        .description = "The number of seconds the fading of the rendering should take "
+            "per default when navigating through a 'jump' transition. This is when the "
+            "rendering is first faded to black, then the camera is moved, and then the "
+            "rendering fades in again.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 } // namespace
 
@@ -87,8 +94,8 @@ namespace openspace {
 
 NavigationHandler::NavigationHandler()
     : PropertyOwner({ "NavigationHandler", "Navigation Handler" })
-    , _useKeyFrameInteraction(FrameInfo, false)
-    , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.f, 10.f)
+    , _useKeyFrameInteraction(FrameInfo)
+    , _jumpToFadeDuration(JumpToFadeDurationInfo)
 {
     addPropertySubOwner(_orbitalNavigator);
     addPropertySubOwner(_pathNavigator);

@@ -15,34 +15,46 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ShapeParametersInfo = {
-        "ShapeParameters",
-        "Shape parameters",
-        "Selection geometry in parsecs: sphere [0, x, y, z, radius], box "
-        "[1, x, y, z, width, height, depth], sky rectangle "
-        "[2, raMin, raMax, decMin, decMax, useDistanceFilter, distMin, distMax], "
-        "custom mesh [3, id]. "
-        "The straight-sided sky cone approximates the angular selection; wide "
-        "ranges use tessellated angular boundaries.",
-        Property::Visibility::Hidden
+    constexpr DoubleListPropertyInfo ShapeParametersInfo = {
+        .identifier = "ShapeParameters",
+        .name = "Shape parameters",
+        .description = "Selection geometry in parsecs: sphere [0, x, y, z, radius], box "
+            "[1, x, y, z, width, height, depth], sky rectangle "
+            "[2, raMin, raMax, decMin, decMax, useDistanceFilter, distMin, distMax], "
+            "custom mesh [3, id]. "
+            "The straight-sided sky cone approximates the angular selection; wide "
+            "ranges use tessellated angular boundaries.",
+        .visibility = Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The selection volume's fill and outline color."
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The selection volume's fill and outline color.",
+        .defaults = {
+            .value = glm::vec3(0.2f, 0.85f, 0.65f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo OutlineOpacityInfo = {
-        "OutlineOpacity",
-        "Outline opacity",
-        "The opacity of the selection outline."
+    constexpr FloatPropertyInfo OutlineOpacityInfo = {
+        .identifier = "OutlineOpacity",
+        .name = "Outline opacity",
+        .description = "The opacity of the selection outline.",
+        .defaults = {
+            .value = 0.65f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableSpatialSelectionVolume)]] Parameters {
-        std::optional<std::vector<double>> shapeParameters;
-        std::optional<glm::vec3> color [[codegen::color()]];
-        std::optional<float> outlineOpacity [[codegen::inrange(0.f, 1.f)]];
+        std::optional<std::vector<double>> shapeParameters
+            [[codegen::Info(ShapeParametersInfo)]];
+
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
+
+        std::optional<float> outlineOpacity
+            [[codegen::Info(OutlineOpacityInfo), codegen::inrange(0.f, 1.f)]];
     };
 } // namespace
 #include "renderablespatialselectionvolume_codegen.cpp"
@@ -60,8 +72,8 @@ RenderableSpatialSelectionVolume::RenderableSpatialSelectionVolume(
                                             const Dictionary& dictionary)
     : Renderable(dictionary)
     , _shapeParameters(ShapeParametersInfo)
-    , _color(ColorInfo, glm::vec3(0.2f, 0.85f, 0.65f), glm::vec3(0.f), glm::vec3(1.f))
-    , _outlineOpacity(OutlineOpacityInfo, 0.65f, 0.f, 1.f)
+    , _color(ColorInfo)
+    , _outlineOpacity(OutlineOpacityInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _shapeParameters = p.shapeParameters.value_or(std::vector<double>{});

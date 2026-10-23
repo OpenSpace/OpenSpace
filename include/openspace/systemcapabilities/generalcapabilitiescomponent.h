@@ -42,7 +42,7 @@ namespace openspace::systemcapabilities {
 class GeneralCapabilitiesComponent : public SystemCapabilitiesComponent {
 public:
     /**
-     * Main exception that is thrown if an error occured in the detection of general
+     * Main exception that is thrown if an error occurred in the detection of general
      * capabilities.
      */
     struct GeneralCapabilitiesComponentError : public RuntimeError {

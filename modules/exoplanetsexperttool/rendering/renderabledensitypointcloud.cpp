@@ -45,88 +45,126 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableDensityPointCloud";
 
-    constexpr Property::PropertyInfo PointSizeInfo = {
-        "PointSize",
-        "Point size",
-        "The size of each point, in pixels."
+    constexpr FloatPropertyInfo PointSizeInfo = {
+        .identifier = "PointSize",
+        .name = "Point size",
+        .description = "The size of each point, in pixels.",
+        .defaults = {
+            .value = 3.f,
+            .minMax = { 0.5f, 64.f }
+        }
     };
 
-    constexpr Property::PropertyInfo FixedColorInfo = {
-        "FixedColor",
-        "Fixed color",
-        "The color of the points when no color map is used."
+    constexpr Vec3PropertyInfo FixedColorInfo = {
+        .identifier = "FixedColor",
+        .name = "Fixed color",
+        .description = "The color of the points when no color map is used.",
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo UseColorMapInfo = {
-        "UseColorMap",
-        "Use color map",
-        "If true, and a color map file was provided, the points are colored by their "
-        "density using the color map. Otherwise the fixed color is used."
+    constexpr BoolPropertyInfo UseColorMapInfo = {
+        .identifier = "UseColorMap",
+        .name = "Use color map",
+        .description = "If true, and a color map file was provided, the points are colored by their "
+            "density using the color map. Otherwise the fixed color is used.",
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ColorMapFileInfo = {
-        "ColorMap",
-        "Color map",
-        "The file to use for the density-based color mapping."
+    constexpr StringPropertyInfo ColorMapFileInfo = {
+        .identifier = "ColorMap",
+        .name = "Color map",
+        .description = "The file to use for the density-based color mapping."
     };
 
-    constexpr Property::PropertyInfo DensityRangeInfo = {
-        "DensityRange",
-        "Density range",
-        "The density values mapped to the start and end of the color map. Defaults to "
-        "the minimum and maximum density of the computed volume."
+    constexpr Vec2PropertyInfo DensityRangeInfo = {
+        .identifier = "DensityRange",
+        .name = "Density range",
+        .description = "The density values mapped to the start and end of the color map. "
+            "Defaults to the minimum and maximum density of the computed volume.",
+        .defaults = {
+            .value = glm::vec2(0.f, 1.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo UseLogScaleInfo = {
-        "UseLogScale",
-        "Use log scale",
-        "If true, the density is mapped logarithmically onto the color map."
+    constexpr BoolPropertyInfo UseLogScaleInfo = {
+        .identifier = "UseLogScale",
+        .name = "Use log scale",
+        .description = "If true, the density is mapped logarithmically onto the color "
+            "map.",
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo DensityThresholdInfo = {
-        "DensityThreshold",
-        "Density threshold",
-        "Points with a density below this percentage of the maximum density are not "
-        "rendered."
+    constexpr FloatPropertyInfo DensityThresholdInfo = {
+        .identifier = "DensityThreshold",
+        .name = "Density threshold",
+        .description = "Points with a density below this percentage of the maximum "
+            "density are not rendered.",
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 100.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SelectedIndicesInfo = {
-        "SelectedIndices",
-        "Selected indices",
-        "The indices of the selected points, in the order they appear in the dataset "
-        "after rows with invalid positions have been removed.",
-        Property::Visibility::Hidden
+    constexpr IntListPropertyInfo SelectedIndicesInfo = {
+        .identifier = "SelectedIndices",
+        .name = "Selected indices",
+        .description = "The indices of the selected points, in the order they appear in "
+            "the dataset after rows with invalid positions have been removed.",
+        .visibility = Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo ClearSelectionInfo = {
-        "ClearSelection",
-        "Clear selection",
-        "Clears the list of currently selected indices."
+    constexpr TriggerPropertyInfo ClearSelectionInfo = {
+        .identifier = "ClearSelection",
+        .name = "Clear selection",
+        .description = "Clears the list of currently selected indices."
     };
 
-    constexpr Property::PropertyInfo SelectionColorInfo = {
-        "SelectionColor",
-        "Selection color",
-        "The color of the selected points."
+    constexpr Vec3PropertyInfo SelectionColorInfo = {
+        .identifier = "SelectionColor",
+        .name = "Selection color",
+        .description = "The color of the selected points.",
+        .defaults = {
+            .value = glm::vec3(1.f, 0.6f, 0.1f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo UnselectedOpacityInfo = {
-        "UnselectedOpacity",
-        "Unselected opacity",
-        "The opacity factor applied to points that are not selected, when there is a "
-        "selection."
+    constexpr FloatPropertyInfo UnselectedOpacityInfo = {
+        .identifier = "UnselectedOpacity",
+        .name = "Unselected opacity",
+        .description = "The opacity factor applied to points that are not selected, when "
+            "there is a selection.",
+        .defaults = {
+            .value = 0.15f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ShowBoundingBoxInfo = {
-        "Ebabled",
-        "Show bounding box",
-        "If true, the bounding box of the density grid is rendered."
+    constexpr BoolPropertyInfo ShowBoundingBoxInfo = {
+        .identifier = "ShowBoundingBox",
+        .name = "Show bounding box",
+        .description = "If true, the bounding box of the density grid is rendered.",
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo BoundingBoxColorInfo = {
-        "Color",
-        "Bounding box color",
-        "The color of the bounding box of the density grid."
+    constexpr Vec4PropertyInfo BoundingBoxColorInfo = {
+        .identifier = "BoundingBoxColor",
+        .name = "Bounding box color",
+        .description = "The color of the bounding box of the density grid.",
+        .defaults = {
+            .value = glm::vec4(1.f, 1.f, 1.f, 0.5f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
     struct PointVertex {
@@ -220,39 +258,24 @@ openspace::Documentation RenderableDensityPointCloud::Documentation() {
 
 RenderableDensityPointCloud::RenderableDensityPointCloud(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _pointSize(PointSizeInfo, 3.f, 0.5f, 64.f)
-    , _color{
+    , _pointSize(PointSizeInfo)
+    , _color {
         .owner = PropertyOwner({"Color", "Color"}),
-        .fixedColor = Vec3Property(FixedColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f)),
-        .useColorMap = BoolProperty(UseColorMapInfo, true),
+        .fixedColor = Vec3Property(FixedColorInfo),
+        .useColorMap = BoolProperty(UseColorMapInfo),
         .colorMapFile = StringProperty(ColorMapFileInfo),
-        .densityRange = Vec2Property(
-            DensityRangeInfo,
-            glm::vec2(0.f, 1.f),
-            glm::vec2(0.f),
-            glm::vec2(1.f)
-        ),
-        .useLogScale = BoolProperty(UseLogScaleInfo, false),
-        .selectionColor = Vec3Property(
-            SelectionColorInfo,
-            glm::vec3(1.f, 0.6f, 0.1f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .unselectedOpacity = FloatProperty(UnselectedOpacityInfo, 0.15f, 0.f, 1.f)
+        .densityRange = Vec2Property(DensityRangeInfo),
+        .useLogScale = BoolProperty(UseLogScaleInfo),
+        .selectionColor = Vec3Property(SelectionColorInfo),
+        .unselectedOpacity = FloatProperty(UnselectedOpacityInfo)
     }
-    , _densityThreshold(DensityThresholdInfo, 0.f, 0.f, 100.f)
+    , _densityThreshold(DensityThresholdInfo)
     , _selectedIndices(SelectedIndicesInfo)
     , _clearSelection(ClearSelectionInfo)
     , _boundingBox {
         .owner = PropertyOwner({"BoudningBox", "Bounding Box"}),
-        .enabled = BoolProperty(ShowBoundingBoxInfo, true),
-        .color = Vec4Property(
-            SelectionColorInfo,
-            glm::vec4(1.f, 1.f, 1.f, 0.5f),
-            glm::vec4(0.f),
-            glm::vec4(1.f)
-        )
+        .enabled = BoolProperty(ShowBoundingBoxInfo),
+        .color = Vec4Property(BoundingBoxColorInfo)
     }
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

@@ -808,7 +808,7 @@ static VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int 
             .normal = glm::vec3(0.f, 0.f, -1.f)
         });
 
-        // Ring 1 - bottom vertices of cylider sides with normals pointing outwards
+        // Ring 1 - bottom vertices of cylinder sides with normals pointing outwards
         verts1.push_back({
             .position = vBot.position,
             .normal = sideNormal
@@ -839,7 +839,7 @@ static VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int 
         .normal = glm::vec3(0.f, 0.f, 1.f)
     });
 
-    // Contruct the index list, based on the above vertex rings
+    // Construct the index list, based on the above vertex rings
     std::vector<GLushort> indexArray;
     indexArray.reserve(4 * 3 * nSegments);
 

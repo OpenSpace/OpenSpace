@@ -79,7 +79,7 @@ public:
 
     /**
      * Returns a pointer to an allocated object of type T. The parameters to this function
-     * are passed on to the contructor of T.
+     * are passed on to the constructor of T.
      *
      * \tparam T The type of the object that is to be constructed
      * \param args The arguments to the constructor of T
@@ -111,8 +111,9 @@ private:
     struct Bucket {
         /// The number of bytes that have been used in this Bucket
         size_t usage = 0;
-        /// The bucket's data storage
-        std::array<std::byte, BucketSize> payload;
+        /// The bucket's data storage. Explicitly aligned as the payload is handed out to
+        /// objects of any type and a misaligned memory could be problematic
+        alignas(std::max_align_t) std::array<std::byte, BucketSize> payload;
     };
 
     struct EmptyPair {
@@ -128,7 +129,7 @@ private:
 };
 
 /**
- * This memory pool works similar to the \see TypedMemoryPool execept that instances of
+ * This memory pool works similar to the \see TypedMemoryPool except that instances of
  * the returned pointers can be returned to make them available again for future calls of
  * the allocate method.
  *
@@ -182,7 +183,7 @@ public:
 private:
     struct Bucket {
         /// The data storage of this bucket
-        std::array<std::byte, BucketSizeItems * sizeof(T)> payload;
+        alignas(T) std::array<std::byte, BucketSizeItems * sizeof(T)> payload;
         /// The number of bytes that have been used in this Bucket
         int usage = 0;
     };

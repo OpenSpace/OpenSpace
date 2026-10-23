@@ -48,6 +48,9 @@
 #endif
 
 // Entry point function for all processes.
+// Chromium changes the stack canary in forked subprocesses
+// (--change-stack-guard-on-fork), so this frame must not use a stack protector
+__attribute__((no_stack_protector))
 int main(int argc, char* argv[]) {
   // Provide CEF with command-line arguments.
   const CefMainArgs mainArgs(argc, argv);

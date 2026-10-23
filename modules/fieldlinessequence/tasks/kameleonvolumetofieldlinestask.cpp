@@ -135,7 +135,7 @@ void KameleonVolumeToFieldlinesTask::perform(
         extractSeedPointsFromFiles(_seedpointsPath);
 
     if (seedPoints.empty()) {
-        LERROR("Falied to read seedpoints");
+        LERROR("Failed to read seedpoints");
         return;
     }
 

@@ -28,9 +28,8 @@
 
 namespace openspace {
 
-IntProperty::IntProperty(PropertyInfo info, int value, int minValue, int maxValue,
-                         int stepValue)
-    : NumericalProperty<int>(std::move(info), value, minValue, maxValue, stepValue)
+IntProperty::IntProperty(IntPropertyInfo info)
+    : NumericalProperty<int>(std::move(info))
 {}
 
 std::string_view IntProperty::className() const {

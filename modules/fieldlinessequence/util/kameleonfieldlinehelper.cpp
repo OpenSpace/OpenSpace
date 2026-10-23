@@ -108,8 +108,8 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     bool success = addLinesToState(kameleon.get(), seedPoints, tracingVar, state);
     if (success) {
         // The line points are in their RAW format (unscaled & maybe spherical). Before
-        // we scale to meters (and maybe cartesian) we must extract the extraQuantites, as
-        // the iterpolator needs the unaltered positions
+        // we scale to meters (and maybe cartesian) we must extract the extraQuantities,
+        // as the iterpolator needs the unaltered positions
         addExtraQuantities(kameleon.get(), extraVars, extraMagVars, state);
         switch (state.model()) {
             case Model::Batsrus:
@@ -235,7 +235,7 @@ bool traceFromListOfPoints(FieldlinesState& state, const std::string& cdfPath,
     bool success = addLinesToState(kameleon.get(), seedPoints, tracingVar, state);
     if (success) {
         // The line points are in their RAW format (unscaled & maybe spherical). Before we
-        // scale to meters (and maybe cartesian) we must extract the extraQuantites, as
+        // scale to meters (and maybe cartesian) we must extract the extraQuantities, as
         // the iterpolator needs the unaltered positions
         addExtraQuantities(kameleon.get(), extraVars, extraMagVars, state);
         switch (state.model()) {
@@ -323,7 +323,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
  *
  * \param kameleon Raw pointer to an already opened Kameleon object
  * \param extraScalarVars Vector of strings. Strings should be names of a scalar
- *        quantities to load into _extraQuantites; such as: "T" for temperature or "rho"
+ *        quantities to load into _extraQuantities; such as: "T" for temperature or "rho"
  *        for density
  * \param extraMagVars Vector of strings. Size must be multiple of 3. Strings should be
  *        names of the components needed to calculate magnitude. E.g. {"ux", "uy", "uz"}

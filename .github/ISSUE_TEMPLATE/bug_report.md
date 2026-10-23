@@ -12,12 +12,13 @@ body:
      description: What version of OpenSpace are you running?
      options:
        - master branch
-       - 0.19.2 
-       - 0.19.1 
-       - 0.19.0 
-       - 0.18.2 
-       - 0.18.1 
-       - 0.18.0
+       - 0.22.0
+       - 0.21.4
+       - 0.21.3
+       - 0.21.2
+       - 0.21.1
+       - 0.21.0
+       - older version (please state)
      default: 0
 ---
 
@@ -26,10 +27,11 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
+
 1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. Click on '....'
+1. Scroll down to '....'
+1. See error
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
@@ -38,8 +40,8 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
- - OS: [e.g. Windows, Linux (which distribution), MacOS]
- - Version [e.g. 22]
+ - OS: [e.g. Windows, Linux (which distribution)]
+ - Version [e.g. 0.22]
 
 **Additional context**
 Add any other context about the problem here.

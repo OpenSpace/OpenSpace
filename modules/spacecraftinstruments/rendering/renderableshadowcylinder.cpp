@@ -40,75 +40,93 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo NumberPointsInfo = {
-        "NumberOfPoints",
-        "Points",
-        "The number of control points used for constructing the shadow geometry. The "
-        "higher this number, the more detailed the shadow is, but it will have a "
-        "negative impact on the performance.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo NumberPointsInfo = {
+        .identifier = "NumberOfPoints",
+        .name = "Points",
+        .description = "The number of control points used for constructing the shadow "
+            "geometry. The higher this number, the more detailed the shadow is, but it "
+            "will have a negative impact on the performance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 190,
+            .minMax = { 1, 300 }
+        }
     };
 
-    constexpr Property::PropertyInfo ShadowLengthInfo = {
-        "ShadowLength",
-        "Shadow length",
-        "A factor that controls the length of the shadow that is cast by the target "
-        "object. The total length of the shadow is equal to the distance from the target "
-        "to the light source multiplied with this value.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ShadowLengthInfo = {
+        .identifier = "ShadowLength",
+        .name = "Shadow length",
+        .description = "A factor that controls the length of the shadow that is cast by "
+            "the target object. The total length of the shadow is equal to the distance "
+            "from the target to the light source multiplied with this value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.1f,
+            .minMax = { 0.f, 0.5f }
+        }
     };
 
-    constexpr Property::PropertyInfo ShadowColorInfo = {
-        "ShadowColor",
-        "Shadow color",
-        "The color used for the shadow cylinder.",
-        Property::Visibility::User
+    constexpr Vec3PropertyInfo ShadowColorInfo = {
+        .identifier = "ShadowColor",
+        .name = "Shadow color",
+        .description = "The color used for the shadow cylinder.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo TerminatorTypeInfo = {
-        "TerminatorType",
-        "Terminator type",
-        "Determines the type of terminator to use for calculating the shadow eclipse.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo TerminatorTypeInfo = {
+        .identifier = "TerminatorType",
+        .name = "Terminator type",
+        .description = "Determines the type of terminator to use for calculating the "
+            "shadow eclipse.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LightSourceInfo = {
-        "LightSource",
-        "Light source",
-        "The SPICE name of the object that is used as the illuminator for computing the "
-        "shadow cylinder.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo LightSourceInfo = {
+        .identifier = "LightSource",
+        .name = "Light source",
+        .description = "The SPICE name of the object that is used as the illuminator for "
+            "computing the shadow cylinder.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo ObserverInfo = {
-        "Observer",
-        "Observer",
-        "The SPICE name of the object that is the observer.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo ObserverInfo = {
+        .identifier = "Observer",
+        .name = "Observer",
+        .description = "The SPICE name of the object that is the observer.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo BodyInfo = {
-        "Body",
-        "Target body",
-        "The SPICE name of target body that is used as the shadow caster.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo BodyInfo = {
+        .identifier = "Body",
+        .name = "Target body",
+        .description = "The SPICE name of target body that is used as the shadow caster.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo BodyFrameInfo = {
-        "BodyFrame",
-        "Body frame",
-        "The SPICE name of the reference frame in which the shadow cylinder is "
-        "expressed.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo BodyFrameInfo = {
+        .identifier = "BodyFrame",
+        .name = "Body frame",
+        .description = "The SPICE name of the reference frame in which the shadow "
+            "cylinder is expressed.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo AberrationInfo = {
-        "Aberration",
-        "Aberration",
-        "The aberration method that is used for computing the shadow cylinder. The "
-        "options are \"NONE\", \"LT\" (Light Time), \"LT + S\" (Light Time Stellar), "
-        "\"CN\" (Converged Newtonian), and \"CN + S\" (Converged Newtonian Stellar).",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo AberrationInfo = {
+        .identifier = "Aberration",
+        .name = "Aberration",
+        .description = "The aberration method that is used for computing the shadow "
+            "cylinder. The options are \"NONE\", \"LT\" (Light Time), \"LT + S\" (Light "
+            "Time Stellar), \"CN\" (Converged Newtonian), and \"CN + S\" (Converged "
+            "Newtonian Stellar).",
+        .visibility = Visibility::AdvancedUser
     };
 
     // Displays a shadow cylinder behind a planetary body. Given the SPICE name of a
@@ -117,36 +135,30 @@ namespace {
     // occluded by the body. A concrete example is using the Sun as the observer, in which
     // case the shadow cylinder indicates the areas in which there is darkness.
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
-        // [[codegen::verbatim(NumberPointsInfo.description)]]
-        std::optional<int> numberOfPoints [[codegen::greaterequal(0)]];
+        std::optional<int> numberOfPoints
+            [[codegen::Info(NumberPointsInfo), codegen::greaterequal(0)]];
 
-        // [[codegen::verbatim(ShadowLengthInfo.description)]]
-        std::optional<float> shadowLength;
+        std::optional<float> shadowLength [[codegen::Info(ShadowLengthInfo)]];
 
-        // [[codegen::verbatim(ShadowColorInfo.description)]]
-        std::optional<glm::vec3> shadowColor [[codegen::color()]];
+        std::optional<glm::vec3> shadowColor
+            [[codegen::Info(ShadowColorInfo), codegen::color()]];
 
         enum class [[codegen::map(openspace::SpiceManager::TerminatorType)]] Terminator {
             Umbral [[codegen::key("UMBRAL")]],
             Penumbral [[codegen::key("PENUMBRAL")]]
         };
-        // [[codegen::verbatim(TerminatorTypeInfo.description)]]
-        Terminator terminatorType;
+        Terminator terminatorType [[codegen::Info(TerminatorTypeInfo)]];
 
-        // [[codegen::verbatim(LightSourceInfo.description)]]
-        std::string lightSource [[codegen::identifier()]];
+        std::string lightSource [[codegen::Info(LightSourceInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(ObserverInfo.description)]]
-        std::string observer;
+        std::string observer [[codegen::Info(ObserverInfo)]];
 
-        // [[codegen::verbatim(BodyInfo.description)]]
-        std::string body;
+        std::string body [[codegen::Info(BodyInfo)]];
 
-        // [[codegen::verbatim(BodyFrameInfo.description)]]
-        std::string bodyFrame;
+        std::string bodyFrame [[codegen::Info(BodyFrameInfo)]];
 
-        // [[codegen::verbatim(AberrationInfo.description)]]
-        std::string aberration [[codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S")]];
+        std::string aberration [[codegen::Info(AberrationInfo),
+            codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S")]];
     };
 } // namespace
 #include "renderableshadowcylinder_codegen.cpp"
@@ -162,9 +174,9 @@ Documentation RenderableShadowCylinder::Documentation() {
 
 RenderableShadowCylinder::RenderableShadowCylinder(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _numberOfPoints(NumberPointsInfo, 190, 1, 300)
-    , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 0.5f)
-    , _shadowColor(ShadowColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _numberOfPoints(NumberPointsInfo)
+    , _shadowLength(ShadowLengthInfo)
+    , _shadowColor(ShadowColorInfo)
     , _terminatorType(TerminatorTypeInfo)
     , _lightSource(LightSourceInfo)
     , _observer(ObserverInfo)
@@ -195,18 +207,17 @@ RenderableShadowCylinder::RenderableShadowCylinder(const Dictionary& dictionary)
     addProperty(_terminatorType);
 
     _lightSource = p.lightSource;
-    _observer = p.observer;
-    _body = p.body;
-    _bodyFrame = p.bodyFrame;
-
-    _lightSource.setReadOnly(true);
     addProperty(_lightSource);
-    _observer.setReadOnly(true);
+
+    _observer = p.observer;
     addProperty(_observer);
-    _body.setReadOnly(true);
+
+    _body = p.body;
     addProperty(_body);
-    _bodyFrame.setReadOnly(true);
+
+    _bodyFrame = p.bodyFrame;
     addProperty(_bodyFrame);
+
 
     using T = SpiceManager::AberrationCorrection::Type;
     _aberration.addOptions({

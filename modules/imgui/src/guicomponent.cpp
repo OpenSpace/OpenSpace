@@ -29,18 +29,25 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "This setting determines whether this object will be visible or not.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "This setting determines whether this object will be visible or "
+            "not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo CollapsedInfo = {
-        "Collapsed",
-        "Is collapsed",
-        "This setting determines whether this window is collapsed or not.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo CollapsedInfo = {
+        .identifier = "Collapsed",
+        .name = "Is collapsed",
+        .description = "This setting determines whether this window is collapsed or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 } // namespace
 
@@ -48,8 +55,8 @@ namespace openspace {
 
 GuiComponent::GuiComponent(std::string identifier, std::string guiName)
     : PropertyOwner({ std::move(identifier), std::move(guiName) })
-    , _isEnabled(EnabledInfo, false)
-    , _isCollapsed(CollapsedInfo, false)
+    , _isEnabled(EnabledInfo)
+    , _isCollapsed(CollapsedInfo)
 {
     addProperty(_isEnabled);
     addProperty(_isCollapsed);

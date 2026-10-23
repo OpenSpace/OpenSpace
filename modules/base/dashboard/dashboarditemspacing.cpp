@@ -31,18 +31,22 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo SpacingInfo = {
-        "Spacing",
-        "Spacing",
-        "This value determines the spacing (in pixels) that this item represents. The "
-        "default value is 15.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo SpacingInfo = {
+        .identifier = "Spacing",
+        .name = "Spacing",
+        .description = "This value determines the spacing (in pixels) that this item "
+            "represents.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 15.f,
+            .minMax = { 0.f, 2048.f }
+        }
     };
 
     // Adds a variable amount of spacing between two other `DashboardItem`s.
     struct [[codegen::Dictionary(DashboardItemSpacing)]] Parameters {
-        // [[codegen::verbatim(SpacingInfo.description)]]
-        std::optional<float> spacing [[codegen::greaterequal(0.f)]];
+        std::optional<float> spacing
+            [[codegen::Info(SpacingInfo), codegen::greaterequal(0.f)]];
     };
 } // namespace
 #include "dashboarditemspacing_codegen.cpp"
@@ -58,7 +62,7 @@ Documentation DashboardItemSpacing::Documentation() {
 
 DashboardItemSpacing::DashboardItemSpacing(const Dictionary& dictionary)
     : DashboardItem(dictionary)
-    , _spacing(SpacingInfo, 15.f, 0.f, 2048.f)
+    , _spacing(SpacingInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

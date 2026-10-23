@@ -593,7 +593,7 @@ SceneGraphNode* Scene::loadNode(const Dictionary& nodeDictionary) {
         if (!nodeDictionary.hasValue<Dictionary>(SceneGraphNode::KeyDependencies))
         {
             // TODO: Throw exception
-            LERROR("Dependencies did not have the corrent type");
+            LERROR("Dependencies did not have the correct type");
         }
         const Dictionary nodeDependencies =
             nodeDictionary.value<Dictionary>(SceneGraphNode::KeyDependencies);
@@ -758,8 +758,8 @@ void Scene::updateInterpolations() {
 
 
         // This method might crash if someone deleted the property underneath us. We take
-        // care of removing entire PropertyOwners, but we assume that Propertys live as
-        // long as their SceneGraphNodes. This is true in general, but if Propertys are
+        // care of removing entire PropertyOwners, but we assume that Property%s live as
+        // long as their SceneGraphNodes. This is true in general, but if Property%s are
         // created and destroyed often by the SceneGraphNode, this might become a problem
         i.prop->interpolateValue(finalT, i.easingFunction);
 
@@ -1027,6 +1027,79 @@ provided new value, then back to the original value, until manually stopped.
                     std::source_location::current().line()
                 }
             },
+            {
+                "propertyEnabled",
+                &luascriptfunctions::propertyGetEnabled,
+                {
+                    { "uri", "String" }
+                },
+                "Boolean",
+                "Returns true if the property identified by the provided URI is enabled "
+                "and false otherwise. This function will provide an error message if no "
+                "property matching the URI is found, or if the property is not "
+                "enablable.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
+            {
+                "propertyEnablable",
+                &luascriptfunctions::propertyGetEnablable,
+                {
+                    { "uri", "String" }
+                },
+                "Boolean",
+                "Returns true if the property identified by the provided URI is "
+                "enablable and false otherwise. This function will provide an error "
+                "message if no property matching the URI is found.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
+            {
+                "setPropertyEnabled",
+                &luascriptfunctions::setPropertyEnabled<false>,
+                {
+                    { "uri", "String" },
+                    { "value", "Boolean" }
+                },
+                "",
+                "Sets the enabled setting for the property with the provided URI. The "
+                "`uri` identifies which property or properties are affected by this "
+                "function call and can include both wildcards `*` which match anything, "
+                "as well as tags(`{tag }`) which match scene graph nodes that have this "
+                "tag. There is also the ability to combine two tags through the `&`, "
+                "`|`, and `~` operators. `{tag1& tag2}` will match anything that has the "
+                "tag1 and the tag2. `{tag1 | tag2}` will match anything that has the "
+                "tag1 or the tag 2, and `{tag1~tag2}` will match anything that has tag1 "
+                "but not tag2.If no wildcards or tags are provided at most one property "
+                "value will be changed.With wildcards or tags all properties that match "
+                "the URI are changed instead.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
+            {
+                "setPropertyEnabledSingle",
+                &luascriptfunctions::setPropertyEnabled<true>,
+                {
+                    { "uri", "String" },
+                    { "value", "Boolean" }
+                },
+                "",
+                "Sets the enabled setting for the property with the provided URI. If "
+                "you want to change multiple property values simultaneously, also see "
+                "the #propertySetEnabled function.The `propertySetEnabledSingle` "
+                "function however will work more efficiently for individual property "
+                "values.",
+                {
+                    std::source_location::current().file_name(),
+                    std::source_location::current().line()
+                }
+            },
             codegen::lua::StopPropertyBouncing,
             codegen::lua::HasProperty,
             codegen::lua::Property,
@@ -1057,7 +1130,7 @@ provided new value, then back to the original value, until manually stopped.
 std::string makeIdentifier(std::string str) {
     // Note that we want to preserve '-' and '_', but replace any other punctuation
     // marks. Hence, we first convert '_' to whitespaces to avoid them being replaced
-    // in the puncutation check
+    // in the punctuation check
     std::replace(str.begin(), str.end(), '_', ' ');
     std::replace_if(
         str.begin(),

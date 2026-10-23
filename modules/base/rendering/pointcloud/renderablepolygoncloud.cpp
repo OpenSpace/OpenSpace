@@ -126,7 +126,7 @@ void RenderablePolygonCloud::initializeCustomTexture() {
 
     renderToTexture(_pTexture, TexSize, TexSize);
 
-    // Download the data and use it to intialize the data we need to rendering.
+    // Download the data and use it to initialize the data we need to rendering.
     // Allocate memory: N channels, with one byte each
     constexpr unsigned int nChannels = 4;
     unsigned int arraySize = TexSize * TexSize * nChannels;

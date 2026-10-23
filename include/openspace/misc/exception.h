@@ -66,7 +66,7 @@ struct FileNotFoundError final : public RuntimeError {
      * the component \p comp that threw the exception.
      *
      * \param f The file that was missing which caused this exception to be thrown
-     * \param comp The optional compoment that caused this exception to be thrown
+     * \param comp The optional component that caused this exception to be thrown
      *
      * \pre \p f must not be empty
      */

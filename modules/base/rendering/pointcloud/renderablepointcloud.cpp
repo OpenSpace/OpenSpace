@@ -64,239 +64,317 @@ namespace {
         Bottom
     };
 
-    constexpr Property::PropertyInfo TextureEnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "If true, use a provided sprite texture to render the point. If false, draw the "
-        "points using the default point shape.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo TextureEnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "If true, use a provided sprite texture to render the point. If "
+            "false, draw the points using the default point shape.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo AllowTextureCompressionInfo = {
-        "AllowCompression",
-        "Allow compression",
-        "If true, the textures will be compressed to preserve graphics card memory. This "
-        "is enabled per default, but may lead to visible artefacts for certain images, "
-        "especially up close. Set this to false to disable any hardware compression of "
-        "the textures, and represent each color channel with 8 bits.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo AllowTextureCompressionInfo = {
+        .identifier = "AllowCompression",
+        .name = "Allow compression",
+        .description = "If true, the textures will be compressed to preserve graphics "
+            "card memory. This is enabled per default, but may lead to visible artefacts "
+            "for certain images, especially up close. Set this to false to disable any "
+            "hardware compression of the textures, and represent each color channel with "
+            "8 bits.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo UseAlphaInfo = {
-        "UseAlphaChannel",
-        "Use alpha channel",
-        "If true, include transparency information in the loaded textures, if there is "
-        "any. If false, all loaded textures will be converted to RGB format. \nThis "
-        "setting can be used if you have textures with transparency, but do not need the "
-        "transparency information. This may be the case when using additive blending, "
-        "for example. Converting the files to RGB on load may then reduce the memory "
-        "footprint and/or lead to some optimization in terms of rendering speed.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseAlphaInfo = {
+        .identifier = "UseAlphaChannel",
+        .name = "Use alpha channel",
+        .description = "If true, include transparency information in the loaded "
+            "textures, if there is any. If false, all loaded textures will be converted "
+            "to RGB format. This setting can be used if you have textures with "
+            "transparency, but do not need the transparency information. This may be the "
+            "case when using additive blending, for example. Converting the files to RGB "
+            "on load may then reduce the memory footprint and/or lead to some "
+            "optimization in terms of rendering speed.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo SpriteTextureInfo = {
-        "File",
-        "Point sprite texture file",
-        "The path to the texture of the point sprite. Note that if multiple textures "
-        "option is set in the asset, by providing a texture folder, this value will be "
-        "ignored.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo SpriteTextureInfo = {
+        .identifier = "File",
+        .name = "Point sprite texture file",
+        .description = "The path to the texture of the point sprite. Note that if "
+            "multiple textures option is set in the asset, by providing a texture "
+            "folder, this value will be ignored.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TextureModeInfo = {
-        "TextureMode",
-        "Texture mode",
-        "This tells which texture mode is being used for this renderable. There are "
-        "three different texture modes: 1) One single sprite texture used for all "
-        "points, 2) Multiple textures, that are mapped to the points based on a column "
-        "in the dataset, and 3) Other, which is used for specific subtypes where the "
-        "texture is internally controlled by the renderable and can't be set from a file "
-        "(such as the RenderablePolygonCloud).",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureModeInfo = {
+        .identifier = "TextureMode",
+        .name = "Texture mode",
+        .description = "This tells which texture mode is being used for this renderable. "
+            "There are three different texture modes: 1) One single sprite texture used "
+            "for all points, 2) Multiple textures, that are mapped to the points based "
+            "on a column in the dataset, and 3) Other, which is used for specific "
+            "subtypes where the texture is internally controlled by the renderable and "
+            "can't be set from a file (such as the RenderablePolygonCloud).",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
     };
 
-    constexpr Property::PropertyInfo PointColorInfo = {
-        "FixedColor",
-        "Fixed color",
-        "The color of the points, when no color map is used.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo PointColorInfo = {
+        .identifier = "FixedColor",
+        .name = "Fixed color",
+        .description = "The color of the points, when no color map is used.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo DrawElementsInfo = {
-        "DrawElements",
-        "Draw elements",
-        "Enables/Disables the drawing of the points.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo DrawElementsInfo = {
+        .identifier = "DrawElements",
+        .name = "Draw elements",
+        .description = "Enables/Disables the drawing of the points.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
-        "Labels",
-        "Labels",
-        "The labels for the points. If no label file is provided, the labels will be "
-        "created to match the points in the data file. For a CSV file, you should then "
-        "specify which column is the 'Name' column in the data mapping. For SPECK files "
-        "the labels are created from the comment at the end of each line."
+    constexpr PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        .identifier = "Labels",
+        .name = "Labels",
+        .description = "The labels for the points. If no label file is provided, the "
+            "labels will be created to match the points in the data file. For a CSV "
+            "file, you should then specify which column is the 'Name' column in the "
+            "data mapping. For SPECK files the labels are created from the comment at "
+            "the end of each line."
     };
 
-    constexpr Property::PropertyInfo FadeInDistancesInfo = {
-        "FadeInDistances",
-        "Fade-in start and end distances",
-        "Determines the initial and final distances from the origin of the dataset at "
-        "which the points will start and end fading-in. The distances are specified in "
-        "the same unit as the points, that is, the one provodied as the Unit, or meters. "
-        "With normal fading the points are fully visible once the camera is outside this "
-        "range and fully invisible when inside the range. With inverted fading the case "
-        "is the opposite: the points are visible inside when closer than the min value "
-        "of the range and invisible when further away.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo FadeInDistancesInfo = {
+        .identifier = "FadeInDistances",
+        .name = "Fade-in start and end distances",
+        .description = "Determines the initial and final distances from the origin of "
+            "the dataset at which the points will start and end fading-in. The distances "
+            "are specified in the same unit as the points, that is, the one provodied as "
+            "the Unit, or meters. With normal fading the points are fully visible once "
+            "the camera is outside this range and fully invisible when inside the range. "
+            "With inverted fading the case is the opposite: the points are visible "
+            "inside when closer than the min value of the range and invisible when "
+            "further away.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(100.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo EnableDistanceFadeInfo = {
-        "Enabled",
-        "Enable distance-based fading",
-        "Enables/disables the Fade-in effect based on camera distance. Automatically set "
-        "to true if FadeInDistances are specified in the asset.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo EnableDistanceFadeInfo = {
+        .identifier = "Enabled",
+        .name = "Enable distance-based fading",
+        .description = "Enables/disables the Fade-in effect based on camera distance. "
+            "Automatically set to true if FadeInDistances are specified in the asset.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo InvertFadeInfo = {
-        "Invert",
-        "Invert",
-        "If true, inverts the fading so that the points are invisible when the camera is "
-        "further away than the max fade distance and fully visible when it is closer "
-        "than the minimum distance.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo InvertFadeInfo = {
+        .identifier = "Invert",
+        .name = "Invert",
+        .description = "If true, inverts the fading so that the points are invisible "
+            "when the camera is further away than the max fade distance and fully "
+            "visible when it is closer than the minimum distance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo UseAdditiveBlendingInfo = {
-        "UseAdditiveBlending",
-        "Use additive blending",
-        "If true (default), the color of points rendered on top of each other is blended "
-        "additively, resulting in a brighter color where points overlap. If false, no "
-        "such blending will take place and the color of the point will not be modified "
-        "by blending. Note that this may lead to weird behaviors when the points are "
-        "rendered with transparency.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseAdditiveBlendingInfo = {
+        .identifier = "UseAdditiveBlending",
+        .name = "Use additive blending",
+        .description = "If true (default), the color of points rendered on top of each "
+            "other is blended additively, resulting in a brighter color where points "
+            "overlap. If false, no such blending will take place and the color of the "
+            "point will not be modified by blending. Note that this may lead to weird "
+            "behaviors when the points are rendered with transparency.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo UseOrientationDataInfo = {
-        "UseOrientationData",
-        "Use orientation data",
-        "If true, the orientation data in the dataset is included when rendering the "
-        "points, if there is any. To see the rotation, you also need to set the "
-        "\"Orientation Render Option\" to \"Fixed Rotation\".",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseOrientationDataInfo = {
+        .identifier = "UseOrientationData",
+        .name = "Use orientation data",
+        .description = "If true, the orientation data in the dataset is included when "
+            "rendering the points, if there is any. To see the rotation, you also need "
+            "to set the \"Orientation Render Option\" to \"Fixed Rotation\".",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo OrientationRenderOptionInfo = {
-        "OrientationRenderOption",
-        "Orientation render option",
-        "Controls how the planes for the points will be oriented. \"Camera View "
-        "Direction\" rotates the points so that the plane is orthogonal to the viewing "
-        "direction of the camera (useful for planar displays), and \"Camera Position "
-        "Normal\" rotates the points towards the position of the camera (useful for "
-        "spherical displays, like dome theaters). In both these cases the points will be "
-        "billboarded towards the camera. In contrast, \"Fixed Rotation\" does not rotate "
-        "the points at all based on the camera and should be used when the dataset "
-        "contains orientation information for the points.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo OrientationRenderOptionInfo = {
+        .identifier = "OrientationRenderOption",
+        .name = "Orientation render option",
+        .description = "Controls how the planes for the points will be oriented. "
+            "\"Camera View Direction\" rotates the points so that the plane is "
+            "orthogonal to the viewing direction of the camera (useful for planar "
+            "displays), and \"Camera Position Normal\" rotates the points towards the "
+            "position of the camera (useful for spherical displays, like dome theaters). "
+            "In both these cases the points will be billboarded towards the camera. In "
+            "contrast, \"Fixed Rotation\" does not rotate the points at all based on the "
+            "camera and should be used when the dataset contains orientation information "
+            "for the points.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NumShownDataPointsInfo = {
-        "NumberOfDataPoints",
-        "Number of shown data points",
-        "Information about how many points are being rendered.",
-        Property::Visibility::User
+    constexpr UIntPropertyInfo NumShownDataPointsInfo = {
+        .identifier = "NumberOfDataPoints",
+        .name = "Number of shown data points",
+        .description = "Information about how many points are being rendered.",
+        .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 0
+        }
     };
 
-    constexpr Property::PropertyInfo HasOrientationDataInfo = {
-        "HasOrientationData",
-        "Has orientation data",
-        "Set to true if orientation data was read from the dataset.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo HasOrientationDataInfo = {
+        .identifier = "HasOrientationData",
+        .name = "Has orientation data",
+        .description = "Set to true if orientation data was read from the dataset.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ScaleExponentInfo = {
-        "ScaleExponent",
-        "Scale exponent",
-        "An exponential scale value used to set the absolute size of the point. In "
-        "general, the larger distance the dataset covers, the larger this value should "
-        "be. If not included, it is computed based on the maximum positional component "
-        "of the data points. This is useful for showing the dataset at all, but you will "
-        "likely want to change it to something that looks good. Note that a scale "
-        "exponent of 0 leads to the points having a diameter of 1 meter, i.e. no "
-        "exponential scaling.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo ScaleExponentInfo = {
+        .identifier = "ScaleExponent",
+        .name = "Scale exponent",
+        .description = "An exponential scale value used to set the absolute size of the "
+            "point. In general, the larger distance the dataset covers, the larger this "
+            "value should be. If not included, it is computed based on the maximum "
+            "positional component of the data points. This is useful for showing the "
+            "dataset at all, but you will likely want to change it to something that "
+            "looks good. Note that a scale exponent of 0 leads to the points having a "
+            "diameter of 1 meter, i.e. no exponential scaling.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 25.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ScaleFactorInfo = {
-        "ScaleFactor",
-        "Scale factor",
-        "A multiplicative factor used to adjust the size of the points, after the "
-        "exponential scaling and any max size control effects. Simply just increases "
-        "or decreases the visual size of the points.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo ScaleFactorInfo = {
+        .identifier = "ScaleFactor",
+        .name = "Scale factor",
+        .description = "A multiplicative factor used to adjust the size of the points, "
+            "after the exponential scaling and any max size control effects. Simply just "
+            "increases or decreases the visual size of the points.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 100.f }
+        }
     };
 
-    constexpr Property::PropertyInfo UseMaxSizeControlInfo = {
-        "EnableMaxSizeControl",
-        "Enable max size control",
-        "If true, the Max Size property will be used as an upper limit for the size of "
-        "the point. This reduces the size of the points when approaching them, so that "
-        "they stick to a maximum visual size depending on the Max Size value.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseMaxSizeControlInfo = {
+        .identifier = "EnableMaxSizeControl",
+        .name = "Enable max size control",
+        .description = "If true, the Max Size property will be used as an upper limit "
+            "for the size of the point. This reduces the size of the points when "
+            "approaching them, so that they stick to a maximum visual size depending on "
+            "the Max Size value.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo MaxSizeInfo = {
-        "MaxSize",
-        "Max size",
-        "Controls the maximum allowed size for the points, when the max size control "
-        "feature is enabled. This limits the visual size of the points based on the "
-        "distance to the camera. The larger the value, the larger the points may be. In "
-        "the background, the computations are made by limiting the size to a certain "
-        "angle based on the field of view of the camera. So a value of 1 limits the "
-        "point size to take up a maximum of one degree of the view space.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo MaxSizeInfo = {
+        .identifier = "MaxSize",
+        .name = "Max size",
+        .description = "Controls the maximum allowed size for the points, when the max "
+            "size control feature is enabled. This limits the visual size of the points "
+            "based on the distance to the camera. The larger the value, the larger the "
+            "points may be. In the background, the computations are made by limiting the "
+            "size to a certain angle based on the field of view of the camera. So a "
+            "value of 1 limits the point size to take up a maximum of one degree of the "
+            "view space.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 45.f }
+        }
     };
 
-    constexpr Property::PropertyInfo EnableOutlineInfo = {
-        "EnableOutline",
-        "Enable point outline",
-        "Determines whether each point should have an outline or not.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo EnableOutlineInfo = {
+        .identifier = "EnableOutline",
+        .name = "Enable point outline",
+        .description = "Determines whether each point should have an outline or not.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo OutlineColorInfo = {
-        "OutlineColor",
-        "Outline color",
-        "The color of the outline. Darker colors will be less visible if \"Additive "
-        "Blending\" is enabled.",
-        Property::Visibility::User
+    constexpr Vec3PropertyInfo OutlineColorInfo = {
+        .identifier = "OutlineColor",
+        .name = "Outline color",
+        .description = "The color of the outline. Darker colors will be less visible if "
+            "\"Additive Blending\" is enabled.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(0.23f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo OutlineWidthInfo = {
-        "OutlineWidth",
-        "Outline width",
-        "The thickness of the outline, given as a value relative to the size of the "
-        "point. A value of 0 will not show any outline, while a value of 1 will cover "
-        "the whole point.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo OutlineWidthInfo = {
+        .identifier = "OutlineWidth",
+        .name = "Outline width",
+        .description = "The thickness of the outline, given as a value relative to the "
+            "size of the point. A value of 0 will not show any outline, while a value of "
+            "1 will cover the whole point.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.2f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo OutlineStyleInfo = {
-        "OutlineStyle",
-        "Outline style",
-        "Decides the style of the outline (round, square, or a line at the bottom). "
-        "The style also affects the shape of the points.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo OutlineStyleInfo = {
+        .identifier = "OutlineStyle",
+        .name = "Outline style",
+        .description = "Decides the style of the outline (round, square, or a line at "
+            "the bottom). The style also affects the shape of the points.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ApplyColorMapToOutlineInfo = {
-        "ApplyColorMapToOutline",
-        "Apply color map to outline",
-        "If true and the outline is enabled, the color map will be applied to the "
-        "outline rather than the point body. Only works if color mapping is enabled.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ApplyColorMapToOutlineInfo = {
+        .identifier = "ApplyColorMapToOutline",
+        .name = "Apply color map to outline",
+        .description = "If true and the outline is enabled, the color map will be "
+            "applied to the outline rather than the point body. Only works if color "
+            "mapping is enabled.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // Can be used to render point-based datasets in 3D space, optionally including color
@@ -343,11 +421,10 @@ namespace {
             [[codegen::reference("core_dataloader_datamapping")]];
 
         struct Texture {
-            // [[codegen::verbatim(TextureEnabledInfo.description)]]
-            std::optional<bool> enabled;
+            std::optional<bool> enabled [[codegen::Info(TextureEnabledInfo)]];
 
-            // [[codegen::verbatim(SpriteTextureInfo.description)]]
-            std::optional<std::filesystem::path> file;
+            std::optional<std::filesystem::path> file
+                [[codegen::Info(SpriteTextureInfo)]];
 
             // The folder where the textures are located when using multiple different
             // textures to render the points. Setting this value means that multiple
@@ -357,17 +434,15 @@ namespace {
             // best if using textures with the exact same resolution.
             std::optional<std::filesystem::path> folder [[codegen::directory()]];
 
-            // [[codegen::verbatim(AllowTextureCompressionInfo.description)]]
-            std::optional<bool> allowCompression;
+            std::optional<bool> allowCompression
+                [[codegen::Info(AllowTextureCompressionInfo)]];
 
-            // [[codegen::verbatim(UseAlphaInfo.description)]]
-            std::optional<bool> useAlphaChannel;
+            std::optional<bool> useAlphaChannel [[codegen::Info(UseAlphaInfo)]];
         };
         // Settings related to the texturing of the points.
         std::optional<Texture> texture;
 
-        // [[codegen::verbatim(DrawElementsInfo.description)]]
-        std::optional<bool> drawElements;
+        std::optional<bool> drawElements [[codegen::Info(DrawElementsInfo)]];
 
         enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
@@ -390,11 +465,10 @@ namespace {
         // dataset contains orientation information for the points.
         std::optional<std::variant<bool, RenderOption>> billboard;
 
-        // [[codegen::verbatim(UseOrientationDataInfo.description)]]
-        std::optional<bool> useOrientationData;
+        std::optional<bool> useOrientationData [[codegen::Info(UseOrientationDataInfo)]];
 
-        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
-        std::optional<bool> useAdditiveBlending;
+        std::optional<bool> useAdditiveBlending
+            [[codegen::Info(UseAdditiveBlendingInfo)]];
 
         // If true, skip the first data point in the loaded dataset.
         std::optional<bool> skipFirstDataPoint;
@@ -412,71 +486,67 @@ namespace {
         // distances/positions in the data files.
         std::optional<Unit> unit;
 
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<Dictionary> labels [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels
+            [[codegen::Info(LabelsInfo), codegen::reference("core_labelscomponent")]];
 
         struct SizeSettings {
             // Settings related to scaling the points based on data.
             std::optional<Dictionary> sizeMapping
                 [[codegen::reference("base_sizemappingcomponent")]];
 
-            // [[codegen::verbatim(ScaleExponentInfo.description)]]
-            std::optional<float> scaleExponent [[codegen::greaterequal(0.f)]];
+            std::optional<float> scaleExponent
+                [[codegen::Info(ScaleExponentInfo), codegen::greaterequal(0.f)]];
 
-            // [[codegen::verbatim(ScaleFactorInfo.description)]]
-            std::optional<float> scaleFactor [[codegen::greaterequal(0.f)]];
+            std::optional<float> scaleFactor
+                [[codegen::Info(ScaleFactorInfo), codegen::greaterequal(0.f)]];
 
-            // [[codegen::verbatim(UseMaxSizeControlInfo.description)]]
-            std::optional<bool> enableMaxSizeControl;
+            std::optional<bool> enableMaxSizeControl
+                [[codegen::Info(UseMaxSizeControlInfo)]];
 
-            // [[codegen::verbatim(MaxSizeInfo.description)]]
-            std::optional<float> maxSize [[codegen::greaterequal(0.f)]];
+            std::optional<float> maxSize
+                [[codegen::Info(MaxSizeInfo), codegen::greaterequal(0.f)]];
         };
         // Settings related to the scale of the points, whether they should limit to a
         // certain max size, etc.
         std::optional<SizeSettings> sizeSettings;
 
         struct ColorSettings {
-            // [[codegen::verbatim(PointColorInfo.description)]]
-            std::optional<glm::vec3> fixedColor [[codegen::color()]];
+            std::optional<glm::vec3> fixedColor
+                [[codegen::Info(PointColorInfo), codegen::color()]];
 
             // Settings related to the choice of color map, parameters, etc.
             std::optional<Dictionary> colorMapping
                 [[codegen::reference("core_colormappingcomponent")]];
 
-            // [[codegen::verbatim(EnableOutlineInfo.description)]]
-            std::optional<bool> enableOutline;
+            std::optional<bool> enableOutline [[codegen::Info(EnableOutlineInfo)]];
 
-            // [[codegen::verbatim(OutlineColorInfo.description)]]
-            std::optional<glm::vec3> outlineColor [[codegen::color()]];
+            std::optional<glm::vec3> outlineColor
+                [[codegen::Info(OutlineColorInfo), codegen::color()]];
 
-            // [[codegen::verbatim(OutlineWidthInfo.description)]]
-            std::optional<float> outlineWidth [[codegen::greaterequal(0.f)]];
+            std::optional<float> outlineWidth
+                [[codegen::Info(OutlineWidthInfo), codegen::greaterequal(0.f)]];
 
             enum class [[codegen::map(OutlineStyle)]] OutlineStyle {
                 Round,
                 Square,
                 Bottom
             };
-            // [[codegen::verbatim(OutlineStyleInfo.description)]]
-            std::optional<OutlineStyle> outlineStyle;
+            std::optional<OutlineStyle> outlineStyle [[codegen::Info(OutlineStyleInfo)]];
 
-            // [[codegen::verbatim(ApplyColorMapToOutlineInfo.description)]]
-            std::optional<bool> applyColorMapToOutline;
+            std::optional<bool> applyColorMapToOutline
+                [[codegen::Info(ApplyColorMapToOutlineInfo)]];
         };
         // Settings related to the coloring of the points, such as a fixed color, color
         // map, etc.
         std::optional<ColorSettings> coloring;
 
         struct Fading {
-            // [[codegen::verbatim(EnableDistanceFadeInfo.description)]]
-            std::optional<bool> enabled;
+            std::optional<bool> enabled [[codegen::Info(EnableDistanceFadeInfo)]];
 
-            // [[codegen::verbatim(FadeInDistancesInfo.description)]]
-            std::optional<glm::dvec2> fadeInDistances;
+            std::optional<glm::dvec2> fadeInDistances
+                [[codegen::Info(FadeInDistancesInfo)]];
 
-            // [[codegen::verbatim(InvertFadeInfo.description)]]
-            std::optional<bool> invert;
+            std::optional<bool> invert [[codegen::Info(InvertFadeInfo)]];
         };
         // Settings related to fading based on camera distance. Can be used to either fade
         // away or fade in the points when reaching a certain distance from the origin of
@@ -500,10 +570,10 @@ Documentation RenderablePointCloud::Documentation() {
 
 RenderablePointCloud::SizeSettings::SizeSettings(const Dictionary& dictionary)
     : PropertyOwner({ "Sizing", "Sizing", ""})
-    , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 25.f)
-    , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 100.f)
-    , useMaxSizeControl(UseMaxSizeControlInfo, false)
-    , maxAngularSize(MaxSizeInfo, 1.f, 0.f, 45.f)
+    , scaleExponent(ScaleExponentInfo)
+    , scaleFactor(ScaleFactorInfo)
+    , useMaxSizeControl(UseMaxSizeControlInfo)
+    , maxAngularSize(MaxSizeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -531,12 +601,12 @@ RenderablePointCloud::SizeSettings::SizeSettings(const Dictionary& dictionary)
 
 RenderablePointCloud::ColorSettings::ColorSettings(const Dictionary& dictionary)
     : PropertyOwner({ "Coloring", "Coloring", "" })
-    , pointColor(PointColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , enableOutline(EnableOutlineInfo, false)
-    , outlineColor(OutlineColorInfo, glm::vec3(0.23f), glm::vec3(0.f), glm::vec3(1.f))
-    , outlineWidth(OutlineWidthInfo, 0.2f, 0.f, 1.f)
+    , pointColor(PointColorInfo)
+    , enableOutline(EnableOutlineInfo)
+    , outlineColor(OutlineColorInfo)
+    , outlineWidth(OutlineWidthInfo)
     , outlineStyle(OutlineStyleInfo)
-    , applyCmapToOutline(ApplyColorMapToOutlineInfo, false)
+    , applyCmapToOutline(ApplyColorMapToOutlineInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -586,9 +656,9 @@ RenderablePointCloud::ColorSettings::ColorSettings(const Dictionary& dictionary)
 
 RenderablePointCloud::TextureOwner::TextureOwner()
     : PropertyOwner({ "Texture", "Texture", "" })
-    , enabled(TextureEnabledInfo, true)
-    , allowCompression(AllowTextureCompressionInfo, true)
-    , useAlphaChannel(UseAlphaInfo, true)
+    , enabled(TextureEnabledInfo)
+    , allowCompression(AllowTextureCompressionInfo)
+    , useAlphaChannel(UseAlphaInfo)
     , spriteTexturePath(SpriteTextureInfo)
     , inputMode(TextureModeInfo)
 {
@@ -596,21 +666,14 @@ RenderablePointCloud::TextureOwner::TextureOwner()
     addProperty(allowCompression);
     addProperty(useAlphaChannel);
     addProperty(spriteTexturePath);
-
-    inputMode.setReadOnly(true);
     addProperty(inputMode);
 }
 
 RenderablePointCloud::Fading::Fading(const Dictionary& dictionary)
     : PropertyOwner({ "Fading", "Fading", "" })
-    , fadeInDistances(
-        FadeInDistancesInfo,
-        glm::vec2(0.f),
-        glm::vec2(0.f),
-        glm::vec2(100.f)
-    )
-    , enabled(EnableDistanceFadeInfo, false)
-    , invert(InvertFadeInfo, false)
+    , fadeInDistances(FadeInDistancesInfo)
+    , enabled(EnableDistanceFadeInfo)
+    , invert(InvertFadeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -639,12 +702,12 @@ RenderablePointCloud::RenderablePointCloud(const Dictionary& dictionary)
     , _sizeSettings(dictionary)
     , _colorSettings(dictionary)
     , _fading(dictionary)
-    , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
-    , _useRotation(UseOrientationDataInfo, false)
-    , _drawElements(DrawElementsInfo, true)
+    , _useAdditiveBlending(UseAdditiveBlendingInfo)
+    , _useRotation(UseOrientationDataInfo)
+    , _drawElements(DrawElementsInfo)
     , _renderOption(OrientationRenderOptionInfo)
-    , _nDataPoints(NumShownDataPointsInfo, 0)
-    , _hasOrientationData(HasOrientationDataInfo, false)
+    , _nDataPoints(NumShownDataPointsInfo)
+    , _hasOrientationData(HasOrientationDataInfo)
 {
     ZoneScoped;
 
@@ -807,10 +870,7 @@ RenderablePointCloud::RenderablePointCloud(const Dictionary& dictionary)
         _labels->setParentFadeable(this);
     }
 
-    _nDataPoints.setReadOnly(true);
     addProperty(_nDataPoints);
-
-    _hasOrientationData.setReadOnly(true);
     addProperty(_hasOrientationData);
 }
 
@@ -822,7 +882,7 @@ void RenderablePointCloud::initialize() {
             _texture.inputMode = "Single Sprite Texture";
             break;
         case TextureInputMode::Multi:
-            _texture.inputMode = "Multipe Textures / Data-based";
+            _texture.inputMode = "Multiple Textures / Data-based";
             break;
         case TextureInputMode::Other:
             _texture.inputMode = "Other";

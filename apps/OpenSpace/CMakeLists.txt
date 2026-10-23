@@ -28,16 +28,6 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 # We are getting all_enabled_modules from the handle_applications.cmake file which gets
 # it from the main CMakeLists file
 
-#####
-# Spout
-#####
-if (SGCT_SPOUT_SUPPORT AND NOT OPENSPACE_MODULE_SPOUT)
-  message(WARNING "Spout support from SGCT was requested, but OpenSpace Spout module was disabled")
-  message(STATUS "Enabling module as dependency")
-  set(OPENSPACE_MODULE_SPOUT ON CACHE BOOL "Build OPENSPACE_MODULE_SPOUTModule" FORCE)
-endif ()
-
-
 create_new_application(OpenSpace
   ${SGCT_OPENVR_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp

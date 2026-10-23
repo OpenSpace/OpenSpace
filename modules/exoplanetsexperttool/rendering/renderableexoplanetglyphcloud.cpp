@@ -61,57 +61,73 @@ namespace {
         Inclination
     };
 
-    constexpr Property::PropertyInfo ScaleInfo = {
-        "Scale",
-        "Scale",
-        "A scale value controlling the size of the glyphs."
+    constexpr FloatPropertyInfo ScaleInfo = {
+        .identifier = "Scale",
+        .name = "Scale",
+        .description = "A scale value controlling the size of the glyphs.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SelectionInfo = {
-        "Selection",
-        "Selection",
-        "A list of indices of selected points to be highlighted."
+    constexpr IntListPropertyInfo SelectionInfo = {
+        .identifier = "Selection",
+        .name = "Selection",
+        .description = "A list of indices of selected points to be highlighted."
     };
 
-    constexpr Property::PropertyInfo UseFixedWidthInfo = {
-        "UseFixedWidth",
-        "Use fixed width",
-        "If true, all the rings representing the planets will have the very same width. "
-        "Otherwise, the width of each ring decreases a bit as the radius gets larger."
+    constexpr BoolPropertyInfo UseFixedWidthInfo = {
+        .identifier = "UseFixedWidth",
+        .name = "Use fixed width",
+        .description = "If true, all the rings representing the planets will have the "
+            "very same width. Otherwise, the width of each ring decreases a bit as the "
+            "radius gets larger.",
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo OrientationRenderOptionInfo =
-    {
-        "OrientationRenderOption",
-        "Orientation render option",
-        "Controls how the planes for the points will be oriented. \"Camera View "
-        "Direction\" rotates the points so that the plane is orthogonal to the viewing "
-        "direction of the camera (useful for planar displays), and \"Camera Position "
-        "Normal\" rotates the points towards the position of the camera (useful for "
-        "spherical displays, like dome theaters). In both these cases the points will "
-        "be billboarded towards the camera.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo OrientationRenderOptionInfo = {
+        .identifier = "OrientationRenderOption",
+        .name = "Orientation render option",
+        .description = "Controls how the planes for the points will be oriented. "
+            "\"Camera View Direction\" rotates the points so that the plane is "
+            "orthogonal to the viewing direction of the camera (useful for planar "
+            "displays), and \"Camera Position Normal\" rotates the points towards the "
+            "position of the camera (useful for spherical displays, like dome theaters). "
+            "In both these cases the points will be billboarded towards the camera.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo GlyphModeInfo = {
-        "GlyphMode",
-        "Glyph mode",
-        "Controls which visual representation to use for the exoplanet glyps.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo GlyphModeInfo = {
+        .identifier = "GlyphMode",
+        .name = "Glyph mode",
+        .description = "Controls which visual representation to use for the exoplanet "
+            "glyps.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo DarkenFactorInfo = {
-        "DarkenFactor",
-        "Darker factor (on highlight)",
-        "The factor t use when darkening the glyph when in highlight mode (triggered by "
-        "holding CTRL + SHIFT)."
+    constexpr FloatPropertyInfo DarkenFactorInfo = {
+        .identifier = "DarkenFactor",
+        .name = "Darker factor (on highlight)",
+        .description = "The factor to use when darkening the glyph when in highlight "
+            "mode (triggered by holding CTRL + SHIFT).",
+        .defaults = {
+            .value = 0.3f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ShowMissingInclinationInfo = {
-        "ShowMissingInclination",
-        "Show Missing Inclination",
-        "If true, glyphs without inclination data will be displayed with a dashed "
-        "pattern in the inlincation glyph mode. Otherwise, they will be hidden."
+    constexpr BoolPropertyInfo ShowMissingInclinationInfo = {
+        .identifier = "ShowMissingInclination",
+        .name = "Show Missing Inclination",
+        .description = "If true, glyphs without inclination data will be displayed with "
+            "a dashed pattern in the inlincation glyph mode. Otherwise, they will be "
+            "hidden.",
+        .defaults = {
+            .value = false
+        }
     };
 
     const PropertyOwner::PropertyOwnerInfo StarGlyphInfo = {
@@ -121,10 +137,13 @@ namespace {
         "itself, rather than individual planets."
     };
 
-    constexpr Property::PropertyInfo ShowStarLineInfo = {
-        "Enabled",
-        "Enabled",
-        ""
+    constexpr BoolPropertyInfo ShowStarLineInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "If true, the star line will be displayed.",
+        .defaults = {
+            .value = false
+        }
     };
 
     const PropertyOwner::PropertyOwnerInfo StarOvservationLineInfo = {
@@ -145,39 +164,48 @@ namespace {
         "degrees is orthogonal to it."
     };
 
-    constexpr Property::PropertyInfo StarLineColorInfo = {
-        "LineColor",
-        "Line color",
-        "The color of the lines from the stars towards the target direction in "
-        "inclination mode."
+    constexpr Vec4PropertyInfo StarLineColorInfo = {
+        .identifier = "LineColor",
+        .name = "Line color",
+        .description = "The color of the lines from the stars towards the target "
+            "direction in inclination mode.",
+        .defaults = {
+            .value = glm::vec4(0.8f, 0.8f, 0.8f, 0.2f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo StarLineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the lines from the stars towards the target direction in "
-        "inclination mode."
+    constexpr FloatPropertyInfo StarLineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the lines from the stars towards the target "
+            "direction in inclination mode.",
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 0.01f, 3.f }
+        }
     };
 
-    constexpr Property::PropertyInfo StarLineLengthInfo = {
-        "LineLength",
-        "Line length",
-        "A factor controlling the length of the lines from the stars towards the target direction "
-        "in inclination mode."
+    constexpr FloatPropertyInfo StarLineLengthInfo = {
+        .identifier = "LineLength",
+        .name = "Line length",
+        .description = "A factor controlling the length of the lines from the stars "
+            "towards the target direction in inclination mode.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.01f, 3.f }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableExoplanetGlyphCloud)]] Parameters {
-        // [[codegen::verbatim(ScaleInfo.description)]]
-        std::optional<float> scale;
+        std::optional<float> scale [[codegen::Info(ScaleInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(SelectionInfo.description)]]
-        std::optional<std::vector<int>> selection;
+        std::optional<std::vector<int>> selection [[codegen::Info(SelectionInfo)]];
 
-        // [[codegen::verbatim(UseFixedWidthInfo.description)]]
-        std::optional<bool> useFixedWidth;
+        std::optional<bool> useFixedWidth [[codegen::Info(UseFixedWidthInfo)]];
 
-        // [[codegen::verbatim(DarkenFactorInfo.description)]]
-        std::optional<float> darkenFactor [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> darkenFactor
+            [[codegen::Info(DarkenFactorInfo), codegen::inrange(0.f, 1.f)]];
 
         enum class [[codegen::map(OrientationRenderOption)]] OrientationRenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
@@ -193,24 +221,22 @@ namespace {
             Inclination
         };
 
-        // [[codegen::verbatim(GlyphModeInfo.description)]]
-        std::optional<GlyphMode> glyphMode;
+        std::optional<GlyphMode> glyphMode [[codegen::Info(GlyphModeInfo)]];
 
-        // [[codegen::verbatim(ShowMissingInclinationInfo.description)]]
-        std::optional<bool> showMissingInclination;
+        std::optional<bool> showMissingInclination
+            [[codegen::Info(ShowMissingInclinationInfo)]];
 
         struct StarLine {
-            // [[codegen::verbatim(ShowStarLineInfo.description)]]
-            std::optional<bool> enabled;
+            std::optional<bool> enabled [[codegen::Info(ShowStarLineInfo)]];
 
-            // [[codegen::verbatim(StarLineColorInfo.description)]]
-            std::optional<glm::vec4> color [[codegen::color()]];
+            std::optional<glm::vec4> color
+                [[codegen::Info(StarLineColorInfo), codegen::color()]];
 
-            // [[codegen::verbatim(StarLineWidthInfo.description)]]
-            std::optional<float> lineWidth [[codegen::greater(0.f)]];
+            std::optional<float> lineWidth
+                [[codegen::Info(StarLineWidthInfo), codegen::greater(0.f)]];
 
-            // [[codegen::verbatim(StarLineLengthInfo.description)]]
-            std::optional<float> lineLength [[codegen::greater(0.f)]];
+            std::optional<float> lineLength
+                [[codegen::Info(StarLineLengthInfo), codegen::greater(0.f)]];
         };
 
         // Settings for the star rotation axis line, that may be shown in inclination
@@ -234,36 +260,26 @@ Documentation RenderableExoplanetGlyphCloud::Documentation() {
 
 RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _scale(ScaleInfo, 1.f, 0.f, 10.f)
+    , _scale(ScaleInfo)
     , _selectedIndices(SelectionInfo)
-    , _useFixedRingWidth(UseFixedWidthInfo, true)
+    , _useFixedRingWidth(UseFixedWidthInfo)
     , _orientationRenderOption(OrientationRenderOptionInfo)
     , _glyphMode(GlyphModeInfo)
-    , _darkenFactor(DarkenFactorInfo, 0.3f, 0.f, 1.f)
-    , _showMissingInclination(ShowMissingInclinationInfo, false)
+    , _darkenFactor(DarkenFactorInfo)
+    , _showMissingInclination(ShowMissingInclinationInfo)
     , _starObservationLine{
         .owner = PropertyOwner(StarOvservationLineInfo),
-        .enabled = BoolProperty(ShowStarLineInfo, false),
-        .color = Vec4Property(
-            StarLineColorInfo,
-            glm::vec4(0.8f, 0.8f, 0.8f, 0.2f),
-            glm::vec4(0.f),
-            glm::vec4(1.f)
-        ),
-        .lineWidth = FloatProperty(StarLineWidthInfo, 2.f, 0.01f, 3.f),
-        .lineLength = FloatProperty(StarLineLengthInfo, 1.f, 0.01f, 3.f)
+        .enabled = BoolProperty(ShowStarLineInfo),
+        .color = Vec4Property(StarLineColorInfo),
+        .lineWidth = FloatProperty(StarLineWidthInfo),
+        .lineLength = FloatProperty(StarLineLengthInfo)
     }
     , _starRotationAxis{
         .owner = PropertyOwner(StarRotationAxisInfo),
-        .enabled = BoolProperty(ShowStarLineInfo, false),
-        .color = Vec4Property(
-            StarLineColorInfo,
-            glm::vec4(0.8f, 0.8f, 0.8f, 1.f),
-            glm::vec4(0.f),
-            glm::vec4(1.f)
-        ),
-        .lineWidth = FloatProperty(StarLineWidthInfo, 2.f, 0.01f, 3.f),
-        .lineLength = FloatProperty(StarLineLengthInfo, 1.f, 0.01f, 3.f)
+        .enabled = BoolProperty(ShowStarLineInfo),
+        .color = Vec4Property(StarLineColorInfo),
+        .lineWidth = FloatProperty(StarLineWidthInfo),
+        .lineLength = FloatProperty(StarLineLengthInfo)
     }
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

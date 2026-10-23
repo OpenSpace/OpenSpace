@@ -34,8 +34,7 @@ namespace openspace {
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
-    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
-        T maximumValue, T steppingValue, float exponent = 1.f);
+    explicit NumericalProperty(BasicPropertyInfo<NumericalDefaults<T>> info);
 
     T minValue() const;
     void setMinValue(T value);

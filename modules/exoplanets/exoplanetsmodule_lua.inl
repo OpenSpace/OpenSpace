@@ -194,7 +194,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
 [[codegen::luawrap]] void removeExoplanetSystem(std::string starName) {
     const std::string starIdentifier = makeIdentifier(std::move(starName));
 
-    // No sync or send because this is already inside a Lua script, therefor it has
+    // No sync or send because this is already inside a Lua script, therefore it has
     // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript({
         .code = "openspace.removeSceneGraphNode('" + starIdentifier + "');",
@@ -240,7 +240,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
   * The format and column names in the CSV should be the same as the ones provided by the
   * [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/).
   *
-  * When dowloading the data from the archive we recommend including all columns, since a
+  * When downloading the data from the archive we recommend including all columns, since a
   * few required ones are not selected by default.
   *
   * \param csvFile A path to the CSV file to load the data from

@@ -79,71 +79,88 @@ namespace {
         PositionNormal
     };
 
-    constexpr Property::PropertyInfo ScaleInfo = {
-        "Scale",
-        "Scale",
-        "A scale value controlling the size of the glyphs."
+    constexpr FloatPropertyInfo ScaleInfo = {
+        .identifier = "Scale",
+        .name = "Scale",
+        .description = "A scale value controlling the size of the glyphs.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SelectionInfo = {
-        "Selection",
-        "Selection",
-        "A list of indices of selected points to be highlighted."
+    constexpr IntListPropertyInfo SelectionInfo = {
+        .identifier = "Selection",
+        .name = "Selection",
+        .description = "A list of indices of selected points to be highlighted."
     };
 
-    constexpr Property::PropertyInfo OrientationRenderOptionInfo = {
-        "OrientationRenderOption",
-        "Orientation render option",
-        "Controls how the planes for the points will be oriented. \"Camera View "
-        "Direction\" rotates the points so that the plane is orthogonal to the viewing "
-        "direction of the camera (useful for planar displays), and \"Camera Position "
-        "Normal\" rotates the points towards the position of the camera (useful for "
-        "spherical displays, like dome theaters). In both these cases the points will "
-        "be billboarded towards the camera.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo OrientationRenderOptionInfo = {
+        .identifier = "OrientationRenderOption",
+        .name = "Orientation render option",
+        .description = "Controls how the planes for the points will be oriented. "
+            "\"Camera View Direction\" rotates the points so that the plane is "
+            "orthogonal to the viewing direction of the camera (useful for planar "
+            "displays), and \"Camera Position Normal\" rotates the points towards the "
+            "position of the camera (useful for spherical displays, like dome theaters). "
+            "In both these cases the points will be billboarded towards the camera.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DarkenFactorInfo = {
-        "DarkenFactor",
-        "Darker factor (on highlight)",
-        "The factor t use when darkening the glyph when in highlight mode (triggered by "
-        "holding CTRL + SHIFT)."
+    constexpr FloatPropertyInfo DarkenFactorInfo = {
+        .identifier = "DarkenFactor",
+        .name = "Darker factor (on highlight)",
+        .description = "The factor to use when darkening the glyph when in highlight "
+            "mode (triggered by holding CTRL + SHIFT).",
+        .defaults = {
+            .value = 0.3f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo UseAdditiveBlendingInfo = {
-        "UseAdditiveBlending",
-        "Use additive blending",
-        "If true, the color of points rendered on top of each other is blended "
-        "additively, resulting in a brighter color where points overlap. If false, no "
-        "such blending will take place and the color of the point will not be modified "
-        "by blending.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseAdditiveBlendingInfo = {
+        .identifier = "UseAdditiveBlending",
+        .name = "Use additive blending",
+        .description = "If true, the color of points rendered on top of each other is "
+            "blended additively, resulting in a brighter color where points overlap. If "
+            "false, no such blending will take place and the color of the point will not "
+            "be modified by blending.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo UseSecondMappedColorInfo = {
-        "UseSecondMappedColor",
-        "Use second mapped color",
-        "If true, the points will be colored based on the second color in the given "
-        "color mapping, rather than the first one. This allows showing both host and "
-        "planet glyphs, with different color mapping",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseSecondMappedColorInfo = {
+        .identifier = "UseSecondMappedColor",
+        .name = "Use second mapped color",
+        .description = "If true, the points will be colored based on the second color in "
+            "the given color mapping, rather than the first one. This allows showing "
+            "both host and planet glyphs, with different color mapping",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ShouldBlurPointsInfo = {
-        "ShouldBlurPoints",
-        "Should blur points",
-        "If true, the points will be blurred when rendered, looking more like stars."
+    constexpr BoolPropertyInfo ShouldBlurPointsInfo = {
+        .identifier = "ShouldBlurPoints",
+        .name = "Should blur points",
+        .description = "If true, the points will be blurred when rendered, looking more "
+            "like stars.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     struct [[codegen::Dictionary(RenderableHostCloud)]] Parameters {
-        // [[codegen::verbatim(ScaleInfo.description)]]
-        std::optional<float> scale;
+        std::optional<float> scale [[codegen::Info(ScaleInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(SelectionInfo.description)]]
-        std::optional<std::vector<int>> selection;
+        std::optional<std::vector<int>> selection [[codegen::Info(SelectionInfo)]];
 
-        // [[codegen::verbatim(DarkenFactorInfo.description)]]
-        std::optional<float> darkenFactor [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> darkenFactor
+            [[codegen::Info(DarkenFactorInfo), codegen::inrange(0.f, 1.f)]];
 
         enum class [[codegen::map(OrientationRenderOption)]] OrientationRenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
@@ -154,14 +171,13 @@ namespace {
         // This can be either "Camera View Direction" or "Camera Position Normal".
         std::optional<OrientationRenderOption> billboard;
 
-        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
-        std::optional<bool> useAdditiveBlending;
+        std::optional<bool> useAdditiveBlending
+            [[codegen::Info(UseAdditiveBlendingInfo)]];
 
-        // [[codegen::verbatim(UseSecondMappedColorInfo.description)]]
-        std::optional<bool> useSecondMappedColor;
+        std::optional<bool> useSecondMappedColor
+            [[codegen::Info(UseSecondMappedColorInfo)]];
 
-        // [[codegen::verbatim(ShouldBlurPointsInfo.description)]]
-        std::optional<bool> shouldBlurPoints;
+        std::optional<bool> shouldBlurPoints [[codegen::Info(ShouldBlurPointsInfo)]];
     };
 #include "renderablehostcloud_codegen.cpp"
 } // namespace
@@ -176,13 +192,13 @@ Documentation RenderableHostCloud::Documentation() {
 
 RenderableHostCloud::RenderableHostCloud(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _scale(ScaleInfo, 1.f, 0.f, 10.f)
+    , _scale(ScaleInfo)
     , _selectedIndices(SelectionInfo)
     , _orientationRenderOption(OrientationRenderOptionInfo)
-    , _darkenFactor(DarkenFactorInfo, 0.3f, 0.f, 1.f)
-    , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
-    , _shouldBlurPoints(ShouldBlurPointsInfo, true)
-    , _useSecondColor(UseSecondMappedColorInfo, false)
+    , _darkenFactor(DarkenFactorInfo)
+    , _useAdditiveBlending(UseAdditiveBlendingInfo)
+    , _shouldBlurPoints(ShouldBlurPointsInfo)
+    , _useSecondColor(UseSecondMappedColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

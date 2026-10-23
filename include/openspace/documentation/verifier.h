@@ -44,7 +44,7 @@ class Dictionary;
  * The base class of all Verifier%s. Each object must have an Verifier::operator()
  * overload, that performs the actual testing of the key inside the passed
  * Dictionary and return a TestResult. The Verifier::type method returns a human-readable
- * representation of the type that is expected by the concret subclass of Verifier.
+ * representation of the type that is expected by the concrete subclass of Verifier.
  * Furthermore, the Verifier::documentation method returns a human-readable description of
  * the Verifier subclass and what it tests for.
  */
@@ -54,7 +54,7 @@ public:
 
     /**
      * This method tests whether the \p key contained in the \p dictionary adheres to
-     * whatever the concrete Verifer needs to test. The actual testing depends on the
+     * whatever the concrete Verifier needs to test. The actual testing depends on the
      * concrete subclass and can range from type testing (for example IntVerifier or
      * StringVerifier) to more complex testing (for example DoubleInRangeVerifier or
      * TableVerifier).
@@ -551,7 +551,7 @@ public:
 
     /**
      * First checks whether the \p dictionary contains the passed \p key and whether the
-     * \p key%'s value is correct using the template paramater `T` as a verifier. Then,
+     * \p key%'s value is correct using the template parameter `T` as a verifier. Then,
      * the \p key%'s value is checked against the stored OperatorVerifier::value using the
      * `Operator`.
      *
@@ -941,7 +941,7 @@ public:
  * This Verifier takes two Verifiers and performs a boolean `or` operation on their
  * results. In essence, a value only passes this Verifier if it passes either of the two
  * Verifier%s that are passed in the constructor. Opposed to the `C++` `||` operator, the
- * OrVerifier does not perform any short-circut evaluation.
+ * OrVerifier does not perform any short-circuit evaluation.
  */
 class OrVerifier : public Verifier {
 public:

@@ -50,45 +50,44 @@ namespace {
 
     constexpr std::string_view _loggerCat = "Spout";
 
-    constexpr Property::PropertyInfo NameSenderInfo = {
-        "SpoutName",
-        "Spout sender name",
-        "This value sets the Spout sender to use a specific name.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo NameSenderInfo = {
+        .identifier = "SpoutName",
+        .name = "Spout sender name",
+        .description = "This value sets the Spout sender to use a specific name.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NameReceiverInfo = {
-        "SpoutName",
-        "Spout receiver name",
-        "This value explicitly sets the Spout receiver to use a specific name. If this "
-        "is not a valid name, the first Spout image is used instead.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo NameReceiverInfo = {
+        .identifier = "SpoutName",
+        .name = "Spout receiver name",
+        .description = "This value explicitly sets the Spout receiver to use a specific "
+            "name. If this is not a valid name, the first Spout image is used instead.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SelectionInfo = {
-        "SpoutSelection",
-        "Spout selection",
-        "This property displays all available Spout sender on the system. If one them is "
-        "selected, its value is stored in the 'SpoutName' property, overwriting its "
-        "previous value.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo SelectionInfo = {
+        .identifier = "SpoutSelection",
+        .name = "Spout selection",
+        .description = "This property displays all available Spout sender on the system. "
+            "If one them is selected, its value is stored in the 'SpoutName' property, "
+            "overwriting its previous value.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UpdateInfo = {
-        "UpdateSelection",
-        "Update selection",
-        "If this property is trigged, the 'SpoutSelection' options will be refreshed.",
-        Property::Visibility::AdvancedUser
+    constexpr TriggerPropertyInfo UpdateInfo = {
+        .identifier = "UpdateSelection",
+        .name = "Update selection",
+        .description = "If this property is triggered, the 'SpoutSelection' options will "
+            "be refreshed.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SpoutReceiver)]] ReceiverParameters {
-        // [[codegen::verbatim(NameReceiverInfo.description)]]
-        std::optional<std::string> spoutName;
+        std::optional<std::string> spoutName [[codegen::Info(NameReceiverInfo)]];
     };
 
     struct [[codegen::Dictionary(SpoutSender)]] SenderParameters {
-        // [[codegen::verbatim(NameSenderInfo.description)]]
-        std::string spoutName;
+        std::string spoutName [[codegen::Info(NameSenderInfo)]];
     };
 } // namespace
 #include "spoutwrapper_codegen.cpp"
@@ -312,15 +311,15 @@ void SpoutReceiver::releaseTexture() {
     _spoutTexture.release();
 }
 
-const Property::PropertyInfo& SpoutReceiverPropertyProxy::NameInfoProperty() {
+const StringPropertyInfo& SpoutReceiverPropertyProxy::NameInfoProperty() {
     return NameReceiverInfo;
 }
 
-const Property::PropertyInfo& SpoutReceiverPropertyProxy::SelectionInfoProperty() {
+const OptionPropertyInfo& SpoutReceiverPropertyProxy::SelectionInfoProperty() {
     return SelectionInfo;
 }
 
-const Property::PropertyInfo& SpoutReceiverPropertyProxy::UpdateInfoProperty() {
+const TriggerPropertyInfo& SpoutReceiverPropertyProxy::UpdateInfoProperty() {
     return UpdateInfo;
 }
 
@@ -560,7 +559,7 @@ void SpoutSender::onReleaseSender(std::function<void()> callback) {
     _onReleaseSenderCallback = std::move(callback);
 }
 
-const Property::PropertyInfo& SpoutSenderPropertyProxy::NameInfoProperty() {
+const StringPropertyInfo& SpoutSenderPropertyProxy::NameInfoProperty() {
     return NameSenderInfo;
 }
 

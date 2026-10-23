@@ -850,7 +850,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
     ));
 
     int numSteps = 0;
-    // While we are inside the models boundries and not inside earth
+    // While we are inside the models boundaries and not inside earth
     while ((pos.x < _max.x && pos.x > _min.x && pos.y < _max.y && pos.y > _min.y &&
             pos.z < _max.z && pos.z > _min.z) &&
             !(pos.x*pos.x + pos.y*pos.y + pos.z*pos.z < 1.0))
@@ -858,7 +858,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
         // Save position. Model has +Z as up
         trajectory.push_back(pos);
 
-        // Calculate new position with Lorentz force quation and Runge-Kutta 4th order
+        // Calculate new position with Lorentz force equation and Runge-Kutta 4th order
         glm::vec3 b = glm::vec3(
             _interpolator->interpolate(bxID, pos.x, pos.y, pos.z),
             _interpolator->interpolate(byID, pos.x, pos.y, pos.z),

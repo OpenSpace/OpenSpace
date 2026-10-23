@@ -86,10 +86,10 @@ public:
      */
     enum class ShaderType : std::underlying_type_t<GLenum> {
         Vertex = static_cast<std::underlying_type_t<GLenum>>(GL_VERTEX_SHADER),
-        TesselationControl = static_cast<std::underlying_type_t<GLenum>>(
+        TessellationControl = static_cast<std::underlying_type_t<GLenum>>(
             GL_TESS_CONTROL_SHADER
         ),
-        TesselationEvaluation = static_cast<std::underlying_type_t<GLenum>>(
+        TessellationEvaluation = static_cast<std::underlying_type_t<GLenum>>(
             GL_TESS_EVALUATION_SHADER
         ),
         Geometry = static_cast<std::underlying_type_t<GLenum>>(GL_GEOMETRY_SHADER),

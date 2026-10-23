@@ -43,21 +43,29 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ActiveColorInfo = {
-        "ActiveColor",
-        "Active color",
-        "This value determines the color that the active instrument is rendered in. "
-        "Shortly after activation, the used color is mixture of this and the flash "
-        "color. The default value is (0.6, 1.0, 0.0).",
-        Property::Visibility::User
+    constexpr Vec3PropertyInfo ActiveColorInfo = {
+        .identifier = "ActiveColor",
+        .name = "Active color",
+        .description = "This value determines the color that the active instrument is "
+            "rendered in. Shortly after activation, the used color is mixture of this "
+            "and the flash color.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(0.6f, 1.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FlashColorInfo = {
-        "FlashColor",
-        "Flash color",
-        "This value determines the color that is used shortly after an instrument "
-        "activation. The default value is (0.9, 1.0, 0.75).",
-        Property::Visibility::User
+    constexpr Vec3PropertyInfo FlashColorInfo = {
+        .identifier = "FlashColor",
+        .name = "Flash color",
+        .description = "This value determines the color that is used shortly after an "
+            "instrument activation.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(0.9f, 1.f, 0.75f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     // Shows information about the status of individual instruments onboard a spacecraft
@@ -66,11 +74,11 @@ namespace {
     // visual representation on how much time has passed since the previous image capture
     // and how much time remains until the instrument captures the next image.
     struct [[codegen::Dictionary(DashboardItemInstruments)]] Parameters {
-        // [[codegen::verbatim(ActiveColorInfo.description)]]
-        std::optional<glm::vec3> activeColor [[codegen::color()]];
+        std::optional<glm::vec3> activeColor
+            [[codegen::Info(ActiveColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(FlashColorInfo.description)]]
-        std::optional<glm::vec3> flashColor [[codegen::color()]];
+        std::optional<glm::vec3> flashColor
+            [[codegen::Info(FlashColorInfo), codegen::color()]];
     };
 } // namespace
 #include "dashboarditeminstruments_codegen.cpp"
@@ -86,17 +94,8 @@ Documentation DashboardItemInstruments::Documentation() {
 
 DashboardItemInstruments::DashboardItemInstruments(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _activeColor(
-        ActiveColorInfo,
-        glm::vec3(0.6f, 1.f, 0.f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
-    , _activeFlash(FlashColorInfo,
-        glm::vec3(0.9f, 1.f, 0.75f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
+    , _activeColor(ActiveColorInfo)
+    , _activeFlash(FlashColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

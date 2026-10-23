@@ -26,14 +26,21 @@
 
 #include <openspace/misc/assert.h>
 #include <openspace/misc/profiling.h>
+#include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstdint>
+#include <new>
+#include <utility>
 
 namespace openspace::global::callback {
 
 namespace {
     // Using the same mechanism as in the globals file
 #ifdef WIN32
+    // The number of objects that are placed into the DataStorage below
+    constexpr int NumberOfCallbacks = 17;
+
     constexpr int TotalSize =
         sizeof(std::vector<std::function<void()>>) +
         sizeof(std::vector<std::function<void()>>) +
@@ -51,10 +58,40 @@ namespace {
         sizeof(std::vector<MouseScrollWheelCallback>) +
         sizeof(std::vector<std::function<bool(TouchInput)>>) +
         sizeof(std::vector<std::function<bool(TouchInput)>>) +
-        sizeof(std::vector<std::function<void(TouchInput)>>);
+        sizeof(std::vector<std::function<void(TouchInput)>>) +
+        // Every object has to start at an address that satisfies its own alignment
+        // requirement, so there might be some padding in front of each of them. Reserve
+        // enough slack for a maximally sized padding per object
+        NumberOfCallbacks * alignof(std::max_align_t);
 
-    std::array<std::byte, TotalSize> DataStorage;
+    alignas(std::max_align_t) std::array<std::byte, TotalSize> DataStorage;
 #endif // WIN32
+
+/**
+ * Creates the callback list of type \p T. Works the same way as the `createGlobal`
+ * function in the globals file, see the documentation there for why the alignment
+ * rounding is necessary.
+ */
+template <typename T, typename... Args>
+T* createCallback([[maybe_unused]] std::byte*& pos, Args&&... args) {
+#ifdef WIN32
+    constexpr std::uintptr_t Alignment = alignof(T);
+    const std::uintptr_t p = reinterpret_cast<std::uintptr_t>(pos);
+    pos = reinterpret_cast<std::byte*>((p + Alignment - 1) & ~(Alignment - 1));
+
+    assert_msg(
+        pos + sizeof(T) <= DataStorage.data() + TotalSize,
+        "Ran out of space in the callback DataStorage"
+    );
+
+    T* obj = new (pos) T(std::forward<Args>(args)...);
+    pos += sizeof(T);
+    return obj;
+#else // ^^^^ WIN32 / !WIN32 vvvv
+    return new T(std::forward<Args>(args)...);
+#endif // WIN32
+}
+
 } // namespace
 
 void create() {
@@ -63,150 +100,33 @@ void create() {
 #ifdef WIN32
     std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));
     std::byte* currentPos = DataStorage.data();
-#endif // WIN32
-
-#ifdef WIN32
-    initialize = new (currentPos) std::vector<std::function<void()>>();
-    assert_msg(initialize, "No initialize");
-    currentPos += sizeof(std::vector<std::function<void()>>);
 #else // ^^^^ WIN32 / !WIN32 vvvv
-    initialize = new std::vector<std::function<void()>>();
+    std::byte* currentPos = nullptr;
 #endif // WIN32
 
-#ifdef WIN32
-    deinitialize = new (currentPos) std::vector<std::function<void()>>();
-    assert_msg(deinitialize, "No deinitialize");
-    currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    deinitialize = new std::vector<std::function<void()>>();
-#endif // WIN32
+    using VoidCallbacks = std::vector<std::function<void()>>;
 
-#ifdef WIN32
-    initializeGL = new (currentPos) std::vector<std::function<void()>>();
-    assert_msg(initializeGL, "No initializeGL");
-    currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    initializeGL = new std::vector<std::function<void()>>();
-#endif // WIN32
-
-#ifdef WIN32
-    deinitializeGL = new (currentPos) std::vector<std::function<void()>>();
-    assert_msg(deinitializeGL, "No deinitializeGL");
-    currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    deinitializeGL = new std::vector<std::function<void()>>();
-#endif // WIN32
-
-#ifdef WIN32
-    preSync = new (currentPos) std::vector<std::function<void()>>();
-    assert_msg(preSync, "No preSync");
-    currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    preSync = new std::vector<std::function<void()>>();
-#endif // WIN32
-
-#ifdef WIN32
-    postSyncPreDraw = new (currentPos) std::vector<std::function<void()>>();
-    assert_msg(postSyncPreDraw, "No postSyncPreDraw");
-    currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    postSyncPreDraw = new std::vector<std::function<void()>>();
-#endif // WIN32
-
-#ifdef WIN32
-    render = new (currentPos) std::vector<
+    initialize = createCallback<VoidCallbacks>(currentPos);
+    deinitialize = createCallback<VoidCallbacks>(currentPos);
+    initializeGL = createCallback<VoidCallbacks>(currentPos);
+    deinitializeGL = createCallback<VoidCallbacks>(currentPos);
+    preSync = createCallback<VoidCallbacks>(currentPos);
+    postSyncPreDraw = createCallback<VoidCallbacks>(currentPos);
+    render = createCallback<std::vector<
         std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
-    >();
-    assert_msg(render, "No render");
-    currentPos += sizeof(std::vector<
-        std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
-    >);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    render = new std::vector<
-        std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
-    >();
-#endif // WIN32
-
-#ifdef WIN32
-    draw2D = new (currentPos) std::vector<std::function<void()>>();
-    assert_msg(draw2D, "No draw2D");
-    currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    draw2D = new std::vector<std::function<void()>>();
-#endif // WIN32
-
-#ifdef WIN32
-    postDraw = new (currentPos) std::vector<std::function<void()>>();
-    assert_msg(postDraw, "No postDraw");
-    currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    postDraw = new std::vector<std::function<void()>>();
-#endif // WIN32
-
-#ifdef WIN32
-    keyboard = new (currentPos) std::vector<KeyboardCallback>();
-    assert_msg(keyboard, "No keyboard");
-    currentPos += sizeof(std::vector<KeyboardCallback>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    keyboard = new std::vector<KeyboardCallback>();
-#endif // WIN32
-
-#ifdef WIN32
-    character = new (currentPos) std::vector<CharacterCallback>();
-    assert_msg(character, "No character");
-    currentPos += sizeof(std::vector<CharacterCallback>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    character = new std::vector<CharacterCallback>();
-#endif // WIN32
-
-#ifdef WIN32
-    mouseButton = new (currentPos) std::vector<MouseButtonCallback>();
-    assert_msg(mouseButton, "No mouseButton");
-    currentPos += sizeof(std::vector<MouseButtonCallback>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    mouseButton = new std::vector<MouseButtonCallback>();
-#endif // WIN32
-
-#ifdef WIN32
-    mousePosition =
-        new (currentPos) std::vector<MousePositionCallback>();
-    assert_msg(mousePosition, "No mousePosition");
-    currentPos += sizeof(std::vector<MousePositionCallback>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    mousePosition = new std::vector<MousePositionCallback>();
-#endif // WIN32
-
-#ifdef WIN32
-    mouseScrollWheel = new (currentPos) std::vector<MouseScrollWheelCallback>();
-    assert_msg(mouseScrollWheel, "No mouseScrollWheel");
-    currentPos += sizeof(std::vector<MouseScrollWheelCallback>);
-#else // ^^^ WIN32 / !WIN32 vvv
-    mouseScrollWheel = new std::vector<MouseScrollWheelCallback>();
-#endif // WIN32
-
-#ifdef WIN32
-    touchDetected = new (currentPos) std::vector<std::function<bool(TouchInput)>>();
-    assert_msg(touchDetected, "No touchDetected");
-    currentPos += sizeof(std::vector<std::function<bool(TouchInput)>>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    touchDetected = new std::vector<std::function<bool(TouchInput)>>();
-#endif // WIN32
-
-#ifdef WIN32
-    touchUpdated = new (currentPos) std::vector<std::function<bool(TouchInput)>>();
-    assert_msg(touchUpdated, "No touchUpdated");
-    currentPos += sizeof(std::vector<std::function<bool(TouchInput)>>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    touchUpdated = new std::vector<std::function<bool(TouchInput)>>();
-#endif // WIN32
-
-#ifdef WIN32
-    touchExit = new (currentPos) std::vector<std::function<void(TouchInput)>>();
-    assert_msg(touchExit, "No touchExit");
-    //currentPos += sizeof(std::vector<std::function<void(TouchInput)>>);
-#else // ^^^^ WIN32 / !WIN32 vvvv
-    touchExit = new std::vector<std::function<void(TouchInput)>>();
-#endif // WIN32
+    >>(currentPos);
+    draw2D = createCallback<VoidCallbacks>(currentPos);
+    postDraw = createCallback<VoidCallbacks>(currentPos);
+    keyboard = createCallback<std::vector<KeyboardCallback>>(currentPos);
+    character = createCallback<std::vector<CharacterCallback>>(currentPos);
+    mouseButton = createCallback<std::vector<MouseButtonCallback>>(currentPos);
+    mousePosition = createCallback<std::vector<MousePositionCallback>>(currentPos);
+    mouseScrollWheel = createCallback<std::vector<MouseScrollWheelCallback>>(currentPos);
+    touchDetected =
+        createCallback<std::vector<std::function<bool(TouchInput)>>>(currentPos);
+    touchUpdated =
+        createCallback<std::vector<std::function<bool(TouchInput)>>>(currentPos);
+    touchExit = createCallback<std::vector<std::function<void(TouchInput)>>>(currentPos);
 }
 
 void destroy() {

@@ -40,64 +40,87 @@ namespace {
 
     constexpr std::string_view _loggerCat = "GlobeTranslation";
 
-    constexpr Property::PropertyInfo GlobeInfo = {
-        "Globe",
-        "Attached globe",
-        "The node on which the longitude/latitude is specified. If the node is a globe, "
-        "the correct height information for the globe is used. Otherwise, the position "
-        "is specified based on the longitude and latitude on the node's interaction "
-        "sphere",
-        Property::Visibility::User
+    constexpr StringPropertyInfo GlobeInfo = {
+        .identifier = "Globe",
+        .name = "Attached globe",
+        .description = "The node on which the longitude/latitude is specified. If the "
+            "node is a globe, the correct height information for the globe is used. "
+            "Otherwise, the position is specified based on the longitude and latitude on "
+            "the node's interaction sphere",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo LatitudeInfo = {
-        "Latitude",
-        "Latitude",
-        "The latitude of the location on the globe's surface. The value can range from "
-        "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe. The default value is 0.0.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo LatitudeInfo = {
+        .identifier = "Latitude",
+        .name = "Latitude",
+        .description = "The latitude of the location on the globe's surface. The value "
+            "can range from -90 to 90, with negative values representing the southern "
+            "hemisphere of the globe.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { -90.0, 90.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo LongitudeInfo = {
-        "Longitude",
-        "Longitude",
-        "The longitude of the location on the globe's surface. The value can range from "
-        "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo LongitudeInfo = {
+        .identifier = "Longitude",
+        .name = "Longitude",
+        .description = "The longitude of the location on the globe's surface. The value "
+            "can range from -180 to 180, with negative values representing the western "
+            "hemisphere of the globe.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { -180.0, 180.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo AltitudeInfo = {
-        "Altitude",
-        "Altitude",
-        "The altitude in meters. If the 'UseHeightmap' property is 'true', this is an "
-        "offset from the actual surface of the globe. If not, this is an offset from the "
-        "reference ellipsoid. The default value is 0.0.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo AltitudeInfo = {
+        .identifier = "Altitude",
+        .name = "Altitude",
+        .description = "The altitude in meters. If the 'UseHeightmap' property is "
+            "'true', this is an offset from the actual surface of the globe. If not, "
+            "this is an offset from the reference ellipsoid.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.0,
+            .minMax = { -1e12, 1e12 }
+        }
     };
 
-    constexpr Property::PropertyInfo UseHeightmapInfo = {
-        "UseHeightmap",
-        "Use heightmap",
-        "If this value is 'true', the altitude specified in 'Altitude' will be treated "
-        "as an offset from the heightmap. Otherwise, it will be an offset from the "
-        "globe's reference ellipsoid. The default value is 'false'.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo UseHeightmapInfo = {
+        .identifier = "UseHeightmap",
+        .name = "Use heightmap",
+        .description = "If this value is 'true', the altitude specified in 'Altitude' "
+            "will be treated as an offset from the heightmap. Otherwise, it will be an "
+            "offset from the globe's reference ellipsoid.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo UseCameraInfo = {
-        "UseCamera",
-        "Use camera",
-        "If this value is 'true', the lat and lon are updated to match the camera.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseCameraInfo = {
+        .identifier = "UseCamera",
+        .name = "Use camera",
+        .description = "If this value is 'true', the lat and lon are updated to match "
+            "the camera.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo UseCameraAltitudeInfo = {
-        "UseCameraAltitude",
-        "Use camera altitude",
-        "If this value is 'true', the altitude is updated to match the camera.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseCameraAltitudeInfo = {
+        .identifier = "UseCameraAltitude",
+        .name = "Use camera altitude",
+        .description = "If this value is 'true', the altitude is updated to match the "
+            "camera.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // Places the scene graph node at a specific location relative to another scene graph
@@ -114,26 +137,21 @@ namespace {
     // If the `UseCamera` value is set, the object's position automatically updates based
     // on the current camera location.
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {
-        // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe [[codegen::identifier()]];
+        std::string globe [[codegen::Info(GlobeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(LatitudeInfo.description)]]
-        std::optional<double> latitude [[codegen::inrange(-90.0, 90.0)]];
+        std::optional<double> latitude
+            [[codegen::Info(LatitudeInfo), codegen::inrange(-90.0, 90.0)]];
 
-        // [[codegen::verbatim(LongitudeInfo.description)]]
-        std::optional<double> longitude [[codegen::inrange(-180.0, 180.0)]];
+        std::optional<double> longitude
+            [[codegen::Info(LongitudeInfo), codegen::inrange(-180.0, 180.0)]];
 
-        // [[codegen::verbatim(AltitudeInfo.description)]]
-        std::optional<double> altitude;
+        std::optional<double> altitude [[codegen::Info(AltitudeInfo)]];
 
-        // [[codegen::verbatim(UseHeightmapInfo.description)]]
-        std::optional<bool> useHeightmap;
+        std::optional<bool> useHeightmap [[codegen::Info(UseHeightmapInfo)]];
 
-        // [[codegen::verbatim(UseCameraInfo.description)]]
-        std::optional<bool> useCamera;
+        std::optional<bool> useCamera [[codegen::Info(UseCameraInfo)]];
 
-        // [[codegen::verbatim(UseCameraAltitudeInfo.description)]]
-        std::optional<bool> useCameraAltitude;
+        std::optional<bool> useCameraAltitude [[codegen::Info(UseCameraAltitudeInfo)]];
     };
 } // namespace
 #include "globetranslation_codegen.cpp"
@@ -150,12 +168,12 @@ Documentation GlobeTranslation::Documentation() {
 GlobeTranslation::GlobeTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
     , _sceneGraphNode(GlobeInfo)
-    , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
-    , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
-    , _altitude(AltitudeInfo, 0.0, -1e12, 1e12)
-    , _useHeightmap(UseHeightmapInfo, false)
-    , _useCamera(UseCameraInfo, false)
-    , _useCameraAltitude(UseCameraAltitudeInfo, false)
+    , _latitude(LatitudeInfo)
+    , _longitude(LongitudeInfo)
+    , _altitude(AltitudeInfo)
+    , _useHeightmap(UseHeightmapInfo)
+    , _useCamera(UseCameraInfo)
+    , _useCameraAltitude(UseCameraAltitudeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

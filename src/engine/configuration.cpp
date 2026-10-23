@@ -75,7 +75,7 @@ namespace {
         // global rebinding of keys from the default.
         std::optional<std::vector<std::string>> globalCustomizationScripts;
 
-        enum class [[codegen::map(Property::Visibility)]] Visibility {
+        enum class [[codegen::map(Visibility)]] Visibility {
             NoviceUser = 0,
             User,
             AdvancedUser,
@@ -91,7 +91,7 @@ namespace {
         std::optional<bool> showPropertyConfirmation;
 
         // A list of paths that are automatically registered with the file system. If a
-        // key X is used in the table, it is then useable by referencing ${X} in all other
+        // key X is used in the table, it is then usable by referencing ${X} in all other
         // configuration files or scripts.
         std::map<std::string, std::string> paths;
 
@@ -249,7 +249,7 @@ namespace {
             // Determines whether the OpenGL context should be a debug context.
             bool activate;
 
-            // If this is set to 'true', everytime an OpenGL error is logged, the full
+            // If this is set to 'true', every time an OpenGL error is logged, the full
             // stacktrace leading to the error is printed as well, making debugging under
             // production situations much easier.
             std::optional<bool> printStacktrace;
@@ -551,7 +551,8 @@ void parseLuaState(Configuration& configuration) {
         p.globalCustomizationScripts.value_or(c.globalCustomizationScripts);
 
     if (p.propertyVisibility.has_value()) {
-        c.propertyVisibility = codegen::map<Property::Visibility>(*p.propertyVisibility);
+        c.propertyVisibility =
+            codegen::map<Visibility>(*p.propertyVisibility);
     }
 
     c.showPropertyConfirmation = p.showPropertyConfirmation.value_or(true);

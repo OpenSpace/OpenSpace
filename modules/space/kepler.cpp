@@ -191,7 +191,7 @@ namespace {
         // The epochString is in the form:
         // YYDDD.DDDDDDDD
         // With YY being the last two years of the launch epoch, the first DDD the day of
-        // the year and the remaning a fractional part of the day
+        // the year and the remaining a fractional part of the day
 
         // The main overview of this function:
         // 1. Reconstruct the full year from the YY part
@@ -953,7 +953,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
             continue;
         }
         if (line.starts_with("------------------")) {
-            // It is the special case of the header seperator
+            // It is the special case of the header separator
             continue;
         }
 

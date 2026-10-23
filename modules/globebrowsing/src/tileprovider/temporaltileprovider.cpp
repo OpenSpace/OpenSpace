@@ -61,21 +61,24 @@ namespace {
 
     constexpr std::string_view TimePlaceholder = "${OpenSpaceTimeId}";
 
-    constexpr Property::PropertyInfo UseFixedTimeInfo = {
-        "UseFixedTime",
-        "Use fixed time",
-        "If this value is enabled, the time-varying timevarying dataset will always use "
-        "the time that is specified in the 'FixedTime' property, rather than using the "
-        "actual time from OpenSpace.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseFixedTimeInfo = {
+        .identifier = "UseFixedTime",
+        .name = "Use fixed time",
+        .description = "If this value is enabled, the time-varying timevarying dataset "
+            "will always use the time that is specified in the 'FixedTime' property, "
+            "rather than using the actual time from OpenSpace.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo FixedTimeInfo = {
-        "FixedTime",
-        "Fixed time",
-        "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
-        "time taken from OpenSpace for the displayed tiles.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FixedTimeInfo = {
+        .identifier = "FixedTime",
+        .name = "Fixed time",
+        .description = "If the 'UseFixedTime' is enabled, this time will be used instead "
+            "of the actual time taken from OpenSpace for the displayed tiles.",
+        .visibility = Visibility::AdvancedUser
     };
 
     std::string_view timeStringify(const std::string& format, const Time& t) {
@@ -99,11 +102,9 @@ namespace {
     }
 
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
-        // [[codegen::verbatim(UseFixedTimeInfo.description)]]
-        std::optional<bool> useFixedTime;
+        std::optional<bool> useFixedTime [[codegen::Info(UseFixedTimeInfo)]];
 
-        // [[codegen::verbatim(FixedTimeInfo.description)]]
-        std::optional<std::string> fixedTime;
+        std::optional<std::string> fixedTime [[codegen::Info(FixedTimeInfo)]];
 
         enum class Mode {
             Prototyped,
@@ -136,7 +137,7 @@ namespace {
             std::string timeFormat;
 
             // The text that will be used as the prototype to generate the data to load
-            // the image layer. Any occurance of `${OpenSpaceTimeId}` in this prototype
+            // the image layer. Any occurrence of `${OpenSpaceTimeId}` in this prototype
             // is replaced with the current date according to the remaining information
             // such as the resolution and the format and the resulting text is used to
             // load the corresponding images.
@@ -177,7 +178,7 @@ Documentation TemporalTileProvider::Documentation() {
 
 TemporalTileProvider::TemporalTileProvider(const Dictionary& dictionary)
     : _initDict(dictionary)
-    , _useFixedTime(UseFixedTimeInfo, false)
+    , _useFixedTime(UseFixedTimeInfo)
     , _fixedTime(FixedTimeInfo)
 {
     ZoneScoped;
@@ -269,7 +270,7 @@ TemporalTileProvider::TemporalTileProvider(const Dictionary& dictionary)
                     // If the user asked for a day-of-year, the day-of-month and the month
                     // fields will not be set and calls to std::asctime will assert
                     // unfortunately. Luckily, Spice understands DOY date formats, so we
-                    // can specify those directly and noone would use a DOY and a DOM
+                    // can specify those directly and no one would use a DOY and a DOM
                     // time string in the same format string, right?  Right?!
                     date = std::format(
                         "{}-{}T{}:{}:{}",
@@ -759,7 +760,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     );
 
     // Check if a tile exists for the given key in the tileCache
-    // Initializing the tile that will contian the interpolated texture
+    // Initializing the tile that will contain the interpolated texture
     Tile ourTile;
     // The texture that will contain the interpolated image
     opengl::Texture* writeTexture = nullptr;

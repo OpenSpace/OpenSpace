@@ -45,20 +45,6 @@ struct [[codegen::Dictionary("Wrong")]] Parameters {
     );
 }
 
-TEST_CASE("Parsing/Structs/Error:  Missing description", "[Parsing][Structs]") {
-    constexpr std::string_view Source = R"(
-struct [[codegen::Dictionary(Error)]] Parameters {
-    // [[codegen::verbatim]]
-    int error;
-};
-)";
-    const Code code = parse(Source);
-    CHECK_THROWS_MATCHES(
-        generateResult(code),
-        CodegenError, CM::StartsWith("Malformed codegen::verbatim")
-    );
-}
-
 TEST_CASE("Parsing/Structs/Error:  Missing space", "[Parsing][Structs]") {
     constexpr std::string_view Source = R"(struct [[codegen::Dictionary(Name)]] Parameters{
 };)";

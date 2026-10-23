@@ -32,26 +32,36 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ChromaKeyColorInfo = {
-        "ChromaKeyColor",
-        "Chroma key color",
-        "This color is used as the chroma key for the layer that is adjusted.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ChromaKeyColorInfo = {
+        .identifier = "ChromaKeyColor",
+        .name = "Chroma key color",
+        .description = "This color is used as the chroma key for the layer that is "
+            "adjusted.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ChromaKeyToleranceInfo = {
-        "ChromaKeyTolerance",
-        "Chroma key tolerance",
-        "This value determines the tolerance that is used to determine whether a color "
-        "is matching the selected Chroma key.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ChromaKeyToleranceInfo = {
+        .identifier = "ChromaKeyTolerance",
+        .name = "Chroma key tolerance",
+        .description = "This value determines the tolerance that is used to determine "
+            "whether a color is matching the selected Chroma key.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo TypeInfo = {
-        "Type",
-        "Type",
-        "The type of layer adjustment that is applied to the underlying layer.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo TypeInfo = {
+        .identifier = "Type",
+        .name = "Type",
+        .description = "The type of layer adjustment that is applied to the underlying "
+            "layer.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(LayerAdjustment)]] Parameters {
@@ -81,8 +91,8 @@ Documentation LayerAdjustment::Documentation() {
 
 LayerAdjustment::LayerAdjustment()
     : PropertyOwner({ "Adjustment" })
-    , _chromaKeyColor(ChromaKeyColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _chromaKeyTolerance(ChromaKeyToleranceInfo, 0.f, 0.f, 1.f)
+    , _chromaKeyColor(ChromaKeyColorInfo)
+    , _chromaKeyTolerance(ChromaKeyToleranceInfo)
     , _typeOption(TypeInfo)
     , _typeId(static_cast<layers::Adjustment::ID>(_typeOption.value()))
 {

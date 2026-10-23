@@ -161,7 +161,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       // angle
       // float muGround = (r2 - distToGround*distToGround - rPlanet2)/(2*distToGround*Rg);
       // Access the Transmittance LUT in order to calculate the transmittance from the
-      // ground point Rg, thorugh the atmosphere, at a distance: distanceToGround
+      // ground point Rg, through the atmosphere, at a distance: distanceToGround
       groundTransmittance = transmittance(transmittanceTexture, rPlanet, muGround,
         distanceToGround, rPlanet, rAtmosphere);
     }

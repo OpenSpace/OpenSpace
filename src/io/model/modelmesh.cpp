@@ -84,7 +84,7 @@ void ModelMesh::render(opengl::ProgramObject& program, const glm::mat4& meshTran
 
     if (!isProjection) {
         if (isFullyTexturedModel) {
-            // Use embeded vertex colors if specified
+            // Use embedded vertex colors if specified
             program.setUniform("use_vertex_colors", _hasVertexColors);
 
             // Reset shader
@@ -100,7 +100,7 @@ void ModelMesh::render(opengl::ProgramObject& program, const glm::mat4& meshTran
 
             // Bind appropriate textures
             for (const Texture& texture : _textures) {
-                // Tell shader wether to render invisible mesh with flashy color or not
+                // Tell shader whether to render invisible mesh with flashy color or not
                 program.setUniform("use_forced_color", texture.useForcedColor);
                 if (texture.useForcedColor) {
                     break;

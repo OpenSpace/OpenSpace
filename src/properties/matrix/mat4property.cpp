@@ -28,15 +28,8 @@
 
 namespace openspace {
 
-Mat4Property::Mat4Property(PropertyInfo info, glm::mat4 value, glm::mat4 minValue,
-                           glm::mat4 maxValue, glm::mat4 stepValue)
-    : NumericalProperty<glm::mat4>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+Mat4Property::Mat4Property(Mat4PropertyInfo info)
+    : NumericalProperty<glm::mat4>(std::move(info))
 {}
 
 std::string_view Mat4Property::className() const {

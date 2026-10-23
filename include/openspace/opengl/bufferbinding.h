@@ -80,7 +80,7 @@ public:
     operator GLint();
 
     /**
-     * Deinitializes all the used BufferBinding%s and marks them as free. The total numbe
+     * Deinitializes all the used BufferBinding%s and marks them as free. The total number
      * of used buffer bindings after this call will be `0`.
      */
     static void deinitialize();

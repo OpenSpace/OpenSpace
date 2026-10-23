@@ -49,61 +49,88 @@ namespace {
         glm::vec3 position;
     };
 
-    constexpr Property::PropertyInfo StartNodeInfo = {
-        "StartNode",
-        "Start node",
-        "The identifier of the node the line starts from. Defaults to 'Root' if not "
-        "specified.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo StartNodeInfo = {
+        .identifier = "StartNode",
+        .name = "Start node",
+        .description = "The identifier of the node the line starts from. Defaults to "
+            "'Root' if not specified.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = "Root"
+        }
     };
 
-    constexpr Property::PropertyInfo EndNodeInfo = {
-        "EndNode",
-        "End node",
-        "The identifier of the node the line ends at. Defaults to 'Root' if not "
-        "specified.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo EndNodeInfo = {
+        .identifier = "EndNode",
+        .name = "End node",
+        .description = "The identifier of the node the line ends at. Defaults to 'Root' "
+            "if not specified.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = "Root"
+        }
     };
 
-    constexpr Property::PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
-        "The RGB color for the line.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo LineColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The RGB color for the line.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the line. The larger number, the thicker the line.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the line. The larger number, the thicker the line.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr Property::PropertyInfo StartOffsetInfo = {
-        "StartOffset",
-        "Offset to start node",
-        "A distance from the start node at which the rendered line should begin. By "
-        "default it takes a value in meters, but if 'UseRelativeOffsets' is set to true "
-        "it is read as a multiplier times the bounding sphere of the node.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo StartOffsetInfo = {
+        .identifier = "StartOffset",
+        .name = "Offset to start node",
+        .description = "A distance from the start node at which the rendered line should "
+            "begin. By default it takes a value in meters, but if 'UseRelativeOffsets' "
+            "is set to true it is read as a multiplier times the bounding sphere of the "
+            "node.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1e13f }
+        }
     };
 
-    constexpr Property::PropertyInfo EndOffsetInfo = {
-        "EndOffset",
-        "Offset to end node",
-        "A distance to the end node at which the rendered line should end. By default it "
-        "takes a value in meters, but if 'UseRelativeOffsets' is set to true it is read "
-        "as a multiplier times the bounding sphere of the node.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo EndOffsetInfo = {
+        .identifier = "EndOffset",
+        .name = "Offset to end node",
+        .description = "A distance to the end node at which the rendered line should "
+            "end. By default it takes a value in meters, but if 'UseRelativeOffsets' is "
+            "set to true it is read as a multiplier times the bounding sphere of the "
+            "node.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1e13f }
+        }
     };
 
-    constexpr Property::PropertyInfo RelativeOffsetsInfo = {
-        "UseRelativeOffsets",
-        "Use relative offsets",
-        "If true, the offset values are interpreted as relative values to be multiplied "
-        "with the bounding sphere of the start/end node. If false, the value is "
-        "interpreted as a distance in meters.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo RelativeOffsetsInfo = {
+        .identifier = "UseRelativeOffsets",
+        .name = "Use relative offsets",
+        .description = "If true, the offset values are interpreted as relative values to "
+            "be multiplied with the bounding sphere of the start/end node. If false, the "
+            "value is interpreted as a distance in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     /**
@@ -130,26 +157,24 @@ namespace {
     // also be added to show the distance as a number. That renderable is designed to show
     // the distance between the start and end node for a given `RenderableNodeLine`.
     struct [[codegen::Dictionary(RenderableNodeLine)]] Parameters {
-        // [[codegen::verbatim(StartNodeInfo.description)]]
-        std::optional<std::string> startNode [[codegen::identifier()]];
+        std::optional<std::string> startNode
+            [[codegen::Info(StartNodeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(EndNodeInfo.description)]]
-        std::optional<std::string> endNode [[codegen::identifier()]];
+        std::optional<std::string> endNode
+            [[codegen::Info(EndNodeInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(LineColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(LineColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(StartOffsetInfo.description)]]
-        std::optional<float> startOffset [[codegen::greaterequal(0.f)]];
+        std::optional<float> startOffset
+            [[codegen::Info(StartOffsetInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(EndOffsetInfo.description)]]
-        std::optional<float> endOffset [[codegen::greaterequal(0.f)]];
+        std::optional<float> endOffset
+            [[codegen::Info(EndOffsetInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(RelativeOffsetsInfo.description)]]
-        std::optional<bool> useRelativeOffsets;
+        std::optional<bool> useRelativeOffsets [[codegen::Info(RelativeOffsetsInfo)]];
     };
 } // namespace
 #include "renderablenodeline_codegen.cpp"
@@ -165,13 +190,13 @@ Documentation RenderableNodeLine::Documentation() {
 
 RenderableNodeLine::RenderableNodeLine(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _start(StartNodeInfo, "Root")
-    , _end(EndNodeInfo, "Root")
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
-    , _startOffset(StartOffsetInfo, 0.f, 0.f, 1e13f)
-    , _endOffset(EndOffsetInfo, 0.f, 0.f, 1e13f)
-    , _useRelativeOffsets(RelativeOffsetsInfo, true)
+    , _start(StartNodeInfo)
+    , _end(EndNodeInfo)
+    , _lineColor(LineColorInfo)
+    , _lineWidth(LineWidthInfo)
+    , _startOffset(StartOffsetInfo)
+    , _endOffset(EndOffsetInfo)
+    , _useRelativeOffsets(RelativeOffsetsInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

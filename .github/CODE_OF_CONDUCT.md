@@ -4,19 +4,21 @@ In the interest of fostering an open and welcoming environment, we as contributo
 ## Our Standards
 Examples of behavior that contributes to creating a positive environment include:
 
-  - Using welcoming and inclusive language. Politeness is expected at all times. Be kind and courteous.
-  - Being respectful of differing viewpoints and experiences
-  - Gracefully accepting constructive criticism
-  - Focusing on what is best for the community
-  - Showing empathy towards other community members and always assume positive intent from others.
+- Using welcoming and inclusive language. Politeness is expected at all times. Be kind and courteous.
+- Being respectful of differing viewpoints and experiences
+- Gracefully accepting constructive criticism
+- Focusing on what is best for the community
+- Showing empathy towards other community members and always assume positive intent from others.
 
 Examples of unacceptable behavior by participants include:
 
-  - The use of sexualized language or imagery and unwelcome sexual attention or advances
-  - Trolling, insulting/derogatory comments, and personal or political attacks
-  - Public or private harassment
-  - Publishing others' private information, such as a physical or electronic address, without explicit permission
-  - Other conduct which could reasonably be considered inappropriate in a professional setting
+- The use of sexualized language or imagery and unwelcome sexual attention or advances
+- Trolling, insulting/derogatory comments, and personal or political attacks
+- Public or private harassment
+- Publishing others' private information, such as a physical or electronic address, without explicit permission
+- Other conduct which could reasonably be considered inappropriate in a professional setting
+
+Regarding the user of AI tools or AI-assissted tools, see the AI_CODE_OF_CONDUCT.md document.
 
 ## Our Responsibilities
 Project maintainers are responsible for clarifying the standards of acceptable behavior and are expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
@@ -36,43 +38,3 @@ This Code of Conduct is adapted from the [Contributor Covenant][homepage], versi
 
 [homepage]: http://contributor-covenant.org
 [version]: http://contributor-covenant.org/version/1/4/
-
-
-# AI Code of Conduct
-OpenSpace is a research-driven, production-grade, open-source visualization framework used in scientific, educational, and public dissemination contexts. This document defines the acceptable use of AI-assisted tools within the OpenSpace repositories.
-
-AI is a tool. It is not a contributor, not an author, and not accountable. Humans remain accountable.
-
-Contributors may use AI tools (e.g., code assistants, large language models, refactoring tools) for:
-  - Drafting code
-  - Refactoring
-  - Generating documentation
-  - Creating test scaffolding
-  - Explaining APIs
-  - Prototyping ideas
-  
-AI assistance is treated as a productivity tool, similar to a compiler, linter, or IDE. If you submit code, you are the author. This includes AI-assisted code.
-
-Contributors must:
-  - Fully understand the submitted code
-  - Be able to explain what it does and why
-  - Ensure compliance with licensing and copyright requirements
-  
-If you cannot explain the code, do not submit it.
-
-AI-generated code must meet the same standards as manually written code:
-  - Follows OpenSpace coding conventions
-  - Includes appropriate error handling
-  - Is readable and maintainable
-  - Includes tests where applicable
-  - Does not introduce dead code or unused dependencies
-  - Do not sacrifice maintainability
-  
-Reviewers may request rewriting if AI-generated content does not meet standards.
-
-Contributors must ensure that:
-  - AI-generated code does not violate third-party licenses
-  - No copyrighted material is reproduced improperly
-  - No proprietary code has been inserted into prompts in violation of agreements
-  
-If there is uncertainty regarding origin or licensing, the code must not be merged.

@@ -65,7 +65,7 @@ void OpenGLCapabilitiesComponent::detectCapabilities() {
     detectGLRenderer();
     detectExtensions();
     try {
-        // This function might fail if the process has insufficient priviledges to access
+        // This function might fail if the process has insufficient privileges to access
         // the WMI on Windows
         detectDriverInformation();
     }

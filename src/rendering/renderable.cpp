@@ -46,34 +46,33 @@ namespace {
 
     constexpr std::string_view KeyType = "Type";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Determines whether this object will be visible or not.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Determines whether this object will be visible or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo RenderableTypeInfo = {
-        "Type",
-        "Renderable type",
-        "The type of the renderable.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo RenderableTypeInfo = {
+        .identifier = "Type",
+        .name = "Renderable type",
+        .description = "The type of the renderable.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo RenderableRenderBinModeInfo = {
-        "RenderBinMode",
-        "Render bin mode",
-        "A value that specifies if the renderable should be rendered in the Background, "
-        "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo DimInAtmosphereInfo = {
-        "DimInAtmosphere",
-        "Dim in atmosphere",
-        "Decides if the object should be dimmed (i.e. faded out) when the camera is in "
-        "the sunny part of an atmosphere.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo DimInAtmosphereInfo = {
+        .identifier = "DimInAtmosphere",
+        .name = "Dim in atmosphere",
+        .description = "Decides if the object should be dimmed (i.e. faded out) when the "
+            "camera is in the sunny part of an atmosphere.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // This is the base class for all `Renderable` types. These objects are responsible
@@ -88,8 +87,7 @@ namespace {
     // Each `Renderable` type typically also includes a number of settings to alter its
     // appearance. See the documentation for the individual types for more details.
     struct [[codegen::Dictionary(Renderable)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
         // This value determines the opacity of this renderable. A value of 0 means
         // completely transparent.
@@ -99,8 +97,8 @@ namespace {
         // setting properties.
         std::optional<std::variant<std::vector<std::string>, std::string>> tag;
 
-        // [[codegen::verbatim(RenderableTypeInfo.description)]]
-        std::optional<std::string> type [[codegen::private()]];
+        std::optional<std::string> type
+            [[codegen::Info(RenderableTypeInfo), codegen::private()]];
 
         // Fragile! Keep in sync with documentation
         enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderBinMode {
@@ -112,11 +110,11 @@ namespace {
             Sticker
         };
 
-        // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
+        // A value that specifies if the renderable should be rendered in the Background,
+        // Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.
         std::optional<RenderBinMode> renderBinMode;
 
-        // [[codegen::verbatim(DimInAtmosphereInfo.description)]]
-        std::optional<bool> dimInAtmosphere;
+        std::optional<bool> dimInAtmosphere [[codegen::Info(DimInAtmosphereInfo)]];
     };
 } // namespace
 #include "renderable_codegen.cpp"
@@ -152,9 +150,9 @@ mm_unique_ptr<Renderable> Renderable::createFromDictionary(const Dictionary& dic
 
 Renderable::Renderable(const Dictionary& dictionary, RenderableSettings settings)
     : PropertyOwner({ "Renderable" })
-    , _enabled(EnabledInfo, true)
-    , _renderableType(RenderableTypeInfo, "Renderable")
-    , _dimInAtmosphere(DimInAtmosphereInfo, false)
+    , _enabled(EnabledInfo)
+    , _renderableType(RenderableTypeInfo)
+    , _dimInAtmosphere(DimInAtmosphereInfo)
     , _shouldUpdateIfDisabled(settings.shouldUpdateIfDisabled)
     , _automaticallyUpdateRenderBin(settings.automaticallyUpdateRenderBin)
 {
@@ -210,7 +208,6 @@ Renderable::Renderable(const Dictionary& dictionary, RenderableSettings settings
 
     // Set type for UI
     _renderableType = p.type.value_or(_renderableType);
-    _renderableType.setReadOnly(true);
     addProperty(_renderableType);
 
     _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);

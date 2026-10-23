@@ -33,11 +33,14 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Whether the light source is enabled or not.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Whether the light source is enabled or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     // This is the base class of all `LightSource` types, which are components that can be
@@ -61,8 +64,7 @@ namespace {
         // the identifier is used.
         std::optional<std::string> name;
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
     };
 } // namespace
 #include "lightsource_codegen.cpp"
@@ -92,7 +94,7 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
 
 LightSource::LightSource(const Dictionary& dictionary)
     : PropertyOwner({ "LightSource" })
-    , _enabled(EnabledInfo, true)
+    , _enabled(EnabledInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -101,7 +103,7 @@ LightSource::LightSource(const Dictionary& dictionary)
 
     _type = p.type;
     _identifier = p.identifier;
-    _guiName = p.name.value_or(_identifier);
+    _name = p.name.value_or(_identifier);
 }
 
 bool LightSource::initialize() {

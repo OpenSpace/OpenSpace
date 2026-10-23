@@ -42,18 +42,22 @@ namespace {
 
     constexpr std::string_view _loggerCat = "IswaDataGroup";
 
-    constexpr Property::PropertyInfo ResolutionInfo = {
-        "Resolution",
-        "Resolution",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ResolutionInfo = {
+        .identifier = "Resolution",
+        .name = "Resolution",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 100.f,
+            .minMax = { 10.f, 200.f }
+        }
     };
 
-    constexpr Property::PropertyInfo FieldlineSeedInfo = {
-        "FieldlineSeedsIndexFile",
-        "Fieldline seedpoints",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr SelectionPropertyInfo FieldlineSeedInfo = {
+        .identifier = "FieldlineSeedsIndexFile",
+        .name = "Fieldline seedpoints",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer
     };
 } // namespace
 
@@ -61,7 +65,7 @@ namespace openspace {
 
 IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
     : IswaDataGroup(name, type)
-    , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
+    , _resolution(ResolutionInfo)
     , _fieldlines(FieldlineSeedInfo)
 {
     addProperty(_resolution);

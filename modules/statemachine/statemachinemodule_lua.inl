@@ -33,7 +33,7 @@ namespace {
 
 /**
  * Creates a state machine from a list of states and transitions. See State and Transition
- * documentation for details. The optional thrid argument is the identifier of the desired
+ * documentation for details. The optional third argument is the identifier of the desired
  * initial state. If left out, the first state in the list will be used.
  */
 [[codegen::luawrap]] void createStateMachine(Dictionary states, Dictionary transitions,

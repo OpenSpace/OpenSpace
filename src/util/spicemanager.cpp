@@ -99,7 +99,7 @@ SpiceManager::AberrationCorrection::AberrationCorrection(const std::string& iden
     auto it = Mapping.find(identifier);
 
     assert_msg(!identifier.empty(), "Identifier may not be empty");
-    assert_msg(it != Mapping.end(), std::format("Invalid identifer '{}'", identifier));
+    assert_msg(it != Mapping.end(), std::format("Invalid identifier '{}'", identifier));
 
     type = it->second.first;
     direction = it->second.second;
@@ -296,6 +296,17 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
             const std::string p = it->path.string();
             unload_c(p.c_str());
             _loadedKernels.erase(it);
+
+            // Reset the coverage
+            _ckCoverageTimes.clear();
+            _ckIntervals.clear();
+            _spkCoverageTimes.clear();
+            _spkIntervals.clear();
+
+            for (const KernelInformation& i : _loadedKernels) {
+                findCkCoverage(i.path);
+                findSpkCoverage(i.path);
+            }
         }
         // Otherwise, we hold on to it, but reduce the reference counter by 1
         else {
@@ -331,6 +342,17 @@ void SpiceManager::unloadKernel(std::filesystem::path filePath) {
         const std::string p = filePath.string();
         unload_c(p.c_str());
         _loadedKernels.erase(it);
+
+        // Reset the coverage
+        _ckCoverageTimes.clear();
+        _ckIntervals.clear();
+        _spkCoverageTimes.clear();
+        _spkIntervals.clear();
+
+        for (const KernelInformation& i : _loadedKernels) {
+            findCkCoverage(i.path);
+            findSpkCoverage(i.path);
+        }
     }
     else {
         // Otherwise, we hold on to it, but reduce the reference counter by 1
@@ -981,7 +1003,8 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
     assert_msg(!observer.empty(), "Observer must not be empty");
     assert_msg(!frame.empty(), "Frame must not be empty");
     assert_msg(!lightSource.empty(), "Light source must not be empty");
-    assert_msg(numberOfTerminatorPoints >= 1, "Terminator points must be >= 1");
+
+    numberOfTerminatorPoints = std::max(0, numberOfTerminatorPoints);
 
     TerminatorEllipseResult res;
 

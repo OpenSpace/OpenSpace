@@ -191,7 +191,7 @@ protected:
 
     /**
      * Calculates the model, model view, and the model view projection transformation
-     * matricies with the given data and returns them in a tuple object.
+     * matrices with the given data and returns them in a tuple object.
      *
      * \param data The RenderData for the object that the transforms should be
      *        calculated for
