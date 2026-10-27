@@ -133,18 +133,11 @@ protected:
     bool hasPointColorData() const;
 
     /**
-     * Whether this renderable type supports per-point RGB colors. Subclasses with a
-     * custom vertex layout that does not include the point color attribute override this
-     * to return false.
-     */
-    virtual bool supportsPointColor() const { return true; }
-
-    /**
      * Load (or reload) the dataset from _dataFile and update all derived state (number of
      * data points, orientation data, scale exponent, color column indices, color map and
      * labels). Marks the buffer data as dirty.
      */
-    void loadDataset();
+    virtual void loadDataset();
 
     /**
      * Resolve the data column indices for the configured per-point RGB color columns.

@@ -885,12 +885,6 @@ RenderablePointCloud::RenderablePointCloud(const Dictionary& dictionary)
                 "specified. Ignoring the per-point RGB color settings."
             );
         }
-        else if (!supportsPointColor()) {
-            LWARNING(
-                "Per-point RGB colors (Coloring.RGB) are not supported by this "
-                "renderable type. Ignoring the per-point RGB color settings."
-            );
-        }
         else {
             _pointColorColumns = { *rgb.r, *rgb.g, *rgb.b };
             _pointColorConfigured = true;
@@ -1050,7 +1044,7 @@ void RenderablePointCloud::onFilePropertyChanged() {
 }
 
 bool RenderablePointCloud::hasPointColorData() const {
-    if (!_pointColorConfigured || !supportsPointColor()) {
+    if (!_pointColorConfigured) {
         return false;
     }
 

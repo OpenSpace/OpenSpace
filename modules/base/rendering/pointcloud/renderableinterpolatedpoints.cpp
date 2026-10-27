@@ -308,8 +308,8 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(const Dictionary& dic
     }
 }
 
-void RenderableInterpolatedPoints::initialize() {
-    RenderablePointCloud::initialize();
+void RenderableInterpolatedPoints::loadDataset() {
+    RenderablePointCloud::loadDataset();
 
     // At this point, the dataset has been loaded and we know how many data points it
     // contains => we can compute the number of interpolation steps
@@ -324,11 +324,16 @@ void RenderableInterpolatedPoints::initialize() {
     if (_nObjectsInDataset > 0) {
         _interpolation.nSteps = _nDataPoints / _nObjectsInDataset;
     }
-    _interpolation.value.setMaxValue(static_cast<float>(_interpolation.nSteps - 1));
+    const float maxValue = static_cast<float>(_interpolation.nSteps - 1);
+    _interpolation.value.setMaxValue(maxValue);
+    // A newly loaded dataset might have fewer steps than the previous one
+    _interpolation.value = std::min(_interpolation.value.value(), maxValue);
 
     // This is the property that is shown in the user interface, so update it so the user
     // can get an idea of how many points will be rendered
     _nDataPoints = _nObjectsInDataset;
+
+    _shouldReinitializeBufferdata = true;
 }
 
 void RenderableInterpolatedPoints::initializeShadersAndGlExtras() {
@@ -388,13 +393,10 @@ int RenderableInterpolatedPoints::nAttributesPerPoint() const {
     }
     // And potentially some more color and size data
     n += hasColorData() ? 1 : 0;
+    n += hasPointColorData() ? 3 : 0;
     n += hasSizeData() ? 1 : 0;
 
     return n;
-}
-
-bool RenderableInterpolatedPoints::supportsPointColor() const {
-    return false;
 }
 
 bool RenderableInterpolatedPoints::useSplineInterpolation() const {
@@ -463,6 +465,15 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
         result.push_back(e1.data[colorParamIndex]);
     }
 
+    if (hasPointColorData()) {
+        for (int i : _pointColorIndices) {
+            result.push_back(e0.data[i]);
+        }
+        for (int i : _pointColorIndices) {
+            result.push_back(e1.data[i]);
+        }
+    }
+
     if (hasSizeData()) {
         const int sizeParamIndex = currentSizeParameterIndex();
         // @TODO: Consider more detailed control over the scaling. Currently the value is
@@ -528,6 +539,11 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     if (hasColorData()) {
         offset = bufferVertexAttribute("in_colorParameter0", 1, attibsPerPoint, offset);
         offset = bufferVertexAttribute("in_colorParameter1", 1, attibsPerPoint, offset);
+    }
+
+    if (hasPointColorData()) {
+        offset = bufferVertexAttribute("in_pointColor0", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_pointColor1", 3, attibsPerPoint, offset);
     }
 
     if (hasSizeData()) {
