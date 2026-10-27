@@ -42,9 +42,6 @@ public:
 
     static openspace::Documentation Documentation();
 
-protected:
-    bool supportsPointColor() const override;
-
 private:
     void initializeCustomTexture() override;
     void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
