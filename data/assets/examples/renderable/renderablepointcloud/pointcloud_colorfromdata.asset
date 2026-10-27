@@ -1,0 +1,27 @@
+-- Color from Data
+-- This example creates a point cloud where the color of each point is determined by the
+-- RGB values in the data file (range 0.0 to 1.0).
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_ColorFromData",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata_color.csv"),
+    Coloring = {
+      Rgb = { R = "r", G = "g", B = "b" }
+    }
+  },
+  GUI = {
+    Name = "RenderablePointCloud - Color from Data",
+    Path = "/Examples"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
