@@ -77,9 +77,14 @@ endif ()
 
 # The sgct port installs sgct.schema.json next to its CMake config, which is what
 # ${sgct_DIR} points at
+if (OPENSPACE_SGCT_SOURCE_DIR)
+  set(sgct_schema "${OPENSPACE_SGCT_SOURCE_DIR}/sgct.schema.json")
+else ()
+  set(sgct_schema "${sgct_DIR}/sgct.schema.json")
+endif ()
 add_custom_command(TARGET OpenSpace POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  ${sgct_DIR}/sgct.schema.json
+  ${sgct_schema}
   ${CMAKE_CURRENT_SOURCE_DIR}/../../config/schema/sgct.schema.json
   COMMAND_EXPAND_LISTS
 )
