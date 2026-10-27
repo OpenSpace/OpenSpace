@@ -32,6 +32,7 @@
 #include <openspace/misc/profiling.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <cmath>
 #include <optional>
 #include <variant>
 
@@ -39,6 +40,10 @@ namespace {
     using namespace openspace;
 
     constexpr std::string_view _loggerCat = "FixedRotation";
+
+    // Since there are only three axes, a chain of dependent axes that is longer than this
+    // must contain a circular dependency, which would otherwise cause infinite recursion
+    constexpr int MaxAxisDepth = 2;
 
     constexpr BoolPropertyInfo EnableInfo = {
         .identifier = "Enable",
@@ -573,14 +578,30 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
         return glm::dmat3();
     }
 
-    const glm::vec3 x = xAxis();
-    const glm::vec3 y = yAxis();
-    const glm::vec3 z = zAxis();
+    const glm::vec3 x = xAxis(0);
+    const glm::vec3 y = yAxis(0);
+    const glm::vec3 z = zAxis(0);
+
+    const bool hasInvalidValues =
+        glm::any(glm::isnan(x)) || glm::any(glm::isinf(x)) ||
+        glm::any(glm::isnan(y)) || glm::any(glm::isinf(y)) ||
+        glm::any(glm::isnan(z)) || glm::any(glm::isinf(z));
+    if (hasInvalidValues) [[unlikely]] {
+        LWARNING(
+            std::format(
+                "Invalid axis values detected: "
+                "x ({}, {}, {}) y ({}, {}, {}) z ({}, {}, {})",
+                x.x, x.y, x.z, y.x, y.y, y.z, z.x, z.y, z.z
+            )
+        );
+        return glm::dmat3();
+    }
 
     constexpr float Epsilon = 1e-3f;
 
-    if (glm::dot(x, y) > 1.f - Epsilon || glm::dot(y, z) > 1.f - Epsilon ||
-        glm::dot(x, z) > 1.f - Epsilon) [[unlikely]]
+    if (std::abs(glm::dot(x, y)) > 1.f - Epsilon ||
+        std::abs(glm::dot(y, z)) > 1.f - Epsilon ||
+        std::abs(glm::dot(x, z)) > 1.f - Epsilon) [[unlikely]]
     {
         LWARNING(
             std::format(
@@ -599,7 +620,12 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
     };
 }
 
-glm::vec3 FixedRotation::xAxis() const {
+glm::vec3 FixedRotation::xAxis(int depth) const {
+    if (depth > MaxAxisDepth) {
+        LWARNING("Circular dependency between the axes detected for X axis");
+        return glm::vec3(1.f, 0.f, 0.f);
+    }
+
     switch (_xAxis.type) {
         case Axis::Type::Unspecified:
             LWARNING("Unspecified axis type for X axis");
@@ -642,32 +668,45 @@ glm::vec3 FixedRotation::xAxis() const {
             }
             else {
                 if (_yAxis.type != Axis::Type::CoordinateSystemCompletion) {
-                    return glm::normalize(glm::cross(_xAxis.vector.value(), yAxis()));
+                    return glm::normalize(
+                        glm::cross(_xAxis.vector.value(), yAxis(depth + 1))
+                    );
                 }
                 else {
-                    return glm::normalize(glm::cross(_xAxis.vector.value(), zAxis()));
+                    return glm::normalize(
+                        glm::cross(_xAxis.vector.value(), zAxis(depth + 1))
+                    );
                 }
             }
         case Axis::Type::CoordinateSystemCompletion:
-            return glm::normalize(-glm::cross(yAxis(), zAxis()));
+            return glm::normalize(-glm::cross(yAxis(depth + 1), zAxis(depth + 1)));
         default:
             throw MissingCaseException();
     }
 }
 
-glm::vec3 FixedRotation::yAxis() const {
+glm::vec3 FixedRotation::yAxis(int depth) const {
+    if (depth > MaxAxisDepth) {
+        LWARNING("Circular dependency between the axes detected for Y axis");
+        return glm::vec3(0.f, 1.f, 0.f);
+    }
+
     switch (_yAxis.type) {
         case Axis::Type::Unspecified:
             LWARNING("Unspecified axis type for Y axis");
             return glm::vec3(0.f, 1.f, 0.f);
         case Axis::Type::Object:
             if (_yAxis.node && _attachedNode) {
-                const glm::vec3 dir = glm::vec3(glm::normalize(
-                    // @TODO(abock): This should be changed to be in the coordinate system
-                    // of the attached node // same with xAxis and zAxis ofc
-                    _yAxis.node->worldPosition() - _attachedNode->worldPosition()
-                ));
-                return _yAxis.invertObject ? -dir : dir;
+                // @TODO(abock): This should be changed to be in the coordinate system of
+                // the attached node // same with xAxis and zAxis ofc
+                glm::dvec3 dir =
+                    _yAxis.node->worldPosition() - _attachedNode->worldPosition();
+
+                if (dir == glm::dvec3(0.0)) {
+                    dir = glm::dvec3(0.0, 1.0, 0.0);
+                }
+                const glm::vec3 dirNorm = glm::vec3(glm::normalize(dir));
+                return _yAxis.invertObject ? -dirNorm : dirNorm;
             }
             else {
                 if (_yAxis.node) {
@@ -696,30 +735,43 @@ glm::vec3 FixedRotation::yAxis() const {
             }
             else {
                 if (_zAxis.type != Axis::Type::CoordinateSystemCompletion) {
-                    return glm::normalize(glm::cross(_yAxis.vector.value(), zAxis()));
+                    return glm::normalize(
+                        glm::cross(_yAxis.vector.value(), zAxis(depth + 1))
+                    );
                 }
                 else {
-                    return glm::normalize(glm::cross(_yAxis.vector.value(), xAxis()));
+                    return glm::normalize(
+                        glm::cross(_yAxis.vector.value(), xAxis(depth + 1))
+                    );
                 }
             }
         case Axis::Type::CoordinateSystemCompletion:
-            return glm::normalize(glm::cross(xAxis(), -zAxis()));
+            return glm::normalize(glm::cross(xAxis(depth + 1), -zAxis(depth + 1)));
         default:
             throw MissingCaseException();
     }
 }
 
-glm::vec3 FixedRotation::zAxis() const {
+glm::vec3 FixedRotation::zAxis(int depth) const {
+    if (depth > MaxAxisDepth) {
+        LWARNING("Circular dependency between the axes detected for Z axis");
+        return glm::vec3(0.f, 0.f, 1.f);
+    }
+
     switch (_zAxis.type) {
         case Axis::Type::Unspecified:
             LWARNING("Unspecified axis type for Z axis");
             return glm::vec3(0.f, 0.f, 1.f);
         case Axis::Type::Object:
             if (_zAxis.node && _attachedNode) {
-                const glm::vec3 dir = glm::vec3(glm::normalize(
-                    _zAxis.node->worldPosition() - _attachedNode->worldPosition()
-                ));
-                return _zAxis.invertObject ? -dir : dir;
+                glm::dvec3 dir = _zAxis.node->worldPosition() -
+                    _attachedNode->worldPosition();
+
+                if (dir == glm::dvec3(0.0)) {
+                    dir = glm::dvec3(0.0, 0.0, 1.0);
+                }
+                const glm::vec3 dirNorm = glm::vec3(glm::normalize(dir));
+                return _zAxis.invertObject ? -dirNorm : dirNorm;
             }
             else {
                 if (_zAxis.node) {
@@ -748,14 +800,18 @@ glm::vec3 FixedRotation::zAxis() const {
             }
             else {
                 if (_xAxis.type != Axis::Type::CoordinateSystemCompletion) {
-                    return glm::normalize(glm::cross(_zAxis.vector.value(), xAxis()));
+                    return glm::normalize(
+                        glm::cross(_zAxis.vector.value(), xAxis(depth + 1))
+                    );
                 }
                 else {
-                    return glm::normalize(glm::cross(_zAxis.vector.value(), yAxis()));
+                    return glm::normalize(
+                        glm::cross(_zAxis.vector.value(), yAxis(depth + 1))
+                    );
                 }
             }
         case Axis::Type::CoordinateSystemCompletion:
-            return glm::normalize(glm::cross(xAxis(), yAxis()));
+            return glm::normalize(glm::cross(xAxis(depth + 1), yAxis(depth + 1)));
         default:
             throw MissingCaseException();
     }
