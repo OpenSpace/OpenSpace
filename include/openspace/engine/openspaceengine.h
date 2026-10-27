@@ -28,6 +28,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/glm.h>
 #include <openspace/properties/misc/optionproperty.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -199,8 +200,12 @@ private:
  * absolute position or a go-to-geolocation command using the globebrowsing module.
  *
  * \param p The Profile to be read
- */
-void setCameraFromProfile(const Profile& p);
+ * \param isCameraInteraction If `IsCameraInteraction::Yes`, a change of the anchor node
+ *        caused by setting the camera is treated as a camera interaction, which, for
+ *        example, aborts an ongoing idle motion
+*/
+void setCameraFromProfile(const Profile& p,
+    OrbitalNavigator::IsCameraInteraction isCameraInteraction);
 
 /**
  * Reads a list of modules from a profile, and executes scripts based on whether or not
