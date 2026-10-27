@@ -638,7 +638,7 @@ void ScriptEngine::preSync(bool isMaster) {
         while (!_incomingScripts.empty()) {
             Script item = std::move(_incomingScripts.front());
             _incomingScripts.pop();
-            _clientScriptQueue.push(item.code);
+            _clientScriptQueue.push(std::move(item));
         }
     }
 }
@@ -664,7 +664,7 @@ void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     for (size_t i = 0; i < nScripts; i++) {
         std::string script;
         syncBuffer->decode(script);
-        _clientScriptQueue.push(std::move(script));
+        _clientScriptQueue.push({ .code = std::move(script) });
     }
 }
 
@@ -688,7 +688,7 @@ void ScriptEngine::postSync(bool isMaster) {
         const std::unique_lock lock(_clientScriptsMutex);
         while (!_clientScriptQueue.empty()) {
             try {
-                runScript({ _clientScriptQueue.front() });
+                runScript(_clientScriptQueue.front());
                 _clientScriptQueue.pop();
             }
             catch (const RuntimeError& e) {
