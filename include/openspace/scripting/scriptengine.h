@@ -156,7 +156,7 @@ private:
     /// Client scripts are mutex protected since decode and rendering may happen
     /// asynchronously
     std::mutex _clientScriptsMutex;
-    std::queue<std::string> _clientScriptQueue;
+    std::queue<Script> _clientScriptQueue;
     std::queue<Script> _masterScriptQueue;
 
     std::vector<std::string> _scriptsToSync;
