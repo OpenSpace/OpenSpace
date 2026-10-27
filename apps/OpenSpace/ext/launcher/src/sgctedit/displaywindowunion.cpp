@@ -153,7 +153,7 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
                 posY -= monitorSizeList[monitorNum].y();
             }
         }
-        sgct::ivec2 sz = w.size.value_or(sgct::ivec2{ 1920, 1080 });
+        glm::ivec2 sz = w.size.value_or(glm::ivec2(1920, 1080));
         wCtrl->setDimensions(posX, posY, sz.x, sz.y);
 
         //
@@ -196,10 +196,14 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
             },
             [&](const sgct::config::FisheyeProjection& p) {
                 if (p.quality.has_value()) {
+                    // The editor only exposes the tilt component of the orientation
+                    const float tilt = p.orientation.has_value() ?
+                        -glm::degrees(glm::pitch(*p.orientation)) :
+                        0.f;
                     wCtrl->setProjectionFisheye(
                         *p.quality,
-                        p.tilt.value_or(0.f),
-                        p.fov.value_or(180.0)
+                        tilt,
+                        p.fov.value_or(180.f)
                     );
                 }
             },

@@ -27,7 +27,6 @@
 #include <openspace/format.h>
 #include <openspace/misc/assert.h>
 #include <sgct/config.h>
-#include <sgct/math.h>
 #include "windowcolors.h"
 #include <QCheckBox>
 #include <QComboBox>
@@ -808,7 +807,7 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
     window.size = { _sizeX->value(), _sizeY->value() };
     window.monitor = _monitor->currentIndex();
     const QRect resolution = _monitorResolutions[_monitor->currentIndex()];
-    window.pos = sgct::ivec2(
+    window.pos = glm::ivec2(
         resolution.x() + _offsetX->value(),
         resolution.y() + _offsetY->value()
     );
@@ -835,17 +834,27 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
 
     sgct::config::Viewport vp;
     vp.isTracked = true;
-    vp.position = sgct::vec2(0.f, 0.f);
-    vp.size = sgct::vec2(1.f, 1.f);
+    vp.position = glm::vec2(0.f, 0.f);
+    vp.size = glm::vec2(1.f, 1.f);
 
     switch (static_cast<ProjectionIndices>(_projectionType->currentIndex())) {
         case ProjectionIndices::Fisheye:
-            vp.projection = sgct::config::FisheyeProjection {
-                .fov = static_cast<float>(_fisheye.fov->value()),
-                .quality = Quality[_fisheye.quality->currentIndex()].first,
-                .tilt = static_cast<float>(_fisheye.tilt->value()),
-            };
-            break;
+            {
+                sgct::config::FisheyeProjection projection = {
+                    .fov = static_cast<float>(_fisheye.fov->value()),
+                    .quality = Quality[_fisheye.quality->currentIndex()].first
+                };
+                const float tilt = static_cast<float>(_fisheye.tilt->value());
+                if (tilt != 0.f) {
+                    // A tilt of t degrees is the same as pitching the projection by -t
+                    projection.orientation = glm::angleAxis(
+                        glm::radians(-tilt),
+                        glm::vec3(1.f, 0.f, 0.f)
+                    );
+                }
+                vp.projection = projection;
+                break;
+            }
         case ProjectionIndices::SphericalMirror:
             vp.projection = sgct::config::SphericalMirrorProjection {
                 .quality = Quality[_sphericalMirror.quality->currentIndex()].first

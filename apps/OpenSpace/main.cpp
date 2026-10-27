@@ -539,25 +539,12 @@ void mainRenderFunc(const sgct::RenderData& data) {
     currentWindow = &data.window;
     currentViewport = &data.viewport;
     currentFrustumMode = data.frustumMode;
-    currentDrawResolution = glm::ivec2(data.bufferSize.x, data.bufferSize.y);
+    currentDrawResolution = data.bufferSize;
 
-    glm::vec3 pos;
-    std::memcpy(glm::value_ptr(pos), &Engine::defaultUser().posMono().x, sizeof(vec3));
+    const glm::vec3 pos = Engine::defaultUser().posMono();
+    const glm::mat4 viewMatrix = data.viewMatrix * glm::translate(glm::mat4(1.f), pos);
 
-    glm::mat4 viewMatrix;
-    std::memcpy(
-        glm::value_ptr(viewMatrix),
-        data.viewMatrix.values.data(),
-        sizeof(mat4)
-    );
-    viewMatrix = viewMatrix * glm::translate(glm::mat4(1.f), pos);
-
-    glm::mat4 projectionMatrix;
-    std::memcpy(
-        glm::value_ptr(projectionMatrix),
-        data.projectionMatrix.values.data(),
-        sizeof(mat4)
-    );
+    glm::mat4 projectionMatrix = data.projectionMatrix;
 #ifdef OPENVR_SUPPORT
     bool currentWindowIsHMD = FirstOpenVRWindow == SgctEngine->getCurrentWindowPtr();
     if (sgct::SGCTOpenVR::isHMDActive() && currentWindowIsHMD) {
@@ -568,14 +555,8 @@ void mainRenderFunc(const sgct::RenderData& data) {
 #endif // OPENVR_SUPPORT
 
     try {
-        glm::mat4 modelMatrix;
-        std::memcpy(
-            glm::value_ptr(modelMatrix),
-            data.modelMatrix.values.data(),
-            sizeof(mat4)
-        );
-        currentModelMatrix = modelMatrix;
-        global::openSpaceEngine->render(modelMatrix, viewMatrix, projectionMatrix);
+        currentModelMatrix = data.modelMatrix;
+        global::openSpaceEngine->render(data.modelMatrix, viewMatrix, projectionMatrix);
 
 #ifdef OPENSPACE_HAS_SPOUT
         for (SpoutWindow& w : SpoutWindows) {
@@ -616,7 +597,7 @@ void mainDraw2DFunc(const sgct::RenderData& data) {
     currentWindow = &data.window;
     currentViewport = &data.viewport;
     currentFrustumMode = data.frustumMode;
-    currentDrawResolution = glm::ivec2(data.bufferSize.x, data.bufferSize.y);
+    currentDrawResolution = data.bufferSize;
 
     try {
         global::openSpaceEngine->drawOverlays();
@@ -829,7 +810,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentWindowSize = []() {
         ZoneScoped;
 
-        return glm::ivec2(currentWindow->windowSize().x, currentWindow->windowSize().y);
+        return currentWindow->windowSize();
     };
     sgctDelegate.currentSubwindowSize = []() {
         ZoneScoped;
@@ -849,8 +830,7 @@ void setSgctDelegateFunctions() {
                 );
             default:
                 return glm::ivec2(
-                    currentWindow->windowSize().x * currentViewport->size().x,
-                    currentWindow->windowSize().y * currentViewport->size().y
+                    glm::vec2(currentWindow->windowSize()) * currentViewport->size()
                 );
         }
     };
@@ -860,12 +840,10 @@ void setSgctDelegateFunctions() {
         const Viewport* viewport = dynamic_cast<const Viewport*>(currentViewport);
         if (viewport) {
             if (viewport->hasSubViewports() && viewport->nonLinearProjection()) {
-                const ivec2 dim = viewport->nonLinearProjection()->cubemapResolution();
-                return glm::ivec2(dim.x, dim.y);
+                return viewport->nonLinearProjection()->cubemapResolution();
             }
             else {
-                const ivec2 dim = currentWindow->framebufferResolution();
-                return glm::ivec2(dim.x, dim.y);
+                return currentWindow->framebufferResolution();
             }
         }
         else {
@@ -876,8 +854,7 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         if (currentViewport) {
-            const vec2 size = currentViewport->size();
-            return glm::ivec2(size.x, size.y);
+            return glm::ivec2(currentViewport->size());
         }
         return glm::ivec2(-1, -1);
     };
@@ -885,22 +862,20 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         if (currentViewport) {
-            const ivec2 res = currentWindow->windowSize();
-            const vec2 size = currentViewport->size();
-            return glm::ivec2(size.x * res.x, size.y * res.y);
+            const glm::ivec2 res = currentWindow->windowSize();
+            const glm::vec2 size = currentViewport->size();
+            return glm::ivec2(size * glm::vec2(res));
         }
         return glm::ivec2(-1, -1);
     };
     sgctDelegate.dpiScaling = []() {
         ZoneScoped;
 
-        const vec2 scale = currentWindow->scale();
-        return glm::vec2(scale.x, scale.y);
+        return currentWindow->scale();
     };
     sgctDelegate.firstWindowResolution = []() {
         ZoneScoped;
-        sgct::Window* window = Engine::instance().windows().front().get();
-        return glm::ivec2(window->windowSize().x, window->windowSize().y);
+        return Engine::instance().windows().front()->windowSize();
     };
     sgctDelegate.guiWindowResolution = []() {
         ZoneScoped;
@@ -916,7 +891,7 @@ void setSgctDelegateFunctions() {
             guiWin = Engine::instance().windows().front().get();
         }
 
-        return glm::ivec2(guiWin->windowSize().x, guiWin->windowSize().y);
+        return guiWin->windowSize();
     };
     sgctDelegate.osDpiScaling = []() {
         ZoneScoped;
@@ -1094,10 +1069,10 @@ void setSgctDelegateFunctions() {
                 continue;
             }
 
-            const sgct::ivec2 res = window->windowSize();
+            const glm::ivec2 res = window->windowSize();
             for (const std::unique_ptr<Viewport>& viewport : window->viewports()) {
-                const sgct::vec2 pos = viewport->position();
-                const sgct::vec2 size = viewport->size();
+                const glm::vec2 pos = viewport->position();
+                const glm::vec2 size = viewport->size();
                 const glm::vec4 bounds = glm::vec4(
                     pos.x * res.x,
                     (1.0 - pos.y - size.y) * res.y,
@@ -1122,7 +1097,7 @@ void setSgctDelegateFunctions() {
         sgct::Engine::instance().setStatsGraphScale(scale);
     };
     sgctDelegate.setStatisticsGraphOffset = [](glm::vec2 offset) {
-        sgct::Engine::instance().setStatsGraphOffset(sgct::vec2{ offset.x, offset.y });
+        sgct::Engine::instance().setStatsGraphOffset(offset);
     };
     sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
         auto createGLFWCursor = [](int shape) {

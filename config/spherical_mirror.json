@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "masteraddress": "127.0.0.1",
   "nodes": [
     {
@@ -22,7 +22,7 @@
                 "type": "FisheyeProjection",
                 "fov": 180.0,
                 "quality": "2k",
-                "tilt": 30.0,
+                "orientation": { "pitch": -30.0, "yaw": 0.0, "roll": 0.0 },
                 "background": { "r": 0.1, "g": 0.1, "b": 0.1, "a": 1.0 }
               }
             }
