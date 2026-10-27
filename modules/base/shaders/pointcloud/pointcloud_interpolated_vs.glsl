@@ -46,6 +46,7 @@ layout(location = 10) in vec4 in_orientation1; // quaternion
 out Data {
   flat float textureLayer;
   flat float colorParameter;
+  flat vec3 pointColor;
   flat float scalingParameter;
   flat vec4 orientation; // quaternion
 } out_data;
@@ -126,6 +127,8 @@ void main() {
   float t = interpolationValue;
 
   out_data.colorParameter = interpolateValue(in_colorParameter0, in_colorParameter1, t);
+  // Per-point RGB colors are not supported by this renderable
+  out_data.pointColor = vec3(0.0);
   out_data.scalingParameter = interpolateValue(in_scalingParameter0, in_scalingParameter1,
     t);
 

@@ -30,6 +30,7 @@ layout(points) in;
 in Data {
   flat float textureLayer;
   flat float colorParameter;
+  flat vec3 pointColor;
   flat float scalingParameter;
   flat vec4 orientation; // quaternion
 } in_data[];
@@ -38,6 +39,7 @@ layout(triangle_strip, max_vertices = 4) out;
 out Data {
   flat int textureLayer;
   flat float colorParameter;
+  flat vec3 pointColor;
   vec2 texCoords;
   flat float screenSpaceDepth;
   flat vec4 positionViewSpace;
@@ -101,6 +103,7 @@ vec3 rotateVector(vec3 v, vec4 q) {
 void main() {
   out_data.textureLayer = int(in_data[0].textureLayer);
   out_data.colorParameter = in_data[0].colorParameter;
+  out_data.pointColor = in_data[0].pointColor;
 
   dvec4 dpos = modelMatrix * dvec4(dvec3(gl_in[0].gl_Position.xyz), 1.0);
 

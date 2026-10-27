@@ -84,6 +84,10 @@ void RenderablePolygonCloud::deinitializeGL() {
     RenderablePointCloud::deinitializeGL();
 }
 
+bool RenderablePolygonCloud::supportsPointColor() const {
+    return false;
+}
+
 void RenderablePolygonCloud::initializeCustomTexture() {
     ZoneScoped;
 
