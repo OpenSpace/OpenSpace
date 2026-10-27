@@ -393,6 +393,10 @@ int RenderableInterpolatedPoints::nAttributesPerPoint() const {
     return n;
 }
 
+bool RenderableInterpolatedPoints::supportsPointColor() const {
+    return false;
+}
+
 bool RenderableInterpolatedPoints::useSplineInterpolation() const {
     return _interpolation.useSpline && _interpolation.nSteps > 1;
 }

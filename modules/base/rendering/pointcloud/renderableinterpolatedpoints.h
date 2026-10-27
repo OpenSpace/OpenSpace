@@ -55,6 +55,8 @@ protected:
 
     int nAttributesPerPoint() const override;
 
+    bool supportsPointColor() const override;
+
     bool useSplineInterpolation() const;
 
     /**
