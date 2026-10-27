@@ -316,12 +316,14 @@ void NavigationHandler::updateCameraTransitions() {
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Approaching"s);
             for (const std::string& action : node->onApproachAction()) {
-                // No sync because events are always synced and sent to the connected
-                // nodes and peers
+                // The camera transitions are only computed on the master node, so the
+                // actions have to be synchronized to the other nodes
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::Yes,
+                    ActionManager::ShouldBeLogged::No,
+                    ActionManager::ShouldSendToRemote::No
                 );
             }
         }
@@ -340,12 +342,14 @@ void NavigationHandler::updateCameraTransitions() {
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Reaching"s);
             for (const std::string& action : node->onReachAction()) {
-                // No sync because events are always synced and sent to the connected
-                // nodes and peers
+                // The camera transitions are only computed on the master node, so the
+                // actions have to be synchronized to the other nodes
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::Yes,
+                    ActionManager::ShouldBeLogged::No,
+                    ActionManager::ShouldSendToRemote::No
                 );
             }
         }
@@ -364,12 +368,14 @@ void NavigationHandler::updateCameraTransitions() {
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Receding"s);
             for (const std::string& action : node->onRecedeAction()) {
-                // No sync because events are always synced and sent to the connected
-                // nodes and peers
+                // The camera transitions are only computed on the master node, so the
+                // actions have to be synchronized to the other nodes
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::Yes,
+                    ActionManager::ShouldBeLogged::No,
+                    ActionManager::ShouldSendToRemote::No
                 );
             }
         }
@@ -388,12 +394,14 @@ void NavigationHandler::updateCameraTransitions() {
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Exiting"s);
             for (const std::string& action : node->onExitAction()) {
-                // No sync because events are always synced and sent to the connected
-                // nodes and peers
+                // The camera transitions are only computed on the master node, so the
+                // actions have to be synchronized to the other nodes
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::Yes,
+                    ActionManager::ShouldBeLogged::No,
+                    ActionManager::ShouldSendToRemote::No
                 );
             }
         }

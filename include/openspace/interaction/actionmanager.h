@@ -39,6 +39,7 @@ class ActionManager {
 public:
     BooleanType(ShouldBeSynchronized);
     BooleanType(ShouldBeLogged);
+    BooleanType(ShouldSendToRemote);
 
     bool hasAction(const std::string& identifier) const;
     void registerAction(Action action);
@@ -48,7 +49,8 @@ public:
 
     void triggerAction(const std::string& identifier, const Dictionary& arguments,
         ShouldBeSynchronized shouldBeSynchronized,
-        ShouldBeLogged shouldBeLogged = ShouldBeLogged::No) const;
+        ShouldBeLogged shouldBeLogged = ShouldBeLogged::No,
+        ShouldSendToRemote shouldSendToRemote = ShouldSendToRemote::Yes) const;
     static LuaLibrary luaLibrary();
 
 private:

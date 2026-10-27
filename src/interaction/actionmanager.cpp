@@ -91,7 +91,8 @@ std::vector<Action> ActionManager::actions() const {
 void ActionManager::triggerAction(const std::string& identifier,
                                   const Dictionary& arguments,
                                  ActionManager::ShouldBeSynchronized shouldBeSynchronized,
-                                                      ShouldBeLogged shouldBeLogged) const
+                                                            ShouldBeLogged shouldBeLogged,
+                                              ShouldSendToRemote shouldSendToRemote) const
 {
     assert_msg(!identifier.empty(), "Identifier must not be empty");
 
@@ -120,6 +121,7 @@ void ActionManager::triggerAction(const std::string& identifier,
     else {
         global::scriptEngine->queueScript({
             .code = std::move(script),
+            .sendToRemote = ScriptEngine::Script::ShouldSendToRemote(shouldSendToRemote),
             .addToLog = ScriptEngine::ShouldBeLogged(shouldBeLogged)
         });
     }

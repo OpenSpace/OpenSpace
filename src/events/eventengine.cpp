@@ -25,6 +25,7 @@
 #include <openspace/events/eventengine.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/format.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/logging/logmanager.h>
@@ -211,6 +212,15 @@ void EventEngine::triggerActions() const {
         return;
     }
 
+    // Events are not synchronized between the nodes of a cluster and some of them (for
+    // example the camera events) are only published on the master node. Therefore only
+    // the master node triggers the actions, which are then synchronized to all other
+    // nodes. If the nodes would also trigger the actions themselves, actions for events
+    // that are published on all nodes would be executed twice on those nodes
+    if (!global::windowDelegate->isMaster()) {
+        return;
+    }
+
     const Event* e = _firstEvent;
     while (e) {
         const auto it = _eventActions.find(e->type);
@@ -220,12 +230,13 @@ void EventEngine::triggerActions() const {
                 if (ai.isEnabled &&
                     (!ai.filter.has_value() || params.isSubset(*ai.filter)))
                 {
-                    // No sync because events are always synced and sent to the connected
-                    // nodes and peers
+                    // Not sent to remote peers as they publish their own events
                     global::actionManager->triggerAction(
                         ai.action,
                         params,
-                        ActionManager::ShouldBeSynchronized::No
+                        ActionManager::ShouldBeSynchronized::Yes,
+                        ActionManager::ShouldBeLogged::No,
+                        ActionManager::ShouldSendToRemote::No
                     );
                 }
             }
