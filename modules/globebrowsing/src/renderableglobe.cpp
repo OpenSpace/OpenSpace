@@ -2326,12 +2326,13 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             (glm::dot(planetCasterVec, sourceCasterVec) / (scLength * scLength)) *
             sourceCasterVec;
 
+        const double sourceRadius = shadowConf.source.second * sourceRadiusScale;
+        const double casterRadius = shadowConf.caster.second * casterRadiusScale;
+
         const double dTest  = glm::length(planetCasterVec - planetCasterProj);
-        const double xpTest = shadowConf.caster.second * casterRadiusScale *
-                scLength / (shadowConf.source.second * sourceRadiusScale +
-                             shadowConf.caster.second * casterRadiusScale);
-        const double rpTest = shadowConf.caster.second * casterRadiusScale *
-            (glm::length(planetCasterProj) + xpTest) / xpTest;
+        const double xpTest = casterRadius * scLength / (sourceRadius + casterRadius);
+        const double rpTest =
+            casterRadius * (glm::length(planetCasterProj) + xpTest) / xpTest;
 
         const glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
             "SUN",
@@ -2355,12 +2356,13 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         {
             // The current caster is shadowing the current planet
             shadowData = {
-                .xu = shadowData.rc * scLength / (shadowData.rs - shadowData.rc),
+                .xu = casterRadius * scLength / (sourceRadius - casterRadius),
                 .xp = xpTest,
-                .rs = shadowConf.source.second * sourceRadiusScale,
-                .rc = shadowConf.caster.second * casterRadiusScale,
+                .rs = sourceRadius,
+                .rc = casterRadius,
                 .sourceCasterVec = glm::normalize(sourceCasterVec),
-                .casterPositionVec = casterPos,
+                // Relative to the globe to not lose precision in the shader
+                .casterPositionVec = planetCasterVec,
                 .isShadowing = true
             };
         }

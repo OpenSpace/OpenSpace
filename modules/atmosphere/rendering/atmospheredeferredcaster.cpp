@@ -456,8 +456,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         {
             // The current caster is shadowing the current planet
             shadow = {
-                .umbra = shadow.radiusCaster * scLength /
-                         (shadow.radiusSource - shadow.radiusCaster),
+                .umbra = actualCasterRadius * scLength /
+                         (actualSourceRadius - actualCasterRadius),
                 .penumbra = xpTest,
                 .radiusSource = actualSourceRadius,
                 .radiusCaster = actualCasterRadius,
