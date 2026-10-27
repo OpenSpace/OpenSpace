@@ -38,9 +38,10 @@
 #include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <glm/gtx/projection.hpp>
+#include <glm/gtc/constants.hpp>
 #include <optional>
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <iterator>
 #include <limits>
@@ -197,6 +198,38 @@ namespace {
         }
     }
 
+    // SPICE describes circular and elliptical fields of view with only one or two bound
+    // vectors. For a circle, the single vector lies on the edge of the field of view. For
+    // an ellipse, the first vector points to the end of the semi-major axis and the
+    // second vector to the end of the semi-minor axis. This function creates `nSegments`
+    // bound vectors that approximate the edge of the field of view
+    std::vector<glm::dvec3> approximateBounds(const SpiceManager::FieldOfViewResult& fov,
+                                              int nSegments)
+    {
+        assert_msg(!fov.bounds.empty(), "Bounds must not be empty");
+        const glm::dvec3 boresight = glm::normalize(fov.boresightVector);
+
+        // Scale the bound vectors so that they end in the plane that is orthogonal to the
+        // boresight at unit distance and only keep the components in that plane
+        auto inPlane = [&boresight](const glm::dvec3& v) {
+            return v / glm::dot(v, boresight) - boresight;
+        };
+
+        const glm::dvec3 major = inPlane(fov.bounds[0]);
+        const glm::dvec3 minor =
+            fov.shape == SpiceManager::FieldOfViewResult::Shape::Circle ?
+            glm::cross(boresight, major) :
+            inPlane(fov.bounds[1]);
+
+        std::vector<glm::dvec3> result;
+        result.reserve(nSegments);
+        for (int i = 0; i < nSegments; i++) {
+            const double a = glm::two_pi<double>() * static_cast<double>(i) / nSegments;
+            result.push_back(boresight + std::cos(a) * major + std::sin(a) * minor);
+        }
+        return result;
+    }
+
     // Shows a visual representation of a spacecraft instrument's field-of-view.
     // Information about the field-of-view are extracted from SPICE kernels that must be
     // loaded with the correct information. By default a field-of-view is only visible
@@ -241,6 +274,12 @@ namespace {
         // vectors will be removed if they are the strict linear interpolation between the
         // two neighboring vectors. This value is disabled by default.
         std::optional<bool> simplifyBounds;
+
+        // The number of segments that are used to approximate the edge of the field of
+        // view if the instrument has a circular or elliptical field of view. Higher
+        // values result in a smoother shape at the cost of performance. This value is
+        // ignored for all other field of view shapes. The default value is 32.
+        std::optional<int> circleSegments [[codegen::greaterequal(3)]];
     };
 } // namespace
 #include "renderablefov_codegen.cpp"
@@ -305,6 +344,7 @@ RenderableFov::RenderableFov(const Dictionary& dictionary)
     addProperty(_alwaysDrawFov);
 
     _simplifyBounds = p.simplifyBounds.value_or(_simplifyBounds);
+    _circleSegments = p.circleSegments.value_or(_circleSegments);
 
     _colors.defaultStart.setViewOption(Property::ViewOptions::Color, true);
     _colors.defaultEnd.setViewOption(Property::ViewOptions::Color, true);
@@ -343,16 +383,18 @@ void RenderableFov::initializeGL() {
         _instrument.name
     );
 
-    // Right now, we can only deal with rectangles or polygons. Circles and ellipses only
-    // return one or two bound vectors that have to used to construct an approximation
-    const bool supportedShape =
-        res.shape == SpiceManager::FieldOfViewResult::Shape::Polygon ||
-        res.shape == SpiceManager::FieldOfViewResult::Shape::Rectangle;
-    if (!supportedShape) {
-        throw RuntimeError(
-            std::format("'{}' has unsupported shape", _instrument.name),
-            "RenderableFov"
-        );
+    // Circles and ellipses only return one or two bound vectors that have to be used to
+    // construct an approximation of the field of view
+    switch (res.shape) {
+        case SpiceManager::FieldOfViewResult::Shape::Polygon:
+        case SpiceManager::FieldOfViewResult::Shape::Rectangle:
+            break;
+        case SpiceManager::FieldOfViewResult::Shape::Circle:
+        case SpiceManager::FieldOfViewResult::Shape::Ellipse:
+            res.bounds = approximateBounds(res, _circleSegments);
+            break;
+        default:
+            throw MissingCaseException();
     }
 
     if (_simplifyBounds) {
@@ -509,13 +551,16 @@ glm::dvec3 RenderableFov::orthogonalProjection(const glm::dvec3& vecFov, double 
             _instrument.aberrationCorrection,
             time
         );
+        // Place the point on the plane that is orthogonal to the boresight at the
+        // distance of the target
+        const double scale = glm::length(vecToTarget) /
+            glm::dot(vecFov, glm::normalize(_instrument.boresight));
         const glm::dvec3 fov = SpiceManager::ref().frameTransformationMatrix(
             _instrument.name,
             _instrument.referenceFrame,
             time
         ) * vecFov;
-        const glm::dvec3 p = glm::proj(vecToTarget, fov);
-        return p * 1000.0; // km -> m
+        return fov * scale * 1000.0; // km -> m
     }
 }
 
@@ -802,7 +847,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
 }
 
 void RenderableFov::render(const RenderData& data, RendererTasks&) {
-    if (!_drawFOV) {
+    if (!_drawFOV && !_alwaysDrawFov) {
         return;
     }
 
@@ -854,7 +899,7 @@ void RenderableFov::update(const UpdateData& data) {
     }
 
     // TODO: figure out if time has changed
-    if (_drawFOV /* && time changed */) {
+    if (_drawFOV || _alwaysDrawFov) {
         const std::pair<std::string, bool>& t = determineTarget(data.time.j2000Seconds());
 
         computeIntercepts(data.time.j2000Seconds(), t.first, t.second);

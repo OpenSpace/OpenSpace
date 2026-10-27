@@ -78,6 +78,7 @@ private:
         intersectionEndColor, squareColor, interpolation, opacity) _uniformCache;
 
     bool _simplifyBounds = false;
+    int _circleSegments = 32;
 
     std::string _previousTarget;
     bool _drawFOV = false;
