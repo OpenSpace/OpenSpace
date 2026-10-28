@@ -62,6 +62,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -386,16 +387,34 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
 
     // Shadow calculations
     _shadowDataArrayCache.clear();
+    const double time = data.time.j2000Seconds();
     for (ShadowConfiguration& shadowConf : _shadowConfArray) {
         // All distances and lengths in world coordinates are in meters. We need to move
         // this to view space
+        // The shadow that reaches the planet now was cast by the caster one light time
+        // earlier. Ignoring the light time would place the shadow behind its actual
+        // position. The light time between the source and the caster only has a
+        // negligible effect and is ignored
+        
         double lt = 0.0;
+        const glm::dvec3 currentCasterPos = SpiceManager::ref().targetPosition(
+            shadowConf.caster.first,
+            "SSB",
+            "GALACTIC",
+            {},
+            time,
+            lt
+        ) * KilometerToMeter;
+        const double lightTime =
+            glm::length(currentCasterPos - data.modelTransform.translation) /
+            distanceconstants::LightSecond;
+
         const glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
             shadowConf.source.first,
             "SSB",
             "GALACTIC",
             {},
-            data.time.j2000Seconds(),
+            time - lightTime,
             lt
         ) * KilometerToMeter;
         const glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
@@ -403,9 +422,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
             "SSB",
             "GALACTIC",
             {},
-            data.time.j2000Seconds(),
+            time - lightTime,
             lt
-        )* KilometerToMeter;
+        ) * KilometerToMeter;
 
         SceneGraphNode* sourceNode = sceneGraphNode(shadowConf.source.first);
         if (!sourceNode) {
