@@ -30,6 +30,7 @@
 #include <openspace/glm.h>
 #include <openspace/opengl/textureunit.h>
 #include <openspace/opengl/uniformcache.h>
+#include <utility>
 #include <vector>
 
 namespace openspace {
@@ -103,59 +104,97 @@ private:
     void calculateInscattering(int scatteringOrder, opengl::ProgramObject& program,
         GLuint deltaSRayleigh) const;
 
+    /**
+     * Split a double-precision 4×4 matrix into two single-precision matrices (hi, lo)
+     * such that for every element e:  hi[i][j] + lo[i][j] == e  exactly.
+     * The pair is used by the float-emulation shader path (NO_GPU_DOUBLE) to perform
+     * compensated matrix-vector multiplies with ~46 bits of effective precision.
+     */
+    static std::pair<glm::mat4, glm::mat4> splitDmat4(const glm::dmat4& m);
+
+    // ---------------------------------------------------------------------------
+    // Uniform caches — two variants depending on GPU double-precision support.
+    //
+    // _gpuSupportsDouble == true  → _uniformCacheDouble  (dmat4, dvec3 uniforms)
+    // _gpuSupportsDouble == false → _uniformCacheFloat   (mat4 hi/lo pairs, vec3)
+    // ---------------------------------------------------------------------------
+
+    // Uniforms common to both paths
     UniformCache(cullAtmosphere, opacity, rPlanet, rAtmosphere, groundRadianceEmission,
         rayleighHeightScale, betaRayleigh, mieHeightScale, betaMieExtinction, mieG,
         sunRadiance, ozoneLayerEnabled, ozoneHeightScale, betaOzoneExtinction, rSamples,
-        muSamples, muSSamples, nuSamples, inverseModelTransformMatrix,
-        modelTransformMatrix, projectionToModelTransformMatrix, viewToWorldMatrix,
-        camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture,
-        inscatterTexture, sunAngularSize) _uniformCache;
+        muSamples, muSSamples, nuSamples, hardShadows,
+        transmittanceTexture, irradianceTexture, inscatterTexture,
+        sunAngularSize) _uniformCacheCommon;
+
+    // Double-precision uniforms (used when _gpuSupportsDouble == true)
+    UniformCache(inverseModelTransformMatrix, modelTransformMatrix,
+        viewToWorldMatrix, projectionToModelTransformMatrix,
+        camPosObj, sunDirectionObj) _uniformCacheDouble;
+
+    // Float-emulation uniforms (used when _gpuSupportsDouble == false)
+    // viewToObjectMatrix: maps view space directly to object space (split into hi + lo)
+    // modelTransformMatrix: maps object space to world space for shadows (split into hi + lo)
+    // rayDirectionMatrix: maps near-plane NDC coordinates to ray direction in object space
+    // camPosObj: camera position in object space (meters) split into hi + lo
+    // sunDirectionObj: sun direction unit vector in object space
+    UniformCache(
+        viewToObjectMatrix_hi,          viewToObjectMatrix_lo,
+        modelTransformMatrix_hi,        modelTransformMatrix_lo,
+        rayDirectionMatrix,
+        camPosObj_hi, camPosObj_lo,
+        sunDirectionObj) _uniformCacheFloat;
 
     opengl::TextureUnit _transmittanceTableTextureUnit;
     opengl::TextureUnit _irradianceTableTextureUnit;
     opengl::TextureUnit _inScatteringTableTextureUnit;
 
     GLuint _transmittanceTableTexture = 0;
-    GLuint _irradianceTableTexture = 0;
-    GLuint _inScatteringTableTexture = 0;
+    GLuint _irradianceTableTexture    = 0;
+    GLuint _inScatteringTableTexture  = 0;
 
     // Atmosphere Data
-    bool _ozoneEnabled = false;
-    bool _sunFollowingCameraEnabled = false;
-    float _atmosphereRadius = 0.f;
-    float _atmospherePlanetRadius = 0.f;
-    float _averageGroundReflectance = 0.f;
-    float _groundRadianceEmission = 0.f;
-    float _rayleighHeightScale = 0.f;
-    float _ozoneHeightScale = 0.f;
-    float _mieHeightScale = 0.f;
-    float _miePhaseConstant = 0.f;
-    float _sunRadianceIntensity = 5.f;
-    float _sunAngularSize = 0.3f;
+    bool  _ozoneEnabled             = false;
+    bool  _sunFollowingCameraEnabled = false;
+    float _atmosphereRadius          = 0.f;
+    float _atmospherePlanetRadius    = 0.f;
+    float _averageGroundReflectance  = 0.f;
+    float _groundRadianceEmission    = 0.f;
+    float _rayleighHeightScale       = 0.f;
+    float _ozoneHeightScale          = 0.f;
+    float _mieHeightScale            = 0.f;
+    float _miePhaseConstant          = 0.f;
+    float _sunRadianceIntensity      = 5.f;
+    float _sunAngularSize            = 0.3f;
     SceneGraphNode* _lightSourceNode = nullptr;
 
     glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.f);
-    glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);
-    glm::vec3 _mieScatteringCoeff = glm::vec3(0.f);
-    glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
+    glm::vec3 _ozoneExtinctionCoeff    = glm::vec3(0.f);
+    glm::vec3 _mieScatteringCoeff      = glm::vec3(0.f);
+    glm::vec3 _mieExtinctionCoeff      = glm::vec3(0.f);
 
     // Atmosphere Textures Dimensions
     const glm::ivec2 _transmittanceTableSize;
     const glm::ivec2 _irradianceTableSize;
     const glm::ivec2 _deltaETableSize;
-    const int _muSSamples;
-    const int _nuSamples;
-    const int _muSamples;
-    const int _rSamples;
+    const int        _muSSamples;
+    const int        _nuSamples;
+    const int        _muSamples;
+    const int        _rSamples;
     const glm::ivec3 _textureSize;
 
     glm::dmat4 _modelTransform;
-    float _opacity = 1.f;
+    float      _opacity = 1.f;
 
     // Eclipse Shadows
-    std::vector<ShadowConfiguration> _shadowConfArray;
-    std::vector<ShadowRenderingStruct> _shadowDataArrayCache;
+    std::vector<ShadowConfiguration>    _shadowConfArray;
+    std::vector<ShadowRenderingStruct>  _shadowDataArrayCache;
     bool _hardShadowsEnabled = false;
+
+    // Precision mode flag — determined by the NO_GPU_DOUBLE environment variable.
+    // When false, the dedicated atmosphere_deferred_fs_float.glsl shader is loaded and
+    // transform uniforms are sent as float hi/lo pairs.
+    bool _gpuSupportsDouble = true;
 
     // Atmosphere Debugging
     const bool _saveCalculationTextures = false;

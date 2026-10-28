@@ -39,6 +39,7 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <memory>
+#include <utility>
 
 namespace openspace {
 
@@ -124,14 +125,29 @@ private:
     DoubleProperty _properMotionEpoch;
     BoolProperty _enableFadeInDistance;
 
+    static std::pair<glm::mat4, glm::mat4> splitDmat4(const glm::dmat4& m);
+
+    bool _gpuSupportsDouble = true;
+
     std::unique_ptr<opengl::ProgramObject> _program;
+
+    // Common uniforms used by both double and float paths
     UniformCache(
-        modelMatrix, cameraViewProjectionMatrix, cameraUp, eyePosition, colorOption,
-        useProperMotion, diffTime, magnitudeExponent, sizeComposition, lumCent,
-        radiusCent, colorTexture, opacity, otherDataTexture, otherDataRange,
+        colorOption, useProperMotion, diffTime, magnitudeExponent, sizeComposition,
+        lumCent, radiusCent, colorTexture, opacity, otherDataTexture, otherDataRange,
         filterOutOfRange, fixedColor, glareTexture, glareMultiplier, glareGamma,
         glareScale, hasCore, coreTexture, coreMultiplier, coreGamma, coreScale
-    ) _uniformCache;
+    ) _uniformCacheCommon;
+
+    // Double-precision uniforms (used when _gpuSupportsDouble == true)
+    UniformCache(
+        modelMatrix, cameraViewProjectionMatrix, cameraUp, eyePosition
+    ) _uniformCacheDouble;
+
+    // Float-emulation uniforms (used when _gpuSupportsDouble == false)
+    UniformCache(
+        modelViewMatrix_hi, modelViewMatrix_lo, projectionMatrix, viewScaling
+    ) _uniformCacheFloat;
 
     bool _speckFileIsDirty = true;
     bool _pointSpreadFunctionTextureIsDirty = true;
