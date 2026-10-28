@@ -10,22 +10,22 @@ local labelsPath = asset.resource({
 })
 
 
--- local EarthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
-local EarthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
-
 local Earth = {
   Identifier = "Earth",
   Parent = transforms.EarthIAU.Identifier,
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = EarthEllipsoid,
+    Radii = { 6378137.0, 6378137.0, 6356752.314245 },
     PerformShading = false,
     ShadowGroup = {
       Sources = {
-        { Name = "Sun", Radius = 696300000 },
+        -- The solar radius used by NASA's eclipse predictions (959.63" at 1 AU)
+        { Name = "Sun", Radius = 695990000 },
       },
       Casters = {
-        { Name = "Moon", Radius = 1737000 },
+        -- The umbral radius of the Moon used by NASA's eclipse predictions (k = 0.272281
+        -- Earth equatorial radii), which accounts for the valleys along the lunar limb
+        { Name = "Moon", Radius = 1736645.5 },
       }
     },
     Labels = {

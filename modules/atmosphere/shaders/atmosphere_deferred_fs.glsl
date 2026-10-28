@@ -195,6 +195,12 @@ vec3 analyticTransmittance(float r, float mu, float d) {
   );
 }
 
+// The lookup tables are only defined for positions above the planet radius, but the
+// planet's surface can be lower than that, for example if the camera is close to the
+// ground or if the planet's shape does not exactly match the atmosphere's. In these cases
+// the positions are clamped to this distance above the planet radius (in km)
+const float MinimumAltitude = 0.01;
+
 vec3 irradiance(sampler2D s, float r, float muSun) {
   float u_r = (r - rPlanet) / (rAtmosphere - rPlanet);
   float u_muSun = (muSun + 0.2) / 1.2;
@@ -331,7 +337,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 
   // After removing the initial path from camera pos to top of atmosphere (for an
   // observer in the space) we test if the light ray is hitting the atmosphere
-  float r0 = length(fragPosObj);
+  float r0 = max(length(fragPosObj), rPlanet + MinimumAltitude);
   float invr0 = 1.0 / r0;
   float muSun0 = dot(fragPosObj, s) * invr0;
   float mu0 = dot(fragPosObj, v) * invr0;
@@ -387,7 +393,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // r0 = sqrt(r2 + t2 + 2.0 * r * t * mu);
     float halfCosineLaw1 = r2 + (t * t);
     float halfCosineLaw2 = 2.0 * r * t;
-    r0 = sqrt(halfCosineLaw1 + halfCosineLaw2 * mu);
+    r0 = max(sqrt(halfCosineLaw1 + halfCosineLaw2 * mu), rPlanet + MinimumAltitude);
 
     // From the dot product: cos(theta0) = (x0 dot v)/(||ro||*||v||)
     // mu0 = ((x + t) dot v) / r0
@@ -404,7 +410,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 
     // Below Horizon
     mu = muHorizon + InterpolationEpsilon;
-    r0 = sqrt(halfCosineLaw1 + halfCosineLaw2 * mu);
+    r0 = max(sqrt(halfCosineLaw1 + halfCosineLaw2 * mu), rPlanet + MinimumAltitude);
 
     mu0 = (r * mu + t) * (1.0 / r0);
 
@@ -462,7 +468,7 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, vec3 attenuationXtoX0, vec3 gr
                  float sunIntensity)
 {
   // First we obtain the ray's end point on the surface
-  float r0 = length(x + t * v);
+  float r0 = max(length(x + t * v), rPlanet + MinimumAltitude);
 
   vec3 groundReflectance = groundColor * groundRadianceEmission;
 
@@ -625,7 +631,7 @@ void main() {
   // Moving observer from camera location to top atmosphere. If the observer is already
   // inside the atm, offset = 0.0 and no changes at all
   vec3 x = vec3(ray.origin + t * ray.direction);
-  float r = length(x);
+  float r = max(length(x), rPlanet + MinimumAltitude);
   vec3 v = vec3(ray.direction);
   float mu = 0.0; // dot(x, v) / r;
   vec3 s = vec3(sunDirectionObj);

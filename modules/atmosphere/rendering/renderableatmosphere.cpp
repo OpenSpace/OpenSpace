@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <variant>
 
 namespace {
     using namespace openspace;
@@ -281,8 +282,11 @@ namespace {
 
         float atmosphereHeight [[codegen::Info(AtmosphereHeightInfo)]];
 
-        // The radius of the planet in meters.
-        float planetRadius;
+        // The radius of the planet in kilometers. If a single value is given, the planet
+        // is a sphere. If three values are given, they are the radii of the planet's
+        // ellipsoid and the atmosphere is stretched to follow its shape. In that case,
+        // the first radius is the one that the atmosphere height is relative to.
+        std::variant<float, glm::vec3> planetRadius;
 
         float planetAverageGroundReflectance;
 
@@ -397,7 +401,14 @@ RenderableAtmosphere::RenderableAtmosphere(const Dictionary& dictionary)
     _atmosphereHeight.onChange(updateWithCalculation);
     addProperty(_atmosphereHeight);
 
-    _planetRadius = p.planetRadius;
+    if (std::holds_alternative<float>(p.planetRadius)) {
+        _planetRadius = std::get<float>(p.planetRadius);
+    }
+    else {
+        const glm::dvec3 radii = std::get<glm::vec3>(p.planetRadius);
+        _planetRadius = static_cast<float>(radii.x);
+        _ellipsoidScale = radii / radii.x;
+    }
 
     _groundAverageReflectance = p.planetAverageGroundReflectance;
     _groundAverageReflectance.onChange(updateWithCalculation);
@@ -522,10 +533,12 @@ void RenderableAtmosphere::initializeGL() {
 }
 
 glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(const TransformData& data) {
-    // Scale the planet to appropriate size since the planet is a unit sphere
+    // Scale the planet to appropriate size since the planet is a unit sphere. The
+    // ellipsoid scale turns the spherical atmosphere into the shape of the planet
     return glm::translate(glm::dmat4(1.0), data.translation) *
         glm::dmat4(data.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.scale));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.scale)) *
+        glm::scale(glm::dmat4(1.0), _ellipsoidScale);
 }
 
 void RenderableAtmosphere::render(const RenderData& data, RendererTasks& rendererTask) {
@@ -590,7 +603,12 @@ void RenderableAtmosphere::setDimmingCoefficient(const glm::dmat4& modelTransfor
     const glm::dvec3 normalUnderCamera = glm::normalize(cameraPos - planetPos);
     const glm::dvec3 vecToSun = glm::normalize(-planetPos);
 
-    const float cameraDistance = static_cast<float>(glm::distance(planetPos, cameraPos));
+    // Measure the distance in the space in which the atmosphere is spherical, since the
+    // model transform might contain a non-uniform scale for an ellipsoidal planet
+    const glm::dvec3 cameraPosObj =
+        glm::dvec3(glm::inverse(modelTransform) * glm::dvec4(cameraPos, 1.0));
+    const double scale = glm::length(glm::dvec3(modelTransform[0]));
+    const float cameraDistance = static_cast<float>(glm::length(cameraPosObj) * scale);
     const float cameraSunAngle = static_cast<float>(
         glm::degrees(glm::acos(glm::dot(vecToSun, normalUnderCamera))
     ));
