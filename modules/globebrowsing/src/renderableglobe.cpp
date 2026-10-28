@@ -38,7 +38,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-#include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/memorymanager.h>

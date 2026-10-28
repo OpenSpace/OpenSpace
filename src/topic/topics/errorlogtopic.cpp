@@ -25,7 +25,9 @@
 #include <openspace/topic/topics/errorlogtopic.h>
 
 #include <openspace/documentation/schema.h>
+#include <openspace/engine/globals.h>
 #include <openspace/topic/notificationlog.h>
+#include <openspace/topic/server.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringconversion.h>
 #include <string_view>
