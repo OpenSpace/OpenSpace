@@ -81,7 +81,7 @@ public:
             TransitionType) override;
         void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame>, int) override;
 
-        double _zoomLevel = 0.0;
+        double _zoomLevel = 1.0;
 
         IMPLEMENT_REFCOUNTING(LoadHandler);
     };

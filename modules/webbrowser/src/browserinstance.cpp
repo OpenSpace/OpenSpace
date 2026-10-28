@@ -190,7 +190,7 @@ void BrowserInstance::setZoom(float ratio) {
 
     // Zooming in CEF is non-linear according to this:
     // https://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11491
-    const double zoomLevel = std::log(ratio * dpiScaling) / glm::log(1.2);
+    const double zoomLevel = std::log(ratio * dpiScaling) / std::log(1.2);
     _client->setZoomLevel(zoomLevel);
     _browser->GetHost()->SetZoomLevel(zoomLevel);
 }
