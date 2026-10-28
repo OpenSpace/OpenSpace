@@ -36,7 +36,7 @@ layout(triangle_strip, max_vertices = 4) out;
 out Data {
   vec4 positionViewSpace;
   vec2 texCoords;
-  flat float screenSpaceDepth;
+  float screenSpaceDepth;
 } out_data;
 
 // General settings
@@ -134,23 +134,27 @@ void main() {
     topLeft = z_normalization(dposClip + scaledUpClip - scaledRightClip);
   }
 
-  out_data.screenSpaceDepth = bottomLeft.w;
   out_data.positionViewSpace = vec4(viewTransform * dpos);
 
-  // Build primitive
+  // Build primitive. The depth has to be set per vertex as the billboard is not
+  // necessarily parallel to the image plane, for example in fisheye rendering
   out_data.texCoords = Corners[0];
+  out_data.screenSpaceDepth = bottomLeft.w;
   gl_Position = bottomLeft;
   EmitVertex();
 
   out_data.texCoords = Corners[1];
+  out_data.screenSpaceDepth = bottomRight.w;
   gl_Position = bottomRight;
   EmitVertex();
 
   out_data.texCoords = Corners[3];
+  out_data.screenSpaceDepth = topLeft.w;
   gl_Position = topLeft;
   EmitVertex();
 
   out_data.texCoords = Corners[2];
+  out_data.screenSpaceDepth = topRight.w;
   gl_Position = topRight;
   EmitVertex();
 
