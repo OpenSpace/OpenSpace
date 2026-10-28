@@ -170,7 +170,7 @@ namespace {
         .description = "The color of the lines from the stars towards the target "
             "direction in inclination mode.",
         .defaults = {
-            .value = glm::vec4(0.8f, 0.8f, 0.8f, 0.2f),
+            .value = glm::vec4(0.8f, 0.8f, 0.8f, 0.5f),
             .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
         }
     };
