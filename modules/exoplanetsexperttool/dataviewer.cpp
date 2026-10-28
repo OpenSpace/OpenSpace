@@ -65,7 +65,7 @@
 
 #include <implot.h>
 
-#define SHOW_IMGUI_HELPERS
+//#define SHOW_IMGUI_HELPERS
 
 namespace {
     using namespace openspace;
