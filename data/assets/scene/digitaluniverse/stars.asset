@@ -51,9 +51,9 @@ local Stars = {
       Luminance = "lum",
       AbsoluteMagnitude = "absmag",
       ApparentMagnitude = "appmag",
-      Vx = "vx",
-      Vy = "vy",
-      Vz = "vz",
+      Vx = "u",
+      Vy = "v",
+      Vz = "w",
       Speed = "speed"
     },
     DimInAtmosphere = true
@@ -99,9 +99,9 @@ local SunStar = {
       Luminance = "lum",
       AbsoluteMagnitude = "absmag",
       ApparentMagnitude = "appmag",
-      Vx = "vx",
-      Vy = "vy",
-      Vz = "vz",
+      Vx = "u",
+      Vy = "v",
+      Vz = "w",
       Speed = "speed"
     },
     DimInAtmosphere = true
