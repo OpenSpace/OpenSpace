@@ -97,6 +97,12 @@ void TimelineRotation::initialize() {
     }
 }
 
+void TimelineRotation::setOwnerNode(SceneGraphNode* node) {
+    for (const Keyframe<mm_unique_ptr<Rotation>>& kf : _timeline.keyframes()) {
+        kf.data->setOwnerNode(node);
+    }
+}
+
 void TimelineRotation::update(const UpdateData& data) {
     const double now = data.time.j2000Seconds();
     using KeyframePointer = const Keyframe<mm_unique_ptr<Rotation>>*;

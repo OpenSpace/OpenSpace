@@ -117,4 +117,6 @@ void Rotation::update(const UpdateData& data) {
     }
 }
 
+void Rotation::setOwnerNode(SceneGraphNode*) {}
+
 } // namespace openspace

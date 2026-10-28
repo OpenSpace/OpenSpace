@@ -48,7 +48,8 @@ namespace {
         .description = "The node on which the longitude/latitude is specified. If the "
             "node is a globe, the correct height information for the globe is used. "
             "Otherwise, the position is specified based on the longitude and latitude on "
-            "the node's interaction sphere.",
+            "the node's interaction sphere. If not set, the parent of the scene graph "
+            "node that this rotation is attached to is used.",
         .visibility = Visibility::User
     };
 
@@ -120,7 +121,8 @@ namespace {
     // [GlobeTranslation](#base_translation_globe) to place the scene graph node at the
     // same position for which the rotation is calculated.
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
-        std::string globe [[codegen::Info(GlobeInfo), codegen::identifier()]];
+        std::optional<std::string> globe
+            [[codegen::Info(GlobeInfo), codegen::identifier()]];
 
         double latitude [[codegen::Info(LatitudeInfo), codegen::inrange(-90.0, 90.0)]];
 
@@ -128,7 +130,7 @@ namespace {
             [[codegen::Info(LongitudeInfo), codegen::inrange(-180.0, 180.0)]];
 
         std::optional<double> angle
-            [[codegen::Info(AngleInfo), codegein::inrange(0.0, 360.0)]];
+            [[codegen::Info(AngleInfo), codegen::inrange(0.0, 360.0)]];
 
         std::optional<bool> useHeightmap [[codegen::Info(UseHeightmapInfo)]];
 
@@ -157,7 +159,7 @@ GlobeRotation::GlobeRotation(const Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _sceneGraphNode = p.globe;
+    _sceneGraphNode = p.globe.value_or("");
     _sceneGraphNode.onChange([this]() {
         fillAttachedNode();
         setUpdateVariables();
@@ -185,7 +187,17 @@ GlobeRotation::GlobeRotation(const Dictionary& dictionary)
     addProperty(_useCamera);
 }
 
+void GlobeRotation::setOwnerNode(SceneGraphNode* node) {
+    _ownerNode = node;
+}
+
 void GlobeRotation::fillAttachedNode() {
+    if (std::string_view(_sceneGraphNode).empty()) {
+        // If the 'Globe' property is not set, use the parent of the scene graph node
+        // that this rotation is attached to
+        _attachedNode = _ownerNode ? _ownerNode->parent() : nullptr;
+        return;
+    }
     SceneGraphNode* n = sceneGraphNode(_sceneGraphNode);
     if (!n) {
         LERROR(std::format("Could not find attached node '{}'", _sceneGraphNode.value()));

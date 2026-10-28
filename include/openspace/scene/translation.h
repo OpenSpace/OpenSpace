@@ -37,6 +37,7 @@ namespace openspace {
 
 class Dictionary;
 struct Documentation;
+class SceneGraphNode;
 struct UpdateData;
 
 class Translation : public PropertyOwner {
@@ -49,6 +50,17 @@ public:
     virtual void initialize();
 
     virtual void update(const UpdateData& data);
+
+    /**
+     * Sets the scene graph node that owns this translation. This is called by the
+     * SceneGraphNode after it has created the translation. Translations that need to
+     * reference their owner node can override this method to store the reference. The
+     * default implementation does nothing.
+     *
+     * \param node The scene graph node that owns this translation
+     */
+    virtual void setOwnerNode(SceneGraphNode* node);
+
     glm::dvec3 position() const;
 
     virtual glm::dvec3 position(const UpdateData& data) const = 0;

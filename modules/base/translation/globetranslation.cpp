@@ -46,7 +46,8 @@ namespace {
         .description = "The node on which the longitude/latitude is specified. If the "
             "node is a globe, the correct height information for the globe is used. "
             "Otherwise, the position is specified based on the longitude and latitude on "
-            "the node's interaction sphere",
+            "the node's interaction sphere. If not set, the parent of the scene graph "
+            "node that this translation is attached to is used.",
         .visibility = Visibility::User
     };
 
@@ -137,7 +138,8 @@ namespace {
     // If the `UseCamera` value is set, the object's position automatically updates based
     // on the current camera location.
     struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {
-        std::string globe [[codegen::Info(GlobeInfo), codegen::identifier()]];
+        std::optional<std::string> globe
+            [[codegen::Info(GlobeInfo), codegen::identifier()]];
 
         std::optional<double> latitude
             [[codegen::Info(LatitudeInfo), codegen::inrange(-90.0, 90.0)]];
@@ -177,7 +179,7 @@ GlobeTranslation::GlobeTranslation(const Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _sceneGraphNode = p.globe;
+    _sceneGraphNode = p.globe.value_or("");
     _sceneGraphNode.onChange([this]() {
         fillAttachedNode();
         setUpdateVariables();
@@ -211,7 +213,17 @@ GlobeTranslation::GlobeTranslation(const Dictionary& dictionary)
     addProperty(_useCameraAltitude);
 }
 
+void GlobeTranslation::setOwnerNode(SceneGraphNode* node) {
+    _ownerNode = node;
+}
+
 void GlobeTranslation::fillAttachedNode() {
+    if (std::string_view(_sceneGraphNode).empty()) {
+        // If the 'Globe' property is not set, use the parent of the scene graph node
+        // that this translation is attached to
+        _attachedNode = _ownerNode ? _ownerNode->parent() : nullptr;
+        return;
+    }
     SceneGraphNode* n = sceneGraphNode(_sceneGraphNode);
     if (!n) {
         LERROR(std::format("Could not find attached node '{}'", _sceneGraphNode.value()));

@@ -8,7 +8,6 @@ local MeridianPosition = {
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = earthAsset.Earth.Identifier,
       Latitude = 0.0,
       Longitude = 0.0,
       Altitude = 0.0,
@@ -16,7 +15,6 @@ local MeridianPosition = {
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = earthAsset.Earth.Identifier,
       Latitude = 0.0,
       Longitude = 0.0,
       UseCamera = true
