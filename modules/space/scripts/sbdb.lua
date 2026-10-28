@@ -4,7 +4,7 @@ registerFunction(
     Arguments = {
       { "object_search_string", "String" }
     },
-    Return = "( Trail, Position )",
+    Return = "( Table, Table )",
     Documentation = [[
       Creates a new scene graph node from the small body object by querying the JPL Small
       Body Database for the provided object. If the object exists, its Keplerian elements
