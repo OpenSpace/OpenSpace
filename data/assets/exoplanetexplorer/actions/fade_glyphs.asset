@@ -1,10 +1,16 @@
-local identifier = "ExoplanetDataPoints"
+local tag = "exoplanet_explorer_glyphs"
+
+-- Note that here we set the fade value, rather than use the fadeIn or fadeOut functons.
+-- The reason is that the ExoplanetExplorer controls the enabled setting of the
+-- renderable separately, so using fadeIn or fadeOut would conflict with that.
 
 local HideGlyphs = {
   Identifier = "os.hide_exo_glyphs",
-  Name = "Hide ExoExplorer Renderable",
-  Command = [[openspace.fadeOut("Scene.]] .. identifier .. [[.Renderable")]],
-  Documentation = [[]],
+  Name = "Hide ExoExplorer Glyphs",
+  Command = [[openspace.setPropertyValue("{]] .. tag .. [[}.Renderable.Fade", 0.0, 1.0)]],
+  Documentation = [[
+    Hides the Exoplanet Explorer glyphs by setting their fade value to 0.0.
+  ]],
   GuiPath = "/ExoplanetExplorer",
   IsLocal = false
 }
@@ -12,9 +18,11 @@ asset.export("HideGlyphs", HideGlyphs.Identifier)
 
 local ShowGlyphs = {
   Identifier = "os.show_exo_glyphs",
-  Name = "Show ExoExplorer Renderable",
-  Command = [[openspace.fadeIn("Scene.]] .. identifier .. [[.Renderable")]],
-  Documentation = [[]],
+  Name = "Show ExoExplorer Glyphs",
+  Command = [[openspace.setPropertyValue("{]] .. tag .. [[}.Renderable.Fade", 1.0, 1.0)]],
+  Documentation = [[
+    Shows the Exoplanet Explorer glyphs by setting their fade value to 1.0.
+  ]],
   GuiPath = "/ExoplanetExplorer",
   IsLocal = false
 }
@@ -22,20 +30,36 @@ asset.export("ShowGlyphs", ShowGlyphs.Identifier)
 
 local ToggleGlyphs = {
   Identifier = "os.toggle_exo_glyphs",
-  Name = "Toggle ExoExplorer Renderable",
-  Command = [[openspace.toggleFade("Scene.]] .. identifier .. [[.Renderable")]],
-  Documentation = [[]],
+  Name = "Toggle ExoExplorer Glyphs",
+  Command = [[
+    local properties = openspace.property("{]] .. tag .. [[}.Renderable.Fade")
+    for _, p in ipairs(properties) do
+      local value = openspace.propertyValue(p)
+      local diff = 1.0 - value
+      local duration = value ~= 0.0 and value ~= 1.0 and diff or 1.0
+      openspace.setPropertyValue(
+        p,
+        math.floor(diff + 0.5),
+        duration
+      )
+    end
+  ]],
+  Documentation = [[
+    Toggles the visibility of the Exoplanet Explorer glyphs by inverting their current
+    fade value.
+  ]],
   GuiPath = "/ExoplanetExplorer",
   IsLocal = false
 }
 asset.export("ToggleGlyphs", ToggleGlyphs.Identifier)
+
 
 asset.onInitialize(function()
   openspace.action.registerAction(ShowGlyphs)
   openspace.action.registerAction(HideGlyphs)
   openspace.action.registerAction(ToggleGlyphs)
 
-  openspace.bindKey("G", ToggleGlyphs)
+  openspace.bindKey("G", ToggleGlyphs.Identifier)
 end)
 
 asset.onDeinitialize(function()
@@ -48,7 +72,7 @@ end)
 
 
 asset.meta = {
-  Name = "Actions - Show/Hide Exoplanet Explorer Renderable",
+  Name = "Actions - Show/Hide Exoplanet Explorer Glyphs",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

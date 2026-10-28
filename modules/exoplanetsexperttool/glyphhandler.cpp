@@ -40,6 +40,10 @@
 namespace {
     using namespace openspace;
 
+    constexpr std::string_view GlyphCloudIdentifier = "ExoplanetGlyphCloud";
+    constexpr std::string_view HostCloudIdentifier = "HostCloud";
+    constexpr std::string_view GlyphTag = "exoplanet_explorer_glyphs";
+
     // @TODO this could be a templated helper function for lists. Used a lot
     std::string formatIndicesList(const std::vector<size_t>& indices) {
         std::string result;
@@ -56,8 +60,7 @@ namespace {
         global::scriptEngine->queueScript(std::format(
             "if openspace.hasSceneGraphNode('{}') then "
             "openspace.setPropertyValueSingle('Scene.{}.Renderable.Enabled', {}) end",
-            exoplanets::GlyphHandler::HostCloudIdentifier,
-            exoplanets::GlyphHandler::HostCloudIdentifier, enabled
+            HostCloudIdentifier, HostCloudIdentifier, enabled
         ));
     }
 
@@ -65,8 +68,8 @@ namespace {
         global::scriptEngine->queueScript(std::format(
             "if openspace.hasSceneGraphNode('{}') then "
             "openspace.setPropertyValueSingle('Scene.{}.Renderable.Enabled', {}) end",
-            exoplanets::GlyphHandler::GlyphCloudIdentifier,
-            exoplanets::GlyphHandler::GlyphCloudIdentifier, enabled
+            GlyphCloudIdentifier,
+            GlyphCloudIdentifier, enabled
         ));
     }
 
@@ -91,6 +94,9 @@ void GlyphHandler::initializeRenderables() {
 
     _dataViewer.updateGlyphRenderData();
 
+    Dictionary tags;
+    tags.setValue("1", std::string(GlyphTag));
+
     // Glyphs
     Dictionary gui;
     gui.setValue("Name", "Glyphs - Planets"s);
@@ -105,6 +111,7 @@ void GlyphHandler::initializeRenderables() {
     Dictionary node;
     node.setValue("Identifier", std::string(GlyphCloudIdentifier));
     node.setValue("Renderable", renderable);
+    node.setValue("Tag", tags);
     node.setValue("GUI", gui);
 
     global::scriptEngine->queueScript(
@@ -125,6 +132,7 @@ void GlyphHandler::initializeRenderables() {
     Dictionary hostsNode;
     hostsNode.setValue("Identifier", std::string(HostCloudIdentifier));
     hostsNode.setValue("Renderable", hostsRenderable);
+    hostsNode.setValue("Tag", tags);
     hostsNode.setValue("GUI", hostsGui);
 
     global::scriptEngine->queueScript(

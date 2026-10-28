@@ -43,9 +43,6 @@ public:
         InclinationAndStar
     };
 
-    // The identifier used for the glyph cloud renderable throughout the module
-    constexpr static std::string_view GlyphCloudIdentifier = "ExoplanetDataPoints";
-    constexpr static std::string_view HostCloudIdentifier = "ExoplanetHostPoints";
     constexpr static float DefaultGlyphScale = 1.f;
 
     GlyphHandler(DataViewer& dataViewer);

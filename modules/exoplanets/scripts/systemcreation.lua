@@ -202,6 +202,7 @@ function addExoplanetSystem(data)
       }
     },
     BoundingSphere = starRadii,
+    InteractionSphere = starRadii,
     Tag = { "exoplanet_system" },
     GUI = {
       Name = data.StarName .. " (Star)",
@@ -578,6 +579,11 @@ function addExoplanetSystem(data)
       end
     end
 
+    -- Default to the star's radius for interaction sphere if planet radius is unknown.
+    -- ExoplanetExplorer uses interaction sphere for fading renderables in and out based
+    -- on distance
+    local interactionSphere = starRadii
+
     local PlanetRenderable = nil
     local planetTypeData = nil
     if hasValue(planetData.Radius) then
@@ -618,6 +624,8 @@ function addExoplanetSystem(data)
         LightSourceNode = starIdentifier,
         AmbientIntensity = ambientIntensity
       }
+
+      interactionSphere = planetData.Radius
     end
 
     local Planet = {
@@ -627,6 +635,7 @@ function addExoplanetSystem(data)
         Translation = PlanetKeplerTranslation
       },
       Tag = { "exoplanet_planet" },
+      InteractionSphere = interactionSphere,
       GUI = {
         Name = planetData.Name,
         Path = guiPath,
