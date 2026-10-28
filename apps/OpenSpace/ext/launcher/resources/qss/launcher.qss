@@ -253,10 +253,6 @@ HorizonsDialog  QLabel#thin {
   font-weight: normal;
 }
 
-HorizonsDialog  QLabel#normal {
-  color: black;
-}
-
 /*
  * SGCT
  */

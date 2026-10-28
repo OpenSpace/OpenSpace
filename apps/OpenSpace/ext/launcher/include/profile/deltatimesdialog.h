@@ -28,7 +28,6 @@
 #include <QDialog>
 
 #include <string>
-#include <string_view>
 #include <vector>
 
 class QComboBox;
@@ -87,7 +86,7 @@ private:
      */
     void transitionEditMode(int index, bool state);
 
-    void setLabelForKey(int index, bool editMode, std::string_view color);
+    void setLabelForKey(int index, bool editMode);
     bool isLineEmpty(int index);
 
     std::vector<double>* _deltaTimes = nullptr;
