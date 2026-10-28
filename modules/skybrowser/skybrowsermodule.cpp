@@ -162,6 +162,18 @@ namespace {
         }
     };
 
+    constexpr StringPropertyInfo BrowserUrlInfo = {
+        .identifier = "WwtBrowserUrl",
+        .name = "AAS WorldWide Telescope Browser URL",
+        .description = "The URL of the AAS WorldWide Telescope wrapper page that is "
+            "loaded into the SkyBrowser instances.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = "https://wwt.openspaceproject.com/2/openspace/"
+        }
+    };
+
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         std::optional<bool> allowCameraRotation [[codegen::Info(AllowRotationInfo)]];
 
@@ -181,11 +193,13 @@ namespace {
             [[codegen::Info(SpaceCraftTimeInfo)]];
 
         std::optional<std::string> wwtImageCollectionUrl
-            [[codegen::Info(SpaceCraftTimeInfo)]];
+            [[codegen::Info(ImageCollectionInfo)]];
 
-        // How often the SkyBrowser module should send updates to the UI.
-        // Set in milliseconds, so for example a value of 100 will result in
-        //  an update sent every 0.1 second (10 updates per second).
+        std::optional<std::string> wwtBrowserUrl [[codegen::Info(BrowserUrlInfo)]];
+
+        // How often the SkyBrowser module should send updates to the UI. Set in
+        // milliseconds, so for example a value of 100 will result in an update sent every
+        // 0.1 second (10 updates per second).
         std::optional<int> updateInterval;
     };
 } // namespace
@@ -208,6 +222,7 @@ SkyBrowserModule::SkyBrowserModule()
     , _synchronizeAim(SynchronizeAimInfo)
     , _spaceCraftAnimationTime(SpaceCraftTimeInfo)
     , _wwtImageCollectionUrl(ImageCollectionInfo)
+    , _wwtBrowserUrl(BrowserUrlInfo)
 {
     addProperty(_allowCameraRotation);
     addProperty(_cameraRotationSpeed);
@@ -217,6 +232,7 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_inverseZoomDirection);
     addProperty(_spaceCraftAnimationTime);
     addProperty(_wwtImageCollectionUrl);
+    addProperty(_wwtBrowserUrl);
     addProperty(_synchronizeAim);
 
     // Set callback functions
@@ -283,6 +299,7 @@ void SkyBrowserModule::internalInitialize(const Dictionary& dict) {
     _browserAnimationSpeed = p.browserSpeed.value_or(_browserAnimationSpeed);
     _inverseZoomDirection = p.inverseZoomDirection.value_or(_inverseZoomDirection);
     _wwtImageCollectionUrl = p.wwtImageCollectionUrl.value_or(_wwtImageCollectionUrl);
+    _wwtBrowserUrl = p.wwtBrowserUrl.value_or(_wwtBrowserUrl);
     _synchronizeAim = p.synchronizeAim.value_or(_synchronizeAim);
     _hideTargetsBrowsersWithGui = p.hideTargetsBrowsersGui.value_or(
         _hideTargetsBrowsersWithGui
@@ -502,6 +519,10 @@ double SkyBrowserModule::spaceCraftAnimationTime() const {
 
 std::string SkyBrowserModule::wwtImageCollectionUrl() const {
     return _wwtImageCollectionUrl;
+}
+
+std::string SkyBrowserModule::wwtBrowserUrl() const {
+    return _wwtBrowserUrl;
 }
 
 void SkyBrowserModule::setSelectedBrowser(std::string_view id) {

@@ -29,7 +29,14 @@
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/misc/assert.h>
+#include <string_view>
+
+namespace {
+    constexpr std::string_view _loggerCat = "BrowserClient";
+} // namespace
 
 namespace openspace {
 
@@ -112,6 +119,23 @@ void BrowserClient::LoadHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser,
     }
 }
 
+void BrowserClient::LoadHandler::OnLoadError(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
+                                             ErrorCode errorCode,
+                                             const CefString& errorText,
+                                             const CefString& failedUrl)
+{
+    // The loading might be aborted which we don't want to log as a warning since it
+    // happens naturally at statup
+    if (errorCode == ERR_ABORTED) {
+        return;
+    }
+
+    LWARNING(std::format(
+        "CEF load error ({}): {} for '{}'",
+        static_cast<int>(errorCode), errorText.ToString(), failedUrl.ToString()
+    ));
+}
+
 bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle,
                                                    cef_cursor_type_t type,
                                                    const CefCursorInfo&)
@@ -170,6 +194,32 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCur
             break;
     }
     global::windowDelegate->setMouseCursor(newCursor);
+    return false;
+}
+
+bool BrowserClient::DisplayHandler::OnConsoleMessage(CefRefPtr<CefBrowser>,
+                                                     cef_log_severity_t level,
+                                                     const CefString& message,
+                                                     const CefString& source, int line)
+{
+    const std::string msg = std::format(
+        "CEF console ({}:{}): {}", source.ToString(), line, message.ToString()
+    );
+    switch (level) {
+        case LOGSEVERITY_ERROR:
+        case LOGSEVERITY_FATAL:
+            LERROR(msg);
+            break;
+        case LOGSEVERITY_WARNING:
+            LWARNING(msg);
+            break;
+        case LOGSEVERITY_INFO:
+            LINFO(msg);
+            break;
+        default:
+            LDEBUG(msg);
+            break;
+    }
     return false;
 }
 

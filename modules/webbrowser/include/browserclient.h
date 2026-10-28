@@ -52,10 +52,10 @@ public:
     };
 
     class DisplayHandler : public CefDisplayHandler {
-        bool OnCursorChange(CefRefPtr<CefBrowser>,
-            CefCursorHandle,
-            cef_cursor_type_t type,
-            const CefCursorInfo&) override;
+        bool OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle,
+            cef_cursor_type_t type, const CefCursorInfo&) override;
+        bool OnConsoleMessage(CefRefPtr<CefBrowser>, cef_log_severity_t level,
+            const CefString& message, const CefString& source, int line) override;
         IMPLEMENT_REFCOUNTING(DisplayHandler);
     };
 
@@ -73,6 +73,8 @@ public:
 
     class LoadHandler : public CefLoadHandler {
         void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame>, int) override;
+        void OnLoadError(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, ErrorCode errorCode,
+            const CefString& errorText, const CefString& failedUrl) override;
 
         IMPLEMENT_REFCOUNTING(LoadHandler);
     };
