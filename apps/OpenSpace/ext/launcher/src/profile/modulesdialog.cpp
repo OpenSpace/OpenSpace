@@ -302,9 +302,6 @@ void ModulesDialog::transitionToEditMode() {
     _buttonCancel->setDisabled(true);
     _buttonBox->setDisabled(true);
 
-    _moduleLabel->setText("<font color='black'>Module</font>");
-    _loadedLabel->setText("<font color='black'>Command if Module is Loaded</font>");
-    _notLoadedLabel->setText("<font color='black'>Command if Module is NOT Loaded</font>");
     editBoxDisabled(false);
 }
 
@@ -317,11 +314,6 @@ void ModulesDialog::transitionFromEditMode() {
     _buttonBox->setDisabled(false);
 
     editBoxDisabled(true);
-    _moduleLabel->setText("<font color='light gray'>Module</font>");
-    _loadedLabel->setText("<font color='light gray'>Command if Module is Loaded</font>");
-    _notLoadedLabel->setText(
-        "<font color='light gray'>Command if Module is NOT Loaded</font>"
-    );
 }
 
 void ModulesDialog::editBoxDisabled(bool disabled) {
