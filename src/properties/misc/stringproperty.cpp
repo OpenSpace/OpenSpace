@@ -69,6 +69,7 @@ nlohmann::json StringProperty::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": { "type": "string" }
           },
           "additionalProperties": false,

@@ -108,6 +108,10 @@ Schema PropertyTreeTopic::Schema() {
                       "type": "string",
                       "description": "The URI of the property this value corresponds to"
                     },
+                    "isEnabled": {
+                      "type": "boolean",
+                      "description": "Whether the property is enabled. Only sent for enablable properties"
+                    },
                     "type": { "const": "value" }
                   },
                   "additionalProperties": false,
