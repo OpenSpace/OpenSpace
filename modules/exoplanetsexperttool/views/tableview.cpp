@@ -293,16 +293,10 @@ void TableView::renderTable(const std::string& tableId, std::vector<size_t>& dat
 
                             ImGui::Separator();
 
-                            ImGui::Text(item.referenceName.c_str());
-                            ImGui::SameLine();
-
-                            if (ImGui::Button("Link (Chrome)")) {
-                                system(std::format("start chrome.exe {}", item.referenceUrl).c_str());
-                            }
-                            ImGui::SameLine();
-                            if (ImGui::Button("Link (Firefox)")) {
-                                system(std::format("start firefox {}", item.referenceUrl).c_str());
-                            }
+                            ImGui::TextLinkOpenURL(
+                                item.referenceName.c_str(),
+                                item.referenceUrl.c_str()
+                            );
 
                             ImGui::Separator();
                             if (!_dataViewer.dataMapping().hostName.empty() &&
