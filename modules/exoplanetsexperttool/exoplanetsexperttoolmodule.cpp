@@ -32,6 +32,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/logging/logmanager.h>
 #include <openspace/util/factorymanager.h>
 #include <string_view>
@@ -246,6 +247,12 @@ bool ExoplanetsExpertToolModule::showInfoWindowAtStartup() const {
     return _showInfoWindowAtStartup;
 }
 
+std::filesystem::path ExoplanetsExpertToolModule::computedColumnHistoryFile() const {
+    return absPath(
+        "${MODULE_EXOPLANETSEXPERTTOOL}/cache/computed_columns_history.json"
+    );
+}
+
 std::filesystem::path ExoplanetsExpertToolModule::dataConfigFile() const {
     return std::filesystem::path(_dataConfigFile.value());
 }
@@ -369,6 +376,10 @@ void ExoplanetsExpertToolModule::decode(SyncBuffer* syncBuffer) {
 }
 
 void ExoplanetsExpertToolModule::internalInitialize(const Dictionary& dict) {
+    std::filesystem::create_directories(
+        computedColumnHistoryFile().parent_path()
+    );
+
     const Parameters p = codegen::bake<Parameters>(dict);
 
     if (p.dataConfigFile.has_value()) {

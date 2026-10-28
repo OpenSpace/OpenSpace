@@ -589,12 +589,6 @@ std::filesystem::path DataViewer::currentDataFile() const {
     return _dataSettings.dataFile;
 }
 
-std::filesystem::path DataViewer::computedColumnHistoryFile() const {
-    auto module = global::moduleEngine->module<ExoplanetsExpertToolModule>();
-    const std::filesystem::path settingsFile = absPath(module->dataConfigFile());
-    return settingsFile.parent_path() / "computed_columns_history.json";
-}
-
 std::variant<const char*, float> DataViewer::columnValue(const ColumnKey& key,
                                                          const ExoplanetItem& item) const
 {

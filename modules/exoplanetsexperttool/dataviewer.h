@@ -65,7 +65,6 @@ public:
     // Accessors and functions that are needed for the other views
 
     std::filesystem::path currentDataFile() const;
-    std::filesystem::path computedColumnHistoryFile() const;
 
     bool isNumericColumn(size_t index) const;
     bool isNumericColumn(const ColumnKey& key) const;

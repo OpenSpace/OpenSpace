@@ -25,10 +25,13 @@
 #include <modules/exoplanetsexperttool/views/computecolumnsview.h>
 
 #include <modules/exoplanetsexperttool/dataviewer.h>
+#include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 #include <modules/exoplanetsexperttool/util/columnfilter.h>
 #include <modules/exoplanetsexperttool/util/expressionparser.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/json.h>
 #include <openspace/util/distanceconstants.h>
 #include <algorithm>
@@ -85,7 +88,8 @@ std::string formatNumericConstant(double value) {
 
 ComputeColumnsView::ComputeColumnsView(DataViewer& dataViewer)
     : _dataViewer(dataViewer)
-    , _historyFile(dataViewer.computedColumnHistoryFile())
+    , _historyFile(global::moduleEngine->module<ExoplanetsExpertToolModule>()
+        ->computedColumnHistoryFile())
 {
     loadHistory();
 }
@@ -160,6 +164,8 @@ void ComputeColumnsView::saveHistory() const {
             });
         }
     }
+
+    std::filesystem::create_directories(_historyFile.parent_path());
 
     std::ofstream file(_historyFile, std::ofstream::trunc);
     if (file.good()) {

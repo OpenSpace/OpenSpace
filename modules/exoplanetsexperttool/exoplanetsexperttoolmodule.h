@@ -65,6 +65,7 @@ public:
     bool enabled() const;
     bool showInfoWindowAtStartup() const;
     std::filesystem::path dataConfigFile() const;
+    std::filesystem::path computedColumnHistoryFile() const;
 
     GlyphRenderData glyphRenderData() const;
 
