@@ -41,8 +41,6 @@
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/updatestructures.h>
-
-
 #include <optional>
 #include <string_view>
 
@@ -128,13 +126,6 @@ namespace {
         .defaults = {
             .value = false
         }
-    };
-
-    const PropertyOwner::PropertyOwnerInfo StarGlyphInfo = {
-        "StarGlyph",
-        "Star Glyph",
-        "Controls properties for the part for the glyph that are related to the star "
-        "itself, rather than individual planets."
     };
 
     constexpr BoolPropertyInfo ShowStarLineInfo = {
@@ -229,7 +220,7 @@ namespace {
         struct StarLine {
             std::optional<bool> enabled [[codegen::Info(ShowStarLineInfo)]];
 
-            std::optional<glm::vec4> color
+            std::optional<glm::vec4> lineColor
                 [[codegen::Info(StarLineColorInfo), codegen::color()]];
 
             std::optional<float> lineWidth
@@ -334,7 +325,7 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(const Dictionary& d
                                             auto& properties)
     {
         properties.enabled = params.enabled.value_or(properties.enabled);
-        properties.color = params.color.value_or(properties.color);
+        properties.color = params.lineColor.value_or(properties.color);
         properties.lineWidth = params.lineWidth.value_or(properties.lineWidth);
         properties.lineLength = params.lineLength.value_or(properties.lineLength);
     };

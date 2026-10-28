@@ -108,6 +108,10 @@ void GlyphHandler::initializeRenderables() {
     renderable.setValue("UseFixedWidth", false);
     renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
 
+    Dictionary starRotationAxis;
+    starRotationAxis.setValue("LineColor", glm::dvec4(1.0, 1.0, 1.0, 0.5));
+    renderable.setValue("StarRotationAxis", starRotationAxis);
+
     Dictionary node;
     node.setValue("Identifier", std::string(GlyphCloudIdentifier));
     node.setValue("Renderable", renderable);
