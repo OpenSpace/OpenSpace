@@ -137,17 +137,22 @@ void NavigationHandler::setCamera(Camera* camera) {
 }
 
 void NavigationHandler::setNavigationStateNextFrame(const NavigationState& state,
-                                                    bool useTimeStamp)
+                                                    bool useTimeStamp,
+                                OrbitalNavigator::IsCameraInteraction isCameraInteraction)
 {
     _pendingState = state;
+    _pendingStateIsCameraInteraction = isCameraInteraction;
 
     if (useTimeStamp && state.timestamp.has_value()) {
         global::timeManager->setTimeNextFrame(Time(*state.timestamp));
     }
 }
 
-void NavigationHandler::setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec) {
+void NavigationHandler::setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec,
+                                OrbitalNavigator::IsCameraInteraction isCameraInteraction)
+{
     _pendingState = std::move(spec);
+    _pendingStateIsCameraInteraction = isCameraInteraction;
 }
 
 OrbitalNavigator& NavigationHandler::orbitalNavigator() {
@@ -254,7 +259,7 @@ void NavigationHandler::applyPendingState() {
     std::variant<NodeCameraStateSpec, NavigationState> pending = *_pendingState;
     if (std::holds_alternative<NavigationState>(pending)) {
         const NavigationState ns = std::get<NavigationState>(pending);
-        _orbitalNavigator.setAnchorNode(ns.anchor);
+        _orbitalNavigator.setAnchorNode(ns.anchor, _pendingStateIsCameraInteraction);
         _orbitalNavigator.setAimNode(ns.aim);
         _camera->setPose(ns.cameraPose());
     }
@@ -262,13 +267,17 @@ void NavigationHandler::applyPendingState() {
         const NodeCameraStateSpec spec = std::get<NodeCameraStateSpec>(pending);
         const Waypoint wp = computeWaypointFromNodeInfo(spec);
 
-        _orbitalNavigator.setAnchorNode(wp.nodeIdentifier());
+        _orbitalNavigator.setAnchorNode(
+            wp.nodeIdentifier(),
+            _pendingStateIsCameraInteraction
+        );
         _orbitalNavigator.setAimNode("");
         _camera->setPose(wp.pose());
     }
 
     resetNavigationUpdateVariables();
     _pendingState.reset();
+    _pendingStateIsCameraInteraction = OrbitalNavigator::IsCameraInteraction::Yes;
 }
 
 void NavigationHandler::updateCameraTransitions() {
