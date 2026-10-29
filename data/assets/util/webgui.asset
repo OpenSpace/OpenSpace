@@ -17,7 +17,7 @@ local frontend = asset.resource({
 })
 
 
-local showcomposerHash = "966fb2c3f4b58ecf056916a35bbc076dcd383bc1"
+local showcomposerHash = "59ae1a70955d060725453000f29c17453c5872a1"
 local showcomposerFile = "showcomposer.zip"
 
 local showcomposer = asset.resource({
