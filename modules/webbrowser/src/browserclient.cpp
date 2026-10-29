@@ -91,6 +91,10 @@ CefRefPtr<CefFocusHandler> BrowserClient::GetFocusHandler() {
     return _focusHandler;
 }
 
+void BrowserClient::setZoomLevel(double zoomLevel) {
+    _loadHandler->setZoomLevel(zoomLevel);
+}
+
 bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
                                                          CefRefPtr<CefFrame>,
                                                          CefRefPtr<CefContextMenuParams>,
@@ -108,6 +112,18 @@ void BrowserClient::FocusHandler::OnTakeFocus(CefRefPtr<CefBrowser>, bool) {
 bool BrowserClient::FocusHandler::OnSetFocus(CefRefPtr<CefBrowser>, FocusSource) {
     _hasFocus = true;
     return false;
+}
+
+void BrowserClient::LoadHandler::setZoomLevel(double zoomLevel) {
+    _zoomLevel = zoomLevel;
+}
+
+void BrowserClient::LoadHandler::OnLoadStart(CefRefPtr<CefBrowser> browser,
+                                             CefRefPtr<CefFrame> frame, TransitionType)
+{
+    if (frame->IsMain()) {
+        browser->GetHost()->SetZoomLevel(_zoomLevel);
+    }
 }
 
 void BrowserClient::LoadHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser,

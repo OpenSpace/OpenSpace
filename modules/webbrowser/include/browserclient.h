@@ -72,9 +72,18 @@ public:
     };
 
     class LoadHandler : public CefLoadHandler {
+    public:
+        void setZoomLevel(double zoomLevel);
+
+    private:
+        // CEF resets the zoom level when a navigation commits, so it is reapplied here
+        void OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+            TransitionType) override;
         void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame>, int) override;
         void OnLoadError(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, ErrorCode errorCode,
             const CefString& errorText, const CefString& failedUrl) override;
+
+        double _zoomLevel = 1.0;
 
         IMPLEMENT_REFCOUNTING(LoadHandler);
     };
@@ -90,6 +99,8 @@ public:
     CefRefPtr<CefLoadHandler> GetLoadHandler() override;
     CefRefPtr<CefFocusHandler> GetFocusHandler() override;
 
+    void setZoomLevel(double zoomLevel);
+
 protected:
     static bool _hasFocus;
 
@@ -101,8 +112,8 @@ private:
     CefRefPtr<CefContextMenuHandler> _contextMenuHandler;
     CefRefPtr<CefDisplayHandler> _displayHandler;
 
-    // Try to fix the focus bug
-    CefRefPtr<CefLoadHandler> _loadHandler;
+    // Try to fix the focus bug and keep the zoom level across navigations
+    CefRefPtr<LoadHandler> _loadHandler;
     CefRefPtr<CefFocusHandler> _focusHandler;
 
     IMPLEMENT_REFCOUNTING(BrowserClient);
