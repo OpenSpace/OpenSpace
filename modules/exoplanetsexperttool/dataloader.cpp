@@ -39,8 +39,9 @@
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/progressbar.h>
 
-#include <cmath>
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <fstream>
 #include <limits>
 #include <set>
@@ -703,6 +704,8 @@ void DataLoader::saveData(const std::filesystem::path& targetPath,
                           const std::vector<ExoplanetItem>& allItems,
                           const std::vector<size_t>& indices,
                           const std::vector<ColumnKey>& columns,
+                          const std::map<ColumnKey, ComputedColumn>& computedColumns,
+                          bool includeComputedColumns,
                           bool includeCartesianPosition, bool useParsec)
 {
     // TODO: verify csv ending
@@ -718,16 +721,32 @@ void DataLoader::saveData(const std::filesystem::path& targetPath,
         f << "x,y,z,";
     }
 
-    if (!columns.empty()) {
-        f << join(columns, ",") << std::endl;
+    const bool includeAllDataColumns = columns.empty();
+    std::vector<ColumnKey> columnsToSave = columns;
+    if (!includeComputedColumns) {
+        std::erase_if(columnsToSave, [&computedColumns](const ColumnKey& key) {
+            return computedColumns.contains(key);
+        });
     }
-    else {
-        std::string line;
-        for (auto [key, _] : allItems.front().dataColumns) {
-            line += key + ",";
+
+    if (includeAllDataColumns) {
+        columnsToSave.reserve(allItems.front().dataColumns.size());
+        for (const auto& [key, _] : allItems.front().dataColumns) {
+            columnsToSave.push_back(key);
         }
-        f << line.substr(0, line.size() - 1) << std::endl;
     }
+
+    if (includeComputedColumns) {
+        for (const auto& [key, _] : computedColumns) {
+            if (std::find(columnsToSave.begin(), columnsToSave.end(), key) ==
+                columnsToSave.end())
+            {
+                columnsToSave.push_back(key);
+            }
+        }
+    }
+
+    f << join(columnsToSave, ",") << std::endl;
 
     for (const size_t& i : indices) {
         const ExoplanetItem& item = allItems[i];
@@ -742,18 +761,32 @@ void DataLoader::saveData(const std::filesystem::path& targetPath,
             f << ",,,"; // no position exists
         }
 
-        std::string line;
-        for (auto [_, value] : item.dataColumns) {
-            if (std::holds_alternative<float>(value)) {
-                float v = std::get<float>(value);
-                line += std::isnan(v) ? "" : to_string(v);
+        for (size_t columnIndex = 0; columnIndex < columnsToSave.size(); columnIndex++) {
+            if (columnIndex > 0) {
+                f << ",";
+            }
+
+            const ColumnKey& key = columnsToSave[columnIndex];
+            if (includeComputedColumns && computedColumns.contains(key)) {
+                const float value = computedColumns.at(key).values.at(i);
+                if (!std::isnan(value)) {
+                    f << to_string(value);
+                }
             }
             else {
-                line += std::get<std::string>(value);
+                const std::variant<std::string, float>& value = item.dataColumns.at(key);
+                if (std::holds_alternative<float>(value)) {
+                    const float floatValue = std::get<float>(value);
+                    if (!std::isnan(floatValue)) {
+                        f << to_string(floatValue);
+                    }
+                }
+                else {
+                    f << std::get<std::string>(value);
+                }
             }
-            line += ",";
         }
-        f << line.substr(0, line.size() - 1) << std::endl;
+        f << std::endl;
     }
 
     // TODO: handle indices empty

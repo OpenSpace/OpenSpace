@@ -1826,12 +1826,19 @@ void DataViewer::renderFileMenu() {
                 IM_ARRAYSIZE(dir)
             );
 
-            static bool incudeAllColumns = true;
-            ImGui::Checkbox("Include all columns", &incudeAllColumns);
+            static bool includeComputedColumns = false;
+            ImGui::Checkbox("Include computed columns", &includeComputedColumns);
             ImGui::SameLine();
             view::helper::renderHelpMarker(
-                "If checked, include all data column in the original data file. "
-                "Otherwise, only include the selected columns."
+                "If checked, include all computed columns in the saved file."
+            );
+
+            static bool includeAllColumns = true;
+            ImGui::Checkbox("Include all columns", &includeAllColumns);
+            ImGui::SameLine();
+            view::helper::renderHelpMarker(
+                "If checked, include all data columns in the original data file. "
+                "Otherwise, only include the selected columns (shown in table)."
             );
 
             static bool savePosition = true;
@@ -1847,12 +1854,24 @@ void DataViewer::renderFileMenu() {
             ImGui::SameLine();
             view::helper::renderHelpMarker("Otherwise, the position is saved in meters.");
 
-            // TODO: Also add option to save filtering separately
+            std::vector<ColumnKey> columnsToSave;
+            if (!includeAllColumns) {
+                for (const ColumnKey& key : _columnSelectionView.orderedSelectedColumns()) {
+                    if (!_computedColumns.contains(key)) {
+                        columnsToSave.push_back(key);
+                    }
+                }
+            }
+
+            const size_t numberOfColumns =
+                (includeAllColumns ? _data.front().dataColumns.size() :
+                    columnsToSave.size()) +
+                (includeComputedColumns ? _computedColumns.size() : 0);
 
             view::helper::renderDescriptiveText(std::format(
                 "Will save {} rows with {} columns",
                 _filteredData.size(),
-                incudeAllColumns ? _data.front().dataColumns.size() :_columns.size()
+                numberOfColumns
             ).c_str());
 
             ImGui::Separator();
@@ -1865,11 +1884,18 @@ void DataViewer::renderFileMenu() {
                 showSaveCsvModal = false;
             }
             ImGui::SameLine();
+
             // Save
-            if (ImGui::Button("Save") ||
-                ImGui::IsKeyPressed(ImGuiKey_Enter))
-            {
-                std::filesystem::path fileName = std::filesystem::path(name);
+            std::string trimmedName = std::string(name);
+            trimWhitespace(trimmedName);
+            bool saveDisabled = trimmedName.empty();
+
+            if (saveDisabled) {
+                ImGui::BeginDisabled();
+            }
+
+            if (ImGui::Button("Save") || ImGui::IsKeyPressed(ImGuiKey_Enter)) {
+                std::filesystem::path fileName = std::filesystem::path(trimmedName);
                 std::filesystem::path directory = std::filesystem::path(dir);
                 if (directory.empty()) {
                     directory = std::filesystem::path(defaultDir);
@@ -1883,7 +1909,9 @@ void DataViewer::renderFileMenu() {
                     path,
                     _data,
                     _filteredData,
-                    !incudeAllColumns ? _columns : std::vector<ColumnKey>(),
+                    columnsToSave,
+                    _computedColumns,
+                    includeComputedColumns,
                     savePosition,
                     useParsec
                 );
@@ -1891,6 +1919,11 @@ void DataViewer::renderFileMenu() {
                 ImGui::CloseCurrentPopup();
                 showSaveCsvModal = false;
             }
+            if (saveDisabled) {
+                ImGui::SetItemTooltip("Enter a file name");
+                ImGui::EndDisabled();
+            }
+
             ImGui::SetItemDefaultFocus();
 
             ImGui::EndPopup();
