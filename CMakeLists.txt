@@ -35,7 +35,7 @@ set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 set(OPENSPACE_RELEASE_BUILD ON)
 set(OPENSPACE_VERSION_MAJOR 0)
 set(OPENSPACE_VERSION_MINOR 22)
-set(OPENSPACE_VERSION_PATCH 0)
+set(OPENSPACE_VERSION_PATCH 1)
 
 # Optionally disable vcpkg to prevent dependency conflicts
 set(DISABLE_VCPKG OFF CACHE BOOL "Disable the use of vcpkg libs for Windows builds")
