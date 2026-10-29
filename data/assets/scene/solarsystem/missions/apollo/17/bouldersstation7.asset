@@ -17,7 +17,6 @@ local Station7Boulder = {
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moonAsset.Moon.Identifier,
       Longitude = 30.8165882,
       Latitude = 20.2908556,
       Altitude = -2593.5,

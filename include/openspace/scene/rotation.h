@@ -36,6 +36,7 @@ namespace openspace {
 
 class Dictionary;
 struct Documentation;
+class SceneGraphNode;
 struct UpdateData;
 
 /**
@@ -64,6 +65,17 @@ public:
     virtual void initialize();
 
     virtual void update(const UpdateData& data);
+
+    /**
+     * Sets the scene graph node that owns this rotation. This is called by the
+     * SceneGraphNode after it has created the rotation. Rotations that need to reference
+     * their owner node can override this method to store the reference. The default
+     * implementation does nothing.
+     *
+     * \param node The scene graph node that owns this rotation
+     */
+    virtual void setOwnerNode(SceneGraphNode* node);
+
     const glm::dmat3& matrix() const;
     virtual glm::dmat3 matrix(const UpdateData& time) const = 0;
 

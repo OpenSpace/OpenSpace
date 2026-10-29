@@ -495,6 +495,7 @@ mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             result->_transform.translation = Translation::createFromDictionary(
                 *p.transform->translation
             );
+            result->_transform.translation->setOwnerNode(result.get());
 
             LDEBUG(std::format(
                 "Successfully created ephemeris for '{}'", result->identifier()
@@ -505,6 +506,7 @@ mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             result->_transform.rotation = Rotation::createFromDictionary(
                 *p.transform->rotation
             );
+            result->_transform.rotation->setOwnerNode(result.get());
 
             LDEBUG(std::format(
                 "Successfully created rotation for '{}'", result->identifier()
