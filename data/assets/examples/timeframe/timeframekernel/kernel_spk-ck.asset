@@ -18,7 +18,7 @@ local Node = {
   Identifier = "TimeFrameKernel_Example_Combined_SPK-CK",
   TimeFrame = {
     Type = "TimeFrameKernel",
-    Object = "JUICE"
+    Object = "JUICE",
     Reference = "-28002"
   },
   Renderable = {
