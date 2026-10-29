@@ -48,6 +48,28 @@ class TestResult:
   commit: str = ""
   error: str = ""
 
+def test_identifier(path: Path) -> tuple[str, str]:
+  """
+  Returns the group and the name of the test at `path`, under which its results are
+  submitted to the regression server. The file itself is not read
+  """
+  # Get the testname by removing everything before (and including) "visualtests" and
+  # also removing the extension. If the file is not in a `visualtests` folder (for
+  # example when using --attach with a local test file), use the full file path.
+  parts = path.with_suffix("").parts
+  if "visualtests" in parts:
+    vis_idx = parts.index("visualtests")
+    sub_parts = parts[vis_idx + 1:]
+  else:
+    absolute_path = path.with_suffix("").resolve()
+    try:
+      sub_parts = absolute_path.relative_to(Path.cwd().resolve()).parts
+    except ValueError:
+      sub_parts = (absolute_path.parent.name, absolute_path.name)
+
+  # The last part is the name of test, all others are combined to make the grouping
+  return "-".join(sub_parts[:-1]), sub_parts[-1]
+
 class Test:
   """
   This class represents an entire test run, consisting of multiple Instructions and a
@@ -94,23 +116,7 @@ class Test:
       raise Exception(f"Error loading test {path}: Only a single screenshot supported")
 
 
-    # Get the testname by removing everything before (and including) "visualtests" and
-    # also removing the extension. If the file is not in a `visualtests` folder (for
-    # example when using --attach with a local test file), use the full file path.
-    parts = path.with_suffix("").parts
-    if "visualtests" in parts:
-      vis_idx = parts.index("visualtests")
-      sub_parts = parts[vis_idx + 1:]
-    else:
-      absolute_path = path.with_suffix("").resolve()
-      try:
-        sub_parts = absolute_path.relative_to(Path.cwd().resolve()).parts
-      except ValueError:
-        sub_parts = (absolute_path.parent.name, absolute_path.name)
-
-    # The last part is the name of test, all others are combined to make the grouping
-    self.group = "-".join(sub_parts[:-1])
-    self.name = sub_parts[-1]
+    self.group, self.name = test_identifier(path)
 
 
   async def run(self, openspace: Any, os_api: Any) -> None:

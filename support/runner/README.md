@@ -4,6 +4,7 @@ The _Runner_ is a Python script that will execute and possibly submit test resul
 | Parameter | Description |
 | --------- | ----------- |
 | `--test` | A comma-separated list of the group/name combination of the tests that should be run. The group of a test is all of the folders relative to the `visualtests` server concatenated with the name of the test being the filename. For example a test in `visualtests/mars/insight/landing.ostest` would have the group "mars/insight" and the name "landing". |
+| `--test-id` | A comma-separated list of tests identified by the group and name under which their results are submitted to the regression server, for example `mars-insight/landing` for the test in `visualtests/mars/insight/landing.ostest`. This is used by the regression server to rerun a single test and cannot be combined with `--test` or `--attach`. |
 | `--overwrite` | This path can be provided to store commonly used files that can be useful to keep between test runs. Right now, this is only used for the Sync folder and the MRF cache used by OpenSpace. |
 
 Example: `python main.py --test default/earth,rosetta/model default --overwrite C:/Development/TestCache`

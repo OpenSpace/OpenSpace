@@ -32,7 +32,7 @@ import shutil
 import time
 from pathlib import Path
 from testsuite.openspace import write_configuration_overwrite, run_single_test
-from testsuite.test import Test, TestResult
+from testsuite.test import Test, TestResult, test_identifier
 
 
 
@@ -78,6 +78,28 @@ def invalid_test_message(path: Path) -> str | None:
   return (
     invalid_name_message("group", test.group) or invalid_name_message("name", test.name)
   )
+
+
+
+def find_tests_by_id(test_folder: Path, ids: list[str]) -> list[Path]:
+  """
+  Returns the paths of the tests in the `test_folder` whose `group/name` combination, as
+  it is submitted to the regression server, is one of the provided `ids`. Raises a
+  `SystemExit` if one of the ids does not match any test
+  """
+  wanted = set(ids)
+  files = []
+  found = set()
+  for path in sorted(test_folder.rglob("*.ostest")):
+    group, name = test_identifier(path)
+    if f"{group}/{name}" in wanted:
+      files.append(path)
+      found.add(f"{group}/{name}")
+
+  missing = wanted - found
+  if missing:
+    raise SystemExit(f"Could not find tests with the ids: {sorted(missing)}")
+  return files
 
 
 
@@ -156,6 +178,16 @@ if __name__ == "__main__":
     required=False
   )
   parser.add_argument(
+    "--test-id",
+    dest="test_id",
+    type=str,
+    help="A comma-separated list of specific tests that should be run, identified by the "
+      "group and name under which their results are submitted to the regression server. "
+      "For example, the test file `mars/insight/landing.ostest` has the id "
+      "`mars-insight/landing`. This argument cannot be combined with --test or --attach.",
+    required=False
+  )
+  parser.add_argument(
     "-o", "--overwrite",
     dest="overwrite_path",
     type=str,
@@ -177,6 +209,9 @@ if __name__ == "__main__":
     default=False
   )
   args = parser.parse_args()
+
+  if args.test_id is not None and (args.test is not None or args.attach):
+    raise SystemExit("--test-id cannot be combined with --test or --attach")
 
   # Finding the root OpenSpace folder
   root_dir = Path(__file__).resolve().parents[2]
@@ -259,7 +294,11 @@ if __name__ == "__main__":
             store_image(result, file)
 
   else:
-    if args.test is None:
+    if args.test_id is not None:
+      ids = [t.strip() for t in args.test_id.split(",")]
+      print(f"Running tests: {ids}")
+      files = find_tests_by_id(root_dir / "visualtests", ids)
+    elif args.test is None:
       print("Running all tests in OpenSpace folder")
       files = list((root_dir / "visualtests").rglob("*.ostest"))
     else:
