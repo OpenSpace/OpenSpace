@@ -546,9 +546,30 @@ endif()
 # directory it lives in becomes ${BASE}. Without it an installed OpenSpace cannot start
 install(FILES "${PROJECT_SOURCE_DIR}/openspace.cfg" DESTINATION .)
 
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/data/" DESTINATION data)
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/config/" DESTINATION config)
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/modules/" DESTINATION modules)
+# modules/ holds runtime content (shaders, Lua scripts, the webgui node binary, ...) but
+# is also the C++ source tree. Leave out everything only needed to build OpenSpace.
+# ".hglsl" shader includes are not matched by "*.h" because PATTERN matches the whole
+# file name
+set(OPENSPACE_INSTALL_SOURCE_EXCLUDES
+  PATTERN "*.cpp" EXCLUDE
+  PATTERN "*.cc" EXCLUDE
+  PATTERN "*.cxx" EXCLUDE
+  PATTERN "*.c" EXCLUDE
+  PATTERN "*.mm" EXCLUDE
+  PATTERN "*.h" EXCLUDE
+  PATTERN "*.hpp" EXCLUDE
+  PATTERN "*.inl" EXCLUDE
+  PATTERN "*.cmake" EXCLUDE
+  PATTERN "CMakeLists.txt" EXCLUDE
+  PATTERN ".git*" EXCLUDE
+  PATTERN ".clang-format" EXCLUDE
+  REGEX "/modules/[^/]+/(include|src|tests)$" EXCLUDE
+  REGEX "/modules/iswa/ext$" EXCLUDE
+)
+
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/data/" DESTINATION data ${OPENSPACE_INSTALL_SOURCE_EXCLUDES})
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/config/" DESTINATION config ${OPENSPACE_INSTALL_SOURCE_EXCLUDES})
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/modules/" DESTINATION modules ${OPENSPACE_INSTALL_SOURCE_EXCLUDES})
 
 if (UNIX AND OPENSPACE_MODULE_WEBGUI AND
     EXISTS "${PROJECT_SOURCE_DIR}/modules/webgui/ext/nodejs/node")
