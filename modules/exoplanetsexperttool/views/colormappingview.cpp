@@ -568,11 +568,12 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
         wasChanged = true;
     }
 
-    const bool isNumeric = _dataViewer.isNumericColumn(variable.column);
-
-    if (!isNumeric && variable.categories.empty()) {
+    if (!_dataViewer.isNumericColumn(variable.column) && variable.categories.empty()) {
         updateCategoriesForVariable(variable);
     }
+
+    bool numericColumnChanged = false;
+    bool isNumeric = _dataViewer.isNumericColumn(variable.column);
 
     ImGui::BeginGroup();
     {
@@ -597,6 +598,8 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
 
                 const ColumnKey& column = _dataViewer.columns()[i];
                 if (ImGui::Selectable(name, variable.column == column)) {
+                    numericColumnChanged =
+                        variable.column != column && _dataViewer.isNumericColumn(column);
                     variable.column = column;
                     if (!_dataViewer.isNumericColumn(column)) {
                         updateCategoriesForVariable(variable);
@@ -608,6 +611,8 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
             }
             ImGui::EndCombo();
         }
+
+        isNumeric = _dataViewer.isNumericColumn(variable.column);
 
         if (isNumeric) {
             ImGui::SetNextItemWidth(InputWidth);
@@ -636,6 +641,17 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
 
             const std::vector<ExoplanetItem>& data = _dataViewer.data();
 
+            if (numericColumnChanged) {
+                if (relevantSystem.empty()) {
+                    relevantIndices = _dataViewer.currentFiltering();
+                }
+                else {
+                    relevantIndices =
+                        _dataViewer.planetsForHost(std::string(relevantSystem));
+                }
+                updateMinMax = true;
+            }
+
             if (!relevantSystem.empty() && ImGui::SmallButton("Set from planets in system")) {
                 relevantIndices = _dataViewer.planetsForHost(std::string(relevantSystem));
                 updateMinMax = true;
@@ -654,6 +670,7 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
             if (updateMinMax && !relevantIndices.empty()) {
                 float newMin = std::numeric_limits<float>::max();
                 float newMax = std::numeric_limits<float>::lowest();
+                bool hasValue = false;
 
                 for (size_t i : relevantIndices) {
                     const ExoplanetItem& item = data[i];
@@ -668,11 +685,14 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
                     }
                     newMax = std::max(val, newMax);
                     newMin = std::min(val, newMin);
+                    hasValue = true;
                 }
 
-                variable.colorScaleMin = newMin;
-                variable.colorScaleMax = newMax;
-                wasChanged = true;
+                if (hasValue) {
+                    variable.colorScaleMin = newMin;
+                    variable.colorScaleMax = newMax;
+                    wasChanged = true;
+                }
             };
 
             // Logarithmic scaling toggle
