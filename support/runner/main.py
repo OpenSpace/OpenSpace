@@ -26,12 +26,13 @@ import argparse
 import datetime
 import json
 import os
+import re
 import requests
 import shutil
 import time
 from pathlib import Path
 from testsuite.openspace import write_configuration_overwrite, run_single_test
-from testsuite.test import TestResult
+from testsuite.test import Test, TestResult
 
 
 
@@ -40,37 +41,91 @@ from testsuite.test import TestResult
 # TODO: Instead of waiting a fixed amount of time when starting OpenSpace, we can listen
 #       to the finished loading event instead
 
+# The regression server only accepts group, test, and hardware names that start with a
+# letter or digit and only contain letters, digits, '.', '_', and '-'. Keep this in sync
+# with the `NamePattern` in the regression server's src/validation.ts
+NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+
+# Explanations for the errors that the regression server returns for a submission
+SUBMISSION_ERRORS = {
+  400: "The server rejected the values of the submission",
+  401: "The runner 'id' in the config.json is not accepted by the server",
+  409: "A test run with the same timestamp was already submitted for this test",
+  413: "The image or the log is too large",
+  429: "Too many failed attempts, the server is rejecting requests for a while"
+}
+
+def invalid_name_message(kind: str, value: str) -> str | None:
+  """
+  Returns a message describing why the `value` cannot be used as a name on the regression
+  server, or `None` if the name is valid
+  """
+  if NAME_PATTERN.match(value):
+    return None
+  return (
+    f"The {kind} '{value}' cannot be submitted to the regression server. Names must start "
+    "with a letter or digit and only contain letters, digits, '.', '_', and '-'"
+  )
+
+
+
+def invalid_test_message(path: Path) -> str | None:
+  """
+  Returns a message describing why the test at `path` cannot be submitted to the
+  regression server because of its group or name, or `None` if it can be submitted
+  """
+  test = Test(path)
+  return (
+    invalid_name_message("group", test.group) or invalid_name_message("name", test.name)
+  )
+
+
+
 def submit_image(result: TestResult, hardware: str, timestamp: str, file: str,
                  runner: str, url: str) -> None:
   """
   Submits a new candidate image to the provided URL. This function logs a method
   indicating whether the image submission succeeded
   """
-  with open(file, "rb") as f:
-    res = requests.post(
-      url,
-      data = {
-        "group": result.group,
-        "name": result.name,
-        "hardware": hardware,
-        "runnerID": runner,
-        "timestamp": timestamp,
-        "timing": result.timing,
-        "commitHash": result.commit
-      },
-      files = {
-        "file": f,
-        "log": result.error
-      }
-    )
+  try:
+    with open(file, "rb") as f:
+      res = requests.post(
+        url,
+        # The runner id is sent first, so that the server can reject an unknown runner
+        # before the image is uploaded
+        data = {
+          "runnerID": runner,
+          "group": result.group,
+          "name": result.name,
+          "hardware": hardware,
+          "timestamp": timestamp,
+          "timing": result.timing,
+          "commitHash": result.commit
+        },
+        files = {
+          "file": f,
+          "log": result.error
+        },
+        # Seconds to wait for the connection and for the server to process the image
+        timeout = (30, 600)
+      )
+  except requests.RequestException as e:
+    print(f"Image submission failed: {e}")
+    return
+
   if res.status_code == 200:
     print("Image submitted successfully")
     print(f"  Group: {result.group}")
     print(f"  Name: {result.name}")
     print(f"  Hardware: {hardware}")
   else:
-    print(f"Image submission failed with error {res.status_code}")
-    print(res.text)
+    try:
+      message = res.json().get("error", res.text)
+    except ValueError:
+      message = res.text
+    print(f"Image submission failed with error {res.status_code}: {message}")
+    if res.status_code in SUBMISSION_ERRORS:
+      print(f"  {SUBMISSION_ERRORS[res.status_code]}")
 
 
 
@@ -138,14 +193,19 @@ if __name__ == "__main__":
     with open("config.json") as f:
       config = json.load(f)
       url: str = config["url"]
-      submit_url = f"{url}/api/submit-test"
+      submit_url = f"{url.rstrip('/')}/api/submit-test"
       hardware = config["hardware"]
       runner_id = config["id"]
       per_profile_wait = config["per-profile-wait"]
     print(f"Submit URL: {submit_url}")
     print(f"Hardware: {hardware}")
-    print(f"ID: {runner_id}")
+    # The runner id is a secret, so only its beginning is shown to identify it
+    print(f"ID: {runner_id[:4]}{'*' * max(len(runner_id) - 4, 0)}")
     print(f"Per Profile wait: {per_profile_wait}")
+
+    message = invalid_name_message("hardware", hardware)
+    if message is not None:
+      raise SystemExit(message)
   else:
     print("No 'config.json' provided. Test results will be stored locally instead")
 
@@ -180,6 +240,11 @@ if __name__ == "__main__":
     if not path.is_file():
       raise SystemExit(f"Could not find test '{path}'")
 
+    if submit_images:
+      message = invalid_test_message(path)
+      if message is not None:
+        raise SystemExit(message)
+
     timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     try:
       result = run_single_test(path, None, {})
@@ -209,6 +274,11 @@ if __name__ == "__main__":
       timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
       try:
+        # Don't spend the time running a test whose results the server would reject
+        message = invalid_test_message(file) if submit_images else None
+        if message is not None:
+          print(f"Skipping test '{file}': {message}")
+          continue
         result = run_single_test(file, executable, per_profile_wait)
       except Exception as e:
         print(f"Test '{file}' failed with error: {e}")
