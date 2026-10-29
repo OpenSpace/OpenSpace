@@ -583,7 +583,13 @@ void main() {
   vec4 normalViewSpaceAndWaterReflectance = texture(mainNormalTexture, st);
   dvec4 normalViewSpace = vec4(normalViewSpaceAndWaterReflectance.xyz, 0.0);
   dvec4 normalWorldSpace = viewToWorldMatrix * normalViewSpace;
-  vec4 normal = vec4(inverseModelTransformMatrix * normalWorldSpace);
+  // Normals transform with the inverse transpose of the world-to-object matrix, which is
+  // the transpose of the model matrix. This is only different from transforming with the
+  // inverse model matrix if the model matrix has a non-uniform scale
+  vec4 normal = vec4(
+    transpose(dmat3(modelTransformMatrix)) * normalWorldSpace.xyz,
+    0.0
+  );
   normal.xyz = normalize(normal.xyz);
   normal.w = normalViewSpaceAndWaterReflectance.w;
 
