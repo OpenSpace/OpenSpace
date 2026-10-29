@@ -31,10 +31,12 @@ layout(location = 1) in float in_textureLayer;
 layout(location = 2) in float in_colorParameter;
 layout(location = 3) in float in_scalingParameter;
 layout(location = 4) in vec4 in_orientation; // quaternion
+layout(location = 5) in vec3 in_pointColor;
 
 out Data {
   flat float textureLayer;
   flat float colorParameter;
+  flat vec3 pointColor;
   flat float scalingParameter;
   flat vec4 orientation; // quaternion
 } out_data;
@@ -43,6 +45,7 @@ out Data {
 void main() {
   out_data.textureLayer = in_textureLayer;
   out_data.colorParameter = in_colorParameter;
+  out_data.pointColor = in_pointColor;
   out_data.scalingParameter = in_scalingParameter;
   out_data.orientation = in_orientation;
   gl_Position = vec4(in_position, 1.0);

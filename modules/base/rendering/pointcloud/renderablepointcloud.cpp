@@ -114,6 +114,15 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
+    constexpr StringPropertyInfo DataFilePropertyInfo = {
+        .identifier = "File",
+        .name = "Data file",
+        .description = "The path to the data file with the point positions (and "
+            "optionally color and size data). Changing this property at runtime reloads "
+            "the dataset from the new file.",
+        .visibility = Visibility::AdvancedUser
+    };
+
     constexpr StringPropertyInfo TextureModeInfo = {
         .identifier = "TextureMode",
         .name = "Texture mode",
@@ -518,6 +527,21 @@ namespace {
             std::optional<Dictionary> colorMapping
                 [[codegen::reference("core_colormappingcomponent")]];
 
+            // Settings for using per-point RGB colors, where each of the three color
+            // channels is read from a separate column in the dataset. When set, this
+            // takes priority over both the color map and the fixed color.
+            struct RGB {
+                // The name of the data column with the red color values (0 to 1)
+                std::optional<std::string> r;
+
+                // The name of the data column with the green color values (0 to 1)
+                std::optional<std::string> g;
+
+                // The name of the data column with the blue color values (0 to 1)
+                std::optional<std::string> b;
+            };
+            std::optional<RGB> rgb;
+
             std::optional<bool> enableOutline [[codegen::Info(EnableOutlineInfo)]];
 
             std::optional<glm::vec3> outlineColor
@@ -708,6 +732,7 @@ RenderablePointCloud::RenderablePointCloud(const Dictionary& dictionary)
     , _renderOption(OrientationRenderOptionInfo)
     , _nDataPoints(NumShownDataPointsInfo)
     , _hasOrientationData(HasOrientationDataInfo)
+    , _fileProperty(DataFilePropertyInfo)
 {
     ZoneScoped;
 
@@ -718,7 +743,10 @@ RenderablePointCloud::RenderablePointCloud(const Dictionary& dictionary)
     if (p.file.has_value()) {
         _hasDataFile = true;
         _dataFile = absPath(*p.file);
+        _fileProperty = _dataFile.string();
     }
+    _fileProperty.onChange([this]() { onFilePropertyChanged(); });
+    addProperty(_fileProperty);
 
     if (p.dataMapping.has_value()) {
         _dataMapping = dataloader::DataMapping::createFromDictionary(*p.dataMapping);
@@ -849,6 +877,20 @@ RenderablePointCloud::RenderablePointCloud(const Dictionary& dictionary)
         });
     }
 
+    if (p.coloring.has_value() && p.coloring->rgb.has_value()) {
+        const Parameters::ColorSettings::RGB& rgb = *p.coloring->rgb;
+        if (!rgb.r.has_value() || !rgb.g.has_value() || !rgb.b.has_value()) {
+            LWARNING(
+                "Coloring.RGB requires all of the R, G, and B column names to be "
+                "specified. Ignoring the per-point RGB color settings."
+            );
+        }
+        else {
+            _pointColorColumns = { *rgb.r, *rgb.g, *rgb.b };
+            _pointColorConfigured = true;
+        }
+    }
+
     _useCaching = p.useCaching.value_or(_useCaching);
 
     _skipFirstDataPoint = p.skipFirstDataPoint.value_or(_skipFirstDataPoint);
@@ -892,43 +934,127 @@ void RenderablePointCloud::initialize() {
     }
 
     if (_hasDataFile) {
-        if (_useCaching) {
-            _dataset = dataloader::data::loadFileWithCache(_dataFile, _dataMapping);
-        }
-        else {
-            _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
-        }
+        // loadDataset() also (re)loads and initializes the labels if they are created
+        // from the dataset
+        loadDataset();
+    }
+    else if (_hasLabels) {
+        _labels->initialize();
+    }
 
-        if (_skipFirstDataPoint) {
-            _dataset.entries.erase(_dataset.entries.begin());
-        }
+    _datasetInitialized = true;
+}
 
-        _nDataPoints = static_cast<unsigned int>(_dataset.entries.size());
-        _hasOrientationData = _dataset.orientationDataIndex >= 0;
+void RenderablePointCloud::loadDataset() {
+    ZoneScoped;
 
-        // If no scale exponent was specified, compute one that will at least show the
-        // points based on the scale of the positions in the dataset
-        if (_shouldComputeScaleExponent) {
-            double dist = _dataset.maxPositionComponent * toMeter(_unit);
-            if (dist > 0.0) {
-                float exponent = static_cast<float>(std::log10(dist));
-                // Reduce the actually used exponent a little bit, as just using the
-                // logarithm as is leads to very large points
-                _sizeSettings.scaleExponent = 0.9f * exponent;
-            }
+    if (_useCaching) {
+        _dataset = dataloader::data::loadFileWithCache(_dataFile, _dataMapping);
+    }
+    else {
+        _dataset = dataloader::data::loadFile(_dataFile, _dataMapping);
+    }
+
+    if (_skipFirstDataPoint) {
+        _dataset.entries.erase(_dataset.entries.begin());
+    }
+
+    _nDataPoints = static_cast<unsigned int>(_dataset.entries.size());
+    _hasOrientationData = _dataset.orientationDataIndex >= 0;
+
+    // If no scale exponent was specified, compute one that will at least show the
+    // points based on the scale of the positions in the dataset
+    if (_shouldComputeScaleExponent) {
+        double dist = _dataset.maxPositionComponent * toMeter(_unit);
+        if (dist > 0.0) {
+            float exponent = static_cast<float>(std::log10(dist));
+            // Reduce the actually used exponent a little bit, as just using the
+            // logarithm as is leads to very large points
+            _sizeSettings.scaleExponent = 0.9f * exponent;
         }
     }
 
-    if (_hasDataFile && _hasColorMapFile) {
+    resolvePointColorIndices();
+
+    if (_hasColorMapFile) {
         _colorSettings.colorMapping->initialize(_dataset, _useCaching);
     }
 
-    if (_hasLabels) {
-        if (_createLabelsFromDataset) {
-            _labels->loadLabelsFromDataset(_dataset, _unit);
-        }
+    if (_hasLabels && _createLabelsFromDataset) {
+        _labels->loadLabelsFromDataset(_dataset, _unit);
         _labels->initialize();
     }
+
+    _dataIsDirty = true;
+}
+
+void RenderablePointCloud::resolvePointColorIndices() {
+    std::fill(_pointColorIndices.begin(), _pointColorIndices.end(), -1);
+
+    if (!_pointColorConfigured || _dataset.entries.empty()) {
+        return;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        _pointColorIndices[i] = _dataset.index(_pointColorColumns[i]);
+        if (_pointColorIndices[i] < 0) {
+            LWARNING(std::format(
+                "Could not find color column '{}' in the dataset '{}'. Per-point RGB "
+                "colors will not be used.",
+                _pointColorColumns[i],
+                _dataFile.filename().string()
+            ));
+        }
+    }
+}
+
+void RenderablePointCloud::onFilePropertyChanged() {
+    const std::string& value = _fileProperty.value();
+
+    if (value.empty()) {
+        LWARNING(std::format(
+            "The File property of '{}' was set to an empty value. Keeping the "
+            "currently loaded data.",
+            _loggerCat
+        ));
+        return;
+    }
+
+    const std::filesystem::path newPath = absPath(value);
+    if (!std::filesystem::is_regular_file(newPath)) {
+        LWARNING(std::format(
+            "The File property of '{}' was set to '{}' which is not a valid file. "
+            "Keeping the currently loaded data.",
+            _loggerCat,
+            newPath.string()
+        ));
+        return;
+    }
+
+    _dataFile = newPath;
+    _hasDataFile = true;
+
+    if (!_datasetInitialized) {
+        // The initial dataset load is done in initialize()
+        return;
+    }
+
+    LINFO(std::format("Reloading point cloud data from '{}'", newPath.string()));
+    loadDataset();
+}
+
+bool RenderablePointCloud::hasPointColorData() const {
+    if (!_pointColorConfigured) {
+        return false;
+    }
+
+    for (const int index : _pointColorIndices) {
+        if (index < 0) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void RenderablePointCloud::initializeGL() {
@@ -1370,6 +1496,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     }
 
     _program->setUniform(_uniformCache.useOrientationData, useOrientationData());
+    _program->setUniform(_uniformCache.usePointColor, hasPointColorData());
 
     bool useTexture = _hasSpriteTexture && _texture.enabled;
     _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
@@ -1517,6 +1644,7 @@ glm::quat RenderablePointCloud::orientationQuaternion(
 int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 3; // Position
     n += hasColorData() ? 1 : 0;
+    n += hasPointColorData() ? 3 : 0;
     n += hasSizeData() ? 1 : 0;
     n += useOrientationData() ? 4 : 0;
     n += _hasSpriteTexture ? 1 : 0; // Texture id
@@ -1564,6 +1692,10 @@ void RenderablePointCloud::updateBufferData() {
 
     if (hasColorData()) {
         offset = bufferVertexAttribute("in_colorParameter", 1, attibsPerPoint, offset);
+    }
+
+    if (hasPointColorData()) {
+        offset = bufferVertexAttribute("in_pointColor", 3, attibsPerPoint, offset);
     }
 
     if (hasSizeData()) {
@@ -1687,6 +1819,12 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
     if (hasColorData()) {
         const int colorParamIndex = currentColorParameterIndex();
         result.push_back(e.data[colorParamIndex]);
+    }
+
+    if (hasPointColorData()) {
+        result.push_back(e.data[_pointColorIndices[0]]);
+        result.push_back(e.data[_pointColorIndices[1]]);
+        result.push_back(e.data[_pointColorIndices[2]]);
     }
 
     if (hasSizeData()) {

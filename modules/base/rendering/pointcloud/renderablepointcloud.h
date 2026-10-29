@@ -44,8 +44,10 @@
 #include <openspace/rendering/colormappingcomponent.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <openspace/util/distanceconversion.h>
+#include <array>
 #include <filesystem>
 #include <memory>
+#include <string>
 #include <unordered_map>
 
 namespace openspace {
@@ -123,6 +125,30 @@ protected:
     bool hasSizeData() const;
     bool hasMultiTextureData() const;
     bool useOrientationData() const;
+
+    /**
+     * True if per-point RGB colors are configured (via Coloring.RGB) and all three color
+     * columns were found in the loaded dataset.
+     */
+    bool hasPointColorData() const;
+
+    /**
+     * Load (or reload) the dataset from _dataFile and update all derived state (number of
+     * data points, orientation data, scale exponent, color column indices, color map and
+     * labels). Marks the buffer data as dirty.
+     */
+    virtual void loadDataset();
+
+    /**
+     * Resolve the data column indices for the configured per-point RGB color columns.
+     */
+    void resolvePointColorIndices();
+
+    /**
+     * Callback for changes to the File property. Reloading the dataset is deferred until
+     * after initialize() has run.
+     */
+    void onFilePropertyChanged();
 
     virtual void addPositionDataForPoint(unsigned int index, std::vector<float>& result,
         double& maxRadius) const;
@@ -231,12 +257,18 @@ protected:
         right, fadeInValue, hasSpriteTexture, spriteTexture, useTextureAlpha, useColorMap,
         colorMapTexture, cmapRangeMin, cmapRangeMax, nanColor, useNanColor,
         hideOutsideRange, enableMaxSizeControl, aboveRangeColor, useAboveRangeColor,
-        belowRangeColor, useBelowRangeColor, hasDvarScaling, dvarScaleFactor, enableOutline,
-        outlineColor, outlineWeight, outlineStyle, useCmapOutline, aspectRatioScale,
-        useOrientationData
+        belowRangeColor, useBelowRangeColor, hasDvarScaling, dvarScaleFactor,
+        enableOutline, outlineColor, outlineWeight, outlineStyle, useCmapOutline,
+        aspectRatioScale, useOrientationData, usePointColor
     ) _uniformCache;
 
     std::filesystem::path _dataFile;
+
+    StringProperty _fileProperty;
+    bool _datasetInitialized = false;
+    bool _pointColorConfigured = false;
+    std::array<std::string, 3> _pointColorColumns;
+    std::array<int, 3> _pointColorIndices = { -1, -1, -1 };
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 
