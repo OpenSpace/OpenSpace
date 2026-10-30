@@ -700,6 +700,34 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
     return planets;
 }
 
+bool DataLoader::validateSaveTarget(const std::filesystem::path& targetPath,
+                                    const std::filesystem::path& protectedPath)
+{
+    if (protectedPath.empty()) {
+        throw std::runtime_error("The configured dataset has no CSV path.");
+    }
+    const std::filesystem::path target = std::filesystem::weakly_canonical(
+        absPath(targetPath.string())
+    );
+    const std::filesystem::path source = std::filesystem::weakly_canonical(
+        absPath(protectedPath.string())
+    );
+    const bool targetExists = std::filesystem::exists(target);
+    if (target == source ||
+        (targetExists && std::filesystem::exists(source) &&
+         std::filesystem::equivalent(target, source)))
+    {
+        throw std::runtime_error(
+            "Cannot overwrite the module-configured dataset. "
+            "Choose a different filename or directory."
+        );
+    }
+    if (targetExists && !std::filesystem::is_regular_file(target)) {
+        throw std::runtime_error("The destination is not a regular file.");
+    }
+    return targetExists;
+}
+
 void DataLoader::saveData(const std::filesystem::path& targetPath,
                           const std::vector<ExoplanetItem>& allItems,
                           const std::vector<size_t>& indices,
@@ -713,8 +741,9 @@ void DataLoader::saveData(const std::filesystem::path& targetPath,
     std::fstream f(targetPath, std::ios::out);
 
     if (!f.is_open()) {
-        LERROR(std::format("Failed writing data to file: '{}'", targetPath));
-        return;
+        throw std::runtime_error(std::format(
+            "Failed writing data to file: '{}'", targetPath
+        ));
     }
 
     if (includeCartesianPosition) {
@@ -787,6 +816,13 @@ void DataLoader::saveData(const std::filesystem::path& targetPath,
             }
         }
         f << std::endl;
+    }
+
+    f.close();
+    if (!f) {
+        throw std::runtime_error(std::format(
+            "Failed finishing CSV file: '{}'", targetPath
+        ));
     }
 
     // TODO: handle indices empty

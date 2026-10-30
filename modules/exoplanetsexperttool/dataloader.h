@@ -41,6 +41,17 @@ public:
     static std::vector<ExoplanetItem> loadData(const DataSettings& settings);
 
     /**
+     * Validate a CSV destination without opening it. Throws if it identifies the
+     * protected dataset, is not a regular file, or cannot be inspected.
+     *
+     * \param targetPath the destination to inspect
+     * \param protectedPath the module-configured CSV that must not be overwritten
+     * \return Whether the destination exists and requires overwrite confirmation
+     */
+    static bool validateSaveTarget(const std::filesystem::path& targetPath,
+        const std::filesystem::path& protectedPath);
+
+    /**
      * Save data to a CSV file.
      *
      * \param targetPath the filepath for where to save the dataset

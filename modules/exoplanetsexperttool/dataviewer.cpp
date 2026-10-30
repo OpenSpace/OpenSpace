@@ -46,6 +46,7 @@
 #include <openspace/scripting/scriptengine.h>
 
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <set>
@@ -1707,6 +1708,10 @@ void DataViewer::renderFileMenu() {
     static char csvPath[1024] = "";
     static char settingsJsonPath[1024] = "";
     static std::string openCsvError;
+    static std::vector<std::filesystem::path> csvFiles;
+    static std::string csvDirectoryError;
+    static std::string saveCsvError;
+    static std::filesystem::path pendingOverwritePath;
 
     // Menu
     if (ImGui::BeginMenu("File")) {
@@ -1744,9 +1749,64 @@ void DataViewer::renderFileMenu() {
     if (_showOpenCsvModal) {
         ImGui::OpenPopup("Open CSV");
         if (ImGui::BeginPopupModal("Open CSV", NULL, flags)) {
-            ImGui::TextUnformatted(
-                "Load a CSV and optionally provide its dataset settings JSON."
-            );
+            if (ImGui::IsWindowAppearing()) {
+                csvFiles.clear();
+                csvDirectoryError.clear();
+                openCsvError.clear();
+                try {
+                    const std::filesystem::path directory = absPath(
+                        "${MODULE_EXOPLANETSEXPERTTOOL}/data"
+                    );
+                    const std::filesystem::directory_iterator entries(directory);
+                    for (const auto& entry : entries) {
+                        if (entry.is_regular_file() &&
+                            toLowerCase(entry.path().extension().string()) == ".csv")
+                        {
+                            csvFiles.push_back(entry.path());
+                        }
+                    }
+                    std::sort(csvFiles.begin(), csvFiles.end());
+                }
+                catch (const std::exception& e) {
+                    csvFiles.clear();
+                    csvDirectoryError = e.what();
+                }
+            }
+
+            std::string preview = csvFiles.empty() ?
+                "No CSV files in data folder" : "Select a CSV";
+            for (const std::filesystem::path& file : csvFiles) {
+                if (file.string() == csvPath) {
+                    preview = file.filename().string();
+                    break;
+                }
+            }
+            ImGui::SetNextItemWidth(520.f);
+            ImGui::BeginDisabled(csvFiles.empty());
+            if (ImGui::BeginCombo("Data folder", preview.c_str())) {
+                for (const std::filesystem::path& file : csvFiles) {
+                    const std::string path = file.string();
+                    const bool selected = path == csvPath;
+                    if (ImGui::Selectable(file.filename().string().c_str(), selected)) {
+                        if (path.size() < IM_ARRAYSIZE(csvPath)) {
+                            std::copy(path.begin(), path.end(), csvPath);
+                            csvPath[path.size()] = '\0';
+                            openCsvError.clear();
+                        }
+                        else {
+                            openCsvError = "The selected path exceeds 1023 bytes.";
+                        }
+                    }
+                    if (selected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::EndDisabled();
+            if (!csvDirectoryError.empty()) {
+                ImGui::TextWrapped("%s", csvDirectoryError.c_str());
+            }
             ImGui::SetNextItemWidth(520.f);
             ImGui::InputText("CSV path", csvPath, IM_ARRAYSIZE(csvPath));
             ImGui::SetNextItemWidth(520.f);
@@ -1802,6 +1862,10 @@ void DataViewer::renderFileMenu() {
     if (showSaveCsvModal) {
         ImGui::OpenPopup("Save CSV");
         if (ImGui::BeginPopupModal("Save CSV", NULL, flags)) {
+            if (ImGui::IsWindowAppearing()) {
+                saveCsvError.clear();
+                pendingOverwritePath.clear();
+            }
             ImGui::Text("Save the currently selected filtering to a CSV file.");
 
             static char name[128] = "";
@@ -1811,17 +1875,17 @@ void DataViewer::renderFileMenu() {
                 IM_ARRAYSIZE(name)
             );
 
-            const char* defaultDir = absPath(
+            const std::string defaultDir = absPath(
                 "${MODULE_EXOPLANETSEXPERTTOOL}/data"
-            ).string().c_str();
+            ).string();
 
-            const float dirTextWidth = ImGui::CalcTextSize(defaultDir).x;
+            const float dirTextWidth = ImGui::CalcTextSize(defaultDir.c_str()).x;
             ImGui::SetNextItemWidth(dirTextWidth * 1.3f);
 
             static char dir[256] = "";
             ImGui::InputTextWithHint(
                 "Directory",
-                defaultDir,
+                defaultDir.c_str(),
                 dir,
                 IM_ARRAYSIZE(dir)
             );
@@ -1876,12 +1940,50 @@ void DataViewer::renderFileMenu() {
 
             ImGui::Separator();
 
+            auto saveCsv = [&](const std::filesystem::path& path) {
+                try {
+                    const DataSettings configured =
+                        DataLoader::loadDataSettingsFromJson();
+                    DataLoader::validateSaveTarget(path, configured.dataFile);
+                    DataLoader::saveData(
+                        path,
+                        _data,
+                        _filteredData,
+                        columnsToSave,
+                        _computedColumns,
+                        includeComputedColumns,
+                        savePosition,
+                        useParsec
+                    );
+                    saveCsvError.clear();
+                    showSaveCsvModal = false;
+                }
+                catch (const std::exception& e) {
+                    saveCsvError = e.what();
+                }
+            };
+
+            if (!saveCsvError.empty()) {
+                ImGui::PushStyleColor(
+                    ImGuiCol_Text,
+                    view::helper::toImVec4(view::colors::Error)
+                );
+                ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + 520.f);
+                ImGui::TextUnformatted(saveCsvError.c_str());
+                ImGui::PopTextWrapPos();
+                ImGui::PopStyleColor();
+            }
+
+            const bool confirmingOverwrite = !pendingOverwritePath.empty();
+
             // Cancel
             if (ImGui::Button("Cancel") ||
-                ImGui::IsKeyPressed(ImGuiKey_Escape))
+                (!confirmingOverwrite && ImGui::IsKeyPressed(ImGuiKey_Escape)))
             {
                 ImGui::CloseCurrentPopup();
                 showSaveCsvModal = false;
+                saveCsvError.clear();
+                pendingOverwritePath.clear();
             }
             ImGui::SameLine();
 
@@ -1894,30 +1996,34 @@ void DataViewer::renderFileMenu() {
                 ImGui::BeginDisabled();
             }
 
-            if (ImGui::Button("Save") || ImGui::IsKeyPressed(ImGuiKey_Enter)) {
-                std::filesystem::path fileName = std::filesystem::path(trimmedName);
-                std::filesystem::path directory = std::filesystem::path(dir);
-                if (directory.empty()) {
-                    directory = std::filesystem::path(defaultDir);
+            const bool savePressed = ImGui::Button("Save");
+            if (!saveDisabled && (savePressed ||
+                (!confirmingOverwrite && ImGui::IsKeyPressed(ImGuiKey_Enter))))
+            {
+                try {
+                    std::filesystem::path fileName(trimmedName);
+                    const std::filesystem::path directory = dir[0] == '\0' ?
+                        std::filesystem::path(defaultDir) : std::filesystem::path(dir);
+                    if (!fileName.has_extension()) {
+                        fileName.replace_extension("csv");
+                    }
+                    const std::filesystem::path path = absPath(
+                        (directory / fileName).string()
+                    );
+                    const DataSettings configured =
+                        DataLoader::loadDataSettingsFromJson();
+                    saveCsvError.clear();
+                    if (DataLoader::validateSaveTarget(path, configured.dataFile)) {
+                        pendingOverwritePath = path;
+                        ImGui::OpenPopup("Overwrite CSV?");
+                    }
+                    else {
+                        saveCsv(path);
+                    }
                 }
-
-                if (!fileName.has_extension()) {
-                    fileName.replace_extension("csv");
+                catch (const std::exception& e) {
+                    saveCsvError = e.what();
                 }
-                std::filesystem::path path = directory / fileName;
-                DataLoader::saveData(
-                    path,
-                    _data,
-                    _filteredData,
-                    columnsToSave,
-                    _computedColumns,
-                    includeComputedColumns,
-                    savePosition,
-                    useParsec
-                );
-
-                ImGui::CloseCurrentPopup();
-                showSaveCsvModal = false;
             }
             if (saveDisabled) {
                 ImGui::SetItemTooltip("Enter a file name");
@@ -1926,6 +2032,28 @@ void DataViewer::renderFileMenu() {
 
             ImGui::SetItemDefaultFocus();
 
+            ImGui::SetNextWindowSize(ImVec2(540.f, 0.f), ImGuiCond_Appearing);
+            if (ImGui::BeginPopupModal("Overwrite CSV?", nullptr,
+                                      ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::TextUnformatted("Replace the existing file?");
+                ImGui::TextWrapped("%s", pendingOverwritePath.string().c_str());
+                if (ImGui::Button("Cancel") || ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+                    pendingOverwritePath.clear();
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+                if (ImGui::Button("Overwrite")) {
+                    saveCsv(pendingOverwritePath);
+                    pendingOverwritePath.clear();
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+            }
+            if (!showSaveCsvModal) {
+                ImGui::CloseCurrentPopup();
+            }
             ImGui::EndPopup();
         }
     }
