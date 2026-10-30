@@ -1443,13 +1443,10 @@ bool SpatialSelectionView::renderLassoTab() {
         _lassoVisibilityActive = true;
     }
 
+    ImGui::SeparatorText("1. Select Dataset for Selection:");
+
     ImGui::TextWrapped(
         "Do a spatial selectionbased on the density of points in another point cloud."
-    );
-    ImGui::Spacing();
-    ImGui::TextWrapped(
-        "Hold Shift and drag with the left mouse button to draw a "
-        "lasso around the particles to select."
     );
 
     if (ImGui::BeginCombo("Point cloud", _lassoTargetNode.c_str())) {
@@ -1463,7 +1460,7 @@ bool SpatialSelectionView::renderLassoTab() {
         ImGui::EndCombo();
     }
     updateLassoCloudVisibility(candidates);
-    if (ImGui::Checkbox("Show glyphs", &_showLassoGlyphs)) {
+    if (ImGui::Checkbox("Show glyphs##before_lasso", &_showLassoGlyphs)) {
         _dataViewer.setLassoGlyphVisibility(_showLassoGlyphs);
     }
     ImGui::SameLine();
@@ -1474,6 +1471,20 @@ bool SpatialSelectionView::renderLassoTab() {
     if (candidates.empty()) {
         ImGui::TextDisabled("No RenderableDensityPointCloud in the scene");
     }
+
+    ImGui::Spacing();
+    ImGui::SeparatorText("2. Do Lasso Selection:");
+    ImGui::Bullet();
+    ImGui::TextWrapped(
+        "Hold SHIFT and drag with the left mouse button to draw a "
+        "lasso around the particles to select."
+    );
+
+    ImGui::Spacing();
+    ImGui::Bullet();
+    ImGui::TextWrapped(
+        "Double-click while holding SHIFT to clear the selection."
+    );
 
     // @TODO (2026-10-16, emmbr) bring back when we're implementingthe other cast methods
     //constexpr std::array<const char*, 3> MethodNames = {
@@ -1511,6 +1522,9 @@ bool SpatialSelectionView::renderLassoTab() {
     }
 
     ImGui::Separator();
+
+    ImGui::Spacing();
+    ImGui::SeparatorText("3. Adjust Selection Threshold:");
 
     const bool hasSelection = _castSelection != nullptr;
     const bool hasDensityVolume = target && target->densityVolume();
@@ -1560,6 +1574,9 @@ bool SpatialSelectionView::renderLassoTab() {
     }
     ImGui::EndDisabled();
 
+    ImGui::Spacing();
+    ImGui::SeparatorText("4. Generate Selection Volume:");
+
     ImGui::BeginDisabled(_castSelection && _castResult.selectedParticles.empty());
     if (ImGui::Button("Generate Isosurface")) {
         generateLassoVolume(target, true);
@@ -1579,6 +1596,13 @@ bool SpatialSelectionView::renderLassoTab() {
     );
 
     ImGui::EndDisabled();
+    ImGui::Spacing();
+    ImGui::Spacing();
+
+    if (ImGui::Button(_showLassoGlyphs ? "Hide glyphs##after_generate" : "Show glyphs##after_generate")) {
+        _showLassoGlyphs = !_showLassoGlyphs;
+        _dataViewer.setLassoGlyphVisibility(_showLassoGlyphs);
+    }
 
     if (!_lassoStatus.empty()) {
         ImGui::TextColored(ImVec4(1.f, 0.7f, 0.3f, 1.f), "%s", _lassoStatus.c_str());
