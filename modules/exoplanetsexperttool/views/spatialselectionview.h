@@ -113,7 +113,7 @@ public:
     void lassoMousePosition(const glm::vec2& mousePos);
 
 private:
-    bool renderMethodTabs();
+    bool renderMethodTabs(float footerHeight);
     bool renderShape3DTab();
     bool renderSkyMapTab();
     bool renderLassoTab();

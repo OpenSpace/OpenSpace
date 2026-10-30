@@ -45,6 +45,7 @@
 #include <array>
 #include <cmath>
 #include <format>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -54,6 +55,7 @@ namespace {
     const ImVec4 accentButtonColor(0.17f, 0.34f, 0.31f, 1.f);
     const ImVec4 accentButtonHoveredColor(0.21f, 0.42f, 0.37f, 1.f);
     const ImVec4 accentButtonActiveColor(0.14f, 0.29f, 0.26f, 1.f);
+    constexpr float SavedSelectionsListHeight = 100.f;
 
     struct SkyPoint {
         float ra = 0.f;
@@ -945,7 +947,22 @@ bool SpatialSelectionView::render(bool* open) {
         return false;
     }
 
+    const ImGuiStyle& style = ImGui::GetStyle();
+    const float textHeight = ImGui::GetTextLineHeight();
+    const float separatorHeight = textHeight + 2.f * style.SeparatorTextPadding.y;
+
+    const float footerHeight = 2.f * separatorHeight + textHeight +
+        4.f * ImGui::GetFrameHeight() + 8.f * style.ItemSpacing.y +
+        SavedSelectionsListHeight;
+
+    const float minHeight = footerHeight + 2.f * style.WindowPadding.y +
+        ImGui::GetFrameHeight() + 3.f * ImGui::GetFrameHeightWithSpacing();
+
     ImGui::SetNextWindowSize(ImVec2(520, 640), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSizeConstraints(
+        ImVec2(520.f, minHeight),
+        ImVec2(std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
+    );
     if (!ImGui::Begin("Spatial Selection", open)) {
         ImGui::End();
         endLassoSession();
@@ -954,7 +971,7 @@ bool SpatialSelectionView::render(bool* open) {
 
     bool changed = false;
 
-    changed |= renderMethodTabs();
+    changed |= renderMethodTabs(footerHeight);
     changed |= renderCurrentSelectionActions();
     changed |= renderSavedSelectionsManager();
 
@@ -1036,12 +1053,19 @@ void SpatialSelectionView::endLassoSession() {
     _lassoVisibilityActive = false;
 }
 
-bool SpatialSelectionView::renderMethodTabs() {
+bool SpatialSelectionView::renderMethodTabs(float footerHeight) {
     bool changed = false;
     const std::optional<SpatialSelectionMethod> requestedTab = _requestedTab;
     const auto tabFlags = [requestedTab](SpatialSelectionMethod method) {
         return requestedTab == method ?
             ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
+    };
+    const auto contentSize = [footerHeight]() {
+        return ImVec2(0.f, std::max(
+            1.f,
+            ImGui::GetContentRegionAvail().y - footerHeight -
+                ImGui::GetStyle().ItemSpacing.y
+        ));
     };
     if (ImGui::BeginTabBar("SpatialSelectionTabBar")) {
         if (ImGui::BeginTabItem(
@@ -1051,7 +1075,10 @@ bool SpatialSelectionView::renderMethodTabs() {
                 _requestedTab.reset();
                 changed |= _currentMethod != SpatialSelectionMethod::Shape3D;
                 _currentMethod = SpatialSelectionMethod::Shape3D;
-                changed |= renderShape3DTab();
+                if (ImGui::BeginChild("Shape3DContent", contentSize())) {
+                    changed |= renderShape3DTab();
+                }
+                ImGui::EndChild();
             }
             ImGui::EndTabItem();
         }
@@ -1062,7 +1089,10 @@ bool SpatialSelectionView::renderMethodTabs() {
                 _requestedTab.reset();
                 changed |= _currentMethod != SpatialSelectionMethod::SkyMap;
                 _currentMethod = SpatialSelectionMethod::SkyMap;
-                changed |= renderSkyMapTab();
+                if (ImGui::BeginChild("SkyMapContent", contentSize())) {
+                    changed |= renderSkyMapTab();
+                }
+                ImGui::EndChild();
             }
             ImGui::EndTabItem();
         }
@@ -1074,7 +1104,10 @@ bool SpatialSelectionView::renderMethodTabs() {
                 changed |= _currentMethod != SpatialSelectionMethod::Lasso;
                 _currentMethod = SpatialSelectionMethod::Lasso;
                 _lassoTabActive = true;
-                changed |= renderLassoTab();
+                if (ImGui::BeginChild("LassoContent", contentSize())) {
+                    changed |= renderLassoTab();
+                }
+                ImGui::EndChild();
             }
             ImGui::EndTabItem();
         }
@@ -2032,14 +2065,18 @@ bool SpatialSelectionView::renderSavedSelectionsManager() {
     ImGui::SeparatorText("Saved selections:");
 
     std::vector<SavedSelection>& saved = handler().savedSelections();
-    if (saved.empty()) {
-        ImGui::TextDisabled("No saved selections yet.");
-        return false;
-    }
 
-    ImGui::BeginChild("SavedSelectionsList", ImVec2(0, 150), true);
+    ImGui::BeginChild(
+        "SavedSelectionsList", ImVec2(0, SavedSelectionsListHeight), true
+    );
     size_t toRemove = static_cast<size_t>(-1);
     bool changed = false;
+
+    if (saved.empty()) {
+        ImGui::TextDisabled("No saved selections yet.");
+        ImGui::EndChild();
+        return false;
+    }
 
     for (size_t i = 0; i < saved.size(); ++i) {
         ImGui::PushID(static_cast<int>(i));
