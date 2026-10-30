@@ -5,11 +5,13 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/syncengine.h>
 #include <openspace/filesystem/filesystem.h>
 #include <openspace/opengl/openglstatecache.h>
 #include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
+#include <openspace/util/syncbuffer.h>
 #include <openspace/util/updatestructures.h>
 
 namespace {
@@ -86,6 +88,11 @@ RenderableSpatialSelectionVolume::RenderableSpatialSelectionVolume(
     addProperty(_outlineOpacity);
     addProperty(Fadeable::_opacity);
     setRenderBin(RenderBin::PostDeferredTransparent);
+    global::syncEngine->addSyncable(this);
+}
+
+RenderableSpatialSelectionVolume::~RenderableSpatialSelectionVolume() {
+    global::syncEngine->removeSyncable(this);
 }
 
 void RenderableSpatialSelectionVolume::initializeGL() {
@@ -118,8 +125,56 @@ void RenderableSpatialSelectionVolume::deinitializeGL() {
 }
 
 void RenderableSpatialSelectionVolume::setCustomMesh(SelectionVolumeMesh mesh) {
+    std::lock_guard guard(_meshMutex);
     _customMesh = std::move(mesh);
-    _meshIsDirty = true;
+    _customMeshNeedsSync = true;
+    _customMeshIsDirty = true;
+}
+
+void RenderableSpatialSelectionVolume::encode(SyncBuffer* syncBuffer) {
+    std::lock_guard guard(_meshMutex);
+    syncBuffer->encode(_customMeshNeedsSync);
+    if (!_customMeshNeedsSync) {
+        return;
+    }
+
+    const auto encodeVertices = [syncBuffer](const std::vector<glm::dvec3>& vertices) {
+        syncBuffer->encode(vertices.size());
+        for (const glm::dvec3& vertex : vertices) {
+            syncBuffer->encode(vertex.x);
+            syncBuffer->encode(vertex.y);
+            syncBuffer->encode(vertex.z);
+        }
+    };
+    encodeVertices(_customMesh.triangles);
+    encodeVertices(_customMesh.lines);
+    _customMeshNeedsSync = false;
+}
+
+void RenderableSpatialSelectionVolume::decode(SyncBuffer* syncBuffer) {
+    bool hasUpdate = false;
+    syncBuffer->decode(hasUpdate);
+    if (!hasUpdate) {
+        return;
+    }
+
+    const auto decodeVertices = [syncBuffer](std::vector<glm::dvec3>& vertices) {
+        size_t nVertices = 0;
+        syncBuffer->decode(nVertices);
+        vertices.resize(nVertices);
+        for (glm::dvec3& vertex : vertices) {
+            syncBuffer->decode(vertex.x);
+            syncBuffer->decode(vertex.y);
+            syncBuffer->decode(vertex.z);
+        }
+    };
+    SelectionVolumeMesh mesh;
+    decodeVertices(mesh.triangles);
+    decodeVertices(mesh.lines);
+
+    std::lock_guard guard(_meshMutex);
+    _customMesh = std::move(mesh);
+    _customMeshIsDirty = true;
 }
 
 void RenderableSpatialSelectionVolume::updateMesh() {
@@ -149,6 +204,7 @@ void RenderableSpatialSelectionVolume::updateMesh() {
         });
     }
     else if (parameters.size() == 2 && parameters[0] == 3.0) {
+        std::lock_guard guard(_meshMutex);
         mesh = _customMesh;
     }
     _nTriangleVertices = static_cast<GLsizei>(mesh.triangles.size());
@@ -171,6 +227,13 @@ void RenderableSpatialSelectionVolume::updateMesh() {
 }
 
 void RenderableSpatialSelectionVolume::update(const UpdateData&) {
+    {
+        std::lock_guard guard(_meshMutex);
+        if (_customMeshIsDirty) {
+            _meshIsDirty = true;
+            _customMeshIsDirty = false;
+        }
+    }
     if (_program && _program->isDirty()) {
         _program->rebuildFromFile();
         opengl::updateUniformLocations(*_program, _uniformCache);

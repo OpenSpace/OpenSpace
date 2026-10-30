@@ -8,15 +8,18 @@
 #include <openspace/properties/list/doublelistproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/syncable.h>
 #include <memory>
+#include <mutex>
 
 namespace openspace::opengl { class ProgramObject; }
 
 namespace openspace::exoplanets {
 
-class RenderableSpatialSelectionVolume : public Renderable {
+class RenderableSpatialSelectionVolume : public Renderable, public Syncable {
 public:
     explicit RenderableSpatialSelectionVolume(const Dictionary& dictionary);
+    ~RenderableSpatialSelectionVolume() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -31,6 +34,8 @@ public:
     void setCustomMesh(SelectionVolumeMesh mesh);
 
 private:
+    void encode(SyncBuffer* syncBuffer) override;
+    void decode(SyncBuffer* syncBuffer) override;
     void updateMesh();
 
     DoubleListProperty _shapeParameters;
@@ -43,7 +48,10 @@ private:
     GLsizei _nTriangleVertices = 0;
     GLsizei _nLineVertices = 0;
     bool _meshIsDirty = true;
+    std::mutex _meshMutex;
     SelectionVolumeMesh _customMesh;
+    bool _customMeshNeedsSync = false;
+    bool _customMeshIsDirty = false;
 };
 
 } // namespace openspace::exoplanets
