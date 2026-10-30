@@ -200,6 +200,9 @@ private:
     bool _lassoTabActive = false;
     bool _lassoVisibilityActive = false;
     bool _showLassoGlyphs = true;
+    bool _lassoCloudsHidden = false;
+    std::map<std::string, bool> _lassoCloudVisibilityBeforeHide;
+    std::optional<std::map<std::string, bool>> _lassoCloudVisibilityOverride;
     struct CloudVisibility {
         bool original = false;
         bool requested = false;
