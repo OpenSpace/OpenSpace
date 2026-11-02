@@ -261,6 +261,16 @@ public:
      */
     std::string tokenizePath(const std::filesystem::path& path) const;
 
+    /**
+     * Resolves the given asset path, which might be tokenized, relative to the asset
+     * root or absolute, into the fully formed path that is used internally to identify
+     * the asset.
+     *
+     * \param assetPath The path to resolve
+     * \return The fully formed asset path
+     */
+    std::filesystem::path resolveAssetPath(const std::string& assetPath) const;
+
 private:
     /**
      * Creates and registers all of the callback functions that the asset is expected to

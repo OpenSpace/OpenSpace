@@ -1089,6 +1089,10 @@ void AssetManager::setCurrentAsset(Asset* asset) {
     }
 }
 
+std::filesystem::path AssetManager::resolveAssetPath(const std::string& assetPath) const {
+    return generateAssetPath(_assetRootDirectory, assetPath);
+}
+
 std::filesystem::path AssetManager::generateAssetPath(
                                                const std::filesystem::path& baseDirectory,
                                                        const std::string& assetPath) const
