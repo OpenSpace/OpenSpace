@@ -35,9 +35,9 @@
         ]
     },
     "default_colormapping": {
-        "column": "ESM",
-        "min": 10,
-        "max": 200
+        "column": "pl_rade",
+        "min": 0.276,
+        "max": 20
     },
     "column_info": {
         "pl_name": {
