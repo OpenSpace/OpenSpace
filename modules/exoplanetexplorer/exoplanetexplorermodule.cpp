@@ -72,6 +72,14 @@ namespace {
         .isReadOnly = IsReadOnly::Yes
     };
 
+    constexpr StringPropertyInfo HostedDataLocationInfo = {
+        .identifier = "HostedDataLocation",
+        .name = "Hosted data location",
+        .description = "The file directory where data is hosted. Put the data in here "
+            "for it to work directly with the webpage part of the tool.",
+        .isReadOnly = IsReadOnly::Yes
+    };
+
     constexpr BoolPropertyInfo HasActiveFiltersInfo = {
         .identifier = "HasActiveFilters",
         .name = "Has active filters",
@@ -120,6 +128,7 @@ ExoplanetExplorerModule::ExoplanetExplorerModule()
     , _hoveredIndex(HoveredIndexInfo)
     , _dataConfigFile(DataConfigFileInfo)
     , _loadedDataFile(LoadedDataFileInfo)
+    , _hostedDataLocation(HostedDataLocationInfo)
     , _gui("ExoplanetsToolGui")
 {
     addProperty(_enabled);
@@ -131,6 +140,7 @@ ExoplanetExplorerModule::ExoplanetExplorerModule()
     addProperty(_showInfoWindowAtStartup);
     addProperty(_dataConfigFile);
     addProperty(_loadedDataFile);
+    addProperty(_hostedDataLocation);
     addProperty(_hasActiveFilters);
 
     _dataConfigFile.onChange([this]() {

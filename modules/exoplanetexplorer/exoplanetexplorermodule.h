@@ -90,6 +90,7 @@ protected:
     IntProperty _hoveredIndex;
     StringProperty _dataConfigFile;
     StringProperty _loadedDataFile;
+    StringProperty _hostedDataLocation;
 
     exoplanets::gui::Gui _gui;
     glm::vec2 _mousePosition = glm::vec2(0.f);

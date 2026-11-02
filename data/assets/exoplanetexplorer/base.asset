@@ -44,12 +44,19 @@ asset.onInitialize(function ()
 
   -- Add asset folders (first the endpoint, and then the path to the hosted files)
   directories[#directories + 1] = "exoplanetexplorer/data"
-  directories[#directories + 1] = openspace.absPath("${BASE}/modules/exoplanetexplorer/data")
+  directories[#directories + 1] = openspace.absPath("${MODULE_EXOPLANETEXPLORER}/data")
 
   directories[#directories + 1] = "exoplanetexplorer/web"
-  directories[#directories + 1] = openspace.absPath("${BASE}/modules/exoplanetexplorer/webpage")
+  directories[#directories + 1] = openspace.absPath("${MODULE_EXOPLANETEXPLORER}/webpage")
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
+
+  -- Set the hosted data location for the Exoplanet Explorer module, so the webpage
+  -- can interpret if the current data is hosted locally or not
+  openspace.setPropertyValueSingle(
+    "Modules.ExoplanetExplorer.HostedDataLocation",
+    openspace.absPath("${MODULE_EXOPLANETEXPLORER}/data")
+  )
 end)
 
 asset.onDeinitialize(function ()
