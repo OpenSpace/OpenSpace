@@ -1261,6 +1261,21 @@ AssetManager::assetStates() const
     return _assetStates;
 }
 
+std::string AssetManager::tokenizePath(const std::filesystem::path& path) const {
+    const AssetPathLocation location = classifyAssetPath(path);
+    if (location == AssetPathLocation::Shipped) {
+        const std::filesystem::path relative =
+            std::filesystem::relative(path, _assetRootDirectory);
+        return std::format("{}/{}", "${ASSETS}", relative.generic_string());
+    }
+    if (location == AssetPathLocation::User) {
+        const std::filesystem::path userRoot = absPath("${USER_ASSETS}");
+        const std::filesystem::path relative = std::filesystem::relative(path, userRoot);
+        return std::format("{}/{}", "${USER_ASSETS}", relative.generic_string());
+    }
+    return path.generic_string();
+}
+
 
 LuaLibrary AssetManager::luaLibrary() {
     return {

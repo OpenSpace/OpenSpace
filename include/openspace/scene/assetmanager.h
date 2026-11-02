@@ -249,6 +249,18 @@ public:
      */
     std::unordered_map<std::string, EventAssetLoading::State> assetStates() const;
 
+    /**
+     * Converts an absolute asset path into a portable, tokenized path. If the path is
+     * located under the Data or User asset root, the corresponding root is replaced by
+     * its path token (`${ASSETS}` or `${USER_ASSETS}`). Paths located anywhere else are
+     * returned as their full generic string.
+     *
+     * \param path The absolute asset path to tokenize
+     * \return The tokenized path if the path is under the Data or User root, otherwise
+     *         the full generic path
+     */
+    std::string tokenizePath(const std::filesystem::path& path) const;
+
 private:
     /**
      * Creates and registers all of the callback functions that the asset is expected to
