@@ -170,11 +170,19 @@ void DataViewer::initializeData() {
     LDEBUG("Initializing dataset from files specified in module");
 
     try {
-        DataSettings settings = DataLoader::loadDataSettingsFromJson();
+        auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
+        const std::filesystem::path settingsJsonPath = mod->dataConfigFile();
+        if (settingsJsonPath.empty()) {
+            throw std::runtime_error("No dataset settings (.json) file was provided");
+        }
+        const std::filesystem::path resolvedSettingsJsonPath =
+            absPath(settingsJsonPath.string());
+        DataSettings settings =
+            DataLoader::loadDataSettingsFromJson(resolvedSettingsJsonPath);
         if (settings.dataFile.empty()) {
             throw std::runtime_error("The dataset settings file does not specify a datafile");
         }
-        prepareDataLoad(std::move(settings));
+        prepareDataLoad(std::move(settings), false, resolvedSettingsJsonPath);
     }
     catch (const std::exception& e) {
         _pendingDataError = e.what();
@@ -187,7 +195,8 @@ bool DataViewer::loadCsvFile(std::filesystem::path path) {
     settings.dataFile = std::move(path);
     settings.dataMapping.nameFromRowIndex = false;
     try {
-        return prepareDataLoad(std::move(settings)) && !_pendingDataSettings;
+        return prepareDataLoad(std::move(settings), false, _settingsJsonPath) &&
+            !_pendingDataSettings;
     }
     catch (const std::exception& e) {
         _pendingDataError = e.what();
@@ -196,7 +205,9 @@ bool DataViewer::loadCsvFile(std::filesystem::path path) {
     }
 }
 
-bool DataViewer::prepareDataLoad(DataSettings settings, bool showMappingPrompt) {
+bool DataViewer::prepareDataLoad(DataSettings settings, bool showMappingPrompt,
+                                 std::filesystem::path settingsJsonPath)
+{
     if (settings.dataFile.empty()) {
         throw std::invalid_argument("No CSV file was selected");
     }
@@ -278,6 +289,7 @@ bool DataViewer::prepareDataLoad(DataSettings settings, bool showMappingPrompt) 
 
     _pendingDataColumns = columns;
     _pendingDataSettings = std::move(settings);
+    _pendingSettingsJsonPath = std::move(settingsJsonPath);
     _pendingUseRowIndexForName = _pendingDataSettings->dataMapping.nameFromRowIndex;
 
     const DataSettings::DataMapping& pendingMapping = _pendingDataSettings->dataMapping;
@@ -322,6 +334,8 @@ bool DataViewer::commitPendingDataLoad() {
     if (!initializeData(std::move(settings))) {
         return false;
     }
+    _settingsJsonPath = std::move(_pendingSettingsJsonPath);
+    _pendingSettingsJsonPath.clear();
     _pendingDataSettings.reset();
     _pendingDataColumns.clear();
     _pendingDataError.clear();
@@ -458,6 +472,7 @@ void DataViewer::renderPendingDataMappings() {
     ImGui::SameLine();
     if (ImGui::Button("Cancel", ImVec2(100.f, 0.f))) {
         _pendingDataSettings.reset();
+        _pendingSettingsJsonPath.clear();
         _pendingDataColumns.clear();
         _pendingDataError.clear();
     }
@@ -551,6 +566,9 @@ bool DataViewer::initializeData(DataSettings settings) {
     _selectionChanged = true;
     _filterChanged = true;
     _isInitialized = true;
+
+    auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
+    mod->setLoadedDataFile(currentDataFile());
 
     return true;
 }
@@ -1705,6 +1723,7 @@ void DataViewer::updateFilteredRowsProperty(std::optional<std::vector<size_t>> c
 
 void DataViewer::renderFileMenu() {
     static bool showSaveCsvModal = false;
+    static bool useLoadedSettingsJson = false;
     static char csvPath[1024] = "";
     static char settingsJsonPath[1024] = "";
     static std::string openCsvError;
@@ -1810,11 +1829,29 @@ void DataViewer::renderFileMenu() {
             ImGui::SetNextItemWidth(520.f);
             ImGui::InputText("CSV path", csvPath, IM_ARRAYSIZE(csvPath));
             ImGui::SetNextItemWidth(520.f);
+
+            if (_settingsJsonPath.empty()) {
+                useLoadedSettingsJson = false;
+            }
+            if (useLoadedSettingsJson) {
+                const std::string path = _settingsJsonPath.string();
+                const size_t pathLength = std::min(
+                    path.size(),
+                    static_cast<size_t>(IM_ARRAYSIZE(settingsJsonPath) - 1)
+                );
+                std::copy_n(path.begin(), pathLength, settingsJsonPath);
+                settingsJsonPath[pathLength] = '\0';
+            }
             ImGui::InputText(
                 "Settings JSON (optional)",
                 settingsJsonPath,
-                IM_ARRAYSIZE(settingsJsonPath)
+                IM_ARRAYSIZE(settingsJsonPath),
+                useLoadedSettingsJson ?
+                    ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None
             );
+            ImGui::BeginDisabled(_settingsJsonPath.empty());
+            ImGui::Checkbox("Use currently loaded settings JSON", &useLoadedSettingsJson);
+            ImGui::EndDisabled();
 
             if (!openCsvError.empty()) {
                 ImGui::TextColored(
@@ -1833,11 +1870,24 @@ void DataViewer::renderFileMenu() {
             if (ImGui::Button("Open") || ImGui::IsKeyPressed(ImGuiKey_Enter)) {
                 try {
                     DataSettings settings;
-                    if (settingsJsonPath[0] != '\0') {
-                        settings = DataLoader::loadDataSettingsFromJson(settingsJsonPath);
+                    std::filesystem::path settingsJsonSource;
+                    if (useLoadedSettingsJson) {
+                        settings = _dataSettings;
+                        settingsJsonSource = _settingsJsonPath;
+                    }
+                    else if (settingsJsonPath[0] != '\0') {
+                        settingsJsonSource = absPath(settingsJsonPath);
+                        settings = DataLoader::loadDataSettingsFromJson(
+                            settingsJsonSource
+                        );
                     }
                     settings.dataFile = std::filesystem::path(csvPath);
-                    const bool prepared = prepareDataLoad(std::move(settings), true);
+                    const bool showMappingPrompt = settingsJsonSource.empty();
+                    const bool prepared = prepareDataLoad(
+                        std::move(settings),
+                        showMappingPrompt,
+                        std::move(settingsJsonSource)
+                    );
                     if (prepared || _pendingDataSettings.has_value()) {
                         csvPath[0] = '\0';
                         settingsJsonPath[0] = '\0';

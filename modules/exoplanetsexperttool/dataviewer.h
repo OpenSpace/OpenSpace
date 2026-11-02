@@ -149,7 +149,11 @@ public:
 
 private:
     bool initializeData(DataSettings settings);
-    bool prepareDataLoad(DataSettings settings, bool showMappingPrompt = false);
+    bool prepareDataLoad(
+        DataSettings settings,
+        bool showMappingPrompt = false,
+        std::filesystem::path settingsJsonPath = {}
+    );
     bool commitPendingDataLoad();
     void renderPendingDataMappings();
 
@@ -185,7 +189,9 @@ private:
     void computeMeanForColumn(const ColumnKey& key);
 
     DataSettings _dataSettings;
+    std::filesystem::path _settingsJsonPath;
     std::optional<DataSettings> _pendingDataSettings;
+    std::filesystem::path _pendingSettingsJsonPath;
     std::vector<std::string> _pendingDataColumns;
     std::string _pendingDataError;
     bool _isGLInitialized = false;
