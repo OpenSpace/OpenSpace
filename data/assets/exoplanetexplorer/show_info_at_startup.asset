@@ -1,5 +1,5 @@
 asset.onInitialize(function()
-  openspace.setPropertyValueSingle("Modules.ExoplanetsExpertTool.ShowInfoAtStartup", true)
+  openspace.setPropertyValueSingle("Modules.ExoplanetExplorer.ShowInfoAtStartup", true)
 end)
 
 asset.meta = {

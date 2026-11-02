@@ -1,0 +1,432 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <modules/exoplanetexplorer/exoplanetexplorermodule.h>
+
+#include <modules/exoplanetexplorer/rendering/renderabledensitypointcloud.h>
+#include <modules/exoplanetexplorer/rendering/renderablehostcloud.h>
+#include <modules/exoplanetexplorer/rendering/renderableexoplanetglyphcloud.h>
+#include <modules/exoplanetexplorer/rendering/renderablespatialselectionvolume.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/syncengine.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/util/factorymanager.h>
+#include <string_view>
+
+namespace {
+    using namespace openspace;
+
+    constexpr std::string_view _loggerCat = "ExoplanetExplorerModule";
+
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Decides if the GUI for this module should be enabled."
+    };
+
+    constexpr BoolPropertyInfo ShowInfoAtStartupInfo = {
+        .identifier = "ShowInfoAtStartup",
+        .name = "Show Info at Startup",
+        .description = "If true, an info window is shown when starting the application, "
+            "containing information about the research projecs and contact info for "
+            "feedback."
+    };
+
+    constexpr StringPropertyInfo DataConfigFileInfo = {
+        .identifier = "DataConfigFile",
+        .name = "Data Config File",
+        .description = "The path to a file that dictates which dataset to load, what "
+            "columns to use for position, and optional names and descriptions for "
+            "columns and pre-defined filters."
+    };
+
+    constexpr StringPropertyInfo LoadedDataFileInfo = {
+        .identifier = "LoadedDataFile",
+        .name = "Loaded data file",
+        .description = "The path to the currently loaded CSV file, loaded through a "
+            "data configuration file or opened directly in the tool.",
+        .isReadOnly = IsReadOnly::Yes
+    };
+
+    constexpr IntListPropertyInfo FilteredDataRowsInfo = {
+        .identifier = "FilteredDataRows",
+        .name = "Filtered Data Rows",
+        .description = "Contains the indices of the rows in the data file that are "
+            "currently being shown in the tool, excluding the external selection (from "
+            "the website).",
+        .visibility = Visibility::Hidden
+    };
+
+    constexpr IntPropertyInfo HoveredIndexInfo = {
+        .identifier = "HoveredIndex",
+        .name = "Hovered Index",
+        .description = "The index of the currently hovered object.",
+        .visibility = Visibility::Developer
+    };
+
+    struct [[codegen::Dictionary(ExoplanetExplorerModule)]] Parameters {
+        std::optional<std::filesystem::path> dataConfigFile
+            [[codegen::Info(DataConfigFileInfo)]];
+
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
+
+        std::optional<bool> showInfoAtStartup [[codegen::Info(ShowInfoAtStartupInfo)]];
+    };
+#include "exoplanetexplorermodule_codegen.cpp"
+} // namespace
+
+namespace openspace {
+
+using namespace exoplanets;
+
+ExoplanetExplorerModule::ExoplanetExplorerModule()
+    : OpenSpaceModule(Name)
+    , _enabled(EnabledInfo)
+    , _showInfoWindowAtStartup(ShowInfoAtStartupInfo)
+    , _filteredRows(FilteredDataRowsInfo)
+    , _hoveredIndex(HoveredIndexInfo)
+    , _dataConfigFile(DataConfigFileInfo)
+    , _loadedDataFile(LoadedDataFileInfo)
+    , _gui("ExoplanetsToolGui")
+{
+    addProperty(_enabled);
+    _enabled.onChange([this]() {
+        if (!_enabled) {
+            _gui.hideSelectionVolume();
+        }
+    });
+    addProperty(_showInfoWindowAtStartup);
+    addProperty(_dataConfigFile);
+    addProperty(_loadedDataFile);
+
+    _dataConfigFile.onChange([this]() {
+        _gui.initializeDataset();
+    });
+
+    addPropertySubOwner(_gui);
+
+    _filteredRows.setReadOnly(true);
+    addProperty(_filteredRows);
+
+    _hoveredIndex.setReadOnly(true);
+    addProperty(_hoveredIndex);
+
+    // TODO: Renderables are initialized even if modules is disabled
+
+    global::callback::initialize->emplace_back([&]() {
+        global::syncEngine->addSyncable(this);
+
+        LDEBUG("Initializing Exoplanets Expert Tool GUI");
+        _gui.initialize();
+    });
+
+    global::callback::deinitialize->emplace_back([&]() {
+        global::syncEngine->removeSyncable(this);
+
+        LDEBUG("Deinitialize Exoplanets Expert Tool GUI");
+        _gui.deinitialize();
+    });
+
+    global::callback::initializeGL->emplace_back([&]() {
+        LDEBUG("Initializing Exoplanets Expert Tool GUI OpenGL");
+        _gui.initializeGL();
+    });
+
+    global::callback::deinitializeGL->emplace_back([&]() {
+        LDEBUG("Deinitialize Exoplanets Expert Tool GUI OpenGL");
+        _gui.deinitializeGL();
+    });
+
+    global::callback::draw2D->emplace_back([&]() {
+        WindowDelegate& delegate = *global::windowDelegate;
+
+        if (!_enabled || !delegate.isMaster()) {
+            return;
+        }
+
+        const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
+        if (showGui) {
+            const glm::ivec2 windowSize = delegate.currentSubwindowSize();
+            const glm::ivec2 resolution = delegate.currentDrawBufferResolution();
+
+            if (windowSize.x <= 0 || windowSize.y <= 0) {
+                return;
+            }
+
+            const double dt = std::max(delegate.averageDeltaTime(), 0.0);
+            // We don't do any collection of immediate mode user interface, so it
+            // is fine to open and close a frame immediately
+            _gui.startFrame(
+                static_cast<float>(dt),
+                glm::vec2(windowSize),
+                resolution / windowSize,
+                _mousePosition,
+                _mouseButtons
+            );
+
+            _gui.endFrame();
+        }
+    });
+
+    global::callback::keyboard->emplace_back(
+        [&](Key key, KeyModifier mod, KeyAction action, bool isGuiWindow) -> bool {
+            if (!_enabled || !isGuiWindow) {
+                return false;
+            }
+            return _gui.keyCallback(key, mod, action);
+        }
+    );
+
+    global::callback::character->emplace_back(
+        [&](unsigned int codepoint, KeyModifier modifier, bool isGuiWindow) -> bool {
+            if (!isGuiWindow) {
+                return false;
+            }
+            return _gui.charCallback(codepoint, modifier);
+        }
+    );
+
+    global::callback::mousePosition->emplace_back(
+        [&](double x, double y, bool isGuiWindow) {
+            if (!_enabled || !isGuiWindow) {
+                return; // do nothing
+            }
+            _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
+            _gui.mousePositionCallback(_mousePosition);
+        }
+    );
+
+    global::callback::mouseButton->emplace_back(
+        [&](MouseButton button, MouseAction action,
+            KeyModifier modifier, bool isGuiWindow) -> bool
+        {
+            if (!_enabled || !isGuiWindow) {
+                return false;
+            }
+
+            if (action == MouseAction::Press) {
+                _mouseButtons |= (1 << static_cast<int>(button));
+            }
+            else if (action == MouseAction::Release) {
+                _mouseButtons &= ~(1 << static_cast<int>(button));
+            }
+
+            return _gui.mouseButtonCallback(button, action, modifier, _mousePosition);
+        }
+    );
+
+    global::callback::mouseScrollWheel->emplace_back(
+        [&](double, double posY, bool isGuiWindow) -> bool {
+            if (!_enabled || !isGuiWindow) {
+                return false;
+            }
+            return _gui.mouseWheelCallback(posY);
+        }
+    );
+}
+
+bool ExoplanetExplorerModule::enabled() const {
+    return _enabled;
+}
+
+bool ExoplanetExplorerModule::showInfoWindowAtStartup() const {
+    return _showInfoWindowAtStartup;
+}
+
+std::filesystem::path ExoplanetExplorerModule::computedColumnHistoryFile() const {
+    return absPath(
+        "${MODULE_EXOPLANETEXPLORER}/cache/computed_columns_history.json"
+    );
+}
+
+std::filesystem::path ExoplanetExplorerModule::dataConfigFile() const {
+    return std::filesystem::path(_dataConfigFile.value());
+}
+
+void ExoplanetExplorerModule::setLoadedDataFile(const std::filesystem::path& path) {
+    _loadedDataFile = path.string();
+}
+
+ExoplanetExplorerModule::GlyphRenderData
+ExoplanetExplorerModule::glyphRenderData() const {
+    // Mutex to make sure we don't read data while it's being updated in the
+    // middle of a sync
+    std::lock_guard guard(_syncMutex);
+
+    // We return a copy, since the data may be updated asynchronously while rendering,
+    // and we want to avoid any issues with that
+    return _glyphRenderData;
+}
+
+void ExoplanetExplorerModule::updateGlyphRenderData(
+                                                std::vector<GlyphRenderData::Item> data)
+{
+    // OBS! These are set only on master, but should be synced to all the nodes
+    _glyphRenderData.items = std::move(data);
+    _glyphRenderData.timeStamp = global::windowDelegate->applicationTime();
+    _gotNewDataFromGui = true;
+}
+
+void ExoplanetExplorerModule::encode(SyncBuffer* syncBuffer) {
+    std::lock_guard guard(_syncMutex);
+
+    if (!_gotNewDataFromGui) {
+        // Indicate that there is no update (nItems = -1)
+        syncBuffer->encode(-1);
+        return;
+    }
+
+    _gotNewDataFromGui = false;
+
+    LDEBUG("Encode: Encoding glyph render data");
+
+    int nItems = static_cast<int>(_glyphRenderData.items.size());
+    syncBuffer->encode(nItems);
+
+    for (const GlyphRenderData::Item& item : _glyphRenderData.items) {
+        syncBuffer->encode(item.index);
+        syncBuffer->encode(item.component);
+
+        syncBuffer->encode(item.position.x);
+        syncBuffer->encode(item.position.y);
+        syncBuffer->encode(item.position.z);
+
+        size_t nColors = item.colors.size();
+        syncBuffer->encode(nColors);
+        for (const glm::vec4& color : item.colors) {
+            syncBuffer->encode(color.r);
+            syncBuffer->encode(color.g);
+            syncBuffer->encode(color.b);
+            syncBuffer->encode(color.a);
+        }
+
+        syncBuffer->encode(item.inclination);
+        syncBuffer->encode(item.stellarInclination);
+    }
+
+    // Sync timestamp
+    syncBuffer->encode(_glyphRenderData.timeStamp);
+
+    LDEBUG(std::format("Message size: {}", sizeof(syncBuffer->data())));
+
+    LDEBUG("Encode: Done encoding glyph render data");
+}
+
+void ExoplanetExplorerModule::decode(SyncBuffer* syncBuffer) {
+    std::lock_guard guard(_syncMutex);
+    int nItems;
+    syncBuffer->decode(nItems);
+
+    if (nItems == -1) {
+        // No update => no need to change the data
+        return;
+    }
+
+    if (nItems < 0) {
+        LERROR(std::format("Invalid nItems received in sync: {}", nItems));
+        return;
+    }
+
+    LDEBUG("Decode: Decoding glyph data");
+
+    LDEBUG(std::format("Message size: {}", sizeof(syncBuffer->data())));
+
+    _glyphRenderData.items.clear();
+    _glyphRenderData.items.reserve(nItems);
+
+    for (size_t i = 0; i < nItems; i++) {
+        GlyphRenderData::Item item;
+        syncBuffer->decode(item.index);
+        syncBuffer->decode(item.component);
+
+        syncBuffer->decode(item.position.x);
+        syncBuffer->decode(item.position.y);
+        syncBuffer->decode(item.position.z);
+
+        size_t nColors;
+        syncBuffer->decode(nColors);
+
+        for (size_t j = 0; j < nColors; j++) {
+            glm::vec4 color;
+            syncBuffer->decode(color.r);
+            syncBuffer->decode(color.g);
+            syncBuffer->decode(color.b);
+            syncBuffer->decode(color.a);
+            item.colors.push_back(color);
+        }
+        syncBuffer->decode(item.inclination);
+        syncBuffer->decode(item.stellarInclination);
+
+        _glyphRenderData.items.push_back(std::move(item));
+    }
+
+    syncBuffer->decode(_glyphRenderData.timeStamp);
+
+    LDEBUG("Decode: Done decoding glyph data");
+}
+
+void ExoplanetExplorerModule::internalInitialize(const Dictionary& dict) {
+    std::filesystem::create_directories(
+        computedColumnHistoryFile().parent_path()
+    );
+
+    const Parameters p = codegen::bake<Parameters>(dict);
+
+    if (p.dataConfigFile.has_value()) {
+        _dataConfigFile = (*p.dataConfigFile).string();
+    }
+
+    _enabled = p.enabled.value_or(false);
+    _showInfoWindowAtStartup = p.showInfoAtStartup.value_or(false);
+
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    assert_msg(fRenderable, "No renderable factory existed");
+
+    fRenderable->registerClass<RenderableHostCloud>("RenderableHostCloud");
+    fRenderable->registerClass<RenderableExoplanetGlyphCloud>(
+        "RenderableExoplanetGlyphCloud"
+    );
+    fRenderable->registerClass<RenderableSpatialSelectionVolume>(
+        "RenderableSpatialSelectionVolume"
+    );
+    fRenderable->registerClass<RenderableDensityPointCloud>(
+        "RenderableDensityPointCloud"
+    );
+}
+
+std::vector<openspace::Documentation>
+ExoplanetExplorerModule::documentations() const
+{
+    return {
+        RenderableHostCloud::Documentation(),
+        RenderableExoplanetGlyphCloud::Documentation(),
+        RenderableSpatialSelectionVolume::Documentation(),
+        RenderableDensityPointCloud::Documentation()
+    };
+}
+
+} // namespace openspace

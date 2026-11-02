@@ -1,0 +1,136 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef __OPENSPACE_MODULE_EXOPLANETEXPLORER___FILTERINGVIEW___H__
+#define __OPENSPACE_MODULE_EXOPLANETEXPLORER___FILTERINGVIEW___H__
+
+#include <modules/exoplanetexplorer/datastructures.h>
+#include <modules/exoplanetexplorer/util/columnfilter.h>
+#include <filesystem>
+#include <optional>
+#include <string>
+
+namespace openspace::exoplanets {
+
+class DataViewer;
+class SpatialSelectionView;
+struct SavedSelection;
+
+class FilteringView {
+public:
+    FilteringView(DataViewer& dataViewer, const DataSettings& dataSettings);
+
+    bool isUsingRowFiltering() const;
+    bool isUsingExternalFiltering() const;
+    bool isUsingSpatialFiltering() const;
+    bool useCurrentSpatialQueryAsFilter();
+    bool disableSpatialFiltering();
+
+    int activeFilters() const;
+    std::string rowLimitDescription() const;
+    std::string spatialFilterDescription(
+        const SpatialSelectionView& spatialSelectionView) const;
+
+    void renderAppliedColumnFilters() const;
+
+    // Return true if filtering was changed
+    bool render(bool* open, const SpatialSelectionView& spatialSelectionView);
+
+    // Return the rows matching the current filtering
+    std::vector<size_t> applyFiltering(const std::vector<ExoplanetItem>& data,
+        const std::vector<int>& externalSelection,
+        const SpatialSelectionView& spatialSelectionView,
+        std::vector<size_t>& rowsWithoutExternalSelection);
+
+private:
+    const ColumnKey& rowLimitColumn() const;
+    const SavedSelection* appliedSavedSelection(
+        const SpatialSelectionView& spatialSelectionView) const;
+
+    void resetInternalFilters();
+    void updateActiveFilterCount();
+    void setStatus(std::string message, bool isError = false, std::string warning = "");
+
+    // Spatial filter, if enabled, is written to a companion "<stem>.spatial.json" file
+    void saveToFile(const std::filesystem::path& path,
+        const SpatialSelectionView& spatialSelectionView);
+    // Throws and leaves the current filtering untouched if the file can't be applied
+    void loadFromFile(const std::filesystem::path& path, bool merge);
+    // Returns true if the filtering was changed
+    bool tryLoadFromFile(const std::filesystem::path& path, bool merge);
+
+    bool renderMenuBar();
+    bool renderSaveLoadPopups(const SpatialSelectionView& spatialSelectionView);
+
+    bool renderColumnFilterSettings();
+    bool renderRowLimitFilterSettings();
+    bool renderSpatialFilterSettings(
+        const SpatialSelectionView& spatialSelectionView);
+    bool renderExternalFilterSettings();
+
+    void applyRowLimit(const std::vector<ExoplanetItem>& data,
+        std::vector<size_t>& prefilteredData);
+    void applyExternalSelection(const std::vector<int>& externalSelection,
+        std::vector<size_t>& prefilteredData);
+    void applySpatialSelection(const std::vector<ExoplanetItem>& data,
+        const SpatialSelectionView& spatialSelectionView,
+        std::vector<size_t>& prefilteredData) const;
+
+    struct ColumnFilterEntry {
+        ColumnKey column;
+        ColumnFilter filter;
+        bool enabled = true;
+    };
+    std::vector<ColumnFilterEntry> _columnFilters;
+    ColumnKey _newFilterColumn;
+    std::vector<std::vector<bool>> _quickFilterFlags;
+    int _editingFilterIndex = -1;
+
+    bool _limitNumberOfRows = false;
+    int _nRows = 100;
+    bool _useHighestValue = true;
+    ColumnKey _rowLimitColumn;
+
+    // Filter selection from webpage
+    bool _useExternalSelection = false;
+    bool _overrideInternalSelection = false;
+
+    bool _useSpatialSelection = false;
+    std::optional<size_t> _appliedSavedSpatialSelection;
+
+    int _nActiveFilters = 0;
+
+    bool _openSavePopup = false;
+    bool _openLoadPathPopup = false;
+    std::string _statusMessage;
+    std::string _statusWarning;
+    bool _statusIsError = false;
+
+    DataViewer& _dataViewer;
+    const std::vector<DataSettings::QuickFilterGroup>& _quickFilterGroups;
+};
+
+} // namespace openspace::exoplanets
+
+#endif // __OPENSPACE_MODULE_EXOPLANETEXPLORER___FILTERINGVIEW___H__

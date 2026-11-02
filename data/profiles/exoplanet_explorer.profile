@@ -98,9 +98,9 @@
       "value": "100"
     },
     {
-      "name": "Modules.ExoplanetsExpertTool.DataConfigFile",
+      "name": "Modules.ExoplanetExplorer.DataConfigFile",
       "type": "setPropertyValueSingle",
-      "value": "${MODULE_EXOPLANETSEXPERTTOOL}/scripts/datasettings_exoplanets.json"
+      "value": "${MODULE_EXOPLANETEXPLORER}/scripts/datasettings_exoplanets.json"
     }
   ],
   "time": {
