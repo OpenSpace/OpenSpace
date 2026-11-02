@@ -1379,6 +1379,19 @@ void DataViewer::render() {
             _filteredDataWithoutExternalSelection
         );
 
+        const bool hasActiveFilters = _filteringView->activeFilters() > 0 ||
+            _filteringView->isUsingRowFiltering() ||
+            _filteringView->isUsingSpatialFiltering();
+
+        global::scriptEngine->queueScript(
+            std::format(
+                "openspace.setPropertyValueSingle('{}', {})",
+                "Modules.ExoplanetExplorer.HasActiveFilters",
+                hasActiveFilters
+            ),
+            ScriptEngine::ShouldBeLogged::No
+        );
+
         updateFilteredRowsProperty();
 
         // Clear selection

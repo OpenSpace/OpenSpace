@@ -50,7 +50,7 @@ namespace {
 
     constexpr BoolPropertyInfo ShowInfoAtStartupInfo = {
         .identifier = "ShowInfoAtStartup",
-        .name = "Show Info at Startup",
+        .name = "Show info at startup",
         .description = "If true, an info window is shown when starting the application, "
             "containing information about the research projecs and contact info for "
             "feedback."
@@ -58,7 +58,7 @@ namespace {
 
     constexpr StringPropertyInfo DataConfigFileInfo = {
         .identifier = "DataConfigFile",
-        .name = "Data Config File",
+        .name = "Data config file",
         .description = "The path to a file that dictates which dataset to load, what "
             "columns to use for position, and optional names and descriptions for "
             "columns and pre-defined filters."
@@ -72,9 +72,17 @@ namespace {
         .isReadOnly = IsReadOnly::Yes
     };
 
+    constexpr BoolPropertyInfo HasActiveFiltersInfo = {
+        .identifier = "HasActiveFilters",
+        .name = "Has active filters",
+        .description = "Whether column filters, quick filters, a row limit, or spatial "
+            "filtering are active, excluding the external selection from the webpage.",
+        .isReadOnly = IsReadOnly::Yes
+    };
+
     constexpr IntListPropertyInfo FilteredDataRowsInfo = {
         .identifier = "FilteredDataRows",
-        .name = "Filtered Data Rows",
+        .name = "Filtered data rows",
         .description = "Contains the indices of the rows in the data file that are "
             "currently being shown in the tool, excluding the external selection (from "
             "the website).",
@@ -107,6 +115,7 @@ ExoplanetExplorerModule::ExoplanetExplorerModule()
     : OpenSpaceModule(Name)
     , _enabled(EnabledInfo)
     , _showInfoWindowAtStartup(ShowInfoAtStartupInfo)
+    , _hasActiveFilters(HasActiveFiltersInfo)
     , _filteredRows(FilteredDataRowsInfo)
     , _hoveredIndex(HoveredIndexInfo)
     , _dataConfigFile(DataConfigFileInfo)
@@ -122,6 +131,7 @@ ExoplanetExplorerModule::ExoplanetExplorerModule()
     addProperty(_showInfoWindowAtStartup);
     addProperty(_dataConfigFile);
     addProperty(_loadedDataFile);
+    addProperty(_hasActiveFilters);
 
     _dataConfigFile.onChange([this]() {
         _gui.initializeDataset();

@@ -85,6 +85,7 @@ protected:
 
     BoolProperty _enabled;
     BoolProperty _showInfoWindowAtStartup;
+    BoolProperty _hasActiveFilters;
     IntListProperty _filteredRows;
     IntProperty _hoveredIndex;
     StringProperty _dataConfigFile;
