@@ -65,6 +65,7 @@ public:
     bool enabled() const;
     bool showInfoWindowAtStartup() const;
     std::filesystem::path dataConfigFile() const;
+    void setLoadedDataFile(const std::filesystem::path& path);
     std::filesystem::path computedColumnHistoryFile() const;
 
     GlyphRenderData glyphRenderData() const;
@@ -87,6 +88,7 @@ protected:
     IntListProperty _filteredRows;
     IntProperty _hoveredIndex;
     StringProperty _dataConfigFile;
+    StringProperty _loadedDataFile;
 
     exoplanets::gui::Gui _gui;
     glm::vec2 _mousePosition = glm::vec2(0.f);

@@ -64,6 +64,14 @@ namespace {
             "columns and pre-defined filters."
     };
 
+    constexpr StringPropertyInfo LoadedDataFileInfo = {
+        .identifier = "LoadedDataFile",
+        .name = "Loaded data file",
+        .description = "The path to the currently loaded CSV file, loaded through a "
+            "data configuration file or opened directly in the tool.",
+        .isReadOnly = IsReadOnly::Yes
+    };
+
     constexpr IntListPropertyInfo FilteredDataRowsInfo = {
         .identifier = "FilteredDataRows",
         .name = "Filtered Data Rows",
@@ -102,6 +110,7 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     , _filteredRows(FilteredDataRowsInfo)
     , _hoveredIndex(HoveredIndexInfo)
     , _dataConfigFile(DataConfigFileInfo)
+    , _loadedDataFile(LoadedDataFileInfo)
     , _gui("ExoplanetsToolGui")
 {
     addProperty(_enabled);
@@ -112,6 +121,7 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     });
     addProperty(_showInfoWindowAtStartup);
     addProperty(_dataConfigFile);
+    addProperty(_loadedDataFile);
 
     _dataConfigFile.onChange([this]() {
         _gui.initializeDataset();
@@ -255,6 +265,10 @@ std::filesystem::path ExoplanetsExpertToolModule::computedColumnHistoryFile() co
 
 std::filesystem::path ExoplanetsExpertToolModule::dataConfigFile() const {
     return std::filesystem::path(_dataConfigFile.value());
+}
+
+void ExoplanetsExpertToolModule::setLoadedDataFile(const std::filesystem::path& path) {
+    _loadedDataFile = path.string();
 }
 
 ExoplanetsExpertToolModule::GlyphRenderData
