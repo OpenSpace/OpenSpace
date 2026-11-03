@@ -567,8 +567,15 @@ bool DataViewer::initializeData(DataSettings settings) {
     _filterChanged = true;
     _isInitialized = true;
 
-    auto mod = global::moduleEngine->module<ExoplanetExplorerModule>();
-    mod->setLoadedDataFile(currentDataFile());
+    // This is a bit hacky but correctly formats the loaded data file path to work with
+    // Lua. Might be some better way to do it
+    Dictionary loadedData;
+    loadedData.setValue("path", currentDataFile().string());
+    global::scriptEngine->queueScript(std::format(
+        "openspace.setPropertyValueSingle('{}', ({}).path)",
+        "Modules.ExoplanetExplorer.LoadedDataFile",
+        formatLua(loadedData)
+    ));
 
     return true;
 }

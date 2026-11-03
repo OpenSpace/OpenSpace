@@ -287,10 +287,6 @@ std::filesystem::path ExoplanetExplorerModule::dataConfigFile() const {
     return std::filesystem::path(_dataConfigFile.value());
 }
 
-void ExoplanetExplorerModule::setLoadedDataFile(const std::filesystem::path& path) {
-    _loadedDataFile = path.string();
-}
-
 ExoplanetExplorerModule::GlyphRenderData
 ExoplanetExplorerModule::glyphRenderData() const {
     // Mutex to make sure we don't read data while it's being updated in the
