@@ -110,8 +110,6 @@ void Gui::initializeGL() {
 
     opengl::updateUniformLocations(*_program, _uniformCache);
 
-    ImGuiIO& io = ImGui::GetIO();
-
     // Keyboard navigation would be nice, but leads to conflicts in capturing when using
     // CTRL to double click on a glyph and open a new window. Also, it does not really
     // together with the WebGui
@@ -120,10 +118,10 @@ void Gui::initializeGL() {
     {
         unsigned char* texData = nullptr;
         glm::ivec2 texSize = glm::ivec2(0);
-        for (int i = 0; i < nWindows; ++i) {
+        for (size_t i = 0; i < nWindows; ++i) {
             setCurrectContext(_contexts[i]);
 
-            io.Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
+            ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
         }
 
         _fontTexture = std::make_unique<opengl::Texture>(
@@ -138,10 +136,10 @@ void Gui::initializeGL() {
         );
         _fontTexture->setName("ExoGui Text");
     }
-    for (int i = 0; i < nWindows; ++i) {
+    for (size_t i = 0; i < nWindows; ++i) {
         uintptr_t texture = static_cast<GLuint>(*_fontTexture);
         setCurrectContext(_contexts[i]);
-        io.Fonts->TexID = reinterpret_cast<void*>(texture);
+        ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(texture);
     }
 
     glGenBuffers(1, &vbo);
