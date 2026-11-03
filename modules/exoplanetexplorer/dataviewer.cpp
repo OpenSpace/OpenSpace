@@ -375,7 +375,18 @@ void DataViewer::renderPendingDataMappings() {
         const char* preview = selected.empty() ? "Select a column" : selected.c_str();
         bool changed = false;
         if (ImGui::BeginCombo(label, preview)) {
+            static ImGuiTextFilter columnFilter;
+            if (ImGui::IsWindowAppearing()) {
+                ImGui::SetKeyboardFocusHere();
+                columnFilter.Clear();
+            }
+            columnFilter.Draw("##Filter");
+
             for (const std::string& column : _pendingDataColumns) {
+                if (!columnFilter.PassFilter(column.c_str())) {
+                    continue;
+                }
+
                 const bool isSelected = selected == column;
                 if (ImGui::Selectable(column.c_str(), isSelected)) {
                     selected = column;
