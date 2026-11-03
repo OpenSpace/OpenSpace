@@ -9,6 +9,17 @@ local DomeSetup = {
 
     -- Remove fade glyphs event - does not work in dome
     openspace.asset.remove("${ASSETS}/exoplanetexplorer/events/fade_glyphs.asset")
+
+    -- Live charts should be made bigger for the dome setup
+    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceBrowser_ScatterPlotMatrix.Placement.Scale", 0.630000)
+    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceBrowser_ScatterPlotMatrix.Placement.RadiusAzimuthElevation", {2.000000,1.064651,0.575959})
+    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceBrowser_ScatterPlotMatrix.ZoomLevel", 2.700000)
+    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceBrowser_ScatterPlotMatrix.Dimensions", {1920.000000,1800.000000})
+
+    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceBrowser_ParallelCoordinates.Dimensions", {3000.000000,1679.000000})
+    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceBrowser_ParallelCoordinates.ZoomLevel", 2.870000)
+    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceBrowser_ParallelCoordinates.Placement.RadiusAzimuthElevation", {2.000000,5.323254,0.418879})
+    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceBrowser_ParallelCoordinates.Placement.Scale", 0.650000)
   ]],
   Documentation = [[ExoplanetExplorer dome setup (Nkpg dome)]],
   GuiPath = "/ExoplanetExplorer",
