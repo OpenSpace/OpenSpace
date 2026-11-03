@@ -32,6 +32,7 @@
 #include <openspace/format.h>
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/assert.h>
+#include <iostream>
 #include <string_view>
 
 namespace {
@@ -130,10 +131,12 @@ void BrowserClient::LoadHandler::OnLoadError(CefRefPtr<CefBrowser>, CefRefPtr<Ce
         return;
     }
 
-    LWARNING(std::format(
+    // Using std::cout here instead of the logging macros as we don't want to pass the
+    // error straight back to the CEF context
+    std::cout << std::format(
         "CEF load error ({}): {} for '{}'",
         static_cast<int>(errorCode), errorText.ToString(), failedUrl.ToString()
-    ));
+    ) << std::endl;
 }
 
 bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle,
@@ -202,24 +205,18 @@ bool BrowserClient::DisplayHandler::OnConsoleMessage(CefRefPtr<CefBrowser>,
                                                      const CefString& message,
                                                      const CefString& source, int line)
 {
-    const std::string msg = std::format(
-        "CEF console ({}:{}): {}", source.ToString(), line, message.ToString()
-    );
-    switch (level) {
-        case LOGSEVERITY_ERROR:
-        case LOGSEVERITY_FATAL:
-            LERROR(msg);
-            break;
-        case LOGSEVERITY_WARNING:
-            LWARNING(msg);
-            break;
-        case LOGSEVERITY_INFO:
-            LINFO(msg);
-            break;
-        default:
-            LDEBUG(msg);
-            break;
-    }
+    static std::unordered_map<cef_log_severity_t, std::string_view> Severity = {
+        { LOGSEVERITY_ERROR, "error" },
+        { LOGSEVERITY_FATAL, "fatal" },
+        { LOGSEVERITY_WARNING, "warning" },
+        { LOGSEVERITY_INFO, "info" }
+    };
+
+    std::string_view s = Severity.contains(level) ? Severity[level] : "";
+
+    std::cout << std::format(
+        "CEF console ({} {}:{}): {}", s, source.ToString(), line, message.ToString()
+    ) << std::endl;
     return false;
 }
 
