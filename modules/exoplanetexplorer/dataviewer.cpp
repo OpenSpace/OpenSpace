@@ -1023,6 +1023,43 @@ void DataViewer::render() {
 #ifdef SHOW_IMGUI_HELPERS
             ImGui::MenuItem("ImGui Helpers", NULL, &showHelpers);
 #endif
+            ImGui::Separator();
+            if (ImGui::MenuItem("Reset window positions")) {
+                const ImGuiViewport* viewport = ImGui::GetMainViewport();
+                const char* windows[] = {
+                    "Table",
+                    "Filters",
+                    "Color mapping",
+                    "Compute data columns",
+                    "Spatial Selection",
+                    "Available numeric columns",
+                    "Available numeric constants",
+                    "Set table columns"
+                };
+
+                const float step = std::min(
+                    25.f,
+                    0.05f * std::min(viewport->WorkSize.x, viewport->WorkSize.y)
+                );
+                float windowOffset = step;
+                for (const char* name : windows) {
+                    ImGui::SetWindowPos(
+                        name,
+                        ImVec2(
+                            viewport->WorkPos.x + windowOffset,
+                            viewport->WorkPos.y + windowOffset
+                        ),
+                        ImGuiCond_Always
+                    );
+                    windowOffset += step;
+                }
+            }
+            ImGui::SameLine();
+            view::helper::renderHelpMarker(
+                "Reset the position of all windows to a default location. This is useful "
+                "if the windows are off-screen or hard to find."
+            );
+
             ImGui::EndMenu();
         }
 
