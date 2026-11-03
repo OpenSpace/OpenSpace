@@ -89,6 +89,15 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
     _otherColumns.shrink_to_fit();
     allColumnsOrdered.insert(allColumnsOrdered.end(), _otherColumns.begin(), _otherColumns.end());
     _selectedOtherColumns.assign(_otherColumns.size(), false);
+
+    // If no named columns are selected, select the first few other columns by default
+    constexpr size_t nColumns = 20;
+    if (_namedColumns.empty()) {
+        for (size_t i = 0; i < _otherColumns.size() && i < nColumns; i++) {
+            _selectedOtherColumns[i] = true;
+        }
+    }
+
     _computedColumns.clear();
     _computedColumnDescriptions.clear();
     _selectedComputedColumns.clear();
