@@ -767,10 +767,14 @@ void WindowControl::resetToDefaults() {
     emit windowChanged(_monitorIndexDefault, _windowIndex, _windowDimensions);
 }
 
-void WindowControl::setDimensions(int x, int y, int width, int height) {
-    _windowDimensions = QRect(x, y, width, height);
+void WindowControl::setSize(int width, int height) {
+    _windowDimensions.setSize(QSize(width, height));
     _sizeX->setValue(width);
     _sizeY->setValue(height);
+}
+
+void WindowControl::setPosition(int x, int y) {
+    _windowDimensions.moveTo(x, y);
     _offsetX->setValue(x);
     _offsetY->setValue(y);
 }

@@ -72,14 +72,20 @@ public:
     void resetToDefaults();
 
     /**
-     * Sets the window dimensions.
+     * Sets the window size.
      *
-     * \param x The x coordinate to set the window to
-     * \param y The y coordinate to set the window to
      * \param width The width to set the window to
      * \param height The height to set the window to
      */
-    void setDimensions(int x, int y, int width, int height);
+    void setSize(int width, int height);
+
+    /**
+     * Sets the window position.
+     *
+     * \param x The x coordinate to set the window to
+     * \param y The y coordinate to set the window to
+     */
+    void setPosition(int x, int y);
 
     /**
      * Sets the monitor selection combobox.

@@ -138,13 +138,12 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
         }
 
         //
-        // Get position for the window in monitor coordinates
-        unsigned int posX = 0;
-        unsigned int posY = 0;
+        // Get position for the window in monitor coordinates. If the configuration does
+        // not specify a position, we keep the default position of the window control
         wCtrl->setMonitorSelection(monitorNum);
         if (w.pos.has_value()) {
-            posX = w.pos->x;
-            posY = w.pos->y;
+            unsigned int posX = w.pos->x;
+            unsigned int posY = w.pos->y;
             // Convert offsets to coordinates relative to the selected monitor bounds,
             // since window offsets are stored n the sgct config file relative to the
             // coordinates of the total "canvas" of all displays
@@ -152,9 +151,10 @@ void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
                 posX -= monitorSizeList[monitorNum].x();
                 posY -= monitorSizeList[monitorNum].y();
             }
+            wCtrl->setPosition(posX, posY);
         }
         glm::ivec2 sz = w.size.value_or(glm::ivec2(1920, 1080));
-        wCtrl->setDimensions(posX, posY, sz.x, sz.y);
+        wCtrl->setSize(sz.x, sz.y);
 
         //
         // Get Window name
