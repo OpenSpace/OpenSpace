@@ -177,7 +177,15 @@ void SystemViewer::renderAllSystemViews() {
         }
 
         bool isOpen = true;
-        ImGui::SetNextWindowSize(ImVec2(0.f, 0.f), ImGuiCond_Appearing);
+        const float width = std::min(
+            48.f * ImGui::GetTextLineHeight(),
+            0.9f * ImGui::GetMainViewport()->WorkSize.x
+        );
+        const float height = std::min(
+            24.f * ImGui::GetTextLineHeightWithSpacing(),
+            0.9f * ImGui::GetMainViewport()->WorkSize.y
+        );
+        ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Appearing);
         const ExoplanetItem& item = _dataViewer.data()[rowIndex];
         const bool visible = ImGui::Begin(objectWindowName(item, rowIndex).c_str(), &isOpen);
         if (visible) {
@@ -470,22 +478,55 @@ void SystemViewer::renderObjectViewContent(size_t rowIndex) {
         return;
     }
 
+    static bool showObjectErrorColumns = false;
+
     const ExoplanetItem& item = _dataViewer.data()[rowIndex];
     ImGui::Text("Object details");
+    ImGui::SameLine();
+    ImGui::Checkbox("Show error columns", &showObjectErrorColumns);
+    ImGui::SameLine();
+    view::helper::renderHelpMarker(
+        "Show columns that represent error values (end in 'err1' or 'err2')."
+    );
     ImGui::Separator();
 
+    std::vector<ColumnKey> columns;
+    columns.reserve(_dataViewer.columns().size());
     for (const ColumnKey& key : _dataViewer.columns()) {
-        if (!_dataViewer.hasColumn(key)) {
+        if (!showObjectErrorColumns && (key.ends_with("err1") || key.ends_with("err2"))) {
             continue;
         }
-        ImGui::Text("%s:", _dataViewer.columnName(key));
-        ImGui::SameLine();
-        _dataViewer.renderColumnValue(key, item);
-        _dataViewer.renderUncertaintyIndicator(key, item);
-        if (_dataViewer.hasColumnDescription(key)) {
-            ImGui::SameLine();
-            view::helper::renderHelpMarker(_dataViewer.columnDescription(key));
+        if (_dataViewer.hasColumn(key)) {
+            columns.push_back(key);
         }
+    }
+    if (columns.empty()) {
+        return;
+    }
+
+    const float height = std::max(ImGui::GetContentRegionAvail().y, 1.f);
+
+    constexpr ImGuiTableFlags Flags = ImGuiTableFlags_ScrollY |
+        ImGuiTableFlags_ScrollX | ImGuiTableFlags_RowBg |
+        ImGuiTableFlags_SizingFixedFit;
+
+    if (ImGui::BeginTable("ObjectDetails", 2, Flags, ImVec2(0.f, height))) {
+        ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthFixed);
+
+        for (const ColumnKey& key : columns) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("%s:", _dataViewer.columnName(key));
+            ImGui::TableSetColumnIndex(1);
+            _dataViewer.renderColumnValue(key, item);
+            _dataViewer.renderUncertaintyIndicator(key, item);
+            if (_dataViewer.hasColumnDescription(key)) {
+                ImGui::SameLine();
+                view::helper::renderHelpMarker(_dataViewer.columnDescription(key));
+            }
+        }
+        ImGui::EndTable();
     }
 }
 
