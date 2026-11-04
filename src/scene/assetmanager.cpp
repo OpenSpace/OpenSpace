@@ -1280,7 +1280,6 @@ std::string AssetManager::tokenizePath(const std::filesystem::path& path) const 
     return path.generic_string();
 }
 
-
 LuaLibrary AssetManager::luaLibrary() {
     return {
         "asset",
