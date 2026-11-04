@@ -613,18 +613,6 @@ df.replace({'\'': ''}, regex=True, inplace=True)
 print("Writing data to file...")
 df.to_csv(dataFileName + ".csv", index=False)
 
-# Also print json string as a variable in a javascript file
-jsonString = df.to_json(orient='records')
-
-with open(dataFileName + ".json", 'w') as f:
-    f.write(jsonString)
-
-with open(dataFileName + ".js", 'w') as f:
-    f.write("let dataString = ")
-    f.write("'" + jsonString + "'")
-    f.write(";\n")
-    f.write("const data = JSON.parse(dataString);")
-
 print("Done!")
 
 
