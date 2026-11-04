@@ -12,7 +12,7 @@ Dataset settings JSON files describe how the Exoplanet Expert Tool should interp
     "position_dec": "dec_degrees",
     "position_distance": "distance_pc",
     "name": "object_name",
-    "hostName": "host_name"
+    "host_name": "host_name"
   }
 }
 ```

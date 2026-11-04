@@ -5,7 +5,7 @@
         "position_dec": "dec",
         "position_distance": "sy_dist",
         "name": "pl_name",
-        "hostName": "hostname",
+        "host_name": "hostname",
         "ring_size": "pl_orbsmax",
         "reference_name": "pl_refname_name",
         "reference_link": "pl_refname_url",

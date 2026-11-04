@@ -131,7 +131,7 @@ namespace {
             }
         }
         readMapping("name", s.dataMapping.name);
-        readMapping("hostName", s.dataMapping.hostName);
+        readMapping("host_name", s.dataMapping.hostName);
         readMapping("ring_size", s.dataMapping.ringSize);
         readMapping("reference_name", s.dataMapping.referenceName);
         readMapping("reference_link", s.dataMapping.referenceLink);
