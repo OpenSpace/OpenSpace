@@ -113,9 +113,9 @@ ImageInfo loadImage(const std::filesystem::path& filename) {
     int y = 0;
     int n = 0;
 
-    stbi_set_flip_vertically_on_load(1);
+    stbi_set_flip_vertically_on_load_thread(1);
     unsigned char* data = stbi_load(f.c_str(), &x, &y, &n, 0);
-    stbi_set_flip_vertically_on_load(0);
+    stbi_set_flip_vertically_on_load_thread(0);
 
     return loadImageData(data, x, y, n, f);
 }
@@ -136,7 +136,7 @@ ImageInfo loadImage(void* memory, size_t size, const std::string& format) {
     int y = 0;
     int n = 0;
 
-    stbi_set_flip_vertically_on_load(1);
+    stbi_set_flip_vertically_on_load_thread(1);
     unsigned char* data = stbi_load_from_memory(
         reinterpret_cast<unsigned char*>(memory),
         static_cast<int>(size),
@@ -145,7 +145,7 @@ ImageInfo loadImage(void* memory, size_t size, const std::string& format) {
         &n,
         0
     );
-    stbi_set_flip_vertically_on_load(0);
+    stbi_set_flip_vertically_on_load_thread(0);
 
     return loadImageData(data, x, y, n, "Memory");
 }
