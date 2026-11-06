@@ -114,6 +114,18 @@ namespace {
         }
     };
 
+    constexpr BoolPropertyInfo ShowLodCenterInfo = {
+        .identifier = "ShowLodCenter",
+        .name = "Show level of detail center",
+        .description = "Shows a point on the globe surface that is the closest to the "
+            "point the level of detail is centered around, which is affected by the "
+            "'LodCenterOffset'.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
+    };
+
     constexpr BoolPropertyInfo LevelProjectedAreaInfo = {
         .identifier = "LevelByProjectedAreaElseDistance",
         .name = "Level by projected area (else distance)",
@@ -316,6 +328,24 @@ namespace {
         .defaults = {
             .value = 15.f,
             .minMax = { 1.f, 50.f }
+        }
+    };
+
+    constexpr DVec2PropertyInfo LodCenterOffsetInfo = {
+        .identifier = "LodCenterOffset",
+        .name = "Level of detail center offset",
+        .description = "Offsets the point that the level of detail is centered around. "
+            "By default, the highest detail is placed at the point of the globe closest "
+            "to the camera. The offset is given in the camera's frame, where x is to "
+            "the right and y is up, and is relative to a distance between the camera's "
+            "altitude above the globe surface and its distance to the globe center. "
+            "This makes it possible to move the detail on screen, for example if the "
+            "rendering is rotated.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::dvec2(0.0),
+            .minMax = { glm::dvec2(-2.0), glm::dvec2(2.0) },
+            .stepSize = glm::dvec2(0.01)
         }
     };
 
@@ -625,6 +655,8 @@ namespace {
         std::optional<float> targetLodScaleFactor
             [[codegen::Info(TargetLodScaleFactorInfo)]];
 
+        std::optional<glm::dvec2> lodCenterOffset [[codegen::Info(LodCenterOffsetInfo)]];
+
         std::optional<int> modelSpaceRenderingCutoffLevel
             [[codegen::Info(ModelSpaceRenderingInfo), codegen::greater(0)]];
 
@@ -702,10 +734,12 @@ RenderableGlobe::RenderableGlobe(const Dictionary& dictionary)
     , _eclipseHardShadows(EclipseHardShadowsInfo)
     , _targetLodScaleFactor(TargetLodScaleFactorInfo)
     , _currentLodScaleFactor(CurrentLodScaleFactorInfo)
+    , _lodCenterOffset(LodCenterOffsetInfo)
     , _orenNayarRoughness(OrenNayarRoughnessInfo)
     , _nActiveLayers(NActiveLayersInfo)
     , _debugProperties({
         .showChunkEdges = BoolProperty(ShowChunkEdgeInfo),
+        .showLodCenter = BoolProperty(ShowLodCenterInfo),
         .levelByProjectedAreaElseDistance = BoolProperty(LevelProjectedAreaInfo),
         .resetTileProviders = TriggerProperty(ResetTileProviderInfo),
         .performFrustumCulling = BoolProperty(PerformFrustumCullingInfo),
@@ -820,6 +854,9 @@ RenderableGlobe::RenderableGlobe(const Dictionary& dictionary)
     addProperty(_targetLodScaleFactor);
     addProperty(_currentLodScaleFactor);
 
+    _lodCenterOffset = p.lodCenterOffset.value_or(_lodCenterOffset);
+    addProperty(_lodCenterOffset);
+
     _orenNayarRoughness = p.orenNayarRoughness.value_or(_orenNayarRoughness);
     addProperty(_orenNayarRoughness);
 
@@ -827,6 +864,7 @@ RenderableGlobe::RenderableGlobe(const Dictionary& dictionary)
     addProperty(_nActiveLayers);
 
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
+    _debugPropertyOwner.addProperty(_debugProperties.showLodCenter);
     _debugPropertyOwner.addProperty(_debugProperties.levelByProjectedAreaElseDistance);
     _debugProperties.resetTileProviders.onChange([&]() { _resetTileProviders = true; });
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
@@ -1298,6 +1336,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         viewTransform;
     const glm::dmat4 mvp = vp * _cachedModelTransform;
 
+    // The center of the level of detail is the same for all chunks, so it is only
+    // computed once per frame
+    _lodCenter = lodCenterPosition(data);
+
     _allChunksAvailable = true;
     updateChunkTree(_leftRoot, data, mvp);
     updateChunkTree(_rightRoot, data, mvp);
@@ -1489,6 +1531,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         renderChunkLocally(*_localChunkBuffer[i], data, depthMapData, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
+
+    if (_debugProperties.showLodCenter) {
+        debugRenderLodCenter(mvp);
+    }
 
     if (global::sessionRecordingHandler->isSavingFramesDuringPlayback() &&
         global::sessionRecordingHandler->shouldWaitForTileLoading())
@@ -1829,6 +1875,26 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
     }
 }
 
+void RenderableGlobe::debugRenderLodCenter(const glm::dmat4& mvp) const {
+    ZoneScoped;
+
+    // Show the point on the surface that is closest to the center of the level of detail
+    const glm::dvec3 surfacePoint = _ellipsoid.cartesianSurfacePosition(
+        _ellipsoid.cartesianToGeodetic2(_lodCenter)
+    );
+
+    const glm::vec4 clippingSpacePoint = glm::vec4(mvp * glm::dvec4(surfacePoint, 1.0));
+
+    glDisable(GL_DEPTH_TEST);
+    glPointSize(15.f);
+    DebugRenderer::ref().renderVertices(
+        { clippingSpacePoint },
+        GL_POINTS,
+        glm::vec4(1.f, 1.f, 0.f, 1.f)
+    );
+    glEnable(GL_DEPTH_TEST);
+}
+
 void RenderableGlobe::setCommonUniforms(opengl::ProgramObject& programObject,
                                         const Chunk& chunk, const RenderData& data)
 {
@@ -2155,14 +2221,14 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk, const RenderData& rende
     return horizon || frustum;
 }
 
-int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
+int RenderableGlobe::desiredLevel(const Chunk& chunk,
                                   const BoundingHeights& heights) const
 {
     ZoneScoped;
 
     const int desiredLevel = _debugProperties.levelByProjectedAreaElseDistance ?
-        desiredLevelByProjectedArea(chunk, renderData, heights) :
-        desiredLevelByDistance(chunk, renderData, heights);
+        desiredLevelByProjectedArea(chunk, heights) :
+        desiredLevelByDistance(chunk, heights);
     const int levelByAvailableData = desiredLevelByAvailableTileData(chunk);
 
     if (LimitLevelByAvailableData && (levelByAvailableData != UnknownDesiredLevel)) {
@@ -2483,16 +2549,69 @@ void RenderableGlobe::calculateEclipseShadows(opengl::ProgramObject& programObje
     }
 }
 
-int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk, const RenderData& data,
+glm::dvec3 RenderableGlobe::lodCenterPosition(const RenderData& data) const {
+    ZoneScoped;
+
+    const glm::dvec3 cameraModel = glm::dvec3(
+        _cachedInverseModelTransform * glm::dvec4(data.camera.position(), 1.0)
+    );
+
+    // Without an offset the center is the camera position, so there is nothing to do
+    if (_lodCenterOffset.value() == glm::dvec2(0.0)) {
+        return cameraModel;
+    }
+
+    const glm::dvec3 viewDir = data.camera.viewDirectionWorldSpace();
+    const glm::dvec3 upDir = data.camera.lookUpVectorWorldSpace();
+    const glm::dvec3 rightDir = glm::cross(viewDir, upDir);
+
+    // The offset is relative to a distance that lies between the camera's altitude and
+    // its distance to the globe center. Using only the altitude makes the offset too
+    // small close to the surface, and using only the center distance makes it too large
+    const glm::dvec3 surfaceModel = _ellipsoid.cartesianSurfacePosition(
+        _ellipsoid.cartesianToGeodetic2(cameraModel)
+    );
+    const glm::dvec3 surfaceWorld = glm::dvec3(
+        _cachedModelTransform * glm::dvec4(surfaceModel, 1.0)
+    );
+    const double altitude = glm::length(data.camera.position() - surfaceWorld);
+    const double centerDistance = glm::length(
+        data.camera.position() - data.modelTransform.translation
+    );
+    const double referenceDistance = std::sqrt(altitude * centerDistance);
+    const glm::dvec2 offset = _lodCenterOffset.value() * referenceDistance;
+    const glm::dvec3 offsetWorld = offset.x * rightDir + offset.y * upDir;
+
+    // Calculations are done in the reference frame of the globe (model space). Hence, the
+    // position needs to be transformed with the inverse model matrix
+    const glm::dvec3 positionWorld = data.camera.position() + offsetWorld;
+    const glm::dvec3 shiftedModel = glm::dvec3(
+        _cachedInverseModelTransform * glm::dvec4(positionWorld, 1.0)
+    );
+
+    // Moving the position in 3D also changes its altitude, which would change the level
+    // of detail at the point on the surface that we want to center it on (and the
+    // position might even end up inside the globe). Therefore, the shifted position is
+    // moved along the surface normal to have the same altitude as the camera
+    auto signedAltitude = [this](const glm::dvec3& p) {
+        const Geodetic2 geodetic = _ellipsoid.cartesianToGeodetic2(p);
+        const glm::dvec3 normal = _ellipsoid.geodeticSurfaceNormal(geodetic);
+        return glm::dot(p - _ellipsoid.cartesianSurfacePosition(geodetic), normal);
+    };
+
+    const Geodetic2 shiftedGeodetic = _ellipsoid.cartesianToGeodetic2(shiftedModel);
+    const glm::dvec3 shiftedNormal = _ellipsoid.geodeticSurfaceNormal(shiftedGeodetic);
+    const double altitudeDifference =
+        signedAltitude(cameraModel) - signedAltitude(shiftedModel);
+    return shiftedModel + altitudeDifference * shiftedNormal;
+}
+
+int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk,
                                             const BoundingHeights& heights) const
 {
     ZoneScoped;
 
-    // Calculations are done in the reference frame of the globe (model space). Hence, the
-    // camera position needs to be transformed with the inverse model matrix
-    const glm::dvec3 cameraPosition = glm::dvec3(
-        _cachedInverseModelTransform * glm::dvec4(data.camera.position(), 1.0)
-    );
+    const glm::dvec3 cameraPosition = _lodCenter;
 
     const Geodetic2 pointOnPatch = chunk.surfacePatch.closestPoint(
         _ellipsoid.cartesianToGeodetic2(cameraPosition)
@@ -2518,16 +2637,11 @@ int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk, const RenderData
 }
 
 int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk,
-                                                 const RenderData& data,
                                                  const BoundingHeights& heights) const
 {
     ZoneScoped;
 
-    // Calculations are done in the reference frame of the globe (model space). Hence, the
-    // camera position needs to be transformed with the inverse model matrix
-    const glm::dvec3 cameraPosition = glm::dvec3(
-        _cachedInverseModelTransform * glm::dvec4(data.camera.position(), 1.0)
-    );
+    const glm::dvec3 cameraPosition = _lodCenter;
 
     // Approach:
     // The projected area of the chunk will be calculated based on a small area that is
@@ -2843,7 +2957,7 @@ void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data,
         chunk.isVisible = true;
     }
 
-    const int dl = desiredLevel(chunk, data, heights);
+    const int dl = desiredLevel(chunk, heights);
 
     if (dl < chunk.tileIndex.level) {
         chunk.status = Chunk::Status::WantMerge;
