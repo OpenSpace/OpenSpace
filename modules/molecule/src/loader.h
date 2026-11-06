@@ -28,26 +28,16 @@
 #include <core/md_str.h>
 #include <filesystem>
 
-struct md_allocator_i;
-struct md_molecule_t;
-struct md_molecule_api;
-struct md_trajectory_i;
-struct md_trajectory_api;
-struct md_bitfield_t;
+struct md_system_t;
+struct md_system_state_t;
 
 namespace molecule {
 
-md_molecule_api* moleculeApi(std::filesystem::path filename);
+bool loadSystemFromFile(md_system_t* sys, md_system_state_t* state,
+    const std::filesystem::path& file);
 
-md_trajectory_api* trajectoryApi(std::filesystem::path filename);
-
-md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* mol,
-    md_allocator_i* alloc, bool deperiodize_on_load);
-bool close(md_trajectory_i* traj);
-
-bool setRecenterTarget(md_trajectory_i* traj, const md_bitfield_t* atom_mask);
-bool clearCache(md_trajectory_i* traj);
-int64_t numCacheFrames(md_trajectory_i* traj);
+bool publishTrajectoryRun(md_system_t* sys, const std::filesystem::path& file,
+    str_t run);
 
 } // namespace molecule
 

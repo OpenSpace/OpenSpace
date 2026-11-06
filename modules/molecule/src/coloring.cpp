@@ -26,8 +26,12 @@
 
 #include <modules/molecule/src/coloring.h>
 
+#include <md_system.h>
+#include <md_gl.h>
 #include <md_util.h>
-#include <core/md_bitfield.h>
+#include <core/md_bitset.h>
+#include <openspace/glm.h>
+#include <algorithm>
 
 namespace {
     constexpr uint32_t crc32Tab[] = {
@@ -175,13 +179,13 @@ namespace {
 
 namespace molecule {
 
-void uniform(uint32_t* colors, int64_t count, uint32_t rgba, const md_bitfield_t* mask) {
+void uniform(uint32_t* colors, int64_t count, uint32_t rgba, const md_bitmask_t* mask) {
     if (mask) {
-        int64_t begBit = mask->beg_bit;
-        int64_t endBit = mask->end_bit;
-        while ((begBit = md_bitfield_scan(mask, begBit, endBit)) != 0) {
-            int64_t i = begBit - 1;
-            colors[i] = rgba;
+        md_bitset_iter_t it = md_bitmask_iter(mask);
+        while (md_bitset_iter_next(&it)) {
+            if (it.idx < static_cast<uint32_t>(count)) {
+                colors[it.idx] = rgba;
+            }
         }
     }
     else {
@@ -189,129 +193,132 @@ void uniform(uint32_t* colors, int64_t count, uint32_t rgba, const md_bitfield_t
     }
 }
 
-void cpk(uint32_t* colors, int64_t count, const md_molecule_t& mol) {
-    // In the case of coarsegrained molecules, CPK is a bit illdefined as it operates on
-    // elements. What we do instead is to try and ad-hoc guess elements from the atom
-    // names
+void cpk(uint32_t* colors, int64_t count, const md_system_t& sys) {
     if (count == 0) {
         return;
     }
 
-    md_element_t* elements = nullptr;
-    const md_element_t* elem = mol.atom.element;
-
-    if (!elem) {
-        elements = md_array_create(md_element_t, count, default_temp_allocator);
-        md_util_element_guess(elements, md_array_size(elements), &mol);
-        elem = elements;
-    }
-
     for (int64_t i = 0; i < count; i++) {
-        colors[i] = md_util_element_cpk_color(elem[i]);
+        size_t typeIdx = sys.atom.type_idx ? sys.atom.type_idx[i] : 0;
+        colors[i] = md_atom_type_color(&sys.atom.type, typeIdx);
     }
-
-    md_array_free(elements, default_temp_allocator);
 }
 
-void idx(uint32_t* colors, int64_t count, const md_molecule_t&) {
+void idx(uint32_t* colors, int64_t count, const md_system_t&) {
     for (int64_t i = 0; i < count; i++) {
         colors[i] = convertColor(
-            colorFromHash(crc32(reinterpret_cast<char*>(&i), sizeof(i)))
+            colorFromHash(crc32(reinterpret_cast<const char*>(&i), sizeof(i)))
         );
     }
 }
 
-void residueId(uint32_t* colors, int64_t count, const md_molecule_t& mol) {
+void residueId(uint32_t* colors, int64_t count, const md_system_t& sys) {
     setColors(colors, count, 0xFFFFFFFF);
-    if (mol.residue.name && mol.residue.atom_range) {
-        for (int64_t i = 0; i < mol.residue.count; i++) {
-            str_t str = mol.residue.name[i];
-            const uint32_t color = convertColor(
-                colorFromHash(crc32(str.ptr, str.len), 30)
-            );
-            setColors(
-                colors + mol.residue.atom_range[i].beg,
-                mol.residue.atom_range[i].end - mol.residue.atom_range[i].beg,
-                color
-            );
-        }
-    }
-}
-void residueIndex(uint32_t* colors, int64_t count, const md_molecule_t& mol) {
-    setColors(colors, count, 0xFFFFFFFF);
-    if (mol.residue.atom_range) {
-        for (int64_t i = 0; i < mol.residue.count; i++) {
-            const uint32_t color = convertColor(
-                colorFromHash(crc32(reinterpret_cast<char*>(&i), sizeof(i)))
-            );
-            setColors(
-                colors + mol.residue.atom_range[i].beg,
-                mol.residue.atom_range[i].end - mol.residue.atom_range[i].beg,
-                color
-            );
-        }
-    }
-}
-void chainId(uint32_t* colors, int64_t count, const md_molecule_t& mol) {
-    setColors(colors, count, 0xFFFFFFFF);
-    if (mol.chain.atom_range) {
-        for (int64_t i = 0; i < mol.chain.count; i++) {
-            str_t str = mol.chain.id[i];
-            const uint32_t color = convertColor(
-                colorFromHash(crc32(str.ptr, str.len), 30)
-            );
-            setColors(
-                colors + mol.chain.atom_range[i].beg,
-                mol.chain.atom_range[i].end - mol.chain.atom_range[i].beg,
-                color
-            );
-        }
-    }
-}
-
-void chainIndex(uint32_t* colors, int64_t count, const md_molecule_t& mol) {
-    setColors(colors, count, 0xFFFFFFFF);
-    if (mol.chain.atom_range == nullptr) {
-        return;
-    }
-
-    for (int64_t i = 0; i < mol.chain.count; i++) {
+    for (size_t i = 0; i < sys.component.count; i++) {
+        str_t str = md_component_name(&sys.component, i);
         const uint32_t color = convertColor(
-            colorFromHash(crc32(reinterpret_cast<char*>(&i), sizeof(i)))
+            colorFromHash(crc32(str.ptr, str.len), 30)
         );
-        setColors(
-            colors + mol.chain.atom_range[i].beg,
-            mol.chain.atom_range[i].end - mol.chain.atom_range[i].beg,
-            color
-        );
+        md_urange_t range = md_system_component_atom_range(&sys, i);
+        if (range.beg < static_cast<size_t>(count)) {
+            size_t end = std::min(static_cast<size_t>(range.end), static_cast<size_t>(count));
+            setColors(
+                colors + range.beg,
+                end - range.beg,
+                color
+            );
+        }
     }
 }
 
-void secondaryStructure(uint32_t* colors, int64_t count, const md_molecule_t& mol) {
+void residueIndex(uint32_t* colors, int64_t count, const md_system_t& sys) {
+    setColors(colors, count, 0xFFFFFFFF);
+    for (size_t i = 0; i < sys.component.count; i++) {
+        const uint32_t color = convertColor(
+            colorFromHash(crc32(reinterpret_cast<const char*>(&i), sizeof(i)))
+        );
+        md_urange_t range = md_system_component_atom_range(&sys, i);
+        if (range.beg < static_cast<size_t>(count)) {
+            size_t end = std::min(static_cast<size_t>(range.end), static_cast<size_t>(count));
+            setColors(
+                colors + range.beg,
+                end - range.beg,
+                color
+            );
+        }
+    }
+}
+
+void chainId(uint32_t* colors, int64_t count, const md_system_t& sys) {
+    setColors(colors, count, 0xFFFFFFFF);
+    for (size_t i = 0; i < sys.instance.count; i++) {
+        str_t str = md_system_instance_auth_id(&sys, i);
+        if (str.len == 0) {
+            str = md_system_instance_id(&sys, i);
+        }
+        const uint32_t color = convertColor(
+            colorFromHash(crc32(str.ptr, str.len), 30)
+        );
+        md_urange_t range = md_system_instance_atom_range(&sys, i);
+        if (range.beg < static_cast<size_t>(count)) {
+            size_t end = std::min(static_cast<size_t>(range.end), static_cast<size_t>(count));
+            setColors(
+                colors + range.beg,
+                end - range.beg,
+                color
+            );
+        }
+    }
+}
+
+void chainIndex(uint32_t* colors, int64_t count, const md_system_t& sys) {
+    setColors(colors, count, 0xFFFFFFFF);
+    for (size_t i = 0; i < sys.instance.count; i++) {
+        const uint32_t color = convertColor(
+            colorFromHash(crc32(reinterpret_cast<const char*>(&i), sizeof(i)))
+        );
+        md_urange_t range = md_system_instance_atom_range(&sys, i);
+        if (range.beg < static_cast<size_t>(count)) {
+            size_t end = std::min(static_cast<size_t>(range.end), static_cast<size_t>(count));
+            setColors(
+                colors + range.beg,
+                end - range.beg,
+                color
+            );
+        }
+    }
+}
+
+void secondaryStructure(uint32_t* colors, int64_t count, const md_system_t& sys,
+                        const md_secondary_structure_t* ss)
+{
     const uint32_t colorUnknown = 0x22222222;
     const uint32_t colorCoil = 0xDDDDDDDD;
     const uint32_t colorHelix = 0xFF22DD22;
     const uint32_t colorSheet = 0xFFDD2222;
 
     setColors(colors, count, colorUnknown);
-    if (mol.backbone.secondary_structure == nullptr) {
+    if (!ss || sys.protein_backbone.segment.count == 0) {
         return;
     }
 
-    for (int64_t i = 0; i < mol.backbone.count; i++) {
-        const vec4_t& w = convertColor(
-            static_cast<uint32_t>(mol.backbone.secondary_structure[i])
-        );
-        const vec4_t& color =
-            w.x * convertColor(colorCoil) +
-            w.y * convertColor(colorHelix) +
-            w.z * convertColor(colorSheet);
-        md_residue_idx_t resIdx = mol.backbone.residue_idx[i];
-        setColors(
-            colors + mol.residue.atom_range[resIdx].beg,
-            mol.residue.atom_range[resIdx].end - mol.residue.atom_range[resIdx].beg,
-            convertColor(color)
-        );
+    for (size_t i = 0; i < sys.protein_backbone.segment.count; i++) {
+        md_gl_secondary_structure_t gl_ss = md_gl_secondary_structure_convert(ss[i]);
+        float coil = std::max(0.0f, 1.0f - gl_ss.helix - gl_ss.sheet);
+        const vec4_t color =
+            coil * convertColor(colorCoil) +
+            gl_ss.helix * convertColor(colorHelix) +
+            gl_ss.sheet * convertColor(colorSheet);
+        md_component_idx_t compIdx = sys.protein_backbone.segment.comp_idx[i];
+        md_urange_t range = md_system_component_atom_range(&sys, compIdx);
+        if (range.beg < static_cast<size_t>(count)) {
+            size_t end = std::min(static_cast<size_t>(range.end), static_cast<size_t>(count));
+            setColors(
+                colors + range.beg,
+                end - range.beg,
+                convertColor(color)
+            );
+        }
     }
 }
 

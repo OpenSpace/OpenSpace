@@ -40,6 +40,7 @@
 #include <openspace/util/factorymanager.h>
 #include <string_view>
 #include <md_gl.h>
+#include <core/md_str.h>
 
 namespace {
     using namespace openspace;
@@ -188,7 +189,8 @@ void MoleculeModule::internalDeinitializeGL() {
     postprocessing::shutdown();
 
     if (_shaders) {
-        md_gl_shaders_free(_shaders.get());
+        md_gl_shaders_destroy(*_shaders);
+        _shaders.reset();
         md_gl_shutdown();
     }
 }
@@ -264,7 +266,7 @@ void MoleculeModule::initializeShaders() {
 
     md_gl_initialize();
     _shaders = std::make_unique<md_gl_shaders_t>();
-    md_gl_shaders_init(_shaders.get(), ShaderOutputSnippet.data());
+    *_shaders = md_gl_shaders_create(str_from_cstr(ShaderOutputSnippet.data()));
 
     postprocessing::initialize(size.x, size.y);
 

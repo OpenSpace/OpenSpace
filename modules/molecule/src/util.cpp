@@ -28,25 +28,16 @@
 #include <modules/molecule/src/coloring.h>
 #include <openspace/logging/logmanager.h>
 #include <core/md_allocator.h>
-#include <core/md_bitfield.h>
-#include <md_molecule.h>
-#include <md_trajectory.h>
-#include <md_filter.h>
+#include <core/md_bitset.h>
+#include <md_system.h>
 #include <md_gl.h>
 #include <md_util.h>
+#include <algorithm>
 #include <string_view>
+#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "MolUtil";
-
-    constexpr vec4_t convertColor(uint32_t rgba) {
-        return {
-            static_cast<float>((rgba >> 0) & 0xFF) / 255.f,
-            static_cast<float>((rgba >> 8) & 0xFF) / 255.f,
-            static_cast<float>((rgba >> 16) & 0xFF) / 255.f,
-            static_cast<float>((rgba >> 24) & 0xFF) / 255.f
-        };
-    }
 
     constexpr uint32_t convertColor(const glm::vec4& color) {
         const glm::vec4 c =
@@ -60,94 +51,101 @@ namespace {
         return out;
     }
 
-    constexpr uint32_t convertColor(vec4_t color) {
-        return convertColor(glm::vec4(color.x, color.y, color.z, color.w));
+    double cubicSpline1D(double p0, double p1, double p2, double p3, float t, float s) {
+        double t2 = t * t;
+        double t3 = t2 * t;
+        double m1 = s * (p2 - p0) * 0.5;
+        double m2 = s * (p3 - p1) * 0.5;
+        return (2.0 * t3 - 3.0 * t2 + 1.0) * p1 +
+               (t3 - 2.0 * t2 + t) * m1 +
+               (-2.0 * t3 + 3.0 * t2) * p2 +
+               (t3 - t2) * m2;
     }
 } // namespace
 
 namespace molecule {
 
-void updateRepType(md_gl_representation_t& rep, rep::Type type, float scale) {
-    md_gl_representation_args_t repArgs = {};
-    md_gl_representation_type_t repType = 0;
-
+void setDrawOpTypeAndArgs(md_gl_draw_op_t& op, rep::Type type, float scale) {
     switch (type) {
+        case rep::Type::SpaceFill:
+            op.type = MD_GL_REP_SPACE_FILL;
+            op.args.space_fill.radius_scale = scale;
+            break;
         case rep::Type::Licorice:
-            repArgs.licorice.radius = scale * 0.5f;
-            repType = MD_GL_REP_LICORICE;
+            op.type = MD_GL_REP_LICORICE;
+            op.args.licorice.radius = scale * 0.5f;
+            op.args.licorice.color_mode = MD_GL_BOND_MODE_NEAREST;
+            op.args.licorice.sharpness = 1.0f;
+            op.args.licorice.uniform_color = 0;
+            op.args.licorice.bond_orders = true;
             break;
         case rep::Type::Ribbons:
-            repArgs.ribbons.width_scale = scale * 5;
-            repArgs.ribbons.thickness_scale = scale * 5;
-            repType = MD_GL_REP_RIBBONS;
+            op.type = MD_GL_REP_RIBBONS;
+            op.args.ribbons.width_scale = scale * 5.f;
+            op.args.ribbons.thickness_scale = scale * 5.f;
             break;
         case rep::Type::Cartoon:
-            repArgs.cartoon.width_scale = scale * 5;
-            repArgs.cartoon.thickness_scale = scale * 5;
-            repType = MD_GL_REP_CARTOON;
-            break;
-        case rep::Type::SpaceFill:
-            repArgs.space_fill.radius_scale = scale;
-            repType = MD_GL_REP_SPACE_FILL;
+            op.type = MD_GL_REP_CARTOON;
+            op.args.cartoon.coil_scale = scale * 5.f;
+            op.args.cartoon.sheet_scale = scale * 5.f;
+            op.args.cartoon.helix_scale = scale * 5.f;
+            op.args.cartoon.raycast = false;
             break;
     }
-
-    md_gl_representation_set_type_and_args(&rep, repType, repArgs);
 }
 
-void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
-                    rep::Color color, const md_bitfield_t& mask,
-                    const glm::vec4& uniformColor)
+void updateRepColor(md_gl_rep_t rep, const md_system_t& sys,
+                    rep::Color color, const md_bitmask_t& mask,
+                    const glm::vec4& uniformColor,
+                    const md_secondary_structure_t* ss)
 {
-    uint32_t count = static_cast<uint32_t>(mol.atom.count);
+    const uint32_t count = static_cast<uint32_t>(sys.atom.count);
+    if (count == 0) {
+        return;
+    }
 
-    uint32_t* colors = reinterpret_cast<uint32_t*>(
-        md_alloc(default_allocator, count * sizeof(uint32_t))
-    );
-    defer {
-        md_free(default_allocator, colors, count * sizeof(md_flags_t));
-    };
+    std::vector<uint32_t> colors(count);
 
     switch (color) {
         case rep::Color::Cpk:
-            cpk(colors, count, mol);
+            cpk(colors.data(), count, sys);
             break;
         case rep::Color::AtomIndex:
-            idx(colors, count, mol);
+            idx(colors.data(), count, sys);
             break;
         case rep::Color::ResId:
-            residueId(colors, count, mol);
+            residueId(colors.data(), count, sys);
             break;
         case rep::Color::ResIndex:
-            residueIndex(colors, count, mol);
+            residueIndex(colors.data(), count, sys);
             break;
         case rep::Color::ChainId:
-            chainId(colors, count, mol);
+            chainId(colors.data(), count, sys);
             break;
         case rep::Color::ChainIndex:
-            chainIndex(colors, count, mol);
+            chainIndex(colors.data(), count, sys);
             break;
         case rep::Color::SecondaryStructure:
-            secondaryStructure(colors, count, mol);
+            secondaryStructure(colors.data(), count, sys, ss);
             break;
         case rep::Color::Uniform:
-            uniform(colors, count, convertColor(uniformColor));
+            uniform(colors.data(), count, convertColor(uniformColor));
             break;
     }
 
     for (uint32_t i = 0; i < count; i++) {
-        uint32_t bitmask = md_bitfield_test_bit(&mask, i) ? 0xFFFFFFFF : 0x00FFFFFF;
+        uint32_t bitmask = md_bitmask_test_bit(&mask, i) ? 0xFFFFFFFF : 0x00FFFFFF;
         colors[i] &= bitmask;
     }
 
-    md_gl_representation_set_color(&rep, 0, count, colors, 0);
+    md_gl_rep_set_atom_colors(rep, 0, count, colors.data(), 0);
 }
 
-void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
+void interpolateFrame(md_system_state_t& state, const Trajectory* traj,
                       InterpolationType interp, double time, bool ensurePbc)
 {
-    if (!mol.atom.count) {
-        LERROR("Cannot interpolate coords: Molecule is empty");
+    if (!state.xyz || !state.num_atoms) {
+        LERROR("Cannot interpolate coords: State coordinate buffer is empty");
         return;
     }
 
@@ -156,14 +154,13 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         return;
     }
 
-    int64_t nFrames = md_trajectory_num_frames(traj);
+    const int64_t nFrames = trajectoryNumFrames(traj);
     if (!nFrames) {
         LERROR("Cannot interpolate coords: Trajectory is empty");
         return;
     }
 
     const int64_t lastFrame = std::max<int64_t>(0, nFrames - 1);
-    // This is not actually time, but the fractional frame representation
     time = std::clamp(time, 0.0, static_cast<double>(lastFrame));
 
     const float t = static_cast<float>(fract(time));
@@ -176,10 +173,9 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         std::min<int64_t>(f + 2, lastFrame)
     };
 
-    md_vec3_soa_t dst = { .x = mol.atom.x, .y = mol.atom.y, .z = mol.atom.z };
-
     const InterpolationType mode =
         (fIdx[1] != fIdx[2]) ? interp : InterpolationType::Nearest;
+
     switch (mode) {
         case InterpolationType::Nearest:
         {
@@ -187,59 +183,40 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
                 std::clamp<int64_t>(static_cast<int64_t>(time + 0.5), 0, lastFrame);
             FrameData frame = frameData(traj, nearestFrame);
 
-            mol.cell = frame.header->cell;
-            std::memcpy(dst.x, frame.x.data(), frame.x.size_bytes());
-            std::memcpy(dst.y, frame.y.data(), frame.y.size_bytes());
-            std::memcpy(dst.z, frame.z.data(), frame.z.size_bytes());
-
-            if (mol.backbone.count) {
-                std::memcpy(
-                    mol.backbone.secondary_structure,
-                    frame.ss.data(),
-                    frame.ss.size_bytes()
-                );
-            }
+            state.unitcell = frame.unitcell;
+            state.frame = static_cast<double>(nearestFrame);
+            const size_t bytes =
+                std::min(state.num_atoms * sizeof(vec3_t), frame.xyz.size_bytes());
+            std::memcpy(state.xyz, frame.xyz.data(), bytes);
             break;
         }
         case InterpolationType::Linear:
         {
-            FrameData frame[2] = { frameData(traj, fIdx[1]), frameData(traj, fIdx[2]) };
-
-            if (mol.backbone.count) {
-                for (int64_t i = 0; i < mol.backbone.count; i++) {
-                    const vec4_t ss[2] = {
-                        convertColor(frame[0].ss[i]),
-                        convertColor(frame[1].ss[i])
-                    };
-                    const vec4_t ssr = vec4_lerp(ss[0], ss[1], t);
-                    mol.backbone.secondary_structure[i] = convertColor(ssr);
-                }
-            }
-
-            // @NOTE(Robin)  It is ugly to interpolate a matrix. It works in this case
-            // because only the extent of each axis and not the angles between them change
-            mol.cell.basis = lerp(
-                frame[0].header->cell.basis,
-                frame[0].header->cell.basis,
-                t
-            );
-            mol.cell.inv_basis = lerp(
-                frame[0].header->cell.inv_basis,
-                frame[1].header->cell.inv_basis,
-                t
-            );
-
-            md_vec3_soa_t src[2] = {
-                { frame[0].x.data(), frame[0].y.data(), frame[0].z.data() },
-                { frame[1].x.data(), frame[1].y.data(), frame[1].z.data() }
+            FrameData frame[2] = {
+                frameData(traj, fIdx[1]),
+                frameData(traj, fIdx[2])
             };
-            md_util_linear_interpolation(
-                dst,
-                src,
-                mol.atom.count,
-                mol.cell.basis * vec3_set1(1),
+
+            state.unitcell.x = glm::mix(frame[0].unitcell.x, frame[1].unitcell.x, t);
+            state.unitcell.y = glm::mix(frame[0].unitcell.y, frame[1].unitcell.y, t);
+            state.unitcell.z = glm::mix(frame[0].unitcell.z, frame[1].unitcell.z, t);
+            state.unitcell.xy = glm::mix(frame[0].unitcell.xy, frame[1].unitcell.xy, t);
+            state.unitcell.xz = glm::mix(frame[0].unitcell.xz, frame[1].unitcell.xz, t);
+            state.unitcell.yz = glm::mix(frame[0].unitcell.yz, frame[1].unitcell.yz, t);
+            state.unitcell.flags = frame[0].unitcell.flags | frame[1].unitcell.flags;
+
+            const vec3_t* in_xyz[2] = {
+                frame[0].xyz.data(),
+                frame[1].xyz.data()
+            };
+            md_util_interpolate_linear(
+                state.xyz,
+                in_xyz,
+                state.num_atoms,
+                &state.unitcell,
                 t
             );
+            state.frame = time;
             break;
         }
         case InterpolationType::Cubic:
@@ -251,57 +228,57 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
                 frameData(traj, fIdx[3])
             };
 
-            if (mol.backbone.count) {
-                for (int64_t i = 0; i < mol.backbone.count; i++) {
-                    const vec4_t ss[4] = {
-                        convertColor(frame[0].ss[i]),
-                        convertColor(frame[1].ss[i]),
-                        convertColor(frame[2].ss[i]),
-                        convertColor(frame[3].ss[i])
-                    };
-                    const vec4_t ssr = cubic_spline(ss[0], ss[1], ss[2], ss[3], t, 1.f);
-                    mol.backbone.secondary_structure[i] = convertColor(ssr);
-                }
-            }
-
             constexpr float Scaling = 1.f;
-            mol.cell.basis = cubic_spline(
-                frame[0].header->cell.basis,
-                frame[1].header->cell.basis,
-                frame[2].header->cell.basis,
-                frame[3].header->cell.basis,
-                t,
-                Scaling
+            state.unitcell.x = cubicSpline1D(
+                frame[0].unitcell.x, frame[1].unitcell.x,
+                frame[2].unitcell.x, frame[3].unitcell.x, t, Scaling
             );
-            mol.cell.inv_basis = cubic_spline(
-                frame[0].header->cell.inv_basis,
-                frame[1].header->cell.inv_basis,
-                frame[2].header->cell.inv_basis,
-                frame[3].header->cell.inv_basis,
-                t,
-                Scaling
+            state.unitcell.y = cubicSpline1D(
+                frame[0].unitcell.y, frame[1].unitcell.y,
+                frame[2].unitcell.y, frame[3].unitcell.y, t, Scaling
             );
+            state.unitcell.z = cubicSpline1D(
+                frame[0].unitcell.z, frame[1].unitcell.z,
+                frame[2].unitcell.z, frame[3].unitcell.z, t, Scaling
+            );
+            state.unitcell.xy = cubicSpline1D(
+                frame[0].unitcell.xy, frame[1].unitcell.xy,
+                frame[2].unitcell.xy, frame[3].unitcell.xy, t, Scaling
+            );
+            state.unitcell.xz = cubicSpline1D(
+                frame[0].unitcell.xz, frame[1].unitcell.xz,
+                frame[2].unitcell.xz, frame[3].unitcell.xz, t, Scaling
+            );
+            state.unitcell.yz = cubicSpline1D(
+                frame[0].unitcell.yz, frame[1].unitcell.yz,
+                frame[2].unitcell.yz, frame[3].unitcell.yz, t, Scaling
+            );
+            state.unitcell.flags = frame[1].unitcell.flags | frame[2].unitcell.flags;
 
-            md_vec3_soa_t src[4] = {
-                { frame[0].x.data(), frame[0].y.data(), frame[0].z.data() },
-                { frame[1].x.data(), frame[1].y.data(), frame[1].z.data() },
-                { frame[2].x.data(), frame[2].y.data(), frame[2].z.data() },
-                { frame[3].x.data(), frame[3].y.data(), frame[3].z.data() }
+            const vec3_t* in_xyz[4] = {
+                frame[0].xyz.data(),
+                frame[1].xyz.data(),
+                frame[2].xyz.data(),
+                frame[3].xyz.data()
             };
-            md_util_cubic_spline_interpolation(
-                dst,
-                src,
-                mol.atom.count,
-                mol.cell.basis * vec3_set1(1),
+            md_util_interpolate_cubic_spline(
+                state.xyz,
+                in_xyz,
+                state.num_atoms,
+                &state.unitcell,
                 t,
                 Scaling
             );
+            state.frame = time;
             break;
         }
     }
 
     if (ensurePbc) {
-        md_util_deperiodize_system(mol.atom.x, mol.atom.y, mol.atom.z, &mol.cell, &mol);
+        const md_system_t* sys = trajectorySystem(traj);
+        if (sys) {
+            md_util_unwrap_system(&state, sys);
+        }
     }
 }
 

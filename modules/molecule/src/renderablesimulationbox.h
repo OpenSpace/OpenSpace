@@ -34,8 +34,14 @@
 #include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <md_gl.h>
-#include <md_molecule.h>
-#include <md_trajectory.h>
+#include <md_system.h>
+#include <filesystem>
+#include <optional>
+#include <vector>
+
+namespace molecule {
+    struct Trajectory;
+} // namespace molecule
 
 namespace openspace {
 
@@ -68,10 +74,11 @@ private:
             };
 
             std::vector<State> states;
-            md_molecule_t molecule = {};
-            const md_trajectory_i* trajectory = nullptr;
-            md_gl_representation_t drawRep = {};
-            md_gl_molecule_t drawMol = {};
+            const md_system_t* system = nullptr;
+            md_system_state_t state = {};
+            const molecule::Trajectory* trajectory = nullptr;
+            md_gl_rep_t drawRep = {};
+            md_gl_mol_t drawMol = {};
         };
         Data data;
     };
@@ -90,7 +97,6 @@ private:
             strokeColor, opacity) uniforms;
         GLuint vao = 0;
     } _billboard;
-
 
     std::vector<Molecules> _molecules;
 
