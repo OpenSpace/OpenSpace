@@ -304,7 +304,7 @@ namespace {
  * Resets the camera position to the same position where the profile originally started.
  */
 [[codegen::luawrap]] void resetCamera() {
-    setCameraFromProfile(*global::profile);
+    setCameraFromProfile(*global::profile, OrbitalNavigator::IsCameraInteraction::Yes);
 }
 
 /**

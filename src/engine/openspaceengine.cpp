@@ -87,7 +87,9 @@
 #include <openspace/systemcapabilities/systemcapabilitiescomponent.h>
 #include <openspace/systemcapabilities/version.h>
 #include <openspace/topic/server.h>
+#include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/spicemanager.h>
@@ -1243,7 +1245,12 @@ void OpenSpaceEngine::preSynchronization() {
     }
 
     if (_isRenderingFirstFrame) {
-        setCameraFromProfile(*global::profile);
+        // Setting the initial camera is not treated as a camera interaction, as that
+        // would, for example, abort an idle motion that was enabled by the profile
+        setCameraFromProfile(
+            *global::profile,
+            OrbitalNavigator::IsCameraInteraction::No
+        );
         setAdditionalScriptsFromProfile(*global::profile);
     }
 
@@ -1907,13 +1914,19 @@ AssetManager& OpenSpaceEngine::assetManager() {
     return *_assetManager;
 }
 
-void setCameraFromProfile(const Profile& p) {
+void setCameraFromProfile(const Profile& p,
+                          OrbitalNavigator::IsCameraInteraction isCameraInteraction)
+{
     if (!p.camera.has_value()) {
         // If the camera is not specified, we want to set it to a sensible default value
         NavigationState nav;
         nav.anchor = "Root";
         nav.referenceFrame = "Root";
-        global::navigationHandler->setNavigationStateNextFrame(nav);
+        global::navigationHandler->setNavigationStateNextFrame(
+            nav,
+            false,
+            isCameraInteraction
+        );
         return;
     }
 
@@ -1927,7 +1940,9 @@ void setCameraFromProfile(const Profile& p) {
 
     std::visit(
         overloaded {
-            [&checkNodeExists](const Profile::CameraNavState& navStateProfile) {
+            [&checkNodeExists, isCameraInteraction](
+                                           const Profile::CameraNavState& navStateProfile)
+            {
                 NavigationState nav;
                 nav.anchor = navStateProfile.anchor;
                 checkNodeExists(nav.anchor);
@@ -1952,30 +1967,45 @@ void setCameraFromProfile(const Profile& p) {
                 if (navStateProfile.pitch.has_value()) {
                     nav.pitch = navStateProfile.pitch.value();
                 }
-                global::navigationHandler->setNavigationStateNextFrame(nav);
+                global::navigationHandler->setNavigationStateNextFrame(
+                    nav,
+                    false,
+                    isCameraInteraction
+                );
             },
-            [&checkNodeExists](const Profile::CameraGoToGeo& geo) {
-                // Instead of direct calls to navigation state code, Lua commands with
-                // globebrowsing goToGeo are used because this prevents a module
-                // dependency in this core code. Eventually, goToGeo will be incorporated
-                // in the OpenSpace core and this code will change
+            [&checkNodeExists, isCameraInteraction](const Profile::CameraGoToGeo& geo) {
                 checkNodeExists(geo.anchor);
-                std::string geoScript;
-                if (geo.altitude.has_value()) {
-                    geoScript = std::format(
-                        "openspace.navigation.flyToGeo([[{}]], {}, {}, {}, 0)",
-                        geo.anchor, geo.latitude, geo.longitude, *geo.altitude
-                    );
-                }
-                else {
-                    geoScript = std::format(
-                        "openspace.navigation.flyToGeo2([[{}]], {}, {}, false, 0)",
-                        geo.anchor, geo.latitude, geo.longitude
-                    );
-                }
-                global::scriptEngine->queueScript(geoScript);
+                const SceneGraphNode* node =
+                    global::renderEngine->scene()->sceneGraphNode(geo.anchor);
+
+                // If no altitude is specified, use the same default height as is used for
+                // camera paths that target the node
+                const double altitude = geo.altitude.value_or(
+                    global::navigationHandler->pathNavigator().defaultArrivalHeight(
+                        geo.anchor
+                    )
+                );
+                const Geodetic3 position = {
+                    .geodetic2 = {
+                        .lat = glm::radians(geo.latitude),
+                        .lon = glm::radians(geo.longitude)
+                    },
+                    .height = altitude
+                };
+
+                NavigationState nav;
+                nav.anchor = geo.anchor;
+                nav.referenceFrame = geo.anchor;
+                nav.position = node->ellipsoid().cartesianPosition(position);
+                // For globes, the up-direction is always the positive Z axis
+                nav.up = glm::dvec3(0.0, 0.0, 1.0);
+                global::navigationHandler->setNavigationStateNextFrame(
+                    nav,
+                    false,
+                    isCameraInteraction
+                );
             },
-            [&checkNodeExists](const Profile::CameraGoToNode& node) {
+            [&checkNodeExists, isCameraInteraction](const Profile::CameraGoToNode& node) {
                 checkNodeExists(node.anchor);
 
                 NodeCameraStateSpec spc = {
@@ -1983,7 +2013,10 @@ void setCameraFromProfile(const Profile& p) {
                     .height = node.height,
                     .useTargetUpDirection = true
                 };
-                global::navigationHandler->setCameraFromNodeSpecNextFrame(std::move(spc));
+                global::navigationHandler->setCameraFromNodeSpecNextFrame(
+                    std::move(spc),
+                    isCameraInteraction
+                );
             }
         },
         p.camera.value()
