@@ -73,13 +73,15 @@ namespace {
  * tested.
  */
 [[codegen::luawrap]] bool isLoaded(std::string assetName) {
-    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
-    for (const Asset* a : as) {
-        if (a->path() == assetName) {
-            return true;
-        }
-    }
-    return false;
+    const AssetManager& manager = global::openSpaceEngine->assetManager();
+    std::vector<const Asset*> allAssets = manager.allAssets();
+    const std::filesystem::path path = manager.resolveAssetPath(assetName);
+    auto it = std::find_if(
+        allAssets.begin(),
+        allAssets.end(),
+        [&path](const Asset* a) { return a->path() == path; }
+    );
+    return it != allAssets.end();
 }
 
 /**
@@ -109,13 +111,19 @@ namespace {
  * 'asset.require()'.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> parents(std::string assetName) {
-    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
-    for (const Asset* a : as) {
-        if (a->path() == assetName) {
-            return a->initializedParents();
-        }
-    }
-    return std::vector<std::filesystem::path>();
+    const AssetManager& manager = global::openSpaceEngine->assetManager();
+    std::vector<const Asset*> allAssets = manager.allAssets();
+    const std::filesystem::path path = manager.resolveAssetPath(assetName);
+
+    auto it = std::find_if(
+        allAssets.begin(),
+        allAssets.end(),
+        [&path](const Asset* a) { return a->path() == path; }
+    );
+
+    return it != allAssets.end() ?
+        (*it)->initializedParents() :
+        std::vector<std::filesystem::path>();
 }
 
 } // namespace
