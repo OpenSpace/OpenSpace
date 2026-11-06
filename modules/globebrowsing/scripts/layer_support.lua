@@ -377,7 +377,6 @@ registerFunction(
               Transform = {
                 Translation = {
                   Type = "GlobeTranslation",
-                  Globe = node_name,
                   Latitude = lat,
                   Longitude = long,
                   UseHeightmap = true
@@ -427,7 +426,6 @@ registerFunction(
         Transform = {
           Translation = {
             Type = "GlobeTranslation",
-            Globe = globe_identifier,
             Latitude = lat,
             Longitude = long,
             FixedAltitude = altitude

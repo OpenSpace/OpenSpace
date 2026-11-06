@@ -16,7 +16,6 @@ local LightPollutionSphere = {
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = earthAsset.Earth.Identifier,
       Latitude = 34.201639,
       Longitude = -118.171319,
       Altitude = 10.0,
@@ -25,7 +24,6 @@ local LightPollutionSphere = {
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = earthAsset.Earth.Identifier,
       Latitude = 34.201639,
       Longitude = -118.171319,
       UseHeightmap = false,
