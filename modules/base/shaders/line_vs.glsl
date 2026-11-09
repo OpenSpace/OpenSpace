@@ -24,6 +24,8 @@
 
 #version __CONTEXT__
 
+#include "powerscaling/powerscalingmath.glsl"
+
 layout(location = 0) in vec3 in_position;
 
 out Data {
@@ -40,6 +42,5 @@ void main() {
   gl_Position = projectionTransform * out_data.positionViewSpace;
   out_data.depth = gl_Position.w;
 
-  // Set z to 0 to disable near and far plane, unique handling for perspective in space
-  gl_Position.z = 0.0;
+  gl_Position = z_normalization(gl_Position);
 }

@@ -25,6 +25,8 @@
 #ifndef _POWERSCALING_MATH___GLSL_
 #define _POWERSCALING_MATH___GLSL_
 
+#include "depth.glsl"
+
 const float k = 10.0;
 const float FLT_MAX = 1e38; // Not max but large enough for the purpose
 
@@ -73,9 +75,11 @@ vec2 psc_subtraction(vec2 v1, vec2 v2) {
   return psc_addition(v1, negV2);
 }
 
+// A constant clip z gives a near plane at w = depthNear and no far plane. The depth of
+// the fragments is written separately, see normalizeFloat
 vec4 z_normalization(vec4 v_in) {
   vec4 v_out = v_in;
-  v_out.z = 0;
+  v_out.z = depthNear;
   return v_out;
 }
 

@@ -24,6 +24,8 @@
 
 #version __CONTEXT__
 
+#include "powerscaling/powerscalingmath.glsl"
+
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_textureCoords;
 
@@ -45,7 +47,6 @@ void main() {
   out_data.textureCoords = in_textureCoords;
 
   vec4 position = modelViewProjection * vec4(in_position.xyz, 1.0);
-  // Set z to 0 to disable near/far-plane clipping
-  gl_Position = vec4(position.xy, 0.0, position.w);
+  gl_Position = z_normalization(position);
   out_data.screenSpaceDepth = position.w;
 }

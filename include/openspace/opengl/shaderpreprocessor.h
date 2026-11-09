@@ -34,6 +34,13 @@
 
 namespace openspace::opengl {
 
+/*
+ * The uniform buffer binding of the depth data. Shaders get it as `#{depthDataBinding}`
+ * The number 14 is arbitrary but chosen to not be too low (can conflict with other bindings) nor too high
+ * (to stay within typical limits of uniform buffer bindings)
+*/ 
+constexpr int DepthDataBinding = 14;
+
 class ShaderPreprocessor {
 public:
     using ShaderChangedCallback = std::function<void()>;

@@ -38,6 +38,6 @@ uniform mat4 transform;
 
 void main() {
   gl_Position = transform * vec4(positions[gl_VertexID], 0.0, 1.0);
-  gl_Position.z = -1.0; // always visible
+  gl_Position.z = 0.0; // always visible
   out_data.position = positions[gl_VertexID];
 }
