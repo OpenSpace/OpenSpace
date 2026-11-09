@@ -398,4 +398,10 @@ std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
     };
 }
 
+float Renderable::nearClipW(const glm::dmat4& modelViewTransform) {
+    constexpr double NearClipFraction = 1e-3;
+    const double distance = glm::length(glm::dvec3(modelViewTransform[3]));
+    return static_cast<float>(NearClipFraction * distance);
+}
+
 } // namespace openspace

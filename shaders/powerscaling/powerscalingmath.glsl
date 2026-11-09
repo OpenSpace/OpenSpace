@@ -83,6 +83,15 @@ vec4 z_normalization(vec4 v_in) {
   return v_out;
 }
 
+// Moves the near plane out to nearW if that is further away than depthNear. Geometry with
+// huge coordinates has too much float rounding for the cut at a vertex that crosses the
+// camera plane to be well-behaved with a tiny near plane
+vec4 z_normalization(vec4 v_in, float nearW) {
+  vec4 v_out = v_in;
+  v_out.z = max(depthNear, nearW);
+  return v_out;
+}
+
 /**
  * Convert a psc vector to a float
  */
