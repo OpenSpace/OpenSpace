@@ -92,7 +92,7 @@ private:
     bool _planeIsDirty = false;
 
     UniformCache(modelViewProjection, modelViewTransform, colorTexture, opacity,
-        mirrorBackside, multiplyColor) _uniformCache;
+        mirrorBackside, multiplyColor, nearClipW) _uniformCache;
 };
 
 } // namespace openspace
