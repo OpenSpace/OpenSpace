@@ -63,6 +63,7 @@ target_sources(
     test_sessionrecording.cpp
     test_settings.cpp
     test_sgctedit.cpp
+    test_shaderpreprocessor.cpp
     test_spicemanager.cpp
     test_templatefactory.cpp
     test_timeconversion.cpp
