@@ -34,6 +34,7 @@
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/profiling.h>
 #include <openspace/opengl/gl.h>
+#include <openspace/opengl/openglstatecache.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <md_filter.h>
@@ -534,7 +535,14 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    md_gl_draw(&args);
+    // The molecule framebuffer uses the standard depth, not the reversed one of the scene
+    // Create scope so that the standard depth convention is only applied within this block
+    {
+        const opengl::DepthConventionScope standardDepth(
+            opengl::DepthConvention::Standard
+        );
+        md_gl_draw(&args);
+    }
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
     glDrawBuffers(lastDrawBufferCount, lastDrawBuffers.data());

@@ -24,6 +24,8 @@
 
 #version __CONTEXT__
 
+#include "powerscaling/powerscalingmath.glsl"
+
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in float in_height;
@@ -55,8 +57,6 @@ void main() {
 
   out_data.positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
   out_data.normal = normalize(normalTransform * in_normal);
-  gl_Position = vec4(projectionTransform * out_data.positionViewSpace);
-  // Set z to 0 to disable near and far plane, unique handling for perspective in space
-  gl_Position.z = 0.0;
+  gl_Position = z_normalization(vec4(projectionTransform * out_data.positionViewSpace));
   out_data.depth = gl_Position.w;
 }

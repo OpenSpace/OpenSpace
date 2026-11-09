@@ -25,29 +25,21 @@
 #ifndef _FLOATOPERATIONS___GLSL_
 #define _FLOATOPERATIONS___GLSL_
 
+#include "depth.glsl"
+
 /**
- * Convert a positive floating point distance [0, 10^27]
- * (size of observable universe)
- * to a float in the range [-1, 1], suitable for depth buffer storage.
+ * Convert a positive distance along the view axis to a reversed depth in (0, 1], suitable
+ * for depth buffer storage. Closer fragments get larger values, and the relative
+ * precision is the same at all distances.
  * Note: This needs to be a monotonic function, so that the value can
  * still be used for depth comparison.
  */
 float normalizeFloat(float value) {
-  if (value > 1.0) {
-    return value / pow(10.0, 30.0);
-  }
-  else {
-    return value - 1.0;
-  }
+  return depthNear / max(value, depthNear);
 }
 
 float denormalizeFloat(float value) {
-  if (value < 0.0) {
-    return value + 1.0;
-  }
-  else {
-    return value * pow(10.0, 30.0);
-  }
+  return min(depthNear / max(value, MinReversedDepth), MaxViewDistance);
 }
 
 /**

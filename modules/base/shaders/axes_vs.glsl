@@ -24,6 +24,8 @@
 
 #version __CONTEXT__
 
+#include "powerscaling/powerscalingmath.glsl"
+
 layout(location = 0) in vec3 in_position;
 
 out Data {
@@ -38,8 +40,7 @@ uniform mat4 projectionTransform;
 
 void main() {
   vec4 positionViewSpace = modelViewTransform * vec4(in_position, 1.0);
-  gl_Position = projectionTransform * positionViewSpace;
-  gl_Position.z = 0.0;
+  gl_Position = z_normalization(projectionTransform * positionViewSpace);
   out_data.positionViewSpace = positionViewSpace;
   out_data.positionModelSpace = in_position;
   out_data.screenSpaceDepth = gl_Position.w;

@@ -156,7 +156,11 @@ namespace {
 
     Env::Env(Dictionary dictionary)
         : _dictionary(std::move(dictionary))
-    {}
+    {
+        if (!_dictionary.hasKey("depthDataBinding")) {
+            _dictionary.setValue("depthDataBinding", DepthDataBinding);
+        }
+    }
 
     void Env::processFile(const std::filesystem::path& path) {
         ZoneScoped;
