@@ -109,6 +109,7 @@ void GlyphHandler::initializeRenderables() {
     renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
 
     Dictionary starRotationAxis;
+    starRotationAxis.setValue("Enabled", true);
     starRotationAxis.setValue("LineColor", glm::dvec4(1.0, 1.0, 1.0, 0.5));
     renderable.setValue("StarRotationAxis", starRotationAxis);
 
@@ -297,7 +298,7 @@ void GlyphHandler::renderModeSpecificSettings() {
     // RenderableExoplanetGlyphCloud
     static bool useFixedWidth = false;
     static bool showStarObservationLine = false;
-    static bool showStarRotationAxis = false;
+    static bool showStarRotationAxis = true;
     static bool showMissingInclination = false;
 
     // RenderableHostCloud
