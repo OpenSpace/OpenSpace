@@ -521,6 +521,7 @@ const std::vector<std::byte> Texture::cachedPixelData() const {
 
 void Texture::clearDownloadedTexture() {
     _pixels.clear();
+    _pixels.shrink_to_fit();
 }
 
 int Texture::expectedPixelDataSize() const {

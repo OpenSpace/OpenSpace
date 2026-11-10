@@ -483,6 +483,7 @@ void RenderableGalaxy::initializeGL() {
         GL_NONE_BIT
     );
     _pointPositionsCache.clear();
+    _pointPositionsCache.shrink_to_fit();
 
     glCreateBuffers(1, &_colorVbo);
     glNamedBufferStorage(
@@ -492,6 +493,7 @@ void RenderableGalaxy::initializeGL() {
         GL_NONE_BIT
     );
     _pointColorsCache.clear();
+    _pointColorsCache.shrink_to_fit();
 
     glCreateVertexArrays(1, &_pointsVao);
     glVertexArrayVertexBuffer(_pointsVao, 0, _positionVbo, 0, sizeof(glm::vec3));
