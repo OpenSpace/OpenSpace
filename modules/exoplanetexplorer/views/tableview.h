@@ -27,6 +27,9 @@
 
 #include <modules/exoplanetexplorer/datastructures.h>
 
+#include <filesystem>
+#include <string>
+
 namespace openspace::exoplanets {
 
 class DataViewer;
@@ -46,6 +49,8 @@ public:
 private:
     // Render the first column in the table, which is used for navigation
     void renderFirstTableColumn(const ExoplanetItem& item, size_t row);
+    void renderExportPopup();
+    void savePinnedItemsToCsv(const std::filesystem::path& path) const;
 
     DataViewer& _dataViewer;
 
@@ -55,6 +60,10 @@ private:
     // ImGui table only supports a limited number of columns, so we need to keep track of
     // the columns we want to display
     std::vector<ColumnKey> _columns;
+
+    bool _openExportPopup = false;
+    std::string _exportStatus;
+    bool _exportStatusIsError = false;
 
 };
 

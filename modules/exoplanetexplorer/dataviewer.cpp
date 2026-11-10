@@ -1501,6 +1501,10 @@ void DataViewer::render() {
     }
 }
 
+void DataViewer::openColumnSelectionView() {
+    _showColumnSelectionView = true;
+}
+
 void DataViewer::renderColormapOverviewWindow(bool* open) {
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     const float posPadding = 10.f;
@@ -2183,17 +2187,15 @@ void DataViewer::renderSettingsMenu() {
     static bool showKepler = true;
     static bool showMilkyWayLine = true;
 
-    static bool showColumnSelectionView = false;
-
     // Column selection is rendered in a separate window, so do this before the menu
-    if (showColumnSelectionView) {
+    if (_showColumnSelectionView) {
         // Always center this window when appearing
         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoSavedSettings;
         ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("Set table columns", &showColumnSelectionView, flags)) {
+        if (ImGui::Begin("Set table columns", &_showColumnSelectionView, flags)) {
             if (_columnSelectionView.renderColumnSettingsView(_dataSettings)) {
                 _tableView->updateColumns(_columnSelectionView.orderedSelectedColumns());
             }
@@ -2206,7 +2208,7 @@ void DataViewer::renderSettingsMenu() {
     }
 
     if (ImGui::Button("Set up table columns...")) {
-        showColumnSelectionView = true;
+        _showColumnSelectionView = true;
     }
 
     ImGui::Separator();

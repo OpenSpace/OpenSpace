@@ -24,17 +24,24 @@
 
 #include <modules/exoplanetexplorer/views/tableview.h>
 
+#include <modules/exoplanetexplorer/dataloader.h>
 #include <modules/exoplanetexplorer/dataviewer.h>
 #include <modules/exoplanetexplorer/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <stdexcept>
 
 
 namespace {
     constexpr std::string_view _loggerCat = "Exoplanets Explorer Table";
+
+    std::filesystem::path defaultPinnedItemsDirectory() {
+        return absPath("${MODULE_EXOPLANETEXPLORER}/cache");
+    }
 }
 
 namespace openspace::exoplanets {
@@ -50,9 +57,42 @@ void TableView::updateColumns(const std::vector<ColumnKey>& columns) {
 void TableView::render(bool* open, std::vector<size_t>& filteredDataRows) {
     ImGui::SetNextWindowSize(view::helper::DefaultWindowSize, ImGuiCond_FirstUseEver);
 
-    if (!ImGui::Begin("Table", open)) {
+    if (!ImGui::Begin("Table", open, ImGuiWindowFlags_MenuBar)) {
         ImGui::End();
         return;
+    }
+
+    if (ImGui::BeginMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+            ImGui::BeginDisabled(_pinnedItems.empty());
+            if (ImGui::MenuItem("Export pinned items...")) {
+                _openExportPopup = true;
+                _exportStatus.clear();
+                _exportStatusIsError = false;
+            }
+            ImGui::EndDisabled();
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Settings")) {
+            if (ImGui::MenuItem("Set table columns...")) {
+                _dataViewer.openColumnSelectionView();
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
+
+    if (_openExportPopup) {
+        ImGui::OpenPopup("Export pinned items");
+        _openExportPopup = false;
+    }
+    renderExportPopup();
+
+    if (!_exportStatus.empty()) {
+        const ImVec4 statusColor = view::helper::toImVec4(
+            _exportStatusIsError ? view::colors::Error : view::colors::Good
+        );
+        ImGui::TextColored(statusColor, "%s", _exportStatus.c_str());
     }
 
     // @TODO: Maybe do a more sophisticated comparison view
@@ -87,6 +127,101 @@ void TableView::render(bool* open, std::vector<size_t>& filteredDataRows) {
     renderTable("full_exoplanets_table", filteredDataRows, false, searchString);
 
     ImGui::End();
+}
+
+void TableView::renderExportPopup() {
+    const ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize;
+    if (!ImGui::BeginPopupModal("Export pinned items", nullptr, flags)) {
+        return;
+    }
+
+    static char name[128] = "pinned_items.csv";
+    static char directory[512] = "";
+
+    ImGui::InputText("Filename (.csv)", name, IM_ARRAYSIZE(name));
+
+    const std::string defaultDirectory = defaultPinnedItemsDirectory().string();
+    ImGui::SetNextItemWidth(ImGui::CalcTextSize(defaultDirectory.c_str()).x * 1.3f);
+    ImGui::InputTextWithHint(
+        "Directory",
+        defaultDirectory.c_str(),
+        directory,
+        IM_ARRAYSIZE(directory)
+    );
+
+    const bool hasName = name[0] != '\0';
+    std::filesystem::path filePath =
+        std::filesystem::path(directory[0] == '\0' ? defaultDirectory : directory) / name;
+    if (filePath.extension() != ".csv") {
+        filePath += ".csv";
+    }
+    filePath = absPath(filePath.string());
+
+    std::error_code ec;
+    const bool exists = hasName && std::filesystem::exists(filePath, ec);
+    if (exists) {
+        ImGui::TextColored(
+            ImVec4(1.f, 0.7f, 0.3f, 1.f),
+            "A file with this name exists and will be overwritten"
+        );
+    }
+    if (!_exportStatus.empty() && _exportStatusIsError) {
+        ImGui::TextColored(
+            view::helper::toImVec4(view::colors::Error),
+            "%s",
+            _exportStatus.c_str()
+        );
+    }
+
+    ImGui::Separator();
+    if (ImGui::Button("Cancel") || ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!hasName);
+    if (ImGui::Button(exists ? "Overwrite" : "Export") ||
+        (hasName && ImGui::IsKeyPressed(ImGuiKey_Enter)))
+    {
+        try {
+            savePinnedItemsToCsv(filePath);
+            _exportStatus = std::format(
+                "Exported {} pinned items to '{}'",
+                _pinnedItems.size(),
+                filePath.string()
+            );
+            _exportStatusIsError = false;
+            name[0] = '\0';
+            ImGui::CloseCurrentPopup();
+        }
+        catch (const std::exception& e) {
+            _exportStatus = std::format("Failed to export pinned items: {}", e.what());
+            _exportStatusIsError = true;
+        }
+    }
+    ImGui::EndDisabled();
+    ImGui::EndPopup();
+}
+
+void TableView::savePinnedItemsToCsv(const std::filesystem::path& path) const {
+    std::error_code ec;
+    std::filesystem::create_directories(path.parent_path(), ec);
+    if (ec) {
+        throw std::runtime_error(std::format(
+            "Could not create directory '{}': {}",
+            path.parent_path().string(),
+            ec.message()
+        ));
+    }
+
+    DataLoader::validateSaveTarget(path, _dataViewer.currentDataFile());
+    DataLoader::saveData(
+        path,
+        _dataViewer.data(),
+        _pinnedItems,
+        _dataViewer.columns(),
+        _dataViewer.computedColumns(),
+        true
+    );
 }
 
 void TableView::renderFirstTableColumn(const ExoplanetItem& item, size_t row) {

@@ -133,6 +133,7 @@ public:
         std::optional<std::vector<size_t>> customIndices = std::nullopt);
 
     void render();
+    void openColumnSelectionView();
 
     // Render column description on the same line as the previous imgui item,
     // if a description exists.
@@ -214,6 +215,7 @@ private:
     bool _showComputeColumnsWindow = false;
     bool _showSpatialSelectionWindow = false;
     bool _showOpenCsvModal = false;
+    bool _showColumnSelectionView = false;
 
     bool _showColormapOverviewWindow = false;
 
