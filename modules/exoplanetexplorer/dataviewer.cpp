@@ -558,6 +558,7 @@ bool DataViewer::initializeData(DataSettings settings) {
     _spatialSelectionView = std::make_unique<SpatialSelectionView>(*this);
     if (_isGLInitialized) {
         _colorMappingView->initializeGL();
+        _spatialSelectionView->initializeGL();
     }
 
     _currentlyTargettedSystem = std::nullopt;

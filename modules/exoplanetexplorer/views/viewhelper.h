@@ -50,6 +50,7 @@ namespace helper {
     // Fixed red hue with saturation scaled by relative uncertainty, in percent
     glm::vec4 uncertaintyIndicatorColor(float percent);
 
+    void pushBoldFont();
     void renderDescriptiveText(const char* text);
     void renderHelpMarker(const char* text);
 

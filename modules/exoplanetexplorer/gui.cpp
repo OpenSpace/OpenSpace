@@ -37,6 +37,7 @@
 
 namespace {
     constexpr std::string_view GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
+    constexpr std::string_view GuiBoldFont = "${FONTS}/arimo/Arimo-Bold.ttf";
     constexpr float FontSize = 16.f;
 
     ImGuiKey toImGuiKey(openspace::Key key) {
@@ -97,6 +98,9 @@ void Gui::initializeGL() {
         io.DeltaTime = 1.f / 60.f;
 
         io.Fonts->AddFontFromFileTTF(absPath(GuiFont).string().c_str(), FontSize);
+        io.Fonts->AddFontFromFileTTF(
+            absPath(GuiBoldFont).string().c_str(), FontSize
+        );
 
         //ImGuiStyle& style = ImGui::GetStyle();
         // TODO: can set style by altering this value
@@ -188,9 +192,15 @@ void Gui::initializeGL() {
     // The dataviewer's initialization requires the imgui/impot contexts,
     // so do it afterc onstexts have been created
     _dataViewer.initializeGL();
+    if (SpatialSelectionView* view = _dataViewer.spatialSelectionView()) {
+        view->initializeGL();
+    }
 }
 
 void Gui::deinitializeGL() {
+    if (SpatialSelectionView* view = _dataViewer.spatialSelectionView()) {
+        view->deinitializeGL();
+    }
     _program = nullptr;
     _fontTexture = nullptr;
 

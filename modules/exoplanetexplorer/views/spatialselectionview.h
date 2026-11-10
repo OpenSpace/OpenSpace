@@ -33,9 +33,14 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
+
+namespace openspace::opengl {
+class Texture;
+} // namespace openspace::opengl
 
 namespace openspace::exoplanets {
 
@@ -71,6 +76,10 @@ enum class Shape3DType {
 class SpatialSelectionView {
 public:
     SpatialSelectionView(DataViewer& dataViewer);
+    ~SpatialSelectionView();
+
+    void initializeGL();
+    void deinitializeGL();
 
     SpatialSelectionHandler& handler();
     const SpatialSelectionHandler& handler() const;
@@ -143,6 +152,7 @@ private:
 
     /// Reference to the main DataViewer coordinator
     DataViewer& _dataViewer;
+    std::vector<std::unique_ptr<opengl::Texture>> _lassoStepImages;
 
     /// Active spatial selection category
     SpatialSelectionMethod _currentMethod = SpatialSelectionMethod::Shape3D;

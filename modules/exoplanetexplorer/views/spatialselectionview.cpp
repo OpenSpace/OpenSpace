@@ -33,7 +33,11 @@
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -44,6 +48,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <filesystem>
 #include <format>
 #include <limits>
 #include <stdexcept>
@@ -51,6 +56,7 @@
 #include <vector>
 
 namespace {
+    constexpr std::string_view _loggerCat = "SpatialSelection";
 
     const ImVec4 accentButtonColor(0.17f, 0.34f, 0.31f, 1.f);
     const ImVec4 accentButtonHoveredColor(0.21f, 0.42f, 0.37f, 1.f);
@@ -748,6 +754,61 @@ SpatialSelectionView::SpatialSelectionView(DataViewer& dataViewer)
     _skyMapRect.decMax = 55.0;
 }
 
+SpatialSelectionView::~SpatialSelectionView() = default;
+
+void SpatialSelectionView::initializeGL() {
+    constexpr std::array<const char*, 4> ImagePaths = {
+        "${MODULE_EXOPLANETEXPLORER}/spatialselection/icons/step_select_dataset.png",
+        "${MODULE_EXOPLANETEXPLORER}/spatialselection/icons/step_draw_lasso.png",
+        "${MODULE_EXOPLANETEXPLORER}/spatialselection/icons/step_adjust_threshold.png",
+        "${MODULE_EXOPLANETEXPLORER}/spatialselection/icons/step_generate_volume.png"
+    };
+
+    _lassoStepImages.clear();
+    _lassoStepImages.reserve(ImagePaths.size());
+
+    for (const char* imagePathToken : ImagePaths) {
+        _lassoStepImages.emplace_back();
+
+        std::filesystem::path imagePath = imagePathToken;
+        try {
+            imagePath = absPath(imagePathToken);
+            std::unique_ptr<opengl::Texture>& image = _lassoStepImages.back();
+            image = io::texture::loadTexture(
+                imagePath,
+                2,
+                opengl::Texture::SamplerInit{
+                    .filter = opengl::Texture::FilterMode::Linear,
+                    .wrapping = opengl::Texture::WrappingMode::ClampToEdge
+                }
+            );
+            if (!image) {
+                LERROR("No texture was returned for {}", imagePath.string());
+                continue;
+            }
+
+            if (static_cast<GLuint>(*image) == 0) {
+                image.reset();
+                LERROR("OpenGL returned texture ID 0 for {}", imagePath.string());
+                continue;
+            }
+
+            const glm::uvec3 dimensions = image->dimensions();
+            if (dimensions.x == 0 || dimensions.y == 0) {
+                image.reset();
+                LERROR("Image has invalid dimensions: {}", imagePath.string());
+            }
+        }
+        catch (const std::exception& error) {
+            LERROR("Could not load {}: {}", imagePath.string(), error.what());
+        }
+    }
+}
+
+void SpatialSelectionView::deinitializeGL() {
+    _lassoStepImages.clear();
+}
+
 SpatialSelectionHandler& SpatialSelectionView::handler() {
     return _dataViewer.spatialSelectionHandler();
 }
@@ -779,9 +840,11 @@ bool SpatialSelectionView::lassoMouseButton(MouseButton button, MouseAction acti
     if (action == MouseAction::Press) {
         const bool canStart = _lassoTabActive &&
             hasKeyModifier(modifier, KeyModifier::Shift);
+
         if (!canStart) {
             return false;
         }
+
         _isDrawingLasso = true;
         _lassoStroke = { mousePos };
         return true;
@@ -958,11 +1021,12 @@ bool SpatialSelectionView::render(bool* open) {
     const float minHeight = footerHeight + 2.f * style.WindowPadding.y +
         ImGui::GetFrameHeight() + 3.f * ImGui::GetFrameHeightWithSpacing();
 
-    ImGui::SetNextWindowSize(ImVec2(520, 640), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(400, 800), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSizeConstraints(
-        ImVec2(520.f, minHeight),
+        ImVec2(400.f, minHeight),
         ImVec2(std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
     );
+
     if (!ImGui::Begin("Spatial Selection", open)) {
         ImGui::End();
         endLassoSession();
@@ -1067,14 +1131,15 @@ bool SpatialSelectionView::renderMethodTabs(float footerHeight) {
                 ImGui::GetStyle().ItemSpacing.y
         ));
     };
+
+    using Method = SpatialSelectionMethod;
+
     if (ImGui::BeginTabBar("SpatialSelectionTabBar")) {
-        if (ImGui::BeginTabItem(
-            "3D Shape", nullptr, tabFlags(SpatialSelectionMethod::Shape3D)))
-        {
-            if (!requestedTab || requestedTab == SpatialSelectionMethod::Shape3D) {
+        if (ImGui::BeginTabItem("3D Shape", nullptr, tabFlags(Method::Shape3D))) {
+            if (!requestedTab || requestedTab == Method::Shape3D) {
                 _requestedTab.reset();
-                changed |= _currentMethod != SpatialSelectionMethod::Shape3D;
-                _currentMethod = SpatialSelectionMethod::Shape3D;
+                changed |= _currentMethod != Method::Shape3D;
+                _currentMethod = Method::Shape3D;
                 if (ImGui::BeginChild("Shape3DContent", contentSize())) {
                     changed |= renderShape3DTab();
                 }
@@ -1082,13 +1147,12 @@ bool SpatialSelectionView::renderMethodTabs(float footerHeight) {
             }
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem(
-            "2D Sky Map", nullptr, tabFlags(SpatialSelectionMethod::SkyMap)))
-        {
-            if (!requestedTab || requestedTab == SpatialSelectionMethod::SkyMap) {
+
+        if (ImGui::BeginTabItem("2D Sky Map", nullptr, tabFlags(Method::SkyMap))) {
+            if (!requestedTab || requestedTab == Method::SkyMap) {
                 _requestedTab.reset();
-                changed |= _currentMethod != SpatialSelectionMethod::SkyMap;
-                _currentMethod = SpatialSelectionMethod::SkyMap;
+                changed |= _currentMethod != Method::SkyMap;
+                _currentMethod = Method::SkyMap;
                 if (ImGui::BeginChild("SkyMapContent", contentSize())) {
                     changed |= renderSkyMapTab();
                 }
@@ -1096,13 +1160,12 @@ bool SpatialSelectionView::renderMethodTabs(float footerHeight) {
             }
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem(
-            "Lasso / Density", nullptr, tabFlags(SpatialSelectionMethod::Lasso)))
-        {
-            if (!requestedTab || requestedTab == SpatialSelectionMethod::Lasso) {
+
+        if (ImGui::BeginTabItem("Lasso / Density", nullptr, tabFlags(Method::Lasso))) {
+            if (!requestedTab || requestedTab == Method::Lasso) {
                 _requestedTab.reset();
-                changed |= _currentMethod != SpatialSelectionMethod::Lasso;
-                _currentMethod = SpatialSelectionMethod::Lasso;
+                changed |= _currentMethod != Method::Lasso;
+                _currentMethod = Method::Lasso;
                 _lassoTabActive = true;
                 if (ImGui::BeginChild("LassoContent", contentSize())) {
                     changed |= renderLassoTab();
@@ -1497,61 +1560,163 @@ bool SpatialSelectionView::renderLassoTab() {
         _lassoVisibilityActive = true;
     }
 
+    const auto beginStepLayout = [](const char* tableId) {
+        constexpr ImGuiTableFlags Flags =
+            ImGuiTableFlags_Resizable |
+            ImGuiTableFlags_SizingStretchProp |
+            ImGuiTableFlags_NoBordersInBody;
+
+        if (!ImGui::BeginTable(tableId, 2, Flags)) {
+            return false;
+        }
+        ImGui::TableSetupColumn("Content", ImGuiTableColumnFlags_WidthStretch, 0.8f);
+        ImGui::TableSetupColumn("Image", ImGuiTableColumnFlags_WidthStretch, 0.15f);
+        ImGui::TableNextColumn();
+        return true;
+    };
+
+    const auto drawStepImage = [this](
+        size_t imageIndex,
+        const char* tooltip,
+        float imageWidth = 70.f
+    ) {
+        const std::unique_ptr<opengl::Texture>& image = _lassoStepImages[imageIndex];
+        if (!image) {
+            ImGui::TextColored(
+                ImVec4(1.f, 0.4f, 0.4f, 1.f),
+                "%s",
+                "Image is not initialized."
+            );
+            return;
+        }
+        const glm::uvec3 dimensions = image->dimensions();
+        const float aspectRatio = static_cast<float>(dimensions.x) /
+            static_cast<float>(dimensions.y);
+
+        const float availableWidth = ImGui::GetContentRegionAvail().x;
+        const float width = std::min(imageWidth, availableWidth);
+        const ImVec2 imageSize(width, width / aspectRatio);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + availableWidth - width);
+        ImGui::Image(
+            ImTextureRef(static_cast<ImTextureID>(
+                static_cast<GLuint>(*image)
+            )),
+            imageSize,
+            ImVec2(0.f, 1.f),
+            ImVec2(1.f, 0.f)
+        );
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s", tooltip);
+        }
+    };
+
+    view::helper::pushBoldFont();
     ImGui::SeparatorText("1. Select Dataset for Selection:");
+    ImGui::PopFont();
 
-    ImGui::TextWrapped(
-        "Do a spatial selectionbased on the density of points in another point cloud."
-    );
+    if (beginStepLayout("LassoDatasetSelection")) {
+        ImGui::TextDisabled(
+            "Selection is based on another point cloud."
+        );
 
-    if (ImGui::BeginCombo("Point cloud", _lassoTargetNode.c_str())) {
-        for (const std::string& identifier : candidates) {
-            const bool isSelected = identifier == _lassoTargetNode;
-            if (ImGui::Selectable(identifier.c_str(), isSelected) && !isSelected) {
-                clearLassoSelection();
-                _lassoTargetNode = identifier;
-            }
-        }
-        ImGui::EndCombo();
-    }
-    if (_lassoTargetNode != previousTarget) {
-        if (_lassoCloudsHidden) {
-            _lassoCloudVisibilityBeforeHide.clear();
+        if (ImGui::BeginCombo("Point cloud", _lassoTargetNode.c_str())) {
             for (const std::string& identifier : candidates) {
-                _lassoCloudVisibilityBeforeHide.emplace(
-                    identifier, identifier == _lassoTargetNode
-                );
+                const bool isSelected = identifier == _lassoTargetNode;
+                if (ImGui::Selectable(identifier.c_str(), isSelected) && !isSelected) {
+                    clearLassoSelection();
+                    _lassoTargetNode = identifier;
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        if (_lassoTargetNode != previousTarget) {
+            if (_lassoCloudsHidden) {
+                _lassoCloudVisibilityBeforeHide.clear();
+                for (const std::string& identifier : candidates) {
+                    _lassoCloudVisibilityBeforeHide.emplace(
+                        identifier, identifier == _lassoTargetNode
+                    );
+                }
+            }
+            else {
+                _lassoCloudVisibilityOverride.reset();
             }
         }
-        else {
-            _lassoCloudVisibilityOverride.reset();
+        updateLassoCloudVisibility(candidates);
+
+        ImGui::BeginDisabled(lassoTarget() == nullptr);
+        if (ImGui::Button("Zoom to show points")) {
+            _showLassoGlyphs = false;
+            _dataViewer.setLassoGlyphVisibility(false);
+            global::scriptEngine->queueScript(std::format(
+                "openspace.pathnavigation.createPath({{"
+                    "PathType = 'Linear', Target = '{}', TargetType = 'Node'"
+                "}})",
+                _lassoTargetNode
+            ));
         }
-    }
-    updateLassoCloudVisibility(candidates);
-    if (ImGui::Checkbox("Show glyphs##before_lasso", &_showLassoGlyphs)) {
-        _dataViewer.setLassoGlyphVisibility(_showLassoGlyphs);
-    }
-    ImGui::SameLine();
-    view::helper::renderHelpMarker(
-        "Toggle the visibility of exoplanet glyphs. Disable them to better show the "
-        "selected point cloud. The visibility will be restored when leaving this panel."
-    );
-    if (candidates.empty()) {
-        ImGui::TextDisabled("No RenderableDensityPointCloud in the scene");
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(
+            "Zoom to show the selected points in the view. This also hides the "
+            "glyphs, for the points to be clearly visible."
+        );
+        ImGui::SameLine();
+
+        if (ImGui::Checkbox("Show glyphs##before_lasso", &_showLassoGlyphs)) {
+            _dataViewer.setLassoGlyphVisibility(_showLassoGlyphs);
+        }
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(
+            "Toggle the visibility of exoplanet glyphs. Disable them to better show the "
+            "selected point cloud. The visibility will be restored when leaving this panel."
+        );
+        if (candidates.empty()) {
+            ImGui::TextDisabled("No RenderableDensityPointCloud in the scene");
+        }
+
+        ImGui::TableNextColumn();
+        drawStepImage(
+            0,
+            "Select the dataset for lasso selection. This is the point cloud that will \n"
+            "be used as the basis for your selection.",
+            60.f
+        );
+        ImGui::EndTable();
     }
 
     ImGui::Spacing();
+
+    view::helper::pushBoldFont();
     ImGui::SeparatorText("2. Do Lasso Selection:");
-    ImGui::Bullet();
-    ImGui::TextWrapped(
-        "Hold SHIFT and drag with the left mouse button to draw a "
-        "lasso around the particles to select."
-    );
+    ImGui::PopFont();
 
-    ImGui::Spacing();
-    ImGui::Bullet();
-    ImGui::TextWrapped(
-        "Double-click while holding SHIFT to clear the selection."
-    );
+    if (beginStepLayout("LassoGestureInstructions")) {
+        ImGui::Bullet();
+        ImGui::TextWrapped(
+            "Hold SHIFT and drag a lasso to select particles"
+        );
+
+        ImGui::Spacing();
+        ImGui::Bullet();
+        ImGui::TextWrapped(
+            "Hold SHIFT and double-click to clear the selection"
+        );
+
+        ImGui::Spacing();
+        ImGui::Bullet();
+        ImGui::TextWrapped(
+            "Rotate the view to inspect selected particles"
+        );
+
+        ImGui::TableNextColumn();
+        drawStepImage(
+            1,
+            "Hold Shift and drag in the view to select particles."
+        );
+        ImGui::EndTable();
+    }
 
     // @TODO (2026-10-16, emmbr) bring back when we're implementingthe other cast methods
     //constexpr std::array<const char*, 3> MethodNames = {
@@ -1588,146 +1753,175 @@ bool SpatialSelectionView::renderLassoTab() {
         runLassoSelection(target);
     }
 
-    ImGui::Separator();
-
     ImGui::Spacing();
+    view::helper::pushBoldFont();
     ImGui::SeparatorText("3. Adjust Selection Threshold:");
+    ImGui::PopFont();
 
     const bool hasSelection = _castSelection != nullptr;
     const bool hasDensityVolume = target && target->densityVolume();
-    ImGui::BeginDisabled(!hasDensityVolume);
 
-    const bool thresholdChanged = ImGui::SliderFloat(
-        "Density threshold",
-        &_castThresholdExponent,
-        -10.f,
-        10.f,
-        "2^%.2f x base"
-    );
-    ImGui::SameLine();
-    view::helper::renderHelpMarker(
-        "Scales the density threshold used for the selection, relative to the "
-        "automatically computed base threshold (20% of the mean density inside the "
-        "lasso, or across the entire density volume when no lasso exists). "
-        "Lower values grow the selection, higher values shrink it to the densest cores."
-    );
-    if (thresholdChanged && hasDensityVolume) {
-        _castResult = hasSelection ?
-            _castSelection->select(_castThresholdExponent) :
-            selectDensityVolume(*target->densityVolume(), _castThresholdExponent);
+    if (beginStepLayout("LassoThresholdControls")) {
+        ImGui::BeginDisabled(!hasDensityVolume);
 
-        _densityPreviewVolume = hasSelection ? nullptr : target->densityVolume();
-        _lassoStatus.clear();
-        applyLassoSelection();
-    }
-
-    if (hasDensityVolume && (hasSelection || _densityPreviewVolume)) {
-        const float maxDensity = target->densityVolume()->maxDensity();
-        const float percent = maxDensity > 0.f ?
-            100.f * _castResult.threshold / maxDensity :
-            0.f;
-
-        ImGui::Text(
-            "Threshold: %.4g (%.2f%% of max density)", _castResult.threshold, percent
+        const bool thresholdChanged = ImGui::SliderFloat(
+            "Threshold",
+            &_castThresholdExponent,
+            -10.f,
+            10.f,
+            "2^%.2f x base"
         );
-        ImGui::Text(
-            "%zu particles selected",
-            _castResult.selectedParticles.size()
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(
+            "Scales the density threshold used for the selection, relative to the "
+            "automatically computed base threshold (20% of the mean density inside "
+            "the lasso, or across the entire density volume when no lasso exists). "
+            "Lower values grow the selection, higher values shrink it to the densest "
+            "cores."
         );
-    }
+        if (thresholdChanged && hasDensityVolume) {
+            _castResult = hasSelection ?
+                _castSelection->select(_castThresholdExponent) :
+                selectDensityVolume(*target->densityVolume(), _castThresholdExponent);
 
-    ImGui::BeginDisabled(!hasSelection && !hasDensityVolume);
-    if (ImGui::Button("Clear selection")) {
-        clearLassoSelection();
-    }
-    ImGui::EndDisabled();
-
-    ImGui::Spacing();
-    ImGui::SeparatorText("4. Generate Selection Volume:");
-
-    ImGui::PushStyleColor(ImGuiCol_Button, accentButtonColor);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, accentButtonHoveredColor);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, accentButtonActiveColor);
-    ImGui::BeginDisabled(_castSelection && _castResult.selectedParticles.empty());
-    if (ImGui::Button("Generate Isosurface")) {
-        generateLassoVolume(target, true);
-        changed = true;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Generate Convex Hull")) {
-        generateLassoVolume(target, false);
-        changed = true;
-    }
-    ImGui::EndDisabled();
-    ImGui::PopStyleColor(3);
-    ImGui::SameLine();
-    view::helper::renderHelpMarker(
-        "Creates a closed volume around the selected regions of the point cloud, "
-        "or density regions across the entire cloud when no lasso exists, and "
-        "selects the exoplanets inside it."
-    );
-
-    ImGui::EndDisabled();
-    ImGui::Spacing();
-    ImGui::Spacing();
-
-    const bool hasEnabledCloud = std::any_of(
-        _lassoCloudVisibility.begin(),
-        _lassoCloudVisibility.end(),
-        [](const auto& entry) { return entry.second.requested; }
-    );
-
-    const bool hasCloudToRestore = std::any_of(
-        _lassoCloudVisibilityBeforeHide.begin(),
-        _lassoCloudVisibilityBeforeHide.end(),
-        [](const auto& entry) { return entry.second; }
-    );
-
-    ImGui::BeginDisabled(
-        candidates.empty() || (_lassoCloudsHidden ? !hasCloudToRestore : !hasEnabledCloud)
-    );
-
-    if (ImGui::Button(
-        _lassoCloudsHidden ? "Show selection points" : "Hide selection points"
-    ))
-    {
-        if (_lassoCloudsHidden) {
-            _lassoCloudsHidden = false;
-            _lassoCloudVisibilityOverride = _lassoCloudVisibilityBeforeHide;
-            _lassoCloudVisibilityBeforeHide.clear();
+            _densityPreviewVolume = hasSelection ? nullptr : target->densityVolume();
+            _lassoStatus.clear();
+            applyLassoSelection();
         }
-        else {
-            _lassoCloudVisibilityBeforeHide.clear();
-            for (const std::string& identifier : candidates) {
-                const auto cloud = _lassoCloudVisibility.find(identifier);
-                if (cloud != _lassoCloudVisibility.end()) {
-                    _lassoCloudVisibilityBeforeHide.emplace(
-                        identifier, cloud->second.requested
-                    );
+
+        if (hasDensityVolume && (hasSelection || _densityPreviewVolume)) {
+            const float maxDensity = target->densityVolume()->maxDensity();
+            const float percent = maxDensity > 0.f ?
+                100.f * _castResult.threshold / maxDensity :
+                0.f;
+
+            ImGui::TextDisabled(
+                "Threshold: %.4g (%.2f%% of max density)",
+                _castResult.threshold,
+                percent
+            );
+            ImGui::TextDisabled(
+                "%zu particles selected",
+                _castResult.selectedParticles.size()
+            );
+        }
+
+        ImGui::BeginDisabled(!hasSelection && !hasDensityVolume);
+        if (ImGui::Button("Clear selection")) {
+            clearLassoSelection();
+        }
+        ImGui::EndDisabled();
+        ImGui::EndDisabled();
+
+        ImGui::TableNextColumn();
+        drawStepImage(
+            2,
+            "Adjust the density threshold to expand or narrow the selected regions."
+        );
+        ImGui::EndTable();
+    }
+
+    ImGui::Spacing();
+
+    view::helper::pushBoldFont();
+    ImGui::SeparatorText("4. Generate Selection Volume:");
+    ImGui::PopFont();
+
+    if (beginStepLayout("LassoVolumeGeneration")) {
+        ImGui::BeginDisabled(!hasDensityVolume);
+        ImGui::PushStyleColor(ImGuiCol_Button, accentButtonColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, accentButtonHoveredColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, accentButtonActiveColor);
+        ImGui::BeginDisabled(_castSelection && _castResult.selectedParticles.empty());
+        if (ImGui::Button("Generate Isosurface")) {
+            generateLassoVolume(target, true);
+            changed = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Generate Convex Hull")) {
+            generateLassoVolume(target, false);
+            changed = true;
+        }
+        ImGui::EndDisabled();
+        ImGui::PopStyleColor(3);
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(
+            "Creates a closed volume around the selected regions of the point cloud, "
+            "or density regions across the entire cloud when no lasso exists, and "
+            "selects the exoplanets inside it."
+        );
+        ImGui::EndDisabled();
+
+        ImGui::Spacing();
+        ImGui::Spacing();
+
+        if (ImGui::Button(
+            _showLassoGlyphs ?
+            "Hide glyphs##after_generate" : "Show glyphs##after_generate"
+        ))
+        {
+            _showLassoGlyphs = !_showLassoGlyphs;
+            _dataViewer.setLassoGlyphVisibility(_showLassoGlyphs);
+        }
+
+        ImGui::SameLine();
+
+        const bool hasEnabledCloud = std::any_of(
+            _lassoCloudVisibility.begin(),
+            _lassoCloudVisibility.end(),
+            [](const auto& entry) { return entry.second.requested; }
+        );
+
+        const bool hasCloudToRestore = std::any_of(
+            _lassoCloudVisibilityBeforeHide.begin(),
+            _lassoCloudVisibilityBeforeHide.end(),
+            [](const auto& entry) { return entry.second; }
+        );
+
+        ImGui::BeginDisabled(
+            candidates.empty() || (_lassoCloudsHidden ? !hasCloudToRestore : !hasEnabledCloud)
+        );
+
+        if (ImGui::Button(
+            _lassoCloudsHidden ? "Show selection points" : "Hide selection points"
+        )) {
+            if (_lassoCloudsHidden) {
+                _lassoCloudsHidden = false;
+                _lassoCloudVisibilityOverride = _lassoCloudVisibilityBeforeHide;
+                _lassoCloudVisibilityBeforeHide.clear();
+            }
+            else {
+                _lassoCloudVisibilityBeforeHide.clear();
+                for (const std::string& identifier : candidates) {
+                    const auto cloud = _lassoCloudVisibility.find(identifier);
+                    if (cloud != _lassoCloudVisibility.end()) {
+                        _lassoCloudVisibilityBeforeHide.emplace(
+                            identifier, cloud->second.requested
+                        );
+                    }
+                }
+                _lassoCloudsHidden = true;
+                _lassoCloudVisibilityOverride.emplace();
+                for (const std::string& identifier : candidates) {
+                    _lassoCloudVisibilityOverride->emplace(identifier, false);
                 }
             }
-            _lassoCloudsHidden = true;
-            _lassoCloudVisibilityOverride.emplace();
-            for (const std::string& identifier : candidates) {
-                _lassoCloudVisibilityOverride->emplace(identifier, false);
-            }
+            updateLassoCloudVisibility(candidates);
         }
-        updateLassoCloudVisibility(candidates);
-    }
-    ImGui::EndDisabled();
+        ImGui::EndDisabled();
 
-    ImGui::SameLine();
 
-    if (ImGui::Button(
-        _showLassoGlyphs ? "Hide glyphs##after_generate" : "Show glyphs##after_generate"
-    ))
-    {
-        _showLassoGlyphs = !_showLassoGlyphs;
-        _dataViewer.setLassoGlyphVisibility(_showLassoGlyphs);
-    }
+        if (!_lassoStatus.empty()) {
+            ImGui::TextColored(ImVec4(1.f, 0.7f, 0.3f, 1.f), "%s", _lassoStatus.c_str());
+        }
 
-    if (!_lassoStatus.empty()) {
-        ImGui::TextColored(ImVec4(1.f, 0.7f, 0.3f, 1.f), "%s", _lassoStatus.c_str());
+        ImGui::TableNextColumn();
+        drawStepImage(
+            3,
+            "Generate a closed selection volume from the selected density regions.\n"
+            "This volume will be used to filter the main dataset."
+        );
+        ImGui::EndTable();
     }
 
     drawLasso();

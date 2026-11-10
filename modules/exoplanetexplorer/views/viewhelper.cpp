@@ -27,6 +27,10 @@
 #include <algorithm>
 #include <string>
 
+namespace {
+    constexpr int BoldFontIndex = 1;
+} // namespace
+
 namespace openspace::view {
 
 namespace helper {
@@ -64,6 +68,10 @@ glm::vec4 uncertaintyIndicatorColor(float percent) {
     }
     const float alpha = std::clamp(percent / 30.f, 0.f, 1.f);
     return glm::vec4(colors::Warning.r, colors::Warning.g, colors::Warning.b, alpha);
+}
+
+void pushBoldFont() {
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[BoldFontIndex]);
 }
 
 void renderDescriptiveText(const char* text) {
