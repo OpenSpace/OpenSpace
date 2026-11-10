@@ -27,6 +27,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/misc/dictionary.h>
+#include <openspace/opengl/openglstatecache.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
@@ -254,6 +255,11 @@ void ScreenSpaceRenderableRenderable::initializeGL() {
     _renderable->initializeGL();
 
     addRenderFunction([this]() {
+        // The renderable's shaders write reversed depth, as in the main scene
+        const opengl::DepthConventionScope reversedDepth(
+            opengl::DepthConvention::Reversed
+        );
+
         glm::vec4 bg = _style.backgroundColor;
         glClearColor(bg.r, bg.g, bg.b, bg.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
