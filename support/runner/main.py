@@ -23,6 +23,7 @@
 ##########################################################################################
 
 import argparse
+import atexit
 import datetime
 import json
 import os
@@ -31,7 +32,9 @@ import requests
 import shutil
 import time
 from pathlib import Path
-from testsuite.openspace import write_configuration_overwrite, run_single_test
+from testsuite.openspace import (
+  restore_configuration_overwrite, run_single_test, write_configuration_overwrite
+)
 from testsuite.test import Test, TestResult, test_identifier
 
 
@@ -261,7 +264,11 @@ if __name__ == "__main__":
       raise SystemExit(f"Could not find executable '{executable}'")
 
     if args.overwrite_path is not None:
-      write_configuration_overwrite(root_dir, Path(args.overwrite_path))
+      previous_override = write_configuration_overwrite(
+        root_dir, Path(args.overwrite_path)
+      )
+      # Registered right away, so that the file is also restored if a test run is aborted
+      atexit.register(restore_configuration_overwrite, root_dir, previous_override)
 
   if not args.attach and executable is None:
     raise SystemExit("Could not find executable")
