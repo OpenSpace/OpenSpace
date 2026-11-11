@@ -687,9 +687,12 @@ void ScriptEngine::postSync(bool isMaster) {
     else {
         const std::unique_lock lock(_clientScriptsMutex);
         while (!_clientScriptQueue.empty()) {
+            // Remove the script before running it so that a throwing script can not
+            // cause this loop to run forever
+            Script script = std::move(_clientScriptQueue.front());
+            _clientScriptQueue.pop();
             try {
-                runScript(_clientScriptQueue.front());
-                _clientScriptQueue.pop();
+                runScript(script);
             }
             catch (const RuntimeError& e) {
                 LERRORC(e.component, e.message);

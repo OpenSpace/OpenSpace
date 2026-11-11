@@ -260,7 +260,7 @@ bool openFileLocation(const std::filesystem::path& path) {
                                                                    bool recursive = false,
                                                                       bool sorted = false)
 {
-    if (!std::filesystem::exists(path) && !std::filesystem::is_directory(path)) {
+    if (!std::filesystem::is_directory(path)) {
         return std::vector<std::filesystem::path>();
     }
 
@@ -285,7 +285,7 @@ bool openFileLocation(const std::filesystem::path& path) {
                                                                    bool recursive = false,
                                                                       bool sorted = false)
 {
-    if (!std::filesystem::exists(path) && !std::filesystem::is_directory(path)) {
+    if (!std::filesystem::is_directory(path)) {
         return std::vector<std::filesystem::path>();
     }
 
@@ -310,7 +310,7 @@ bool openFileLocation(const std::filesystem::path& path) {
                                                                    bool recursive = false,
                                                                       bool sorted = false)
 {
-    if (!std::filesystem::exists(path) && !std::filesystem::is_directory(path)) {
+    if (!std::filesystem::is_directory(path)) {
         return std::vector<std::filesystem::path>();
     }
 
