@@ -56,7 +56,6 @@
 #include <openspace/scripting/scriptengine.h>
 #include <algorithm>
 #include <array>
-#include <cstring>
 #include <iterator>
 #include <limits>
 #include <set>
@@ -211,11 +210,9 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 
     static constexpr int BufferSize = 256;
     static std::array<char, BufferSize> buffer;
-#ifdef _MSC_VER
-    strcpy_s(buffer.data(), value.length() + 1, value.c_str());
-#else // ^^^^ _MSC_VER // !_MSC_VER vvvv
-    strcpy(buffer.data(), value.c_str());
-#endif // _MSC_VER
+    // Truncate values that do not fit into the buffer
+    const size_t nCopied = value.copy(buffer.data(), BufferSize - 1);
+    buffer[nCopied] = '\0';
     const bool hasNewValue = ImGui::InputText(name.c_str(), buffer.data(), BufferSize);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -236,11 +233,9 @@ void renderListProperty(const std::string& name, std::string_view fullIdentifier
 
     static constexpr int BufferSize = 512;
     static std::array<char, BufferSize> buffer;
-#ifdef _MSC_VER
-    strcpy_s(buffer.data(), value.length() + 1, value.c_str());
-#else // ^^^^ _MSC_VER // !_MSC_VER vvvv
-    strcpy(buffer.data(), value.c_str());
-#endif // _MSC_VER
+    // Truncate values that do not fit into the buffer
+    const size_t nCopied = value.copy(buffer.data(), BufferSize - 1);
+    buffer[nCopied] = '\0';
 
     const bool hasNewValue = ImGui::InputText(name.c_str(), buffer.data(), BufferSize);
     if (hasNewValue) {
