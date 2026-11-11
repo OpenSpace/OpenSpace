@@ -54,7 +54,6 @@ private:
 
     DataViewer& _dataViewer;
 
-    std::vector<size_t> _selection;     // Indices of selected data points
     std::vector<size_t> _pinnedItems;
 
     // ImGui table only supports a limited number of columns, so we need to keep track of

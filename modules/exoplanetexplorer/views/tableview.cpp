@@ -126,9 +126,10 @@ void TableView::render(bool* open, std::vector<size_t>& filteredDataRows) {
     }
 
     ImGui::SameLine();
+    const std::vector<size_t>& selection = _dataViewer.selection();
     const std::string pinButtonLabel = std::format(
         "Pin selected ({})",
-        _selection.size()
+        selection.size()
     );
     const float pinButtonWidth =
         ImGui::CalcTextSize(pinButtonLabel.c_str()).x +
@@ -138,9 +139,9 @@ void TableView::render(bool* open, std::vector<size_t>& filteredDataRows) {
     if (rightAlignedX > currentX) {
         ImGui::SetCursorPosX(rightAlignedX);
     }
-    ImGui::BeginDisabled(_selection.empty());
+    ImGui::BeginDisabled(selection.empty());
     if (ImGui::Button(pinButtonLabel.c_str())) {
-        for (const size_t index : _selection) {
+        for (const size_t index : selection) {
             const auto found = std::find(_pinnedItems.begin(), _pinnedItems.end(), index);
             if (found == _pinnedItems.end()) {
                 _pinnedItems.push_back(index);
@@ -407,8 +408,9 @@ void TableView::renderTable(const std::string& tableId, std::vector<size_t>& dat
                 ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns
                     | ImGuiSelectableFlags_AllowOverlap;
 
-                auto found = std::find(_selection.begin(), _selection.end(), index);
-                const bool itemIsSelected = found != _selection.end();
+                const std::vector<size_t>& selection = _dataViewer.selection();
+                auto found = std::find(selection.begin(), selection.end(), index);
+                const bool itemIsSelected = found != selection.end();
 
                 ImGui::TableNextRow(ImGuiTableRowFlags_None, RowHeight);
 
@@ -489,18 +491,25 @@ void TableView::renderTable(const std::string& tableId, std::vector<size_t>& dat
                         }
 
                         if (changed) {
+                            std::vector<size_t> updatedSelection = selection;
+                            auto selected = std::find(
+                                updatedSelection.begin(),
+                                updatedSelection.end(),
+                                index
+                            );
                             if (ImGui::GetIO().KeyCtrl) {
                                 if (itemIsSelected) {
-                                    _selection.erase(found);
+                                    updatedSelection.erase(selected);
                                 }
                                 else {
-                                    _selection.push_back(index);
+                                    updatedSelection.push_back(index);
                                 }
                             }
                             else {
-                                _selection.clear();
-                                _selection.push_back(index);
+                                updatedSelection.clear();
+                                updatedSelection.push_back(index);
                             }
+                            _dataViewer.setSelection(updatedSelection);
                         }
                         continue;
                     }
