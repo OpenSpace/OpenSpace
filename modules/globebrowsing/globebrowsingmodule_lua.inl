@@ -367,7 +367,8 @@ namespace {
  * Returns an array of tables that describe the available layers that are supported by the
  * WMS server identified by the provided name. The `URL` component of the returned table
  * can be used in the `FilePath` argument for a call to the `addLayer` function to add the
- * value to a globe.
+ * value to a globe. If the capabilities of the server are still being downloaded, an
+ * empty array is returned.
  *
  * \param name The name of the WMS server for which to get the information
  */

@@ -71,6 +71,7 @@
 #include <gdal.h>
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <limits>
@@ -397,12 +398,15 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
 {
     auto downloadFunction = [](const std::string& downloadUrl) {
         LDEBUG("Opening WMS capabilities: " + downloadUrl);
-        CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "15"); // 3 seconds
+        // The timeout is set only for this thread, as changing the global option races
+        // with other capability requests and the tile loading. Setting it to nullptr
+        // afterwards restores the global value
+        CPLSetThreadLocalConfigOption("GDAL_HTTP_TIMEOUT", "15"); // 15 seconds
         GDALDatasetH dataset = GDALOpen(
             downloadUrl.c_str(),
             GA_ReadOnly
         );
-        CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "3"); // 3 seconds
+        CPLSetThreadLocalConfigOption("GDAL_HTTP_TIMEOUT", nullptr);
 
         if (!dataset) {
             LWARNING("Could not open dataset: " + downloadUrl);
@@ -436,8 +440,13 @@ GlobeBrowsingModule::capabilities(const std::string& name)
     else {
         const auto inFlightIt = _inFlightCapabilitiesMap.find(name);
         if (inFlightIt != _inFlightCapabilitiesMap.end()) {
-            // If the download and the parsing has not finished yet, this will block,
-            // otherwise it will just return
+            // Do not block the calling thread, which is the main thread, while the
+            // download and the parsing are still in progress
+            if (inFlightIt->second.wait_for(std::chrono::seconds(0)) !=
+                std::future_status::ready)
+            {
+                return {};
+            }
             const Capabilities cap = inFlightIt->second.get();
             _capabilitiesMap[name] = cap;
             _inFlightCapabilitiesMap.erase(inFlightIt);

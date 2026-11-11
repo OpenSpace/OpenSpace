@@ -73,6 +73,12 @@ public:
      * Registers then user - usable name.
      */
     void loadWMSCapabilities(std::string name, std::string globe, std::string url);
+
+    /**
+     * Returns the capabilities of the WMS server with the provided \p name. If the
+     * capabilities are still being downloaded, an empty list is returned instead of
+     * blocking until they are available.
+     */
     Capabilities capabilities(const std::string& name);
 
     std::vector<UrlInfo> urlInfo(const std::string& globe) const;
