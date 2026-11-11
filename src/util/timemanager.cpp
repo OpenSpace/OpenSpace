@@ -538,19 +538,21 @@ void TimeManager::addDeltaTimesKeybindings() {
 
     const int nKeys = static_cast<int>(Keys.size());
     const int nSteps = static_cast<int>(steps.size());
+    const int maxKeyBinds = 3 * nKeys;
 
     // For each key, add upp to three keybinds (no modifier, then SHIFT and then CTRL),
-    // plus inverted version of each time step one using the ALT modifier
-    for (int i = 0; i < nSteps; i++) {
+    // plus inverted version of each time step one using the ALT modifier. Steps beyond
+    // that would reuse already bound keys, so they are not mapped
+    for (int i = 0; i < std::min(nSteps, maxKeyBinds); i++) {
         const Key key = Keys[i % nKeys];
         const double deltaTimeStep = steps[i];
 
         KeyModifier modifier = KeyModifier::None;
-        if (i > nKeys - 1) {
-            modifier = KeyModifier::Shift;
-        }
-        else if (i > 2 * nKeys - 1) {
+        if (i >= 2 * nKeys) {
             modifier = KeyModifier::Control;
+        }
+        else if (i >= nKeys) {
+            modifier = KeyModifier::Shift;
         }
 
         const KeyModifier negativeModifier = modifier | KeyModifier::Alt;
@@ -560,7 +562,6 @@ void TimeManager::addDeltaTimesKeybindings() {
     }
 
     LINFO("Added keybindings for specified delta time steps");
-    const int maxKeyBinds = 3 * nKeys;
     if (nSteps > maxKeyBinds) {
         LWARNING(std::format(
             "Error settings delta time keys: Too many delta times, so not all could be "
