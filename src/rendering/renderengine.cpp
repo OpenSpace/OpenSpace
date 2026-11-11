@@ -915,15 +915,6 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _camera->invalidateCache();
     }
 
-    const int fpsLimit = _framerateLimit;
-    if (fpsLimit > 0) {
-        // Using a sleep here is not optimal, but we are not looking for perfect timing
-        std::this_thread::sleep_until(_lastFrameTime);
-        const double delta = (1.0 / fpsLimit) * 1000.0 * 1000.0;
-        auto now = std::chrono::high_resolution_clock::now();
-        _lastFrameTime = now + std::chrono::microseconds(static_cast<int>(delta));
-    }
-
     const bool renderingEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
     const float trueBlackoutFactor =
         global::windowDelegate->isMaster() ?
@@ -1124,6 +1115,17 @@ void RenderEngine::renderDashboard() const {
 
 void RenderEngine::postDraw() {
     ZoneScoped;
+
+    // This is done in postDraw rather than in render as the latter is called once per
+    // viewport, which would apply the limit multiple times per frame
+    const int fpsLimit = _framerateLimit;
+    if (fpsLimit > 0) {
+        // Using a sleep here is not optimal, but we are not looking for perfect timing
+        std::this_thread::sleep_until(_lastFrameTime);
+        const double delta = (1.0 / fpsLimit) * 1000.0 * 1000.0;
+        auto now = std::chrono::high_resolution_clock::now();
+        _lastFrameTime = now + std::chrono::microseconds(static_cast<int>(delta));
+    }
 
     _frameNumber++;
 }
