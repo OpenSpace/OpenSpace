@@ -337,16 +337,16 @@ private:
     HttpRequest::ProgressCallback _onProgress;
 
     /// Value indicating whether the HttpDownload is currently downloading a file
-    bool _isDownloading = false;
+    std::atomic_bool _isDownloading = false;
 
     /// Value indicating whether the download is finished
-    bool _isFinished = false;
+    std::atomic_bool _isFinished = false;
 
     /// Value indicated whether the download was successful
-    bool _isSuccessful = false;
+    std::atomic_bool _isSuccessful = false;
 
     /// Marker telling the downloading thread that the download should be cancelled
-    bool _shouldCancel = false;
+    std::atomic_bool _shouldCancel = false;
 
     /// The HttpRequest class that will be used for the download
     HttpRequest _httpRequest;
@@ -357,6 +357,9 @@ private:
     /// This condition variable is used by the #wait function to be able to wait for
     /// completion of the downloading thread
     std::condition_variable _downloadFinishCondition;
+
+    /// The mutex used together with the #_downloadFinishCondition
+    std::mutex _downloadFinishMutex;
 };
 
 /**
