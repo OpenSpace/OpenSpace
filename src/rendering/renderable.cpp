@@ -363,14 +363,18 @@ glm::dmat4 Renderable::calcModelTransform(const RenderData& data,
 glm::dmat4 Renderable::calcModelViewTransform(const RenderData& data,
                                     const std::optional<glm::dmat4>& modelTransform) const
 {
-    const glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    // Not using `value_or` as its argument would be evaluated even if a transform exists
+    const glm::dmat4 modelMatrix =
+        modelTransform.has_value() ? *modelTransform : calcModelTransform(data);
     return data.camera.combinedViewMatrix() * modelMatrix;
 }
 
 glm::dmat4 Renderable::calcModelViewProjectionTransform(const RenderData& data,
                                     const std::optional<glm::dmat4>& modelTransform) const
 {
-    const glm::dmat4& modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    // Not using `value_or` as its argument would be evaluated even if a transform exists
+    const glm::dmat4 modelMatrix =
+        modelTransform.has_value() ? *modelTransform : calcModelTransform(data);
     const glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
     const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
     return glm::dmat4(projectionMatrix * viewMatrix * modelMatrix);
