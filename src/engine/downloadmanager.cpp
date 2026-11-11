@@ -61,9 +61,15 @@ namespace {
         auto* mem = static_cast<DownloadManager::MemoryFile*>(userp);
 
         // @TODO(abock): Remove this and replace mem->buffer with std::vector<char>
-        mem->buffer = reinterpret_cast<char*>(
+        char* buffer = reinterpret_cast<char*>(
             realloc(mem->buffer, mem->size + realsize + 1)
         );
+        if (!buffer) {
+            // Returning a different size than was passed in makes curl abort the
+            // transfer. The old buffer is still valid and owned by `mem`
+            return 0;
+        }
+        mem->buffer = buffer;
 
         std::memcpy(&(mem->buffer[mem->size]), contents, realsize);
         mem->size += realsize;
@@ -249,6 +255,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 
         CURL* curl = curl_easy_init();
         if (!curl) {
+            free(file.buffer);
             throw RuntimeError("Error initializing cURL");
         }
 
@@ -258,7 +265,6 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, reinterpret_cast<void*>(&file));
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
 
         // Will fail when response status is 400 or above
         curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
