@@ -129,6 +129,8 @@ private:
     bool putBytes(const char* buffer, size_t size = 1);
 
     void closeSocket();
+    /// Wakes up all threads waiting on the input or output notifiers
+    void notifyAll();
     void establishConnection(addrinfo* info);
     void streamInput();
     void streamOutput();
@@ -147,13 +149,11 @@ private:
     std::thread _inputThread;
     std::thread _outputThread;
 
-    std::mutex _inputBufferMutex;
     std::mutex _inputQueueMutex;
     std::condition_variable _inputNotifier;
     std::deque<char> _inputQueue;
     std::array<char, 4096> _inputBuffer = { 0 };
 
-    std::mutex _outputBufferMutex;
     std::mutex _outputQueueMutex;
     std::condition_variable _outputNotifier;
     std::deque<char> _outputQueue;
