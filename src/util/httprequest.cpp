@@ -287,17 +287,30 @@ bool HttpFileDownload::setup() {
         }
     }
 
-    while (nCurrentFileHandles >= MaxFileHandles) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    // Take one of the limited file handles, waiting until one becomes available. The
+    // check and the increment have to happen atomically, or multiple downloads could
+    // take the last handle at the same time
+    int nHandles = nCurrentFileHandles;
+    while (nHandles >= MaxFileHandles ||
+           !nCurrentFileHandles.compare_exchange_weak(nHandles, nHandles + 1))
+    {
+        if (nHandles >= MaxFileHandles) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            nHandles = nCurrentFileHandles;
+        }
     }
 
-    nCurrentFileHandles++;
     _hasHandle = true;
     _file = std::ofstream(_destination, std::ofstream::binary);
 
     if (_file.good()) {
         return true;
     }
+
+    // The teardown is not called when the setup fails, so the handle has to be returned
+    // here. This does not modify `errno` or the Windows last error used below
+    _hasHandle = false;
+    nCurrentFileHandles--;
 
 #ifdef WIN32
     // GetLastError() gives more details than errno.
