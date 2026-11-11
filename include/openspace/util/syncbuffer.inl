@@ -43,7 +43,10 @@ void SyncBuffer::encode(const T& v) {
 template <typename T>
 T SyncBuffer::decode() {
     const size_t size = sizeof(T);
-    assert_msg(_decodeOffset + size < _n, "");
+    assert_msg(
+        _decodeOffset + size <= _dataStream.size(),
+        "Decoding past the end of the buffer"
+    );
     T value;
     std::memcpy(&value, _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
@@ -53,7 +56,10 @@ T SyncBuffer::decode() {
 template <typename T>
 void SyncBuffer::decode(T& value) {
     const size_t size = sizeof(T);
-    assert_msg(_decodeOffset + size < _n, "");
+    assert_msg(
+        _decodeOffset + size <= _dataStream.size(),
+        "Decoding past the end of the buffer"
+    );
     std::memcpy(&value, _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
 }
