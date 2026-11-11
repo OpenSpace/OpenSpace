@@ -385,6 +385,8 @@ private:
 
     /// The location of the asset root directory
     std::filesystem::path _assetRootDirectory;
+    /// The location of the user asset root directory
+    std::filesystem::path _userAssetRootDirectory;
 
     /// The Lua state that is used for all asset initialization
     lua::LuaState* _luaState = nullptr;
