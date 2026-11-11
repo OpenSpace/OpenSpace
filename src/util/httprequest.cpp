@@ -206,7 +206,12 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
             _isSuccessful = false;
         }
 
-        _isFinished = true;
+        {
+            // Setting the flag while holding the mutex prevents the notification from
+            // being lost if `wait` is between its predicate check and going to sleep
+            const std::lock_guard lock(_downloadFinishMutex);
+            _isFinished = true;
+        }
         if (_isSuccessful) {
             LTRACEC(
                 "HttpDownload",
@@ -226,16 +231,21 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
 }
 
 void HttpDownload::cancel() {
-    _shouldCancel = true;
+    {
+        const std::lock_guard lock(_downloadFinishMutex);
+        _shouldCancel = true;
+    }
+    _downloadFinishCondition.notify_all();
 }
 
 bool HttpDownload::wait() {
-    std::mutex conditionMutex;
-    std::unique_lock lock(conditionMutex);
-    _downloadFinishCondition.wait(
-        lock,
-        [this]() { return _isFinished || _shouldCancel; }
-    );
+    {
+        std::unique_lock lock(_downloadFinishMutex);
+        _downloadFinishCondition.wait(
+            lock,
+            [this]() { return _isFinished || _shouldCancel; }
+        );
+    }
     if (_downloadThread.joinable()) {
         _downloadThread.join();
     }
