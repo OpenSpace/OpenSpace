@@ -1149,7 +1149,7 @@ void SceneGraphNode::computeScreenSpaceData(const RenderData& newData) {
     const Camera& cam = newData.camera;
     const glm::dvec3& worldPos = _worldPositionCached;
     const glm::dvec4 clipSpace = glm::dmat4(cam.projectionMatrix()) *
-                                 cam.combinedViewMatrix() * glm::vec4(worldPos, 1.0);
+                                 cam.combinedViewMatrix() * glm::dvec4(worldPos, 1.0);
     const glm::dvec2 worldPosNDC = glm::dvec2(clipSpace / clipSpace.w);
 
     const bool visible = worldPosNDC.x >= -1.0 && worldPosNDC.x <= 1.0 &&
@@ -1181,7 +1181,7 @@ void SceneGraphNode::computeScreenSpaceData(const RenderData& newData) {
     const glm::dvec3 lookUp = glm::normalize(cam.lookUpVectorWorldSpace());
     const glm::dvec3 radiusPos = worldPos + (nodeRadius * lookUp);
     const glm::dvec4 clipSpaceRadius = glm::dmat4(cam.projectionMatrix()) *
-                                    cam.combinedViewMatrix() * glm::vec4(radiusPos, 1.0);
+                                    cam.combinedViewMatrix() * glm::dvec4(radiusPos, 1.0);
     const glm::dvec3 radiusNDC = clipSpaceRadius / clipSpaceRadius.w;
 
     const glm::ivec2 centerScreenSpace = glm::ivec2(
