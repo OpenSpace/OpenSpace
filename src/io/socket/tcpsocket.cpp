@@ -139,6 +139,9 @@ void TcpSocket::connect() {
     const std::string p = std::to_string(_port);
     const int result = getaddrinfo(_address.c_str(), p.c_str(), &hints, &addresult);
     if (result != 0) {
+        LERROR(std::format(
+            "Could not resolve address '{}:{}'. Error: {}", _address, _port, result
+        ));
         return;
     }
 
@@ -222,15 +225,19 @@ void TcpSocket::setDelimiter(char delimiter) {
 }
 
 void TcpSocket::establishConnection(addrinfo* info) {
-    _socket = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
-
-    if (_socket == INVALID_SOCKET) {
+    auto fail = [this, info]() {
         freeaddrinfo(info);
-        _isConnected = false;
-        _isConnecting = false;
+        // `_isConnecting` is still true at this point, so this closes the socket
+        closeSocket();
         _shouldStopThreads = true;
         _inputNotifier.notify_all();
         _outputNotifier.notify_all();
+    };
+
+    _socket = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
+
+    if (_socket == INVALID_SOCKET) {
+        fail();
         return;
     }
 
@@ -250,28 +257,28 @@ void TcpSocket::establishConnection(addrinfo* info) {
     result = setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, falseFlag, sizeof(int));
     if (result == SOCKET_ERROR) {
         LWARNING(std::format("Socket error: {}", _ERRNO));
-        freeaddrinfo(info);
-        _isConnecting = false;
-        _isConnected = false;
-        _shouldStopThreads = true;
-        _inputNotifier.notify_all();
-        _outputNotifier.notify_all();
+        fail();
         return;
     }
     // Keep alive
     result = setsockopt(_socket, SOL_SOCKET, SO_KEEPALIVE, trueFlag, sizeof(int));
     if (result == SOCKET_ERROR) {
-        freeaddrinfo(info);
-        _isConnecting = false;
-        _isConnected = false;
-        _shouldStopThreads = true;
-        _inputNotifier.notify_all();
-        _outputNotifier.notify_all();
+        LWARNING(std::format("Socket error: {}", _ERRNO));
+        fail();
         return;
     }
 
     // Try to connect
-    ::connect(_socket, info->ai_addr, static_cast<int>(info->ai_addrlen));
+    result = ::connect(_socket, info->ai_addr, static_cast<int>(info->ai_addrlen));
+    if (result == SOCKET_ERROR) {
+        LERROR(std::format(
+            "Could not connect to '{}:{}'. Socket error: {}", _address, _port, _ERRNO
+        ));
+        fail();
+        return;
+    }
+
+    freeaddrinfo(info);
     _isConnected = true;
     _isConnecting = false;
 }
