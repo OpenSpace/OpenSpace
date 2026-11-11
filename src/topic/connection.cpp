@@ -97,7 +97,11 @@ void Connection::handleJson(const nlohmann::json& json) {
         auto type = json.find("type");
         if (type != json.end() && *type == "apiHandshake") {
             auto apiVersion = json.find("apiVersion");
-            nlohmann::json version = *apiVersion;
+            if (apiVersion == json.end() || !apiVersion->is_object()) {
+                _socket->disconnect();
+                throw RuntimeError("Handshake did not contain an API version");
+            }
+            const nlohmann::json& version = *apiVersion;
 
             _connectedApiVersion = ApiVersion{
                 .major = version.at("major").get<int>(),
