@@ -1296,6 +1296,21 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         scene->render(data, tasks);
     }
 
+    {
+        ZoneScopedN("Get Error Hack");
+
+        // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
+        // thread and the CPU thread from diverging too much, particularly the uploading
+        // of a lot of textures for the globebrowsing planets can cause a hard stuttering
+        // effect. Asking for a glGetError after the scene has been rendered will force
+        // the threads to implicitly synchronize and thus prevent the stuttering. This
+        // used to be done after every render bin, but once per draw is sufficient. The
+        // better solution would be to reduce the number of uploads per frame, use a
+        // staggered buffer, or something else like that preventing a large spike in
+        // uploads
+        glGetError();
+    }
+
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
     // Disabling depth test for filtering and HDR
