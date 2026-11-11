@@ -392,6 +392,8 @@ void PropertyOwner::removePropertySubOwner(PropertyOwner* owner) {
     // Notify the change so the UI can update
     publishPropertyTreePrunedEvent(owner->uri());
 
+    owner->setPropertyOwner(nullptr);
+
     // When a PropertyOwner is removed as a subowner, it means that it will probably be
     // deleted soon and we wouldn't need to invalidate the cache, but we can't be 100%
     // sure of that, so we are invalidating the cache anyway
