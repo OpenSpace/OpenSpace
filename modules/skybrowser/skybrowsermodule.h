@@ -67,6 +67,7 @@ public:
     double spaceCraftAnimationTime() const;
 
     std::string wwtImageCollectionUrl() const;
+    std::string wwtBrowserUrl() const;
 
     bool isCameraInSolarSystem() const;
     bool isSelectedPairFacingCamera() const;
@@ -106,6 +107,7 @@ private:
     BoolProperty _synchronizeAim;
     DoubleProperty _spaceCraftAnimationTime;
     StringProperty _wwtImageCollectionUrl;
+    StringProperty _wwtBrowserUrl;
 
     // The browsers and targets
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;

@@ -386,9 +386,12 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         this, &LauncherWindow::editConfiguration
     );
     {
-        // Set up the default value for the edit button
-        std::string selection = std::get<1>(_windowConfigBox->currentSelection());
-        _editWindowButton->setEnabled(std::filesystem::exists(selection));
+        // Set up the default value for the edit button. The selection signal was already
+        // sent while populating the list, which happened before we connected to it
+        const std::string selection = selectedWindowConfig();
+        selectConfiguration(
+            selection.empty() ? std::nullopt : std::optional<std::string>(selection)
+        );
     }
     {
         QPushButton* newWindowButton = new QPushButton("New", centralWidget);
@@ -497,11 +500,12 @@ void LauncherWindow::selectConfiguration(std::optional<std::string> selection) {
             "Cannot edit the default configuration since it is not a file"
         );
     }
-    else if (selection->starts_with(_configPath.string())) {
-        // If the configuration is a default configuration, we don't allow editing
+    else if (!selection->starts_with(_userConfigPath.string())) {
+        // Only configurations in the user folder can be edited, which excludes both the
+        // built-in configurations and the ones that are stored somewhere else
         _editWindowButton->setEnabled(false);
         _editWindowButton->setToolTip(
-            "Cannot edit the selected configuration as it is one of the built-in profiles"
+            "Cannot edit the selected configuration as it is not a user configuration"
         );
     }
     else {

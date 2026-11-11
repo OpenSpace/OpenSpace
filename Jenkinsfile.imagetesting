@@ -1,0 +1,126 @@
+// OpenSpace image testing pipeline
+//
+// Builds OpenSpace every night and runs all visual tests on each image testing node,
+// submitting the results to the regression server. The regression server can also start
+// this job with parameters to rerun a single test on a single node, optionally at a
+// specific commit.
+//
+// Note that `properties` replaces the triggers that are configured in the Jenkins UI, so
+// the nightly schedule has to be specified here. New parameters only show up in Jenkins
+// after the job has run once with this file
+
+properties([
+  parameters([
+    string(name: 'TEST_ID', defaultValue: '', trim: true,
+      description: 'Comma-separated group/name ids of the tests to run. Empty runs all tests'),
+    string(name: 'COMMIT', defaultValue: '', trim: true,
+      description: 'The OpenSpace commit to build. Empty builds the latest master'),
+    string(name: 'NODE', defaultValue: '', trim: true,
+      description: 'The node label to run on. Empty runs on all image testing nodes')
+  ]),
+  pipelineTriggers([cron('0 3 * * *')])
+])
+
+// The image testing nodes, keyed by the platform name that is used in the stage names
+def nodes = [
+  nvidia: 'windows-image-testing-nvidia'
+]
+
+// The parameters end up on the command line, so only values that cannot contain shell
+// characters are accepted
+def testId = params.TEST_ID ?: ''
+def commit = params.COMMIT ?: ''
+if (!(testId ==~ /^[A-Za-z0-9._\/,-]*$/)) {
+  error("Invalid TEST_ID '${testId}'")
+}
+if (!(commit ==~ /^([0-9a-f]{7,40})?$/)) {
+  error("Invalid COMMIT '${commit}'")
+}
+if (params.NODE && !nodes.containsValue(params.NODE)) {
+  error("Unknown NODE '${params.NODE}'")
+}
+
+def build_and_run(platform, testId, commit) {
+  deleteDir()
+
+  stage(platform + " - SCM") {
+    if (commit) {
+      // A shallow clone only contains the tip of the branch, so the commit is fetched
+      // directly instead
+      withEnv(["COMMIT=${commit}"]) {
+        bat(
+          script: """
+            git init OpenSpace
+            git -C OpenSpace fetch --depth 1 https://github.com/OpenSpace/OpenSpace %COMMIT%
+            git -C OpenSpace checkout FETCH_HEAD
+            git -C OpenSpace submodule update --init --recursive --depth 1 --jobs 4
+          """,
+          label: "Checkout OpenSpace at ${commit}"
+        )
+      }
+    }
+    else {
+      bat(
+        script: "git clone --recursive --jobs 4 --depth 1 https://github.com/OpenSpace/OpenSpace --single-branch",
+        label: "Checkout OpenSpace"
+      )
+    }
+  }
+
+  dir("OpenSpace") {
+    stage(platform + " - Build") {
+      bat(
+        script: "cmake --preset windows-msvc",
+        label: "Configure"
+      )
+      bat(
+        script: "cmake --build --preset windows-msvc-relwithdebinfo --target OpenSpace --parallel 6 -- /nologo /verbosity:minimal",
+        label: "Compile"
+      )
+    }
+
+    stage(platform + " - PIP") {
+      dir("support/runner") {
+        bat(
+          script: "pip install -r requirements.txt",
+          label: "Update Python packages"
+        )
+      }
+    }
+
+    stage(platform + " - Testing") {
+      dir("support/runner") {
+        bat(
+          script: "copy C:\\OpenSpace\\config.json .",
+          label: "Copy config file"
+        )
+        if (testId) {
+          withEnv(["TEST_ID=${testId}"]) {
+            bat(
+              script: "python -u main.py --overwrite C:/OpenSpace --test-id \"%TEST_ID%\"",
+              label: "Running image test ${testId}"
+            )
+          }
+        }
+        else {
+          bat(
+            script: "python -u main.py --overwrite C:/OpenSpace",
+            label: "Running image test"
+          )
+        }
+      }
+    }
+  }
+}
+
+
+def selected = params.NODE ? nodes.findAll { it.value == params.NODE } : nodes
+def branches = [:]
+selected.each { platform, label ->
+  branches["windows_${platform}"] = {
+    node(label) {
+      build_and_run(platform, testId, commit)
+    }
+  }
+}
+parallel branches

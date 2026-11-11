@@ -1,0 +1,39 @@
+local earthAsset = asset.require("scene/solarsystem/planets/earth/globe")
+
+
+
+-- The OpenStreetMap tiles are provided in the Web Mercator projection (EPSG:3857), so
+-- the VRT file reprojects the tile service in `openstreetmap.wms` into the geographic
+-- projection (EPSG:4326) that the globe expects
+local Layer = {
+  Identifier = "OpenStreetMap",
+  Name = "OpenStreetMap",
+  Enabled = asset.enabled,
+  ZIndex = 10,
+  FilePath = asset.resource("openstreetmap.vrt"),
+  Description = [[The standard map style of OpenStreetMap, a map of the world created by
+    a community of volunteer mappers. The map data does not extend beyond the latitudes
+    of the Web Mercator projection (approximately 85 degrees north and south). Map data
+    © OpenStreetMap contributors, available under the Open Database License.]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(earthAsset.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "OpenStreetMap",
+  Description = "Web loaded map layer for Earth showing the OpenStreetMap standard style",
+  Author = "OpenStreetMap contributors",
+  URL = "https://www.openstreetmap.org/copyright",
+  License = "Open Data Commons Open Database License (ODbL)"
+}

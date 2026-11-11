@@ -1,0 +1,50 @@
+<VRTDataset rasterXSize="134217728" rasterYSize="67108864" subClass="VRTWarpedDataset">
+  <SRS dataAxisToSRSAxisMapping="2,1">EPSG:4326</SRS>
+  <GeoTransform>-180.0, 2.682209014892578e-06, 0.0, 90.0, 0.0, -2.682209014892578e-06</GeoTransform>
+  <VRTRasterBand dataType="Byte" band="1" subClass="VRTWarpedRasterBand">
+    <ColorInterp>Red</ColorInterp>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="2" subClass="VRTWarpedRasterBand">
+    <ColorInterp>Green</ColorInterp>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="3" subClass="VRTWarpedRasterBand">
+    <ColorInterp>Blue</ColorInterp>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="4" subClass="VRTWarpedRasterBand">
+    <ColorInterp>Alpha</ColorInterp>
+  </VRTRasterBand>
+  <BlockXSize>256</BlockXSize>
+  <BlockYSize>256</BlockYSize>
+  <GDALWarpOptions>
+    <WarpMemoryLimit>67108864</WarpMemoryLimit>
+    <ResampleAlg>Bilinear</ResampleAlg>
+    <WorkingDataType>Byte</WorkingDataType>
+    <Option name="INIT_DEST">0</Option>
+    <SourceDataset relativeToVRT="1">openstreetmap.wms</SourceDataset>
+    <Transformer>
+      <ApproxTransformer>
+        <MaxError>0.125</MaxError>
+        <BaseTransformer>
+          <GenImgProjTransformer>
+            <SrcGeoTransform>-20037508.342789244, 0.29858214173896974, 0.0, 20037508.342789244, 0.0, -0.29858214173896974</SrcGeoTransform>
+            <SrcInvGeoTransform>67108864.0, 3.3491621239499065, 0.0, 67108864.0, 0.0, -3.3491621239499065</SrcInvGeoTransform>
+            <DstGeoTransform>-180.0, 2.682209014892578e-06, 0.0, 90.0, 0.0, -2.682209014892578e-06</DstGeoTransform>
+            <DstInvGeoTransform>67108864.0, 372827.02222222224, 0.0, 33554432.0, 0.0, -372827.02222222224</DstInvGeoTransform>
+            <ReprojectTransformer>
+              <ReprojectionTransformer>
+                <SourceSRS>EPSG:3857</SourceSRS>
+                <TargetSRS>EPSG:4326</TargetSRS>
+              </ReprojectionTransformer>
+            </ReprojectTransformer>
+          </GenImgProjTransformer>
+        </BaseTransformer>
+      </ApproxTransformer>
+    </Transformer>
+    <BandList>
+      <BandMapping src="1" dst="1" />
+      <BandMapping src="2" dst="2" />
+      <BandMapping src="3" dst="3" />
+    </BandList>
+    <DstAlphaBand>4</DstAlphaBand>
+  </GDALWarpOptions>
+</VRTDataset>

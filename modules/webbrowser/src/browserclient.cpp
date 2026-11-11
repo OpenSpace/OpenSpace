@@ -29,7 +29,15 @@
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/misc/assert.h>
+#include <iostream>
+#include <string_view>
+
+namespace {
+    constexpr std::string_view _loggerCat = "BrowserClient";
+} // namespace
 
 namespace openspace {
 
@@ -128,6 +136,25 @@ void BrowserClient::LoadHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser,
     }
 }
 
+void BrowserClient::LoadHandler::OnLoadError(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
+                                             ErrorCode errorCode,
+                                             const CefString& errorText,
+                                             const CefString& failedUrl)
+{
+    // The loading might be aborted which we don't want to log as a warning since it
+    // happens naturally at statup
+    if (errorCode == ERR_ABORTED) {
+        return;
+    }
+
+    // Using std::cout here instead of the logging macros as we don't want to pass the
+    // error straight back to the CEF context
+    std::cout << std::format(
+        "CEF load error ({}): {} for '{}'",
+        static_cast<int>(errorCode), errorText.ToString(), failedUrl.ToString()
+    ) << std::endl;
+}
+
 bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle,
                                                    cef_cursor_type_t type,
                                                    const CefCursorInfo&)
@@ -186,6 +213,26 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCur
             break;
     }
     global::windowDelegate->setMouseCursor(newCursor);
+    return false;
+}
+
+bool BrowserClient::DisplayHandler::OnConsoleMessage(CefRefPtr<CefBrowser>,
+                                                     cef_log_severity_t level,
+                                                     const CefString& message,
+                                                     const CefString& source, int line)
+{
+    static std::unordered_map<cef_log_severity_t, std::string_view> Severity = {
+        { LOGSEVERITY_ERROR, "error" },
+        { LOGSEVERITY_FATAL, "fatal" },
+        { LOGSEVERITY_WARNING, "warning" },
+        { LOGSEVERITY_INFO, "info" }
+    };
+
+    std::string_view s = Severity.contains(level) ? Severity[level] : "";
+
+    std::cout << std::format(
+        "CEF console ({} {}:{}): {}", s, source.ToString(), line, message.ToString()
+    ) << std::endl;
     return false;
 }
 

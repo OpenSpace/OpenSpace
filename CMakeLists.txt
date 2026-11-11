@@ -146,6 +146,22 @@ if (OPENSPACE_USE_SYSTEM_QT)
   end_header("Dependency: Qt")
 endif ()
 
+# Point this at a local SGCT checkout to build it as part of this project instead of using
+# the vcpkg port, for example to debug or develop SGCT. Every find_package(sgct) is then
+# redirected to that checkout. The vcpkg port is still installed to provide SGCT's own
+# dependencies
+set(OPENSPACE_SGCT_SOURCE_DIR "" CACHE PATH "Build SGCT from this source checkout instead of the vcpkg port")
+if (OPENSPACE_SGCT_SOURCE_DIR)
+  begin_header("Dependency: SGCT (local checkout)")
+  message(STATUS "Using SGCT from ${OPENSPACE_SGCT_SOURCE_DIR}")
+  set(SGCT_BUILD_CALIBRATOR OFF)
+  set(SGCT_TRACY_SUPPORT ${OPENSPACE_ENABLE_TRACY})
+  include(FetchContent)
+  FetchContent_Declare(sgct SOURCE_DIR "${OPENSPACE_SGCT_SOURCE_DIR}" OVERRIDE_FIND_PACKAGE)
+  FetchContent_MakeAvailable(sgct)
+  end_header("Dependency: SGCT (local checkout)")
+endif ()
+
 add_subdirectory(ext)
 add_subdirectory(src)
 add_subdirectory(support/codegen)

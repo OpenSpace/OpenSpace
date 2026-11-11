@@ -1,0 +1,46 @@
+-- Basic
+-- This asset creates a set of coordinate axes that are translated by a value determined 
+-- through evaluating a general perturbation file (in this case a CSV file).
+--
+-- ```{literalinclude} iss.csv
+-- :language: csv
+-- :caption: The general pertubation file that is used in this example
+-- ```
+
+local NodeFocus = {
+  Identifier = "GPTranslation_Example_Focus",
+  GUI = {
+    Name = "GPTranslation - Basic (Focus)",
+    Path = "/Examples"
+  }
+}
+
+local Node = {
+  Identifier = "GPTranslation_Example",
+  Parent = NodeFocus.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GPTranslation",
+      Format = "CSV",
+      File = asset.resource("iss.csv")
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "GPTranslation - Basic",
+    Path = "/Examples"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NodeFocus)
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(NodeFocus)
+end)

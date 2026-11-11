@@ -48,7 +48,8 @@ out Data {
   vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 #if USE_ECLIPSE_SHADOWS
-  vec3 positionWorldSpace;
+  // World space position relative to the center of the globe
+  vec3 positionWorldSpaceRelative;
 #endif // USE_ECLIPSE_SHADOWS
 #if SHADOW_MAPPING_ENABLED
   vec4 shadowCoords;
@@ -158,7 +159,8 @@ void main() {
   out_data.normalObjSpace = pair.normal;
 
 #if USE_ECLIPSE_SHADOWS
-  out_data.positionWorldSpace = vec3(modelTransform * dvec4(pair.position, 1.0));
+  // Ignoring the translation results in a world space position relative to the globe
+  out_data.positionWorldSpaceRelative = vec3(modelTransform * dvec4(pair.position, 0.0));
 #endif // USE_ECLIPSE_SHADOWS
 
 #if SHADOW_MAPPING_ENABLED

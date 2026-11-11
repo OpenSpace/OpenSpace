@@ -9,7 +9,9 @@
 # filesystems (unlike Windows/macOS) are case-sensitive.
 
 vcpkg_download_distfile(ARCHIVE
-    URLS "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/ccfits/v2.7/CCfits-2.7.tar.gz"
+    URLS
+        "https://liu-se.cdn.openspaceproject.com/dependencies/ccfits/CCfits-2.7.tar.gz"
+        "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/ccfits/v2.7/CCfits-2.7.tar.gz"
     FILENAME "CCfits-2.7.tar.gz"
     SHA512 5cb802f41cf0695d0e49924ee163151ee657b93158246766d04c192518c7bed30383405d87b5fb312f5f44af26d5ede3104fab90d93cc232e950f8ae66050fde
 )

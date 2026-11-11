@@ -48,9 +48,11 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    glm::vec3 xAxis() const;
-    glm::vec3 yAxis() const;
-    glm::vec3 zAxis() const;
+    // The `depth` is the number of axes that are already being evaluated in the current
+    // call chain and is used to detect circular dependencies between the axes
+    glm::vec3 xAxis(int depth) const;
+    glm::vec3 yAxis(int depth) const;
+    glm::vec3 zAxis(int depth) const;
 
     struct Axis {
         enum Type {

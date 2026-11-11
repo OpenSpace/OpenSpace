@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "masteraddress": "localhost",
   "scene": {
     "offset": { "x": 0.0, "y": 0.0, "z": 0.0 },

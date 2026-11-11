@@ -1,0 +1,17 @@
+-- Basic
+-- This example adds a dashboard item that shows the activity of image-capturing
+-- instruments with registered image sequences. 
+
+local Item = {
+  Identifier = "DashboardItemInstruments_Example",
+  Type = "DashboardItemInstruments"
+}
+
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

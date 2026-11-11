@@ -50,6 +50,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
@@ -2338,28 +2339,44 @@ void RenderableGlobe::calculateEclipseShadows(opengl::ProgramObject& programObje
         _ellipsoid.shadowConfigurationArray();
     shadowDataArray.reserve(shadowConfArray.size());
     double lt = 0.0;
+    const double time = data.time.j2000Seconds();
     for (const Ellipsoid::ShadowConfiguration& shadowConf : shadowConfArray) {
         // All distances and lengths in world coordinates are in meters. We need to move
         // this to view space.
-        // Getting source and caster
-        glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
-            shadowConf.source.first,
-            "SSB",
-            "GALACTIC",
-            {},
-            data.time.j2000Seconds(),
-            lt
-        );
-        sourcePos *= KmToM;
-        glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
+        // The shadow that reaches the planet now was cast by the caster one light time
+        // earlier. The caster moves fast relative to the solar system barycenter (about
+        // 30 km/s for the Moon), so ignoring the light time would place the shadow tens
+        // of kilometers behind its actual position. The light time between the source and
+        // the caster only has a negligible effect and is ignored
+        const glm::dvec3 currentCasterPos = SpiceManager::ref().targetPosition(
             shadowConf.caster.first,
             "SSB",
             "GALACTIC",
             {},
-            data.time.j2000Seconds(),
+            time,
             lt
-        );
-        casterPos *= KmToM;
+        ) * KmToM;
+        const double lightTime =
+            glm::length(currentCasterPos - data.modelTransform.translation) /
+            distanceconstants::LightSecond;
+
+        // Getting source and caster
+        const glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
+            shadowConf.source.first,
+            "SSB",
+            "GALACTIC",
+            {},
+            time - lightTime,
+            lt
+        ) * KmToM;
+        const glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
+            shadowConf.caster.first,
+            "SSB",
+            "GALACTIC",
+            {},
+            time - lightTime,
+            lt
+        ) * KmToM;
 
         const std::string source = shadowConf.source.first;
         SceneGraphNode* sourceNode =
@@ -2386,21 +2403,22 @@ void RenderableGlobe::calculateEclipseShadows(opengl::ProgramObject& programObje
             (glm::dot(planetCasterVec, sourceCasterVec) / (scLength * scLength)) *
             sourceCasterVec;
 
+        const double sourceRadius = shadowConf.source.second * sourceRadiusScale;
+        const double casterRadius = shadowConf.caster.second * casterRadiusScale;
+
         const double dTest  = glm::length(planetCasterVec - planetCasterProj);
-        const double xpTest = shadowConf.caster.second * casterRadiusScale *
-                scLength / (shadowConf.source.second * sourceRadiusScale +
-                             shadowConf.caster.second * casterRadiusScale);
-        const double rpTest = shadowConf.caster.second * casterRadiusScale *
-            (glm::length(planetCasterProj) + xpTest) / xpTest;
+        const double xpTest = casterRadius * scLength / (sourceRadius + casterRadius);
+        const double rpTest =
+            casterRadius * (glm::length(planetCasterProj) + xpTest) / xpTest;
 
         const glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
             "SUN",
             "SSB",
             "GALACTIC",
             {},
-            data.time.j2000Seconds(),
+            time,
             lt
-        );
+        ) * KmToM;
         const double casterDistSun = glm::length(casterPos - sunPos);
         const double planetDistSun =
             glm::length(data.modelTransform.translation - sunPos);
@@ -2415,12 +2433,13 @@ void RenderableGlobe::calculateEclipseShadows(opengl::ProgramObject& programObje
         {
             // The current caster is shadowing the current planet
             shadowData = {
-                .xu = shadowData.rc * scLength / (shadowData.rs - shadowData.rc),
+                .xu = casterRadius * scLength / (sourceRadius - casterRadius),
                 .xp = xpTest,
-                .rs = shadowConf.source.second * sourceRadiusScale,
-                .rc = shadowConf.caster.second * casterRadiusScale,
+                .rs = sourceRadius,
+                .rc = casterRadius,
                 .sourceCasterVec = glm::normalize(sourceCasterVec),
-                .casterPositionVec = casterPos,
+                // Relative to the globe to not lose precision in the shader
+                .casterPositionVec = planetCasterVec,
                 .isShadowing = true
             };
         }

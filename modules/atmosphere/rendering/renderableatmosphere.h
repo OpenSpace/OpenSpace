@@ -91,6 +91,8 @@ private:
     Vec2Property _atmosphereDimmingSunsetAngle;
 
     float _planetRadius = 0.f;
+    /// The scale that turns the spherical atmosphere into the planet's ellipsoid
+    glm::dvec3 _ellipsoidScale = glm::dvec3(1.0);
 
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
 

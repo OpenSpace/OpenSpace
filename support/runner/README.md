@@ -4,6 +4,7 @@ The _Runner_ is a Python script that will execute and possibly submit test resul
 | Parameter | Description |
 | --------- | ----------- |
 | `--test` | A comma-separated list of the group/name combination of the tests that should be run. The group of a test is all of the folders relative to the `visualtests` server concatenated with the name of the test being the filename. For example a test in `visualtests/mars/insight/landing.ostest` would have the group "mars/insight" and the name "landing". |
+| `--test-id` | A comma-separated list of tests identified by the group and name under which their results are submitted to the regression server, for example `mars-insight/landing` for the test in `visualtests/mars/insight/landing.ostest`. This is used by the regression server to rerun a single test and cannot be combined with `--test` or `--attach`. |
 | `--overwrite` | This path can be provided to store commonly used files that can be useful to keep between test runs. Right now, this is only used for the Sync folder and the MRF cache used by OpenSpace. |
 
 Example: `python main.py --test default/earth,rosetta/model default --overwrite C:/Development/TestCache`
@@ -13,3 +14,5 @@ Additionally, a `config.json` must be provided if tests are to be submitted to t
 If no `config.json` is found, all tests are run locally and are not submitted to the regression server. Instead all resulting images are stored in a `tests` folder whose subfolders mimic the folder structure found in the `visualtests` folder, resulting in images that can be manually inspected.
 
 If a `config.json` is provided, it requires the specification of the URL at which the regression server is located, the hardware string under which the test images are submitted, and a runner id that has to be provided by the administrator of the regression test server. If all these values are correct, test images are directly submitted to the regression server and be can used to compare against a reference image.
+
+The runner id works like a password, so the `config.json` should not be shared or committed. The regression server only accepts hardware, group, and test names that start with a letter or a digit and only contain letters, digits, `.`, `_`, and `-` (the folders of a group are joined with `-`, so the group of `visualtests/mars/insight/landing.ostest` is submitted as "mars-insight"). The runner refuses to start if the configured hardware does not follow this rule and skips tests whose group or name does not, instead of running them and having the submission rejected. If the server rejects a submission, the runner prints the server's error message together with an explanation of the error.

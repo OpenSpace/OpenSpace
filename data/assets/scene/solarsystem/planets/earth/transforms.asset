@@ -3,6 +3,13 @@ local coreKernels = asset.require("spice/core")
 
 
 
+local ITRF93Kernels = asset.resource({
+  Name = "ITRF93 Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "itrf93_kernels",
+  Version = 1
+})
+
 local EarthBarycenter = {
   Identifier = "EarthBarycenter",
   Parent = transforms.SolarSystemBarycenter.Identifier,
@@ -63,21 +70,48 @@ local EarthIAU = {
   Parent = EarthCenter.Identifier,
   Transform = {
     Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = coreKernels.Frame.Earth,
-      DestinationFrame = coreKernels.Frame.Galactic
+      Type = "TimelineRotation",
+      Keyframes = {
+        -- The next keyframe is also evaluated, so this one has to be inside the ITRF93
+        -- coverage, which starts at 1962-01-20
+        ["1962-01-21T00:00:00"] = {
+          Type = "SpiceRotation",
+          SourceFrame = coreKernels.Frame.Earth,
+          DestinationFrame = coreKernels.Frame.Galactic
+        },
+        ["1962-01-22T00:00:00"] = {
+          Type = "SpiceRotation",
+          SourceFrame = coreKernels.Frame.ITRF93,
+          DestinationFrame = coreKernels.Frame.Galactic
+        },
+        -- The ITRF93 coverage ends at 2099-08-25
+        ["2099-08-24T00:00:00"] = {
+          Type = "SpiceRotation",
+          SourceFrame = coreKernels.Frame.Earth,
+          DestinationFrame = coreKernels.Frame.Galactic
+        }
+      },
+      ShouldInterpolate = false
     }
   },
   GUI = {
     Name = "Earth IAU",
     Path = "/Solar System/Planets/Earth",
     Focusable = false,
-    Hidden = true
+    Hidden = true,
+    Description = [[The body-fixed rotation of the Earth. Between 1962-01-22 and 2099-08-24
+      the high-precision ITRF93 frame is used, which includes precession, nutation, and
+      polar motion. Outside of this time range, the lower-precision IAU_EARTH frame is
+      used instead.]]
   }
 }
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(ITRF93Kernels .. "earth_200101_990825_predict.bpc")
+  openspace.spice.loadKernel(ITRF93Kernels .. "earth_620120_240827.bpc")
+  openspace.spice.loadKernel(ITRF93Kernels .. "earth_latest_high_prec.bpc")
+
   openspace.addSceneGraphNode(EarthBarycenter)
   openspace.addSceneGraphNode(EarthCenter)
   openspace.addSceneGraphNode(EarthInertial)
@@ -89,6 +123,10 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EarthInertial)
   openspace.removeSceneGraphNode(EarthCenter)
   openspace.removeSceneGraphNode(EarthBarycenter)
+
+  openspace.spice.unloadKernel(ITRF93Kernels .. "earth_latest_high_prec.bpc")
+  openspace.spice.unloadKernel(ITRF93Kernels .. "earth_620120_240827.bpc")
+  openspace.spice.unloadKernel(ITRF93Kernels .. "earth_200101_990825_predict.bpc")
 end)
 
 asset.export(EarthBarycenter)

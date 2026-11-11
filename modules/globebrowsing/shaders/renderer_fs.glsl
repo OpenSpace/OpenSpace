@@ -45,7 +45,8 @@ in Data {
   vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 #if USE_ECLIPSE_SHADOWS
-  vec3 positionWorldSpace;
+  // World space position relative to the center of the globe
+  vec3 positionWorldSpaceRelative;
 #endif // USE_ECLIPSE_SHADOWS
 #if SHADOW_MAPPING_ENABLED
   vec4 shadowCoords;
@@ -100,6 +101,7 @@ uniform vec2 textureOffset;
 
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
+ *****           RELATIVE TO THE CENTER OF THE GLOBE                        ****
  *******************************************************************************/
 struct ShadowRenderingStruct {
   double xu;
@@ -246,7 +248,11 @@ Fragment getFragment() {
 #endif // PERFORM_SHADING
 
 #if USE_ECLIPSE_SHADOWS
-  frag.color.rgb *= calcShadow(shadowDataArray, dvec3(in_data.positionWorldSpace), true);
+  frag.color.rgb *= calcShadow(
+    shadowDataArray,
+    dvec3(in_data.positionWorldSpaceRelative),
+    true
+  );
 #endif // USE_ECLIPSE_SHADOWS
 
 #if USE_OVERLAY

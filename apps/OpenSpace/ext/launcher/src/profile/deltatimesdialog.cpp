@@ -234,7 +234,7 @@ void DeltaTimesDialog::listItemSelected() {
     transitionEditMode(index, true);
 }
 
-void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string_view color) {
+void DeltaTimesDialog::setLabelForKey(int index, bool editMode) {
     std::string labelS = "Set Simulation Time Increment (in seconds) for key";
     if (index >= static_cast<int>(_deltaTimesData.size())) {
         index = static_cast<int>(_deltaTimesData.size()) - 1;
@@ -242,9 +242,7 @@ void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string_view
     if (editMode) {
         labelS += " '" + createSummaryForDeltaTime(index, false) + "':";
     }
-    _adjustLabel->setText(QString::fromStdString(std::format(
-        "<font color='{}'>{}</font>", color, labelS
-    )));
+    _adjustLabel->setText(QString::fromStdString(labelS));
 }
 
 void DeltaTimesDialog::currentUnitChanged(int index) {
@@ -347,11 +345,11 @@ void DeltaTimesDialog::transitionEditMode(int index, bool state) {
 
     if (state) {
         _value->setFocus(Qt::OtherFocusReason);
-        setLabelForKey(index, true, "black");
+        setLabelForKey(index, true);
     }
     else {
         _addButton->setFocus(Qt::OtherFocusReason);
-        setLabelForKey(index, false, "light gray");
+        setLabelForKey(index, false);
     }
 }
 
