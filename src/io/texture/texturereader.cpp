@@ -48,25 +48,6 @@ namespace {
             );
         }
 
-        // This is weird. stb_image.h says that the first pixel loaded is the one in the
-        // upper left. However, if we load the data and just use it, the images are
-        // flipped in y. I assume that there is a 1-t floating around somewhere and
-        // someone should hunt that down.  For now, we just flip these values as well
-
-        // As we only need to flip in y direction, we can take entire scanlines and move
-        // the ith line to the (y-i-1)th line
-        std::vector<std::byte> buffer = std::vector<std::byte>(x * n);
-        for (int i = 0; i < y / 2; i++) {
-            // 1. Save the destination
-            std::memcpy(buffer.data(), data + (i * x * n), x * n);
-
-            // 2. Copy the source to destination
-            std::memcpy(data + (i * x * n), data + (y - i - 1) * x * n, x * n);
-
-            // 3. Copy into the source
-            std::memcpy(data + (y - i - 1) * x * n, buffer.data(), x * n);
-        }
-
         // Copy data into vector
         std::vector<std::byte> vec(
             reinterpret_cast<std::byte*>(data),
@@ -131,7 +112,10 @@ ImageInfo loadImage(const std::filesystem::path& filename) {
     int x = 0;
     int y = 0;
     int n = 0;
+
+    stbi_set_flip_vertically_on_load_thread(1);
     unsigned char* data = stbi_load(f.c_str(), &x, &y, &n, 0);
+    stbi_set_flip_vertically_on_load_thread(0);
 
     return loadImageData(data, x, y, n, f);
 }
@@ -151,6 +135,8 @@ ImageInfo loadImage(void* memory, size_t size, const std::string& format) {
     int x = 0;
     int y = 0;
     int n = 0;
+
+    stbi_set_flip_vertically_on_load_thread(1);
     unsigned char* data = stbi_load_from_memory(
         reinterpret_cast<unsigned char*>(memory),
         static_cast<int>(size),
@@ -159,6 +145,7 @@ ImageInfo loadImage(void* memory, size_t size, const std::string& format) {
         &n,
         0
     );
+    stbi_set_flip_vertically_on_load_thread(0);
 
     return loadImageData(data, x, y, n, "Memory");
 }
