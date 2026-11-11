@@ -701,13 +701,17 @@ void ScriptEngine::postSync(bool isMaster) {
         global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
         global::sessionRecordingHandler->currentApplicationInterpolationTime() :
         global::windowDelegate->applicationTime();
-    for (RepeatedScriptInfo& info : _repeatedScripts) {
+    // Running a script can register or remove repeated scripts, which invalidates
+    // references into `_repeatedScripts`. So we iterate by index and do not access the
+    // entry after the script was run
+    for (size_t i = 0; i < _repeatedScripts.size(); i++) {
+        RepeatedScriptInfo& info = _repeatedScripts[i];
         if (now - info.lastRun >= info.timeout) {
+            info.lastRun = now;
             runScript({
                 .code = info.script,
                 .addToLog = info.shouldBeLogged
             });
-            info.lastRun = now;
         }
     }
 
