@@ -88,7 +88,7 @@ namespace {
                 error,
                 MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                 buffer.data(),
-                0,
+                static_cast<DWORD>(buffer.size()),
                 nullptr
             );
             std::string msg = std::string(buffer.data());
@@ -108,7 +108,7 @@ namespace {
                     error,
                     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                     buffer.data(),
-                    0,
+                    static_cast<DWORD>(buffer.size()),
                     nullptr
                 );
                 std::string msg = std::string(buffer.data());
