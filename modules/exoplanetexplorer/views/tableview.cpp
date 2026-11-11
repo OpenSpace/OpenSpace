@@ -111,6 +111,7 @@ void TableView::render(bool* open, std::vector<size_t>& filteredDataRows) {
         filteredDataRows.size(), _dataViewer.data().size()
     ).c_str());
 
+
     // Search table
     static char searchString[128] = "";
     ImGui::InputTextWithHint(
@@ -123,6 +124,30 @@ void TableView::render(bool* open, std::vector<size_t>& filteredDataRows) {
     if (ImGui::Button("Clear")) {
         strcpy(searchString, "");
     }
+
+    ImGui::SameLine();
+    const std::string pinButtonLabel = std::format(
+        "Pin selected ({})",
+        _selection.size()
+    );
+    const float pinButtonWidth =
+        ImGui::CalcTextSize(pinButtonLabel.c_str()).x +
+        2.f * ImGui::GetStyle().FramePadding.x;
+    const float currentX = ImGui::GetCursorPosX();
+    const float rightAlignedX = currentX + ImGui::GetContentRegionAvail().x - pinButtonWidth;
+    if (rightAlignedX > currentX) {
+        ImGui::SetCursorPosX(rightAlignedX);
+    }
+    ImGui::BeginDisabled(_selection.empty());
+    if (ImGui::Button(pinButtonLabel.c_str())) {
+        for (const size_t index : _selection) {
+            const auto found = std::find(_pinnedItems.begin(), _pinnedItems.end(), index);
+            if (found == _pinnedItems.end()) {
+                _pinnedItems.push_back(index);
+            }
+        }
+    }
+    ImGui::EndDisabled();
 
     renderTable("full_exoplanets_table", filteredDataRows, false, searchString);
 
@@ -287,8 +312,6 @@ void TableView::renderTable(const std::string& tableId, std::vector<size_t>& dat
     const float TableHeight =
         (dataRows.size() + 1) * 1.2f * RowHeight + ImGui::GetStyle().ScrollbarSize;
     const ImVec2 TableSize = ImVec2(0.f, useFixedHeight ? TableHeight : 0.f);
-
-    bool selectionChanged = false;
 
     if (ImGui::BeginTable(tableId.c_str(), nColumns + 1, flags, TableSize)) {
         // Extra column with add button
@@ -466,22 +489,18 @@ void TableView::renderTable(const std::string& tableId, std::vector<size_t>& dat
                         }
 
                         if (changed) {
-                            // @TODO (2026-09-10): Revive multi-selection if we want to.
-                            // Maybe we could use it to select items to pin/export or something?
-                            //if (ImGui::GetIO().KeyCtrl) {
-                            //    if (itemIsSelected) {
-                            //        _selection.erase(found);
-                            //    }
-                            //    else {
-                            //        _selection.push_back(index);
-                            //    }
-                            //}
-                            //else {
+                            if (ImGui::GetIO().KeyCtrl) {
+                                if (itemIsSelected) {
+                                    _selection.erase(found);
+                                }
+                                else {
+                                    _selection.push_back(index);
+                                }
+                            }
+                            else {
                                 _selection.clear();
                                 _selection.push_back(index);
-                            //}
-
-                            selectionChanged = true;
+                            }
                         }
                         continue;
                     }
@@ -491,10 +510,6 @@ void TableView::renderTable(const std::string& tableId, std::vector<size_t>& dat
             }
         }
         ImGui::EndTable();
-
-        if (selectionChanged) {
-            _dataViewer.setSelection(_selection);
-        }
     }
 }
 
