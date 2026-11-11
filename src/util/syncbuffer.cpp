@@ -61,6 +61,10 @@ void SyncBuffer::encode(const std::string& s) {
 std::string SyncBuffer::decode() {
     ZoneScoped;
 
+    assert_msg(
+        _decodeOffset + sizeof(int32_t) <= _dataStream.size(),
+        "Decoding past the end of the buffer"
+    );
     int32_t length = 0;
     std::memcpy(
         reinterpret_cast<char*>(&length),
@@ -68,12 +72,18 @@ std::string SyncBuffer::decode() {
         sizeof(int32_t)
     );
     length = std::max(length, 0);
-    std::vector<char> tmp(length + 1);
     _decodeOffset += sizeof(int32_t);
-    memcpy(tmp.data(), _dataStream.data() + _decodeOffset, static_cast<size_t>(length));
+    assert_msg(
+        _decodeOffset + static_cast<size_t>(length) <= _dataStream.size(),
+        "Decoding past the end of the buffer"
+    );
+    // Construct the string with an explicit length so that strings containing null
+    // characters, such as binary Lua chunks, are not truncated
+    std::string ret = std::string(
+        reinterpret_cast<const char*>(_dataStream.data() + _decodeOffset),
+        static_cast<size_t>(length)
+    );
     _decodeOffset += length;
-    tmp[length] = '\0';
-    std::string ret(tmp.data());
     return ret;
 }
 
@@ -83,28 +93,40 @@ void SyncBuffer::decode(std::string& s) {
 
 void SyncBuffer::decode(glm::quat& value) {
     const size_t size = sizeof(glm::quat);
-    assert_msg(_decodeOffset + size < _n, "");
+    assert_msg(
+        _decodeOffset + size <= _dataStream.size(),
+        "Decoding past the end of the buffer"
+    );
     std::memcpy(glm::value_ptr(value), _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
 }
 
 void SyncBuffer::decode(glm::dquat& value) {
     const size_t size = sizeof(glm::dquat);
-    assert_msg(_decodeOffset + size < _n, "");
+    assert_msg(
+        _decodeOffset + size <= _dataStream.size(),
+        "Decoding past the end of the buffer"
+    );
     std::memcpy(glm::value_ptr(value), _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
 }
 
 void SyncBuffer::decode(glm::vec3& value) {
     const size_t size = sizeof(glm::vec3);
-    assert_msg(_decodeOffset + size < _n, "");
+    assert_msg(
+        _decodeOffset + size <= _dataStream.size(),
+        "Decoding past the end of the buffer"
+    );
     std::memcpy(glm::value_ptr(value), _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
 }
 
 void SyncBuffer::decode(glm::dvec3& value) {
     const size_t size = sizeof(glm::dvec3);
-    assert_msg(_decodeOffset + size < _n, "");
+    assert_msg(
+        _decodeOffset + size <= _dataStream.size(),
+        "Decoding past the end of the buffer"
+    );
     std::memcpy(glm::value_ptr(value), _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
 }
