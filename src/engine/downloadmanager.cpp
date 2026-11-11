@@ -143,18 +143,19 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     auto future = std::make_shared<FileFuture>(file.filename());
     errno = 0;
 #ifdef WIN32
-    FILE* fp;
+    FILE* fp = nullptr;
     const std::string f = file.string();
-    errno_t error = fopen_s(&fp, f.c_str(), "wb");
-    if (error != 0) {
-        LERROR(std::format("Could not open/create file: {}. Errno: {}", file, errno));
-    }
+    fopen_s(&fp, f.c_str(), "wb");
 #else // ^^^^ WIN32 // !WIN32 vvvv
     const std::string f = file.string();
     FILE* fp = fopen(f.c_str(), "wb");
 #endif // WIN32
     if (!fp) {
-        LERROR(std::format("Could not open/create file: {}. Errno: {}", file, errno));
+        future->errorMessage = std::format(
+            "Could not open/create file: {}. Errno: {}", file, errno
+        );
+        LERROR(future->errorMessage);
+        return future;
     }
 
     auto downloadFunction = [url, failOnError, timeoutSecs,
@@ -189,6 +190,8 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
             const CURLcode res = curl_easy_perform(curl);
+            long rescode = 0;
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &rescode);
             curl_easy_cleanup(curl);
             fclose(fp);
 
@@ -196,8 +199,6 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                 future->isFinished = true;
             }
             else {
-                long rescode = 0;
-                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &rescode);
                 future->errorMessage = std::format(
                     "{}. HTTP code: {}", curl_easy_strerror(res), rescode
                 );
@@ -206,6 +207,10 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             if (finishedCb) {
                 finishedCb(*future);
             }
+        }
+        else {
+            fclose(fp);
+            future->errorMessage = "Error initializing cURL";
         }
     };
 
