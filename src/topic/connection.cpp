@@ -55,16 +55,7 @@ void Connection::handleMessage(const std::string& message) {
         const nlohmann::json j = nlohmann::json::parse(message.c_str());
         handleJson(j);
     }
-    catch (const std::domain_error& e) {
-        LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
-    }
-    catch (const std::out_of_range& e) {
-        LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
-    }
-    catch (const std::exception& e) {
-        LERROR(std::format("Unexpected error {}, from: {}", e.what(), message));
-    }
-    catch (...) {
+    catch (const nlohmann::json::parse_error&) {
         if (!isAuthorized()) {
             _socket->disconnect();
             LERROR(std::format(
@@ -84,6 +75,18 @@ void Connection::handleMessage(const std::string& message) {
             }
         );
         LERROR(std::format("Could not parse JSON '{}'", sanitizedString));
+    }
+    catch (const std::domain_error& e) {
+        LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
+    }
+    catch (const std::out_of_range& e) {
+        LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
+    }
+    catch (const std::exception& e) {
+        LERROR(std::format("Unexpected error {}, from: {}", e.what(), message));
+    }
+    catch (...) {
+        LERROR(std::format("Unexpected error from: {}", message));
     }
 }
 
