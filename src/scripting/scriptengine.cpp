@@ -189,7 +189,7 @@ void ScriptEngine::deinitialize() {
 
     _registeredLibraries.clear();
     for (const RepeatedScriptInfo& info : _repeatedScripts) {
-        if (info.postScript.empty()) {
+        if (!info.postScript.empty()) {
             queueScript(info.postScript, info.shouldBeLogged);
         }
     }
