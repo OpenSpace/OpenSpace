@@ -327,10 +327,19 @@ void TcpSocket::streamOutput() {
     while (_isConnected && !_shouldStopThreads) {
         waitForOutput(1);
 
-        size_t nBytesToSend = 0;
-        const std::unique_lock lock(_outputQueueMutex);
-        while ((nBytesToSend = std::min(_outputQueue.size(), _outputBuffer.size())) > 0) {
-            std::copy_n(_outputQueue.begin(), nBytesToSend, _outputBuffer.begin());
+        while (true) {
+            // Only hold the lock while copying from the queue so that putBytes is not
+            // blocked while the data is being sent. This is safe as only this thread
+            // removes data from the front of the queue
+            size_t nBytesToSend = 0;
+            {
+                const std::unique_lock lock(_outputQueueMutex);
+                nBytesToSend = std::min(_outputQueue.size(), _outputBuffer.size());
+                std::copy_n(_outputQueue.begin(), nBytesToSend, _outputBuffer.begin());
+            }
+            if (nBytesToSend == 0) {
+                break;
+            }
 
 #ifdef WIN32
             const int n = static_cast<int>(nBytesToSend);
@@ -354,9 +363,20 @@ void TcpSocket::streamOutput() {
                 _outputNotifier.notify_all();
                 return;
             }
-            _outputQueue.erase(_outputQueue.begin(), _outputQueue.begin() + nSentBytes);
+            {
+                const std::unique_lock lock(_outputQueueMutex);
+                _outputQueue.erase(
+                    _outputQueue.begin(),
+                    _outputQueue.begin() + nSentBytes
+                );
+            }
         }
-        _outputNotifier.notify_all(); // Let anyone waiting on drainage know
+        {
+            // Let anyone waiting on drainage know. Notifying while holding the lock
+            // ensures that waitForOutputQueueDrained does not miss the notification
+            const std::unique_lock lock(_outputQueueMutex);
+            _outputNotifier.notify_all();
+        }
     }
 }
 
