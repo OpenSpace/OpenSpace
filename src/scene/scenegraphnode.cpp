@@ -1047,9 +1047,10 @@ mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child)
 
     if (iter == _children.end()) {
         LERROR("Trying to detach a non-existing child");
+        return nullptr;
     }
 
-    traversePreOrder([](SceneGraphNode* node) {
+    child.traversePreOrder([](SceneGraphNode* node) {
         node->clearDependencies();
     });
 
