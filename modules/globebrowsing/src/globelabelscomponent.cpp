@@ -459,10 +459,11 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
             // don't have the non-ascii character in the texture atlas). Once this
             // limitation is fixed, we can remove the next piece of code
             // Removing non ASCII characters:
-            strncpy(lEntry.feature, token.c_str(), 255);
+            std::strncpy(lEntry.feature, token.c_str(), 255);
+            lEntry.feature[255] = '\0';
             int tokenChar = 0;
-            while (tokenChar < 256) {
-                if (lEntry.feature[tokenChar] < 0 || lEntry.feature[tokenChar] == '\0') {
+            while (tokenChar < 255 && lEntry.feature[tokenChar] != '\0') {
+                if (lEntry.feature[tokenChar] < 0) {
                     lEntry.feature[tokenChar] = '*';
                 }
                 else if (lEntry.feature[tokenChar] == '\"') {
@@ -501,6 +502,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
                 openspace::getline(issFeature, token, '=');
             }
             std::strncpy(lEntry.feature, token.c_str(), 255);
+            lEntry.feature[255] = '\0';
 
             lEntry.geoPosition = cartesianCoordinatesFromGeo(
                 *static_cast<SceneGraphNode*>(_globe->owner()),
