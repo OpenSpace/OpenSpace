@@ -160,10 +160,17 @@ private:
     // Atmosphere Debugging
     const bool _saveCalculationTextures = false;
 
-    // Assuming < 1000 shadow casters, the longest uniform name that we are getting is
-    // shadowDataArray[999].casterPositionVec
-    // which needs to fit into the uniform buffer
-    char _uniformNameBuffer[40];
+    /// Uniform locations of the members of one `shadowDataArray` entry in the shader
+    struct ShadowUniformLocations {
+        GLint isShadowing = -1;
+        GLint xp = -1;
+        GLint xu = -1;
+        GLint rc = -1;
+        GLint sourceCasterVec = -1;
+        GLint casterPositionVec = -1;
+    };
+    /// One entry per shadow configuration, cached in #initializeCachedVariables
+    std::vector<ShadowUniformLocations> _shadowUniformLocations;
 };
 
 } // namespace openspace

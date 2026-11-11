@@ -76,7 +76,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <memory>
@@ -220,8 +219,6 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster(float textureScale,
     , _shadowConfArray(std::move(shadowConfigArray))
     , _saveCalculationTextures(saveCalculatedTextures)
 {
-    std::memset(_uniformNameBuffer, '\0', sizeof(_uniformNameBuffer));
-    std::strcpy(_uniformNameBuffer, "shadowDataArray[");
     _shadowDataArrayCache.reserve(_shadowConfArray.size());
 }
 
@@ -488,28 +485,22 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         _shadowDataArrayCache.push_back(shadow);
     }
 
-    // _uniformNameBuffer[0..15] = "shadowDataArray["
-    unsigned int counter = 0;
-    for (const ShadowRenderingStruct& sd : _shadowDataArrayCache) {
-        // Add the counter
-        char* bf = std::format_to(_uniformNameBuffer + 16, "{}", counter);
+    assert_msg(
+        _shadowDataArrayCache.size() <= _shadowUniformLocations.size(),
+        "Uniform locations were not cached for all shadow configurations"
+    );
+    for (size_t i = 0; i < _shadowDataArrayCache.size(); i++) {
+        const ShadowRenderingStruct& sd = _shadowDataArrayCache[i];
+        const ShadowUniformLocations& loc = _shadowUniformLocations[i];
 
-        std::strcpy(bf, "].isShadowing\0");
-        program.setUniform(_uniformNameBuffer, sd.isShadowing);
-
+        program.setUniform(loc.isShadowing, sd.isShadowing);
         if (sd.isShadowing) {
-            std::strcpy(bf, "].xp\0");
-            program.setUniform(_uniformNameBuffer, sd.penumbra);
-            std::strcpy(bf, "].xu\0");
-            program.setUniform(_uniformNameBuffer, sd.umbra);
-            std::strcpy(bf, "].rc\0");
-            program.setUniform(_uniformNameBuffer, sd.radiusCaster);
-            std::strcpy(bf, "].sourceCasterVec\0");
-            program.setUniform(_uniformNameBuffer, sd.sourceCasterVec);
-            std::strcpy(bf, "].casterPositionVec\0");
-            program.setUniform(_uniformNameBuffer, sd.casterPositionVec);
+            program.setUniform(loc.xp, sd.penumbra);
+            program.setUniform(loc.xu, sd.umbra);
+            program.setUniform(loc.rc, sd.radiusCaster);
+            program.setUniform(loc.sourceCasterVec, sd.sourceCasterVec);
+            program.setUniform(loc.casterPositionVec, sd.casterPositionVec);
         }
-        counter++;
     }
     program.setUniform(_uniformCache.hardShadows, _hardShadowsEnabled);
 }
@@ -540,6 +531,27 @@ std::filesystem::path AtmosphereDeferredcaster::helperPath() const {
 
 void AtmosphereDeferredcaster::initializeCachedVariables(opengl::ProgramObject& program) {
     opengl::updateUniformLocations(program, _uniformCache);
+
+    // Looking up the locations by name every frame is expensive, so we cache them for
+    // each of the shadow configurations
+    _shadowUniformLocations.clear();
+    _shadowUniformLocations.reserve(_shadowConfArray.size());
+    for (size_t i = 0; i < _shadowConfArray.size(); i++) {
+        auto location = [&program, i](std::string_view member) {
+            return program.uniformLocation(
+                std::format("shadowDataArray[{}].{}", i, member)
+            );
+        };
+
+        _shadowUniformLocations.push_back({
+            .isShadowing = location("isShadowing"),
+            .xp = location("xp"),
+            .xu = location("xu"),
+            .rc = location("rc"),
+            .sourceCasterVec = location("sourceCasterVec"),
+            .casterPositionVec = location("casterPositionVec")
+        });
+    }
 }
 
 void AtmosphereDeferredcaster::setModelTransform(glm::dmat4 transform) {
