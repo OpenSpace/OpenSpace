@@ -31,6 +31,7 @@
 #include <openspace/misc/boolean.h>
 #include <openspace/scripting/lualibrary.h>
 #include <filesystem>
+#include <fstream>
 #include <functional>
 #include <mutex>
 #include <queue>
@@ -196,6 +197,7 @@ private:
     bool _logFileExists = false;
     bool _logScripts = true;
     std::filesystem::path _logFilename;
+    std::ofstream _logFile;
 };
 
 } // namespace openspace

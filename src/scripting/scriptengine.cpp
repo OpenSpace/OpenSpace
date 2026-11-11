@@ -580,13 +580,17 @@ void ScriptEngine::writeLog(const std::string& script) {
 
             LDEBUG(std::format("Using script log file '{}'", _logFilename));
 
-            // Test file and clear previous input
-            std::ofstream file(_logFilename, std::ofstream::out | std::ofstream::trunc);
+            // Clear previous input and keep the file open for all subsequent scripts
+            _logFile = std::ofstream(
+                _logFilename,
+                std::ofstream::out | std::ofstream::trunc
+            );
 
-            if (!file.good()) {
+            if (!_logFile.good()) {
                 LERROR(std::format(
                     "Could not open file '{}' for logging scripts", _logFilename
                 ));
+                _logScripts = false;
                 return;
             }
         }
@@ -596,14 +600,9 @@ void ScriptEngine::writeLog(const std::string& script) {
         }
     }
 
-    // Simple text output to logfile
-    std::ofstream file(_logFilename, std::ofstream::app);
-    if (!file.good()) {
-        LERROR(std::format("Could not open file '{}' for logging scripts", _logFilename));
-        return;
-    }
-
-    file << script << '\n';
+    // Flush after every script so that the log is complete even if the application
+    // crashes
+    _logFile << script << std::endl;
 }
 
 void ScriptEngine::preSync(bool isMaster) {
