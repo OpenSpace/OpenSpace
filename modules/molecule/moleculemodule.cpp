@@ -412,9 +412,7 @@ void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, bufs);
 
-    glClearColor(0.f, 0.f, 0.f, 1.f);
-    glClearDepth(1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    clearFramebuffer();
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
     glDrawBuffers(lastDrawBufferCount, lastDrawBuffers.data());
