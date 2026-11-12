@@ -73,6 +73,12 @@ uniform vec4 override_color;
 
 
 Fragment getFragment() {
+  // The manual depth test below can discard the fragment before the textures are
+  // sampled, which makes the control flow non-uniform. Implicit derivatives are
+  // undefined in that case, so they are computed here and passed in explicitly
+  vec2 texCoordsDx = dFdx(in_data.texCoords);
+  vec2 texCoordsDy = dFdy(in_data.texCoords);
+
   Fragment frag;
   frag.depth = in_data.screenSpaceDepth;
   frag.gPosition = in_data.positionCameraSpace;
@@ -108,7 +114,9 @@ Fragment getFragment() {
 
   // Base color
   vec4 diffuseAlbedo =
-    has_texture_diffuse ? texture(texture_diffuse, in_data.texCoords) : color_diffuse;
+    has_texture_diffuse ?
+    textureGrad(texture_diffuse, in_data.texCoords, texCoordsDx, texCoordsDy) :
+    color_diffuse;
 
   // Multiply with vertex color if specified
   if (use_vertex_colors) {
@@ -122,7 +130,12 @@ Fragment getFragment() {
     // Specular color
     vec3 specularAlbedo;
     if (has_texture_specular) {
-      specularAlbedo = texture(texture_specular, in_data.texCoords).rgb;
+      specularAlbedo = textureGrad(
+        texture_specular,
+        in_data.texCoords,
+        texCoordsDx,
+        texCoordsDy
+      ).rgb;
     }
     else {
       specularAlbedo = has_color_specular ? color_specular.rgb : diffuseAlbedo.rgb;
@@ -131,7 +144,12 @@ Fragment getFragment() {
     // Bump mapping
     vec3 normal;
     if (has_texture_normal) {
-      vec3 normalAlbedo = texture(texture_normal, in_data.texCoords).rgb;
+      vec3 normalAlbedo = textureGrad(
+        texture_normal,
+        in_data.texCoords,
+        texCoordsDx,
+        texCoordsDy
+      ).rgb;
       normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
       normal = normalize(in_data.tbn * normalAlbedo);
     }
