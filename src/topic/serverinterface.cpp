@@ -243,11 +243,12 @@ void ServerInterface::initialize() {
 }
 
 void ServerInterface::deinitialize() {
-    if (!_enabled) {
+    if (!_socketServer) {
         return;
     }
 
     _socketServer->close();
+    _socketServer = nullptr;
 }
 
 bool ServerInterface::isEnabled() const {
@@ -255,7 +256,7 @@ bool ServerInterface::isEnabled() const {
 }
 
 bool ServerInterface::isActive() const {
-    return _socketServer->isListening();
+    return _socketServer && _socketServer->isListening();
 }
 
 int ServerInterface::port() const {
