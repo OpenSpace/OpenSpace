@@ -121,7 +121,7 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
     }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
             LERRORC(
@@ -133,8 +133,8 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
 
         try {
             _texture = io::texture::loadTexture(
-                reinterpret_cast<void*>(imageFile.buffer),
-                imageFile.size,
+                imageFile.buffer.data(),
+                imageFile.buffer.size(),
                 2,
                 { .filter = opengl::Texture::FilterMode::LinearMipMap },
                 imageFile.format

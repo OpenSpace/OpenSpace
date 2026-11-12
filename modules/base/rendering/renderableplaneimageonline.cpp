@@ -160,7 +160,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
     }
 
     if (!_texture && _imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
             LERRORC(
@@ -172,8 +172,8 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
 
         try {
             _texture = io::texture::loadTexture(
-                reinterpret_cast<void*>(imageFile.buffer),
-                imageFile.size,
+                imageFile.buffer.data(),
+                imageFile.buffer.size(),
                 2,
                 opengl::Texture::SamplerInit{
                     .filter = opengl::Texture::FilterMode::LinearMipMap
@@ -199,7 +199,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         if (!_rightTexture && _rightImageFuture.valid() &&
             DownloadManager::futureReady(_rightImageFuture))
         {
-            const DownloadManager::MemoryFile imageFile = _rightImageFuture.get();
+            DownloadManager::MemoryFile imageFile = _rightImageFuture.get();
 
             if (imageFile.corrupted) {
                 LERRORC(
@@ -213,8 +213,8 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
 
             try {
                 _rightTexture = io::texture::loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
+                    imageFile.buffer.data(),
+                    imageFile.buffer.size(),
                     2,
                     opengl::Texture::SamplerInit{
                         .filter = opengl::Texture::FilterMode::LinearMipMap

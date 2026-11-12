@@ -33,8 +33,6 @@
 #include <curl/curl.h>
 #include <cerrno>
 #include <cstdio>
-#include <cstring>
-#include <malloc.h>
 #include <sstream>
 #include <string_view>
 #include <thread>
@@ -59,22 +57,8 @@ namespace {
     size_t writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp) {
         const size_t realsize = size * nmemb;
         auto* mem = static_cast<DownloadManager::MemoryFile*>(userp);
-
-        // @TODO(abock): Remove this and replace mem->buffer with std::vector<char>
-        char* buffer = reinterpret_cast<char*>(
-            realloc(mem->buffer, mem->size + realsize + 1)
-        );
-        if (!buffer) {
-            // Returning a different size than was passed in makes curl abort the
-            // transfer. The old buffer is still valid and owned by `mem`
-            return 0;
-        }
-        mem->buffer = buffer;
-
-        std::memcpy(&(mem->buffer[mem->size]), contents, realsize);
-        mem->size += realsize;
-        mem->buffer[mem->size] = 0;
-
+        const char* data = static_cast<const char*>(contents);
+        mem->buffer.insert(mem->buffer.end(), data, data + realsize);
         return realsize;
     }
 
@@ -247,15 +231,10 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
     auto downloadFunction = [url, successCb = std::move(successCallback),
                              errorCb = std::move(errorCallback)]()
     {
-        DownloadManager::MemoryFile file = {
-            .buffer = reinterpret_cast<char*>(malloc(1)),
-            .size = 0,
-            .corrupted = false
-        };
+        DownloadManager::MemoryFile file;
 
         CURL* curl = curl_easy_init();
         if (!curl) {
-            free(file.buffer);
             throw RuntimeError("Error initializing cURL");
         }
 

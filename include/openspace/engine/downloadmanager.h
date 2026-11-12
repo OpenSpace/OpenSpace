@@ -64,8 +64,7 @@ public:
     };
 
     struct MemoryFile {
-        char* buffer = nullptr;
-        size_t size = 0;
+        std::vector<char> buffer;
         std::string format;
         bool corrupted = false;
     };
