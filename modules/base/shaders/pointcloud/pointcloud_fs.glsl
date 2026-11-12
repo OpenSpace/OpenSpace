@@ -27,6 +27,7 @@
 in Data {
   flat int textureLayer;
   flat float colorParameter;
+  flat vec3 pointColor;
   vec2 texCoords;
   flat float screenSpaceDepth;
   flat vec4 positionViewSpace;
@@ -34,6 +35,8 @@ in Data {
 
 uniform float opacity;
 uniform vec3 color;
+
+uniform bool usePointColor;
 
 uniform vec4 nanColor = vec4(0.5);
 uniform bool useNanColor = true;
@@ -109,7 +112,12 @@ Fragment getFragment() {
 
   vec4 fullColor = vec4(color, 1.0);
   vec4 cmapColor = vec4(1.0);
-  if (useColorMap) {
+  if (usePointColor) {
+    // Per-point RGB color from the dataset takes priority over the color map and the
+    // fixed color
+    fullColor = vec4(in_data.pointColor, 1.0);
+  }
+  else if (useColorMap) {
     cmapColor = sampleColorMap(in_data.colorParameter);
     if (!useCmapOutline) {
       fullColor = cmapColor;

@@ -47,7 +47,13 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void initialize() override;
+    /**
+     * Load the dataset and compute the number of interpolation steps from it. Also marks
+     * the buffer as needing to be reinitialized, as its size and layout might change when
+     * a new dataset is loaded.
+     */
+    void loadDataset() override;
+
     void initializeShadersAndGlExtras() override;
     void deinitializeShaders() override;
     void setExtraUniforms() override;
