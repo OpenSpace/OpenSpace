@@ -24,7 +24,15 @@
 
 #include <openspace/util/threadpool.h>
 
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <exception>
+#include <string_view>
 #include <utility>
+
+namespace {
+    constexpr std::string_view _loggerCat = "ThreadPool";
+} // namespace
 
 namespace openspace {
 
@@ -48,12 +56,21 @@ void Worker::operator()() {
             }
 
             // Get the task from the queue
-            task = _pool._tasks.front();
+            task = std::move(_pool._tasks.front());
             _pool._tasks.pop_front();
         }
 
-        // Execute the task
-        task();
+        // Execute the task. An exception that escapes the thread function would
+        // terminate the application, so it is reported here instead
+        try {
+            task();
+        }
+        catch (const std::exception& e) {
+            LERROR(std::format("Task failed with exception: {}", e.what()));
+        }
+        catch (...) {
+            LERROR("Task failed with an unknown exception");
+        }
     }
 }
 
@@ -99,6 +116,7 @@ void ThreadPool::clearTasks() {
 }
 
 bool ThreadPool::hasOutstandingTasks() const {
+    const std::unique_lock lock(_queueMutex);
     return !_tasks.empty();
 }
 
