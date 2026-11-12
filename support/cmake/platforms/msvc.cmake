@@ -27,14 +27,14 @@
 
 
 function (internal__set_compile_options target)
-  target_compile_options(${target} INTERFACE
+  target_compile_options(${target} PRIVATE
     "/MP"              # Multi-threading support
     "/permissive-"     # Enable conformance mode
     "/EHsc"            # Exception handling
     "/Zc:__cplusplus"  # Correctly set the __cplusplus macro
   )
 
-  target_compile_options(${target} INTERFACE
+  target_compile_options(${target} PRIVATE
     "/W4"       # Highest warning level
     "/w44062"   # missing case label
     "/w44165"   # 'HRESULT' is being converted to 'bool'
@@ -110,12 +110,12 @@ function (internal__set_compile_options target)
     "/w45309"   #	literal suffix 'name' requires at least 'language version'
   )
 
-  target_compile_options(${target} INTERFACE
+  target_compile_options(${target} PRIVATE
     "/wd4068"   # unknown pragma
     "/wd5030"   # attribute 'attribute' is not recognized  [raised by: codegen]
   )
 
-  target_compile_definitions(${target} INTERFACE
+  target_compile_definitions(${target} PRIVATE
     "_CRT_SECURE_NO_WARNINGS"
     "NOMINMAX"
     "VC_EXTRALEAN"
@@ -130,17 +130,17 @@ function (internal__set_compile_options target)
   # CMAKE_SYSTEM_PROCESSOR reports the *host* (ARM64) even for an x64 build, which would
   # drop the flag from the x64 builds made on such a machine
   if (CMAKE_CXX_COMPILER_ARCHITECTURE_ID MATCHES "^([xX]86|[xX]64)$")
-    target_compile_options(${target} INTERFACE "/arch:AVX2")
+    target_compile_options(${target} PRIVATE "/arch:AVX2")
   endif ()
 
   if (OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS)
-    target_compile_options(${target} INTERFACE
+    target_compile_options(${target} PRIVATE
       "/Oi" # usage of intrinsic functions
       "/GL" # Whole program optimization
     )
   else ()
     if (OPENSPACE_ENABLE_EDIT_CONTINUE)
-      target_compile_options(${target} INTERFACE
+      target_compile_options(${target} PRIVATE
         "/ZI" # Edit and continue support
       )
     endif ()

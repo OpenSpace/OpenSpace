@@ -315,7 +315,9 @@ target_precompile_headers(${webbrowser_module} PRIVATE
 )
 
 set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "support")
-set_openspace_compile_settings(libcef_dll_wrapper)
+# This is third-party code, so it only gets the language standard and not the warnings
+# that `set_openspace_compile_settings` would enable
+target_compile_features(libcef_dll_wrapper PRIVATE cxx_std_23)
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()

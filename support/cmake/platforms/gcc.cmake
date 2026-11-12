@@ -27,12 +27,12 @@
 
 
 function (internal__set_compile_options target)
-  target_compile_options(${target} INTERFACE
+  target_compile_options(${target} PRIVATE
     "-ggdb"
     "-march=x86-64-v3"
   )
 
-  target_compile_options(${target} INTERFACE
+  target_compile_options(${target} PRIVATE
     "-Wall"
     "-Wextra"
     "-Wpedantic"
@@ -57,7 +57,7 @@ function (internal__set_compile_options target)
     "-Wzero-as-null-pointer-constant"
     )
 
-  target_compile_options(${target} INTERFACE
+  target_compile_options(${target} PRIVATE
     "-Wno-attributes"
     "-Wno-missing-field-initializers"
   )
