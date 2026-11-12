@@ -34,6 +34,7 @@
 #include <openspace/io/model/modelreader.h>
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/assert.h>
+#include <openspace/misc/defer.h>
 #include <openspace/misc/dictionary.h>
 #include <openspace/misc/exception.h>
 #include <openspace/misc/profiling.h>
@@ -945,6 +946,21 @@ void RenderableModel::initializeGL() {
     // Set Interaction sphere size to be 10% of the bounding sphere
     setInteractionSphere(boundingSphere() * 0.1);
 
+    // The shadow map is shared with other renderables that sample it without a depth
+    // comparison, so the comparison is enabled through a sampler object that is only
+    // bound while this model is rendered
+    glCreateSamplers(1, &_shadowSampler);
+    glSamplerParameteri(_shadowSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glSamplerParameteri(_shadowSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glSamplerParameteri(_shadowSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glSamplerParameteri(_shadowSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glSamplerParameteri(
+        _shadowSampler,
+        GL_TEXTURE_COMPARE_MODE,
+        GL_COMPARE_REF_TO_TEXTURE
+    );
+    glSamplerParameteri(_shadowSampler, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
     if (_castShadow) {
         createDepthMapResources();
     }
@@ -955,6 +971,8 @@ void RenderableModel::deinitializeGL() {
     _geometry.reset();
 
     glDeleteFramebuffers(1, &_framebuffer);
+    glDeleteSamplers(1, &_shadowSampler);
+    _shadowSampler = 0;
 
     glDeleteVertexArrays(1, &_vao);
     glDeleteBuffers(1, &_vbo);
@@ -1122,7 +1140,14 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     // Does only really need to be set when _castShadow changes
     _program->setUniform(_uniformCache.has_shadow_depth_map, _castShadow);
 
+    // The shadow sampler always gets its own texture unit, even if it is not used, as a
+    // shadow sampler must not share a texture unit with the other samplers of the program
     opengl::TextureUnit shadowUnit;
+    _program->setUniform(_uniformCache.shadow_depth_map, shadowUnit);
+    glBindSampler(static_cast<GLuint>(GLint(shadowUnit)), _shadowSampler);
+    // The sampler object would otherwise affect whoever uses the texture unit next
+    defer { glBindSampler(static_cast<GLuint>(GLint(shadowUnit)), 0); };
+
     if (_castShadow && _lightSource) {
         ShadowInfo sm = global::renderEngine->renderer().shadowInformation(_shadowGroup);
 
@@ -1130,7 +1155,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.light_vp, sm.viewProjectionMatrix);
 
         shadowUnit.bind(sm.depthMap.texture);
-        _program->setUniform(_uniformCache.shadow_depth_map, shadowUnit);
     }
 
     _program->setUniform(_uniformCache.has_override_color, _overrideColor.isEnabled());

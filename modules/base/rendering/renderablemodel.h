@@ -125,6 +125,8 @@ private:
 
     // Framebuffer and screen space quad
     GLuint _framebuffer = 0;
+    /// Sampler that enables the hardware depth comparison for the shadow map
+    GLuint _shadowSampler = 0;
     GLuint _vao = 0;
     GLuint _vbo = 0;
     bool _shouldRenderTwice = false;

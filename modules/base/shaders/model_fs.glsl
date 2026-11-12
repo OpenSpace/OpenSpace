@@ -66,7 +66,7 @@ uniform vec2 resolution;
 
 // See renderableglobe and renderer_fs.glsl
 uniform bool has_shadow_depth_map;
-uniform sampler2D shadow_depth_map;
+uniform sampler2DShadow shadow_depth_map;
 
 uniform bool has_override_color;
 uniform vec4 override_color;
@@ -171,26 +171,29 @@ Fragment getFragment() {
       vec3 coords =
         0.5 + 0.5 * in_data.lightspacePosition.xyz / in_data.lightspacePosition.w;
 
-      // Any fragment that is behind the stored depth is in shadow, multisampling for
-      // smoother shadows
-      const int ShadowFilterSize = 3;
-      int accum = 0;
-      vec2 stepSize = 1.0 / textureSize(shadow_depth_map, 0);
-      for (int x = -ShadowFilterSize; x <= ShadowFilterSize; x++) {
-        for (int y = -ShadowFilterSize; y <= ShadowFilterSize; y++) {
-          float depth = texture(
-            shadow_depth_map,
-            coords.xy + vec2(x * stepSize.x, y * stepSize.y)
-          ).r;
-          if (coords.z < 1.0 && depth > coords.z - Bias) {
-            accum++;
+      // Any fragment that is behind the stored depth is in shadow. The shadow sampler
+      // performs the comparison in hardware and interpolates the results of the 2x2
+      // neighboring texels, so a sparse 3x3 kernel with a spacing of two texels covers
+      // about the same area as a dense 7x7 kernel would. Fragments that are beyond the
+      // far plane of the light are considered to be in shadow
+      float shadowFactor = 0.0;
+      if (coords.z < 1.0) {
+        const int ShadowFilterSize = 1;
+        const float ShadowFilterSpacing = 2.0;
+        float accum = 0.0;
+        vec2 stepSize = ShadowFilterSpacing / textureSize(shadow_depth_map, 0);
+        for (int x = -ShadowFilterSize; x <= ShadowFilterSize; x++) {
+          for (int y = -ShadowFilterSize; y <= ShadowFilterSize; y++) {
+            vec2 offset = vec2(x * stepSize.x, y * stepSize.y);
+            accum += texture(shadow_depth_map, vec3(coords.xy + offset, coords.z - Bias));
           }
         }
+
+        // Scale the accumulated shadow factor to [0, 1]
+        const float Norm = pow(2.0 * ShadowFilterSize + 1.0, 2.0);
+        shadowFactor = accum / Norm;
       }
 
-      // Scale the accumulated shadow factor to [0, 1]
-      const float Norm = pow(2.0 * ShadowFilterSize + 1, 2.0);
-      float shadowFactor = float(accum) / Norm;
       // Apply shadow to diffuse lighting (with ambient contribution)
       vec3 ambientLightColor = ambientIntensity * LightColor * diffuseAlbedo.rgb;
       totalLightColor *= ambientLightColor + (1.0 - ambientLightColor) * shadowFactor;
