@@ -41,7 +41,7 @@ namespace {
 
     constexpr std::string_view _loggerCat = "LuaScriptTopic";
 
-    std::string formatLua(const nlohmann::json::const_iterator& it);
+    std::string formatLua(const nlohmann::json& value);
 
     std::string escapeLuaString(const std::string& s) {
         std::string output;
@@ -71,7 +71,7 @@ namespace {
     }
 
     std::string formatKeyValuePair(const nlohmann::json::const_iterator& it) {
-        return "[" + formatLuaString(it.key()) + "] = " + formatLua(it);
+        return "[" + formatLuaString(it.key()) + "] = " + formatLua(it.value());
     }
 
     std::string formatObjectAsLuaTable(const nlohmann::json& json) {
@@ -90,7 +90,7 @@ namespace {
         std::string output = "{";
         auto it = json.begin();
         for (size_t i = 0; i < json.size(); i++, it++) {
-            output += formatLua(it);
+            output += formatLua(*it);
             if (i < json.size() - 1) {
                 output += ",";
             }
@@ -98,23 +98,23 @@ namespace {
         return output + "}";
     }
 
-    std::string formatLua(const nlohmann::json::const_iterator& it) {
-        if (it->is_object()) {
-            return formatObjectAsLuaTable(it->get<nlohmann::json>());
+    std::string formatLua(const nlohmann::json& value) {
+        if (value.is_object()) {
+            return formatObjectAsLuaTable(value);
         }
-        if (it->is_array()) {
-            return formatArrayAsLuaTable(it->get<nlohmann::json>());
+        if (value.is_array()) {
+            return formatArrayAsLuaTable(value);
         }
-        if (it->is_number()) {
-            return std::format("{}", it->get<double>());
+        if (value.is_number()) {
+            return std::format("{}", value.get<double>());
         }
-        if (it->is_string()) {
-            return formatLuaString(it->get<std::string>());
+        if (value.is_string()) {
+            return formatLuaString(value.get<std::string>());
         }
-        if (it->is_boolean()) {
-            return it->get<bool>() ? "true" : "false";
+        if (value.is_boolean()) {
+            return value.get<bool>() ? "true" : "false";
         }
-        if (it->is_null()) {
+        if (value.is_null()) {
             return "nil";
         }
         throw lua::LuaFormatException("Format error");
@@ -176,7 +176,7 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
             std::vector<std::string> formattedArgs;
             formattedArgs.reserve(args->size());
             for (auto it = args->begin(); it != args->end(); it++) {
-                formattedArgs.push_back(formatLua(it));
+                formattedArgs.push_back(formatLua(*it));
             }
 
             std::string luaScript = generateScript(luaFunction, formattedArgs);
@@ -187,6 +187,10 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
         LERROR("Could not run script -- key or value is missing in payload");
         LERROR(e.what());
     }
+}
+
+std::string LuaScriptTopic::jsonToLua(const nlohmann::json& value) {
+    return formatLua(value);
 }
 
 void LuaScriptTopic::runScript(std::string script, bool shouldReturn,

@@ -50,6 +50,7 @@ target_sources(
     test_latlonpatch.cpp
     test_lrucache.cpp
     test_luaconversions.cpp
+    test_luascripttopic.cpp
     test_luatodictionary.cpp
     test_lua_createsinglecolorimage.cpp
     test_lua_factoryconstructors.cpp
@@ -60,6 +61,7 @@ target_sources(
     test_profile.cpp
     test_rawvolumeio.cpp
     test_scriptscheduler.cpp
+    test_serverinterface.cpp
     test_sessionrecording.cpp
     test_settings.cpp
     test_sgctedit.cpp
