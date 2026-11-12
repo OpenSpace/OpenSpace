@@ -43,6 +43,10 @@ namespace {
 
     constexpr std::string_view _loggerCat = "DownloadManager";
 
+    // The protocols that are accepted for downloads. cURL would otherwise also follow
+    // URLs to local files or to a number of legacy protocols
+    constexpr const char* AllowedProtocols = "http,https,ftp,ftps";
+
     struct ProgressInformation {
         std::shared_ptr<DownloadManager::FileFuture> future;
         std::chrono::system_clock::time_point startTime;
@@ -160,6 +164,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace");
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, AllowedProtocols);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeData);
             if (timeoutSecs > 0) {
@@ -247,6 +252,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, AllowedProtocols);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace");
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, reinterpret_cast<void*>(&file));
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
@@ -303,7 +309,13 @@ void DownloadManager::fileExtension(const std::string& url,
         CURL* curl = curl_easy_init();
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+            curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace");
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, AllowedProtocols);
+            curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+            // Without a timeout, a server that never answers would block this thread
+            // indefinitely
+            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
             CURLcode res = curl_easy_perform(curl);
             if (CURLE_OK == res) {
                 char* ct = nullptr;
