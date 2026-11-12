@@ -535,8 +535,8 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    // The molecule framebuffer uses the standard depth, not the reversed one of the scene
-    // Create scope so that the standard depth convention is only applied within this block
+    // The molecule framebuffer uses the standard depth, not the reversed one of the
+    // scene. The scope limits the standard convention to this block
     {
         const opengl::DepthConventionScope standardDepth(
             opengl::DepthConvention::Standard
