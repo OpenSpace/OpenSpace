@@ -33,6 +33,7 @@
 #include <openspace/io/socket/socket.h>
 #include <openspace/io/socket/socketserver.h>
 #include <openspace/io/socket/websocket.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/misc/assert.h>
 #include <openspace/misc/dictionary.h>
 #include <openspace/misc/profiling.h>
@@ -64,10 +65,25 @@
 #include <openspace/topic/topics/versiontopic.h>
 #include <openspace/util/factorymanager.h>
 #include <algorithm>
+#include <chrono>
 #include <optional>
+#include <string_view>
 #include <thread>
 
 namespace {
+    constexpr std::string_view _loggerCat = "Server";
+
+    // The number of clients that can be connected to the server at the same time
+    constexpr size_t MaxConnections = 128;
+
+    // The number of received messages that can be waiting to be handled. The threads
+    // receiving the messages wait when this limit is reached, so no messages are lost
+    constexpr size_t MaxQueuedMessages = 4096;
+
+    // The size in bytes of the largest message that is accepted from a client that has
+    // not been authorized yet. Those clients only have to send the handshake and the
+    // authorization
+    constexpr size_t MaxUnauthorizedMessageSize = 4096;
 
     // Settings for controlling socket connection (WebSocket or TcpSocket).
     // This basically acts as a whitelist for the specified connections.
@@ -188,6 +204,13 @@ void Server::preSync() {
                 // Drop connection if the address is blocked
                 continue;
             }
+            if (_connections.size() >= MaxConnections) {
+                LWARNING(std::format(
+                    "Dropping connection from '{}' as the maximum number of "
+                    "connections has been reached", address
+                ));
+                continue;
+            }
             socket->startStreams();
             auto connection = std::make_shared<Connection>(
                 std::move(socket),
@@ -262,7 +285,25 @@ void Server::handleConnection(const std::shared_ptr<Connection>& connection) {
     std::string messageString;
     messageString.reserve(256);
     while (connection->socket()->getMessage(messageString)) {
-        const std::unique_lock lock(_messageQueueMutex);
+        if (!connection->isAuthorized() &&
+            messageString.size() > MaxUnauthorizedMessageSize)
+        {
+            LERROR("Disconnecting unauthorized client that sent an oversized message");
+            connection->socket()->disconnect();
+            break;
+        }
+
+        std::unique_lock lock(_messageQueueMutex);
+        // The queue is emptied once per frame. If a client sends messages faster than
+        // that, this thread stops receiving until there is space again, which keeps the
+        // memory usage bounded without discarding any messages
+        while (_messageQueue.size() >= MaxQueuedMessages &&
+               connection->socket()->isConnected())
+        {
+            lock.unlock();
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            lock.lock();
+        }
         _messageQueue.push_back({ connection, messageString });
     }
 }

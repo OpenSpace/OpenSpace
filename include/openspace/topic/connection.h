@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___CONNECTION___H__
 
 #include <openspace/json.h>
+#include <atomic>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -91,7 +92,8 @@ private:
     std::mutex _mutex;
 
     std::string _address;
-    bool _isAuthorized = false;
+    // Written by the main thread and read by the thread that receives the messages
+    std::atomic_bool _isAuthorized = false;
     int _nFailedAuthorizations = 0;
     std::optional<ApiVersion> _connectedApiVersion;
     std::string _password;
