@@ -42,9 +42,9 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
+#include <charconv>
 #include <cmath>
 #include <cstdint>
-#include <cstdlib>
 #include <limits>
 #include <string_view>
 #include <utility>
@@ -342,8 +342,15 @@ void Astrocast::connect() {
 
     setStatus(Status::Connecting);
 
-    std::string p = _port.value();
-    _socket = std::make_unique<io::TcpSocket>(_address, std::atoi(p.c_str()));
+    const std::string p = _port.value();
+    int port = 0;
+    const auto [ptr, ec] = std::from_chars(p.data(), p.data() + p.size(), port);
+    if (ec != std::errc() || ptr != p.data() + p.size() || port <= 0 || port > 65535) {
+        LERROR(std::format("Invalid port '{}'", p));
+        setStatus(Status::Disconnected);
+        return;
+    }
+    _socket = std::make_unique<io::TcpSocket>(_address, port);
 
     _socket->connect();
 

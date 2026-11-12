@@ -164,10 +164,7 @@ void Server::initialize(const Dictionary& configuration) {
         serverInterface->initialize();
 
         _interfaceOwner.addPropertySubOwner(serverInterface.get());
-
-        if (serverInterface) {
-            _interfaces.push_back(std::move(serverInterface));
-        }
+        _interfaces.push_back(std::move(serverInterface));
     }
 }
 
