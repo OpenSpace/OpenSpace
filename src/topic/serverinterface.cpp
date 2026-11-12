@@ -282,6 +282,13 @@ bool ServerInterface::clientHasAccessWithoutPassword(
                 return false;
             }
         }
+        // Addresses that are explicitly listed as requiring a password have to provide
+        // it even if all other addresses are allowed by default
+        for (const std::string& address : _requirePasswordAddresses.value()) {
+            if (clientAddress == address) {
+                return false;
+            }
+        }
         return true;
     }
     return false;
