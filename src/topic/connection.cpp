@@ -68,13 +68,16 @@ void Connection::handleMessage(const std::string& message) {
             return;
         }
 
+        // Constructing the locale is expensive, so it is only done once per message
+        // instead of once for every character
+        const std::locale locale = std::locale("");
         std::string sanitizedString = message;
         std::transform(
             message.begin(),
             message.end(),
             sanitizedString.begin(),
-            [](wchar_t c) {
-                return std::isprint(c, std::locale("")) ? char(c) : ' ';
+            [&locale](wchar_t c) {
+                return std::isprint(c, locale) ? char(c) : ' ';
             }
         );
         LERROR(std::format("Could not parse JSON '{}'", sanitizedString));
