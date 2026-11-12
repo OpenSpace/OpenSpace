@@ -231,8 +231,7 @@ bool RenderableDataCygnet::updateTextureResource() {
         return false;
     }
 
-    _dataBuffer = std::string(dataFile.buffer, dataFile.size);
-    delete[] dataFile.buffer;
+    _dataBuffer = std::string(dataFile.buffer.begin(), dataFile.buffer.end());
 
     return true;
 }

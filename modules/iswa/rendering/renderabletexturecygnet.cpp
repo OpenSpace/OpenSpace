@@ -56,8 +56,8 @@ RenderableTextureCygnet::RenderableTextureCygnet(const Dictionary& dictionary)
 
 bool RenderableTextureCygnet::updateTexture() {
     _textures[0] = io::texture::loadTexture(
-        reinterpret_cast<void*>(_imageFile.buffer),
-        _imageFile.size,
+        _imageFile.buffer.data(),
+        _imageFile.buffer.size(),
         2,
         { .filter = opengl::Texture::FilterMode::LinearMipMap },
         _imageFile.format
@@ -99,11 +99,10 @@ bool RenderableTextureCygnet::updateTextureResource() {
         imageFile = _futureObject.get();
 
         if (imageFile.corrupted) {
-            delete[] imageFile.buffer;
             return false;
         }
         else {
-            _imageFile = imageFile;
+            _imageFile = std::move(imageFile);
         }
     }
     else {

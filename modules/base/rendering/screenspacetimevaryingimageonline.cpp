@@ -232,7 +232,7 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
     }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        DownloadManager::MemoryFile imageFile = _imageFuture.get();
         _imageFuture = std::future<DownloadManager::MemoryFile>();
         if (imageFile.corrupted) {
             LERROR(std::format("Error loading image from URL '{}'", _currentUrl));
@@ -241,8 +241,8 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
 
         try {
             _texture = io::texture::loadTexture(
-                reinterpret_cast<void*>(imageFile.buffer),
-                imageFile.size,
+                imageFile.buffer.data(),
+                imageFile.buffer.size(),
                 2,
                 opengl::Texture::SamplerInit{
                     // TODO: AnisotropicMipMap crashes on ATI cards ---abock

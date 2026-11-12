@@ -178,7 +178,7 @@ void IswaManager::addIswaCygnet(int id, const std::string& type, std::string gro
         auto metadataCallback =
             [this, &metaFuture](const DownloadManager::MemoryFile& file) {
                 // Create a string from downloaded file
-                std::string res(file.buffer, file.buffer + file.size);
+                std::string res(file.buffer.begin(), file.buffer.end());
                 metaFuture.json = res;
 
                 // Convert to json
@@ -339,7 +339,7 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id) {
     global::downloadManager->fetchFile(
         _baseUrl + std::to_string(-id),
         [&metaFuture](const DownloadManager::MemoryFile& file) {
-            metaFuture->json = std::string(file.buffer, file.buffer + file.size);
+            metaFuture->json = std::string(file.buffer.begin(), file.buffer.end());
             metaFuture->isFinished = true;
         },
         [](const std::string& err) {
