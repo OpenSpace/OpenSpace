@@ -187,12 +187,21 @@ bool HttpDownload::hasSucceeded() const {
 }
 
 void HttpDownload::start(std::chrono::milliseconds timeout) {
-    if (_isDownloading) {
+    if (_isDownloading.exchange(true)) {
         return;
     }
-    _isDownloading = true;
-    _downloadThread = std::thread([this, timeout]() {
+
+    if (_downloadThread.joinable()) {
+        _downloadThread.join();
+    }
+
+    {
+        const std::lock_guard lock(_downloadFinishMutex);
         _isFinished = false;
+        _isSuccessful = false;
+    }
+
+    _downloadThread = std::thread([this, timeout]() {
         LTRACEC("HttpDownload", std::format("Start download '{}'", _httpRequest.url()));
 
         const bool setupSuccess = setup();
