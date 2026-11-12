@@ -40,6 +40,7 @@ uniform mat4 modelTransform;
 
 void main() {
   out_data.position = in_position;
+  vec4 position = in_position;
   out_data.texCoords = in_texCoords;
 
   // this is wrong for the normal. The normal transform is the transposed inverse of the
@@ -47,5 +48,5 @@ void main() {
   // vs_normal = normalize(modelTransform * vec4(in_normal,0));
 
   gl_Position =
-    z_normalization(viewProjection * pscTransform(in_position, modelTransform));
+    z_normalization(viewProjection * pscTransform(position, modelTransform));
 }

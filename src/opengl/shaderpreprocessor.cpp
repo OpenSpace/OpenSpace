@@ -108,7 +108,7 @@ namespace {
 
     class Env {
     public:
-        explicit Env(Dictionary dictionary);
+        Env(Dictionary dictionary, std::string versionDirective);
 
         void processFile(const std::filesystem::path& path);
         std::vector<std::filesystem::path> includedFiles() const;
@@ -152,10 +152,12 @@ namespace {
 
         std::vector<std::filesystem::path> _includedFiles;
         Dictionary _dictionary;
+        std::string _versionDirective;
     };
 
-    Env::Env(Dictionary dictionary)
+    Env::Env(Dictionary dictionary, std::string versionDirective)
         : _dictionary(std::move(dictionary))
+        , _versionDirective(std::move(versionDirective))
     {}
 
     void Env::processFile(const std::filesystem::path& path) {
@@ -490,25 +492,7 @@ namespace {
             return false;
         }
 
-        int major = 0;
-        int minor = 0;
-        int mask = 0;
-        glGetIntegerv(GL_MAJOR_VERSION, &major);
-        glGetIntegerv(GL_MINOR_VERSION, &minor);
-        glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
-
-        const ContextProfileMask cpm = ContextProfileMask(mask);
-        const bool isCore = cpm == ContextProfileMask::GL_CONTEXT_CORE_PROFILE_BIT;
-        const bool isCompatibility =
-            cpm == ContextProfileMask::GL_CONTEXT_COMPATIBILITY_PROFILE_BIT;
-
-        assert_msg(
-            isCore || isCompatibility,
-            "OpenGL context is neither core nor compatibility"
-        );
-
-        std::string_view t = isCore ? "core" : (isCompatibility ? "compatibility" : "");
-        _output << std::format("#version {}{}0 {}\n", major, minor, t);
+        _output << _versionDirective << '\n';
         return true;
     }
 
@@ -674,7 +658,29 @@ const std::filesystem::path& ShaderPreprocessor::filename() const {
 }
 
 std::string ShaderPreprocessor::process() {
-    Env env = Env(_dictionary);
+    int major = 0;
+    int minor = 0;
+    int mask = 0;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
+
+    const ContextProfileMask cpm = ContextProfileMask(mask);
+    const bool isCore = cpm == ContextProfileMask::GL_CONTEXT_CORE_PROFILE_BIT;
+    const bool isCompatibility =
+        cpm == ContextProfileMask::GL_CONTEXT_COMPATIBILITY_PROFILE_BIT;
+
+    assert_msg(
+        isCore || isCompatibility,
+        "OpenGL context is neither core nor compatibility"
+    );
+
+    std::string_view t = isCore ? "core" : (isCompatibility ? "compatibility" : "");
+    return process(std::format("#version {}{}0 {}", major, minor, t));
+}
+
+std::string ShaderPreprocessor::process(std::string versionDirective) {
+    Env env = Env(_dictionary, std::move(versionDirective));
     env.processFile(_shaderPath);
     std::string result = env.output();
     _includedFiles.clear();
