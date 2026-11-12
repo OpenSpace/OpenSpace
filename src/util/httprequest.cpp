@@ -62,6 +62,9 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
     curl_easy_setopt(curl, CURLOPT_URL, _url.data());
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace");
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    // cURL would otherwise also follow URLs to local files or to a number of legacy
+    // protocols
+    curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, "http,https,ftp,ftps");
 
     // The leading + in all of the lambda expressions are to cause an implicit conversion
     // to a standard C function pointer. Since the `curl_easy_setopt` function just takes
