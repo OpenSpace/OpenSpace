@@ -24,6 +24,7 @@
 
 #include <openspace/misc/clipboard.h>
 
+#include <openspace/misc/defer.h>
 #include <openspace/misc/exception.h>
 #include <openspace/format.h>
 #include <cstring>
@@ -64,27 +65,38 @@ std::string clipboardText([[maybe_unused]] SelectionArea selectionArea) {
     if (!OpenClipboard(nullptr)) {
         return "";
     }
+    defer { CloseClipboard(); };
 
-    // Get handle of clipboard object for ANSI text
-    HANDLE hData = GetClipboardData(CF_TEXT);
+    // Get handle of clipboard object for the UTF-16 encoded text
+    HANDLE hData = GetClipboardData(CF_UNICODETEXT);
     if (!hData) {
         return "";
     }
 
     // Lock the handle to get the actual text pointer
-    char* pszText = static_cast<char*>(GlobalLock(hData));
-    if (!pszText) {
+    const wchar_t* wideText = static_cast<const wchar_t*>(GlobalLock(hData));
+    if (!wideText) {
+        return "";
+    }
+    defer { GlobalUnlock(hData); };
+
+    // The returned size includes the null terminator
+    const int size = WideCharToMultiByte(
+        CP_UTF8,
+        0,
+        wideText,
+        -1,
+        nullptr,
+        0,
+        nullptr,
+        nullptr
+    );
+    if (size <= 1) {
         return "";
     }
 
-    // Save text in a string class instance
-    std::string text(pszText);
-
-    // Release the lock
-    GlobalUnlock(hData);
-
-    // Release the clipboard
-    CloseClipboard();
+    std::string text(size - 1, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, wideText, -1, text.data(), size, nullptr, nullptr);
 
     text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
     return text;
@@ -134,31 +146,54 @@ std::string clipboardText([[maybe_unused]] SelectionArea selectionArea) {
 void setClipboardText(std::string_view text, [[maybe_unused]] SelectionArea selectionArea)
 {
 #ifdef WIN32
-    HANDLE hData = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, text.length() + 1);
+    // The clipboard stores the text in UTF-16
+    const int size = MultiByteToWideChar(
+        CP_UTF8,
+        0,
+        text.data(),
+        static_cast<int>(text.size()),
+        nullptr,
+        0
+    );
+
+    HANDLE hData = GlobalAlloc(GMEM_MOVEABLE, (size + 1) * sizeof(wchar_t));
     if (!hData) {
         throw RuntimeError("Error allocating memory", "Clipboard");
     }
 
-    char* ptrData = static_cast<char*>(GlobalLock(hData));
+    wchar_t* ptrData = static_cast<wchar_t*>(GlobalLock(hData));
     if (!ptrData) {
         GlobalFree(hData);
         throw RuntimeError("Error acquiring lock", "Clipboard");
     }
-    std::memset(ptrData, 0, text.length() + 1);
-    std::memcpy(ptrData, text.data(), text.length());
+    MultiByteToWideChar(
+        CP_UTF8,
+        0,
+        text.data(),
+        static_cast<int>(text.size()),
+        ptrData,
+        size
+    );
+    ptrData[size] = L'\0';
 
     GlobalUnlock(hData);
 
     if (!OpenClipboard(nullptr)) {
+        GlobalFree(hData);
         throw RuntimeError("Error opening clipboard", "Clipboard");
     }
+    defer { CloseClipboard(); };
 
     if (!EmptyClipboard()) {
+        GlobalFree(hData);
         throw RuntimeError("Error cleaning clipboard", "Clipboard");
     }
 
-    SetClipboardData(CF_TEXT, hData);
-    CloseClipboard();
+    // The clipboard takes over the ownership of the memory if setting the data succeeds
+    if (!SetClipboardData(CF_UNICODETEXT, hData)) {
+        GlobalFree(hData);
+        throw RuntimeError("Error setting text to clipboard", "Clipboard");
+    }
 #else // ^^^^ WIN32 // !WIN32 vvvv
     std::string_view s = [](SelectionArea selection) {
         switch (selection) {
