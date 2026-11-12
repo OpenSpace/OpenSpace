@@ -43,6 +43,7 @@ target_sources(
     test_distanceconversion.cpp
     test_documentation.cpp
     test_filesystem.cpp
+    test_globerotation.cpp
     test_horizons.cpp
     test_iswamanager.cpp
     test_jsonformatting.cpp

@@ -73,6 +73,12 @@ void MultiTranslation::initialize() {
     }
 }
 
+void MultiTranslation::setOwnerNode(SceneGraphNode* node) {
+    for (const mm_unique_ptr<Translation>& translation : _translations) {
+        translation->setOwnerNode(node);
+    }
+}
+
 void MultiTranslation::update(const UpdateData& data) {
     for (const mm_unique_ptr<Translation>& translation : _translations) {
         translation->update(data);

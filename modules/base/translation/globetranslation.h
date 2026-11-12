@@ -44,6 +44,8 @@ public:
     void update(const UpdateData& data) override;
     glm::dvec3 position(const UpdateData& data) const override;
 
+    void setOwnerNode(SceneGraphNode* node) override;
+
     static openspace::Documentation Documentation();
 
 private:
@@ -57,6 +59,10 @@ private:
     BoolProperty _useHeightmap;
     BoolProperty _useCamera;
     BoolProperty _useCameraAltitude;
+
+    /// The scene graph node that owns this translation. Its parent is used as the
+    /// attached node when the 'Globe' property is not set
+    SceneGraphNode* _ownerNode = nullptr;
 
     SceneGraphNode* _attachedNode = nullptr;
 

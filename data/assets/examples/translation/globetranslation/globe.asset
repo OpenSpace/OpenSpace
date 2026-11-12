@@ -22,7 +22,6 @@ local Node = {
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = "GlobeTranslation_Example_Globe",
       Latitude = 20.0,
       Longitude = -45.0
     }

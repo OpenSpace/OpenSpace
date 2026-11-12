@@ -75,6 +75,12 @@ void MultiRotation::initialize() {
     }
 }
 
+void MultiRotation::setOwnerNode(SceneGraphNode* node) {
+    for (const mm_unique_ptr<Rotation>& rot : _rotations) {
+        rot->setOwnerNode(node);
+    }
+}
+
 void MultiRotation::update(const UpdateData& data) {
     for (const mm_unique_ptr<Rotation>& rot : _rotations) {
         rot->update(data);

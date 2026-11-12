@@ -39,6 +39,7 @@ public:
     void initialize() override;
 
     void update(const UpdateData& data) override;
+    void setOwnerNode(SceneGraphNode* node) override;
     glm::dvec3 position(const UpdateData& data) const override;
     static openspace::Documentation Documentation();
 
