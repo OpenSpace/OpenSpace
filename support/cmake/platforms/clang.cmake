@@ -27,11 +27,11 @@
 
 
 function (internal__set_compile_options target)
-  target_compile_options(${target} INTERFACE
+  target_compile_options(${target} PRIVATE
     "-march=x86-64-v3"
   )
 
-  target_compile_options(${target} INTERFACE
+  target_compile_options(${target} PRIVATE
     "-Wall"
     "-Wextra"
     "-Wmost"
@@ -167,7 +167,7 @@ function (internal__set_compile_options target)
     "-Wzero-length-array"
   )
 
-  target_compile_options(${target} INTERFACE
+  target_compile_options(${target} PRIVATE
     "-Wno-c++98-compat-unnamed-type-template-args"
     "-Wno-c++98-compat-bind-to-temporary-copy"
     "-Wno-deprecated-copy-with-dtor"
@@ -181,7 +181,7 @@ function (internal__set_compile_options target)
 
   # Warnings introduced in Clang version 18
   if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "18")
-    target_compile_options(${target} INTERFACE
+    target_compile_options(${target} PRIVATE
       "-Wauto-decl-extensions"
       "-Wthread-safety-reference-return"
     )
@@ -189,7 +189,7 @@ function (internal__set_compile_options target)
 
   # Warnings introduced in Clang version 19
   if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "19")
-    target_compile_options(${target} INTERFACE
+    target_compile_options(${target} PRIVATE
       "-Wformat-signedness"
       "-Wfunction-effects"
 
@@ -199,7 +199,7 @@ function (internal__set_compile_options target)
 
   # Warnings introduced in Clang version 20
   if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "20")
-    target_compile_options(${target} INTERFACE
+    target_compile_options(${target} PRIVATE
       "-Wdecls-in-multiple-modules"
     )
   endif ()
