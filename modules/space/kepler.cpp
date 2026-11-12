@@ -31,6 +31,8 @@
 #include <openspace/misc/stringhelper.h>
 #include <openspace/util/distanceconstants.h>
 #include <scn/scan.h>
+#include <algorithm>
+#include <charconv>
 #include <fstream>
 #include <optional>
 #include <sstream>
@@ -562,10 +564,15 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         // patch it to the full year
         {
             const std::string id = firstLine.substr(9, 6);
-            const std::string prefix = [y = id.substr(0, 2)]() {
-                const int year = std::atoi(y.c_str());
-                return year >= 57 ? "19" : "20";
-            }();
+            int year = 0;
+            const char* end = id.data() + std::min<size_t>(id.size(), 2);
+            const auto [ptr, ec] = std::from_chars(id.data(), end, year);
+            if (id.size() < 2 || ec != std::errc() || ptr != end) {
+                throw RuntimeError(std::format(
+                    "Malformed TLE file '{}' at line {}", file, lineNum + 1
+                ));
+            }
+            const std::string_view prefix = year >= 57 ? "19" : "20";
             p.id = std::format("{}{}-{}", prefix, id.substr(0, 2), id.substr(3));
         }
         p.epoch = epochFromSubstring(firstLine.substr(18, 14)); // should be 13?

@@ -33,12 +33,13 @@
 #include <openspace/misc/stringhelper.h>
 #include <openspace/systemcapabilities/systemcapabilities.h>
 #include <openspace/systemcapabilities/generalcapabilitiescomponent.h>
+#include <array>
+#include <charconv>
 #include <sstream>
 #include <string_view>
 #include <filesystem>
 #include <utility>
 #include <vector>
-#include <cstdlib>
 
 namespace {
     constexpr std::string_view _loggerCat = "VersionChecker";
@@ -107,15 +108,26 @@ void VersionChecker::cancel() {
         const std::string versionString(data.begin(), data.end());
         std::istringstream versionData(versionString);
 
-        std::string token;
-        openspace::getline(versionData, token, '.');
-        const int major = std::atoi(token.c_str());
-        openspace::getline(versionData, token, '.');
-        const int minor = std::atoi(token.c_str());
-        openspace::getline(versionData, token, '.');
-        const int patch = std::atoi(token.c_str());
+        // The response comes from a remote server, so it has to be validated
+        std::array<int, 3> version = { 0, 0, 0 };
+        for (int& component : version) {
+            std::string token;
+            openspace::getline(versionData, token, '.');
+            std::string_view t = token;
+            trimWhitespace(t);
+            const char* end = t.data() + t.size();
+            const auto [ptr, ec] = std::from_chars(t.data(), end, component);
+            if (ec != std::errc() || ptr != end) {
+                LWARNING(std::format(
+                    "Received malformed OpenSpace version information '{}' from {}",
+                    versionString, _request->url()
+                ));
+                _request = nullptr;
+                return false;
+            }
+        }
 
-        _latestVersion = { major, minor, patch };
+        _latestVersion = { version[0], version[1], version[2] };
         _request = nullptr;
 
         SemanticVersion currentVersion = {

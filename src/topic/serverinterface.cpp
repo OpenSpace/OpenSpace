@@ -140,9 +140,8 @@ Documentation ServerInterface::Documentation() {
 std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
                                                              const Dictionary& dictionary)
 {
-    // TODO: Use documentation to verify dictionary
-    auto si = std::make_unique<ServerInterface>(dictionary);
-    return si;
+    // The dictionary is verified against the documentation in the constructor
+    return std::make_unique<ServerInterface>(dictionary);
 }
 
 ServerInterface::ServerInterface(const Dictionary& dictionary)
