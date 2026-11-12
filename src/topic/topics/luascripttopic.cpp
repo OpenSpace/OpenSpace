@@ -47,13 +47,16 @@ namespace {
         std::string output;
         for (const char& c : s) {
             switch (c) {
-                case '\a': output += "\\\a"; break;
-                case '\b': output += "\\\b"; break;
-                case '\f': output += "\\\f"; break;
-                case '\n' : output += "\\\n"; break;
-                case '\r' : output += "\\\r"; break;
-                case '\t' : output += "\\\t"; break;
-                case '\v' : output += "\\\v"; break;
+                // The escape sequence has to be spelled out, as a backslash that is
+                // followed by the raw control character is not valid in a Lua string
+                case '\0': output += "\\000"; break;
+                case '\a': output += "\\a"; break;
+                case '\b': output += "\\b"; break;
+                case '\f': output += "\\f"; break;
+                case '\n' : output += "\\n"; break;
+                case '\r' : output += "\\r"; break;
+                case '\t' : output += "\\t"; break;
+                case '\v' : output += "\\v"; break;
                 case '\\' : output += "\\\\"; break;
                 case '"' : output += "\\\""; break;
                 case '\'' : output += "\\'"; break;
