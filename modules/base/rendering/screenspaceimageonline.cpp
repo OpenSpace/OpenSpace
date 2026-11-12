@@ -112,6 +112,9 @@ void ScreenSpaceImageOnline::update() {
         DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
+            // The download is not attempted again until the URL changes, as it would
+            // otherwise be restarted in every frame
+            _textureIsDirty = false;
             LERROR(std::format(
                 "Error loading image from URL '{}'", _texturePath.value()
             ));
