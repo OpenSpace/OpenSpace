@@ -65,6 +65,14 @@ public:
     void handleJson(const nlohmann::json& json);
     void sendJson(const nlohmann::json& json);
     void setAuthorized(bool status);
+
+    /**
+     * Registers a failed attempt to authorize this connection. The connection is closed
+     * once too many attempts have failed, which limits how quickly a client can guess
+     * the password.
+     */
+    void reportFailedAuthorization();
+
     Topic* findTopicByType(const std::string& type);
 
     bool isAuthorized() const;
@@ -84,6 +92,7 @@ private:
 
     std::string _address;
     bool _isAuthorized = false;
+    int _nFailedAuthorizations = 0;
     std::optional<ApiVersion> _connectedApiVersion;
     std::string _password;
 };

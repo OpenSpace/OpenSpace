@@ -55,6 +55,18 @@ namespace {
         response["status"] = toString(status);
         return response;
     }
+
+    // Compares the two strings in a time that only depends on the length of the provided
+    // `key`, so that the duration of the comparison does not reveal how many characters
+    // of the password were guessed correctly
+    bool isEqualConstantTime(std::string_view key, std::string_view password) {
+        unsigned char difference = (key.size() == password.size()) ? 0 : 1;
+        for (size_t i = 0; i < key.size(); i++) {
+            const char p = password.empty() ? '0' : password[i % password.size()];
+            difference = static_cast<unsigned char>(difference | (key[i] ^ p));
+        }
+        return difference == 0;
+    }
 } // namespace
 
 namespace openspace {
@@ -114,6 +126,7 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
             }
             else {
                 sendData(response(Status::IncorrectKey));
+                _connection->reportFailedAuthorization();
             }
         }
         catch (const std::out_of_range&) {
@@ -126,7 +139,10 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
 }
 
 bool AuthorizationTopic::authorize(const std::string& key) {
-    _isAuthenticated = (key == _connection->password());
+    const std::string& password = _connection->password();
+    // An interface without a configured password must not be accessible by providing
+    // an empty password
+    _isAuthenticated = !password.empty() && isEqualConstantTime(key, password);
     return _isAuthenticated;
 }
 
