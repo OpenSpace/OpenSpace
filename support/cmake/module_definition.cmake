@@ -25,8 +25,6 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake)
 
-include(GenerateExportHeader)
-
 # Creates a library for the module with name <module_name>. The name of the library is
 # returned in <output_library_name> for outside configuration
 # The library will have the name openspace-module-<name> and has all of their
@@ -50,16 +48,6 @@ function (create_new_module module_name output_library_name)
   target_compile_definitions(${library_name} PUBLIC "${define_name}")
 
   handle_module_dependencies(${library_name} ${module_name})
-
-  if ("${library_mode}" STREQUAL "SHARED")
-    # If it is a shared library, we want to generate the export header
-    string(TOLOWER ${module_name} lower_module_name)
-    generate_export_header(
-      ${library_name}
-      EXPORT_FILE_NAME
-      ${CMAKE_BINARY_DIR}/_generated/include/${lower_module_name}_export.h
-    )
-  endif ()
 
 
   # For all modules, we want to add the defines for all other enabled modules in order to
@@ -102,8 +90,8 @@ endfunction ()
 # External dependencies are found using the find_package function and then linked
 function (handle_module_dependencies target_name module_name)
   # We always want to link against core library
-  target_link_libraries(${library_name} PRIVATE openspace-core)
-  target_precompile_headers(${library_name} PRIVATE
+  target_link_libraries(${target_name} PRIVATE openspace-core)
+  target_precompile_headers(${target_name} PRIVATE
     <openspace/format.h>
     <openspace/glm.h>
     <openspace/lua/lua_helper.h>

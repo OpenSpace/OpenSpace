@@ -23,7 +23,7 @@
 ##########################################################################################
 
 if (MSVC)
-  option(OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS "Enable other optimizations, like LTCG, intrinsics, etc")
+  option(OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS "Enable other optimizations, like LTCG, intrinsics, etc")
 
   include(${CMAKE_CURRENT_LIST_DIR}/platforms/msvc.cmake)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
