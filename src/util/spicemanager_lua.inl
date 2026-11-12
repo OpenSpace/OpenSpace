@@ -210,10 +210,10 @@ namespace {
     }
 
     const size_t nElements = lines.size() / 3;
-    if (elementToExtract > static_cast<int>(nElements)) {
+    if (elementToExtract < 0 || elementToExtract >= static_cast<int>(nElements)) {
         throw RuntimeError(std::format(
             "Error loading {}. Element number {} requested, but only {} found",
-            tle, nElements, elementToExtract
+            tle, elementToExtract, nElements
         ));
     }
 
