@@ -147,6 +147,18 @@ namespace {
         }
     };
 
+    constexpr BoolPropertyInfo HasPointColorDataInfo = {
+        .identifier = "HasPointColorData",
+        .name = "Has point color data",
+        .description = "Set to true if per-point RGB colors were read from the dataset. "
+            "If this is true, the fixed color is not used.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = false
+        }
+    };
+
     constexpr BoolPropertyInfo DrawElementsInfo = {
         .identifier = "DrawElements",
         .name = "Draw elements",
@@ -626,6 +638,7 @@ RenderablePointCloud::SizeSettings::SizeSettings(const Dictionary& dictionary)
 RenderablePointCloud::ColorSettings::ColorSettings(const Dictionary& dictionary)
     : PropertyOwner({ "Coloring", "Coloring", "" })
     , pointColor(PointColorInfo)
+    , hasPointColorData(HasPointColorDataInfo)
     , enableOutline(EnableOutlineInfo)
     , outlineColor(OutlineColorInfo)
     , outlineWidth(OutlineWidthInfo)
@@ -636,6 +649,8 @@ RenderablePointCloud::ColorSettings::ColorSettings(const Dictionary& dictionary)
 
     pointColor.setViewOption(Property::ViewOptions::Color);
     addProperty(pointColor);
+
+    addProperty(hasPointColorData);
 
     addProperty(enableOutline);
 
@@ -991,21 +1006,24 @@ void RenderablePointCloud::loadDataset() {
 void RenderablePointCloud::resolvePointColorIndices() {
     std::fill(_pointColorIndices.begin(), _pointColorIndices.end(), -1);
 
-    if (!_pointColorConfigured || _dataset.entries.empty()) {
-        return;
-    }
-
-    for (int i = 0; i < 3; i++) {
-        _pointColorIndices[i] = _dataset.index(_pointColorColumns[i]);
-        if (_pointColorIndices[i] < 0) {
-            LWARNING(std::format(
-                "Could not find color column '{}' in the dataset '{}'. Per-point RGB "
-                "colors will not be used.",
-                _pointColorColumns[i],
-                _dataFile.filename().string()
-            ));
+    if (_pointColorConfigured && !_dataset.entries.empty()) {
+        for (int i = 0; i < 3; i++) {
+            _pointColorIndices[i] = _dataset.index(_pointColorColumns[i]);
+            if (_pointColorIndices[i] < 0) {
+                LWARNING(std::format(
+                    "Could not find color column '{}' in the dataset '{}'. Per-point "
+                    "RGB colors will not be used.",
+                    _pointColorColumns[i],
+                    _dataFile.filename().string()
+                ));
+            }
         }
     }
+
+    // The fixed color is ignored when the colors are read from the dataset
+    const bool hasColors = hasPointColorData();
+    _colorSettings.hasPointColorData = hasColors;
+    _colorSettings.pointColor.setReadOnly(hasColors);
 }
 
 void RenderablePointCloud::onFilePropertyChanged() {
@@ -1015,7 +1033,7 @@ void RenderablePointCloud::onFilePropertyChanged() {
         LWARNING(std::format(
             "The File property of '{}' was set to an empty value. Keeping the "
             "currently loaded data.",
-            _loggerCat
+            identifer()
         ));
         return;
     }
@@ -1025,8 +1043,7 @@ void RenderablePointCloud::onFilePropertyChanged() {
         LWARNING(std::format(
             "The File property of '{}' was set to '{}' which is not a valid file. "
             "Keeping the currently loaded data.",
-            _loggerCat,
-            newPath.string()
+            identifer(), newPath.string()
         ));
         return;
     }
@@ -1048,13 +1065,11 @@ bool RenderablePointCloud::hasPointColorData() const {
         return false;
     }
 
-    for (const int index : _pointColorIndices) {
-        if (index < 0) {
-            return false;
-        }
-    }
-
-    return true;
+    return std::none_of(
+        _pointColorIndices.begin(),
+        _pointColorIndices.end(),
+        [](int index) { return index < 0; }
+    );
 }
 
 void RenderablePointCloud::initializeGL() {

@@ -210,6 +210,7 @@ protected:
     struct ColorSettings : PropertyOwner {
         explicit ColorSettings(const Dictionary& dictionary);
         Vec3Property pointColor;
+        BoolProperty hasPointColorData;
         std::unique_ptr<ColorMappingComponent> colorMapping;
         BoolProperty enableOutline;
         Vec3Property outlineColor;
