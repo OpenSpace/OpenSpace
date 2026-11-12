@@ -34,6 +34,9 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "ServerModule: Connection";
+
+    // The number of failed authorization attempts after which a client is disconnected
+    constexpr int MaxFailedAuthorizations = 5;
 } // namespace
 
 namespace openspace {
@@ -209,6 +212,17 @@ io::Socket* Connection::socket() {
 
 void Connection::setAuthorized(bool status) {
     _isAuthorized = status;
+}
+
+void Connection::reportFailedAuthorization() {
+    _nFailedAuthorizations++;
+    if (_nFailedAuthorizations >= MaxFailedAuthorizations) {
+        LERROR(std::format(
+            "Disconnecting '{}' after {} failed authorization attempts",
+            _address, _nFailedAuthorizations
+        ));
+        _socket->disconnect();
+    }
 }
 
 const std::string& Connection::password() const {
