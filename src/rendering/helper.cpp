@@ -57,7 +57,7 @@ namespace {
     std::filesystem::path screenFillingFragmentFile;
 
     constexpr std::string_view XyuvrgbaVertexCode = R"(
-    #version __CONTEXT__
+    #version 460 core
 
     layout(location = 0) in vec2 in_position;
     layout(location = 1) in vec2 in_texCoords;
@@ -83,7 +83,7 @@ namespace {
     )";
 
     constexpr std::string_view ScreenFillingQuadVertexCode = R"(
-    #version __CONTEXT__
+    #version 460 core
 
     out Data {
       vec2 position;
@@ -106,7 +106,7 @@ namespace {
     )";
 
     constexpr std::string_view XyuvrgbaFragmentCode = R"(
-    #version __CONTEXT__
+    #version 460 core
 
     #include "fragment.glsl"
 

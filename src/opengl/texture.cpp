@@ -263,12 +263,12 @@ void Texture::initialize(const std::byte* data) {
             if (std::equal_to<>()(_anisotropyLevel, -1.f)) {
                 GLfloat maxTextureAnisotropy = 1.0;
                 glGetFloatv(
-                    GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT,
+                    GL_MAX_TEXTURE_MAX_ANISOTROPY,
                     &maxTextureAnisotropy
                 );
                 _anisotropyLevel = maxTextureAnisotropy;
             }
-            glTextureParameterf(_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, _anisotropyLevel);
+            glTextureParameterf(_id, GL_TEXTURE_MAX_ANISOTROPY, _anisotropyLevel);
             glTextureParameteri(_id, GL_TEXTURE_BASE_LEVEL, 0);
             break;
     }

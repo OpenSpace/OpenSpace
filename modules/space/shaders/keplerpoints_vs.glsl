@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#version 460 core
 
 layout (location = 0) in vec3 in_vertexData; // 1: x, 2: y, 3: z
 layout (location = 1) in dvec3 in_orbitData; // 1: timeOffset, 2: epoch, 3: period

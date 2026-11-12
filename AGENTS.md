@@ -208,7 +208,7 @@ Rules:
 - **OpenGL API:** use the direct state access style (`glCreateBuffers`, `glNamedBufferStorage`, `glVertexArrayAttribFormat`, ...).
 - **GL state:** restore blend, depth and line state through `global::renderEngine->openglStateCache()`.
 - **Shader files:** named `<name>_vs.glsl`, `_fs.glsl`, `_gs.glsl` and stored in the module's `shaders/` folder. They carry the same copyright box and use 2-space indentation.
-- **Vertex shaders:** start with `#version __CONTEXT__` and use `in_`/`out_` naming or interface blocks (`out Data { ... } out_data;`).
+- **Vertex shaders:** start with `#version 460 core` and use `in_`/`out_` naming or interface blocks (`out Data { ... } out_data;`).
 - **Fragment shaders:** `#include "fragment.glsl"` and implement `Fragment getFragment()`, setting `frag.color` and `frag.depth`.
 
 ## Assets and profiles (`data/`)

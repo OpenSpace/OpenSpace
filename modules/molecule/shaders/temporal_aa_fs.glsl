@@ -22,9 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#version 460 core
 
-#extension GL_ARB_explicit_attrib_location : enable
 #pragma optionNV(unroll all)
 
 const float FltEps = 0.00000001f;

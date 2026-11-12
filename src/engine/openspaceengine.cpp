@@ -85,7 +85,6 @@
 #include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 #include <openspace/systemcapabilities/systemcapabilities.h>
 #include <openspace/systemcapabilities/systemcapabilitiescomponent.h>
-#include <openspace/systemcapabilities/version.h>
 #include <openspace/topic/server.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
@@ -650,19 +649,7 @@ void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(end)");
 
     LTRACE("OpenSpaceEngine::initializeGL::DebugContext(begin)");
-    bool debugActive = global::configuration->openGLDebugContext.isActive;
-
-    // Debug output is not available before 4.3
-    const systemcapabilities::Version minVersion = {
-        .major = 4,
-        .minor = 3,
-        .release = 0
-    };
-    if (debugActive && OpenGLCap.openGLVersion() < minVersion) {
-        LINFO("OpenGL Debug context requested, but insufficient version available");
-        debugActive = false;
-    }
-
+    const bool debugActive = global::configuration->openGLDebugContext.isActive;
     if (debugActive) {
         using namespace opengl;
 

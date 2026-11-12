@@ -46,7 +46,7 @@ namespace openspace::opengl {
  * constructor (if a constructor with a filename was chosen) or in the setFilename method.
  * If the file changes after it has been loaded, the ShaderObject will not change unless
  * rebuildFromFile is called, which pulls the changes. Each object can have a name that
- * will be used for a debug label (if available) and for the logging. The type of the
+ * will be used for a debug label and for the logging. The type of the
  * ShaderObject is selected in the constructor and cannot be changed afterwards. To use
  * the ShaderObjects, they have to be attached to a ProgramObject first.
  */

@@ -42,7 +42,6 @@
 #include <utility>
 
 // #endfor
-// #version __CONTEXT__
 // #define __OS__
 // #include
 // #for <key>, <value> in <dictionary>
@@ -108,7 +107,7 @@ namespace {
 
     class Env {
     public:
-        Env(Dictionary dictionary, std::string versionDirective);
+        explicit Env(Dictionary dictionary);
 
         void processFile(const std::filesystem::path& path);
         std::vector<std::filesystem::path> includedFiles() const;
@@ -137,7 +136,6 @@ namespace {
         bool parseFor(std::string_view line);
         bool parseEndFor(std::string_view line);
         bool parseInclude(std::string_view line);
-        bool parseVersion(std::string_view line);
         bool parseOs(std::string_view line);
 
         std::string substitute(std::string_view in) const;
@@ -152,12 +150,10 @@ namespace {
 
         std::vector<std::filesystem::path> _includedFiles;
         Dictionary _dictionary;
-        std::string _versionDirective;
     };
 
-    Env::Env(Dictionary dictionary, std::string versionDirective)
+    Env::Env(Dictionary dictionary)
         : _dictionary(std::move(dictionary))
-        , _versionDirective(std::move(versionDirective))
     {}
 
     void Env::processFile(const std::filesystem::path& path) {
@@ -229,7 +225,6 @@ namespace {
                 line = std::format("{}{}{}", first, out, last);
             }
 
-            isLineProcessed |= parseVersion(line);
             isLineProcessed |= parseOs(line);
             isLineProcessed |= parseInclude(line);
             isLineProcessed |= parseFor(line);
@@ -483,19 +478,6 @@ namespace {
         }
     }
 
-    bool Env::parseVersion(std::string_view line) {
-        constexpr std::string_view VersionString = "#version __CONTEXT__";
-
-        trimWhitespace(line);
-
-        if (!line.starts_with(VersionString)) {
-            return false;
-        }
-
-        _output << _versionDirective << '\n';
-        return true;
-    }
-
     bool Env::parseOs(std::string_view line) {
         constexpr std::string_view OsString = "#define __OS__";
 
@@ -658,29 +640,7 @@ const std::filesystem::path& ShaderPreprocessor::filename() const {
 }
 
 std::string ShaderPreprocessor::process() {
-    int major = 0;
-    int minor = 0;
-    int mask = 0;
-    glGetIntegerv(GL_MAJOR_VERSION, &major);
-    glGetIntegerv(GL_MINOR_VERSION, &minor);
-    glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
-
-    const ContextProfileMask cpm = ContextProfileMask(mask);
-    const bool isCore = cpm == ContextProfileMask::GL_CONTEXT_CORE_PROFILE_BIT;
-    const bool isCompatibility =
-        cpm == ContextProfileMask::GL_CONTEXT_COMPATIBILITY_PROFILE_BIT;
-
-    assert_msg(
-        isCore || isCompatibility,
-        "OpenGL context is neither core nor compatibility"
-    );
-
-    std::string_view t = isCore ? "core" : (isCompatibility ? "compatibility" : "");
-    return process(std::format("#version {}{}0 {}", major, minor, t));
-}
-
-std::string ShaderPreprocessor::process(std::string versionDirective) {
-    Env env = Env(_dictionary, std::move(versionDirective));
+    Env env = Env(_dictionary);
     env.processFile(_shaderPath);
     std::string result = env.output();
     _includedFiles.clear();

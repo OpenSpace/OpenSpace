@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#version 460 core
 
 // Sources:
 // https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/

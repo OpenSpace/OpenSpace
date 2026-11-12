@@ -265,21 +265,16 @@ bool WebBrowserModule::isEnabled() const {
 bool WebBrowserModule::canUseAcceleratedRendering() {
 // Linux doesn't have a problem with the rendering
 #ifdef WIN32
-    systemcapabilities::Version acceleratedVersion = {
-        .major = 4, .minor = 5, .release = 0
-    };
     auto it = std::find(
         OpenGLCap.extensions().begin(),
         OpenGLCap.extensions().end(),
         "GL_EXT_memory_object_win32"
     );
-    bool isVersionOk = OpenGLCap.openGLVersion() >= acceleratedVersion;
     bool isExtensionsOk = it != OpenGLCap.extensions().end();
     bool isVendorOk =
         OpenGLCap.gpuVendor() ==
         systemcapabilities::OpenGLCapabilitiesComponent::Vendor::Nvidia;
-    return isVersionOk && isExtensionsOk &&
-           isVendorOk && !_disableAcceleratedRendering;
+    return isExtensionsOk && isVendorOk && !_disableAcceleratedRendering;
 #else  // ^^^^ WIN32 // !WIN32 vvvv
     return false;
 #endif // WIN32

@@ -56,7 +56,7 @@ namespace {
         "${TEMPORARY}/projectionfontrenderer_fs.glsl";
 
     constexpr std::string_view DefaultVertexShaderSource = R"(
-    #version __CONTEXT__
+    #version 460 core
 
     layout (location = 0) in vec2 in_position;
     layout (location = 1) in vec2 in_texCoords;
@@ -77,7 +77,7 @@ namespace {
     })";
 
     constexpr std::string_view DefaultFragmentShaderSource = R"(
-    #version __CONTEXT__
+    #version 460 core
 
     in Data {
       vec2 texCoords;
@@ -105,7 +105,7 @@ namespace {
     })";
 
     constexpr std::string_view ProjectionVertexShaderSource = R"(
-    #version __CONTEXT__
+    #version 460 core
 
     layout (location = 0) in vec3 in_position;
     layout (location = 1) in vec2 in_texCoords;
@@ -133,7 +133,7 @@ namespace {
     })";
 
     constexpr std::string_view ProjectionFragmentShaderSource = R"(
-    #version __CONTEXT__
+    #version 460 core
 
     in Data {
       vec2 texCoords;

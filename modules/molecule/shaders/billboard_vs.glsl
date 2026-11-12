@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#version 460 core
 
 vec2 positions[6] = vec2[](
   vec2(0.5, 0.5), vec2( 0.5, -0.5), vec2(-0.5, 0.5),

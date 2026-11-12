@@ -44,10 +44,10 @@ namespace openspace::opengl {
  * This class is a wrapper for an OpenGL program object storing an array of OpenGL
  * shaders. The usual restrictions for shader objects as described in the OpenGL and GLSL
  * language specifications apply. The ProgramObject can have a `name` that is used in the
- * logging feature and as an OpenGL object label, if OpenGL > 4.3 is available. Before the
- * ProgramObject can be used, ShaderObject%s have to be attached, the ShaderObject%s have
- * to be compiled (#compileShaderObjects will compile all attached ShaderObject%s) and the
- * ProgramObject has to be linked before it can be used (using #activate and #deactivate).
+ * logging feature and as an OpenGL object label. Before the ProgramObject can be used,
+ * ShaderObject%s have to be attached, the ShaderObject%s have to be compiled
+ * (#compileShaderObjects will compile all attached ShaderObject%s) and the ProgramObject
+ * has to be linked before it can be used (using #activate and #deactivate).
  * If the OpenGL name of the ProgramObject is required, it is available as an overloaded
  * operator to an `GLuint` type. The copy constructor and the assignment operation will
  * perform deep copies of the attached ShaderObject%s. When setting uniforms, attributes,

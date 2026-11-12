@@ -1,3 +1,3 @@
-#version __CONTEXT__
+#version 460 core
 
 #include <#{rendererData.fragmentRendererPath}>

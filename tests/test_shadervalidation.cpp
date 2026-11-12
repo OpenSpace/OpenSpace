@@ -53,7 +53,6 @@ namespace {
     using namespace openspace;
 
     // OpenSpace always requests an OpenGL 4.6 core profile context through SGCT
-    constexpr std::string_view VersionDirective = "#version 460 core";
     constexpr int GlslVersion = 460;
 
     // Wraps a file that only provides `Fragment getFragment()` into the main fragment
@@ -94,7 +93,7 @@ namespace {
 
     /**
      * Returns all shader stage files of the core and of all enabled modules. Files that
-     * neither start a shader stage (`#version __CONTEXT__`) nor provide a
+     * neither start a shader stage (`#version 460 core`) nor provide a
      * `Fragment getFragment()` function are only ever included and are skipped.
      */
     std::vector<ShaderFile> collectShaderFiles() {
@@ -135,7 +134,7 @@ namespace {
                 }
 
                 const std::string content = readFile(path);
-                const bool isStage = content.contains("#version __CONTEXT__");
+                const bool isStage = content.contains("#version 460 core");
                 const bool providesFragmentFunction =
                     content.contains("Fragment getFragment()");
                 if (isStage || providesFragmentFunction) {
@@ -246,7 +245,7 @@ namespace {
         );
         std::string source;
         try {
-            source = preprocessor.process(std::string(VersionDirective));
+            source = preprocessor.process();
         }
         catch (const RuntimeError& e) {
             return {

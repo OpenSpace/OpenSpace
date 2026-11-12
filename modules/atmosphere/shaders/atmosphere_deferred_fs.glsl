@@ -54,7 +54,7 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#version __CONTEXT__
+#version 460 core
 
 #include "floatoperations.glsl"
 #include "atmosphere_common.glsl"

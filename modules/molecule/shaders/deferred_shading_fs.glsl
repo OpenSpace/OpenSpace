@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#version 460 core
 
 const float SpecularExponent = 100.0;
 const vec3 EnvironmentalRadiance = vec3(5.0);
