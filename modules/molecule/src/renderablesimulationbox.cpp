@@ -585,8 +585,8 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, bufs);
 
-    // The molecule framebuffer uses the standard depth, not the reversed one of the scene
-    // Create scope so that the standard depth convention is only applied within this block
+    // The molecule framebuffer uses the standard depth, not the reversed one of the
+    // scene. The scope limits the standard convention to this block
     {
         const opengl::DepthConventionScope standardDepth(
             opengl::DepthConvention::Standard

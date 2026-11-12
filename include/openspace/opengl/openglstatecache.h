@@ -139,7 +139,7 @@ private:
 
 /**
  * Class that temporarily switches the depth buffer convention in the OpenGL context.
- * The previous convention is restored when the object goes out of scope. 
+ * The previous convention is restored when the object goes out of scope.
  * The depth test and depth mask are not modified.
  */
 class DepthConventionScope {
