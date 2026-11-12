@@ -120,7 +120,7 @@ if (UNIX AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
   endif ()
-  add_compile_definitions(D_GNU_SOURCE)
+  add_compile_definitions(_GNU_SOURCE)
 endif ()
 
 # Qt is consumed by apps/OpenSpace/ext/launcher and apps/AssetBuilder, both of which call
