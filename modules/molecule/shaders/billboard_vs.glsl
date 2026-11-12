@@ -24,6 +24,8 @@
 
 #version __CONTEXT__
 
+#include "powerscaling/powerscalingmath.glsl"
+
 vec2 positions[6] = vec2[](
   vec2(0.5, 0.5), vec2( 0.5, -0.5), vec2(-0.5, 0.5),
   vec2(0.5, -0.5), vec2(-0.5, -0.5), vec2(-0.5, 0.5)
@@ -37,7 +39,6 @@ uniform mat4 transform;
 
 
 void main() {
-  gl_Position = transform * vec4(positions[gl_VertexID], 0.0, 1.0);
-  gl_Position.z = 0.0; // always visible
+  gl_Position = z_normalization(transform * vec4(positions[gl_VertexID], 0.0, 1.0));
   out_data.position = positions[gl_VertexID];
 }
