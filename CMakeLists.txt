@@ -237,7 +237,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   if (TARGET openspace_copy_external_dependencies)
     add_dependencies(${CEF_HELPER_TARGET} openspace_copy_external_dependencies)
   endif ()
-else ()
+elseif (OPENSPACE_MODULE_WEBBROWSER)
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
 
