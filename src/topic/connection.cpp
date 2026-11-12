@@ -31,12 +31,23 @@
 #include <openspace/misc/templatefactory.h>
 #include <openspace/topic/topics/topic.h>
 #include <openspace/util/factorymanager.h>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "ServerModule: Connection";
 
     // The number of failed authorization attempts after which a client is disconnected
     constexpr int MaxFailedAuthorizations = 5;
+
+    // The number of topics that a single connection can keep alive at the same time
+    constexpr size_t MaxTopics = 1024;
+
+    // Returns the beginning of the message. Messages are provided by the client and can
+    // be arbitrarily large, so only this part of them is written to the log
+    std::string_view shortened(std::string_view message) {
+        constexpr size_t MaxLoggedCharacters = 256;
+        return message.substr(0, MaxLoggedCharacters);
+    }
 } // namespace
 
 namespace openspace {
@@ -63,7 +74,7 @@ void Connection::handleMessage(const std::string& message) {
             _socket->disconnect();
             LERROR(std::format(
                 "Could not parse JSON '{}'. Connection is unauthorized. Disconnecting",
-                message
+                shortened(message)
             ));
             return;
         }
@@ -71,10 +82,10 @@ void Connection::handleMessage(const std::string& message) {
         // Constructing the locale is expensive, so it is only done once per message
         // instead of once for every character
         const std::locale locale = std::locale("");
-        std::string sanitizedString = message;
+        std::string sanitizedString = std::string(shortened(message));
         std::transform(
-            message.begin(),
-            message.end(),
+            sanitizedString.begin(),
+            sanitizedString.end(),
             sanitizedString.begin(),
             [&locale](wchar_t c) {
                 return std::isprint(c, locale) ? char(c) : ' ';
@@ -83,16 +94,22 @@ void Connection::handleMessage(const std::string& message) {
         LERROR(std::format("Could not parse JSON '{}'", sanitizedString));
     }
     catch (const std::domain_error& e) {
-        LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
+        LERROR(std::format(
+            "JSON handling error from: {}. {}", shortened(message), e.what()
+        ));
     }
     catch (const std::out_of_range& e) {
-        LERROR(std::format("JSON handling error from: {}. {}", message, e.what()));
+        LERROR(std::format(
+            "JSON handling error from: {}. {}", shortened(message), e.what()
+        ));
     }
     catch (const std::exception& e) {
-        LERROR(std::format("Unexpected error {}, from: {}", e.what(), message));
+        LERROR(std::format(
+            "Unexpected error {}, from: {}", e.what(), shortened(message)
+        ));
     }
     catch (...) {
-        LERROR(std::format("Unexpected error from: {}", message));
+        LERROR(std::format("Unexpected error from: {}", shortened(message)));
     }
 }
 
@@ -155,6 +172,11 @@ void Connection::handleJson(const nlohmann::json& json) {
 
         if (!isAuthorized() && (type != "authorize")) {
             LERROR("Connection is not authorized");
+            return;
+        }
+
+        if (_topics.size() >= MaxTopics) {
+            LERROR("Connection has too many active topics");
             return;
         }
 
