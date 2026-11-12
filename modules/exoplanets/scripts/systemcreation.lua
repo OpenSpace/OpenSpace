@@ -305,7 +305,7 @@ function addExoplanetSystem(data)
         Enabled = false,
         XColor = { 0.0, 0.0, 0.0, 0.0 },
         YColor = { 0.0, 0.0, 0.0, 0.0 },
-        ZColor = { 0.8, 0.8, 0.8, 1.0 }
+        ZColor = { 0.9, 0.9, 0.9, 1.0 }
       },
       Tag = { "exoplanet_star_rotationaxis" },
       GUI = {
@@ -530,7 +530,8 @@ function addExoplanetSystem(data)
       Enabled = false,
       Size = { 2.0 * meanSemiMajor, 2.0 * meanSemiMajor },
       Color = { 0.4, 0.4, 0.4 },
-      Segments = { 10, 10 }
+      Segments = { 10, 10 },
+      RenderBinMode = "PostDeferredTransparent"
     },
     GUI = {
       Name = "Edge-on Inclination Plane (" .. starIdentifier .. ")",
