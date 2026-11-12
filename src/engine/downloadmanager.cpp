@@ -82,18 +82,21 @@ namespace {
         i->future->totalSize = dltotal;
         i->future->progress = static_cast<float>(dlnow) / static_cast<float>(dltotal);
 
-        auto now = std::chrono::system_clock::now();
+        // The remaining time cannot be estimated before the first bytes have arrived
+        if (dlnow > 0) {
+            auto now = std::chrono::system_clock::now();
 
-        // Compute time spent transferring
-        auto transferTime = now - i->startTime;
-        // Compute estimated transfer time
-        auto estimatedTime = transferTime / i->future->progress;
-        // Compute estimated time remaining
-        auto timeRemaining = estimatedTime - transferTime;
+            // Compute time spent transferring
+            auto transferTime = now - i->startTime;
+            // Compute estimated transfer time
+            auto estimatedTime = transferTime / i->future->progress;
+            // Compute estimated time remaining
+            auto timeRemaining = estimatedTime - transferTime;
 
-        i->future->secondsRemaining = static_cast<float>(
-            std::chrono::duration_cast<std::chrono::seconds>(timeRemaining).count()
-        );
+            i->future->secondsRemaining = static_cast<float>(
+                std::chrono::duration_cast<std::chrono::seconds>(timeRemaining).count()
+            );
+        }
 
         if (*(i->callback)) {
             // The callback function is a pointer to an std::function; that is the reason
@@ -201,6 +204,10 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         else {
             fclose(fp);
             future->errorMessage = "Error initializing cURL";
+
+            if (finishedCb) {
+                finishedCb(*future);
+            }
         }
     };
 
@@ -263,7 +270,9 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             else {
                 LWARNING("Could not get extension from file downloaded from: " + url);
             }
-            successCb(file);
+            if (successCb) {
+                successCb(file);
+            }
             curl_easy_cleanup(curl);
             return file;
         }
