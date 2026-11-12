@@ -205,10 +205,17 @@ void setClipboardText(std::string_view text, [[maybe_unused]] SelectionArea sele
         }
     }(selectionArea);
 
-    std::string cmd = std::format("echo \"{}\" | xclip -i -selection {} -f", text, s);
-    std::string buf;
-    const bool success = exec(cmd.c_str(), buf);
-    if (!success) {
+    // The text is written to the standard input of xclip instead of being made part of
+    // the command, as it would be interpreted by the shell otherwise
+    const std::string cmd = std::format("xclip -i -selection {}", s);
+    FILE* pipe = popen(cmd.c_str(), "w");
+    if (!pipe) {
+        throw RuntimeError("Error setting text to clipboard", "Clipboard");
+    }
+
+    const size_t nWritten = fwrite(text.data(), sizeof(char), text.size(), pipe);
+    const int status = pclose(pipe);
+    if (nWritten != text.size() || status != 0) {
         throw RuntimeError("Error setting text to clipboard", "Clipboard");
     }
 #endif // WIN32
