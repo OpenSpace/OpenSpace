@@ -51,8 +51,9 @@ namespace {
                 value += buffer.data();
             }
         }
-        pclose(pipe);
-        return true;
+        // Opening the pipe succeeds even if the command itself fails, so the exit status
+        // of the command is what determines whether the returned value is usable
+        return pclose(pipe) == 0;
     }
 #endif // WIN32
 } // namespace
