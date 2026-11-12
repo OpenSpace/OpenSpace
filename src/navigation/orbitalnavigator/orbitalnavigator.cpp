@@ -941,8 +941,10 @@ void OrbitalNavigator::updateAnchorNode(const SceneGraphNode* anchorNode) {
     }
 
     if (changedAnchor) {
-        // Mark a changed anchor node as a camera interaction
-        markCameraInteraction();
+        // Mark a changed anchor node as a camera interaction, unless requested otherwise
+        if (_anchorChangeIsCameraInteraction) {
+            markCameraInteraction();
+        }
         updatePreviousAnchorState();
     }
 
@@ -962,8 +964,14 @@ void OrbitalNavigator::updateAimNode(const SceneGraphNode* aimNode) {
     updatePreviousAimState();
 }
 
-void OrbitalNavigator::setAnchorNode(const std::string& identifier) {
+void OrbitalNavigator::setAnchorNode(const std::string& identifier,
+                                     IsCameraInteraction isCameraInteraction)
+{
+    // The anchor's onChange callback is called synchronously when the value changes, so
+    // the flag can be reset to the default value immediately afterwards
+    _anchorChangeIsCameraInteraction = isCameraInteraction;
     _anchor = identifier;
+    _anchorChangeIsCameraInteraction = true;
 }
 
 void OrbitalNavigator::setAimNode(const std::string& identifier) {
