@@ -396,8 +396,8 @@ std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
 
 float Renderable::nearClipW(const glm::dmat4& modelViewTransform) {
     constexpr double NearClipFraction = 1e-3;
-    // Based on the distance to the model origin, but applied to all of the geometry. Parts
-    // of the geometry that are closer to the camera than this are clipped
+    // Based on the distance to the model origin, but applied to all of the geometry.
+    // Parts of the geometry that are closer to the camera than this are clipped
     const double distance = glm::length(glm::dvec3(modelViewTransform[3]));
     return static_cast<float>(NearClipFraction * distance);
 }
