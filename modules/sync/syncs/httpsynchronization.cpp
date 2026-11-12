@@ -353,18 +353,38 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
 
             return !_shouldCancel;
         });
+    }
+    // All entries of `sizeData` exist at this point, so the progress callbacks can safely
+    // access it from the download threads
+    startedAllDownloads = true;
+
+    // Starting all downloads at once would create one thread and one connection for every
+    // file, so only a limited number of downloads are running at the same time
+    constexpr size_t MaxConcurrentDownloads = 8;
+    for (size_t i = 0; i < downloads.size(); i++) {
+        HttpFileDownload& dl = *downloads[i];
+        if (_shouldCancel) {
+            // A download that was never started has to be cancelled, as waiting for it
+            // below would never return otherwise
+            dl.cancel();
+            continue;
+        }
+
+        if (i >= MaxConcurrentDownloads) {
+            // Wait for the oldest running download before starting the next one
+            downloads[i - MaxConcurrentDownloads]->wait();
+        }
 
         DownloadEventEngine::DownloadEvent event = {
             .type = DownloadEventEngine::DownloadEvent::Type::Started,
-            .id = line,
+            .id = dl.url(),
             .downloadedBytes = 0
         };
         global::downloadEventEngine->publish(event);
-        LDEBUG(std::format("Started downloading '{}'", dl->url()));
+        LDEBUG(std::format("Started downloading '{}'", dl.url()));
 
-        dl->start();
+        dl.start();
     }
-    startedAllDownloads = true;
 
     constexpr int MaxDownloadRetries = 5;
     int downloadTry = 0;
