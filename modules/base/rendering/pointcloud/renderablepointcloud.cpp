@@ -527,9 +527,6 @@ namespace {
             std::optional<Dictionary> colorMapping
                 [[codegen::reference("core_colormappingcomponent")]];
 
-            // Settings for using per-point RGB colors, where each of the three color
-            // channels is read from a separate column in the dataset. When set, this
-            // takes priority over both the color map and the fixed color.
             struct RGB {
                 // The name of the data column with the red color values (0 to 1)
                 std::optional<std::string> r;
@@ -540,7 +537,10 @@ namespace {
                 // The name of the data column with the blue color values (0 to 1)
                 std::optional<std::string> b;
             };
-            std::optional<RGB> rgb;
+            // Settings for using per-point RGB colors, where each of the three color
+            // channels is read from a separate column in the dataset. When set, this
+            // takes priority over both the color map and the fixed color.
+            std::optional<RGB> rgbMapping;
 
             std::optional<bool> enableOutline [[codegen::Info(EnableOutlineInfo)]];
 
