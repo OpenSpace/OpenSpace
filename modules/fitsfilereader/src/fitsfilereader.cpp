@@ -344,8 +344,8 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
 
         // Read extra columns, if any. This will slow down the sorting tremendously
         for (int col = defaultCols; col < nColumnsRead; col++) {
-            std::vector<float> vecData = std::move(tableContent[allColumnNames[col]]);
-            values[idx++] = vecData[i];
+            const std::vector<float>& vecData = tableContent[allColumnNames[col]];
+            values[idx++] = vecData[i % nStars];
         }
 
         for (int j = 0; j < nValuesPerStar; j++) {
