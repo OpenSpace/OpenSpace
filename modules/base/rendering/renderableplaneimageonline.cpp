@@ -163,6 +163,9 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
+            // The download is not attempted again until the URL changes, as it would
+            // otherwise be restarted in every frame
+            _textureIsDirty = false;
             LERRORC(
                 "RenderablePlaneImageOnline",
                 std::format("Error loading image from URL '{}'", _texturePath.value())
@@ -202,6 +205,9 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
             DownloadManager::MemoryFile imageFile = _rightImageFuture.get();
 
             if (imageFile.corrupted) {
+                // The download is not attempted again until the URL changes, as it would
+                // otherwise be restarted in every frame
+                _textureIsDirty = false;
                 LERRORC(
                     "RenderablePlaneImageOnline",
                     std::format("Error loading right image from URL '{}'",
