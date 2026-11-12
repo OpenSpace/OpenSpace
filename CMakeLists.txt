@@ -94,13 +94,15 @@ endif ()
 # Main                                                                                   #
 ##########################################################################################
 
-# Get the current working branch
+# Get the current working branch. The source might not be a git checkout, for example
+# when it was extracted from an archive, so a failure is not fatal
 execute_process(
   COMMAND git rev-parse --abbrev-ref HEAD
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE OPENSPACE_GIT_BRANCH
   OUTPUT_STRIP_TRAILING_WHITESPACE
-  COMMAND_ERROR_IS_FATAL ANY
+  RESULT_VARIABLE git_branch_result
+  ERROR_QUIET
 )
 
 # Get the latest abbreviated commit hash of the working branch
@@ -109,17 +111,40 @@ execute_process(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE OPENSPACE_GIT_COMMIT
   OUTPUT_STRIP_TRAILING_WHITESPACE
-  COMMAND_ERROR_IS_FATAL ANY
+  RESULT_VARIABLE git_commit_result
+  ERROR_QUIET
 )
+
+if (git_branch_result EQUAL 0 AND git_commit_result EQUAL 0)
+  # The values above are only read when CMake configures the project. The reflog of HEAD
+  # changes with every commit, checkout, and reset, so depending on it reconfigures the
+  # project whenever the values would be different
+  execute_process(
+    COMMAND git rev-parse --absolute-git-dir
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE git_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+  if (EXISTS "${git_dir}/logs/HEAD")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${git_dir}/logs/HEAD")
+  endif ()
+else ()
+  message(WARNING "Could not determine the git branch and commit of the source")
+  set(OPENSPACE_GIT_BRANCH "unknown")
+  set(OPENSPACE_GIT_COMMIT "unknown")
+endif ()
 
 if (MSVC)
   option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
 endif ()
 
+# Single-configuration generators would otherwise build without optimizations
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
+endif ()
+
 if (UNIX AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
-  endif ()
   add_compile_definitions(_GNU_SOURCE)
 endif ()
 
