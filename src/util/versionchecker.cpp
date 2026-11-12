@@ -67,6 +67,7 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     else {
         profile = "user-profile";
     }
+    profile = encodeUrl(profile);
 
     std::string fullUrl = std::format(
         "{}?client_version={}&commit_hash={}&operating_system={}&profile={}",
