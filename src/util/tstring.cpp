@@ -31,22 +31,21 @@
 namespace openspace {
 
 tstring temporaryString(const std::string& str) {
-    void* ptr = global::memoryManager->TemporaryMemory.do_allocate(str.size(), 8);
-    std::strcpy(reinterpret_cast<char*>(ptr), str.data());
-    return tstring(reinterpret_cast<char*>(ptr), str.size());
+    return temporaryString(std::string_view(str));
 }
 
 tstring temporaryString(std::string_view str) {
-    void* ptr = global::memoryManager->TemporaryMemory.do_allocate(str.size(), 8);
-    std::strcpy(reinterpret_cast<char*>(ptr), str.data());
-    return tstring(reinterpret_cast<char*>(ptr), str.size());
+    // The additional byte is used for the null terminator. `str` is not guaranteed to be
+    // null-terminated, so only the characters that belong to it are copied
+    void* ptr = global::memoryManager->TemporaryMemory.do_allocate(str.size() + 1, 8);
+    char* dst = static_cast<char*>(ptr);
+    std::memcpy(dst, str.data(), str.size());
+    dst[str.size()] = 0;
+    return tstring(dst, str.size());
 }
 
 tstring temporaryString(const char str[]) {
-    const size_t size = strlen(str);
-    void* ptr = global::memoryManager->TemporaryMemory.do_allocate(size, 8);
-    std::strcpy(reinterpret_cast<char*>(ptr), str);
-    return tstring(reinterpret_cast<char*>(ptr), size);
+    return temporaryString(std::string_view(str));
 }
 
 } // namespace openspace
