@@ -139,8 +139,8 @@ void FramebufferRenderer::initialize() {
     glCreateBuffers(1, &_vbo);
     glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), VertexData.data(), GL_NONE_BIT);
 
-    // std140 pads a single float to 16 bytes. The buffer is initialized with the near plane
-    // of an unscaled camera, so that shaders never read an undefined block
+    // std140 pads a single float to 16 bytes. The buffer is initialized with the near
+    // plane of an unscaled camera, so that shaders never read an undefined block
     const std::array<float, 4> depthData = { static_cast<float>(DepthNearWorld) };
     glCreateBuffers(1, &_depthDataBuffer);
     glNamedBufferStorage(
@@ -435,7 +435,7 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
         glTextureParameteri(info.depthMap.texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureParameteri(info.depthMap.texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTextureParameteri(info.depthMap.texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        constexpr glm::vec4 borderColor = glm::vec4(1.f);
+        constexpr glm::vec4 borderColor = glm::vec4(0.f);
         glTextureParameterfv(
             info.depthMap.texture,
             GL_TEXTURE_BORDER_COLOR,
@@ -1372,8 +1372,9 @@ void FramebufferRenderer::renderDepthMaps() {
     GLint prevVp[4];
     glGetIntegerv(GL_VIEWPORT, prevVp);
 
-    // The shadow maps use orthographic projections and the standard depth
-    const opengl::DepthConventionScope standardDepth(opengl::DepthConvention::Standard);
+    // The shadow maps use the reversed depth, where the near plane of the light is 1 and
+    // the far plane is 0
+    const opengl::DepthConventionScope reversedDepth(opengl::DepthConvention::Reversed);
 
     for (std::pair<const std::string, ShadowInfo>& shadowMap : _shadowMaps) {
         glm::dvec3 vmin = glm::dvec3(std::numeric_limits<double>::max());
@@ -1415,7 +1416,9 @@ void FramebufferRenderer::renderDepthMaps() {
         const glm::dvec3 up = glm::cross(right, lightDir);
 
         const glm::dmat4 view = glm::lookAt(eye, center, up);
-        const glm::dmat4 projection = glm::ortho(-sz, sz, -sz, sz, d - sz, d + sz);
+        // Swapping the near and far planes gives the reversed depth in the [0, 1] range
+        // of the clip control
+        const glm::dmat4 projection = glm::orthoRH_ZO(-sz, sz, -sz, sz, d + sz, d - sz);
         shadowMap.second.viewProjectionMatrix = projection * view;
 
         glBindFramebuffer(GL_FRAMEBUFFER, shadowMap.second.fbo);

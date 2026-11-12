@@ -211,8 +211,8 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     glViewport(0, 0, _shadowDepthTextureWidth, _shadowDepthTextureHeight);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
-    glClearDepth(1.f);
-    glDepthFunc(GL_LEQUAL);
+    // The depth function and clear value come from the reversed depth convention that
+    // is active while the scene is rendered
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -293,7 +293,7 @@ void ShadowComponent::updateDepthTexture() const {
     glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    constexpr glm::vec4 ShadowBorder = glm::vec4(1.f);
+    constexpr glm::vec4 ShadowBorder = glm::vec4(0.f);
     glTextureParameterfv(
         _shadowDepthTexture,
         GL_TEXTURE_BORDER_COLOR,
@@ -304,7 +304,7 @@ void ShadowComponent::updateDepthTexture() const {
         GL_TEXTURE_COMPARE_MODE,
         GL_COMPARE_REF_TO_TEXTURE
     );
-    glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_COMPARE_FUNC, GL_GEQUAL);
 }
 
 void ShadowComponent::buildDDepthTexture() {
