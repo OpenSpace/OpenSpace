@@ -118,6 +118,14 @@ namespace {
 #endif
     }
 
+    std::string stripSurroundingQuotes(std::string path) {
+        trimWhitespace(path);
+        trimSurroundingCharacters(path, '\"');
+        trimSurroundingCharacters(path, '\'');
+        trimWhitespace(path);
+        return path;
+    };
+
     constexpr const IntListPropertyInfo ExternalSelectionInfo = {
         .identifier = "ExternalSelection",
         .name = "External Selection from Webpage",
@@ -1867,6 +1875,7 @@ void DataViewer::renderFileMenu() {
 
             std::string preview = csvFiles.empty() ?
                 "No CSV files in data folder" : "Select a CSV";
+
             for (const std::filesystem::path& file : csvFiles) {
                 if (file.string() == csvPath) {
                     preview = file.filename().string();
@@ -1942,19 +1951,23 @@ void DataViewer::renderFileMenu() {
             ImGui::SameLine();
             if (ImGui::Button("Open") || ImGui::IsKeyPressed(ImGuiKey_Enter)) {
                 try {
+                    const std::string csvFilePath = stripSurroundingQuotes(csvPath);
+                    const std::string settingsFilePath =
+                        stripSurroundingQuotes(settingsJsonPath);
+
                     DataSettings settings;
                     std::filesystem::path settingsJsonSource;
                     if (useLoadedSettingsJson) {
                         settings = _dataSettings;
                         settingsJsonSource = _settingsJsonPath;
                     }
-                    else if (settingsJsonPath[0] != '\0') {
-                        settingsJsonSource = absPath(settingsJsonPath);
+                    else if (!settingsFilePath.empty()) {
+                        settingsJsonSource = absPath(settingsFilePath);
                         settings = DataLoader::loadDataSettingsFromJson(
                             settingsJsonSource
                         );
                     }
-                    settings.dataFile = std::filesystem::path(csvPath);
+                    settings.dataFile = std::filesystem::path(csvFilePath);
                     const bool showMappingPrompt = settingsJsonSource.empty();
                     const bool prepared = prepareDataLoad(
                         std::move(settings),
