@@ -295,8 +295,9 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelGeometry::loadCacheFile(
                 "No texture size was found while loading cache"
             );
         }
-        std::byte* data = new std::byte[textureSize];
-        fileStream.read(reinterpret_cast<char*>(data), textureSize);
+        std::vector<std::byte> data =
+            std::vector<std::byte>(static_cast<size_t>(textureSize));
+        fileStream.read(reinterpret_cast<char*>(data.data()), textureSize);
 
         textureEntry.texture = std::make_unique<opengl::Texture>(
             opengl::Texture::FormatInit {
@@ -309,7 +310,7 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelGeometry::loadCacheFile(
             opengl::Texture::SamplerInit {
                 .filter = opengl::Texture::FilterMode::AnisotropicMipMap
             },
-            data
+            data.data()
         );
 
         textureStorageArray.push_back(std::move(textureEntry));

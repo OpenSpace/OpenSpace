@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
 #include <openspace/navigation/orbitalnavigator/directmanipulation.h>
 #include <openspace/navigation/orbitalnavigator/idlemotion.h>
 #include <openspace/navigation/orbitalnavigator/orbitalinputhandler.h>
@@ -54,6 +55,8 @@ class Syncable;
 
 class OrbitalNavigator : public PropertyOwner {
 public:
+    BooleanType(IsCameraInteraction);
+
     OrbitalNavigator();
 
     void updateCamera(double deltaTime);
@@ -76,7 +79,19 @@ public:
 
     void setFocusNode(const SceneGraphNode* node, bool resetVelocities = true);
     void setFocusNode(const std::string& identifier, bool resetVelocities = true);
-    void setAnchorNode(const std::string& identifier);
+
+    /**
+     * Sets the anchor node to the scene graph node with the provided \p identifier.
+     *
+     * \param identifier The identifier of the scene graph node that should become the
+     *        new anchor
+     * \param isCameraInteraction If `IsCameraInteraction::Yes`, a change of the anchor
+     *        node is treated as a camera interaction, which, for example, aborts an
+     *        ongoing idle motion
+     */
+    void setAnchorNode(const std::string& identifier,
+        IsCameraInteraction isCameraInteraction = IsCameraInteraction::Yes);
+
     void setAimNode(const std::string& identifier);
 
     void startRetargetAnchor();
@@ -207,6 +222,7 @@ private:
     std::optional<glm::dquat> _previousAnchorNodeRotation;
     std::optional<glm::dvec3> _previousAimNodePosition;
     bool _resetVelocitiesOnAnchorChange = true;
+    bool _anchorChangeIsCameraInteraction = true;
 
     double _currentCameraToSurfaceDistance = 0.0;
     bool _directlySetStereoDistance = false;

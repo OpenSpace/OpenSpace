@@ -99,6 +99,12 @@ void TimelineTranslation::initialize() {
     }
 }
 
+void TimelineTranslation::setOwnerNode(SceneGraphNode* node) {
+    for (const Keyframe<mm_unique_ptr<Translation>>& kf : _timeline.keyframes()) {
+        kf.data->setOwnerNode(node);
+    }
+}
+
 void TimelineTranslation::update(const UpdateData& data) {
     const double now = data.time.j2000Seconds();
     using KeyframePointer = const Keyframe<mm_unique_ptr<Translation>>*;

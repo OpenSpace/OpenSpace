@@ -52,7 +52,28 @@ public:
     const Dictionary& dictionary() const;
     void setDictionary(Dictionary dictionary);
     void setCallback(ShaderChangedCallback changeCallback);
+    /**
+     * Processes the shader file and returns the resulting source code. A
+     * `#version __CONTEXT__` line is replaced with the version and profile of the
+     * currently bound OpenGL context.
+     *
+     * \return The processed shader source
+     *
+     * \pre An OpenGL context must be current
+     */
     std::string process();
+
+    /**
+     * Processes the shader file and returns the resulting source code. A
+     * `#version __CONTEXT__` line is replaced with \p versionDirective, which makes it
+     * possible to process shaders without an OpenGL context.
+     *
+     * \param versionDirective The full line that replaces `#version __CONTEXT__`, for
+     *        example `#version 460 core`
+     * \return The processed shader source
+     */
+    std::string process(std::string versionDirective);
+
     std::string includedFiles() const;
 
     /**

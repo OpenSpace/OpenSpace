@@ -27,14 +27,12 @@ local Node = {
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = "GlobeRotation_Example_UseCamera_Globe",
       Latitude = 20.0,
       Longitude = -45.0,
       UseCamera = true
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = "GlobeRotation_Example_UseCamera_Globe",
       Latitude = 20.0,
       Longitude = -45.0,
       Angle = 45.0,

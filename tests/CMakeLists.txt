@@ -25,6 +25,8 @@
 add_executable(OpenSpaceTest)
 set_openspace_compile_settings(OpenSpaceTest)
 add_test(NAME OpenSpaceTest COMMAND OpenSpaceTest)
+add_test(NAME ShaderValidationOpenGL COMMAND OpenSpaceTest "[shadervalidationopengl]")
+add_test(NAME ShaderValidationSpirV COMMAND OpenSpaceTest "[shadervalidationspirv]")
 
 target_sources(
   OpenSpaceTest
@@ -43,6 +45,7 @@ target_sources(
     test_distanceconversion.cpp
     test_documentation.cpp
     test_filesystem.cpp
+    test_globerotation.cpp
     test_horizons.cpp
     test_iswamanager.cpp
     test_jsonformatting.cpp
@@ -64,6 +67,7 @@ target_sources(
     test_settings.cpp
     test_sgctedit.cpp
     test_shaderpreprocessor.cpp
+    test_shadervalidation.cpp
     test_spicemanager.cpp
     test_templatefactory.cpp
     test_timeconversion.cpp
@@ -255,6 +259,7 @@ target_sources(
 )
 
 find_package(Catch2 CONFIG REQUIRED)
+find_package(glslang CONFIG REQUIRED)
 find_package(sgct CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(nlohmann_json_schema_validator CONFIG REQUIRED)
@@ -273,6 +278,8 @@ target_link_libraries(
   PRIVATE
     Catch2::Catch2
     codegen::codegen-lib
+    glslang::glslang
+    glslang::glslang-default-resource-limits
     openspace-core
     openspace-module-collection
     sgct::sgct

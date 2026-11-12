@@ -1,0 +1,33 @@
+-- Interpolated Points with Color from Data
+-- Example of interpolating points where the color of each point is determined by the RGB
+-- values in the data file (range 0.0 to 1.0). The colors are interpolated together with
+-- the positions, leading to the points changing color throughout the interpolation.
+
+local Node = {
+  Identifier = "RenderableInterpolatedPoints_Example_ColorFromData",
+  Renderable = {
+    Type = "RenderableInterpolatedPoints",
+    File = asset.resource("data/interpolation_expand_color.csv"),
+    NumberOfObjects = 10,
+    Coloring = {
+      -- The names of the columns in the dataset that contain the RGB color values
+      Rgb = { R = "r", G = "g", B = "b" }
+    },
+    SizeSettings = {
+      ScaleExponent = 3.5
+    }
+  },
+  GUI = {
+    Name = "RenderableInterpolatedPoints - Color from Data",
+    Path = "/Examples"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

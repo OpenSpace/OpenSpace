@@ -115,6 +115,8 @@ void Translation::update(const UpdateData& data) {
     }
 }
 
+void Translation::setOwnerNode(SceneGraphNode*) {}
+
 glm::dvec3 Translation::position() const {
     return _cachedPosition;
 }

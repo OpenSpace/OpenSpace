@@ -102,7 +102,7 @@
     },
     "tests": {
       "description": "Build the unit tests",
-      "dependencies": ["catch2"]
+      "dependencies": ["catch2", "glslang"]
     },
     "profiling": {
       "description": "Enable profiling support through Tracy",

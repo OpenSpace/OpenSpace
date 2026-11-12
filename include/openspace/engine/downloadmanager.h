@@ -105,8 +105,7 @@ public:
      * \param overrideFile If `true`, overrides existing file of same name
      * \param failOnError If `true`, http codes >= 400 (client/server errors) result in
      *        fail
-     * \param timeout_secs Timeout in seconds before giving up on download (0 = no
-     *        timeout)
+     * \param timeoutSecs Timeout in seconds before giving up on download (0 = no timeout)
      * \param finishedCallback Callback when download finished (happens on different
      *        thread)
      * \param progressCallback Callback for status during (happens on different thread)
@@ -114,7 +113,7 @@ public:
     std::shared_ptr<FileFuture> downloadFile(const std::string& url,
         const std::filesystem::path& file,
         OverrideFile overrideFile = OverrideFile::Yes,
-        FailOnError failOnError = FailOnError::No, unsigned int timeout_secs = 0,
+        FailOnError failOnError = FailOnError::No, unsigned int timeoutSecs = 0,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()) const;
 

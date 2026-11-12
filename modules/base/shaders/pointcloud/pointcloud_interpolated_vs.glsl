@@ -43,9 +43,13 @@ layout(location = 8) in float in_textureLayer;
 layout(location = 9) in vec4 in_orientation0; // quaternion
 layout(location = 10) in vec4 in_orientation1; // quaternion
 
+layout(location = 11) in vec3 in_pointColor0;
+layout(location = 12) in vec3 in_pointColor1;
+
 out Data {
   flat float textureLayer;
   flat float colorParameter;
+  flat vec3 pointColor;
   flat float scalingParameter;
   flat vec4 orientation; // quaternion
 } out_data;
@@ -126,6 +130,7 @@ void main() {
   float t = interpolationValue;
 
   out_data.colorParameter = interpolateValue(in_colorParameter0, in_colorParameter1, t);
+  out_data.pointColor = mix(in_pointColor0, in_pointColor1, t);
   out_data.scalingParameter = interpolateValue(in_scalingParameter0, in_scalingParameter1,
     t);
 

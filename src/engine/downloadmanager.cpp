@@ -132,7 +132,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                                                         const std::filesystem::path& file,
                                                                 OverrideFile overrideFile,
                                                                   FailOnError failOnError,
-                                                                unsigned int timeout_secs,
+                                                                 unsigned int timeoutSecs,
                                                 DownloadFinishedCallback finishedCallback,
                                           DownloadProgressCallback progressCallback) const
 {
@@ -157,7 +157,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         LERROR(std::format("Could not open/create file: {}. Errno: {}", file, errno));
     }
 
-    auto downloadFunction = [url, failOnError, timeout_secs,
+    auto downloadFunction = [url, failOnError, timeoutSecs,
                              finishedCb = std::move(finishedCallback),
                              progressCb = std::move(progressCallback), future, fp]()
     {
@@ -168,8 +168,8 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeData);
-            if (timeout_secs) {
-                curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout_secs);
+            if (timeoutSecs > 0) {
+                curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeoutSecs);
             }
             if (failOnError) {
                 curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);

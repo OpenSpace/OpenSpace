@@ -40,7 +40,8 @@ uniform mat4 modelTransform;
 
 void main() {
   out_data.position = in_position;
+  vec4 position = in_position;
   out_data.texCoords = in_texCoords;
   gl_Position =
-    z_normalization(viewProjection * pscTransform(in_position, modelTransform));
+    z_normalization(viewProjection * pscTransform(position, modelTransform));
 }

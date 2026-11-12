@@ -113,12 +113,16 @@ namespace {
  * \param overrideExistingFile If `true`, the file will be downloaded even if a file
  *        already exists at the `savePath` location. The existing file will be overritten.
  *        If it is `false` and a file already exists, no file will be downloaded
+ * \param timeout Specifies the number of seconds after which the download will be
+ *        considered unresponsive and be cancelled. If this value is 0, there is no
+ *        timeout
  * \return `true` if the download completed successfully, `false` otherwise. IMPORTANT:
- *         If `waitForCompletion` is `true`, this function will always return `true` 
+ *         If `waitForCompletion` is `true`, this function will always return `true`
  */
 [[codegen::luawrap]] bool downloadFile(std::string url, std::string savePath,
                                        bool waitForCompletion = false,
-                                       bool overrideExistingFile = true)
+                                       bool overrideExistingFile = true,
+                                       int timeout = 0)
 {
     LINFOC("OpenSpaceEngine", std::format("Downloading file from '{}'", url));
     std::shared_ptr<DownloadManager::FileFuture> future =
@@ -127,7 +131,7 @@ namespace {
             savePath,
             DownloadManager::OverrideFile(overrideExistingFile),
             DownloadManager::FailOnError::Yes,
-            5
+            timeout
         );
 
     if (waitForCompletion) {
@@ -304,7 +308,7 @@ namespace {
  * Resets the camera position to the same position where the profile originally started.
  */
 [[codegen::luawrap]] void resetCamera() {
-    setCameraFromProfile(*global::profile);
+    setCameraFromProfile(*global::profile, OrbitalNavigator::IsCameraInteraction::Yes);
 }
 
 /**
