@@ -939,6 +939,114 @@ void ProgramObject::setUniform(const std::string& name, const glm::mat4x4& value
     }
 }
 
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::mat2x2>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::mat2x3>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::mat2x4>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::mat3x2>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::mat3x3>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::mat3x4>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::mat4x2>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::mat4x3>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::mat4x4>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
 void ProgramObject::setUniform(const std::string& name, const glm::dmat2x2& value,
                                Transpose transpose) const
 {
@@ -1035,6 +1143,114 @@ void ProgramObject::setUniform(const std::string& name, const glm::dmat4x4& valu
     const GLint location = uniformLocation(name);
     if (location != -1) {
         setUniform(location, value, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::dmat2x2>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::dmat2x3>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::dmat2x4>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::dmat3x2>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::dmat3x3>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::dmat3x4>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::dmat4x2>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::dmat4x3>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
+    }
+}
+
+void ProgramObject::setUniform(const std::string& name,
+                               const std::vector<glm::dmat4x4>& values,
+                               Transpose transpose) const
+{
+    assert_msg(!name.empty(), "Name must not be empty");
+
+    const GLint location = uniformLocation(name);
+    if (location != -1) {
+        setUniform(location, values, transpose);
     }
 }
 
@@ -1446,6 +1662,115 @@ void ProgramObject::setUniform(GLint location, const glm::mat4x4& value,
     );
 }
 
+void ProgramObject::setUniform(GLint location, const std::vector<glm::mat2x2>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix2fv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::mat2x3>& values,
+                               Transpose transpose) const
+{
+
+    glProgramUniformMatrix2x3fv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::mat2x4>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix2x4fv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::mat3x2>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix3x2fv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::mat3x3>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix3fv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::mat3x4>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix3x4fv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::mat4x2>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix4x2fv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::mat4x3>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix4x3fv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::mat4x4>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix4fv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
 void ProgramObject::setUniform(GLint location, const glm::dmat2x2& value,
                                Transpose transpose) const
 {
@@ -1551,6 +1876,114 @@ void ProgramObject::setUniform(GLint location, const glm::dmat4x4& value,
         1,
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(value)
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat2x2>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix2dv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat2x3>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix2x3dv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat2x4>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix2x4dv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat3x2>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix3x2dv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat3x3>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix3dv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat3x4>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix3x4dv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat4x2>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix4x2dv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat4x3>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix4x3dv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
+    );
+}
+
+void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat4x4>& values,
+                               Transpose transpose) const
+{
+    glProgramUniformMatrix4dv(
+        _id,
+        location,
+        values.size(),
+        transpose ? GL_TRUE : GL_FALSE,
+        value_ptr(values[0])
     );
 }
 
