@@ -30,6 +30,18 @@ using namespace openspace;
 
 namespace {
 
+const Asset* findAsset(const std::string& assetName) {
+    const AssetManager& manager = global::openSpaceEngine->assetManager();
+    std::vector<const Asset*> allAssets = manager.allAssets();
+    const std::filesystem::path path = manager.resolveAssetPath(assetName);
+    auto it = std::find_if(
+        allAssets.begin(),
+        allAssets.end(),
+        [&path](const Asset* a) { return a->path() == path; }
+    );
+    return it != allAssets.end() ? *it : nullptr;
+}
+
 /**
  * Adds an asset to the current scene. The parameter passed into this function is the path
  * to the file that should be loaded.
@@ -73,13 +85,7 @@ namespace {
  * tested.
  */
 [[codegen::luawrap]] bool isLoaded(std::string assetName) {
-    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
-    for (const Asset* a : as) {
-        if (a->path() == assetName) {
-            return true;
-        }
-    }
-    return false;
+    return findAsset(assetName) != nullptr;
 }
 
 /**
@@ -109,13 +115,8 @@ namespace {
  * 'asset.require()'.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> parents(std::string assetName) {
-    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
-    for (const Asset* a : as) {
-        if (a->path() == assetName) {
-            return a->initializedParents();
-        }
-    }
-    return std::vector<std::filesystem::path>();
+    const Asset* asset = findAsset(assetName);
+    return asset ? asset->initializedParents() : std::vector<std::filesystem::path>();
 }
 
 } // namespace

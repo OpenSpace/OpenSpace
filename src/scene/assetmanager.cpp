@@ -145,6 +145,7 @@ AssetManager::AssetManager(lua::LuaState* state, std::filesystem::path assetRoot
     , _luaState(state)
 {
     precondition(state, "Lua state must not be nullptr");
+    _userAssetRootDirectory = absPath("${USER_ASSETS}");
 
     // Create _assets table
     lua_newtable(*_luaState);
@@ -1089,6 +1090,10 @@ void AssetManager::setCurrentAsset(Asset* asset) {
     }
 }
 
+std::filesystem::path AssetManager::resolveAssetPath(const std::string& assetPath) const {
+    return generateAssetPath(_assetRootDirectory, assetPath);
+}
+
 std::filesystem::path AssetManager::generateAssetPath(
                                                const std::filesystem::path& baseDirectory,
                                                        const std::string& assetPath) const
@@ -1206,7 +1211,7 @@ void AssetManager::rescanAssetPaths() {
     };
 
     std::vector<std::filesystem::path> newShipped = scanAssets(_assetRootDirectory);
-    std::vector<std::filesystem::path> newUser = scanAssets(absPath("${USER_ASSETS}"));
+    std::vector<std::filesystem::path> newUser = scanAssets(_userAssetRootDirectory);
 
     const bool shippedChanged = newShipped != _shippedAssetPaths;
     const bool userChanged = newUser != _userAssetPaths;
@@ -1228,7 +1233,7 @@ AssetManager::classifyAssetPath(const std::filesystem::path& path) const
     if (isSameRoot(path, _assetRootDirectory)) {
         return AssetPathLocation::Shipped;
     }
-    if (isSameRoot(path, absPath("${USER_ASSETS}"))) {
+    if (isSameRoot(path, _userAssetRootDirectory)) {
         return AssetPathLocation::User;
     }
     return AssetPathLocation::Other;
@@ -1261,6 +1266,20 @@ AssetManager::assetStates() const
     return _assetStates;
 }
 
+std::string AssetManager::tokenizePath(const std::filesystem::path& path) const {
+    const AssetPathLocation location = classifyAssetPath(path);
+    if (location == AssetPathLocation::Shipped) {
+        const std::filesystem::path relative =
+            std::filesystem::relative(path, _assetRootDirectory);
+        return std::format("{}/{}", "${ASSETS}", relative.generic_string());
+    }
+    if (location == AssetPathLocation::User) {
+        const std::filesystem::path relative =
+            std::filesystem::relative(path, _userAssetRootDirectory);
+        return std::format("{}/{}", "${USER_ASSETS}", relative.generic_string());
+    }
+    return path.generic_string();
+}
 
 LuaLibrary AssetManager::luaLibrary() {
     return {

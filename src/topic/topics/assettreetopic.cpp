@@ -156,9 +156,10 @@ Schema AssetTreeTopic::Schema() {
 void AssetTreeTopic::sendPathList(std::string_view category,
                                           const std::vector<std::filesystem::path>& paths)
 {
+    AssetManager& m = global::openSpaceEngine->assetManager();
     nlohmann::json result = nlohmann::json::array();
     for (const std::filesystem::path& p : paths) {
-        result.push_back(p.generic_string());
+        result.push_back(m.tokenizePath(p));
     }
 
     nlohmann::json payload;
@@ -178,7 +179,7 @@ void AssetTreeTopic::sendFullSnapshot() {
 
     nlohmann::json states = nlohmann::json::object();
     for (const auto& [path, state] : m.assetStates()) {
-        states[path] = stateToString(state);
+        states[m.tokenizePath(path)] = stateToString(state);
     }
 
     nlohmann::json payload;
@@ -207,7 +208,7 @@ void AssetTreeTopic::handleChange(const AssetManager::AssetTreeChange& change) {
         case MessageType::AssetState: {
             nlohmann::json payload;
             payload["type"] = "state";
-            payload["path"] = change.statePath;
+            payload["path"] = m.tokenizePath(change.statePath);
             payload["state"] = stateToString(change.state);
             sendData(payload);
             break;
