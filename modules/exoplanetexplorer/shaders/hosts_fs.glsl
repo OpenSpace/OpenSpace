@@ -46,6 +46,7 @@ uniform float darkenFactor;
 uniform bool shouldBlur;
 
 const float M_PI = 3.141592657;
+const float MaskTolerance = 1e-6;
 
 Fragment getFragment() {
   Fragment frag;
@@ -53,6 +54,12 @@ Fragment getFragment() {
   frag.depth = in_data.depthClipSpace;
 
   vec4 color = in_data.color;
+
+  // Keep selection icons and the original boundary test outside this fast rejection.
+  float radiusSquared = dot(in_data.texCoords, in_data.texCoords);
+  if (!onTop && radiusSquared > 1.0 + MaskTolerance) {
+    discard;
+  }
 
   float radius = length(in_data.texCoords);
   float x = in_data.texCoords.x;
@@ -70,14 +77,11 @@ Fragment getFragment() {
     discard;
   }
 
-  // Gaussian/star-like alpha fade from center to edge of the point sprite
+  // Determine visibility before calculating the more expensive RGB glow
+  float gaussianFade = 1.0;
   if (shouldBlur) {
     const float sigma = 0.45;
-    float gaussianFade = exp(-(radius * radius) / (2.0 * sigma * sigma));
-    float coreGlow = exp(-(radius * radius) / (2.0 * (sigma * 0.28) * (sigma * 0.28)));
-
-    color.rgb *= gaussianFade;         // smooth outer fade
-    color.rgb += vec3(0.2) * coreGlow; // brighter center point
+    gaussianFade = exp(-(radius * radius) / (2.0 * sigma * sigma));
     color.a *= gaussianFade;
   }
 
@@ -88,7 +92,7 @@ Fragment getFragment() {
     discard;
   }
 
-  // Render glyph index if we are at that rendering step
+  // Render glyph index instead of color if we are at that rendering step
   if (isRenderIndexStep) {
     float index = float(in_data.glyphIndex) / float(maxIndex);
     color = vec4(vec3(index), 1.0);
@@ -96,6 +100,16 @@ Fragment getFragment() {
     frag.disableLDR2HDR = true;
   }
   else {
+    // Gaussian/star-like alpha fade from center to edge of the point sprite.
+    if (shouldBlur) {
+      const float sigma = 0.45;
+      float coreGlow = exp(
+        -(radius * radius) / (2.0 * (sigma * 0.28) * (sigma * 0.28))
+      );
+      color.rgb *= gaussianFade;
+      color.rgb += vec3(0.2) * coreGlow; // brighter center point
+    }
+
     bool isCurrentHoveredGlyph = in_data.glyphIndex == currentIndex;
 
     // Ring border

@@ -34,12 +34,11 @@ in Data {
   flat int nColors;
   flat vec4 colors[MaxColors];
   vec2 texCoords; // [-1, 1]
-  float sizeFactor; // The factor used for the radius of the ring
+  flat float ringWidth;
 } in_data;
 
 uniform float opacity;
 uniform bool onTop;
-uniform bool useFixedRingWidth;
 
 uniform int maxIndex;
 uniform int currentIndex;
@@ -48,45 +47,41 @@ uniform bool isHighlightMode = false;
 uniform float darkenFactor;
 
 const float M_PI = 3.141592657;
+const float MaskTolerance = 1e-6;
 
 Fragment getFragment() {
   Fragment frag;
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
   frag.depth = in_data.depthClipSpace;
 
-  float radius = length(in_data.texCoords);
+  float radiusSquared = dot(in_data.texCoords, in_data.texCoords);
   float x = in_data.texCoords.x;
   float y = in_data.texCoords.y;
 
-  float component = in_data.component;
-
   // Render selection icon
-  if (onTop && radius > 1.0 && (abs(x - y) < 0.2 || abs(-1.0 * x - y) < 0.2)) {
-    frag.color = vec4(1.0);
-    return frag;
-  }
-
-  if (onTop || radius > 1.0) {
+  if (onTop) {
+    float radius = length(in_data.texCoords);
+    if (radius > 1.0 && (abs(x - y) < 0.2 || abs(-1.0 * x - y) < 0.2)) {
+      frag.color = vec4(1.0);
+      return frag;
+    }
     discard;
   }
 
-  // Same width
-  float width = 0.95 * 1.0 / component; // Make it a little smaller than full width
+  float minRadius = 1.0 - in_data.ringWidth;
 
-  if (!useFixedRingWidth) {
-//    // Same area: Compute width from radius relationship instead
-//    float underRoot = 1.0 - 1.0 / component;
-//    // Prevent problems with potentially taking square of negative value
-//    if (underRoot < 0.0) {
-//      underRoot = 0.0;
-//    }
-//    width = 1.0 - sqrt(underRoot); // r_n minus r_(n-1) divided by r_n
-
-    // Ish 90% width of previous ring
-    width = pow(0.87, component) / in_data.sizeFactor;
+  // Reject empty regions before square roots. Keep the original tests near edges
+  // so floating-point rounding does not change the visible or pickable boundary.
+  if (radiusSquared > 1.0 + MaskTolerance ||
+      (minRadius > 0.0 && radiusSquared < minRadius * minRadius - MaskTolerance))
+  {
+    discard;
   }
 
-  float minRadius = 1.0 - width;
+  float radius = length(in_data.texCoords);
+  if (radius > 1.0) {
+    discard;
+  }
 
   float coord = (radius - minRadius) / (1.0 - minRadius);
   if (coord < 0.0 || coord > 1.0) {

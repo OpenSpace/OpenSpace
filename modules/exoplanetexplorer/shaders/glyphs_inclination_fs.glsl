@@ -45,13 +45,14 @@ uniform bool isHighlightMode = false;
 uniform float darkenFactor;
 
 const float M_PI = 3.141592657;
+const float MaskTolerance = 1e-6;
 
 Fragment getFragment() {
   Fragment frag;
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
   frag.depth = in_data.depthClipSpace;
 
-  float radius = length(in_data.texCoords);
+  float radiusSquared = dot(in_data.texCoords, in_data.texCoords);
   float x = in_data.texCoords.x;
   float y = in_data.texCoords.y;
 
@@ -61,12 +62,12 @@ Fragment getFragment() {
   bool isCurrentHoveredGlyph = in_data.glyphIndex == currentIndex;
 
   // Render selection icon
-  if (onTop && radius > 1.0 && (abs(x - y) < 0.2 || abs(-1.0 * x - y) < 0.2)) {
-    frag.color = vec4(1.0);
-    return frag;
-  }
-
-  if (onTop || radius > 1.0) {
+  if (onTop) {
+    float radius = length(in_data.texCoords);
+    if (radius > 1.0 && (abs(x - y) < 0.2 || abs(-1.0 * x - y) < 0.2)) {
+      frag.color = vec4(1.0);
+      return frag;
+    }
     discard;
   }
 
@@ -76,6 +77,18 @@ Fragment getFragment() {
   }
   float width = ringWidth * 1.0 / component;
   float minRadius = 1.0 - width;
+
+  // Use the current hover/picking width, and retain the original tests near edges.
+  if (radiusSquared > 1.0 + MaskTolerance ||
+      (minRadius > 0.0 && radiusSquared < minRadius * minRadius - MaskTolerance))
+  {
+    discard;
+  }
+
+  float radius = length(in_data.texCoords);
+  if (radius > 1.0) {
+    discard;
+  }
 
   float coord = (radius - minRadius) / (1.0 - minRadius);
   if (coord < 0.0 || coord > 1.0) {

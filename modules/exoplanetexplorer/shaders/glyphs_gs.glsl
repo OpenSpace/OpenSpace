@@ -47,7 +47,7 @@ out Data {
   flat int nColors;
   flat vec4 colors[MaxColors];
   vec2 texCoords;
-  float sizeFactor; // The factor used for the radius of the ring
+  flat float ringWidth;
 } out_data;
 
 uniform dmat4 modelMatrix;
@@ -117,26 +117,22 @@ void main() {
   // Apply component scaling lastly, to get comparable sizes
   float comp = in_data[0].component;
 
-  out_data.sizeFactor = comp;
+  float sizeFactor = comp;
+  float ringWidth = 0.95 * 1.0 / comp;
   if (!useFixedRingWidth) {
-    // Same area:
-//    sizeFactor = sqrt(2.0 * comp);
-
-    // Ish 90% width of previous ring
-    double sizeFactor = 1.0;
+    float componentPower = pow(0.87, comp);
+    double ringSpacing = double(sqrt(componentPower));
+    double accumulatedSizeFactor = 1.0;
     for (int i = 1; i < int(comp); i++) {
-      // This computation is not completely logical.
-      // But it makes the result look ok. based on
-      // trying to make each ring about 90% as wide
-      // as the previous. The sqrt spaces them out quite nicely
-      sizeFactor += double(sqrt(pow(0.87, comp)));
+      accumulatedSizeFactor += ringSpacing;
     }
-    out_data.sizeFactor = float(sizeFactor);
+    sizeFactor = float(accumulatedSizeFactor);
+    ringWidth = componentPower / sizeFactor;
   }
 
-  vec4 scaledRightClip = out_data.sizeFactor *
+  vec4 scaledRightClip = sizeFactor *
     vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));
-  vec4 scaledUpClip = out_data.sizeFactor *
+  vec4 scaledUpClip = sizeFactor *
     vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
 
   dvec4 dposClip = cameraViewProjectionMatrix * dpos;
@@ -145,21 +141,25 @@ void main() {
 
   // Lower left
   out_data.texCoords = Corners[0];
+  out_data.ringWidth = ringWidth;
   gl_Position = z_normalization(lowerLeft);
   EmitVertex();
 
   // Lower right
   out_data.texCoords = Corners[1];
+  out_data.ringWidth = ringWidth;
   gl_Position = z_normalization(vec4(dposClip + scaledRightClip - scaledUpClip));
   EmitVertex();
 
   // Upper left
   out_data.texCoords = Corners[2];
+  out_data.ringWidth = ringWidth;
   gl_Position = z_normalization(vec4(dposClip + scaledUpClip - scaledRightClip));
   EmitVertex();
 
   // Upper right
   out_data.texCoords = Corners[3];
+  out_data.ringWidth = ringWidth;
   gl_Position = z_normalization(vec4(dposClip + scaledUpClip + scaledRightClip));
   EmitVertex();
 
