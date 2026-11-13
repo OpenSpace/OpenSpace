@@ -285,7 +285,9 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     // Parse the file line by line to compose system information
     std::string row;
+    size_t dataRowIndex = 0;
     while (openspace::getline(inputDataFile, row)) {
+        dataRowIndex++;
         // Fast pre-filter by hostname before expensive parsing
         if (hostName.has_value() && hostColumnIndex >= 0) {
             std::istringstream ss(row);
@@ -298,13 +300,24 @@ std::vector<std::string> hostStarsWithSufficientData() {
             }
         }
 
-        PlanetData planetData = ExoplanetsDataPreparationTask::parseDataRow(
-            row,
-            columnNames,
-            "",
-            module->teffToBvConversionFilePath(),
-            module->stellarInclinationColumn()
-        );
+        PlanetData planetData;
+        try {
+            planetData = ExoplanetsDataPreparationTask::parseDataRow(
+                row,
+                columnNames,
+                "",
+                module->teffToBvConversionFilePath(),
+                module->stellarInclinationColumn()
+            );
+        }
+        catch (const RuntimeError& error) {
+            throw lua::LuaError(std::format(
+                "Failed to load exoplanet CSV '{}', data row {}: {}",
+                csvFile,
+                dataRowIndex,
+                error.message
+            ));
+        }
 
         if (!hasSufficientData(planetData.dataEntry)) {
             LWARNING(std::format(

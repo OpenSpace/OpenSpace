@@ -33,6 +33,7 @@
 #include <openspace/glm.h>
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/misc/stringhelper.h>
 #include <openspace/util/coordinateconversion.h>
 #include <charconv>
@@ -298,7 +299,7 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
     float distanceInParsec = std::numeric_limits<float>::quiet_NaN();
 
     std::istringstream lineStream(row);
-    int columnIndex = 0;
+    size_t columnIndex = 0;
 
     ExoplanetDataEntry p;
     std::string component;
@@ -307,8 +308,38 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
 
     std::string data;
     while (openspace::getline(lineStream, data, ',')) {
+        if (columnIndex >= columnNames.size()) {
+            throw RuntimeError(
+                std::format(
+                    "Exoplanet CSV row contains field {} but the header has only {} "
+                    "columns. Array values and quoted fields containing commas are "
+                    "not supported by this loader. Remove those columns or export "
+                    "scalar values without embedded commas. Extra field: '{}'. Row: {}",
+                    columnIndex + 1,
+                    columnNames.size(),
+                    data,
+                    row
+                ),
+                "ExoplanetsDataPreparationTask"
+            );
+        }
         const std::string& column = columnNames[columnIndex];
         columnIndex++;
+
+        const size_t valueStart = data.find_first_not_of(" \t\r\"");
+        if (valueStart != std::string::npos && data[valueStart] == '[') {
+            throw RuntimeError(
+                std::format(
+                    "Exoplanet CSV column {} ('{}') contains an unsupported array "
+                    "value. Commas inside arrays are treated as column separators. "
+                    "Remove this column or export scalar values. Row: {}",
+                    columnIndex,
+                    column,
+                    row
+                ),
+                "ExoplanetsDataPreparationTask"
+            );
+        }
 
         // Stellar inclination does not exist in the exoplanet archive by default, so we
         // check if a custom column is specified. If it is not, it will later be computed
