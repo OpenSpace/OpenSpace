@@ -25,46 +25,40 @@
 #ifndef __OPENSPACE_MODULE_MOLECULE___CACHE___H__
 #define __OPENSPACE_MODULE_MOLECULE___CACHE___H__
 
-#include <md_types.h>
+#include <core/md_vec_math.h>
+#include <md_system.h>
+#include <md_unitcell.h>
 #include <filesystem>
 #include <span>
-#include <string_view>
-
-struct md_molecule_t;
-struct md_trajectory_i;
-struct md_trajectory_frame_header_t;
-struct md_frame_cache_lock_t;
-
-// @NOTE(Robin) If you want to go full blown cplusplus bananas mode, you can use smart
-// pointers (shared external + weak internal) to keep some type of reference counting
-// going and free resources when they are not held by any external pointers anymore. I'm
-// not going to care about that right now.
-
-struct FrameData {
-    ~FrameData();
-
-    const md_trajectory_frame_header_t* header;
-    std::span<float> x;
-    std::span<float> y;
-    std::span<float> z;
-    std::span<const md_secondary_structure_t> ss;
-    md_frame_cache_lock_t* lock = nullptr;
-};
+#include <vector>
 
 namespace molecule {
 
-const md_molecule_t* loadMolecule(std::filesystem::path file,
-    bool isCoarseGrained = false);
-const md_trajectory_i* loadTrajectory(std::filesystem::path file,
-    const md_molecule_t* mol = nullptr, bool deperiodizeOnLoad = false);
+struct Molecule {
+    md_system_t system = {};
+    md_system_state_t state = {};
+};
 
-// This will kick of work into worker threads and thus not stall the calling thread
-void prefetchFrames(const md_trajectory_i* traj, std::span<int64_t> frames);
+struct Trajectory;
 
-// FrameCoords also holds an optional lock for the frame if it is a cached trajectory.
-// This is released upon destruction of the object. So don't attempt to store and
-// access its x,y,z data after the object has been destroyed
-FrameData frameData(const md_trajectory_i* traj, int64_t frame);
+struct FrameData {
+    md_unitcell_t unitcell = {};
+    std::span<const vec3_t> xyz;
+    std::span<const md_secondary_structure_t> ss;
+};
+
+const Molecule* loadMolecule(std::filesystem::path file, bool isCoarseGrained = false);
+
+const Trajectory* loadTrajectory(std::filesystem::path file,
+    const Molecule* mol = nullptr, bool deperiodizeOnLoad = false);
+
+int64_t trajectoryNumFrames(const Trajectory* traj);
+int64_t trajectoryNumAtoms(const Trajectory* traj);
+const md_system_t* trajectorySystem(const Trajectory* traj);
+
+void prefetchFrames(const Trajectory* traj, std::span<const int64_t> frames);
+
+FrameData frameData(const Trajectory* traj, int64_t frame);
 
 } // namespace molecule
 
