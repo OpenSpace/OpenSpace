@@ -32,6 +32,7 @@
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/stringhelper.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
@@ -853,14 +854,56 @@ void SystemViewer::renderVisualsTabContent(const std::string& host,
         if (!rotationAxis) {
             ImGui::BeginDisabled();
         }
-        bool enabled = rotationAxis ? rotationAxis->isEnabled() : false;
-        if (ImGui::Checkbox("Show star rotation axis", &enabled)) {
-            setRenderableEnabled(rotationAxisId, enabled);
+        bool rotationAxisEnabled = rotationAxis ? rotationAxis->isEnabled() : false;
+        if (ImGui::Checkbox("Show star rotation axis", &rotationAxisEnabled)) {
+            setRenderableEnabled(rotationAxisId, rotationAxisEnabled);
         }
 
         if (!rotationAxis) {
             ImGui::SetItemTooltip("This star does not have data for the rotation axis");
             ImGui::EndDisabled();
+        }
+
+        {
+            // Axis scale
+            const SceneGraphNode* axisNode = sceneGraphNode(rotationAxisId);
+            const SceneGraphNode* starNode = sceneGraphNode(hostIdentifier);
+
+            const DoubleProperty* axisScale = axisNode ?
+                dynamic_cast<const DoubleProperty*>(axisNode->property("Scale.Scale")) :
+                nullptr;
+
+            const DoubleProperty* starRadius = starNode ?
+                dynamic_cast<const DoubleProperty*>(
+                    starNode->property("InteractionSphere")
+                ) :
+                nullptr;
+
+            const bool hasScale = axisScale && starRadius && starRadius->value() > 0.0;
+            const bool canScaleAxis = rotationAxis && rotationAxisEnabled && hasScale;
+
+            if (!canScaleAxis) {
+                ImGui::BeginDisabled();
+            }
+
+            float axisScaleFactor = 1.f;
+            if (hasScale) {
+                axisScaleFactor = static_cast<float>(
+                    axisScale->value() / (3.0 * starRadius->value())
+                );
+            }
+
+            ImGui::SetNextItemWidth(100.f);
+            if (ImGui::SliderFloat("Axis scale", &axisScaleFactor, 1.f, 10.f, "%.1f")) {
+                global::scriptEngine->queueScript(std::format(
+                    "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {});",
+                    rotationAxisId, 3.0 * starRadius->value() * axisScaleFactor
+                ));
+            }
+
+            if (!canScaleAxis) {
+                ImGui::EndDisabled();
+            }
         }
 
         if (!planetIndices.empty()) {
