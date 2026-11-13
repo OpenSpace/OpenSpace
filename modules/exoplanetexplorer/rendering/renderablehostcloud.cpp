@@ -254,17 +254,15 @@ void RenderableHostCloud::initializeSelectionCallbacks() {
 
     global::callback::keyboard->emplace_back(
         [&](Key key, KeyModifier, KeyAction action, bool) -> bool {
-            if (!_enabled) {
-                return false;
-            }
-
             bool isCtrl = key == Key::LeftControl;
             if (isCtrl && action == KeyAction::Press) {
                 _isInSelectionMode = true;
+                _pendingHoveredIndex = -1;
             }
             else if (isCtrl && action == KeyAction::Release) {
                 _isInSelectionMode = false;
                 _currentlyHoveredIndex = -1;
+                _pendingHoveredIndex = -1;
             }
 
             // Extra check for left shift, used for extra highlighting
@@ -283,40 +281,17 @@ void RenderableHostCloud::initializeSelectionCallbacks() {
 
     global::callback::mousePosition->emplace_back(
         [&](double x, double y, bool) {
-            if (!_enabled || !_isInSelectionMode) {
-                return; // do nothing
-            }
-
-            // Convert mouse position to pixel position
-            glm::dvec2 lastViewportSize = glm::dvec2(_lastViewPortSize);
-            double normalizedX = x / lastViewportSize.x;
-            double normalizedY = (lastViewportSize.y - y) / lastViewportSize.y;
-
-            if (_glyphIdTexture) {
-                glm::uvec3 textureDim = _glyphIdTexture->dimensions();
-                glm::uvec2 pos = glm::uvec2(
-                    normalizedX * static_cast<double>(textureDim.x),
-                    normalizedY * static_cast<double>(textureDim.y)
-                );
-
-                _glyphIdTexture->downloadTexture();
-                // TODO: make sure pos is within texture
-                if (pos.x < textureDim.x && pos.y < textureDim.y) {
-                    glm::vec4 pixelValue = _glyphIdTexture->texelAsFloat({ pos, 0 });
-                    _currentlyHoveredIndex =
-                        static_cast<int>(std::round(pixelValue.r * _maxIndex)) - 1;
-                }
-                _glyphIdTexture->clearDownloadedTexture();
-            }
+            _mousePosition = glm::dvec2(x, y);
         }
     );
 
     global::callback::preSync->emplace_back([this]() {
-        if (!_enabled) {
-            return;
-        }
-        // Update flag that needs syncing
-        _shouldHighlightHovered = _isInSelectionMode && _isLeftShiftHeld;
+        // Publish the previous draw's pick before syncing highlights to other nodes.
+        _currentlyHoveredIndex =
+            _enabled && _isInSelectionMode && !_glyphData.empty() ?
+            _pendingHoveredIndex : -1;
+        _pendingHoveredIndex = -1;
+        _shouldHighlightHovered = _enabled && _isInSelectionMode && _isLeftShiftHeld;
     });
 }
 
@@ -392,9 +367,8 @@ void RenderableHostCloud::render(const RenderData& data, RendererTasks&) {
     // 1st rendering pass: render the glyphs normally, with correct color
     renderMainPass();
 
-    // 2nd rendering pass: Render IDs to a separate texture every frame as well
-    // To use for picking. We only need to do this on the master node
-    if (global::windowDelegate->isMaster()) {
+    // 2nd rendering pass: Render IDs for picking on the master during selection
+    if (global::windowDelegate->isMaster() && _isInSelectionMode) {
         renderIndexTexture(*_program);
     }
 
@@ -484,6 +458,11 @@ void RenderableHostCloud::renderIndexTexture(opengl::ProgramObject& program) {
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
+    _pendingHoveredIndex = -1;
+    if (viewport[2] <= 0 || viewport[3] <= 0) {
+        return;
+    }
+
     program.setUniform("isRenderIndexStep", true);
     GLint defaultFBO = opengl::FramebufferObject::getActiveObject();
 
@@ -491,7 +470,7 @@ void RenderableHostCloud::renderIndexTexture(opengl::ProgramObject& program) {
     GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, drawBuffers);
 
-    glm::uvec3 textureDim = _glyphIdTexture->dimensions();
+    const glm::uvec3 textureDim = _glyphIdTexture->dimensions();
 
     // Potentially update texture size
     if (static_cast<unsigned int>(viewport[2]) != textureDim.x ||
@@ -507,8 +486,46 @@ void RenderableHostCloud::renderIndexTexture(opengl::ProgramObject& program) {
     glDisablei(GL_BLEND, 0);
 
     // Draw again! And specify viewport size
-    glViewport(viewport[0], viewport[1], textureDim.x, textureDim.y);
+    glViewport(0, 0, viewport[2], viewport[3]);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_glyphData.size()));
+
+    // Only sample a known, finite cursor position inside the current viewport.
+    // Check bounds before converting to pixels, and avoid decoding an empty ID range.
+    if (_mousePosition && std::isfinite(_mousePosition->x) &&
+        std::isfinite(_mousePosition->y) &&
+        _mousePosition->x >= 0.0 && _mousePosition->x < viewport[2] &&
+        _mousePosition->y >= 0.0 && _mousePosition->y < viewport[3] && _maxIndex > 0)
+    {
+        const GLint pixelX = static_cast<GLint>(_mousePosition->x);
+        // Mouse coordinates start at the top; texture coordinates start at the bottom.
+        const GLint pixelY = viewport[3] - 1 - static_cast<GLint>(_mousePosition->y);
+        // Read one float into CPU memory regardless of inherited pixel-pack state,
+        // then restore that state for subsequent rendering and readbacks.
+        constexpr std::array PackParameters = {
+            GL_PACK_ALIGNMENT, GL_PACK_ROW_LENGTH, GL_PACK_IMAGE_HEIGHT,
+            GL_PACK_SKIP_PIXELS, GL_PACK_SKIP_ROWS, GL_PACK_SKIP_IMAGES,
+            GL_PACK_SWAP_BYTES
+        };
+        std::array<GLint, PackParameters.size()> packValues;
+        GLint packBuffer = 0;
+        glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &packBuffer);
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        for (size_t i = 0; i < PackParameters.size(); i++) {
+            glGetIntegerv(PackParameters[i], &packValues[i]);
+            glPixelStorei(PackParameters[i], i == 0 ? 1 : 0);
+        }
+        float pixelValue = 0.f;
+        glGetTextureSubImage(
+            *_glyphIdTexture, 0, pixelX, pixelY, 0, 1, 1, 1,
+            GL_RED, GL_FLOAT, sizeof(pixelValue), &pixelValue
+        );
+        for (size_t i = 0; i < PackParameters.size(); i++) {
+            glPixelStorei(PackParameters[i], packValues[i]);
+        }
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, static_cast<GLuint>(packBuffer));
+        _pendingHoveredIndex =
+            static_cast<int>(std::round(pixelValue * _maxIndex)) - 1;
+    }
 
     // Reset index rendering, viewport size and frame buffer
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
@@ -516,8 +533,6 @@ void RenderableHostCloud::renderIndexTexture(opengl::ProgramObject& program) {
     program.setUniform("isRenderIndexStep", false);
     glEnablei(GL_BLEND, 0);
 
-    // Save viewport size
-    _lastViewPortSize = glm::ivec2(viewport[2], viewport[3]);
 }
 
 void RenderableHostCloud::renderSelectedPoints(opengl::ProgramObject& program) {
@@ -529,6 +544,8 @@ void RenderableHostCloud::renderSelectedPoints(opengl::ProgramObject& program) {
     program.setUniform(_uniformCache.opacity, 1.f);
     program.setUniform(_uniformCache.onTop, true);
 
+    glDepthMask(true);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBindVertexArray(_selectedVao);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(nSelected));
 }

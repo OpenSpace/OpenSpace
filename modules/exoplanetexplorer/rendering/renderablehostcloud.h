@@ -35,6 +35,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/syncdata.h>
 #include <array>
+#include <optional>
 
 namespace openspace { struct Documentation; }
 
@@ -122,6 +123,8 @@ private:
 
     bool _isInSelectionMode = false;
     bool _isLeftShiftHeld = false;
+    std::optional<glm::dvec2> _mousePosition;
+    int _pendingHoveredIndex = -1;
 
     GLuint _pointsVao = 0;
     GLuint _pointsVbo = 0;
@@ -134,7 +137,6 @@ private:
     std::unique_ptr<opengl::Texture> _depthTexture;
     GLuint _glyphIdFbo = 0;
 
-    glm::ivec2 _lastViewPortSize;
     double _lastDataTimeStamp = 0.0;
 };
 
