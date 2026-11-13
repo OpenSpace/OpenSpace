@@ -345,6 +345,69 @@ bool ColorMappingView::render(bool* open) {
 
     bool cmapWasChanged = false;
 
+    auto renderVariablePieChart = [&]() {
+        const int nVariables = static_cast<int>(_variableSelection.size());
+        if (nVariables <= 1) {
+            return;
+        }
+
+        ImGui::SameLine();
+        std::vector<float> data(nVariables, 1.f / static_cast<float>(nVariables));
+
+        // ImPlot draws pie slices in the opposite winding order of the label
+        // sequence we want, so build labels directly in reverse order
+        std::vector<std::string> labelStrings;
+        labelStrings.reserve(nVariables);
+        for (int i = nVariables - 1; i >= 0; --i) {
+            std::string label = _dataViewer.columnName(_variableSelection[i].column);
+            label = label.substr(0, 10); // limit length
+            labelStrings.push_back(std::format(" {}. {}", i + 1, label));
+        }
+
+        std::vector<const char*> pieLabels;
+        pieLabels.reserve(nVariables);
+        for (const std::string& s : labelStrings) {
+            pieLabels.push_back(s.c_str());
+        }
+
+        // The label is included in the specified plot size. Reserve extra vertical
+        // space for labels above the pie.
+        const float extraTopSpace = nVariables *
+            (ImGui::GetFrameHeight() - ImGui::GetStyle().FramePadding.y);
+
+        ImPlot::PushStyleVar(ImPlotStyleVar_LegendPadding, ImVec2(0.f, 3.f));
+
+        const ImVec2 size = ImVec2(120.f, 120.f + extraTopSpace);
+        constexpr ImPlotFlags flags = ImPlotFlags_Equal | ImPlotFlags_NoMouseText;
+        if (ImPlot::BeginPlot("##Pie", size, flags)) {
+            ImPlot::SetupAxes(
+                nullptr, nullptr,
+                ImPlotAxisFlags_NoDecorations,
+                ImPlotAxisFlags_NoDecorations
+            );
+
+            ImPlot::SetupLegend(
+                ImPlotLocation_North,
+                ImPlotLegendFlags_Outside | ImPlotLegendFlags_Reverse
+            );
+
+            ImPlot::SetupAxesLimits(0.0, 1.0, 0.0, 1.0, ImGuiCond_Always);
+
+            constexpr double pieCenterY = 0.5;
+            constexpr double pieRadius = 0.4;
+
+            ImPlot::PlotPieChart(
+                pieLabels.data(), data.data(), nVariables,
+                0.5, pieCenterY, pieRadius,
+                "", 90.0
+            );
+
+            ImPlot::EndPlot();
+        }
+
+        ImPlot::PopStyleVar();
+    };
+
     // Start variable group
     ImGui::BeginGroup();
 
@@ -392,6 +455,10 @@ bool ColorMappingView::render(bool* open) {
             }
             ImGui::PopID();
 
+            if (index == 0) {
+                renderVariablePieChart();
+            }
+
             // Some spacing before the next group
             ImGui::Spacing();
         }
@@ -420,70 +487,6 @@ bool ColorMappingView::render(bool* open) {
         }
 
         ImGui::EndGroup(); // all variable groups
-    }
-
-    // Circle plot to show which parameters map to which part of a glyph
-    const int nVariables = static_cast<int>(_variableSelection.size());
-    if (nVariables > 1) {
-        ImGui::SameLine();
-        if (nVariables > 0) {
-            std::vector<float> data(nVariables, 1.f / static_cast<float>(nVariables));
-
-            // ImPlot draws pie slices in the opposite winding order of the label
-            // sequence we want, so build labels directly in reverse order
-            std::vector<std::string> labelStrings;
-            labelStrings.reserve(nVariables);
-            for (int i = nVariables - 1; i >= 0; --i) {
-                std::string label = _dataViewer.columnName(
-                    _variableSelection[i].column
-                );
-                label = label.substr(0, 10); // limit length
-                labelStrings.push_back(std::format(" {}. {}", i + 1, label));
-            }
-
-            std::vector<const char*> pieLabels;
-            pieLabels.reserve(nVariables);
-            for (const std::string& s : labelStrings) {
-                pieLabels.push_back(s.c_str());
-            }
-
-            // The label is included in the speicfied plot size
-            // Reserve extra vertical space for labels above the pie
-            const float extraTopSpace = nVariables *
-                (ImGui::GetFrameHeight() - ImGui::GetStyle().FramePadding.y);
-
-            ImPlot::PushStyleVar(ImPlotStyleVar_LegendPadding, ImVec2(0.f, 3.f));
-
-            const ImVec2 size = ImVec2(120.f, 120.f + extraTopSpace);
-            constexpr ImPlotFlags flags = ImPlotFlags_Equal | ImPlotFlags_NoMouseText;
-            if (ImPlot::BeginPlot("##Pie", size, flags)) {
-                ImPlot::SetupAxes(
-                    nullptr, nullptr,
-                    ImPlotAxisFlags_NoDecorations,
-                    ImPlotAxisFlags_NoDecorations
-                );
-
-                ImPlot::SetupLegend(
-                    ImPlotLocation_North,
-                    ImPlotLegendFlags_Outside | ImPlotLegendFlags_Reverse
-                );
-
-                ImPlot::SetupAxesLimits(0.0, 1.0, 0.0, 1.0, ImGuiCond_Always);
-
-                constexpr double pieCenterY = 0.5;
-                constexpr double pieRadius = 0.4;
-
-                ImPlot::PlotPieChart(
-                    pieLabels.data(), data.data(), nVariables,
-                    0.5, pieCenterY, pieRadius,
-                    "", 90.0
-                );
-
-                ImPlot::EndPlot();
-            }
-
-            ImPlot::PopStyleVar();
-        }
     }
 
     ImGui::EndGroup(); // variables + plot group
