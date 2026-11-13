@@ -145,7 +145,7 @@ private:
 
     std::unique_ptr<opengl::ProgramObject> _programTM;
     UniformCache(renderedTexture, screenSize, filterSize, sigma, pixelWeightThreshold,
-        projection) _uniformCacheTM;
+        projection, viewScaling) _uniformCacheTM;
     std::unique_ptr<opengl::Texture> _fboTexture;
 
     OctreeManager _octreeManager;

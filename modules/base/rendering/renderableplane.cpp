@@ -480,6 +480,8 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
         glm::mat4(modelViewProjectionTransform)
     );
     _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
+    // Moves the near plane out for huge planes, see z_normalization
+    _shader->setUniform(_uniformCache.nearClipW, nearClipW(modelViewTransform));
 
     opengl::TextureUnit unit;
     bindTexture(unit);

@@ -363,18 +363,20 @@ Fragment getFragment() {
   for (int idx = 0; idx < nDepthMaps; idx++) {
     vec2 ssz = 1.0 / textureSize(lightDepthMaps[idx], 0);
     vec4 pls = in_data.positionsLightspace[idx];
-    vec3 coords = 0.5 + 0.5 * pls.xyz / pls.w;
+    // The depth maps use reversed depth, so z is already in [0, 1] with 1 at the near
+    // plane of the light
+    vec3 coords = vec3(0.5 + 0.5 * pls.xy / pls.w, pls.z / pls.w);
     for (int x = -Size; x <= Size; x++) {
       for (int y = -Size; y <= Size; y++) {
         float depth = texture(lightDepthMaps[idx], coords.xy + vec2(x, y) * ssz).r;
         // inside of the far plane of the frustum
-        if (coords.z < 1.0) {
-          accum -= float(depth < coords.z - Bias) / Norm;
+        if (coords.z > 0.0) {
+          accum -= float(depth > coords.z + Bias) / Norm;
         }
         else {
           // outside of the far plane of the frustum, typically happens with long shadows
           // cast on the surface of a globe
-          accum -= float(depth < 1.0) / Norm;
+          accum -= float(depth > 0.0) / Norm;
         }
       }
     }

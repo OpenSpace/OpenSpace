@@ -38,6 +38,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
+#include <array>
 #include <string_view>
 #include <md_gl.h>
 
@@ -267,6 +268,7 @@ void MoleculeModule::initializeShaders() {
     md_gl_shaders_init(_shaders.get(), ShaderOutputSnippet.data());
 
     postprocessing::initialize(size.x, size.y);
+    clearFramebuffer();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -330,6 +332,24 @@ void MoleculeModule::preDraw() {
     );
 
     postprocessing::resize(size.x, size.y);
+    clearFramebuffer();
+}
+
+void MoleculeModule::clearFramebuffer() const {
+    // New textures have undefined contents. The post-processing only skips pixels with
+    // depth 1.0, so without this clear it would shade garbage over the whole screen,
+    // for example the screen flashed in black when adding a molecule for the first time
+    constexpr std::array<GLenum, 2> Buffers = {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1
+    };
+    constexpr std::array<GLfloat, 4> Black = { 0.f, 0.f, 0.f, 1.f };
+    constexpr GLfloat FarDepth = 1.f;
+
+    glNamedFramebufferDrawBuffers(_fbo, 2, Buffers.data());
+    glClearNamedFramebufferfv(_fbo, GL_COLOR, 0, Black.data());
+    glClearNamedFramebufferfv(_fbo, GL_COLOR, 1, Black.data());
+    glClearNamedFramebufferfv(_fbo, GL_DEPTH, 0, &FarDepth);
 }
 
 void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
@@ -392,9 +412,7 @@ void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, bufs);
 
-    glClearColor(0.f, 0.f, 0.f, 1.f);
-    glClearDepth(1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    clearFramebuffer();
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
     glDrawBuffers(lastDrawBufferCount, lastDrawBuffers.data());

@@ -33,6 +33,17 @@
 namespace openspace::opengl {
 
 /**
+ * The depth buffer convention used in the OpenGL context. Reversed keeps the relative
+ * depth precision uniform over all distances in a floating point depth buffer, see
+ * https://developer.nvidia.com/content/depth-precision-visualized. Standard is used by
+ * libraries (sgct, the GUI, molecule) and by the shadow maps.
+ */
+enum class DepthConvention {
+    Standard,
+    Reversed
+};
+
+/**
  * This class works as cache for the OpenGL most common properties defining the current
  * GL's state. Be aware that not all OpenGL states are available for caching at this
  * moment. New states caching should be added as needed.
@@ -55,6 +66,8 @@ public:
     void resetCachedStates() const;
     void resetBlendState() const;
     void resetDepthState() const;
+    void setDepthConvention(DepthConvention convention);
+    DepthConvention depthConvention() const;
     void resetLineState() const;
     void resetPolygonAndClippingState() const;
     void resetViewportState() const;
@@ -99,11 +112,10 @@ private:
     GLboolean _clampColorEnabled;
 
     // Depth
+    DepthConvention _depthConvention = DepthConvention::Standard;
     struct {
         GLboolean testEnabled = false;
         GLboolean maskEnabled = true;
-        GLfloat clearValue = 1.f;
-        GLenum function;
     } _depth;
 
     // Blending
@@ -123,6 +135,25 @@ private:
         GLboolean smoothEnabled = false;
         GLfloat width = 1.f;
     } _line;
+};
+
+/**
+ * Class that temporarily switches the depth buffer convention in the OpenGL context.
+ * The previous convention is restored when the object goes out of scope.
+ * The depth test and depth mask are not modified.
+ */
+class DepthConventionScope {
+public:
+    explicit DepthConventionScope(DepthConvention convention);
+    ~DepthConventionScope();
+
+    DepthConventionScope(const DepthConventionScope&) = delete;
+    DepthConventionScope(DepthConventionScope&&) = delete;
+    DepthConventionScope& operator=(const DepthConventionScope&) = delete;
+    DepthConventionScope& operator=(DepthConventionScope&&) = delete;
+
+private:
+    DepthConvention _previous;
 };
 
 } // namespace openspace::opengl

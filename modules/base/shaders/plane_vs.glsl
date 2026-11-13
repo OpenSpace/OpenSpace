@@ -38,12 +38,13 @@ out Data {
 
 uniform mat4 modelViewProjection;
 uniform mat4 modelViewTransform;
+uniform float nearClipW;
 
 
 void main() {
   vec4 position = vec4(in_position.xyz * pow(10.0, in_position.w), 1.0);
 
-  gl_Position = z_normalization(modelViewProjection * position);
+  gl_Position = z_normalization(modelViewProjection * position, nearClipW);
 
   out_data.gPosition = modelViewTransform * position;
   out_data.gNormal = vec3(0.0);

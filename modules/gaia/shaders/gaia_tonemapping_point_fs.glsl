@@ -34,6 +34,7 @@ uniform vec2 screenSize;
 uniform int filterSize;
 uniform float sigma;
 uniform float pixelWeightThreshold;
+uniform float viewScaling;
 
 const float M_PI = 3.141592653589793238462;
 const float DefaultDepth = 3.08567758e19; // 1000 Pc
@@ -163,7 +164,8 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = vec4(intensity, 1.0);
-  frag.depth = DefaultDepth;
+  // The depth is a view space distance, so it has to be scaled like the rest of the scene
+  frag.depth = DefaultDepth * viewScaling;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.blend = BlendModeNormal;
 

@@ -158,7 +158,11 @@ namespace {
     Env::Env(Dictionary dictionary, std::string versionDirective)
         : _dictionary(std::move(dictionary))
         , _versionDirective(std::move(versionDirective))
-    {}
+    {
+        if (!_dictionary.hasKey("depthDataBinding")) {
+            _dictionary.setValue("depthDataBinding", DepthDataBinding);
+        }
+    }
 
     void Env::processFile(const std::filesystem::path& path) {
         ZoneScoped;

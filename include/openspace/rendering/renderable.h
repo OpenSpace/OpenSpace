@@ -206,6 +206,17 @@ protected:
             std::nullopt, std::nullopt, std::nullopt
         }) const;
 
+    /**
+     * Computes a near plane distance that is relative to the distance to the geometry.
+     * Geometry with huge coordinates has too much float rounding in its vertices for
+     * triangles that cross the camera plane to be clipped correctly at the global near
+     * plane. The result is meant to be passed to `z_normalization(vec4, float)`.
+     *
+     * \param modelViewTransform The model view transform of the geometry
+     * \return The distance to the near plane, in view space
+     */
+    static float nearClipW(const glm::dmat4& modelViewTransform);
+
 private:
     void registerUpdateRenderBinFromOpacity();
 

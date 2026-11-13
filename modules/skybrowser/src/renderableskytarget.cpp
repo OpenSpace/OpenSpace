@@ -267,6 +267,8 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     );
 
     _shader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    // Moves the near plane out for the huge plane, see z_normalization
+    _shader->setUniform("nearClipW", nearClipW(modelViewTransform));
     _shader->setUniform("multiplyColor", _multiplyColor);
 
     const bool additiveBlending = _blendMode == static_cast<int>(BlendMode::Additive);

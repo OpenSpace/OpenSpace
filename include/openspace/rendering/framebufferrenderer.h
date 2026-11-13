@@ -220,6 +220,9 @@ private:
     GLint _defaultFBO = 0;
     GLuint _vao = 0;
     GLuint _vbo = 0;
+    /// Uniform buffer with the view-space near distance of the reversed depth, shared by
+    /// all shaders. See shaders/depth.glsl
+    GLuint _depthDataBuffer = 0;
     GLuint _exitColorTexture = 0;
     GLuint _exitDepthTexture = 0;
     GLuint _exitFramebuffer = 0;

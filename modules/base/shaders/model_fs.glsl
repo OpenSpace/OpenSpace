@@ -168,8 +168,12 @@ Fragment getFragment() {
 
     if (has_shadow_depth_map) {
       const float Bias = 0.0005;
-      vec3 coords =
-        0.5 + 0.5 * in_data.lightspacePosition.xyz / in_data.lightspacePosition.w;
+      // The shadow map uses reversed depth, so z is already in [0, 1] with 1 at the near
+      // plane of the light
+      vec3 coords = vec3(
+        0.5 + 0.5 * in_data.lightspacePosition.xy / in_data.lightspacePosition.w,
+        in_data.lightspacePosition.z / in_data.lightspacePosition.w
+      );
 
       // Any fragment that is behind the stored depth is in shadow, multisampling for
       // smoother shadows
@@ -182,7 +186,7 @@ Fragment getFragment() {
             shadow_depth_map,
             coords.xy + vec2(x * stepSize.x, y * stepSize.y)
           ).r;
-          if (coords.z < 1.0 && depth > coords.z - Bias) {
+          if (coords.z > 0.0 && depth < coords.z + Bias) {
             accum++;
           }
         }

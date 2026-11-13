@@ -29,6 +29,27 @@
 
 namespace openspace::opengl {
 
+namespace {
+    void applyDepthConvention(DepthConvention convention) {
+        switch (convention) {
+            case DepthConvention::Standard:
+                glDepthFunc(GL_LESS);
+                glClearDepth(1.0);
+                glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
+                break;
+            case DepthConvention::Reversed:
+                // Reversed-Z depth. Basically the inverse of standard.
+                glDepthFunc(GL_GREATER);
+                glClearDepth(0.0);
+                // GL_ZERO_TO_ONE is used for the depth range in reversed-Z depth.
+                glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+                break;
+            default:
+                throw MissingCaseException();
+        }
+    }
+} // namespace
+
 OpenGLStateCache* OpenGLStateCache::_singleton = nullptr;
 GLint OpenGLStateCache::_maxAttachBuffers = 8;
 
@@ -62,10 +83,8 @@ void OpenGLStateCache::loadCurrentGLState() {
     glGetBooleanv(GL_CLAMP_READ_COLOR, &_clampColorEnabled);
 
     // Depth
-    glGetFloatv(GL_DEPTH_CLEAR_VALUE, &_depth.clearValue);
     _depth.testEnabled = glIsEnabled(GL_DEPTH_TEST);
     glGetBooleanv(GL_DEPTH_WRITEMASK, &_depth.maskEnabled);
-    glGetIntegerv(GL_DEPTH_FUNC, &_depth.function);
 
     // Blending
     _blending.enabled = glIsEnabled(GL_BLEND);
@@ -150,8 +169,26 @@ void OpenGLStateCache::resetDepthState() const {
         glDepthMask(GL_FALSE);
     }
 
-    glClearDepth(_depth.clearValue);
-    glDepthFunc(_depth.function);
+    applyDepthConvention(_depthConvention);
+}
+
+void OpenGLStateCache::setDepthConvention(DepthConvention convention) {
+    _depthConvention = convention;
+    applyDepthConvention(_depthConvention);
+}
+
+DepthConvention OpenGLStateCache::depthConvention() const {
+    return _depthConvention;
+}
+
+DepthConventionScope::DepthConventionScope(DepthConvention convention)
+    : _previous(OpenGLStateCache::instance()->depthConvention())
+{
+    OpenGLStateCache::instance()->setDepthConvention(convention);
+}
+
+DepthConventionScope::~DepthConventionScope() {
+    OpenGLStateCache::instance()->setDepthConvention(_previous);
 }
 
 void OpenGLStateCache::resetLineState() const {
