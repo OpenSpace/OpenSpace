@@ -312,9 +312,10 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
             throw RuntimeError(
                 std::format(
                     "Exoplanet CSV row contains field {} but the header has only {} "
-                    "columns. Array values and quoted fields containing commas are "
-                    "not supported by this loader. Remove those columns or export "
-                    "scalar values without embedded commas. Extra field: '{}'. Row: {}",
+                    "columns. Check for extra separators or embedded commas in field "
+                    "values; this loader splits fields at every comma. The first "
+                    "overflow field is not necessarily the column containing the "
+                    "embedded comma. Extra field: '{}'. Row: {}",
                     columnIndex + 1,
                     columnNames.size(),
                     data,
@@ -325,21 +326,6 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
         }
         const std::string& column = columnNames[columnIndex];
         columnIndex++;
-
-        const size_t valueStart = data.find_first_not_of(" \t\r\"");
-        if (valueStart != std::string::npos && data[valueStart] == '[') {
-            throw RuntimeError(
-                std::format(
-                    "Exoplanet CSV column {} ('{}') contains an unsupported array "
-                    "value. Commas inside arrays are treated as column separators. "
-                    "Remove this column or export scalar values. Row: {}",
-                    columnIndex,
-                    column,
-                    row
-                ),
-                "ExoplanetsDataPreparationTask"
-            );
-        }
 
         // Stellar inclination does not exist in the exoplanet archive by default, so we
         // check if a custom column is specified. If it is not, it will later be computed
