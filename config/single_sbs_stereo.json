@@ -1,12 +1,6 @@
 {
   "version": 2,
-  "masteraddress": "localhost",
-  "externalcontrolport": 20500,
-  "settings": {
-    "display": {
-      "swapinterval": 0
-    }
-  },
+  "serveraddress": "localhost",
   "nodes": [
     {
       "address": "localhost",

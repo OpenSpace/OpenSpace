@@ -941,7 +941,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.isMaster = []() {
         ZoneScoped;
 
-        return Engine::instance().isMaster();
+        return Engine::instance().isServer();
     };
     sgctDelegate.modelMatrix = []() {
         ZoneScoped;

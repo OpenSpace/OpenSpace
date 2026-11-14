@@ -1,9 +1,9 @@
 {
   "version": 2,
-  "masteraddress": "127.0.0.1",
+  "serveraddress": "localhost",
   "nodes": [
     {
-      "address": "127.0.0.1",
+      "address": "localhost",
       "port": 20401,
       "windows": [
         {

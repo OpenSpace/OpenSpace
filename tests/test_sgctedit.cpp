@@ -199,7 +199,7 @@ R"({
     );
 }
 
-TEST_CASE("SgctEdit: missingMasterAddress", "[sgctedit]") {
+TEST_CASE("SgctEdit: missingServerAddress", "[sgctedit]") {
     constexpr std::string_view Source =
 R"({
   "generator": {
@@ -281,7 +281,7 @@ R"({
             "true}]}]}],\"scene\":{\"orientation\":{\"w\":0.0,\"x\":0.0,\"y\":0.0,"
             "\"z\":0.0}},\"users\":[{\"eyeseparation\":0.06499999761581421,\"pos\":"
             "{\"x\":0.0,\"y\":0.0,\"z\":4.0}}],\"version\":2} - required property "
-            "'masteraddress' not found in object\n"
+            "'serveraddress' not found in object\n"
         )
     );
 }

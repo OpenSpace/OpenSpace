@@ -1,20 +1,16 @@
 {
   "version": 2,
-  "masteraddress": "localhost",
+  "serveraddress": "localhost",
   "scene": {
     "offset": { "x": 0.0, "y": 0.0, "z": 0.0 },
     "orientation": { "yaw": 0.0, "pitch": -90.0, "roll": 0.0 },
     "scale": 1.0
   },
-  "settings": {
-    "display": {
-      "swapinterval": 1
-    }
-  },
   "nodes": [
     {
       "address": "localhost",
       "port": 20401,
+      "vsync": true,
       "windows": [
         {
           "name": "OpenSpace",
