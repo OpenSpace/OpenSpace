@@ -330,7 +330,7 @@ void GeneralCapabilitiesComponent::detectOS() {
         );
     }
 
-    _operatingSystem = OperatingSystem::Unknown;
+    _operatingSystem = OperatingSystem::Linux;
     _operatingSystemExtra = std::format(
         "{} {} {} {}", name.sysname, name.release, name.version, name.machine
     );
