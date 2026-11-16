@@ -102,18 +102,20 @@ std::filesystem::path HorizonsDialog::file() const {
 }
 
 void HorizonsDialog::openSaveAs() {
-    const QString filename = QFileDialog::getSaveFileName(
+    QFileDialog dialog = QFileDialog(
         this,
         "Choose a file path where the generated Horizons file will be saved",
         QString::fromStdString(absPath("${USER}").string()),
-        "Horizons data file (*.hrz)",
-        nullptr
-#ifdef __linux__
-        // Linux in Qt6 crashes when trying to access the native dialog here
-        , QFileDialog::DontUseNativeDialog
-#endif // __linux__
+        "Horizons data file (*.hrz)"
     );
-    _fileEdit->setText(filename);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    // Without this, the non-native dialog does not add the extension of the filter
+    dialog.setDefaultSuffix("hrz");
+
+    if (dialog.exec() != QDialog::Accepted || dialog.selectedFiles().isEmpty()) {
+        return;
+    }
+    _fileEdit->setText(dialog.selectedFiles().first());
 }
 
 void HorizonsDialog::typeOnChange(int index) {

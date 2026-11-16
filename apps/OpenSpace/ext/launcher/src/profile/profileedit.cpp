@@ -464,22 +464,21 @@ void ProfileEdit::approved() {
     // actual desired filename
     std::filesystem::create_directories(std::filesystem::path(fullPath).parent_path());
 
-    const QString path = QFileDialog::getSaveFileName(
+    QFileDialog dialog = QFileDialog(
         this,
         "Save Profile",
         QString::fromStdString(fullPath.string()),
-        "Profile (*.profile)",
-        nullptr
-#ifdef __linux__
-        // Linux in Qt6 crashes when trying to access the native dialog here
-        , QFileDialog::DontUseNativeDialog
-#endif // __linux__
+        "Profile (*.profile)"
     );
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    // Without this, the non-native dialog does not add the extension of the filter
+    dialog.setDefaultSuffix("profile");
 
     // The user canceled the saving
-    if (path.isEmpty()) {
+    if (dialog.exec() != QDialog::Accepted || dialog.selectedFiles().isEmpty()) {
         return;
     }
+    const QString path = dialog.selectedFiles().first();
 
     //
     // If we got this far then we have a new or existing file that the user wanted to save
