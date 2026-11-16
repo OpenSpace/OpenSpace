@@ -591,6 +591,13 @@ void RenderableExoplanetGlyphCloud::setupRingsSpecificUniforms(
 {
     program.setUniform(_uniformCacheRings.useFixedRingWidth, _useFixedRingWidth);
 
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    program.setUniform(
+        _uniformCacheRings.viewportSize,
+        glm::vec2(viewport[2], viewport[3])
+    );
+
     glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
     glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
     glm::dvec3 orthoRight = glm::normalize(

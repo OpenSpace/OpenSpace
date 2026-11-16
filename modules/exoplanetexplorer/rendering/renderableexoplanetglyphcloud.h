@@ -99,7 +99,7 @@ private:
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, opacity, scale, maxIndex,
         currentIndex, cameraPosition, isHighlightMode, darkenFactor,
         // Rings specific uniforms
-        renderOption, up, right, cameraLookUp,  useFixedRingWidth
+        renderOption, up, right, cameraLookUp, useFixedRingWidth, viewportSize
     ) _uniformCacheRings;
 
     std::unique_ptr<opengl::ProgramObject> _programInclination = nullptr;

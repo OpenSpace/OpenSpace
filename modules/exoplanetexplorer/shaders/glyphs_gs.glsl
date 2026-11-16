@@ -27,9 +27,16 @@
 #include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 4) out;
+layout(triangle_strip, max_vertices = 26) out;
 
 const int MaxColors = 4;
+
+// Rings rendering
+const int RingSegments = 12;
+const float Pi = 3.141592657;
+const float MinAnnularRadiusPixels = 160.0;
+const float MinAnnularWidthPixels = 2.0;
+const float GeometryTolerance = 1e-5;
 
 in Data {
   flat float component;
@@ -55,6 +62,8 @@ uniform dmat4 cameraViewProjectionMatrix;
 uniform float scale;
 uniform bool onTop;
 uniform bool useFixedRingWidth;
+uniform bool isRenderIndexStep = false;
+uniform vec2 viewportSize;
 
 uniform int renderOption;
 
@@ -76,12 +85,19 @@ const vec2 Corners[4] = vec2[4](
   vec2(1.0, 1.0)
 );
 
-void main() {
+void emitGlyphVertex(vec2 texCoords, vec4 positionClip, float ringWidth, float depth) {
   out_data.component = in_data[0].component;
   out_data.colors = in_data[0].colors;
   out_data.nColors = in_data[0].nColors;
   out_data.glyphIndex = in_data[0].glyphIndex;
+  out_data.depthClipSpace = depth;
+  out_data.texCoords = texCoords;
+  out_data.ringWidth = ringWidth;
+  gl_Position = z_normalization(positionClip);
+  EmitVertex();
+}
 
+void main() {
   dvec4 dpos = in_data[0].dposWorld;
 
   vec3 scaledRight = vec3(1.0, 0.0, 0.0);
@@ -137,31 +153,85 @@ void main() {
 
   dvec4 dposClip = cameraViewProjectionMatrix * dpos;
   vec4 lowerLeft = vec4(dposClip - scaledRightClip - scaledUpClip);
-  out_data.depthClipSpace = lowerLeft.w * (1 - int(onTop));
+  float depth = lowerLeft.w * (1 - int(onTop));
+
+  float innerRadius = 1.0 - ringWidth;
+  float outerRadius = 1.0 / cos(Pi / float(RingSegments)) + GeometryTolerance;
+  double minimumW = dposClip.w - double(outerRadius) *
+    (abs(double(scaledRightClip.w)) + abs(double(scaledUpClip.w)));
+
+  vec2 centerNdc = vec2(dposClip.xy / dposClip.w);
+  vec2 rightPixels = 0.5 * viewportSize *
+    (scaledRightClip.xy - centerNdc * scaledRightClip.w) / float(dposClip.w);
+  vec2 upPixels = 0.5 * viewportSize *
+    (scaledUpClip.xy - centerNdc * scaledUpClip.w) / float(dposClip.w);
+  float projectedRadius = min(length(rightPixels), length(upPixels));
+
+  // Use annular geometry for large, narrow rings safely in front of the camera.
+  // Keep the full quad for picking, selection overlays, and smaller or wider rings.
+  // The annular rendering prevent rasterizing uneccessary fragments, like the empty
+  // space inside the ring
+  if (!onTop && !isRenderIndexStep && innerRadius > 0.5 && minimumW > 0.0 &&
+      projectedRadius >= MinAnnularRadiusPixels &&
+      projectedRadius * ringWidth >= MinAnnularWidthPixels)
+  {
+    innerRadius = max(0.0, innerRadius - GeometryTolerance);
+
+    for (int segment = 0; segment <= RingSegments; segment++) {
+      // Repeat the first vertex to close the strip without overlapping triangles
+      float angle = 2.0 * Pi * float(segment % RingSegments) / float(RingSegments);
+      vec2 direction = vec2(cos(angle), sin(angle));
+      vec2 innerCoords = innerRadius * direction;
+      vec2 outerCoords = outerRadius * direction;
+
+      emitGlyphVertex(
+        innerCoords,
+        vec4(dposClip + double(innerCoords.x) * dvec4(scaledRightClip) +
+          double(innerCoords.y) * dvec4(scaledUpClip)),
+        ringWidth,
+        depth
+      );
+
+      emitGlyphVertex(
+        outerCoords,
+        vec4(dposClip + double(outerCoords.x) * dvec4(scaledRightClip) +
+          double(outerCoords.y) * dvec4(scaledUpClip)),
+        ringWidth,
+        depth
+      );
+    }
+    EndPrimitive();
+    return;
+  }
+
+  // Quad rendering
 
   // Lower left
-  out_data.texCoords = Corners[0];
-  out_data.ringWidth = ringWidth;
-  gl_Position = z_normalization(lowerLeft);
-  EmitVertex();
+  emitGlyphVertex(Corners[0], lowerLeft, ringWidth, depth);
 
   // Lower right
-  out_data.texCoords = Corners[1];
-  out_data.ringWidth = ringWidth;
-  gl_Position = z_normalization(vec4(dposClip + scaledRightClip - scaledUpClip));
-  EmitVertex();
+  emitGlyphVertex(
+    Corners[1],
+    vec4(dposClip + scaledRightClip - scaledUpClip),
+    ringWidth,
+    depth
+  );
 
   // Upper left
-  out_data.texCoords = Corners[2];
-  out_data.ringWidth = ringWidth;
-  gl_Position = z_normalization(vec4(dposClip + scaledUpClip - scaledRightClip));
-  EmitVertex();
+  emitGlyphVertex(
+    Corners[2],
+    vec4(dposClip + scaledUpClip - scaledRightClip),
+    ringWidth,
+    depth
+  );
 
   // Upper right
-  out_data.texCoords = Corners[3];
-  out_data.ringWidth = ringWidth;
-  gl_Position = z_normalization(vec4(dposClip + scaledUpClip + scaledRightClip));
-  EmitVertex();
+  emitGlyphVertex(
+    Corners[3],
+    vec4(dposClip + scaledUpClip + scaledRightClip),
+    ringWidth,
+    depth
+  );
 
   EndPrimitive();
 }
