@@ -23,7 +23,8 @@ properties([
 
 // The image testing nodes, keyed by the platform name that is used in the stage names
 def nodes = [
-  nvidia: 'windows-image-testing-nvidia'
+  nvidia: 'windows-image-testing-nvidia',
+  amd: 'windows-image-testing-amd'
 ]
 
 // The parameters end up on the command line, so only values that cannot contain shell
