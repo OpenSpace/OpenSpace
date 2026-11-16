@@ -240,6 +240,9 @@ namespace {
 
             // If entire texture is transparent, do not add it
             if (!isOpaque) {
+                LINFO(std::format(
+                    "Texture '{}' is fully transparent and is not used", path.C_Str()
+                ));
                 continue;
             }
 
@@ -261,7 +264,8 @@ namespace {
                   std::vector<modelgeometry::ModelGeometry::TextureEntry>& textureStorage,
                                                     std::filesystem::path& modelDirectory,
                                                                 bool forceRenderInvisible,
-                                                              bool notifyInvisibleDropped)
+                                                              bool notifyInvisibleDropped,
+                                                               bool& hasTextureLoadErrors)
     {
         std::vector<ModelMesh::Vertex> vertexArray;
         std::vector<unsigned int> indexArray;
@@ -388,6 +392,7 @@ namespace {
             );
 
             if (!success) {
+                hasTextureLoadErrors = true;
                 return ModelMesh(
                     std::move(vertexArray),
                     std::move(indexArray),
@@ -446,6 +451,7 @@ namespace {
             );
 
             if (!success) {
+                hasTextureLoadErrors = true;
                 return ModelMesh(
                     std::move(vertexArray),
                     std::move(indexArray),
@@ -495,6 +501,7 @@ namespace {
             );
 
             if (!success) {
+                hasTextureLoadErrors = true;
                 return ModelMesh(
                     std::move(vertexArray),
                     std::move(indexArray),
@@ -538,7 +545,8 @@ namespace {
                   std::vector<modelgeometry::ModelGeometry::TextureEntry>& textureStorage,
                                                                 bool forceRenderInvisible,
                                                               bool notifyInvisibleDropped,
-                                                    std::filesystem::path& modelDirectory)
+                                                    std::filesystem::path& modelDirectory,
+                                                               bool& hasTextureLoadErrors)
     {
         // Convert transform matrix of the node
         // Assimp stores matrixes in row major and glm stores matrixes in column major
@@ -584,7 +592,8 @@ namespace {
                 textureStorage,
                 modelDirectory,
                 forceRenderInvisible,
-                notifyInvisibleDropped
+                notifyInvisibleDropped,
+                hasTextureLoadErrors
             );
 
             // Don't render invisible meshes
@@ -707,7 +716,8 @@ namespace {
                 textureStorage,
                 forceRenderInvisible,
                 notifyInvisibleDropped,
-                modelDirectory
+                modelDirectory,
+                hasTextureLoadErrors
             );
         }
     }
@@ -808,6 +818,7 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
     std::vector<ModelNode> nodeArray;
     std::vector<modelgeometry::ModelGeometry::TextureEntry> textureStorage;
     textureStorage.reserve(scene->mNumTextures);
+    bool hasTextureLoadErrors = false;
     processNode(
         *(scene->mRootNode),
         *scene,
@@ -817,15 +828,18 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
         textureStorage,
         forceRenderInvisible,
         notifyInvisibleDropped,
-        modelDirectory
+        modelDirectory,
+        hasTextureLoadErrors
     );
 
     // Return the ModelGeometry from the meshArray
-    return std::make_unique<modelgeometry::ModelGeometry>(
+    auto model = std::make_unique<modelgeometry::ModelGeometry>(
         std::move(nodeArray),
         std::move(textureStorage),
         std::move(modelAnimation)
     );
+    model->setHasTextureLoadErrors(hasTextureLoadErrors);
+    return model;
 }
 
 void ModelReaderAssimp::printModelTree(const std::filesystem::path& filepath) const {

@@ -44,7 +44,7 @@ namespace {
     using namespace openspace;
 
     constexpr std::string_view _loggerCat = "ModelGeometry";
-    constexpr int8_t CurrentCacheVersion = 12;
+    constexpr int8_t CurrentCacheVersion = 13;
     constexpr int FormatStringSize = 4;
     constexpr int8_t ShouldSkipMarker = -1;
     constexpr int8_t NoSkipMarker = 1;
@@ -1127,6 +1127,14 @@ bool ModelGeometry::isTransparent() const {
         );
     }
     return _isTransparent;
+}
+
+void ModelGeometry::setHasTextureLoadErrors(bool hasTextureLoadErrors) {
+    _hasTextureLoadErrors = hasTextureLoadErrors;
+}
+
+bool ModelGeometry::hasTextureLoadErrors() const {
+    return _hasTextureLoadErrors;
 }
 
 std::vector<io::ModelNode>& ModelGeometry::nodes() {

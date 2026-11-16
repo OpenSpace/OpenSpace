@@ -121,6 +121,16 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReader::loadModel(
     std::unique_ptr<modelgeometry::ModelGeometry> model =
         reader->loadModel(filename, forceRenderInvisible, notifyInvisibleDropped);
 
+    if (model->hasTextureLoadErrors()) {
+        // The cache would not contain the textures that failed to load, and since the
+        // cache is preferred on the next run, the model would never get its textures
+        LWARNING(std::format(
+            "Not saving cache for ModelGeometry file '{}' as some textures failed to "
+            "load", filename
+        ));
+        return model;
+    }
+
     LINFO("Saving cache");
     try {
         model->saveToCacheFile(cachedFile);

@@ -91,6 +91,14 @@ public:
     void recalculateTransparency();
     bool isTransparent() const;
 
+    /**
+     * Marks whether at least one texture of this model could not be loaded and was
+     * replaced with a debug texture. A model with texture load errors should not be
+     * written to a cache file, as the cache would not contain the missing textures.
+     */
+    void setHasTextureLoadErrors(bool hasTextureLoadErrors);
+    bool hasTextureLoadErrors() const;
+
     std::vector<io::ModelNode>& nodes();
     const std::vector<io::ModelNode>& nodes() const;
     std::vector<TextureEntry>& textureStorage();
@@ -105,6 +113,7 @@ protected:
     bool _hasCalcTransparency = false;
     bool _isTransparent = false;
     bool _replaceWithCustomTransforms = false;
+    bool _hasTextureLoadErrors = false;
 };
 
 } // namespace openspace::modelgeometry
