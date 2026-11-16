@@ -995,8 +995,11 @@ void RenderablePointCloud::loadDataset() {
         _colorSettings.colorMapping->initialize(_dataset, _useCaching);
     }
 
-    if (_hasLabels && _createLabelsFromDataset) {
-        _labels->loadLabelsFromDataset(_dataset, _unit);
+    if (_hasLabels) {
+        if (_createLabelsFromDataset) {
+            _labels->loadLabelsFromDataset(_dataset, _unit);
+        }
+
         _labels->initialize();
     }
 
