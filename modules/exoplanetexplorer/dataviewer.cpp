@@ -804,6 +804,10 @@ bool DataViewer::colormapChanged() const {
     return _colormapWasChanged;
 }
 
+size_t DataViewer::dataVersion() const {
+    return _dataVersion;
+}
+
 ColorMappingView* DataViewer::colorMappingView() {
     return _colorMappingView.get();
 }
@@ -1506,6 +1510,7 @@ void DataViewer::render() {
         updateGlyphRenderData();
         _colormapWasChanged = false;
         _filterChanged = false;
+        _dataVersion++;
     }
 
     if (_selectionChanged) {

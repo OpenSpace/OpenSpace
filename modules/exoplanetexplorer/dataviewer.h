@@ -96,6 +96,9 @@ public:
     bool filterChanged() const;
     bool colormapChanged() const;
 
+    /// Incremented whenever the filtering or the color mapping has changed
+    size_t dataVersion() const;
+
     ColorMappingView* colorMappingView();
     SystemViewer* systemViewer();
     TableView* tableView();
@@ -234,6 +237,7 @@ private:
     bool _colormapWasChanged = true;
     bool _filterChanged = false;
     bool _selectionChanged = false;
+    size_t _dataVersion = 0;
 
     bool _externalSelectionChanged = false;
     std::string _lastExternalSelectionTimeStamp;

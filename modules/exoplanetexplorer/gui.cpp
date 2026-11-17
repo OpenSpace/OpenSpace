@@ -97,6 +97,9 @@ void Gui::initializeGL() {
         ImGuiIO& io = ImGui::GetIO();
         io.DeltaTime = 1.f / 60.f;
 
+        // Needed for plots with more than 64k vertices, as we use 16-bit indices
+        io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
+
         io.Fonts->AddFontFromFileTTF(absPath(GuiFont).string().c_str(), FontSize);
         io.Fonts->AddFontFromFileTTF(
             absPath(GuiBoldFont).string().c_str(), FontSize
@@ -332,11 +335,12 @@ void Gui::endFrame() {
                     static_cast<int>(pcmd->ClipRect.z - pcmd->ClipRect.x),
                     static_cast<int>(pcmd->ClipRect.w - pcmd->ClipRect.y)
                 );
-                glDrawElements(
+                glDrawElementsBaseVertex(
                     GL_TRIANGLES,
                     static_cast<GLsizei>(pcmd->ElemCount),
                     sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
-                    indexBufferOffset
+                    indexBufferOffset,
+                    static_cast<GLint>(pcmd->VtxOffset)
                 );
             }
             indexBufferOffset += pcmd->ElemCount;

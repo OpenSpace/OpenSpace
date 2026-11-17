@@ -207,6 +207,9 @@ private:
     /// Dirty flag indicating if the 2D sky map cache needs updating
     mutable bool _skyMapCacheDirty = true;
 
+    /// The data version that the 2D sky map cache was built from
+    mutable size_t _skyMapCacheVersion = 0;
+
     bool _lassoTabActive = false;
     bool _lassoVisibilityActive = false;
     bool _showLassoGlyphs = true;

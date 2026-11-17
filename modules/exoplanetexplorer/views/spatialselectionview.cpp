@@ -962,6 +962,7 @@ void SpatialSelectionView::updateSkyMapCache() const {
     }
 
     _skyMapCacheDirty = false;
+    _skyMapCacheVersion = _dataViewer.dataVersion();
 }
 
 std::vector<size_t> SpatialSelectionView::currentSpatialSelection(
@@ -1375,9 +1376,7 @@ bool SpatialSelectionView::renderSkyMapTab() {
         initConstellationLines();
     }
 
-    if (_skyMapCacheDirty || _dataViewer.filterChanged() ||
-        _dataViewer.colormapChanged())
-    {
+    if (_skyMapCacheDirty || _skyMapCacheVersion != _dataViewer.dataVersion()) {
         updateSkyMapCache();
     }
 
