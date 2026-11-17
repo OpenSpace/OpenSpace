@@ -158,8 +158,8 @@ def run_single_test(test_path: Path, executable: Path | None, per_profile_wait: 
   start_time = time.perf_counter()
 
   if launch_process:
-    print(f"  Starting OpenSpace (Profile: {test.profile})")
     executable_path = Path(executable).resolve()
+    print(f"  Starting OpenSpace (Executable: {executable_path}  Profile: {test.profile})")
     process = subprocess.Popen(
       [
         executable_path,
