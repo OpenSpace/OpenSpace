@@ -367,18 +367,6 @@ void DataViewer::renderPendingDataMappings() {
         return;
     }
 
-    DataSettings::DataMapping& mapping = _pendingDataSettings->dataMapping;
-    const char* coordinateTypes[] = { "RA / Dec / Distance", "Galactic X / Y / Z" };
-    int coordinateType = mapping.positionType ==
-        DataSettings::DataMapping::PositionType::Equatorial ? 0 : 1;
-    if (ImGui::Combo("Position coordinates", &coordinateType, coordinateTypes,
-                     IM_ARRAYSIZE(coordinateTypes)))
-    {
-        mapping.positionType = coordinateType == 0 ?
-            DataSettings::DataMapping::PositionType::Equatorial :
-            DataSettings::DataMapping::PositionType::GalacticCartesian;
-    }
-
     auto renderColumnCombo = [this](const char* label, ColumnKey& selected) {
         const char* preview = selected.empty() ? "Select a column" : selected.c_str();
         bool changed = false;
@@ -409,6 +397,10 @@ void DataViewer::renderPendingDataMappings() {
         return changed;
     };
 
+    DataSettings::DataMapping& mapping = _pendingDataSettings->dataMapping;
+
+    ImGui::SeparatorText("Object Name");
+
     if (ImGui::Checkbox("Use row index for object name", &_pendingUseRowIndexForName)) {
         mapping.nameFromRowIndex = _pendingUseRowIndexForName;
         if (mapping.nameFromRowIndex) {
@@ -429,6 +421,19 @@ void DataViewer::renderPendingDataMappings() {
     if (!_pendingUseRowIndexForName) {
         mapping.nameFromRowIndex = false;
         renderColumnCombo("Object name", mapping.name);
+    }
+
+    ImGui::SeparatorText("Position Mapping");
+
+    const char* coordinateTypes[] = { "RA / Dec / Distance", "Galactic X / Y / Z" };
+    int coordinateType = mapping.positionType ==
+        DataSettings::DataMapping::PositionType::Equatorial ? 0 : 1;
+    if (ImGui::Combo("Position coordinates", &coordinateType, coordinateTypes,
+                     IM_ARRAYSIZE(coordinateTypes)))
+    {
+        mapping.positionType = coordinateType == 0 ?
+            DataSettings::DataMapping::PositionType::Equatorial :
+            DataSettings::DataMapping::PositionType::GalacticCartesian;
     }
 
     if (mapping.positionType == DataSettings::DataMapping::PositionType::Equatorial) {
