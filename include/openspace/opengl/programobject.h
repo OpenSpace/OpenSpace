@@ -1059,6 +1059,141 @@ public:
         Transpose transpose = Transpose::No) const;
 
     /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix2fv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::mat2x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix2x3fv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::mat2x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix2x4fv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::mat2x4>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3x2fv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::mat3x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3fv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::mat3x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3x4fv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::mat3x4>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4x2fv`.
+     *
+     * \param name The name of the uniform in the ShaderObjects
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::mat4x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4x3fv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::mat4x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4fv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::mat4x4>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
      * Locates and sets the uniform(s) \p name with the passed value \p value. Returns
      * `true` if the initial uniform could be found; `false` otherwise. Will call the
      * OpenGL function `glProgramUniformMatrix2dv`.
@@ -1191,6 +1326,141 @@ public:
      * \pre \p name must not be empty
      */
     void setUniform(const std::string& name, const glm::dmat4x4& value,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix2dv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::dmat2x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix2x3dv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::dmat2x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix2x4dv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::dmat2x4>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3x2dv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::dmat3x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3dv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::dmat3x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3x4dv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::dmat3x4>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4x2dv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::dmat4x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4x3dv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::dmat4x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Locates and sets the uniform(s) \p name with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4dv`.
+     *
+     * \param name The name of the uniform in the ShaderObject%s
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p name must not be empty
+     */
+    void setUniform(const std::string& name, const std::vector<glm::dmat4x4>& values,
         Transpose transpose = Transpose::No) const;
 
     /**
@@ -1849,6 +2119,141 @@ public:
         Transpose transpose = Transpose::No) const;
 
     /**
+     * Sets the uniform(s) located at \p location with the passed values \p values.
+     * Returns `true` if the initial uniform could be found; `false` otherwise. Will call
+     * the OpenGL function `glProgramUniformMatrix2fv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::mat2x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix2x3fv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::mat2x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix2x4fv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::mat2x4>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3x2fv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::mat3x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3fv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::mat3x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3x4fv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::mat3x4>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4x2fv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::mat4x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4x3fv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::mat4x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4fv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::mat4x4>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
      * Sets the uniform(s) located at \p location with the passed value \p value. Returns
      * `true` if the initial uniform could be found; `false` otherwise. Will call the
      * OpenGL function `glProgramUniformMatrix2dv`.
@@ -1981,6 +2386,141 @@ public:
      * \pre \p location must not be `-1`
      */
     void setUniform(GLint location, const glm::dmat4x4& value,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+    * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+    * `true` if the initial uniform could be found; `false` otherwise. Will call the
+    * OpenGL function `glProgramUniformMatrix2dv`.
+    *
+    * \param location The location of the uniform retrieved from #uniformLocation
+    * \param values The values the uniform(s) should be set to
+    * \param transpose Transpose::Yes if the matrix should be set in row major order,
+    *        Transpose::No if the matrix is in column major order
+    *
+    * \pre \p location must not be `-1`
+    */
+    void setUniform(GLint location, const std::vector<glm::dmat2x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix2x3dv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::dmat2x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix2x4dv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::dmat2x4>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3x2dv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::dmat3x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3dv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::dmat3x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix3x4dv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::dmat3x4>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4x2dv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::dmat4x2>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4x3dv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::dmat4x3>& values,
+        Transpose transpose = Transpose::No) const;
+
+    /**
+     * Sets the uniform(s) located at \p location with the passed values \p values. Returns
+     * `true` if the initial uniform could be found; `false` otherwise. Will call the
+     * OpenGL function `glProgramUniformMatrix4dv`.
+     *
+     * \param location The location of the uniform retrieved from #uniformLocation
+     * \param values The values the uniform(s) should be set to
+     * \param transpose Transpose::Yes if the matrix should be set in row major order,
+     *        Transpose::No if the matrix is in column major order
+     *
+     * \pre \p location must not be `-1`
+     */
+    void setUniform(GLint location, const std::vector<glm::dmat4x4>& values,
         Transpose transpose = Transpose::No) const;
 
     /**
