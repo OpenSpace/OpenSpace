@@ -653,8 +653,9 @@ df['st_spectype_short'] = df['st_spectype'].str[0]
 df = df.fillna('')
 
 # Remove single quotes in names, etc.. Causes problems when saving to javascript and when
-# creating strings in c++
-df.replace({'\'': ''}, regex=True, inplace=True)
+# creating strings in c++. Also remove commas (e.g. in IAC molecule names), since the
+# CSV reader in OpenSpace doesn't handle quoted fields
+df.replace({'\'': '', ',': ''}, regex=True, inplace=True)
 
 print("Writing data to file...")
 df.to_csv(dataFileName + ".csv", index=False)
