@@ -106,10 +106,12 @@
 #include <string_view>
 #include <thread>
 #include <variant>
+#include <vector>
 
 #ifdef WIN32
 #include <Windows.h>
-#include <Pdh.h>
+#include <dxgi1_4.h>
+#include <wrl/client.h>
 #include "Psapi.h"
 #endif // WIN32
 
@@ -125,9 +127,8 @@ namespace {
     constexpr std::string_view _loggerCat = "OpenSpaceEngine";
 
 #ifdef WIN32
-    // This counter is used to measure the VRAM usage of OpenSpace
-    PDH_HQUERY vramQuery;
-    PDH_HCOUNTER vramCounter;
+    // These adapters are used to measure the VRAM usage of OpenSpace
+    std::vector<Microsoft::WRL::ComPtr<IDXGIAdapter3>> vramAdapters;
 #endif // WIN32
 
     constexpr std::string_view stringify(OpenSpaceEngine::Mode m) {
@@ -287,23 +288,29 @@ OpenSpaceEngine::OpenSpaceEngine()
     fTask->registerClass<ConvertRecFormatTask>("ConvertRecFormatTask");
 
 #ifdef WIN32
-    PDH_STATUS status = PdhOpenQueryA(nullptr, 0, &vramQuery);
-    if (status != ERROR_SUCCESS) {
-        LWARNING("Error opening Performance Query for VRAM usage");
+    // We don't know which adapter the OpenGL context is running on, so we keep all of
+    // them and sum up the usage. Adapters that OpenSpace doesn't use will report 0
+    Microsoft::WRL::ComPtr<IDXGIFactory1> factory;
+    if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory)))) {
+        LWARNING("Error creating DXGI factory for VRAM usage");
+        return;
     }
 
-    const std::string queryStr = std::format(
-        "\\GPU Process Memory(pid_{}*)\\Dedicated Usage",
-        GetCurrentProcessId()
-    );
-    status = PdhAddEnglishCounterA(vramQuery, queryStr.c_str(), 0, &vramCounter);
-    if (status != ERROR_SUCCESS) {
-        LWARNING("Error add Performance Query for VRAM usage");
+    Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter;
+    for (UINT i = 0; factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND; i++) {
+        Microsoft::WRL::ComPtr<IDXGIAdapter3> adapter3;
+        if (SUCCEEDED(adapter.As(&adapter3))) {
+            vramAdapters.push_back(std::move(adapter3));
+        }
     }
 #endif // WIN32
 }
 
-OpenSpaceEngine::~OpenSpaceEngine() {}
+OpenSpaceEngine::~OpenSpaceEngine() {
+#ifdef WIN32
+    vramAdapters.clear();
+#endif // WIN32
+}
 
 void OpenSpaceEngine::initialize() {
     ZoneScoped;
@@ -1088,25 +1095,21 @@ uint64_t OpenSpaceEngine::ramInUse() const {
 
 uint64_t OpenSpaceEngine::vramInUse() const {
 #ifdef WIN32
-    PDH_STATUS status = PdhCollectQueryData(vramQuery);
-    if (status != ERROR_SUCCESS) {
-        LERROR("Error collecting VRAM query data");
-        return 0;
+    uint64_t result = 0;
+    for (const Microsoft::WRL::ComPtr<IDXGIAdapter3>& adapter : vramAdapters) {
+        DXGI_QUERY_VIDEO_MEMORY_INFO info;
+        const HRESULT res = adapter->QueryVideoMemoryInfo(
+            0,
+            DXGI_MEMORY_SEGMENT_GROUP_LOCAL,
+            &info
+        );
+        if (FAILED(res)) {
+            LERROR("Error retrieving VRAM usage");
+            continue;
+        }
+        result += info.CurrentUsage;
     }
-
-    PDH_FMT_COUNTERVALUE value;
-    status = PdhGetFormattedCounterValue(
-        vramCounter,
-        PDH_FMT_LARGE | PDH_FMT_NOSCALE,
-        nullptr,
-        &value
-    );
-    if (status != ERROR_SUCCESS) {
-        LERROR("Error formatting VRAM query data");
-        return 0;
-    }
-    LONGLONG v = value.largeValue;
-    return v;
+    return result;
 #else // ^^^^ WIN32 // !WIN32 vvvv
     LWARNING("Unsupported operating");
     return 0;

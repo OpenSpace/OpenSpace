@@ -893,8 +893,8 @@ configure_file(
 
 if (WIN32)
   # Dbghelp is used to resolve the stack trace of a crash from the context that the
-  # unhandled exception filter is handed
-  target_link_libraries(openspace-core PUBLIC "pdh" "Dbghelp")
+  # unhandled exception filter is handed. DXGI is used to query the VRAM usage
+  target_link_libraries(openspace-core PUBLIC "dxgi" "Dbghelp")
 endif ()
 
 set_openspace_compile_settings(openspace-core)
