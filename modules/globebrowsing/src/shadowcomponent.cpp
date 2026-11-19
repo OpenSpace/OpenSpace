@@ -276,7 +276,6 @@ void ShadowComponent::createShadowFBO() {
 
 void ShadowComponent::updateDepthTexture() const {
     glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
-
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
@@ -288,6 +287,7 @@ void ShadowComponent::updateDepthTexture() const {
         GL_FLOAT,
         nullptr
     );
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -309,18 +309,7 @@ void ShadowComponent::updateDepthTexture() const {
 
 void ShadowComponent::buildDDepthTexture() {
     glCreateTextures(GL_TEXTURE_2D, 1, &_dDepthTexture);
-    glBindTexture(GL_TEXTURE_2D, _dDepthTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_DEPTH_COMPONENT32F,
-        1,
-        1,
-        0,
-        GL_DEPTH_COMPONENT,
-        GL_FLOAT,
-        nullptr
-    );
+    glTextureStorage2D(_dDepthTexture, 1, GL_DEPTH_COMPONENT32F, 1, 1);
 
     glTextureParameteri(_dDepthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(_dDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

@@ -92,7 +92,6 @@ public:
      */
     enum class WrappingMode : std::underlying_type_t<GLenum> {
         Repeat = static_cast<std::underlying_type_t<GLenum>>(GL_REPEAT),
-        Clamp = static_cast<std::underlying_type_t<GLenum>>(GL_CLAMP),
         ClampToEdge = static_cast<std::underlying_type_t<GLenum>>(GL_CLAMP_TO_EDGE),
         ClampToBorder = static_cast<std::underlying_type_t<GLenum>>(GL_CLAMP_TO_BORDER),
         MirroredRepeat = static_cast<std::underlying_type_t<GLenum>>(GL_MIRRORED_REPEAT)

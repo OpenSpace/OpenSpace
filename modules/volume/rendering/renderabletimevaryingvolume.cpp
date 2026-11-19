@@ -300,7 +300,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
                 .dataType = GL_FLOAT
             },
             opengl::Texture::SamplerInit {
-                .wrapping = opengl::Texture::WrappingMode::Clamp
+                .wrapping = opengl::Texture::WrappingMode::ClampToEdge
             },
             reinterpret_cast<std::byte*>(data)
         );

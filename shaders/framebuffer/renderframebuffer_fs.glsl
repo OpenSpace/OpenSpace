@@ -43,12 +43,18 @@ void main() {
     out_color = f.color;
   }
   else {
+    // The result of `log2` is undefined for colors at or above 1 + DeltaError, so these
+    // are explicitly mapped to the largest value instead
+    vec3 logArgument = vec3(1.0 + DeltaError) - f.color.rgb;
+    bvec3 isOutOfRange = lessThanEqual(logArgument, vec3(0.0));
+    vec3 encoded = log2(max(logArgument, vec3(1e-30))) / -exposure;
     out_color = vec4(
-      log2(vec3(1.0) - (f.color.rgb - vec3(DeltaError))) / -exposure,
+      mix(encoded, vec3(MaxValueColorBuffer), isOutOfRange),
       f.color.a
     );
   }
 
+  // Guard against NaN values that the renderables themselves might produce
   out_color.x = isnan(out_color.x) ? MaxValueColorBuffer : out_color.x;
   out_color.y = isnan(out_color.y) ? MaxValueColorBuffer : out_color.y;
   out_color.z = isnan(out_color.z) ? MaxValueColorBuffer : out_color.z;

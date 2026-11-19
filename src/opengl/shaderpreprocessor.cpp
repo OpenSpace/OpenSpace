@@ -660,23 +660,9 @@ const std::filesystem::path& ShaderPreprocessor::filename() const {
 std::string ShaderPreprocessor::process() {
     int major = 0;
     int minor = 0;
-    int mask = 0;
     glGetIntegerv(GL_MAJOR_VERSION, &major);
     glGetIntegerv(GL_MINOR_VERSION, &minor);
-    glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
-
-    const ContextProfileMask cpm = ContextProfileMask(mask);
-    const bool isCore = cpm == ContextProfileMask::GL_CONTEXT_CORE_PROFILE_BIT;
-    const bool isCompatibility =
-        cpm == ContextProfileMask::GL_CONTEXT_COMPATIBILITY_PROFILE_BIT;
-
-    assert_msg(
-        isCore || isCompatibility,
-        "OpenGL context is neither core nor compatibility"
-    );
-
-    std::string_view t = isCore ? "core" : (isCompatibility ? "compatibility" : "");
-    return process(std::format("#version {}{}0 {}", major, minor, t));
+    return process(std::format("#version {}{}0 core", major, minor));
 }
 
 std::string ShaderPreprocessor::process(std::string versionDirective) {

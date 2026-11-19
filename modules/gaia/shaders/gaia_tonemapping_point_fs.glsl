@@ -67,9 +67,11 @@ Fragment getFragment() {
   float scaling = screenSize.y / defaultScreen * yFactor;
 
   // Scale filter size depending on screen pos
+  // The screen position can be negative, for which `pow` is undefined
+  vec2 screenPosNear = screenPos / near;
   vec2 filterScaleFactor = vec2(
-    pow(screenPos.x / near, 2.0) * fullAspect,
-    pow(screenPos.y / near, 2.0)
+    screenPosNear.x * screenPosNear.x * fullAspect,
+    screenPosNear.y * screenPosNear.y
   );
 
   // Use to ignore scaling.
@@ -107,17 +109,21 @@ Fragment getFragment() {
   float b = 0.0;
   float c = 0.0;
   if (!useCircleDist) {
-    float alpha = atan(screenPos.y, screenPos.x);
+    // `atan` is undefined if both arguments are 0
+    float alpha = screenPos == vec2(0.0) ? 0.0 : atan(screenPos.y, screenPos.x);
     // Apply scaling on sigma.
     float sigmaMajor = sigma * sigmaScaleFactor.y * scaling;
     float sigmaMinor = sigma * sigmaScaleFactor.x * scaling;
 
-    a = pow(cos(alpha), 2.0) / (2.0 * pow(sigmaMajor, 2.0)) +
-        pow(sin(alpha), 2.0) / (2.0 * pow(sigmaMinor, 2.0));
-    b = sin(2.0 * alpha) / (4.0 * pow(sigmaMajor, 2.0)) -
-        sin(2.0 * alpha) / (4.0 * pow(sigmaMinor, 2.0));
-    c = pow(sin(alpha), 2.0) / (2.0 * pow(sigmaMajor, 2.0)) +
-        pow(cos(alpha), 2.0) / (2.0 * pow(sigmaMinor, 2.0));
+    // The sine and cosine can be negative, for which `pow` is undefined
+    float cosAlpha2 = cos(alpha) * cos(alpha);
+    float sinAlpha2 = sin(alpha) * sin(alpha);
+    float sigmaMajor2 = sigmaMajor * sigmaMajor;
+    float sigmaMinor2 = sigmaMinor * sigmaMinor;
+
+    a = cosAlpha2 / (2.0 * sigmaMajor2) + sinAlpha2 / (2.0 * sigmaMinor2);
+    b = sin(2.0 * alpha) / (4.0 * sigmaMajor2) - sin(2.0 * alpha) / (4.0 * sigmaMinor2);
+    c = sinAlpha2 / (2.0 * sigmaMajor2) + cosAlpha2 / (2.0 * sigmaMinor2);
   }
 
   // Get a [newFilterSize x newFilterSize] filter around our pixel. UV is [0, 1]
@@ -129,8 +135,9 @@ Fragment getFragment() {
       vec2 sPoint = in_data.texCoords + (pixelSize * ivec2(x, y));
 
       // Calculate the contribution of this pixel (elliptic gaussian distribution)
+      float xAspect = float(x) * fullAspect;
       float pixelWeight = exp(
-        -(a * pow(x * fullAspect, 2.0) + 2.0 * b * x * y * fullAspect + c * pow(y, 2.0))
+        -(a * xAspect * xAspect + 2.0 * b * xAspect * float(y) + c * float(y * y))
       );
 
       // Only sample inside FBO texture and if the pixel will contribute to final color
@@ -141,10 +148,10 @@ Fragment getFragment() {
 
         // Use normal distribution function for halo/bloom effect
         if (useCircleDist) {
-          float circleDist = sqrt(pow(x / (1.0 + length(filterScaleFactor)), 2.0) +
-            pow(y / (1.0 + length(filterScaleFactor)), 2.0));
+          vec2 circlePos = vec2(x, y) / (1.0 + length(filterScaleFactor));
+          float circleDist2 = dot(circlePos, circlePos);
           intensity += sIntensity.rgb * (1.0 / (sigma * sqrt(2.0 * M_PI))) *
-            exp(-(pow(circleDist, 2.0) / (2.0 * pow(sigma, 2.0)))) / filterSize;
+            exp(-(circleDist2 / (2.0 * sigma * sigma))) / filterSize;
         }
         else {
           // Divide contribution by area of ellipse

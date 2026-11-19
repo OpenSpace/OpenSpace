@@ -46,9 +46,14 @@ uniform int numSpacecraftCameraPlanes;
 void main() {
   vec4 position = vec4(in_position.xyz, 1.0);
 
+  // Initialize all outputs, including the ones for unused camera planes, so that no
+  // undefined values are passed to the fragment shader
+  for (int i = 0; i < MaxSpacecraftObservatories; i++) {
+    out_data.texCoords[i] = vec3(0.0);
+  }
+
   // Transform the positions to the reference frame of the spacecraft to get tex coords
   for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
-    out_data.texCoords[i] = vec3(0.0);
     if (isCoronaGraph[i] || !isEnabled[i])  {
       continue;
     };

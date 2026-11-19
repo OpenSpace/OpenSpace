@@ -135,7 +135,9 @@ void main() {
     (accumulatedAlpha.r + accumulatedAlpha.g + accumulatedAlpha.b) / 3.0
   );
 
-  out_color.rgb /= out_color.a;
+  if (out_color.a > 0.0) {
+    out_color.rgb /= out_color.a;
+  }
 
   gl_FragDepth = normalizeFloat(entryDepth);
 }

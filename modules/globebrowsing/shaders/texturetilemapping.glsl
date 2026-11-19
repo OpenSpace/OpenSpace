@@ -76,9 +76,10 @@ const vec3 DefaultLevelWeights = vec3(1.0, 0.0, 0.0);
 float orenNayarDiffuse(vec3 lightDirection, vec3 viewDirection, vec3 surfaceNormal,
                        float roughness)
 {
-  // calculate intermediary values
-  float NdotL = dot(surfaceNormal, lightDirection);
-  float NdotV = dot(surfaceNormal, viewDirection);
+  // calculate intermediary values. Rounding errors can move the dot products slightly
+  // outside of [-1, 1], for which `acos` is undefined
+  float NdotL = clamp(dot(surfaceNormal, lightDirection), -1.0, 1.0);
+  float NdotV = clamp(dot(surfaceNormal, viewDirection), -1.0, 1.0);
 
   float angleVN = acos(NdotV);
   float angleLN = acos(NdotL);

@@ -36,8 +36,12 @@ vec3 cartesianToSpherical(vec3 _cartesian) {
   float phi = 0.0;
 
   if (r != 0.0) {
-    theta = acos(cartesian.z / r) / M_PI;
-    phi = (M_PI + atan(cartesian.y, cartesian.x)) / (2.0 * M_PI);
+    // Rounding errors can move the argument of `acos` outside of [-1, 1] and `atan` is
+    // undefined if both arguments are 0, so these cases are handled explicitly
+    bool isOnAxis = cartesian.x == 0.0 && cartesian.y == 0.0;
+    float azimuth = isOnAxis ? 0.0 : atan(cartesian.y, cartesian.x);
+    theta = acos(clamp(cartesian.z / r, -1.0, 1.0)) / M_PI;
+    phi = (M_PI + azimuth) / (2.0 * M_PI);
   }
   r *= SQRT1_3;
   return vec3(r, theta, phi);

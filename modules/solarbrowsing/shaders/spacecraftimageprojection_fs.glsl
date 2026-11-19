@@ -66,20 +66,26 @@ Fragment getFragment() {
       continue;
     }
 
+    vec3 uv = in_data.texCoords[i].xyz;
+    uv /= (SunRadius / scale[i]) * 2.0;
+    uv += 0.5;
+
+    uv.x += (centerPixel[i].x / SunRadius) / 2.0;
+    uv.y -= (centerPixel[i].y / SunRadius) / 2.0;
+
+    // The textures are sampled inside a branch that depends on the fragment, where
+    // implicit derivatives are undefined, so they are calculated before the branch
+    vec2 st = vec2(uv.x, 1.0 - uv.y);
+    vec2 stDx = dFdx(st);
+    vec2 stDy = dFdy(st);
+
     if (planePositionSpacecraft[i].z < in_data.texCoords[i].z) {
-      vec3 uv = in_data.texCoords[i].xyz;
-      uv /= (SunRadius / scale[i]) * 2.0;
-      uv += 0.5;
-
-      uv.x += (centerPixel[i].x / SunRadius) / 2.0;
-      uv.y -= (centerPixel[i].y / SunRadius) / 2.0;
-
-      float intensityOrg = texture(imageryTexture[i], vec2(uv.x, 1.0 - uv.y)).r;
+      float intensityOrg = textureGrad(imageryTexture[i], st, stDx, stDy).r;
       intensityOrg = contrast(intensityOrg, i);
 
       vec4 res;
       if (hasLut[i]) {
-        res = texture(lut[i], intensityOrg);
+        res = textureLod(lut[i], intensityOrg, 0.0);
       }
       else {
         res = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);

@@ -53,7 +53,9 @@ vec4 depthToViewCoord(vec2 texCoord, float depth) {
 float fresnel(float HdotV) {
   const float N1 = 1.0;
   const float N2 = 1.5;
-  const float R0 = pow((N1 - N2) / (N1 + N2), 2.0);
+  // The base is negative, for which `pow` is undefined
+  const float R = (N1 - N2) / (N1 + N2);
+  const float R0 = R * R;
   return R0 + (1.0 - R0) * pow(1.0 - HdotV, 5.0);
 }
 

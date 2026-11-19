@@ -205,14 +205,6 @@ Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(0.3, 0.3, 0.3, 1.0);
 
-  // Skirts are vertical walls that hide gaps between neighboring tiles. They sit below
-  // the surface and are occluded while the globe is opaque, but once the globe is faded
-  // they become visible as stretched edges. Drop the skirt fragments when the globe is
-  // transparent
-  if (opacity < 1.0 && in_data.isSkirt > 0.0) {
-    discard;
-  }
-
   vec3 normal = normalize(in_data.ellipsoidNormalCameraSpace);
 
 #if USE_ACCURATE_NORMALS
@@ -324,9 +316,7 @@ Fragment getFragment() {
   vec3 p = in_data.posObjSpace;
   const vec3 RingPlaneNormal = vec3(0.0, 0.0, 1.0);
 
-  if (abs(surfaceToSun.y) > 1e-8 &&
-      dot(in_data.normalObjSpace, lightDirectionObjSpace) < 0.0)
-  {
+  if (abs(surfaceToSun.y) > 1e-8) {
     float t = rayPlaneIntersection(p, surfaceToSun, vec3(0.0), RingPlaneNormal);
 
     vec3 ringIntersection = p + t * surfaceToSun;
@@ -336,16 +326,28 @@ Fragment getFragment() {
     // See advanced_rings_fs.glsl for explanation of textureOffset
     float texCoord = (tx - textureOffset.x) / (textureOffset.y - textureOffset.x);
 
-    if (texCoord >= 0.0 && texCoord <= 1.0) {
+    // The ring textures are sampled inside branches that depend on the fragment, where
+    // implicit derivatives are undefined, so they are calculated before the branches
+    float texCoordDx = dFdx(texCoord);
+    float texCoordDy = dFdy(texCoord);
+
+    if (dot(in_data.normalObjSpace, lightDirectionObjSpace) < 0.0 &&
+        texCoord >= 0.0 && texCoord <= 1.0)
+    {
       // Sample ring transparency texture
-      float ringOpacity = texture(ringTextureTransparency, texCoord).r;
+      float ringOpacity = textureGrad(
+        ringTextureTransparency,
+        texCoord,
+        texCoordDx,
+        texCoordDy
+      ).r;
 
       // Increase the shadow darkness factor with low angle to simulate the light having
       // to pass through more material
       float angleFactor = clamp(abs(-dot(RingPlaneNormal, surfaceToSun)) / 2.0, 0.0, 0.3);
       // Calculate shadow factor based on ring opacity
       shadow = clamp(ringOpacity + angleFactor, 0.05, 1.0);
-      lightColor = texture(ringTextureColor, texCoord).rgb;
+      lightColor = textureGrad(ringTextureColor, texCoord, texCoordDx, texCoordDy).rgb;
     }
   }
 
@@ -385,6 +387,16 @@ Fragment getFragment() {
   const float Ambience = 0.2;
   frag.color.xyz *= mix(max(0.0, accum), 1.0, Ambience);
 #endif // USE_DEPTHMAP_SHADOWS && nDepthMaps > 0
+
+  // Skirts are vertical walls that hide gaps between neighboring tiles. They sit below
+  // the surface and are occluded while the globe is opaque, but once the globe is faded
+  // they become visible as stretched edges. Drop the skirt fragments when the globe is
+  // transparent. This happens at the end as implicit derivatives, which are needed for
+  // the texture lookups above, are undefined after a `discard` that only applies to
+  // some of the fragments
+  if (opacity < 1.0 && in_data.isSkirt > 0.0) {
+    discard;
+  }
 
   frag.color.a *= opacity;
   frag.color = clamp(frag.color, 0.0, 1.0);

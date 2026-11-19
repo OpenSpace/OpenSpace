@@ -49,9 +49,9 @@ float semiMinorAxis(float a, float e) {
 // cx is the displacement of the center of the ellipse along the x-axis (for an orbit,
 // the y-displacement is always zero)
 float ellipseTest(vec2 point, float a, float b, float cx) {
-  float x = point.x;
+  float x = point.x - cx;
   float y = point.y;
-  return (pow(x - cx, 2.0) / (a * a)) + ((y * y) / (b * b));
+  return ((x * x) / (a * a)) + ((y * y) / (b * b));
 }
 
 
@@ -91,10 +91,15 @@ Fragment getFragment() {
   vec2 dir = normalize(st);
 
   // Find outer ellipse: where along the direction does the equation == 1?
-  float denominator = pow(normBU * dir.x, 2.0) + pow(normAU * dir.y, 2.0);
+  // The bases can be negative, for which `pow` is undefined, so the squares are written
+  // out as multiplications
+  vec2 scaledDir = vec2(normBU * dir.x, normAU * dir.y);
+  float denominator = dot(scaledDir, scaledDir);
   float first = -(normBU * normBU * dir.x * normCU) / denominator;
-  float second = pow((normBU * normBU * dir.x * normCU)  /  denominator, 2.0);
-  float third = (pow(normBU * normCU, 2.0) - pow(normAU * normBU, 2.0)) / denominator;
+  float second = first * first;
+  float bc = normBU * normCU;
+  float ab = normAU * normBU;
+  float third = (bc * bc - ab * ab) / denominator;
 
   float scale = first + sqrt(second - third);
 
