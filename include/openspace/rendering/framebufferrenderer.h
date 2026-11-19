@@ -57,6 +57,9 @@ class FramebufferRenderer final : public RaycasterListener, public Deferredcaste
 public:
     virtual ~FramebufferRenderer() override = default;
 
+    // NOTE: The textures returned by the following functions are recreated whenever the
+    // rendering resolution changes, so their identifiers must not be cached
+
     /**
      * Gives access to the currently NOT used pingPongTexture. This texture is available
      * for all RenderBins. However, it cannot be used at the same time as the Deferred
@@ -192,7 +195,7 @@ private:
         float blackoutTextureFactor, opengl::Texture* blackoutTexture,
         const glm::ivec4& viewport);
     void applyFXAA(const glm::ivec4& viewport);
-    void updateDownscaleTextures() const;
+    void updateDownscaleTextures();
     void writeDownscaledVolume(const glm::ivec4& viewport);
     void renderDepthMaps();
 

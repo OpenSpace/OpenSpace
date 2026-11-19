@@ -75,6 +75,37 @@ namespace {
        GL_COLOR_ATTACHMENT2,
        GL_COLOR_ATTACHMENT3
     };
+
+    // Deletes the provided `texture` (if it exists) and replaces it with a new texture
+    // that has immutable storage with the provided format and size. Immutable storage
+    // cannot be resized, so this is needed whenever the resolution changes
+    void recreateTexture(GLuint& texture, GLenum internalFormat, const glm::ivec2& size,
+                         std::string_view label)
+    {
+        const int width = std::max(size.x, 1);
+        const int height = std::max(size.y, 1);
+
+        glDeleteTextures(1, &texture);
+        glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+        glTextureStorage2D(texture, 1, internalFormat, width, height);
+        glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glObjectLabel(
+            GL_TEXTURE,
+            texture,
+            static_cast<GLsizei>(label.size()),
+            label.data()
+        );
+    }
+
+    void checkFramebufferStatus(GLuint framebuffer, std::string_view name) {
+        const GLenum status = glCheckNamedFramebufferStatus(framebuffer, GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            LERROR(std::format("{} framebuffer is not complete", name));
+        }
+    }
 } // namespace
 
 namespace openspace {
@@ -143,37 +174,20 @@ void FramebufferRenderer::initialize() {
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
-    // GBuffers
-    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.colorTexture);
-    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.depthTexture);
-    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.positionTexture);
-    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.normalTexture);
+    // Framebuffers. Their textures are created and attached in `updateResolution`
     glCreateFramebuffers(1, &_gBuffers.framebuffer);
     glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, -1, "G-Buffer Main");
 
-
-    // PingPong Buffers
-    // The first pingpong buffer shares the color texture with the renderbuffer:
-    _pingPongBuffers.colorTexture[0] = _gBuffers.colorTexture;
-    glCreateTextures(GL_TEXTURE_2D, 1, &_pingPongBuffers.colorTexture[1]);
     glCreateFramebuffers(1, &_pingPongBuffers.framebuffer);
     glObjectLabel(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer, -1, "G-Buffer Ping-Pong");
 
-    // Exit framebuffer
-    glCreateTextures(GL_TEXTURE_2D, 1, &_exitColorTexture);
-    glCreateTextures(GL_TEXTURE_2D, 1, &_exitDepthTexture);
     glCreateFramebuffers(1, &_exitFramebuffer);
     glObjectLabel(GL_FRAMEBUFFER, _exitFramebuffer, -1, "Exit");
 
-    // FXAA Buffers
     glCreateFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
-    glCreateTextures(GL_TEXTURE_2D, 1, &_fxaaBuffers.fxaaTexture);
     glObjectLabel(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer, -1, "FXAA");
 
-    // DownscaleVolumeRendering
     glCreateFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
-    glCreateTextures(GL_TEXTURE_2D, 1, &_downscaleVolumeRendering.colorTexture);
-    glCreateTextures(GL_TEXTURE_2D, 1, &_downscaleVolumeRendering.depthbuffer);
     glObjectLabel(
         GL_FRAMEBUFFER,
         _downscaleVolumeRendering.framebuffer,
@@ -186,114 +200,6 @@ void FramebufferRenderer::initialize() {
 
     updateRendererData();
     updateRaycastData();
-
-    glNamedFramebufferTexture(
-        _gBuffers.framebuffer,
-        GL_COLOR_ATTACHMENT0,
-        _gBuffers.colorTexture,
-        0
-    );
-    glNamedFramebufferTexture(
-        _gBuffers.framebuffer,
-        GL_COLOR_ATTACHMENT1,
-        _gBuffers.positionTexture,
-        0
-    );
-    glNamedFramebufferTexture(
-        _gBuffers.framebuffer,
-        GL_COLOR_ATTACHMENT2,
-        _gBuffers.normalTexture,
-        0
-    );
-    glNamedFramebufferTexture(
-        _gBuffers.framebuffer,
-        GL_DEPTH_ATTACHMENT,
-        _gBuffers.depthTexture,
-        0
-    );
-
-    GLenum status = glCheckNamedFramebufferStatus(_gBuffers.framebuffer, GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("Main framebuffer is not complete");
-    }
-
-    glNamedFramebufferTexture(
-        _pingPongBuffers.framebuffer,
-        GL_COLOR_ATTACHMENT0,
-        _pingPongBuffers.colorTexture[0],
-        0
-    );
-    glNamedFramebufferTexture(
-        _pingPongBuffers.framebuffer,
-        GL_COLOR_ATTACHMENT1,
-        _pingPongBuffers.colorTexture[1],
-        0
-    );
-    glNamedFramebufferTexture(
-        _pingPongBuffers.framebuffer,
-        GL_DEPTH_ATTACHMENT,
-        _gBuffers.depthTexture,
-        0
-    );
-
-    status = glCheckNamedFramebufferStatus(_pingPongBuffers.framebuffer, GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("Ping pong buffer is not complete");
-    }
-
-    // Builds Exit Framebuffer
-    glNamedFramebufferTexture(
-        _exitFramebuffer,
-        GL_COLOR_ATTACHMENT0,
-        _exitColorTexture,
-        0
-    );
-    glNamedFramebufferTexture(
-        _exitFramebuffer,
-        GL_DEPTH_ATTACHMENT,
-        _exitDepthTexture,
-        0
-    );
-
-    status = glCheckNamedFramebufferStatus(_exitFramebuffer, GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("Exit framebuffer is not complete");
-    }
-
-    glNamedFramebufferTexture(
-        _fxaaBuffers.fxaaFramebuffer,
-        GL_COLOR_ATTACHMENT0,
-        _fxaaBuffers.fxaaTexture,
-        0
-    );
-
-    status = glCheckNamedFramebufferStatus(_fxaaBuffers.fxaaFramebuffer, GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("FXAA framebuffer is not complete");
-    }
-
-    glNamedFramebufferTexture(
-        _downscaleVolumeRendering.framebuffer,
-        GL_COLOR_ATTACHMENT0,
-        _downscaleVolumeRendering.colorTexture,
-        0
-    );
-    glNamedFramebufferTexture(
-        _downscaleVolumeRendering.framebuffer,
-        GL_DEPTH_ATTACHMENT,
-        _downscaleVolumeRendering.depthbuffer,
-        0
-    );
-
-
-    status = glCheckNamedFramebufferStatus(
-        _downscaleVolumeRendering.framebuffer,
-        GL_FRAMEBUFFER
-    );
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("Downscale Volume Rendering framebuffer is not complete");
-    }
-
 
     // JCC: Moved to here to avoid NVidia: "Program/shader state performance warning"
     // Building programs
@@ -568,60 +474,39 @@ void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
     _fxaaProgram->deactivate();
 }
 
-void FramebufferRenderer::updateDownscaleTextures() const {
-    const float cdf = _downscaleVolumeRendering.currentDownscaleFactor;
+void FramebufferRenderer::updateDownscaleTextures() {
+    const glm::ivec2 size = glm::ivec2(
+        glm::vec2(_resolution) * _downscaleVolumeRendering.currentDownscaleFactor
+    );
 
-    glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.colorTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
+    // The color stays at 32 bit as the raycaster divides by the accumulated alpha, which
+    // can produce values outside of the half-float range
+    recreateTexture(
+        _downscaleVolumeRendering.colorTexture,
         GL_RGBA32F,
-        static_cast<GLsizei>(glm::max(_resolution.x * cdf, 1.f)),
-        static_cast<GLsizei>(glm::max(_resolution.y * cdf, 1.f)),
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
+        size,
+        "Downscaled Volume Color"
     );
-    glTextureParameteri(
-        _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_MAG_FILTER,
-        GL_LINEAR
-    );
-    glTextureParameteri(
-        _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_MIN_FILTER,
-        GL_LINEAR
-    );
-    constexpr glm::vec4 VolumeBorderColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
-    glTextureParameterfv(
-        _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_BORDER_COLOR,
-        glm::value_ptr(VolumeBorderColor)
+    recreateTexture(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_DEPTH_COMPONENT32F,
+        size,
+        "Downscaled Volume Depth"
     );
 
-    glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_DEPTH_COMPONENT32F,
-        static_cast<GLsizei>(std::max(_resolution.x * cdf, 1.f)),
-        static_cast<GLsizei>(std::max(_resolution.y * cdf, 1.f)),
-        0,
-        GL_DEPTH_COMPONENT,
-        GL_FLOAT,
-        nullptr
+    glNamedFramebufferTexture(
+        _downscaleVolumeRendering.framebuffer,
+        GL_COLOR_ATTACHMENT0,
+        _downscaleVolumeRendering.colorTexture,
+        0
     );
-    glTextureParameteri(
+    glNamedFramebufferTexture(
+        _downscaleVolumeRendering.framebuffer,
+        GL_DEPTH_ATTACHMENT,
         _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_MAG_FILTER,
-        GL_LINEAR
+        0
     );
-    glTextureParameteri(
-        _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_MIN_FILTER,
-        GL_LINEAR
-    );
+    checkFramebufferStatus(_downscaleVolumeRendering.framebuffer, "Downscaled volume");
 }
 
 void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
@@ -767,260 +652,113 @@ void FramebufferRenderer::updateResolution() {
     ZoneScoped;
     TracyGpuZone("Renderer updateResolution");
 
-    glBindTexture(GL_TEXTURE_2D, _gBuffers.colorTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
+    // G-Buffer
+    recreateTexture(_gBuffers.colorTexture, GL_RGBA32F, _resolution, "G-Buffer Color");
+    recreateTexture(
+        _gBuffers.positionTexture,
         GL_RGBA32F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
+        _resolution,
+        "G-Buffer Position"
     );
-    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glObjectLabel(GL_TEXTURE, _gBuffers.colorTexture, -1, "G-Buffer Color");
-
-    glBindTexture(GL_TEXTURE_2D, _gBuffers.positionTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glObjectLabel(GL_TEXTURE, _gBuffers.positionTexture, -1, "G-Buffer Position");
-
-    glBindTexture(GL_TEXTURE_2D, _gBuffers.normalTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glObjectLabel(GL_TEXTURE, _gBuffers.normalTexture, -1, "G-Buffer Normal");
-
-    glBindTexture(GL_TEXTURE_2D, _gBuffers.depthTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
+    // The normal buffer only contains a unit vector and the water reflectance in [0, 1],
+    // for which half-float precision is sufficient
+    recreateTexture(_gBuffers.normalTexture, GL_RGBA16F, _resolution, "G-Buffer Normal");
+    recreateTexture(
+        _gBuffers.depthTexture,
         GL_DEPTH_COMPONENT32F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_DEPTH_COMPONENT,
-        GL_FLOAT,
-        nullptr
+        _resolution,
+        "G-Buffer Depth"
     );
-    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glObjectLabel(GL_TEXTURE, _gBuffers.depthTexture, -1, "G-Buffer Depth");
 
-    glBindTexture(GL_TEXTURE_2D, _pingPongBuffers.colorTexture[1]);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
+        GL_COLOR_ATTACHMENT0,
+        _gBuffers.colorTexture,
+        0
+    );
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
+        GL_COLOR_ATTACHMENT1,
+        _gBuffers.positionTexture,
+        0
+    );
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
+        GL_COLOR_ATTACHMENT2,
+        _gBuffers.normalTexture,
+        0
+    );
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
+        GL_DEPTH_ATTACHMENT,
+        _gBuffers.depthTexture,
+        0
+    );
+    checkFramebufferStatus(_gBuffers.framebuffer, "Main");
+
+    // Ping-Pong buffers. The first one shares the color texture with the G-Buffer
+    _pingPongBuffers.colorTexture[0] = _gBuffers.colorTexture;
+    recreateTexture(
+        _pingPongBuffers.colorTexture[1],
         GL_RGBA32F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTextureParameteri(
-        _pingPongBuffers.colorTexture[1],
-        GL_TEXTURE_WRAP_S,
-        GL_CLAMP_TO_EDGE
-    );
-    glTextureParameteri(
-        _pingPongBuffers.colorTexture[1],
-        GL_TEXTURE_WRAP_T,
-        GL_CLAMP_TO_EDGE
-    );
-    glTextureParameteri(
-        _pingPongBuffers.colorTexture[1],
-        GL_TEXTURE_MAG_FILTER,
-        GL_LINEAR
-    );
-    glTextureParameteri(
-        _pingPongBuffers.colorTexture[1],
-        GL_TEXTURE_MIN_FILTER,
-        GL_LINEAR
-    );
-    glObjectLabel(
-        GL_TEXTURE,
-        _pingPongBuffers.colorTexture[1],
-        -1,
+        _resolution,
         "G-Buffer Color Ping-Pong"
     );
 
+    glNamedFramebufferTexture(
+        _pingPongBuffers.framebuffer,
+        GL_COLOR_ATTACHMENT0,
+        _pingPongBuffers.colorTexture[0],
+        0
+    );
+    glNamedFramebufferTexture(
+        _pingPongBuffers.framebuffer,
+        GL_COLOR_ATTACHMENT1,
+        _pingPongBuffers.colorTexture[1],
+        0
+    );
+    glNamedFramebufferTexture(
+        _pingPongBuffers.framebuffer,
+        GL_DEPTH_ATTACHMENT,
+        _gBuffers.depthTexture,
+        0
+    );
+    checkFramebufferStatus(_pingPongBuffers.framebuffer, "Ping-pong");
+
+    // Volume rendering exit points
+    recreateTexture(_exitColorTexture, GL_RGBA16F, _resolution, "Exit color");
+    recreateTexture(_exitDepthTexture, GL_DEPTH_COMPONENT32F, _resolution, "Exit depth");
+
+    glNamedFramebufferTexture(
+        _exitFramebuffer,
+        GL_COLOR_ATTACHMENT0,
+        _exitColorTexture,
+        0
+    );
+    glNamedFramebufferTexture(
+        _exitFramebuffer,
+        GL_DEPTH_ATTACHMENT,
+        _exitDepthTexture,
+        0
+    );
+    checkFramebufferStatus(_exitFramebuffer, "Exit");
+
     // FXAA
-    glBindTexture(GL_TEXTURE_2D, _fxaaBuffers.fxaaTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_RGBA,
-        GL_UNSIGNED_BYTE,
-        nullptr
-    );
-    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glObjectLabel(GL_TEXTURE, _fxaaBuffers.fxaaTexture, -1, "FXAA");
+    recreateTexture(_fxaaBuffers.fxaaTexture, GL_RGBA8, _resolution, "FXAA");
 
-    const float cdf = _downscaleVolumeRendering.currentDownscaleFactor;
+    glNamedFramebufferTexture(
+        _fxaaBuffers.fxaaFramebuffer,
+        GL_COLOR_ATTACHMENT0,
+        _fxaaBuffers.fxaaTexture,
+        0
+    );
+    checkFramebufferStatus(_fxaaBuffers.fxaaFramebuffer, "FXAA");
 
-    // Downscale Volume Rendering
-    glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.colorTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        static_cast<GLsizei>(glm::max(_resolution.x * cdf, 1.f)),
-        static_cast<GLsizei>(glm::max(_resolution.y * cdf, 1.f)),
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-    glTextureParameteri(
-        _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_WRAP_S,
-        GL_CLAMP_TO_EDGE
-    );
-    glTextureParameteri(
-        _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_WRAP_T,
-        GL_CLAMP_TO_EDGE
-    );
-    glTextureParameteri(
-        _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_MAG_FILTER,
-        GL_LINEAR
-    );
-    glTextureParameteri(
-        _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_MIN_FILTER,
-        GL_LINEAR
-    );
-
-    constexpr glm::vec4 VolumeBorderColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
-    glTextureParameterfv(
-        _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_BORDER_COLOR,
-        glm::value_ptr(VolumeBorderColor)
-    );
-    glObjectLabel(
-        GL_TEXTURE,
-        _downscaleVolumeRendering.colorTexture,
-        -1,
-        "Downscaled Volume Color"
-    );
-
-    glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_DEPTH_COMPONENT32F,
-        static_cast<GLsizei>(glm::max(_resolution.x * cdf, 1.f)),
-        static_cast<GLsizei>(glm::max(_resolution.y * cdf, 1.f)),
-        0,
-        GL_DEPTH_COMPONENT,
-        GL_FLOAT,
-        nullptr
-    );
-    glTextureParameteri(
-        _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_WRAP_S,
-        GL_CLAMP_TO_EDGE
-    );
-    glTextureParameteri(
-        _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_WRAP_T,
-        GL_CLAMP_TO_EDGE
-    );
-    glTextureParameteri(
-        _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_MAG_FILTER,
-        GL_LINEAR
-    );
-    glTextureParameteri(
-        _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_MIN_FILTER,
-        GL_LINEAR
-    );
-    glObjectLabel(
-        GL_TEXTURE,
-        _downscaleVolumeRendering.depthbuffer,
-        -1,
-        "Downscaled Volume Depth"
-    );
-
-    // Volume Rendering Textures
-    glBindTexture(GL_TEXTURE_2D, _exitColorTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA16F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_RGBA,
-        GL_UNSIGNED_SHORT,
-        nullptr
-    );
-    glTextureParameteri(_exitColorTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_exitColorTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_exitColorTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureParameteri(_exitColorTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glObjectLabel(GL_TEXTURE, _exitColorTexture, -1, "Exit color");
-
-    glBindTexture(GL_TEXTURE_2D, _exitDepthTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_DEPTH_COMPONENT32F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_DEPTH_COMPONENT,
-        GL_FLOAT,
-        nullptr
-    );
-    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glObjectLabel(GL_TEXTURE, _exitDepthTexture, -1, "Exit depth");
+    // The downscaled volume textures are only needed while a raycaster is rendering at
+    // a reduced resolution. They are created on demand in `performRaycasterTasks`
+    if (_downscaleVolumeRendering.currentDownscaleFactor < 1.f) {
+        updateDownscaleTextures();
+    }
 
     _dirtyResolution = false;
 }

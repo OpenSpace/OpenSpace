@@ -890,39 +890,10 @@ void RenderableModel::initializeGL() {
     glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, s));
     glVertexArrayAttribBinding(_vao, 1, 0);
 
-    // Generate textures and the frame buffer
+    // Generate the frame buffer. The textures are attached when rendering as they are
+    // owned by the FramebufferRenderer and change with the rendering resolution
     glCreateFramebuffers(1, &_framebuffer);
     glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
-
-    glNamedFramebufferTexture(
-        _framebuffer,
-        GL_COLOR_ATTACHMENT0,
-        global::renderEngine->renderer().additionalColorTexture1(),
-        0
-    );
-    glNamedFramebufferTexture(
-        _framebuffer,
-        GL_COLOR_ATTACHMENT1,
-        global::renderEngine->renderer().additionalColorTexture2(),
-        0
-    );
-    glNamedFramebufferTexture(
-        _framebuffer,
-        GL_COLOR_ATTACHMENT2,
-        global::renderEngine->renderer().additionalColorTexture3(),
-        0
-    );
-    glNamedFramebufferTexture(
-        _framebuffer,
-        GL_DEPTH_ATTACHMENT,
-        global::renderEngine->renderer().additionalDepthTexture(),
-        0
-    );
-
-    const GLenum status = glCheckNamedFramebufferStatus(_framebuffer, GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("Framebuffer is not complete");
-    }
 
     // Initialize geometry
     _geometry->initialize();
@@ -1165,12 +1136,32 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Prepare framebuffer
         const GLint defaultFBO = opengl::FramebufferObject::getActiveObject();
 
-        // Re-bind first texture to use the currently not used Ping-Pong texture in the
-        // FramebufferRenderer
+        // The textures are re-attached every frame as the first one is the currently not
+        // used Ping-Pong texture in the FramebufferRenderer and all of them are recreated
+        // when the rendering resolution changes
+        const FramebufferRenderer& renderer = global::renderEngine->renderer();
         glNamedFramebufferTexture(
             _framebuffer,
             GL_COLOR_ATTACHMENT0,
-            global::renderEngine->renderer().additionalColorTexture1(),
+            renderer.additionalColorTexture1(),
+            0
+        );
+        glNamedFramebufferTexture(
+            _framebuffer,
+            GL_COLOR_ATTACHMENT1,
+            renderer.additionalColorTexture2(),
+            0
+        );
+        glNamedFramebufferTexture(
+            _framebuffer,
+            GL_COLOR_ATTACHMENT2,
+            renderer.additionalColorTexture3(),
+            0
+        );
+        glNamedFramebufferTexture(
+            _framebuffer,
+            GL_DEPTH_ATTACHMENT,
+            renderer.additionalDepthTexture(),
             0
         );
         const GLenum status = glCheckNamedFramebufferStatus(_framebuffer, GL_FRAMEBUFFER);
