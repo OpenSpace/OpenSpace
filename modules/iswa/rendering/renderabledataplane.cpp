@@ -28,9 +28,9 @@
 #include <modules/iswa/util/dataprocessortext.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
 
 namespace {
     struct [[codegen::Dictionary(RenderableDataPlane)]] Parameters {};
@@ -46,7 +46,7 @@ Documentation RenderableDataPlane::Documentation() {
     );
 }
 
-RenderableDataPlane::RenderableDataPlane(const ghoul::Dictionary& dictionary)
+RenderableDataPlane::RenderableDataPlane(const Dictionary& dictionary)
     : RenderableDataCygnet(dictionary)
 {}
 
@@ -74,11 +74,11 @@ void RenderableDataPlane::initializeGL() {
             // unregister backgroundvalues property
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(Property::Visibility::Hidden);
+                _backgroundValues.setVisibility(Visibility::Hidden);
             }
             else {
                 // If autofilter is turned off, register backgroundValues
-                _backgroundValues.setVisibility(Property::Visibility::Always);
+                _backgroundValues.setVisibility(Visibility::Always);
             }
         });
     }

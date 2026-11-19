@@ -27,18 +27,18 @@
 #include <modules/iswa/rendering/iswadatagroup.h>
 #include <modules/iswa/util/dataprocessor.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/designpattern/synchronousevent.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/downloadmanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/transferfunction.h>
-#include <ghoul/designpattern/event.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <fstream>
 #include <iterator>
@@ -51,53 +51,73 @@ namespace {
     constexpr std::string_view _loggerCat = "DataCygnet";
     constexpr int MaxTextures = 6;
 
-    constexpr Property::PropertyInfo DataOptionsInfo = {
-        "DataOptions",
-        "Data options",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr SelectionPropertyInfo DataOptionsInfo = {
+        .identifier = "DataOptions",
+        .name = "Data options",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo UseLogInfo = {
-        "UseLog",
-        "Use logarithm",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseLogInfo = {
+        .identifier = "UseLog",
+        .name = "Use logarithm",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo UseHistogramInfo = {
-        "UseHistogram",
-        "Auto contrast",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseHistogramInfo = {
+        .identifier = "UseHistogram",
+        .name = "Auto contrast",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AutoFilterInfo = {
-        "AutoFilter",
-        "Auto filter",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo AutoFilterInfo = {
+        .identifier = "AutoFilter",
+        .name = "Auto filter",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo NormalizeValuesInfo = {
-        "NormValues",
-        "Normalize values",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr Vec2PropertyInfo NormalizeValuesInfo = {
+        .identifier = "NormValues",
+        .name = "Normalize values",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::vec2(1.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(5.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo BackgroundInfo = {
-        "BackgroundValues",
-        "Background values",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr Vec2PropertyInfo BackgroundInfo = {
+        .identifier = "BackgroundValues",
+        .name = "Background values",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo TransferFunctionsFile = {
-        "Transferfunctions",
-        "Transfer functions",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr StringPropertyInfo TransferFunctionsFile = {
+        .identifier = "Transferfunctions",
+        .name = "Transfer functions",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = "${SCENE}/iswa/tfs/default.tf"
+        }
     };
 
     struct [[codegen::Dictionary(RenderableDataCygnet)]] Parameters {};
@@ -113,15 +133,15 @@ Documentation RenderableDataCygnet::Documentation() {
     );
 }
 
-RenderableDataCygnet::RenderableDataCygnet(const ghoul::Dictionary& dictionary)
+RenderableDataCygnet::RenderableDataCygnet(const Dictionary& dictionary)
     : RenderableIswaCygnet(dictionary)
     , _dataOptions(DataOptionsInfo)
-    , _transferFunctionsFile(TransferFunctionsFile, "${SCENE}/iswa/tfs/default.tf")
-    , _backgroundValues(BackgroundInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _normValues(NormalizeValuesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(5.f))
-    , _useLog(UseLogInfo, false)
-    , _useHistogram(UseHistogramInfo, false)
-    , _autoFilter(AutoFilterInfo, true)
+    , _transferFunctionsFile(TransferFunctionsFile)
+    , _backgroundValues(BackgroundInfo)
+    , _normValues(NormalizeValuesInfo)
+    , _useLog(UseLogInfo)
+    , _useHistogram(UseHistogramInfo)
+    , _autoFilter(AutoFilterInfo)
 {
     addProperty(_dataOptions);
     addProperty(_useLog);
@@ -148,7 +168,7 @@ bool RenderableDataCygnet::updateTexture() {
     std::vector<int> selectedOptionsIndices;
     for (const std::string& option : selectedOptions) {
         auto it = std::find(options.begin(), options.end(), option);
-        ghoul_assert(it != options.end(), "Selected option must be in all options");
+        assert_msg(it != options.end(), "Selected option must be in all options");
         int idx = static_cast<int>(std::distance(options.begin(), it));
         selectedOptionsIndices.push_back(idx);
     }
@@ -160,16 +180,16 @@ bool RenderableDataCygnet::updateTexture() {
         }
 
         if (!_textures[option]) {
-            auto texture = std::make_unique<ghoul::opengl::Texture>(
-                ghoul::opengl::Texture::FormatInit {
+            auto texture = std::make_unique<opengl::Texture>(
+                opengl::Texture::FormatInit {
                     .dimensions = _textureDimensions,
                     .type = GL_TEXTURE_2D,
-                    .format = ghoul::opengl::Texture::Format::Red,
+                    .format = opengl::Texture::Format::Red,
                     .dataType = GL_FLOAT
                 },
-                ghoul::opengl::Texture::SamplerInit {
-                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
-                    .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                opengl::Texture::SamplerInit {
+                    .filter = opengl::Texture::FilterMode::LinearMipMap,
+                    .wrapping = opengl::Texture::WrappingMode::ClampToEdge
                 },
                 reinterpret_cast<const std::byte*>(values.data())
             );
@@ -211,8 +231,7 @@ bool RenderableDataCygnet::updateTextureResource() {
         return false;
     }
 
-    _dataBuffer = std::string(dataFile.buffer, dataFile.size);
-    delete[] dataFile.buffer;
+    _dataBuffer = std::string(dataFile.buffer.begin(), dataFile.buffer.end());
 
     return true;
 }
@@ -224,7 +243,7 @@ bool RenderableDataCygnet::readyToRender() const {
 /**
  * Set both transfer function textures and data textures in same function so that they
  * bind to the right texture units. If separate in to two functions a list of
- * ghoul::TextureUnit needs to be passed as an argument to both.
+ * TextureUnit needs to be passed as an argument to both.
  */
 void RenderableDataCygnet::setTextureUniforms() {
     const std::set<std::string>& selectedOptions = _dataOptions;
@@ -232,7 +251,7 @@ void RenderableDataCygnet::setTextureUniforms() {
     std::vector<int> selectedOptionsIndices;
     for (const std::string& option : selectedOptions) {
         auto it = std::find(options.begin(), options.end(), option);
-        ghoul_assert(it != options.end(), "Selected option must be in all options");
+        assert_msg(it != options.end(), "Selected option must be in all options");
         const int idx = static_cast<int>(std::distance(options.begin(), it));
         selectedOptionsIndices.push_back(idx);
     }
@@ -244,7 +263,7 @@ void RenderableDataCygnet::setTextureUniforms() {
     );
 
     // Set Textures
-    ghoul::opengl::TextureUnit txUnits[MaxTextures];
+    opengl::TextureUnit txUnits[MaxTextures];
     int j = 0;
     for (int option : selectedOptionsIndices) {
         if (_textures[option]) {
@@ -265,7 +284,7 @@ void RenderableDataCygnet::setTextureUniforms() {
     }
 
     // This array + txUnits will use up 12 Texture Units, which is a lot
-    ghoul::opengl::TextureUnit tfUnits[MaxTextures];
+    opengl::TextureUnit tfUnits[MaxTextures];
     j = 0;
 
     if (activeTransferfunctions == 1) {
@@ -299,7 +318,7 @@ void RenderableDataCygnet::readTransferFunctions(std::string tfPath) {
     std::vector<TransferFunction> tfs;
     if (tfFile.is_open()) {
         std::string line;
-        while (ghoul::getline(tfFile, line)) {
+        while (openspace::getline(tfFile, line)) {
             tfs.emplace_back(absPath(line).string());
         }
     }
@@ -363,12 +382,12 @@ void RenderableDataCygnet::setPropertyCallbacks() {
 }
 
 void RenderableDataCygnet::subscribeToGroup() {
-    ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
+    SynchronousEvent<Dictionary>& groupEvent = _group->groupEvent();
 
     groupEvent.subscribe(
         identifier(),
         "dataOptionsChanged",
-        [this](const ghoul::Dictionary& dict) {
+        [this](const Dictionary& dict) {
             LDEBUG(identifier() + " Event dataOptionsChanged");
             if (dict.hasValue<std::vector<int>>("dataOptions")) {
                 std::vector<int> idx = dict.value<std::vector<int>>("dataOptions");
@@ -385,7 +404,7 @@ void RenderableDataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "normValuesChanged",
-        [this](const ghoul::Dictionary& dict) {
+        [this](const Dictionary& dict) {
             LDEBUG(identifier() + " Event normValuesChanged");
             if (dict.hasValue<glm::dvec2>("normValues")) {
                 _normValues = dict.value<glm::dvec2>("normValues");
@@ -396,7 +415,7 @@ void RenderableDataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "backgroundValuesChanged",
-        [this](const ghoul::Dictionary& dict) {
+        [this](const Dictionary& dict) {
             LDEBUG(identifier() + " Event backgroundValuesChanged");
             if (dict.hasValue<glm::dvec2>("backgroundValues")) {
                 _backgroundValues = dict.value<glm::dvec2>("backgroundValues");
@@ -407,7 +426,7 @@ void RenderableDataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "transferFunctionsChanged",
-        [this](const ghoul::Dictionary& dict) {
+        [this](const Dictionary& dict) {
             LDEBUG(identifier() + " Event transferFunctionsChanged");
             _transferFunctionsFile = dict.value<std::string>("transferFunctions");
         }
@@ -416,7 +435,7 @@ void RenderableDataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "useLogChanged",
-        [this](const ghoul::Dictionary& dict) {
+        [this](const Dictionary& dict) {
             LDEBUG(identifier() + " Event useLogChanged");
             _useLog = dict.value<bool>("useLog");
         }
@@ -425,7 +444,7 @@ void RenderableDataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "useHistogramChanged",
-        [this](const ghoul::Dictionary& dict) {
+        [this](const Dictionary& dict) {
             LDEBUG(identifier() + " Event useHistogramChanged");
             _useHistogram = dict.value<bool>("useHistogram");
         }
@@ -434,7 +453,7 @@ void RenderableDataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "autoFilterChanged",
-        [this](const ghoul::Dictionary& dict) {
+        [this](const Dictionary& dict) {
             LDEBUG(identifier() + " Event autoFilterChanged");
             _autoFilter = dict.value<bool>("autoFilter");
         }
@@ -443,7 +462,7 @@ void RenderableDataCygnet::subscribeToGroup() {
     groupEvent.subscribe(
         identifier(),
         "updateGroup",
-        [this](const ghoul::Dictionary&) {
+        [this](const Dictionary&) {
             LDEBUG(identifier() + " Event updateGroup");
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();

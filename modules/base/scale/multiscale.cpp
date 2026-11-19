@@ -25,16 +25,18 @@
 #include <modules/base/scale/multiscale.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     // Combines multiple individual scale operations that are applied one after the other.
     struct [[codegen::Dictionary(MultiScale)]] Parameters {
         // The list of scales that are applied one after the other.
-        std::vector<ghoul::Dictionary> scales [[codegen::reference("core_scale")]];
+        std::vector<Dictionary> scales [[codegen::reference("core_scale")]];
     };
 } // namespace
 #include "multiscale_codegen.cpp"
@@ -48,14 +50,14 @@ Documentation MultiScale::Documentation() {
     );
 }
 
-MultiScale::MultiScale(const ghoul::Dictionary& dictionary)
+MultiScale::MultiScale(const Dictionary& dictionary)
     : Scale(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     int i = 0;
-    for (const ghoul::Dictionary& s : p.scales) {
-        ghoul::mm_unique_ptr<Scale> scale = Scale::createFromDictionary(s);
+    for (const Dictionary& s : p.scales) {
+        mm_unique_ptr<Scale> scale = Scale::createFromDictionary(s);
         scale->setGuiName(std::format("{}: {}", i, scale->guiName()));
         scale->setIdentifier(std::format("{}_{}", i, scale->identifier()));
         addPropertySubOwner(scale.get());
@@ -66,13 +68,13 @@ MultiScale::MultiScale(const ghoul::Dictionary& dictionary)
 
 void MultiScale::initialize() {
     Scale::initialize();
-    for (const ghoul::mm_unique_ptr<Scale>& scale : _scales) {
+    for (const mm_unique_ptr<Scale>& scale : _scales) {
         scale->initialize();
     }
 }
 
 void MultiScale::update(const UpdateData& data) {
-    for (const ghoul::mm_unique_ptr<Scale>& scale : _scales) {
+    for (const mm_unique_ptr<Scale>& scale : _scales) {
         scale->update(data);
     }
     Scale::update(data);
@@ -80,7 +82,7 @@ void MultiScale::update(const UpdateData& data) {
 
 glm::dvec3 MultiScale::scaleValue(const UpdateData& data) const {
     glm::dvec3 res = glm::dvec3(1.0);
-    for (const ghoul::mm_unique_ptr<Scale>& scale : _scales) {
+    for (const mm_unique_ptr<Scale>& scale : _scales) {
         res *= scale->scaleValue(data);
     }
     return res;

@@ -1,15 +1,11 @@
 {
-  "version": 1,
-  "masteraddress": "localhost",
-  "settings": {
-    "display": {
-      "swapinterval": 1
-    }
-  },
+  "version": 2,
+  "serveraddress": "localhost",
   "nodes": [
     {
       "address": "localhost",
       "port": 20401,
+      "vsync": true,
       "windows": [
         {
           "name": "OpenSpace",

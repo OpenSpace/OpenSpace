@@ -78,7 +78,7 @@ public:
      */
     std::vector<LuaLibrary> luaLibraries() const override;
 
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void internalInitialize(const Dictionary& dictionary) override;
     void internalDeinitialize() override;
 
     /**
@@ -105,7 +105,7 @@ public:
     AngleCalculationMode angleCalculationMode() const;
 
     /**
-     * Return whether any elevation angles are being caclulated and sent to the Open Sound
+     * Return whether any elevation angles are being calculated and sent to the Open Sound
      * Control receiver or not.
      *
      * \return `true` if elevation angles are being calculated and sent to the Open Sound

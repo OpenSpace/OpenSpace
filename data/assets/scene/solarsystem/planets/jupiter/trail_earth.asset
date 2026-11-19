@@ -12,7 +12,7 @@ local JupiterTrailEarth = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = jupiterKernels.ID.Jupiter,
+      Target = jupiterKernels.ID.JupiterBarycenter,
       Observer = coreKernels.ID.Earth
     },
     Color = { 0.8, 0.7, 0.7 },

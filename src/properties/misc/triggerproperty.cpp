@@ -26,8 +26,8 @@
 
 namespace openspace {
 
-TriggerProperty::TriggerProperty(PropertyInfo info)
-    : Property(std::move(info))
+TriggerProperty::TriggerProperty(TriggerPropertyInfo info)
+    : Property(static_cast<PropertyInfo>(info))
 {}
 
 std::string_view TriggerProperty::className() const {
@@ -40,8 +40,8 @@ void TriggerProperty::setLuaValue(lua_State*) {
     notifyChangeListeners();
 }
 
-ghoul::lua::LuaTypes TriggerProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Nil;
+lua::LuaTypes TriggerProperty::typeLua() const {
+    return lua::LuaTypes::Nil;
 }
 
 void TriggerProperty::trigger() {

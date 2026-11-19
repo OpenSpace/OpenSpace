@@ -16,7 +16,6 @@ local ZenithPosition = {
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = earthAsset.Earth.Identifier,
       Latitude = 0.0,
       Longitude = 0.0,
       Altitude = 100000000.0,
@@ -24,7 +23,6 @@ local ZenithPosition = {
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = earthAsset.Earth.Identifier,
       Latitude = 0.0,
       Longitude = 0.0,
       UseHeightmap = false,
@@ -136,7 +134,7 @@ asset.export("ToggleZenith", ToggleZenith.Identifier)
 asset.meta = {
   Name = "Zenith",
   Description = [[A dot representation of the Local Zenith (based on the current
-    camera positon), including actions to toggle, hide and show it.]],
+    camera position), including actions to toggle, hide and show it.]],
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",
   License = "MIT license"

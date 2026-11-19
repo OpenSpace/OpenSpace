@@ -27,13 +27,13 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/glm.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
 #include <algorithm>
 #include <cmath>
 #include <optional>
@@ -41,42 +41,59 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color of the grid lines.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color of the grid lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.5f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo LongSegmentsInfo = {
-        "LongSegments",
-        "Number of longitudinal segments",
-        "The number of longitudinal segments the sphere is split into. Determines the "
-        "resolution of the rendered sphere in a left/right direction when looking "
-        "straight at the equator.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo LongSegmentsInfo = {
+        .identifier = "LongSegments",
+        .name = "Number of longitudinal segments",
+        .description = "The number of longitudinal segments the sphere is split into. "
+            "Determines the resolution of the rendered sphere in a left/right direction "
+            "when looking straight at the equator.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 36,
+            .minMax = { 4, 200 }
+        }
     };
 
-    constexpr Property::PropertyInfo LatSegmentsInfo = {
-        "LatSegments",
-        "Number of latitudinal segments",
-        "The number of latitudinal segments the sphere is split into. Determines the "
-        "resolution of the rendered sphere in a up/down direction when looking "
-        "straight at the equator.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo LatSegmentsInfo = {
+        .identifier = "LatSegments",
+        .name = "Number of latitudinal segments",
+        .description = "The number of latitudinal segments the sphere is split into. "
+            "Determines the resolution of the rendered sphere in a up/down direction "
+            "when looking straight at the equator.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 18,
+            .minMax = { 4, 200 }
+        }
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the grid lines. The larger number, the thicker the lines.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the grid lines. The larger number, the thicker the "
+            "lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
-        "Labels",
-        "Labels",
-        "The labels for the grid."
+    constexpr PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        .identifier = "Labels",
+        .name = "Labels",
+        .description = "The labels for the grid."
     };
 
     // Creates a grid with a spherical shape, given a number of segments in the latitude
@@ -89,14 +106,13 @@ namespace {
     // `Segments` parameter, or different number of segments in the latitudal and
     // longtudal direction using the `LatSegments` and `LongSegments` parameters.
     struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(LongSegmentsInfo.description)]]
-        std::optional<int> longSegments [[codegen::greater(0)]];
+        std::optional<int> longSegments
+            [[codegen::Info(LongSegmentsInfo), codegen::greater(0)]];
 
-        // [[codegen::verbatim(LatSegmentsInfo.description)]]
-        std::optional<int> latSegments [[codegen::greater(0)]];
+        std::optional<int> latSegments
+            [[codegen::Info(LatSegmentsInfo), codegen::greater(0)]];
 
         // The number of segments the sphere is split into. Determines the resolution of
         // the rendered sphere. Should be an even value (if an odd value is provided, the
@@ -106,12 +122,11 @@ namespace {
         // `LatSegments`.
         std::optional<int> segments [[codegen::greater(0)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels
+            [[codegen::Info(LabelsInfo), codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderablesphericalgrid_codegen.cpp"
@@ -125,13 +140,13 @@ Documentation RenderableSphericalGrid::Documentation() {
     );
 }
 
-RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
+RenderableSphericalGrid::RenderableSphericalGrid(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridProgram(nullptr)
-    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _longSegments(LongSegmentsInfo, 36, 4, 200)
-    , _latSegments(LatSegmentsInfo, 18, 4, 200)
-    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
+    , _color(ColorInfo)
+    , _longSegments(LongSegmentsInfo)
+    , _latSegments(LatSegmentsInfo)
+    , _lineWidth(LineWidthInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -182,7 +197,7 @@ void RenderableSphericalGrid::initialize() {
 void RenderableSphericalGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
         "GridProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "GridProgram",
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
@@ -203,7 +218,7 @@ void RenderableSphericalGrid::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

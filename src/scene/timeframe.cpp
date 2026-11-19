@@ -25,23 +25,27 @@
 #include <openspace/scene/timeframe.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 #include <string>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo IsInTimeFrameInfo = {
-        "IsInTimeFrame",
-        "Is in time frame",
-        "This property indicates the current state of the TimeFrame time testing. If the "
-        "current simulation time is determined to be a valid time, this property is set "
-        "to true. Otherwise it will be false, meaning that the scene graph node this "
-        "TimeFrame is attached to would not be shown",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo IsInTimeFrameInfo = {
+        .identifier = "IsInTimeFrame",
+        .name = "Is in time frame",
+        .description = "This property indicates the current state of the TimeFrame time "
+            "testing. If the current simulation time is determined to be a valid time, "
+            "this property is set to true. Otherwise it will be false, meaning that the "
+            "scene graph node this TimeFrame is attached to would not be shown.",
+        .visibility = Visibility::Developer,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = false
+        }
     };
 
     // A `TimeFrame` object determines the time frame during which a scene graph node is
@@ -66,9 +70,7 @@ Documentation TimeFrame::Documentation() {
     return codegen::doc<Parameters>("core_timeframe");
 }
 
-ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
-                                                            const ghoul::Dictionary& dict)
-{
+mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(const Dictionary& dict) {
     ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dict);
@@ -77,20 +79,17 @@ ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
     result->setIdentifier("TimeFrame");
     result->_type = p.type;
 
-    return ghoul::mm_unique_ptr<TimeFrame>(result);
+    return mm_unique_ptr<TimeFrame>(result);
 }
 
 TimeFrame::TimeFrame()
     : PropertyOwner({ "TimeFrame", "Time Frame" })
-    , _isInTimeFrame(IsInTimeFrameInfo, false)
+    , _isInTimeFrame(IsInTimeFrameInfo)
 {
-    _isInTimeFrame.setReadOnly(true);
     addProperty(_isInTimeFrame);
 }
 
-bool TimeFrame::initialize() {
-    return true;
-}
+void TimeFrame::initialize() {}
 
 bool TimeFrame::isActive() const {
     return _isInTimeFrame;

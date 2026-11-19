@@ -2,7 +2,7 @@ asset.resource({
   Name = "Example Single",
   Type = "UrlSynchronization",
   Identifier = "example_single",
-  Url = "http://celestrak.org/NORAD/elements/geo.txt"
+  Url = "https://celestrak.org/NORAD/elements/gp.php?GROUP=geo&FORMAT=json"
 })
 
 asset.resource({
@@ -10,8 +10,8 @@ asset.resource({
   Type = "UrlSynchronization",
   Identifier = "example_multiple",
   Url = {
-    "http://celestrak.org/NORAD/elements/stations.txt",
-    "http://celestrak.org/NORAD/elements/gps-ops.txt"
+    "https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=json",
+    "https://celestrak.org/NORAD/elements/gp.php?GROUP=gps-ops&FORMAT=json"
   }
 })
 
@@ -51,6 +51,22 @@ asset.resource({
   UseHash = false
 })
 
+-- Load a zip file and then directly unzip it
+asset.resource({
+  Name = "Example Zip Direct",
+  Type = "UrlSynchronization",
+  Identifier = "zip_direct",
+  Url = "https://liu-se.cdn.openspaceproject.com/files/noaa/land/birds/birds.zip",
+  UnzipFiles = true
+})
+asset.resource({
+  Name = "Example Zip Destination",
+  Type = "UrlSynchronization",
+  Identifier = "zip_destination",
+  Url = "https://liu-se.cdn.openspaceproject.com/files/noaa/land/birds/birds.zip",
+  UnzipFiles = true,
+  UnzipFilesDestination = "dest"
+})
 
 
 asset.meta = {

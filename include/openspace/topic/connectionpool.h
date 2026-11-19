@@ -30,22 +30,22 @@
 #include <mutex>
 #include <vector>
 
-namespace ghoul::io {
+namespace openspace {
+
+namespace io {
     class Socket;
     class SocketServer;
-} // namespace ghoul::io
-
-namespace openspace {
+} // namespace io
 
 class ConnectionPool {
 public:
-    using SocketHandleFunc = std::function<void(ghoul::io::Socket& socket)>;
+    using SocketHandleFunc = std::function<void(io::Socket& socket)>;
 
     explicit ConnectionPool(SocketHandleFunc handleSocket);
     ~ConnectionPool();
 
-    void addServer(std::shared_ptr<ghoul::io::SocketServer> server);
-    void removeServer(ghoul::io::SocketServer* server);
+    void addServer(std::shared_ptr<io::SocketServer> server);
+    void removeServer(io::SocketServer* server);
     void clearServers();
     void updateConnections();
 
@@ -56,8 +56,8 @@ private:
 
     std::mutex _connectionMutex;
     SocketHandleFunc _handleSocket;
-    std::vector<std::shared_ptr<ghoul::io::SocketServer>> _socketServers;
-    std::vector<std::unique_ptr<ghoul::io::Socket>> _sockets;
+    std::vector<std::shared_ptr<io::SocketServer>> _socketServers;
+    std::vector<std::unique_ptr<io::Socket>> _sockets;
 };
 
 } // namespace openspace

@@ -24,16 +24,16 @@
 
 #include <openspace/events/event.h>
 
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/tstring.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/logging/logmanager.h>
 #include <filesystem>
 #include <string_view>
 
@@ -45,31 +45,31 @@ namespace {
     constexpr std::string_view _loggerCat = "EventInfo";
 
     void log(int i, const EventActionAdded& e) {
-        ghoul_assert(e.type == EventActionAdded::Type, "Wrong type");
+        assert_msg(e.type == EventActionAdded::Type, "Wrong type");
         LINFO(std::format("[{}] ActionAdded: {}", i, e.uri));
     }
 
     void log(int i, const EventActionRemoved& e) {
-        ghoul_assert(e.type == EventActionRemoved::Type, "Wrong type");
+        assert_msg(e.type == EventActionRemoved::Type, "Wrong type");
         LINFO(std::format("[{}] ActionRemoved: {}", i, e.uri));
     }
 
     void log(int i, const EventApplicationShutdown& e) {
-        ghoul_assert(e.type == EventApplicationShutdown::Type, "Wrong type");
+        assert_msg(e.type == EventApplicationShutdown::Type, "Wrong type");
         const std::string t = [](EventApplicationShutdown::State state) {
             using State = EventApplicationShutdown::State;
             switch (state) {
                 case State::Started:  return "started";
                 case State::Aborted:  return "aborted";
                 case State::Finished: return "finished";
-                default:              throw ghoul::MissingCaseException();
+                default:              throw MissingCaseException();
             }
         }(e.state);
         LINFO(std::format("[{}] ApplicationShutdown", i));
     }
 
     void log(int i, const EventAssetLoading& e) {
-        ghoul_assert(e.type == EventAssetLoading::Type, "Wrong type");
+        assert_msg(e.type == EventAssetLoading::Type, "Wrong type");
         std::string_view state = [](EventAssetLoading::State s) {
             using State = EventAssetLoading::State;
             switch (s) {
@@ -77,14 +77,14 @@ namespace {
                 case State::Loading:  return "Loading";
                 case State::Unloaded: return "Unloaded";
                 case State::Error:    return "Error";
-                default:              throw ghoul::MissingCaseException();
+                default:              throw MissingCaseException();
             }
         }(e.state);
         LINFO(std::format("[{}] AssetLoading: '{}': ({})", i, e.assetPath, state));
     }
 
     void log(int i, const EventAstrocastConnection& e) {
-        ghoul_assert(e.type == EventAstrocastConnection::Type, "Wrong type");
+        assert_msg(e.type == EventAstrocastConnection::Type, "Wrong type");
         std::string_view state = [](EventAstrocastConnection::State s) {
             using State = EventAstrocastConnection::State;
             switch (s) {
@@ -92,14 +92,14 @@ namespace {
                 case State::Lost:           return "Lost";
                 case State::HostshipGained: return "HostshipGained";
                 case State::HostshipLost:   return "HostshipLost";
-                default:                    throw ghoul::MissingCaseException();
+                default:                    throw MissingCaseException();
             }
         }(e.state);
         LINFO(std::format("[{}] AstrocastConnection ({})", i, state));
     }
 
     void log(int i, const EventCameraFocusTransition& e) {
-        ghoul_assert(e.type == EventCameraFocusTransition::Type, "Wrong type");
+        assert_msg(e.type == EventCameraFocusTransition::Type, "Wrong type");
         std::string_view t = [](EventCameraFocusTransition::Transition transition) {
             using Transition = EventCameraFocusTransition::Transition;
             switch (transition) {
@@ -107,7 +107,7 @@ namespace {
                 case Transition::Reaching:    return "Reaching";
                 case Transition::Receding:    return "Receding";
                 case Transition::Exiting:     return "Exiting";
-                default:                      throw ghoul::MissingCaseException();
+                default:                      throw MissingCaseException();
             }
         }(e.transition);
 
@@ -118,12 +118,12 @@ namespace {
     }
 
     void log(int i, const EventCameraMovedPosition& e) {
-        ghoul_assert(e.type == EventCameraMovedPosition::Type, "Wrong type");
+        assert_msg(e.type == EventCameraMovedPosition::Type, "Wrong type");
         LINFO(std::format("[{}] EventCameraMovedPosition", i));
     }
 
     void log(int i, const EventCameraPathFinished& e) {
-        ghoul_assert(e.type == EventCameraPathFinished::Type, "Wrong type");
+        assert_msg(e.type == EventCameraPathFinished::Type, "Wrong type");
         LINFO(std::format(
             "[{}] EventCameraPathFinished:  Origin: '{}'  Destination: '{}'",
             i, e.origin, e.destination
@@ -131,7 +131,7 @@ namespace {
     }
 
     void log(int i, const EventCameraPathStarted& e) {
-        ghoul_assert(e.type == EventCameraPathStarted::Type, "Wrong type");
+        assert_msg(e.type == EventCameraPathStarted::Type, "Wrong type");
         LINFO(std::format(
             "[{}] EventCameraPathStarted:  Origin: '{}'  Destination: '{}'",
             i, e.origin, e.destination
@@ -139,47 +139,47 @@ namespace {
     }
 
     void log(int i, const CustomEvent& e) {
-        ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
+        assert_msg(e.type == CustomEvent::Type, "Wrong type");
         LINFO(std::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
     }
 
     void log(int i, const EventFocusNodeChanged& e) {
-        ghoul_assert(e.type == EventFocusNodeChanged::Type, "Wrong type");
+        assert_msg(e.type == EventFocusNodeChanged::Type, "Wrong type");
         LINFO(std::format("[{}] FocusNodeChanged: {} -> {}", i, e.oldNode, e.newNode));
     }
 
     void log(int i, const EventGuiTreeUpdated& e) {
-        ghoul_assert(e.type == EventGuiTreeUpdated::Type, "Wrong type");
+        assert_msg(e.type == EventGuiTreeUpdated::Type, "Wrong type");
         LINFO(std::format("[{}] EventGuiTreeUpdated", i));
     }
 
     void log(int i, [[maybe_unused]] const EventInterpolationFinished& e) {
-        ghoul_assert(e.type == EventInterpolationFinished::Type, "Wrong type");
+        assert_msg(e.type == EventInterpolationFinished::Type, "Wrong type");
         LINFO(std::format("[{}] InterpolationFinished", i));
     }
 
     void log(int i, const EventMissionAdded& e) {
-        ghoul_assert(e.type == EventMissionAdded::Type, "Wrong type");
+        assert_msg(e.type == EventMissionAdded::Type, "Wrong type");
         LINFO(std::format("[{}] MissionAdded: {}", i, e.identifier));
     }
 
     void log(int i, [[maybe_unused]] const EventMissionEventReached& e) {
-        ghoul_assert(e.type == EventMissionEventReached::Type, "Wrong type");
+        assert_msg(e.type == EventMissionEventReached::Type, "Wrong type");
         LINFO(std::format("[{}] MissionEventReached", i));
     }
 
     void log(int i, const EventMissionRemoved& e) {
-        ghoul_assert(e.type == EventMissionRemoved::Type, "Wrong type");
+        assert_msg(e.type == EventMissionRemoved::Type, "Wrong type");
         LINFO(std::format("[{}] MissionRemoved: {}", i, e.identifier));
     }
 
     void log(int i, const EventPlanetEclipsed& e) {
-        ghoul_assert(e.type == EventPlanetEclipsed::Type, "Wrong type");
+        assert_msg(e.type == EventPlanetEclipsed::Type, "Wrong type");
         LINFO(std::format("[{}] PlanetEclipsed: {} -> {}", i, e.eclipsee, e.eclipser));
     }
 
     void log(int i, const EventPointSpacecraft& e) {
-        ghoul_assert(e.type == EventPointSpacecraft::Type, "Wrong type");
+        assert_msg(e.type == EventPointSpacecraft::Type, "Wrong type");
         LINFO(std::format(
             "[{}] PointSpacecraft: Ra: {}, Dec: {}, Duration: {}",
             i, e.ra, e.dec, e.duration
@@ -187,37 +187,37 @@ namespace {
     }
 
     void log(int i, [[maybe_unused]] const EventProfileLoadingFinished& e) {
-        ghoul_assert(e.type == EventProfileLoadingFinished::Type, "Wrong type");
+        assert_msg(e.type == EventProfileLoadingFinished::Type, "Wrong type");
         LINFO(std::format("[{}] ProfileLoadingFinished", i));
     }
 
     void log(int i, const EventPropertyTreePruned& e) {
-        ghoul_assert(e.type == EventPropertyTreePruned::Type, "Wrong type");
+        assert_msg(e.type == EventPropertyTreePruned::Type, "Wrong type");
         LINFO(std::format("[{}] PropertyTreePruned: {}", i, e.uri));
     }
 
     void log(int i, const EventPropertyTreeUpdated& e) {
-        ghoul_assert(e.type == EventPropertyTreeUpdated::Type, "Wrong type");
+        assert_msg(e.type == EventPropertyTreeUpdated::Type, "Wrong type");
         LINFO(std::format("[{}] PropertyTreeUpdated: {}", i, e.uri));
     }
 
     void log(int i, const EventRenderableDisabled& e) {
-        ghoul_assert(e.type == EventRenderableDisabled::Type, "Wrong type");
+        assert_msg(e.type == EventRenderableDisabled::Type, "Wrong type");
         LINFO(std::format("[{}] EventRenderableDisabled: {}", i, e.node));
     }
 
     void log(int i, const EventRenderableEnabled& e) {
-        ghoul_assert(e.type == EventRenderableEnabled::Type, "Wrong type");
+        assert_msg(e.type == EventRenderableEnabled::Type, "Wrong type");
         LINFO(std::format("[{}] EventRenderableEnabled: {}", i, e.node));
     }
 
     void log(int i, const EventScheduledScriptExecuted& e) {
-        ghoul_assert(e.type == EventScheduledScriptExecuted::Type, "Wrong type");
+        assert_msg(e.type == EventScheduledScriptExecuted::Type, "Wrong type");
         LINFO(std::format("[{}] ScheduledScriptExecuted: Script '{}'", i, e.script));
     }
 
     void log(int i, const EventSessionRecordingPlayback& e) {
-        ghoul_assert(e.type == EventSessionRecordingPlayback::Type, "Wrong type");
+        assert_msg(e.type == EventSessionRecordingPlayback::Type, "Wrong type");
 
         std::string_view state = [](EventSessionRecordingPlayback::State s) {
             using State = EventSessionRecordingPlayback::State;
@@ -226,7 +226,7 @@ namespace {
                 case State::Paused:   return "Paused";
                 case State::Resumed:  return "Resumed";
                 case State::Finished: return "Finished";
-                default:              throw ghoul::MissingCaseException();
+                default:              throw MissingCaseException();
             }
         }(e.state);
 
@@ -234,7 +234,7 @@ namespace {
     }
 
     void log(int i, const EventTimeOfInterestReached& e) {
-        ghoul_assert(e.type == EventTimeOfInterestReached::Type, "Wrong type");
+        assert_msg(e.type == EventTimeOfInterestReached::Type, "Wrong type");
         LINFO(std::format(
             "[{}] TimeOfInterestReached: {},  {}",
             i, e.time->UTC(), reinterpret_cast<const void*>(e.camera)
@@ -272,7 +272,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::ScheduledScriptExecuted: return "ScheduledScriptExecuted";
         case Event::Type::SessionRecordingPlayback: return "SessionRecordingPlayback";
         case Event::Type::TimeOfInterestReached: return "TimeOfInterestReached";
-        default: throw ghoul::MissingCaseException();
+        default: throw MissingCaseException();
     }
 }
 
@@ -306,11 +306,11 @@ Event::Type fromString(std::string_view str) {
     else if (str == "SessionRecordingPlayback") { return Type::SessionRecordingPlayback; }
     else if (str == "TimeOfInterestReached") { return Type::TimeOfInterestReached; }
 
-    throw ghoul::RuntimeError(std::format("Unknown event type '{}'", str));
+    throw RuntimeError(std::format("Unknown event type '{}'", str));
 }
 
-ghoul::Dictionary toParameter(const Event& e) {
-    ghoul::Dictionary d;
+Dictionary toParameter(const Event& e) {
+    Dictionary d;
     switch (e.type) {
         case Event::Type::ActionAdded:
             d.setValue(
@@ -599,7 +599,7 @@ void logAllEvents(const Event* e) {
                 log(i, *static_cast<const EventTimeOfInterestReached*>(e));
                 break;
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
 
         i++;
@@ -673,7 +673,7 @@ EventFocusNodeChanged::EventFocusNodeChanged(const SceneGraphNode* oldNode_,
     , oldNode(oldNode_ ? temporaryString(oldNode_->identifier()) : "")
     , newNode(temporaryString(newNode_->identifier()))
 {
-    ghoul_assert(newNode_, "There must be a new node");
+    assert_msg(newNode_, "There must be a new node");
 }
 
 EventGuiTreeUpdated::EventGuiTreeUpdated()

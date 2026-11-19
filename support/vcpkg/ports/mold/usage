@@ -1,0 +1,9 @@
+mold provides a CMake target:
+
+    find_package(mold CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE mold::mdlib)
+
+md_gl.c compiles its GLSL at runtime and looks for it relative to the running executable,
+at <exe_dir>/../modules/molecule/shaders/mold/ (or ../../ for a Windows multi-config build
+tree). The package exposes those shader sources as MOLD_SHADER_DIR; a consumer has to copy
+them to that location.

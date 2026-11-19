@@ -33,7 +33,7 @@ namespace openspace {
 
 class KameleonDocumentationTask : public Task {
 public:
-    explicit KameleonDocumentationTask(const ghoul::Dictionary& dictionary);
+    explicit KameleonDocumentationTask(const Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;

@@ -33,7 +33,7 @@ namespace openspace {
 
 class SizeReferenceTileProvider : public TextTileProvider {
 public:
-    explicit SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
+    explicit SizeReferenceTileProvider(const Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;

@@ -24,35 +24,28 @@
 
 #include <openspace/properties/matrix/dmat3property.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-DMat3Property::DMat3Property(PropertyInfo info, glm::dmat3x3 value, glm::dmat3x3 minValue,
-                             glm::dmat3x3 maxValue, glm::dmat3x3 stepValue)
-    : NumericalProperty<glm::dmat3x3>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+DMat3Property::DMat3Property(DMat3PropertyInfo info)
+    : NumericalProperty<glm::dmat3x3>(std::move(info))
 {}
 
 std::string_view DMat3Property::className() const {
     return "DMat3Property";
 }
 
-ghoul::lua::LuaTypes DMat3Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes DMat3Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void DMat3Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::dmat3 DMat3Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::dmat3>(state);
+    return lua::value<glm::dmat3>(state);
 }
 
 std::string DMat3Property::stringValue() const {
@@ -70,6 +63,7 @@ nlohmann::json DMat3Property::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": {
               "type": "array",
               "items": { "type": "number" },

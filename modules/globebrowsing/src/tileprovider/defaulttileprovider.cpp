@@ -32,10 +32,10 @@
 #include <modules/globebrowsing/src/rawtile.h>
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileindex.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <algorithm>
 #include <optional>
 #include <utility>
@@ -43,22 +43,26 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo FilePathInfo = {
-        "FilePath",
-        "File path",
-        "The path of the GDAL file or the image file that is to be used in this tile "
-        "provider.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FilePathInfo = {
+        .identifier = "FilePath",
+        .name = "File path",
+        .description = "The path of the GDAL file or the image file that is to be used "
+            "in this tile provider.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TilePixelSizeInfo = {
-        "TilePixelSize",
-        "Tile pixel size",
-        "This value is the preferred size (in pixels) for each tile. Choosing the right "
-        "value is a tradeoff between more efficiency (larger images) and better quality "
-        "(smaller images). The tile pixel size has to be smaller than the size of the "
-        "complete image if a single image is used.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo TilePixelSizeInfo = {
+        .identifier = "TilePixelSize",
+        .name = "Tile pixel size",
+        .description = "This value is the preferred size (in pixels) for each tile. "
+            "Choosing the right value is a tradeoff between more efficiency (larger "
+            "images) and better quality (smaller images). The tile pixel size has to be "
+            "smaller than the size of the complete image if a single image is used.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 32,
+            .minMax = { 32, 2048 }
+        }
     };
 
     enum class [[codegen::stringify()]] Compression {
@@ -82,8 +86,7 @@ namespace {
         // The layer into which this tile provider is loaded.
         int layerGroupID;
 
-        // [[codegen::verbatim(TilePixelSizeInfo.description)]]
-        std::optional<int> tilePixelSize;
+        std::optional<int> tilePixelSize [[codegen::Info(TilePixelSizeInfo)]];
 
         // Determines if the tiles should be preprocessed before uploading to the GPU.
         std::optional<bool> performPreProcessing;
@@ -102,7 +105,7 @@ namespace {
             // The compression algorithm to use for cached tiles.
             std::optional<Compression> compression;
 
-            // The quality setting of the compression alogrithm, only valid for JPEG.
+            // The quality setting of the compression algorithm, only valid for JPEG.
             std::optional<int> quality [[codegen::inrange(0, 100)]];
 
             // The block-size of the MRF cache.
@@ -124,9 +127,9 @@ Documentation DefaultTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_default");
 }
 
-DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
-    : _filePath(FilePathInfo, "")
-    , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
+DefaultTileProvider::DefaultTileProvider(const Dictionary& dictionary)
+    : _filePath(FilePathInfo)
+    , _tilePixelSize(TilePixelSizeInfo)
 {
     ZoneScoped;
 
@@ -216,7 +219,7 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData,
 Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped;
 
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     if (tileIndex.level > maxLevel()) {
         return {
             .texture = nullptr,
@@ -239,7 +242,7 @@ Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
 }
 
 Tile::Status DefaultTileProvider::tileStatus(const TileIndex& index) {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     const RawTileDataReader& reader = _asyncTextureDataProvider->rawTileDataReader();
 
     if (index.level > reader.maxChunkLevel()) {
@@ -256,12 +259,12 @@ Tile::Status DefaultTileProvider::tileStatus(const TileIndex& index) {
 }
 
 TileDepthTransform DefaultTileProvider::depthTransform() {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     return _asyncTextureDataProvider->rawTileDataReader().depthTransform();
 }
 
 void DefaultTileProvider::update() {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     _asyncTextureDataProvider->update();
 
     std::optional<RawTile> tile = _asyncTextureDataProvider->popFinishedRawTile();
@@ -272,7 +275,7 @@ void DefaultTileProvider::update() {
         };
         MemoryAwareTileCache* tileCache =
             global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
-        ghoul_assert(!tileCache->exist(key), "Tile must not be existing in cache");
+        assert_msg(!tileCache->exist(key), "Tile must not be existing in cache");
         tileCache->createTileAndPut(key, std::move(*tile));
     }
 
@@ -286,22 +289,22 @@ void DefaultTileProvider::update() {
 
 void DefaultTileProvider::reset() {
     global::moduleEngine->module<GlobeBrowsingModule>()->tileCache()->clear();
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     _asyncTextureDataProvider->prepareToBeDeleted();
 }
 
 int DefaultTileProvider::minLevel() {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     return 1;
 }
 
 int DefaultTileProvider::maxLevel() {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     return _asyncTextureDataProvider->rawTileDataReader().maxChunkLevel();
 }
 
 float DefaultTileProvider::noDataValueAsFloat() {
-    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    assert_msg(_asyncTextureDataProvider, "No data provider");
     return _asyncTextureDataProvider->noDataValueAsFloat();
 }
 

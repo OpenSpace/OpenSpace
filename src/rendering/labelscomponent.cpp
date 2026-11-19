@@ -24,14 +24,14 @@
 
 #include <openspace/rendering/labelscomponent.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
 #include <cmath>
 #include <optional>
 
@@ -43,69 +43,77 @@ namespace {
     constexpr int RenderOptionFaceCamera = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "This setting determines whether the labels will be visible or not. They are "
-        "disabled per default.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "This setting determines whether the labels will be visible or "
+            "not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo FileInfo = {
-        "File",
-        "File",
-        "The speck label file with the data for the labels.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color of the labels.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color of the labels.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size",
+        .description = "The size of the labels in pixels.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 8.f,
+            .minMax = { 0.5f, 24.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
-        "The size of the labels in pixels.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo FontSizeInfo = {
+        .identifier = "FontSize",
+        .name = "Font size",
+        .description = "Font size for the labels. This is different from the text size.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 50.f,
+            .minMax = { 1.f, 300.f }
+        }
     };
 
-    constexpr Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font size",
-        "Font size for the labels. This is different from the text size.",
-        Property::Visibility::User
+    constexpr IVec2PropertyInfo MinMaxInfo = {
+        .identifier = "MinMaxSize",
+        .name = "Min/max size",
+        .description = "The minimum and maximum size (in pixels) of the labels.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::ivec2(8, 500),
+            .minMax = { glm::ivec2(0), glm::ivec2(1000) }
+        }
     };
 
-    constexpr Property::PropertyInfo MinMaxInfo = {
-        "MinMaxSize",
-        "Min/max size",
-        "The minimum and maximum size (in pixels) of the labels.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo FaceCameraInfo = {
-        "FaceCamera",
-        "Face camera",
-        "If enabled, the labels will be rotated to face the camera. For non-linear "
-        "display rendering (for example fisheye) this should be set to false.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo TransformationMatrixInfo = {
-        "TransformationMatrix",
-        "Transformation matrix",
-        "Transformation matrix to be applied to the labels.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo FaceCameraInfo = {
+        .identifier = "FaceCamera",
+        .name = "Face camera",
+        .description = "If enabled, the labels will be rotated to face the camera. For "
+            "non-linear display rendering (for example fisheye) this should be set to "
+            "false.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
-        // [[codegen::verbatim(FileInfo.description)]]
+        // The speck label file with the data for the labels.
         std::optional<std::filesystem::path> file;
 
         // If true (default), the loaded labels file will be cached so that it can be
@@ -117,17 +125,13 @@ namespace {
         // The opacity of the labels.
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size;
+        std::optional<float> size [[codegen::Info(SizeInfo)]];
 
-        // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize;
+        std::optional<float> fontSize [[codegen::Info(FontSizeInfo)]];
 
-        // [[codegen::verbatim(MinMaxInfo.description)]]
-        std::optional<glm::ivec2> minMaxSize;
+        std::optional<glm::ivec2> minMaxSize [[codegen::Info(MinMaxInfo)]];
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
@@ -140,10 +144,9 @@ namespace {
         };
         std::optional<Unit> unit;
 
-        // [[codegen::verbatim(FaceCameraInfo.description)]]
-        std::optional<bool> faceCamera;
+        std::optional<bool> faceCamera [[codegen::Info(FaceCameraInfo)]];
 
-        // [[codegen::verbatim(TransformationMatrixInfo.description)]]
+        // Transformation matrix to be applied to the labels.
         std::optional<glm::dmat4x4> transformationMatrix;
     };
 } // namespace
@@ -155,19 +158,14 @@ Documentation LabelsComponent::Documentation() {
     return codegen::doc<Parameters>("core_labelscomponent");
 }
 
-LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
+LabelsComponent::LabelsComponent(const Dictionary& dictionary)
     : PropertyOwner({ "Labels" })
-    , _enabled(EnabledInfo, false)
-    , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _size(SizeInfo, 8.f, 0.5f, 24.f)
-    , _fontSize(FontSizeInfo, 50.f, 1.f, 300.f)
-    , _minMaxSize(
-        MinMaxInfo,
-        glm::ivec2(8, 500),
-        glm::ivec2(0),
-        glm::ivec2(1000)
-    )
-    , _faceCamera(FaceCameraInfo, true)
+    , _enabled(EnabledInfo)
+    , _color(ColorInfo)
+    , _size(SizeInfo)
+    , _fontSize(FontSizeInfo)
+    , _minMaxSize(MinMaxInfo)
+    , _faceCamera(FaceCameraInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -233,8 +231,8 @@ void LabelsComponent::initialize() {
     _font = global::fontManager->font(
         "Mono",
         _fontSize,
-        ghoul::fontrendering::FontManager::Outline::Yes,
-        ghoul::fontrendering::FontManager::LoadGlyphs::No
+        fontrendering::FontManager::Outline::Yes,
+        fontrendering::FontManager::LoadGlyphs::No
     );
 
     loadLabels();
@@ -293,7 +291,7 @@ void LabelsComponent::render(const RenderData& data,
     const int renderOption =
         _faceCamera ? RenderOptionFaceCamera : RenderOptionPositionNormal;
 
-    const ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
+    const fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
         .enableDepth = true,
         .enableFalseDepth = false,
         .scale = std::pow(10.f, _size),
@@ -320,7 +318,7 @@ void LabelsComponent::render(const RenderData& data,
         );
         const glm::vec3 scaledPos = glm::vec3(transformedPos * scale);
 
-        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
+        fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
             e.text,

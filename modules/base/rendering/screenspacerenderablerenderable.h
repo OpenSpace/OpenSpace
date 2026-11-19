@@ -27,10 +27,10 @@
 
 #include <openspace/rendering/screenspacerenderableframebuffer.h>
 
+#include <openspace/misc/managedmemoryuniqueptr.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 
 namespace openspace {
 
@@ -41,7 +41,7 @@ class Translation;
 
 class ScreenSpaceRenderableRenderable : public ScreenSpaceRenderableFramebuffer {
 public:
-    explicit ScreenSpaceRenderableRenderable(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceRenderableRenderable(const Dictionary& dictionary);
     ~ScreenSpaceRenderableRenderable() override;
 
     void initialize() override;
@@ -53,12 +53,12 @@ public:
 
 private:
     struct {
-        ghoul::mm_unique_ptr<PropertyOwner> parent = nullptr;
-        ghoul::mm_unique_ptr<Translation> translation = nullptr;
-        ghoul::mm_unique_ptr<Rotation> rotation = nullptr;
-        ghoul::mm_unique_ptr<Scale> scale = nullptr;
+        mm_unique_ptr<PropertyOwner> parent = nullptr;
+        mm_unique_ptr<Translation> translation = nullptr;
+        mm_unique_ptr<Rotation> rotation = nullptr;
+        mm_unique_ptr<Scale> scale = nullptr;
     } _transform;
-    ghoul::mm_unique_ptr<Renderable> _renderable = nullptr;
+    mm_unique_ptr<Renderable> _renderable = nullptr;
 
     double _previousTime = 0.0;
     DoubleProperty _time;

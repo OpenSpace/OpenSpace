@@ -27,13 +27,12 @@
 
 #include <filesystem>
 
-namespace ghoul::opengl {
-    class Texture;
-    class ProgramObject;
-} // ghoul::opengl
-
 namespace openspace {
 
+namespace opengl {
+    class Texture;
+    class ProgramObject;
+} // opengl
 struct DeferredcastData;
 struct RenderData;
 struct UpdateData;
@@ -43,18 +42,16 @@ public:
     virtual ~Deferredcaster() = default;
 
     virtual void preRaycast(const RenderData& renderData,
-        const DeferredcastData& deferredData,
-        ghoul::opengl::ProgramObject& program);
+        const DeferredcastData& deferredData, opengl::ProgramObject& program);
 
     virtual void postRaycast(const RenderData& renderData,
-        const DeferredcastData& deferredData,
-        ghoul::opengl::ProgramObject& program);
+        const DeferredcastData& deferredData, opengl::ProgramObject& program);
 
     virtual std::filesystem::path deferredcastVSPath() const = 0;
 
     virtual std::filesystem::path deferredcastFSPath() const = 0;
 
-    virtual void initializeCachedVariables(ghoul::opengl::ProgramObject&) = 0;
+    virtual void initializeCachedVariables(opengl::ProgramObject&) = 0;
 
     virtual void update(const UpdateData&) = 0;
 

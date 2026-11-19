@@ -24,13 +24,13 @@
 
 #include <openspace/util/universalhelpers.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <algorithm>
 
 namespace openspace {
 
 double shiftAndScale(double t, double start, double end) {
-    ghoul_assert(
+    assert_msg(
         0.0 < start && start < end && end < 1.0,
         "Values must be 0.0 < start < end < 1.0"
     );

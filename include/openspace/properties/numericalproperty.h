@@ -27,15 +27,14 @@
 
 #include <openspace/properties/templateproperty.h>
 
-#include <ghoul/misc/easing.h>
+#include <openspace/misc/easing.h>
 
 namespace openspace {
 
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
-    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
-        T maximumValue, T steppingValue, float exponent = 1.f);
+    explicit NumericalProperty(BasicPropertyInfo<NumericalDefaults<T>> info);
 
     T minValue() const;
     void setMinValue(T value);
@@ -53,8 +52,7 @@ public:
 
     void setLuaInterpolationTarget(lua_State* state) override;
 
-    void interpolateValue(float t,
-        ghoul::EasingFunc<float> easingFunc = nullptr) override;
+    void interpolateValue(float t, EasingFunc<float> easingFunc = nullptr) override;
 
 protected:
     static nlohmann::json MetaDataSchema();

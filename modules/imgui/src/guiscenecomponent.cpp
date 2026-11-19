@@ -27,18 +27,16 @@
 #include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/assert.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/misc/assert.h>
 
 namespace {
     using namespace openspace;
-
-    const ImVec2 Size = ImVec2(350, 500);
 
     void renderSceneGraphNode(const SceneGraphNode& node, const Time& time) {
         if (!ImGui::TreeNode(node.identifier().c_str())) {
@@ -79,7 +77,7 @@ namespace {
                     case Renderable::RenderBin::Overlay:
                         return "Overlay";
                     default:
-                        throw ghoul::MissingCaseException();
+                        throw MissingCaseException();
                 }
             }(bin);
             ImGui::Text("RenderBin: %s", binStr.c_str());

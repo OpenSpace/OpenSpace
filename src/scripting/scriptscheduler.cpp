@@ -26,10 +26,10 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
-#include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <iterator>
 #include <utility>
@@ -39,22 +39,28 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "This enables or disables the ScriptScheduler. If disabled, no scheduled scripts "
-        "will be executed. If enabled, scheduled scripts will be executed at their given "
-        "time as normal.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "This enables or disables the ScriptScheduler. If disabled, no "
+            "scheduled scripts will be executed. If enabled, scheduled scripts will be "
+            "executed at their given time as normal.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
-        "ShouldRunAllTimeJump",
-        "Should run all time jump",
-        "If 'true': In a time jump, all scheduled scripts between the old time and the "
-        "new time is executed. If 'false': In a time jump, no scripts scheduled between "
-        "the new time and the old time is executed.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShouldRunAllTimeJumpInfo = {
+        .identifier = "ShouldRunAllTimeJump",
+        .name = "Should run all time jump",
+        .description = "If 'true': In a time jump, all scheduled scripts between the old "
+            "time and the new time is executed. If 'false': In a time jump, no scripts "
+            "scheduled between the new time and the old time is executed.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {
@@ -93,14 +99,14 @@ Documentation ScriptScheduler::Documentation() {
 
 ScriptScheduler::ScriptScheduler()
     : PropertyOwner({ "ScriptScheduler" })
-    , _enabled(EnabledInfo, true)
-    , _shouldRunAllTimeJump(ShouldRunAllTimeJumpInfo, true)
+    , _enabled(EnabledInfo)
+    , _shouldRunAllTimeJump(ShouldRunAllTimeJumpInfo)
 {
     addProperty(_enabled);
     addProperty(_shouldRunAllTimeJump);
 }
 
-ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict) {
+ScriptScheduler::ScheduledScript::ScheduledScript(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     time = Time::convertTime(p.time);
@@ -282,7 +288,8 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             codegen::lua::LoadFile,
             codegen::lua::LoadScheduledScript,
             codegen::lua::Clear,
-            codegen::lua::ScheduledScripts
+            codegen::lua::ScheduledScripts,
+            codegen::lua::ScheduleSingleShotScript
         }
     };
 }

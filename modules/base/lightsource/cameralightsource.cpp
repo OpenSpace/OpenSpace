@@ -25,25 +25,28 @@
 #include <modules/base/lightsource/cameralightsource.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo IntensityInfo = {
-        "Intensity",
-        "Intensity",
-        "The intensity of this light source.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo IntensityInfo = {
+        .identifier = "Intensity",
+        .name = "Intensity",
+        .description = "The intensity of this light source.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
     // Represents a light source placed at the position of the camera. An object with
     // this light source will always be illuminated from the current view direction.
     struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
-        // [[codegen::verbatim(IntensityInfo.description)]]
-        std::optional<float> intensity;
+        std::optional<float> intensity [[codegen::Info(IntensityInfo)]];
     };
 } // namespace
 #include "cameralightsource_codegen.cpp"
@@ -57,9 +60,9 @@ Documentation CameraLightSource::Documentation() {
     );
 }
 
-CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
+CameraLightSource::CameraLightSource(const Dictionary& dictionary)
     : LightSource(dictionary)
-    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
+    , _intensity(IntensityInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _intensity = p.intensity.value_or(_intensity);

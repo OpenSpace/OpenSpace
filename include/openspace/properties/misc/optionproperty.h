@@ -29,6 +29,8 @@
 
 namespace openspace {
 
+using OptionPropertyInfo = BasicPropertyInfo<ValueDefaults<int>>;
+
 /**
  * The OptionProperty is a property that provides a number of predefined (using the
  * #addOption method) options consisting of a `description` and a `value`. The available
@@ -53,9 +55,9 @@ public:
      *        information for initializing this Property
      *
      * \pre \p info.identifier must not be empty
-     * \pre \p info.guiName must not be empty
+     * \pre \p info.name must not be empty
      */
-    explicit OptionProperty(PropertyInfo info);
+    explicit OptionProperty(OptionPropertyInfo info);
 
     /**
      * Returns the name of the class for reflection purposes.
@@ -63,7 +65,7 @@ public:
      * \return The name of this class for reflection purposes
      */
     std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+    lua::LuaTypes typeLua() const override final;
 
     using TemplateProperty<int>::operator=;
 

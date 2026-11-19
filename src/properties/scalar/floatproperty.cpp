@@ -24,29 +24,28 @@
 
 #include <openspace/properties/scalar/floatproperty.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-FloatProperty::FloatProperty(PropertyInfo info, float value, float minValue,
-                             float maxValue, float stepValue)
-    : NumericalProperty<float>(std::move(info), value, minValue, maxValue, stepValue)
+FloatProperty::FloatProperty(FloatPropertyInfo info)
+    : NumericalProperty<float>(std::move(info))
 {}
 
 std::string_view FloatProperty::className() const {
     return "FloatProperty";
 }
 
-ghoul::lua::LuaTypes FloatProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes FloatProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void FloatProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 float FloatProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<float>(state);
+    return lua::value<float>(state);
 }
 
 std::string FloatProperty::stringValue() const {
@@ -64,6 +63,7 @@ nlohmann::json FloatProperty::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": { "type": "number" }
           },
           "additionalProperties": false,

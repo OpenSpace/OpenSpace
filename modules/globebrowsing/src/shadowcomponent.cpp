@@ -27,15 +27,15 @@
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/openglstatecache.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <fstream>
 #include <memory>
 #include <optional>
@@ -45,42 +45,48 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ShadowComponent";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Enable/Disable Shadows.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Enable/Disable Shadows.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo SaveDepthTextureInfo = {
-        "SaveDepthTextureInfo",
-        "Save depth texture",
-        "Debug.",
-        Property::Visibility::AdvancedUser
+    constexpr TriggerPropertyInfo SaveDepthTextureInfo = {
+        .identifier = "SaveDepthTextureInfo",
+        .name = "Save depth texture",
+        .description = "Debug.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DistanceFractionInfo = {
-        "DistanceFraction",
-        "Distance fraction",
-        "Distance fraction of original distance from light source to the globe to be "
-        "considered as the new light source distance.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo DistanceFractionInfo = {
+        .identifier = "DistanceFraction",
+        .name = "Distance fraction",
+        .description = "Distance fraction of original distance from light source to the "
+            "globe to be considered as the new light source distance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 20,
+            .minMax = { 1, 10000 }
+        }
     };
 
-    constexpr Property::PropertyInfo DepthMapSizeInfo = {
-        "DepthMapSize",
-        "Depth map size",
-        "The depth map size in pixels. You must entry the width and height values.",
-        Property::Visibility::AdvancedUser
+    constexpr TriggerPropertyInfo DepthMapSizeInfo = {
+        .identifier = "DepthMapSize",
+        .name = "Depth map size",
+        .description = "The depth map size in pixels. You must entry the width and "
+            "height values.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ShadowComponent)]] Parameters {
-        // [[codegen::verbatim(DistanceFractionInfo.description)]]
-        std::optional<int> distanceFraction;
+        std::optional<int> distanceFraction [[codegen::Info(DistanceFractionInfo)]];
 
-        // [[codegen::verbatim(DepthMapSizeInfo.description)]]
         std::optional<glm::ivec2> depthMapSize
-            [[codegen::greater(glm::ivec2(1280, 720))]];
+            [[codegen::Info(DepthMapSizeInfo), codegen::greater(glm::ivec2(1280, 720))]];
     };
 } // namespace
 #include "shadowcomponent_codegen.cpp"
@@ -91,13 +97,13 @@ Documentation ShadowComponent::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_shadowscomponent");
 }
 
-ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
+ShadowComponent::ShadowComponent(const Dictionary& dictionary)
     : PropertyOwner({ "ShadowsComponent" })
     , _saveDepthTexture(SaveDepthTextureInfo)
-    , _distanceFraction(DistanceFractionInfo, 20, 1, 10000)
-    , _enabled(EnabledInfo, true)
+    , _distanceFraction(DistanceFractionInfo)
+    , _enabled(EnabledInfo)
 {
-    using ghoul::filesystem::File;
+    using filesystem::File;
 
     // @TODO (abock, 2021-03-25)  This is not really a nice solution as this key name is
     // coded into the RenderableGlobe. Instead, the parent should unpack the dictionary

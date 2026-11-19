@@ -35,7 +35,7 @@ namespace openspace {
 
 class RenderableSphereSpout : public RenderableSphere {
 public:
-    explicit RenderableSphereSpout(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphereSpout(const Dictionary& dictionary);
 
     void deinitializeGL() override;
     void update(const UpdateData& data) override;
@@ -43,7 +43,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
     SpoutReceiverPropertyProxy _spoutReceiver;
 };

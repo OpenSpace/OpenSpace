@@ -1,6 +1,5 @@
 local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 local coreKernels = asset.require("spice/core")
-local uranusKernels = asset.require("./kernels")
 
 
 
@@ -11,7 +10,7 @@ local UranusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = uranusKernels.ID.Uranus,
+      Target = coreKernels.ID.UranusBarycenter,
       Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.60, 0.95, 1.00 },

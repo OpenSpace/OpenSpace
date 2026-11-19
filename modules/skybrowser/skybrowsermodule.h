@@ -29,10 +29,10 @@
 
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
+#include <openspace/glm.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 
 namespace openspace {
@@ -67,6 +67,7 @@ public:
     double spaceCraftAnimationTime() const;
 
     std::string wwtImageCollectionUrl() const;
+    std::string wwtBrowserUrl() const;
 
     bool isCameraInSolarSystem() const;
     bool isSelectedPairFacingCamera() const;
@@ -91,7 +92,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void internalInitialize(const ghoul::Dictionary& dict) override;
+    void internalInitialize(const Dictionary& dict) override;
 
 private:
     void incrementallyRotateCamera();
@@ -106,6 +107,7 @@ private:
     BoolProperty _synchronizeAim;
     DoubleProperty _spaceCraftAnimationTime;
     StringProperty _wwtImageCollectionUrl;
+    StringProperty _wwtBrowserUrl;
 
     // The browsers and targets
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;

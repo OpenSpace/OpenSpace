@@ -24,20 +24,21 @@
 
 #include <openspace/util/httprequest.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <curl/curl.h>
 #include <array>
 #include <cstdint>
+#include <system_error>
 #include <utility>
 
 namespace openspace {
 
-HttpRequest::HttpRequest(std::string url, ghoul::logging::LogLevel failureVerbosity)
+HttpRequest::HttpRequest(std::string url, logging::LogLevel failureVerbosity)
     : _url(std::move(url))
     , _failureVerbosity(failureVerbosity)
 {
-    ghoul_assert(!_url.empty(), "url must not be empty");
+    assert_msg(!_url.empty(), "url must not be empty");
 }
 
 void HttpRequest::onProgress(ProgressCallback cb) {
@@ -61,6 +62,9 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
     curl_easy_setopt(curl, CURLOPT_URL, _url.data());
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace");
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    // cURL would otherwise also follow URLs to local files or to a number of legacy
+    // protocols
+    curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, "http,https,ftp,ftps");
 
     // The leading + in all of the lambda expressions are to cause an implicit conversion
     // to a standard C function pointer. Since the `curl_easy_setopt` function just takes
@@ -153,7 +157,7 @@ const std::string& HttpRequest::url() const {
 
 
 
-HttpDownload::HttpDownload(std::string url, ghoul::logging::LogLevel failureVerbosity)
+HttpDownload::HttpDownload(std::string url, logging::LogLevel failureVerbosity)
     : _httpRequest(std::move(url), failureVerbosity)
 {
     _httpRequest.onData([this](char* buffer, size_t size) {
@@ -186,12 +190,21 @@ bool HttpDownload::hasSucceeded() const {
 }
 
 void HttpDownload::start(std::chrono::milliseconds timeout) {
-    if (_isDownloading) {
+    if (_isDownloading.exchange(true)) {
         return;
     }
-    _isDownloading = true;
-    _downloadThread = std::thread([this, timeout]() {
+
+    if (_downloadThread.joinable()) {
+        _downloadThread.join();
+    }
+
+    {
+        const std::lock_guard lock(_downloadFinishMutex);
         _isFinished = false;
+        _isSuccessful = false;
+    }
+
+    _downloadThread = std::thread([this, timeout]() {
         LTRACEC("HttpDownload", std::format("Start download '{}'", _httpRequest.url()));
 
         const bool setupSuccess = setup();
@@ -205,7 +218,12 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
             _isSuccessful = false;
         }
 
-        _isFinished = true;
+        {
+            // Setting the flag while holding the mutex prevents the notification from
+            // being lost if `wait` is between its predicate check and going to sleep
+            const std::lock_guard lock(_downloadFinishMutex);
+            _isFinished = true;
+        }
         if (_isSuccessful) {
             LTRACEC(
                 "HttpDownload",
@@ -225,16 +243,21 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
 }
 
 void HttpDownload::cancel() {
-    _shouldCancel = true;
+    {
+        const std::lock_guard lock(_downloadFinishMutex);
+        _shouldCancel = true;
+    }
+    _downloadFinishCondition.notify_all();
 }
 
 bool HttpDownload::wait() {
-    std::mutex conditionMutex;
-    std::unique_lock lock(conditionMutex);
-    _downloadFinishCondition.wait(
-        lock,
-        [this]() { return _isFinished || _shouldCancel; }
-    );
+    {
+        std::unique_lock lock(_downloadFinishMutex);
+        _downloadFinishCondition.wait(
+            lock,
+            [this]() { return _isFinished || _shouldCancel; }
+        );
+    }
     if (_downloadThread.joinable()) {
         _downloadThread.join();
     }
@@ -257,14 +280,13 @@ std::atomic_int HttpFileDownload::nCurrentFileHandles = 0;
 std::mutex HttpFileDownload::_directoryCreationMutex;
 
 HttpFileDownload::HttpFileDownload(std::string url, std::filesystem::path destination,
-                                   Overwrite overwrite,
-                                   ghoul::logging::LogLevel failureVerbosity
+                                   Overwrite overwrite, logging::LogLevel failureVerbosity
 )
     : HttpDownload(std::move(url), failureVerbosity)
     , _destination(std::move(destination))
 {
     if (!overwrite && std::filesystem::is_regular_file(_destination)) {
-        throw ghoul::RuntimeError(std::format("File '{}' already exists", _destination));
+        throw RuntimeError(std::format("File '{}' already exists", _destination));
     }
 }
 
@@ -277,17 +299,30 @@ bool HttpFileDownload::setup() {
         }
     }
 
-    while (nCurrentFileHandles >= MaxFileHandles) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    // Take one of the limited file handles, waiting until one becomes available. The
+    // check and the increment have to happen atomically, or multiple downloads could
+    // take the last handle at the same time
+    int nHandles = nCurrentFileHandles;
+    while (nHandles >= MaxFileHandles ||
+           !nCurrentFileHandles.compare_exchange_weak(nHandles, nHandles + 1))
+    {
+        if (nHandles >= MaxFileHandles) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            nHandles = nCurrentFileHandles;
+        }
     }
 
-    nCurrentFileHandles++;
     _hasHandle = true;
     _file = std::ofstream(_destination, std::ofstream::binary);
 
     if (_file.good()) {
         return true;
     }
+
+    // The teardown is not called when the setup fails, so the handle has to be returned
+    // here. This does not modify `errno` or the Windows last error used below
+    _hasHandle = false;
+    nCurrentFileHandles--;
 
 #ifdef WIN32
     // GetLastError() gives more details than errno.
@@ -298,8 +333,7 @@ bool HttpFileDownload::setup() {
     }
     std::array<char, 256> Buffer;
     size_t size = FormatMessageA(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-            FORMAT_MESSAGE_IGNORE_INSERTS,
+        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
         nullptr,
         errorId,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -316,26 +350,20 @@ bool HttpFileDownload::setup() {
     return false;
 #else // ^^^^ WIN32 / !WIN32 vvvv
     if (errno) {
-#ifdef __unix__
-        std::array<char, 256> buffer;
+        // `strerror_r` cannot be called directly here since it has two incompatible
+        // signatures: glibc's version returns a `char*`, whereas the POSIX one that musl
+        // provides returns an `int` and only fills the buffer. `generic_category` wraps
+        // whichever of the two the standard library was built against, and is thread-safe
+        // either way, unlike a plain `strerror`
         LERRORC(
             "HttpFileDownload",
             std::format(
                 "Cannot open file '{}': {}",
                 _destination,
-                std::string(strerror_r(errno, buffer.data(), sizeof(buffer)))
+                std::generic_category().message(errno)
             )
         );
         return false;
-#else // ^^^^ __unix__ / !__unix__ vvvv
-        LERRORC(
-            "HttpFileDownload",
-            std::format(
-                "Cannot open file '{}': {}", _destination, std::string(strerror(errno))
-            )
-        );
-        return false;
-#endif // __unix__
     }
 
     LERRORC("HttpFileDownload", std::format("Cannot open file '{}'", _destination));
@@ -352,7 +380,7 @@ bool HttpFileDownload::teardown() {
         _hasHandle = false;
         _file.close();
         nCurrentFileHandles--;
-        ghoul_assert(nCurrentFileHandles >= 0, "More handles returned than taken out");
+        assert_msg(nCurrentFileHandles >= 0, "More handles returned than taken out");
         return _file.good();
     }
     else {
@@ -368,7 +396,7 @@ bool HttpFileDownload::handleData(char* buffer, size_t size) {
 
 
 HttpMemoryDownload::HttpMemoryDownload(std::string url,
-                                       ghoul::logging::LogLevel failureVerbosity)
+                                       logging::LogLevel failureVerbosity)
     : HttpDownload(std::move(url), failureVerbosity)
 {}
 

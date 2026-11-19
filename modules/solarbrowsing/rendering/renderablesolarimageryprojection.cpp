@@ -28,6 +28,11 @@
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/transferfunction.h>
@@ -35,11 +40,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/programobject.h>
 #include <format>
 #include <fstream>
 #include <limits>
@@ -81,7 +81,7 @@ openspace::Documentation RenderableSolarImageryProjection::Documentation() {
 }
 
 RenderableSolarImageryProjection::RenderableSolarImageryProjection(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
     : Renderable(dictionary)
     , _sphere(static_cast<float>(distanceconstants::SolarRadius), 100)
 {
@@ -92,7 +92,7 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
         SceneGraphNode* dependentNode = sceneGraphNode(nodeName);
 
         if (!dependentNode) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Specified dependent node '{}' did not exist", nodeName
             ));
         }
@@ -100,7 +100,7 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
         RenderableSolarImagery* renderableSolarImagery =
             dynamic_cast<RenderableSolarImagery*>(dependentRenderable);
         if (!renderableSolarImagery) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Specified dependent node '{}' that was not a RenderableSolarImagery",
                 nodeName
             ));
@@ -119,7 +119,7 @@ void RenderableSolarImageryProjection::initializeGL() {
 
     _shader = BaseModule::ProgramObjectManager.request(
         "SpacecraftImageSphereProgram",
-        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [&]() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "SpacecraftImageSphereProgram",
                 vertexShader,
@@ -134,7 +134,7 @@ void RenderableSolarImageryProjection::initializeGL() {
 void RenderableSolarImageryProjection::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         "SpacecraftImageSphereProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -177,8 +177,8 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
     const int numPlanes = static_cast<int>(_solarImageryDependencies.size());
     int solarImageryCount = 0;
 
-    ghoul::opengl::TextureUnit textureImageryUnits[MaxSpacecraftObservatories];
-    ghoul::opengl::TextureUnit transferFunctionUnits[MaxSpacecraftObservatories];
+    opengl::TextureUnit textureImageryUnits[MaxSpacecraftObservatories];
+    opengl::TextureUnit transferFunctionUnits[MaxSpacecraftObservatories];
 
     for (int i = 0; i < numPlanes && i < MaxSpacecraftObservatories; i++) {
         RenderableSolarImagery* solarImagery = static_cast<RenderableSolarImagery*>(

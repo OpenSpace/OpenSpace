@@ -24,9 +24,9 @@
 
 #include <modules/gaia/tasks/readfilejob.h>
 
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
 #include <cmath>
 #include <string_view>
 #include <unordered_map>
@@ -62,9 +62,7 @@ void ReadFileJob::execute() {
     );
 
     if (!table) {
-        throw ghoul::RuntimeError(std::format(
-            "Failed to open Fits file '{}'", _inFilePath
-        ));
+        throw RuntimeError(std::format("Failed to open Fits file '{}'", _inFilePath));
     }
 
     const int nStars = table->readRows - _firstRow + 1;
@@ -164,7 +162,7 @@ void ReadFileJob::execute() {
             pmdec[i] = 0.f;
         }
 
-        // Convert Proper Motion from ICRS [Ra,Dec] to Galactic Tanget Vector [l,b]
+        // Convert Proper Motion from ICRS [Ra,Dec] to Galactic Tangent Vector [l,b]
         const glm::vec3 uICRS = glm::vec3(
             -std::sin(glm::radians(ra[i])) * pmra[i] -
                 std::cos(glm::radians(ra[i])) * std::sin(glm::radians(dec[i])) * pmdec[i],

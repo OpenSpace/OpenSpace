@@ -25,11 +25,11 @@
 #include <modules/globebrowsing/src/geojson/globegeometryhelper.h>
 
 #include <modules/globebrowsing/src/renderableglobe.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryCollection.h>
@@ -276,7 +276,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
         }
     }
 
-    // Add egde positions
+    // Add edge positions
     for (size_t i = 0; i < maxSteps; i++) {
         if (i < edge01.size() - 1) {
             const Geodetic3 geo = {

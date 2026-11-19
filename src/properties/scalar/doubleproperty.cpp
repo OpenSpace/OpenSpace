@@ -24,29 +24,28 @@
 
 #include <openspace/properties/scalar/doubleproperty.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-DoubleProperty::DoubleProperty(PropertyInfo info, double value, double minValue,
-                               double maxValue, double stepValue)
-    : NumericalProperty<double>(std::move(info), value, minValue, maxValue, stepValue)
+DoubleProperty::DoubleProperty(DoublePropertyInfo info)
+    : NumericalProperty<double>(std::move(info))
 {}
 
 std::string_view DoubleProperty::className() const {
     return "DoubleProperty";
 }
 
-ghoul::lua::LuaTypes DoubleProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes DoubleProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void DoubleProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 double DoubleProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<double>(state);
+    return lua::value<double>(state);
 }
 
 std::string DoubleProperty::stringValue() const {
@@ -64,6 +63,7 @@ nlohmann::json DoubleProperty::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": { "type": "number" }
           },
           "additionalProperties": false,

@@ -30,16 +30,16 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/touchinputstate.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <algorithm>
 #include <functional>
 #include <optional>
@@ -50,23 +50,32 @@ using namespace TUIO;
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TuioPortInfo = {
-        "TuioPort",
-        "TUIO Port",
-        "TUIO UDP port, by default 3333. The port cannot be changed after startup.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo TuioPortInfo = {
+        .identifier = "TuioPort",
+        .name = "TUIO Port",
+        .description = "TUIO UDP port. The port cannot be changed after startup.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 3333,
+            .minMax = { 1, 65535 }
+        }
     };
 
-    constexpr Property::PropertyInfo EventsInfo = {
-        "DetectedTouchEvent",
-        "Detected touch event",
-        "True when there is an active touch TUIO event.",
-        Property::Visibility::Hidden
+    constexpr BoolPropertyInfo EventsInfo = {
+        .identifier = "DetectedTouchEvent",
+        .name = "Detected touch event",
+        .description = "True when there is an active touch TUIO event.",
+        .visibility = Visibility::Hidden,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = false
+        }
     };
 
     struct [[codegen::Dictionary(TouchModule)]] Parameters {
-        // [[codegen::verbatim(TuioPortInfo.description)]]
-        std::optional<int> tuioPort [[codegen::inrange(1, 65535)]];
+        std::optional<int> tuioPort
+            [[codegen::Info(TuioPortInfo), codegen::inrange(1, 65535)]];
     };
 } // namespace
 #include "touchmodule_codegen.cpp"
@@ -75,13 +84,10 @@ namespace openspace {
 
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
-    , _tuioPort(TuioPortInfo, 3333, 1, 65535)
-    , _hasActiveTouchEvent(EventsInfo, false)
+    , _tuioPort(TuioPortInfo)
+    , _hasActiveTouchEvent(EventsInfo)
 {
-    _tuioPort.setReadOnly(true);
     addProperty(_tuioPort);
-
-    _hasActiveTouchEvent.setReadOnly(true);
     addProperty(_hasActiveTouchEvent);
 }
 
@@ -89,7 +95,7 @@ TouchModule::~TouchModule() {
     // intentionally left empty
 }
 
-void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
+void TouchModule::internalInitialize(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     _tuioPort = p.tuioPort.value_or(_tuioPort);

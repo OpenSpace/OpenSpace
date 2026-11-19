@@ -26,23 +26,23 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <utility>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "URL",
-        "Image URL",
-        "A URL to an image to use as a texture for this sphere. The image is expected to "
-        "be an equirectangular projection.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "URL",
+        .name = "Image URL",
+        .description = "A URL to an image to use as a texture for this sphere. The image "
+            "is expected to be an equirectangular projection.",
+        .visibility = Visibility::User
     };
 
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(const std::string& url)
@@ -73,8 +73,7 @@ namespace {
     // and hence expects an equirectangular image. However, it can also be used to show
     // fisheye images by changing the `TextureProjection`.
     struct [[codegen::Dictionary(RenderableSphereImageOnline)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::string url [[codegen::key("URL")]];
+        std::string url [[codegen::Info(TextureInfo), codegen::key("URL")]];
     };
 } // namespace
 #include "renderablesphereimageonline_codegen.cpp"
@@ -88,8 +87,7 @@ Documentation RenderableSphereImageOnline::Documentation() {
     );
 }
 
-RenderableSphereImageOnline::RenderableSphereImageOnline(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableSphereImageOnline::RenderableSphereImageOnline(const Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _textureUrl(TextureInfo)
 {
@@ -123,9 +121,12 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
     }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
+            // The download is not attempted again until the URL changes, as it would
+            // otherwise be restarted in every frame
+            _textureIsDirty = false;
             LERRORC(
                 "RenderableSphereImageOnline",
                 std::format("Error loading image from URL '{}'", _textureUrl.value())
@@ -134,24 +135,24 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            _texture = ghoul::io::texture::loadTexture(
-                reinterpret_cast<void*>(imageFile.buffer),
-                imageFile.size,
+            _texture = io::texture::loadTexture(
+                imageFile.buffer.data(),
+                imageFile.buffer.size(),
                 2,
-                { .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap },
+                { .filter = opengl::Texture::FilterMode::LinearMipMap },
                 imageFile.format
             );
 
             _textureIsDirty = false;
         }
-        catch (const ghoul::io::texture::InvalidLoadException& e) {
+        catch (const io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }
     }
 }
 
-void RenderableSphereImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderableSphereImageOnline::bindTexture(opengl::TextureUnit& unit) {
     if (_texture) {
         unit.bind(*_texture);
     }

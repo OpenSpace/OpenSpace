@@ -24,36 +24,28 @@
 
 #include <openspace/properties/scalar/ulongproperty.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-ULongProperty::ULongProperty(Property::PropertyInfo info, unsigned long value,
-                             unsigned long minValue, unsigned long maxValue,
-                             unsigned long stepValue)
-    : NumericalProperty<unsigned long>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue
-    )
+ULongProperty::ULongProperty(ULongPropertyInfo info)
+    : NumericalProperty<unsigned long>(std::move(info))
 {}
 
 std::string_view ULongProperty::className() const {
     return "ULongProperty";
 }
 
-ghoul::lua::LuaTypes ULongProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes ULongProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void ULongProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 unsigned long ULongProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<unsigned long>(state);
+    return lua::value<unsigned long>(state);
 }
 
 std::string ULongProperty::stringValue() const {
@@ -71,6 +63,7 @@ nlohmann::json ULongProperty::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": { "type": "number" }
           },
           "additionalProperties": false,

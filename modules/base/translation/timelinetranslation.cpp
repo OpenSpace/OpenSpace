@@ -25,22 +25,26 @@
 #include <modules/base/translation/timelinetranslation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/time.h>
-#include <ghoul/misc/dictionary.h>
 #include <optional>
 #include <utility>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ShouldInterpolateInfo = {
-        "ShouldInterpolate",
-        "Should interpolate",
-        "If this value is set to 'true', an interpolation is applied between the given "
-        "keyframes. If this value is set to 'false', the interpolation is not applied.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShouldInterpolateInfo = {
+        .identifier = "ShouldInterpolate",
+        .name = "Should interpolate",
+        .description = "If this value is set to 'true', an interpolation is applied "
+            "between the given keyframes. If this value is set to 'false', the "
+            "interpolation is not applied.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     // Uses a timeline of other `Translation` classes to calculate the final translation
@@ -51,11 +55,10 @@ namespace {
     struct [[codegen::Dictionary(TimelineTranslation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Translation objects.
-        std::map<std::string, ghoul::Dictionary> keyframes
+        std::map<std::string, Dictionary> keyframes
             [[codegen::reference("core_translation")]];
 
-        // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
-        std::optional<bool> shouldInterpolate;
+        std::optional<bool> shouldInterpolate [[codegen::Info(ShouldInterpolateInfo)]];
     };
 } // namespace
 #include "timelinetranslation_codegen.cpp"
@@ -69,16 +72,16 @@ Documentation TimelineTranslation::Documentation() {
     );
 }
 
-TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
+TimelineTranslation::TimelineTranslation(const Dictionary& dictionary)
     : Translation(dictionary)
-    , _shouldInterpolate(ShouldInterpolateInfo, true)
+    , _shouldInterpolate(ShouldInterpolateInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    for (const std::pair<const std::string, ghoul::Dictionary>& kf : p.keyframes) {
+    for (const std::pair<const std::string, Dictionary>& kf : p.keyframes) {
         const double t = Time::convertTime(kf.first);
 
-        ghoul::mm_unique_ptr<Translation> translation =
+        mm_unique_ptr<Translation> translation =
             Translation::createFromDictionary(kf.second);
         translation->setIdentifier(makeIdentifier(kf.first));
         addPropertySubOwner(translation.get());
@@ -91,14 +94,20 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
 
 void TimelineTranslation::initialize() {
     Translation::initialize();
-    for (const Keyframe<ghoul::mm_unique_ptr<Translation>>& kf : _timeline.keyframes()) {
+    for (const Keyframe<mm_unique_ptr<Translation>>& kf : _timeline.keyframes()) {
         kf.data->initialize();
+    }
+}
+
+void TimelineTranslation::setOwnerNode(SceneGraphNode* node) {
+    for (const Keyframe<mm_unique_ptr<Translation>>& kf : _timeline.keyframes()) {
+        kf.data->setOwnerNode(node);
     }
 }
 
 void TimelineTranslation::update(const UpdateData& data) {
     const double now = data.time.j2000Seconds();
-    using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Translation>>*;
+    using KeyframePointer = const Keyframe<mm_unique_ptr<Translation>>*;
 
     if (KeyframePointer prev = _timeline.lastKeyframeBefore(now, true);  prev) {
         prev->data->update(data);
@@ -112,7 +121,7 @@ void TimelineTranslation::update(const UpdateData& data) {
 
 glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {
     const double now = data.time.j2000Seconds();
-    using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Translation>>*;
+    using KeyframePointer = const Keyframe<mm_unique_ptr<Translation>>*;
 
     KeyframePointer prev = _timeline.lastKeyframeBefore(now, true);
     KeyframePointer next = _timeline.firstKeyframeAfter(now, true);

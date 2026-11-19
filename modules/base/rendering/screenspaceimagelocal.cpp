@@ -25,13 +25,13 @@
 #include <modules/base/rendering/screenspaceimagelocal.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <filesystem>
 #include <optional>
 #include <utility>
@@ -39,14 +39,14 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TexturePathInfo = {
-        "TexturePath",
-        "Texture path",
-        "Sets the path of the texture that is displayed on this screen space plane. If "
-        "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. The size of the image will also automatically set the default "
-        "size of this plane.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TexturePathInfo = {
+        .identifier = "TexturePath",
+        .name = "Texture path",
+        .description = "Sets the path of the texture that is displayed on this screen "
+            "space plane. If this value is changed, the image at the new path will "
+            "automatically be loaded and displayed. The size of the image will also "
+            "automatically set the default size of this plane.",
+        .visibility = Visibility::User
     };
 
     // Displays an image from a local file on disk on a plane in screen space.
@@ -56,8 +56,8 @@ namespace {
     struct [[codegen::Dictionary(ScreenSpaceImageLocal)]] Parameters {
         std::optional<std::string> identifier [[codegen::identifier()]];
 
-        // [[codegen::verbatim(TexturePathInfo.description)]]
-        std::optional<std::filesystem::path> texturePath;
+        std::optional<std::filesystem::path> texturePath
+            [[codegen::Info(TexturePathInfo)]];
 
         // If this value is set to true, the image for this plane will not be loaded at
         // startup but rather when plane is shown for the first time. Additionally, if the
@@ -76,7 +76,7 @@ Documentation ScreenSpaceImageLocal::Documentation() {
     );
 }
 
-ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary)
+ScreenSpaceImageLocal::ScreenSpaceImageLocal(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _texturePath(TexturePathInfo)
     , _textureIsDirty(_enabled)
@@ -110,13 +110,13 @@ void ScreenSpaceImageLocal::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
 
     if (!_isLoadingLazily) {
-        _texture = ghoul::io::texture::loadTexture(
+        _texture = io::texture::loadTexture(
             absPath(_texturePath),
             2,
-            ghoul::opengl::Texture::SamplerInit{
+            opengl::Texture::SamplerInit{
                 // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-                //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                //.filter = opengl::Texture::FilterMode::AnisotropicMipMap,
+                .filter = opengl::Texture::FilterMode::LinearMipMap
             }
         );
         _objectSize = _texture->dimensions();
@@ -137,13 +137,13 @@ void ScreenSpaceImageLocal::update() {
     }
 
     if (_textureIsDirty && !_texturePath.value().empty()) [[unlikely]] {
-        _texture = ghoul::io::texture::loadTexture(
+        _texture = io::texture::loadTexture(
             absPath(_texturePath),
             2,
-            ghoul::opengl::Texture::SamplerInit{
+            opengl::Texture::SamplerInit{
                 // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-                //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                //.filter = opengl::Texture::FilterMode::AnisotropicMipMap,
+                .filter = opengl::Texture::FilterMode::LinearMipMap
             }
         );
         _objectSize = _texture->dimensions();
@@ -151,7 +151,7 @@ void ScreenSpaceImageLocal::update() {
     }
 }
 
-void ScreenSpaceImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceImageLocal::bindTexture(opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
         unit.bind(*_texture);
     }

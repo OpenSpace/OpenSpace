@@ -31,13 +31,15 @@
 #include <string_view>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace openspace { struct Documentation; }
+namespace openspace {
+    class Dictionary;
+    struct Documentation;
+} // namespace openspace
 
 namespace openspace::dataloader {
 
 struct DataMapping {
-    static DataMapping createFromDictionary(const ghoul::Dictionary& dictionary);
+    static DataMapping createFromDictionary(const Dictionary& dictionary);
     static openspace::Documentation Documentation();
 
     bool hasExcludeColumns() const;

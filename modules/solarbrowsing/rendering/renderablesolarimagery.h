@@ -28,19 +28,18 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/solarbrowsing/util/structs.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
-
-namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
+namespace opengl { class Texture; }
 class TransferFunction;
 class AsyncImageDecoder;
 
@@ -55,7 +54,7 @@ class AsyncImageDecoder;
 
 class RenderableSolarImagery : public Renderable {
 public:
-    explicit RenderableSolarImagery(const ghoul::Dictionary& dictionary);
+    explicit RenderableSolarImagery(const Dictionary& dictionary);
     ~RenderableSolarImagery() override = default;
 
     void initializeGL() override;
@@ -67,7 +66,7 @@ public:
     static openspace::Documentation Documentation();
 
     TransferFunction* transferFunction();
-    const ghoul::opengl::Texture& imageryTexture() const;
+    const opengl::Texture& imageryTexture() const;
     float contrastValue() const;
     float gammaValue() const;
     float scale() const;
@@ -115,7 +114,7 @@ private:
     IntProperty _predictFramesBefore;
 
     // The decoded image texture
-    std::unique_ptr<ghoul::opengl::Texture> _imageryTexture;
+    std::unique_ptr<opengl::Texture> _imageryTexture;
     size_t _currentKeyframe = NoActiveKeyframe;
     // Data for the currently shown image
     float _currentScale = 0.f;
@@ -140,8 +139,8 @@ private:
     UniformCache(planeOpacity, modelViewProjectionTransform,
         modelViewProjectionTransformPlane, scale, centerPixel) _uniformCacheFrustum;
 
-    ghoul::opengl::ProgramObject* _frustumShader = nullptr;
-    ghoul::opengl::ProgramObject* _planeShader = nullptr;
+    opengl::ProgramObject* _frustumShader = nullptr;
+    opengl::ProgramObject* _planeShader = nullptr;
     GLuint _frustumVao = 0;
     GLuint _frustumPositionBuffer = 0;
     GLuint _quadVao = 0;

@@ -29,26 +29,26 @@
 #include <modules/volume/tasks/generaterawvolumetask.h>
 #include <modules/volume/tasks/generaterawvolumefromfiletask.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
 VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
 
-void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* rFactory =
+void VolumeModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<Renderable>* rFactory =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(rFactory, "No renderable factory existed");
+    assert_msg(rFactory, "No renderable factory existed");
     rFactory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
     rFactory->registerClass<RenderableVectorField>("RenderableVectorField");
 
-    ghoul::TemplateFactory<Task>* tFactory = FactoryManager::ref().factory<Task>();
-    ghoul_assert(tFactory, "No task factory existed");
+    TemplateFactory<Task>* tFactory = FactoryManager::ref().factory<Task>();
+    assert_msg(tFactory, "No task factory existed");
     tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
     tFactory->registerClass<GenerateRawVolumeFromFileTask>(
         "GenerateRawVolumeFromFileTask"

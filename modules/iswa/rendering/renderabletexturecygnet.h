@@ -36,7 +36,7 @@ namespace openspace {
  */
 class RenderableTextureCygnet : public RenderableIswaCygnet {
 public:
-    explicit RenderableTextureCygnet(const ghoul::Dictionary& dictionary);
+    explicit RenderableTextureCygnet(const Dictionary& dictionary);
     ~RenderableTextureCygnet() = default;
 
     static openspace::Documentation Documentation();

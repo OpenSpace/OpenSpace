@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___PATHCURVE___H__
 #define __OPENSPACE_CORE___PATHCURVE___H__
 
-#include <ghoul/glm.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/glm.h>
+#include <openspace/misc/exception.h>
 #include <string>
 #include <vector>
 
@@ -36,11 +36,11 @@ class Waypoint;
 
 class PathCurve {
 public:
-    struct InsufficientPrecisionError final : public ghoul::RuntimeError {
+    struct InsufficientPrecisionError final : public RuntimeError {
         explicit InsufficientPrecisionError(std::string error);
     };
 
-    struct TooShortPathError final : public ghoul::RuntimeError {
+    struct TooShortPathError final : public RuntimeError {
         explicit TooShortPathError(std::string error);
     };
 

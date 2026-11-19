@@ -26,10 +26,10 @@
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <cstdint>
 #include <fstream>
 #include <string_view>
@@ -54,7 +54,7 @@ Documentation ReadSpeckTask::Documentation() {
     return codegen::doc<Parameters>("gaia_task_readspeck", Task::Documentation());
 }
 
-ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
+ReadSpeckTask::ReadSpeckTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _inFilePath = p.inFilePath;
     _outFilePath = p.outFilePath;

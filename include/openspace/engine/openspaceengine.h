@@ -26,7 +26,9 @@
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/glm.h>
 #include <openspace/properties/misc/optionproperty.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -36,7 +38,6 @@
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
 #include <openspace/util/versionchecker.h>
-#include <ghoul/glm.h>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -120,8 +121,8 @@ public:
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
-    Property::Visibility visibility() const;
-    void toggleShutdownMode();
+    Visibility visibility() const;
+    void toggleShutdownMode(std::optional<float> timer = std::nullopt);
 
     Mode currentMode() const;
     bool setMode(Mode newMode);
@@ -164,6 +165,7 @@ private:
     BoolProperty _showPropertyConfirmationDialog;
     FloatProperty _fadeOnEnableDuration;
     BoolProperty _disableAllMouseInputs;
+    FloatProperty _defaultShutdownCountdown;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
@@ -198,8 +200,12 @@ private:
  * absolute position or a go-to-geolocation command using the globebrowsing module.
  *
  * \param p The Profile to be read
- */
-void setCameraFromProfile(const Profile& p);
+ * \param isCameraInteraction If `IsCameraInteraction::Yes`, a change of the anchor node
+ *        caused by setting the camera is treated as a camera interaction, which, for
+ *        example, aborts an ongoing idle motion
+*/
+void setCameraFromProfile(const Profile& p,
+    OrbitalNavigator::IsCameraInteraction isCameraInteraction);
 
 /**
  * Reads a list of modules from a profile, and executes scripts based on whether or not

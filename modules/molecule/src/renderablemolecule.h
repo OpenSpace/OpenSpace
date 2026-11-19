@@ -43,7 +43,7 @@ namespace openspace {
 
 class RenderableMolecule : public Renderable {
 public:
-    explicit RenderableMolecule(const ghoul::Dictionary& dictionary);
+    explicit RenderableMolecule(const Dictionary& dictionary);
     ~RenderableMolecule() override;
 
     void initializeGL() override;

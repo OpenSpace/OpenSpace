@@ -31,10 +31,9 @@
 #include <set>
 #include <vector>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
 
+namespace opengl { class Texture; }
 class TSP;
 
 class AtlasManager {
@@ -54,7 +53,7 @@ public:
     unsigned int atlasMapBuffer() const;
 
     void pboToAtlas(BufferIndex bufferIndex);
-    ghoul::opengl::Texture& textureAtlas();
+    opengl::Texture& textureAtlas();
 
     unsigned int numDiskReads() const;
     unsigned int numUsedBricks() const;
@@ -69,7 +68,7 @@ private:
     unsigned int _pboHandle[2];
     unsigned int _atlasMapBuffer;
 
-    ghoul::opengl::Texture* _textureAtlas = nullptr;
+    opengl::Texture* _textureAtlas = nullptr;
 
     // Stats
     unsigned int _nUsedBricks = 0;

@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___EVENT_HANDLER___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___EVENT_HANDLER___H__
 
+#include <openspace/glm.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
-#include <ghoul/glm.h>
 #include <chrono>
 
 #ifdef _MSC_VER

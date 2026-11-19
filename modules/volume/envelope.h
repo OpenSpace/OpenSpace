@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___ENVELOPE___H__
 #define __OPENSPACE_MODULE_VOLUME___ENVELOPE___H__
 
+#include <openspace/glm.h>
 #include <openspace/json.h>
-#include <ghoul/glm.h>
 #include <string>
 #include <utility>
 #include <vector>

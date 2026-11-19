@@ -24,35 +24,28 @@
 
 #include <openspace/properties/vector/dvec3property.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-DVec3Property::DVec3Property(PropertyInfo info, glm::dvec3 value, glm::dvec3 minValue,
-                             glm::dvec3 maxValue, glm::dvec3 stepValue)
-    : NumericalProperty<glm::dvec3>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+DVec3Property::DVec3Property(DVec3PropertyInfo info)
+    : NumericalProperty<glm::dvec3>(std::move(info))
 {}
 
 std::string_view DVec3Property::className() const {
     return "DVec3Property";
 }
 
-ghoul::lua::LuaTypes DVec3Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes DVec3Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void DVec3Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::dvec3 DVec3Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::dvec3>(state);
+    return lua::value<glm::dvec3>(state);
 }
 
 std::string DVec3Property::stringValue() const {
@@ -72,6 +65,7 @@ nlohmann::json DVec3Property::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": {
               "type": "array",
               "items": { "type": "number" },

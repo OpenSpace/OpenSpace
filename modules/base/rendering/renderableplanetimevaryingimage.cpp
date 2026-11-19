@@ -26,15 +26,15 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <iterator>
 
@@ -43,17 +43,17 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";
 
-    constexpr Property::PropertyInfo SourceFolderInfo = {
-        "SourceFolder",
-        "Source folder",
-        "An image directory that is loaded from disk and contains the textures to use "
-        "for this plane.",
-       Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo SourceFolderInfo = {
+        .identifier = "SourceFolder",
+        .name = "Source folder",
+        .description = "An image directory that is loaded from disk and contains the "
+            "textures to use for this plane.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
-        // [[codegen::verbatim(SourceFolderInfo.description)]]
-        std::filesystem::path sourceFolder [[codegen::directory()]];
+        std::filesystem::path sourceFolder
+            [[codegen::Info(SourceFolderInfo), codegen::directory()]];
 
         // If set to `true` the images are only loaded when it is about to be shown
         // instead of preloading them.
@@ -72,7 +72,7 @@ Documentation RenderablePlaneTimeVaryingImage::Documentation() {
 }
 
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
     : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
     , _sourceFolder(SourceFolderInfo)
 {
@@ -111,10 +111,7 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
 
     _textureFiles.resize(_sourceFiles.size());
     for (size_t i = 0; i < _sourceFiles.size(); i++) {
-        _textureFiles[i] = ghoul::io::texture::loadTexture(
-            absPath(_sourceFiles[i]),
-            2
-        );
+        _textureFiles[i] = io::texture::loadTexture(absPath(_sourceFiles[i]), 2);
     }
     if (!_isLoadingLazily) {
         _texture = loadTexture();
@@ -154,7 +151,7 @@ void RenderablePlaneTimeVaryingImage::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneTimeVaryingImage::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderablePlaneTimeVaryingImage::bindTexture(opengl::TextureUnit& unit) {
     if (_texture && !_textureIsDirty) {
         unit.bind(*_texture);
     }
@@ -207,7 +204,7 @@ void RenderablePlaneTimeVaryingImage::render(const RenderData& data, RendererTas
     }
 }
 
-// Requires time to be formated as such: 'YYYY-MM-DDTHH-MM-SS-XXX'
+// Requires time to be formatted as such: 'YYYY-MM-DDTHH-MM-SS-XXX'
 void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {
     for (const std::filesystem::path& filePath : _sourceFiles) {
         // Extract the filename from the path (without extension)
@@ -254,8 +251,8 @@ void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
     }
 }
 
-ghoul::opengl::Texture* RenderablePlaneTimeVaryingImage::loadTexture() const {
-    ghoul::opengl::Texture* texture = nullptr;
+opengl::Texture* RenderablePlaneTimeVaryingImage::loadTexture() const {
+    opengl::Texture* texture = nullptr;
     if (_activeTriggerTimeIndex != -1) {
         texture = _textureFiles[_activeTriggerTimeIndex].get();
     }

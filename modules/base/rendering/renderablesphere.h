@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -34,16 +35,15 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/sphere.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
-
-namespace ghoul::opengl { class TextureUnit; }
 
 namespace openspace {
 
+namespace opengl { class TextureUnit; }
+
 class RenderableSphere : public Renderable {
 public:
-    explicit RenderableSphere(const ghoul::Dictionary& dictionary,
+    explicit RenderableSphere(const Dictionary& dictionary,
         RenderableSettings settings = RenderableSettings());
 
     void initializeGL() override;
@@ -55,7 +55,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    virtual void bindTexture(ghoul::opengl::TextureUnit& unit) = 0;
+    virtual void bindTexture(opengl::TextureUnit& unit) = 0;
     virtual void unbindTexture();
 
     FloatProperty _size;
@@ -72,7 +72,7 @@ protected:
     BoolProperty _disableDepth;
 
     glm::vec2 _dataMinMaxValues;
-    ghoul::opengl::ProgramObject* _shader = nullptr;
+    opengl::ProgramObject* _shader = nullptr;
     BoolProperty _useColorMap;
 
 private:

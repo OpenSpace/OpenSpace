@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___ORBITALCAMERASTATES___H__
 
 #include <openspace/navigation/orbitalnavigator/dampenedvelocity.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 
 namespace openspace {
 

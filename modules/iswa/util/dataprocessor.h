@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__
 #define __OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__
 
+#include <openspace/glm.h>
 #include <openspace/util/histogram.h>
-#include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
 #include <memory>
 #include <set>

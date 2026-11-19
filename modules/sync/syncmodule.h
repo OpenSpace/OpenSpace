@@ -44,7 +44,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
+    void internalInitialize(const Dictionary& configuration) override;
 
 private:
     std::vector<std::string> _synchronizationRepositories;

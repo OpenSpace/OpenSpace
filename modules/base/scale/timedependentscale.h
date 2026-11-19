@@ -35,7 +35,7 @@ namespace openspace {
 
 class TimeDependentScale : public Scale {
 public:
-    explicit TimeDependentScale(const ghoul::Dictionary& dictionary);
+    explicit TimeDependentScale(const Dictionary& dictionary);
 
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 

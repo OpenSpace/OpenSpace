@@ -59,7 +59,7 @@ struct SchemaMember {
     bool isOptional = false;
 
     /// Full documentation text shown in the documentation panel
-    std::string documentation;
+    std::string_view documentation;
 
     /// Short description, used to describe type or ranges
     std::string description;

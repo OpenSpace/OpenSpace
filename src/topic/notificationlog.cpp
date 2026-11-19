@@ -29,8 +29,8 @@
 namespace openspace {
 
 NotificationLog::NotificationLog(CallbackFunction callbackFunction,
-                                 ghoul::logging::LogLevel minimumLogLevel)
-    : ghoul::logging::Log(
+                                 logging::LogLevel minimumLogLevel)
+    : logging::Log(
         TimeStamping::Yes,
         DateStamping::Yes,
         CategoryStamping::Yes,
@@ -40,7 +40,7 @@ NotificationLog::NotificationLog(CallbackFunction callbackFunction,
     , _callbackFunction(std::move(callbackFunction))
 {}
 
-void NotificationLog::log(ghoul::logging::LogLevel level, std::string_view category,
+void NotificationLog::log(logging::LogLevel level, std::string_view category,
                           std::string_view message)
 {
     ZoneScoped;

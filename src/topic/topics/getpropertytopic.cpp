@@ -26,10 +26,10 @@
 
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/topic/jsonconverters.h>
-#include <ghoul/logging/logmanager.h>
 
 using nlohmann::json;
 
@@ -125,7 +125,7 @@ json GetPropertyTopic::propertyFromKey(const std::string& key) {
         return response;
     }
 
-    throw ghoul::RuntimeError(std::format("Property '{}' not found", key));
+    throw RuntimeError(std::format("Property '{}' not found", key));
 }
 
 } // namespace openspace

@@ -26,13 +26,13 @@
 
 #include <openspace/data/dataloader.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/format.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -43,49 +43,52 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableConstellationsBase";
 
-    constexpr Property::PropertyInfo NamesFileInfo = {
-        "NamesFile",
-        "Constellation names file path",
-        "Specifies the file that contains the mapping between constellation "
-        "abbreviations and full names of the constellations. If this value is empty, the "
-        "abbreviations are used as the full names.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo NamesFileInfo = {
+        .identifier = "NamesFile",
+        .name = "Constellation names file path",
+        .description = "Specifies the file that contains the mapping between "
+            "constellation abbreviations and full names of the constellations. If this "
+            "value is empty, the abbreviations are used as the full names.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The line width used for the constellation shape.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The line width used for the constellation shape.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 1.f, 16.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SelectionInfo = {
-        "ConstellationSelection",
-        "Constellation selection",
-        "The selected constellations are displayed on the celestial sphere.",
-        Property::Visibility::NoviceUser
+    constexpr SelectionPropertyInfo SelectionInfo = {
+        .identifier = "ConstellationSelection",
+        .name = "Constellation selection",
+        .description = "The selected constellations are displayed on the celestial "
+            "sphere.",
+        .visibility = Visibility::NoviceUser
     };
 
-    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
-        "Labels",
-        "Labels",
-        "The labels for the constellations."
+    constexpr PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+        .identifier = "Labels",
+        .name = "Labels",
+        .description = "The labels for the constellations."
     };
 
     struct [[codegen::Dictionary(RenderableConstellationsBase)]] Parameters {
-        // [[codegen::verbatim(NamesFileInfo.description)]]
-        std::optional<std::filesystem::path> namesFile;
+        std::optional<std::filesystem::path> namesFile [[codegen::Info(NamesFileInfo)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greater(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greater(0.f)]];
 
         // A list of constellations (given as abbreviations) to show. If empty or
         // excluded, all constellations will be shown.
         std::optional<std::vector<std::string>> selection;
 
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("core_labelscomponent")]];
+        std::optional<Dictionary> labels
+            [[codegen::Info(LabelsInfo), codegen::reference("core_labelscomponent")]];
     };
 } // namespace
 #include "renderableconstellationsbase_codegen.cpp"
@@ -99,10 +102,9 @@ Documentation RenderableConstellationsBase::Documentation() {
     );
 }
 
-RenderableConstellationsBase::RenderableConstellationsBase(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableConstellationsBase::RenderableConstellationsBase(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
+    , _lineWidth(LineWidthInfo)
     , _selection(SelectionInfo)
     , _namesFilename(NamesFileInfo)
 {
@@ -146,7 +148,7 @@ std::string RenderableConstellationsBase::constellationFullName(
         return _namesTranslation.at(identifier);
     }
 
-    throw ghoul::RuntimeError(std::format(
+    throw RuntimeError(std::format(
         "Identifier '{}' could not be found in list of constellations", identifier
     ));
 }
@@ -167,7 +169,7 @@ void RenderableConstellationsBase::loadConstellationFile() {
 
     std::string line;
     while (file.good()) {
-        ghoul::getline(file, line);
+        openspace::getline(file, line);
         if (line.empty()) {
             continue;
         }
@@ -177,8 +179,8 @@ void RenderableConstellationsBase::loadConstellationFile() {
         s >> abbreviation;
 
         std::string fullName;
-        ghoul::getline(s, fullName);
-        ghoul::trimWhitespace(fullName);
+        openspace::getline(s, fullName);
+        trimWhitespace(fullName);
         _namesTranslation[abbreviation] = fullName;
     }
 

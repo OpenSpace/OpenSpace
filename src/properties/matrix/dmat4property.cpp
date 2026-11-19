@@ -24,35 +24,28 @@
 
 #include <openspace/properties/matrix/dmat4property.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-DMat4Property::DMat4Property(PropertyInfo info, glm::dmat4x4 value, glm::dmat4x4 minValue,
-                             glm::dmat4x4 maxValue, glm::dmat4x4 stepValue)
-    : NumericalProperty<glm::dmat4x4>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+DMat4Property::DMat4Property(DMat4PropertyInfo info)
+    : NumericalProperty<glm::dmat4x4>(std::move(info))
 {}
 
 std::string_view DMat4Property::className() const {
     return "DMat4Property";
 }
 
-ghoul::lua::LuaTypes DMat4Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes DMat4Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void DMat4Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::dmat4 DMat4Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::dmat4>(state);
+    return lua::value<glm::dmat4>(state);
 }
 
 std::string DMat4Property::stringValue() const {
@@ -70,6 +63,7 @@ nlohmann::json DMat4Property::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": {
               "type": "array",
               "items": { "type": "number" },

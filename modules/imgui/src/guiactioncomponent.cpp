@@ -30,9 +30,9 @@
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringconversion.h>
 #include <openspace/util/keys.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringconversion.h>
 #include <set>
 #include <utility>
 
@@ -58,10 +58,10 @@ void GuiActionComponent::render() {
     CaptionText("Keybindings");
     for (const std::pair<const K, V>& p : binds) {
         boundActions.insert(p.second);
-        if (ImGui::Button(ghoul::to_string(p.first).c_str())) {
+        if (ImGui::Button(to_string(p.first).c_str())) {
             global::actionManager->triggerAction(
                 p.second,
-                ghoul::Dictionary(),
+                Dictionary(),
                 ActionManager::ShouldBeSynchronized::Yes,
                 ActionManager::ShouldBeLogged::Yes
             );
@@ -89,7 +89,7 @@ void GuiActionComponent::render() {
         if (ImGui::Button(action.identifier.c_str())) {
             global::actionManager->triggerAction(
                 action.command,
-                ghoul::Dictionary(),
+                Dictionary(),
                 ActionManager::ShouldBeSynchronized::Yes,
                 ActionManager::ShouldBeLogged::Yes
             );

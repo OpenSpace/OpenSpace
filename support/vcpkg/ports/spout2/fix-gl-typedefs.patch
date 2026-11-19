@@ -1,0 +1,28 @@
+Subject: [PATCH] guard the fallback GL typedefs behind SPOUT_NO_GL_TYPEDEFS
+---
+SpoutLibrary.h unconditionally re-declares `GLuint`/`GLenum` as `unsigned int` (and
+`#define`s `GL_RGBA`) to avoid needing to include `GL.h`. A consumer that already has real
+OpenGL type declarations in scope (e.g. glbinding's `gl::GLenum`, which is a scoped enum,
+not a plain integer typedef) gets an ambiguous-symbol error merely from including this
+header, and `GL_RGBA` there stops being usable as an enumerator name because it has become
+a macro. Guard the fallback declarations so such a consumer can `#define
+SPOUT_NO_GL_TYPEDEFS` before including this header and supply its own real GL types
+instead.
+Index: SPOUTSDK/SpoutLibrary/SpoutLibrary.h
+===================================================================
+--- a/SPOUTSDK/SpoutLibrary/SpoutLibrary.h
++++ b/SPOUTSDK/SpoutLibrary/SpoutLibrary.h
+@@ -37,11 +37,13 @@
+ #include <windows.h>
+ #include <string>
+ 
++#ifndef SPOUT_NO_GL_TYPEDEFS
+ // Re-define to avoid include of GL.h 
+ typedef unsigned int GLuint;
+ typedef unsigned int GLenum;
+ #ifndef GL_RGBA
+ #define GL_RGBA 0x1908
+ #endif
++#endif // SPOUT_NO_GL_TYPEDEFS
+ 
+ #define SPOUTLIBRARY_EXPORTS // defined for this DLL. The application imports rather than exports

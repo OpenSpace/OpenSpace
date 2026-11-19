@@ -27,12 +27,12 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/misc/dictionary.h>
 #include <array>
 #include <cmath>
 #include <cstddef>
@@ -80,7 +80,7 @@ Documentation RenderableCrawlingLine::Documentation() {
     );
 }
 
-RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictionary)
+RenderableCrawlingLine::RenderableCrawlingLine(const Dictionary& dictionary)
     : Renderable(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

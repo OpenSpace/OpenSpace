@@ -27,19 +27,19 @@
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <cstddef>
 #include <filesystem>
@@ -58,153 +58,178 @@ namespace {
         glm::vec3 normal;
     };
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Enable/Disable Rings.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Enable/Disable Rings.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for these rings.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "This value is the path to a texture on disk that contains a "
+            "one-dimensional texture which is used for these rings.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TextureFwrdInfo = {
-        "TextureFwrd",
-        "Texture forward",
-        "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for forward scattering light in these rings.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureFwrdInfo = {
+        .identifier = "TextureFwrd",
+        .name = "Texture forward",
+        .description = "This value is the path to a texture on disk that contains a "
+            "one-dimensional texture which is used for forward scattering light in these "
+            "rings.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TextureBckwrdInfo = {
-        "TextureBckwrd",
-        "Texture backward",
-        "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for backward scattering light in these rings.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureBckwrdInfo = {
+        .identifier = "TextureBckwrd",
+        .name = "Texture backward",
+        .description = "This value is the path to a texture on disk that contains a "
+            "one-dimensional texture which is used for backward scattering light in "
+            "these rings.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TextureUnlitInfo = {
-        "TextureUnlit",
-        "Texture unlit",
-        "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for unlit part in these rings.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureUnlitInfo = {
+        .identifier = "TextureUnlit",
+        .name = "Texture unlit",
+        .description = "This value is the path to a texture on disk that contains a "
+            "one-dimensional texture which is used for unlit part in these rings.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TextureColorInfo = {
-        "TextureColor",
-        "Texture color",
-        "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture color which is used for unlit part in these rings.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureColorInfo = {
+        .identifier = "TextureColor",
+        .name = "Texture color",
+        .description = "This value is the path to a texture on disk that contains a "
+            "one-dimensional texture color which is used for unlit part in these rings.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TextureTransparencyInfo = {
-        "TextureTransparency",
-        "Texture transparency",
-        "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture transparency which is used for unlit part in these rings.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureTransparencyInfo = {
+        .identifier = "TextureTransparency",
+        .name = "Texture transparency",
+        .description = "This value is the path to a texture on disk that contains a "
+            "one-dimensional texture transparency which is used for unlit part in these "
+            "rings.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
-        "This value specifies the radius of the rings in meters.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size",
+        .description = "This value specifies the radius of the rings in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1e25f }
+        }
     };
 
-    constexpr Property::PropertyInfo OffsetInfo = {
-        "Offset",
-        "Offset",
-        "This value is used to limit the width of the rings. Each of the two values is "
-        "a value between 0 and 1, where 0 is the center of the ring and 1 is the maximum "
-        "extent at the radius. For example, if the value is {0.5, 1.0}, the ring is only "
-        "shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo OffsetInfo = {
+        .identifier = "Offset",
+        .name = "Offset",
+        .description = "This value is used to limit the width of the rings. Each of the "
+            "two values is a value between 0 and 1, where 0 is the center of the ring "
+            "and 1 is the maximum extent at the radius. For example, if the value is "
+            "{0.5, 1.0}, the ring is only shown between radius/2 and radius. It defaults "
+            "to {0.0, 1.0}.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f, 1.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo NightFactorInfo = {
-        "NightFactor",
-        "Night factor",
-        "This value is a multiplicative factor that is applied to the side of the rings "
-        "that is facing away from the Sun. If this value is equal to '1', no darkening "
-        "of the night side occurs.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo NightFactorInfo = {
+        .identifier = "NightFactor",
+        .name = "Night factor",
+        .description = "This value is a multiplicative factor that is applied to the "
+            "side of the rings that is facing away from the Sun. If this value is equal "
+            "to 1, no darkening of the night side occurs.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.33f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorFilterInfo = {
-        "ColorFilter",
-        "Color filter",
-        "This value affects the filtering out of part of the rings depending on the "
-        "color values of the texture. The higher value, the more rings are filtered out.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ColorFilterInfo = {
+        .identifier = "ColorFilter",
+        .name = "Color filter",
+        .description = "This value affects the filtering out of part of the rings "
+            "depending on the color values of the texture. The higher value, the more "
+            "rings are filtered out.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.15f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ZFightingPercentageInfo = {
-        "ZFightingPercentage",
-        "Z-fighting percentage",
-        "The percentage of the correct distance to the surface being shadowed. Possible "
-        "values: [0.0, 1.0].",
-        Property::Visibility::Developer
+    constexpr FloatPropertyInfo ZFightingPercentageInfo = {
+        .identifier = "ZFightingPercentage",
+        .name = "Z-fighting percentage",
+        .description = "The percentage of the correct distance to the surface being "
+            "shadowed.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 0.95f,
+            .minMax = { 0.000001f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo NumberShadowSamplesInfo = {
-        "NumberShadowSamples",
-        "Number of shadow samples",
-        "The number of samples used during shadow mapping calculation (Percentage Closer "
-        "Filtering).",
-        Property::Visibility::Developer
+    constexpr IntPropertyInfo NumberShadowSamplesInfo = {
+        .identifier = "NumberShadowSamples",
+        .name = "Number of shadow samples",
+        .description = "The number of samples used during shadow mapping calculation "
+            "(Percentage Closer Filtering).",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 2,
+            .minMax = { 1, 7 }
+        }
     };
 
     struct [[codegen::Dictionary(RingsComponent)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
         // This value determines the overall opacity of the rings.
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::optional<std::filesystem::path> texture;
+        std::optional<std::filesystem::path> texture [[codegen::Info(TextureInfo)]];
 
-        // [[codegen::verbatim(TextureFwrdInfo.description)]]
-        std::optional<std::filesystem::path> textureFwrd;
+        std::optional<std::filesystem::path> textureFwrd
+            [[codegen::Info(TextureFwrdInfo)]];
 
-        // [[codegen::verbatim(TextureBckwrdInfo.description)]]
-        std::optional<std::filesystem::path> textureBckwrd;
+        std::optional<std::filesystem::path> textureBckwrd
+            [[codegen::Info(TextureBckwrdInfo)]];
 
-        // [[codegen::verbatim(TextureUnlitInfo.description)]]
-        std::optional<std::filesystem::path> textureUnlit;
+        std::optional<std::filesystem::path> textureUnlit
+            [[codegen::Info(TextureUnlitInfo)]];
 
-        // [[codegen::verbatim(TextureColorInfo.description)]]
-        std::optional<std::filesystem::path> textureColor;
+        std::optional<std::filesystem::path> textureColor
+            [[codegen::Info(TextureColorInfo)]];
 
-        // [[codegen::verbatim(TextureTransparencyInfo.description)]]
-        std::optional<std::filesystem::path> textureTransparency;
+        std::optional<std::filesystem::path> textureTransparency
+            [[codegen::Info(TextureTransparencyInfo)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size;
+        std::optional<float> size [[codegen::Info(SizeInfo)]];
 
-        // [[codegen::verbatim(OffsetInfo.description)]]
-        std::optional<glm::vec2> offset;
+        std::optional<glm::vec2> offset [[codegen::Info(OffsetInfo)]];
 
-        // [[codegen::verbatim(NightFactorInfo.description)]]
-        std::optional<float> nightFactor;
+        std::optional<float> nightFactor [[codegen::Info(NightFactorInfo)]];
 
-        // [[codegen::verbatim(ColorFilterInfo.description)]]
-        std::optional<float> colorFilter;
+        std::optional<float> colorFilter [[codegen::Info(ColorFilterInfo)]];
 
-        // [[codegen::verbatim(ZFightingPercentageInfo.description)]]
-        std::optional<float> zFightingPercentage;
+        std::optional<float> zFightingPercentage
+            [[codegen::Info(ZFightingPercentageInfo)]];
 
-        // [[codegen::verbatim(NumberShadowSamplesInfo.description)]]
-        std::optional<int> numberShadowSamples;
+        std::optional<int> numberShadowSamples [[codegen::Info(NumberShadowSamplesInfo)]];
     };
 } // namespace
 #include "ringscomponent_codegen.cpp"
@@ -215,7 +240,7 @@ Documentation RingsComponent::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_ringscomponent");
 }
 
-RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
+RingsComponent::RingsComponent(const Dictionary& dictionary)
     : PropertyOwner({ "Rings" })
     , _texturePath(TextureInfo)
     , _textureFwrdPath(TextureFwrdInfo)
@@ -223,13 +248,13 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     , _textureUnlitPath(TextureUnlitInfo)
     , _textureColorPath(TextureColorInfo)
     , _textureTransparencyPath(TextureTransparencyInfo)
-    , _size(SizeInfo, 1.f, 0.f, 1e25f)
-    , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
-    , _colorFilter(ColorFilterInfo, 0.15f, 0.f, 1.f)
-    , _enabled(EnabledInfo, true)
-    , _zFightingPercentage(ZFightingPercentageInfo, 0.95f, 0.000001f, 1.f)
-    , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 7)
+    , _size(SizeInfo)
+    , _offset(OffsetInfo)
+    , _nightFactor(NightFactorInfo)
+    , _colorFilter(ColorFilterInfo)
+    , _enabled(EnabledInfo)
+    , _zFightingPercentage(ZFightingPercentageInfo)
+    , _nShadowSamples(NumberShadowSamplesInfo)
     // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long term
     // and rather extract the values directly here.  This would require a bit of a rewrite
     // in the RenderableGlobe class to not create the RingsComponent in the
@@ -244,7 +269,7 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
 void RingsComponent::initialize() {
     ZoneScoped;
 
-    using ghoul::filesystem::File;
+    using filesystem::File;
 
     const Parameters p = codegen::bake<Parameters>(_ringsDictionary);
 
@@ -345,9 +370,9 @@ void RingsComponent::initializeGL() {
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_fs.glsl")
         );
 
-        ghoul::opengl::updateUniformLocations(*_geometryOnlyShader, _geomUniformCache);
+        opengl::updateUniformLocations(*_geometryOnlyShader, _geomUniformCache);
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERROR(e.message);
     }
 
@@ -415,12 +440,12 @@ void RingsComponent::draw(const RenderData& data, const ShadowComponent::ShadowM
         glm::vec3(inverseModelTransform * glm::vec4(_sunPosition, 0.f))
     );
 
-    ghoul::opengl::TextureUnit ringTextureUnit;
-    ghoul::opengl::TextureUnit ringTextureFwrdUnit;
-    ghoul::opengl::TextureUnit ringTextureBckwrdUnit;
-    ghoul::opengl::TextureUnit ringTextureUnlitUnit;
-    ghoul::opengl::TextureUnit ringTextureColorUnit;
-    ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
+    opengl::TextureUnit ringTextureUnit;
+    opengl::TextureUnit ringTextureFwrdUnit;
+    opengl::TextureUnit ringTextureBckwrdUnit;
+    opengl::TextureUnit ringTextureUnlitUnit;
+    opengl::TextureUnit ringTextureColorUnit;
+    opengl::TextureUnit ringTextureTransparencyUnit;
     if (_isAdvancedTextureEnabled) {
         _shader->setUniform(
             _uniformCacheAdvancedRings.modelViewProjectionMatrix,
@@ -537,7 +562,7 @@ void RingsComponent::update(const UpdateData& data) {
 
     if (_geometryOnlyShader->isDirty()) [[unlikely]] {
         _geometryOnlyShader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_geometryOnlyShader, _geomUniformCache);
+        opengl::updateUniformLocations(*_geometryOnlyShader, _geomUniformCache);
     }
 
     if (_planeIsDirty) [[unlikely]] {
@@ -579,19 +604,19 @@ void RingsComponent::update(const UpdateData& data) {
 }
 
 void RingsComponent::loadTexture() {
-    using namespace ghoul::io;
-    using namespace ghoul::opengl;
+    using namespace io;
+    using namespace opengl;
 
     if (!_texturePath.value().empty()) {
         _texture = texture::loadTexture(
             absPath(_texturePath),
             1,
-            { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
+            { .filter = opengl::Texture::FilterMode::AnisotropicMipMap }
         );
 
         LDEBUG(std::format("Loaded texture from '{}'", absPath(_texturePath)));
 
-        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+        _textureFile = std::make_unique<filesystem::File>(_texturePath.value());
         _textureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 
@@ -607,7 +632,7 @@ void RingsComponent::loadTexture() {
             absPath(_textureFwrdPath)
         ));
 
-        _textureFileForwards = std::make_unique<ghoul::filesystem::File>(
+        _textureFileForwards = std::make_unique<filesystem::File>(
             _textureFwrdPath.value()
         );
         _textureFileForwards->setCallback([this]() { _textureIsDirty = true; });
@@ -624,7 +649,7 @@ void RingsComponent::loadTexture() {
             "Loaded backwards scattering texture from '{}'", absPath(_textureBckwrdPath)
         ));
 
-        _textureFileBackwards = std::make_unique<ghoul::filesystem::File>(
+        _textureFileBackwards = std::make_unique<filesystem::File>(
             _textureBckwrdPath.value()
         );
         _textureFileBackwards->setCallback([this]() { _textureIsDirty = true; });
@@ -639,7 +664,7 @@ void RingsComponent::loadTexture() {
 
         LDEBUG(std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath)));
 
-        _textureFileUnlit = std::make_unique<ghoul::filesystem::File>(
+        _textureFileUnlit = std::make_unique<filesystem::File>(
             _textureUnlitPath.value()
         );
         _textureFileUnlit->setCallback([this]() { _textureIsDirty = true; });
@@ -654,7 +679,7 @@ void RingsComponent::loadTexture() {
 
         LDEBUG(std::format("Loaded color texture from '{}'", absPath(_textureColorPath)));
 
-        _textureFileColor = std::make_unique<ghoul::filesystem::File>(
+        _textureFileColor = std::make_unique<filesystem::File>(
             _textureColorPath.value()
         );
         _textureFileColor->setCallback([this]() { _textureIsDirty = true; });
@@ -671,7 +696,7 @@ void RingsComponent::loadTexture() {
             "Loaded transparency texture from '{}'", absPath(_textureTransparencyPath)
         ));
 
-        _textureFileTransparency = std::make_unique<ghoul::filesystem::File>(
+        _textureFileTransparency = std::make_unique<filesystem::File>(
             _textureTransparencyPath.value()
         );
         _textureFileTransparency->setCallback([this]() { _textureIsDirty = true; });
@@ -684,7 +709,7 @@ void RingsComponent::loadTexture() {
 }
 
 void RingsComponent::compileShadowShader() {
-    ghoul::Dictionary dict;
+    Dictionary dict;
     dict.setValue("nShadowSamples", std::to_string(_nShadowSamples - 1));
 
     try {
@@ -700,7 +725,7 @@ void RingsComponent::compileShadowShader() {
                 dict
             );
 
-            ghoul::opengl::updateUniformLocations(*_shader, _uniformCacheAdvancedRings);
+            opengl::updateUniformLocations(*_shader, _uniformCacheAdvancedRings);
         }
         else {
             // Uses simple texture for the Rings
@@ -711,10 +736,10 @@ void RingsComponent::compileShadowShader() {
                 dict
             );
 
-            ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+            opengl::updateUniformLocations(*_shader, _uniformCache);
         }
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERROR(e.message);
     }
 
@@ -730,23 +755,23 @@ double RingsComponent::size() const {
     return _size;
 }
 
-ghoul::opengl::Texture* RingsComponent::textureForwards() const {
+opengl::Texture* RingsComponent::textureForwards() const {
     return _textureForwards.get();
 }
 
-ghoul::opengl::Texture* RingsComponent::textureBackwards() const {
+opengl::Texture* RingsComponent::textureBackwards() const {
     return _textureBackwards.get();
 }
 
-ghoul::opengl::Texture* RingsComponent::textureUnlit() const {
+opengl::Texture* RingsComponent::textureUnlit() const {
     return _textureUnlit.get();
 }
 
-ghoul::opengl::Texture* RingsComponent::textureColor() const {
+opengl::Texture* RingsComponent::textureColor() const {
     return _textureColor.get();
 }
 
-ghoul::opengl::Texture* RingsComponent::textureTransparency() const {
+opengl::Texture* RingsComponent::textureTransparency() const {
     return _textureTransparency.get();
 }
 

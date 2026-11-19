@@ -24,9 +24,9 @@
 
 #include <openspace/navigation/pathcurves/zoomoutoverviewcurve.h>
 
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
 #include <string_view>
 
@@ -37,7 +37,7 @@ namespace {
 namespace openspace {
 
 /**
- * Go far out to get a view of both tagets, aimed to match lookAt orientation.
+ * Go far out to get a view of both targets, aimed to match lookAt orientation.
  */
 ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end) {
     const double startNodeRadius = start.validBoundingSphere();

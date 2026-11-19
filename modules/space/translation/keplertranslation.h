@@ -27,8 +27,8 @@
 
 #include <openspace/scene/translation.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <ghoul/glm.h>
 
 namespace openspace {
 
@@ -36,7 +36,7 @@ namespace openspace {
  * The KeplerTranslation is a concrete Translation implementation that uses the 6
  * Keplerian elements (eccentricity, semi-major axis, inclination, right ascension of the
  * ascending node, argument of periapsis, and mean anomaly at epoch) for computing the
- * position of a space craft. So far, only eccentricities between [0, 1) are supoorted.
+ * position of a space craft. So far, only eccentricities between [0, 1) are supported.
  */
 class KeplerTranslation : public Translation {
 public:
@@ -46,10 +46,10 @@ public:
      * further processing. The \p dictionary is tested against the Documentation for
      * conformance.
      *
-     * \param dictionary The ghoul::Dictionary containing all the information about the
-     *        Keplerian elements (see Documentation)
+     * \param dictionary The Dictionary containing all the information about the Keplerian
+     *        elements (see Documentation)
      */
-    explicit KeplerTranslation(const ghoul::Dictionary& dictionary);
+    explicit KeplerTranslation(const Dictionary& dictionary);
 
     ~KeplerTranslation() override = default;
 
@@ -61,11 +61,11 @@ public:
     glm::dvec3 position(const UpdateData& data) const override;
 
     /**
-     * Method returning the openspace::Documentation that describes the ghoul::Dictionary
-     * that can be passed to the constructor.
+     * Method returning the openspace::Documentation that describes the Dictionary that
+     * can be passed to the constructor.
      *
-     * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
-     *         be passed to the constructor
+     * \return The openspace::Documentation that describes the Dictionary that can be
+     *         passed to the constructor
      */
     static openspace::Documentation Documentation();
 
@@ -119,7 +119,7 @@ public:
 
     /**
      * This method computes the eccentric anomaly (location of the space craft taking the
-     * eccentricity into acount) based on the mean anomaly (location of the space craft
+     * eccentricity into account) based on the mean anomaly (location of the space craft
      * assuming an eccentricity of 0.0).
      *
      * \param meanAnomaly The mean anomaly for which the eccentric anomaly shall be

@@ -24,10 +24,9 @@
 
 #include "sgctedit/windowcontrol.h"
 
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
 #include <sgct/config.h>
-#include <sgct/math.h>
 #include "windowcolors.h"
 #include <QCheckBox>
 #include <QComboBox>
@@ -113,7 +112,7 @@ namespace {
             Quality.cend(),
             [quality](const std::pair<int, std::string>& p) { return p.first == quality; }
         );
-        ghoul_assert(it != Quality.cend(), "Combobox has too many values");
+        assert_msg(it != Quality.cend(), "Combobox has too many values");
         return static_cast<int>(std::distance(Quality.cbegin(), it));
     }
 } // namespace
@@ -768,10 +767,14 @@ void WindowControl::resetToDefaults() {
     emit windowChanged(_monitorIndexDefault, _windowIndex, _windowDimensions);
 }
 
-void WindowControl::setDimensions(int x, int y, int width, int height) {
-    _windowDimensions = QRect(x, y, width, height);
+void WindowControl::setSize(int width, int height) {
+    _windowDimensions.setSize(QSize(width, height));
     _sizeX->setValue(width);
     _sizeY->setValue(height);
+}
+
+void WindowControl::setPosition(int x, int y) {
+    _windowDimensions.moveTo(x, y);
     _offsetX->setValue(x);
     _offsetY->setValue(y);
 }
@@ -808,7 +811,7 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
     window.size = { _sizeX->value(), _sizeY->value() };
     window.monitor = _monitor->currentIndex();
     const QRect resolution = _monitorResolutions[_monitor->currentIndex()];
-    window.pos = sgct::ivec2(
+    window.pos = glm::ivec2(
         resolution.x() + _offsetX->value(),
         resolution.y() + _offsetY->value()
     );
@@ -835,17 +838,27 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
 
     sgct::config::Viewport vp;
     vp.isTracked = true;
-    vp.position = sgct::vec2(0.f, 0.f);
-    vp.size = sgct::vec2(1.f, 1.f);
+    vp.position = glm::vec2(0.f, 0.f);
+    vp.size = glm::vec2(1.f, 1.f);
 
     switch (static_cast<ProjectionIndices>(_projectionType->currentIndex())) {
         case ProjectionIndices::Fisheye:
-            vp.projection = sgct::config::FisheyeProjection {
-                .fov = static_cast<float>(_fisheye.fov->value()),
-                .quality = Quality[_fisheye.quality->currentIndex()].first,
-                .tilt = static_cast<float>(_fisheye.tilt->value()),
-            };
-            break;
+            {
+                sgct::config::FisheyeProjection projection = {
+                    .fov = static_cast<float>(_fisheye.fov->value()),
+                    .quality = Quality[_fisheye.quality->currentIndex()].first
+                };
+                const float tilt = static_cast<float>(_fisheye.tilt->value());
+                if (tilt != 0.f) {
+                    // A tilt of t degrees is the same as pitching the projection by -t
+                    projection.orientation = glm::angleAxis(
+                        glm::radians(-tilt),
+                        glm::vec3(1.f, 0.f, 0.f)
+                    );
+                }
+                vp.projection = projection;
+                break;
+            }
         case ProjectionIndices::SphericalMirror:
             vp.projection = sgct::config::SphericalMirrorProjection {
                 .quality = Quality[_sphericalMirror.quality->currentIndex()].first
@@ -930,7 +943,7 @@ void WindowControl::setProjectionBlit(int windowBlitId) {
     // We add 1 here as SGCT uses a 0-indexing for the window idx, but we present it to
     // the user as a 1-indexing
     int idx = _blit.windowId->findText(QString::number(windowBlitId + 1));
-    ghoul_assert(idx != -1, "Could not find window blit id");
+    assert_msg(idx != -1, "Could not find window blit id");
     _blit.windowId->setCurrentIndex(idx);
     _projectionType->setCurrentIndex(
         static_cast<int>(ProjectionIndices::Blit)

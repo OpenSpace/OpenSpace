@@ -36,7 +36,7 @@ namespace openspace {
 
 class RenderablePlaneImageOnline : public RenderablePlane {
 public:
-    explicit RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneImageOnline(const Dictionary& dictionary);
 
     void deinitializeGL() override;
 
@@ -45,7 +45,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
 private:
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(
@@ -59,8 +59,8 @@ private:
     std::future<DownloadManager::MemoryFile> _imageFuture;
     std::future<DownloadManager::MemoryFile> _rightImageFuture;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::opengl::Texture> _rightTexture;
+    std::unique_ptr<opengl::Texture> _texture;
+    std::unique_ptr<opengl::Texture> _rightTexture;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
     bool _textureIsDirty = false;
     bool _isStereo = false;

@@ -37,12 +37,14 @@ class SceneGraphNode;
 
 class GlobeRotation : public Rotation {
 public:
-    explicit GlobeRotation(const ghoul::Dictionary& dictionary);
+    explicit GlobeRotation(const Dictionary& dictionary);
 
     void initialize() override;
 
     void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;
+
+    void setOwnerNode(SceneGraphNode* node) override;
 
     static openspace::Documentation Documentation();
 
@@ -63,6 +65,10 @@ private:
     DoubleProperty _angle;
     BoolProperty _useHeightmap;
     BoolProperty _useCamera;
+
+    /// The scene graph node that owns this rotation. Its parent is used as the
+    /// attached node when the 'Globe' property is not set
+    SceneGraphNode* _ownerNode = nullptr;
 
     SceneGraphNode* _attachedNode = nullptr;
 

@@ -25,18 +25,31 @@
 
 #include <modules/volume/rendering/volumeclipplanes.h>
 
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionary.h>
 #include <utility>
+
+namespace {
+    using namespace openspace;
+
+    constexpr IntPropertyInfo NClipPlanesInfo = {
+        .identifier = "nClipPlanes",
+        .name = "Number of clip planes",
+        .description = "", // @TODO Missing documentation
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 10 }
+        }
+    };
+} // namespace
 
 namespace openspace {
 
-VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
+VolumeClipPlanes::VolumeClipPlanes(const Dictionary& dictionary)
     : PropertyOwner({ "" }) // @TODO Missing name
-    // @TODO Missing documentation
-    , _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10)
+    , _nClipPlanes(NClipPlanesInfo)
 {
     for (const std::string_view key : dictionary.keys()) {
-        const ghoul::Dictionary cutplane = dictionary.value<ghoul::Dictionary>(key);
+        const Dictionary cutplane = dictionary.value<Dictionary>(key);
         VolumeClipPlane clipPlane = VolumeClipPlane(cutplane);
         clipPlane.setIdentifier(std::string(key));
         _clipPlanes.push_back(std::move(clipPlane));

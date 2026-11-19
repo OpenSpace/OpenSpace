@@ -26,34 +26,38 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/invariants.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 #include <optional>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo CastShadowInfo = {
-        "CastShadow",
-        "Cast shadow",
-        "Enable model to cast shadow on its parent renderable.",
+    constexpr BoolPropertyInfo CastShadowInfo = {
+        .identifier = "CastShadow",
+        .name = "Cast shadow",
+        .description = "Enable model to cast shadow on its parent renderable.",
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo FrustumSizeInfo = {
-        "FrustumSize",
-        "Size of the depth-pass view frustum",
-        "Sets the width & height (effectively left/right & top/bottom) of the depth-pass "
-        "view frustum, z-near & z-far are calculated.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FrustumSizeInfo = {
+        .identifier = "FrustumSize",
+        .name = "Size of the depth-pass view frustum",
+        .description = "Sets the width & height (effectively left/right & top/bottom) of "
+            "the depth-pass view frustum, z-near & z-far are calculated.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f
+        }
     };
 
     struct [[codegen::Dictionary(Shadower)]] Parameters {
-        // [[codegen::verbatim(FrustumSizeInfo.description)]]
-        std::optional<float> frustumSize;
+        std::optional<float> frustumSize [[codegen::Info(FrustumSizeInfo)]];
 
-        // [[codegen::verbatim(CastShadowInfo.description)]]
-        std::optional<bool> castShadow;
+        std::optional<bool> castShadow [[codegen::Info(CastShadowInfo)]];
     };
 } // namespace
 #include "shadowmapping_codegen.cpp"
@@ -64,9 +68,9 @@ Documentation Shadower::Documentation() {
     return codegen::doc<Parameters>("core_shadower");
 }
 
-Shadower::Shadower(const ghoul::Dictionary& dictionary)
-    : _castShadow(CastShadowInfo, false)
-    , _frustumSize(FrustumSizeInfo, 1.f)
+Shadower::Shadower(const Dictionary& dictionary)
+    : _castShadow(CastShadowInfo)
+    , _frustumSize(FrustumSizeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -81,7 +85,7 @@ bool Shadower::isCastingShadow() const {
 }
 
 void Shadower::setLightSource(const SceneGraphNode* lightSource) {
-    ghoul_assert(lightSource, "No light source provided");
+    assert_msg(lightSource, "No light source provided");
     _lightSource = std::move(lightSource);
 }
 
@@ -102,7 +106,7 @@ double Shadower::shadowFrustumSize() const {
 }
 
 void Shadowee::addShadower(const Shadower* shadower) {
-    ghoul_precondition(shadower, "Shadower must not be nullptr");
+    precondition(shadower, "Shadower must not be nullptr");
 
     if (std::find(_shadowers.begin(), _shadowers.end(), shadower) == _shadowers.end()) {
         _shadowers.push_back(shadower);
@@ -111,7 +115,7 @@ void Shadowee::addShadower(const Shadower* shadower) {
 }
 
 void Shadowee::removeShadower(const Shadower* shadower) {
-    ghoul_precondition(shadower, "Shadower must not be nullptr");
+    precondition(shadower, "Shadower must not be nullptr");
 
     auto it = std::find(_shadowers.begin(), _shadowers.end(), shadower);
     if (it != _shadowers.end()) {

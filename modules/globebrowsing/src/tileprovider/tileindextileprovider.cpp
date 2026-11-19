@@ -27,24 +27,28 @@
 #include <openspace/documentation/documentation.h>
 #include <modules/globebrowsing/src/layergroupid.h>
 #include <modules/globebrowsing/src/tileindex.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <limits>
 #include <optional>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo UniqueBackgroundColors = {
-        "UniqueBackgroundColor",
-        "Unique background color",
-        "If 'true' each index tile will have a unique background color assigned to it.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo UniqueBackgroundColors = {
+        .identifier = "UniqueBackgroundColor",
+        .name = "Unique background color",
+        .description = "If 'true' each index tile will have a unique background color "
+            "assigned to it.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
     struct [[codegen::Dictionary(TileIndexTileProvider)]] Parameters {
-        // [[codegen::verbatim(UniqueBackgroundColors.description)]]
-        std::optional<bool> uniqueBackgroundColors;
+        std::optional<bool> uniqueBackgroundColors
+            [[codegen::Info(UniqueBackgroundColors)]];
     };
 } // namespace
 #include "tileindextileprovider_codegen.cpp"
@@ -55,9 +59,9 @@ Documentation TileIndexTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_tileindex");
 }
 
-TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dictionary)
+TileIndexTileProvider::TileIndexTileProvider(const Dictionary& dictionary)
     : TextTileProvider(tileTextureInitData(layers::Group::ID::ColorLayers, false))
-    , _uniqueBackgroundColors(UniqueBackgroundColors, false)
+    , _uniqueBackgroundColors(UniqueBackgroundColors)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -80,7 +84,7 @@ Tile TileIndexTileProvider::tile(const TileIndex& tileIndex) {
         const TileIndex::TileHashKey key = tileIndex.hashKey();
         size_t hash = std::hash<TileIndex::TileHashKey>{}(key);
 
-        // This is pretty ugly, but it's just for debugging and it is reproducable... We
+        // This is pretty ugly, but it's just for debugging and it is reproducible... We
         // take the first three bytes of the hash, treat them as an 8-bit unsigned integer
         // which makes them [0, 255] and also pseudorandom while being always the same for
         // each tile. If we divide the resulting number by 255 we get a value [0, 1] that

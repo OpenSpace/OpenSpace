@@ -33,28 +33,29 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/memorypool.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/memorypool.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -103,170 +104,243 @@ namespace {
     const TileIndex LeftHemisphereIndex = TileIndex(0, 0, 1);
     const TileIndex RightHemisphereIndex = TileIndex(1, 0, 1);
 
-    constexpr Property::PropertyInfo ShowChunkEdgeInfo = {
-        "ShowChunkEdges",
-        "Show chunk edges",
-        "Shows the borders between chunks in a red highlight.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo ShowChunkEdgeInfo = {
+        .identifier = "ShowChunkEdges",
+        .name = "Show chunk edges",
+        .description = "Shows the borders between chunks in a red highlight.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo LevelProjectedAreaInfo = {
-        "LevelByProjectedAreaElseDistance",
-        "Level by projected area (else distance)",
-        "If true, the tile level is determined by the area projected on screen. If "
-        "false, the distance to the center of the tile is used instead.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo LevelProjectedAreaInfo = {
+        .identifier = "LevelByProjectedAreaElseDistance",
+        .name = "Level by projected area (else distance)",
+        .description = "If true, the tile level is determined by the area projected on "
+            "screen. If false, the distance to the center of the tile is used instead.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo PerformFrustumCullingInfo = {
-        "PerformFrustumCulling",
-        "Perform frustum culling",
-        "If this value is set to true, frustum culling will be performed.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo PerformFrustumCullingInfo = {
+        .identifier = "PerformFrustumCulling",
+        .name = "Perform frustum culling",
+        .description = "If this value is set to true, frustum culling will be performed.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo PerformHorizonCullingInfo = {
-        "PerformHorizonCulling",
-        "Perform horizon culling",
-        "If this value is set to 'true', tiles below the horizon will be culled away.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo PerformHorizonCullingInfo = {
+        .identifier = "PerformHorizonCulling",
+        .name = "Perform horizon culling",
+        .description = "If this value is set to 'true', tiles below the horizon will be "
+            "culled away.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ResetTileProviderInfo = {
-        "ResetTileProviders",
-        "Reset tile providers",
-        "Reset all tile provides for the globe and reload the data.",
-        Property::Visibility::Developer
+    constexpr TriggerPropertyInfo ResetTileProviderInfo = {
+        .identifier = "ResetTileProviders",
+        .name = "Reset tile providers",
+        .description = "Reset all tile provides for the globe and reload the data.",
+        .visibility = Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo ModelSpaceRenderingInfo = {
-        "ModelSpaceRenderingCutoffLevel",
-        "Model space rendering cutoff level",
-        "The tile level that is used as the cut off between rendering tiles using the "
-        "globe model rendering vs the flat in-game rendering method. The value is a "
-        "trade-off between not having precision errors in the rendering and representing "
-        "a tile as flat or curved.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo ModelSpaceRenderingInfo = {
+        .identifier = "ModelSpaceRenderingCutoffLevel",
+        .name = "Model space rendering cutoff level",
+        .description = "The tile level that is used as the cut off between rendering "
+            "tiles using the globe model rendering vs the flat in-game rendering method. "
+            "The value is a trade-off between not having precision errors in the "
+            "rendering and representing a tile as flat or curved.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 14,
+            .minMax = { 1, 22 }
+        }
     };
 
-    constexpr Property::PropertyInfo DynamicLodIterationCountInfo = {
-        "DynamicLodIterationCount",
-        "Data availability checks before LOD factor impact",
-        "The number of checks that have to fail/succeed in a row before the dynamic "
-        "level-of-detail adjusts the actual level-of-detail up or down during a session "
-        "recording.",
-        Property::Visibility::Developer
+    constexpr IntPropertyInfo DynamicLodIterationCountInfo = {
+        .identifier = "DynamicLodIterationCount",
+        .name = "Data availability checks before LOD factor impact",
+        .description = "The number of checks that have to fail/succeed in a row before "
+            "the dynamic level-of-detail adjusts the actual level-of-detail up or down "
+            "during a session recording.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 16,
+            .minMax = { 4, 128 }
+        }
     };
 
-    constexpr Property::PropertyInfo PerformShadingInfo = {
-        "PerformShading",
-        "Perform shading",
-        "Specifies whether the planet should be shaded by the primary light source or "
-        "not. If disabled, all parts of the planet are illuminated. Note that if the "
-        "globe has a corresponding atmosphere, there is a separate setting to control "
-        "the shadowing induced by the atmosphere.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo PerformShadingInfo = {
+        .identifier = "PerformShading",
+        .name = "Perform shading",
+        .description = "Specifies whether the planet should be shaded by the primary "
+            "light source or not. If disabled, all parts of the planet are illuminated. "
+            "Note that if the globe has a corresponding atmosphere, there is a separate "
+            "setting to control the shadowing induced by the atmosphere.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo AccurateNormalsInfo = {
-        "UseAccurateNormals",
-        "Use accurate normals",
-        "Determines whether higher-accuracy normals should be used in the rendering. "
-        "These normals are calculated based on the height field information and are thus "
-        "only available if the planet has a height map layer.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo AccurateNormalsInfo = {
+        .identifier = "UseAccurateNormals",
+        .name = "Use accurate normals",
+        .description = "Determines whether higher-accuracy normals should be used in the "
+            "rendering. These normals are calculated based on the height field "
+            "information and are thus only available if the planet has a height map "
+            "layer.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AmbientIntensityInfo = {
-        "AmbientIntensity",
-        "Ambient intensity",
-        "The intensity factor for the ambient light used for light shading.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo AmbientIntensityInfo = {
+        .identifier = "AmbientIntensity",
+        .name = "Ambient intensity",
+        .description = "The intensity factor for the ambient light used for light "
+            "shading.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.05f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo LightSourceNodeInfo = {
-        "LightSourceNode",
-        "Light source",
-        "The identifier of a scene graph node that should be used as the source of "
-        "illumination for the globe. If not specified, the solar system's Sun is used.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo LightSourceNodeInfo = {
+        .identifier = "LightSourceNode",
+        .name = "Light source",
+        .description = "The identifier of a scene graph node that should be used as the "
+            "source of illumination for the globe. If not specified, the solar system's "
+            "Sun is used.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EclipseInfo = {
-        "Eclipse",
-        "Eclipse",
-        "Enables/Disables Eclipse shadows on this globe.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EclipseInfo = {
+        .identifier = "Eclipse",
+        .name = "Eclipse",
+        .description = "Enables/Disables Eclipse shadows on this globe.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo EclipseHardShadowsInfo = {
-        "EclipseHardShadows",
-        "Eclipse hard shadows",
-        "Enables the rendering of eclipse shadows using hard shadows.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo EclipseHardShadowsInfo = {
+        .identifier = "EclipseHardShadows",
+        .name = "Eclipse hard shadows",
+        .description = "Enables the rendering of eclipse shadows using hard shadows.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ShadowMappingInfo = {
-        "ShadowMapping",
-        "Shadow mapping",
-        "Enables shadow mapping algorithm. Used by renderable rings, too.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShadowMappingInfo = {
+        .identifier = "ShadowMapping",
+        .name = "Shadow mapping",
+        .description = "Enables shadow mapping algorithm. Used by renderable rings, too.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo RenderAtDistanceInfo = {
-        "RenderAtDistance",
-        "Render at distance",
-        "Tells the rendering engine not to perform distance based performance culling "
-        "for this globe. Turning this property on will let the globe to be seen at far "
-        "away distances when normally it would be hidden.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo RenderAtDistanceInfo = {
+        .identifier = "RenderAtDistance",
+        .name = "Render at distance",
+        .description = "Tells the rendering engine not to perform distance based "
+            "performance culling for this globe. Turning this property on will let the "
+            "globe to be seen at far away distances when normally it would be hidden.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ZFightingPercentageInfo = {
-        "ZFightingPercentage",
-        "Z-fighting percentage",
-        "The percentage of the correct distance to the surface being shadowed.",
-        Property::Visibility::Developer
+    constexpr FloatPropertyInfo ZFightingPercentageInfo = {
+        .identifier = "ZFightingPercentage",
+        .name = "Z-fighting percentage",
+        .description = "The percentage of the correct distance to the surface being "
+            "shadowed.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 0.995f,
+            .minMax = { 0.000001f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo NumberShadowSamplesInfo = {
-        "NumberShadowSamples",
-        "Number of shadow samples",
-        "The number of samples used during shadow mapping calculation (Percentage Closer "
-        "Filtering).",
-        Property::Visibility::Developer
+    constexpr IntPropertyInfo NumberShadowSamplesInfo = {
+        .identifier = "NumberShadowSamples",
+        .name = "Number of shadow samples",
+        .description = "The number of samples used during shadow mapping calculation "
+            "(Percentage Closer Filtering).",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 5,
+            .minMax = { 1, 7 }
+        }
     };
 
-    constexpr Property::PropertyInfo TargetLodScaleFactorInfo = {
-        "TargetLodScaleFactor",
-        "Target level of detail scale factor",
-        "Determines the targeted level-of-detail of the tiles for this globe. A higher "
-        "value means that the tiles rendered are a higher resolution for the same "
-        "distance of the camera to the planet.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo TargetLodScaleFactorInfo = {
+        .identifier = "TargetLodScaleFactor",
+        .name = "Target level of detail scale factor",
+        .description = "Determines the targeted level-of-detail of the tiles for this "
+            "globe. A higher value means that the tiles rendered are a higher resolution "
+            "for the same distance of the camera to the planet.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 15.f,
+            .minMax = { 1.f, 50.f }
+        }
     };
 
-    constexpr Property::PropertyInfo CurrentLodScaleFactorInfo = {
-        "CurrentLodScaleFactor",
-        "Current level of detail scale factor (read only)",
-        "The currently used scale factor whose target value is deteremined by "
-        "'TargetLodScaleFactor'.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo CurrentLodScaleFactorInfo = {
+        .identifier = "CurrentLodScaleFactor",
+        .name = "Current level of detail scale factor (read only)",
+        .description = "The currently used scale factor whose target value is determined "
+            "by 'TargetLodScaleFactor'.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 15.f,
+            .minMax = { 1.f, 50.f }
+        }
     };
 
-    constexpr Property::PropertyInfo OrenNayarRoughnessInfo = {
-        "OrenNayarRoughness",
-        "Oren-Nayar roughness",
-        "The roughness factor that is used for the Oren-Nayar lighting mode.",
-        Property::Visibility::Developer
+    constexpr FloatPropertyInfo OrenNayarRoughnessInfo = {
+        .identifier = "OrenNayarRoughness",
+        .name = "Oren-Nayar roughness",
+        .description = "The roughness factor that is used for the Oren-Nayar lighting "
+            "mode.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo NActiveLayersInfo = {
-        "NActiveLayers",
-        "Number of active layers",
-        "The number of currently active layers. If this value reaches the maximum, bad "
-        "things will happen.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo NActiveLayersInfo = {
+        .identifier = "NActiveLayers",
+        .name = "Number of active layers",
+        .description = "The number of currently active layers. If this value reaches the "
+            "maximum, bad things will happen.",
+        .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .minMax = { .min = 0 }
+        }
     };
 
     bool isLeaf(const Chunk& cn) {
@@ -538,29 +612,23 @@ namespace {
         // to that value.
         std::optional<std::variant<glm::dvec3, double>> radii;
 
-        // [[codegen::verbatim(PerformShadingInfo.description)]]
-        std::optional<bool> performShading;
+        std::optional<bool> performShading [[codegen::Info(PerformShadingInfo)]];
 
-        // [[codegen::verbatim(AccurateNormalsInfo.description)]]
-        std::optional<bool> useAccurateNormals;
+        std::optional<bool> useAccurateNormals [[codegen::Info(AccurateNormalsInfo)]];
 
-        // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<float> ambientIntensity;
+        std::optional<float> ambientIntensity [[codegen::Info(AmbientIntensityInfo)]];
 
-        // [[codegen::verbatim(LightSourceNodeInfo.description)]]
-        std::optional<std::string> lightSourceNode;
+        std::optional<std::string> lightSourceNode [[codegen::Info(LightSourceNodeInfo)]];
 
-        // [[codegen::verbatim(RenderAtDistanceInfo.description)]]
-        std::optional<bool> renderAtDistance;
+        std::optional<bool> renderAtDistance [[codegen::Info(RenderAtDistanceInfo)]];
 
-        // [[codegen::verbatim(TargetLodScaleFactorInfo.description)]]
-        std::optional<float> targetLodScaleFactor;
+        std::optional<float> targetLodScaleFactor
+            [[codegen::Info(TargetLodScaleFactorInfo)]];
 
-        // [[codegen::verbatim(ModelSpaceRenderingInfo.description)]]
-        std::optional<int> modelSpaceRenderingCutoffLevel [[codegen::greater(0)]];
+        std::optional<int> modelSpaceRenderingCutoffLevel
+            [[codegen::Info(ModelSpaceRenderingInfo), codegen::greater(0)]];
 
-        // [[codegen::verbatim(OrenNayarRoughnessInfo.description)]]
-        std::optional<float> orenNayarRoughness;
+        std::optional<float> orenNayarRoughness [[codegen::Info(OrenNayarRoughnessInfo)]];
 
         enum class [[codegen::map(openspace::layers::Group::ID)]] Group {
             HeightLayers,
@@ -571,12 +639,12 @@ namespace {
         };
 
         // A list of layers that should be added to the globe.
-        std::optional<std::map<Group, std::vector<ghoul::Dictionary>>> layers
+        std::optional<std::map<Group, std::vector<Dictionary>>> layers
             [[codegen::reference("globebrowsing_layer")]];
 
         // Specifies information about planetary labels that can be rendered on the
         // object's surface.
-        std::optional<ghoul::Dictionary> labels
+        std::optional<Dictionary> labels
             [[codegen::reference("globebrowsing_globelabelscomponent")]];
 
         struct ShadowGroup {
@@ -599,10 +667,10 @@ namespace {
         std::optional<ShadowGroup> shadowGroup;
 
         // Details about the rings of the globe, if it has any.
-        std::optional<ghoul::Dictionary> rings
+        std::optional<Dictionary> rings
             [[codegen::reference("globebrowsing_ringscomponent")]];
 
-        std::optional<ghoul::Dictionary> shadows
+        std::optional<Dictionary> shadows
             [[codegen::reference("globebrowsing_shadowscomponent")]];
     };
 } // namespace
@@ -623,33 +691,33 @@ Documentation RenderableGlobe::Documentation() {
     );
 }
 
-RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
+RenderableGlobe::RenderableGlobe(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _performShading(PerformShadingInfo, true)
-    , _useAccurateNormals(AccurateNormalsInfo, false)
-    , _ambientIntensity(AmbientIntensityInfo, 0.05f, 0.f, 1.f)
+    , _performShading(PerformShadingInfo)
+    , _useAccurateNormals(AccurateNormalsInfo)
+    , _ambientIntensity(AmbientIntensityInfo)
     , _lightSourceNodeName(LightSourceNodeInfo)
-    , _renderAtDistance(RenderAtDistanceInfo, false)
-    , _eclipseShadowsEnabled(EclipseInfo, false)
-    , _eclipseHardShadows(EclipseHardShadowsInfo, false)
-    , _targetLodScaleFactor(TargetLodScaleFactorInfo, 15.f, 1.f, 50.f)
-    , _currentLodScaleFactor(CurrentLodScaleFactorInfo, 15.f, 1.f, 50.f)
-    , _orenNayarRoughness(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
-    , _nActiveLayers(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
+    , _renderAtDistance(RenderAtDistanceInfo)
+    , _eclipseShadowsEnabled(EclipseInfo)
+    , _eclipseHardShadows(EclipseHardShadowsInfo)
+    , _targetLodScaleFactor(TargetLodScaleFactorInfo)
+    , _currentLodScaleFactor(CurrentLodScaleFactorInfo)
+    , _orenNayarRoughness(OrenNayarRoughnessInfo)
+    , _nActiveLayers(NActiveLayersInfo)
     , _debugProperties({
-        .showChunkEdges = BoolProperty(ShowChunkEdgeInfo, false),
-        .levelByProjectedAreaElseDistance = BoolProperty(LevelProjectedAreaInfo, true),
+        .showChunkEdges = BoolProperty(ShowChunkEdgeInfo),
+        .levelByProjectedAreaElseDistance = BoolProperty(LevelProjectedAreaInfo),
         .resetTileProviders = TriggerProperty(ResetTileProviderInfo),
-        .performFrustumCulling = BoolProperty(PerformFrustumCullingInfo, true),
-        .performHorizonCulling = BoolProperty(PerformHorizonCullingInfo, false),
-        .modelSpaceRenderingCutoffLevel = IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
-        .dynamicLodIterationCount = IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
+        .performFrustumCulling = BoolProperty(PerformFrustumCullingInfo),
+        .performHorizonCulling = BoolProperty(PerformHorizonCullingInfo),
+        .modelSpaceRenderingCutoffLevel = IntProperty(ModelSpaceRenderingInfo),
+        .dynamicLodIterationCount = IntProperty(DynamicLodIterationCountInfo)
     })
     , _debugPropertyOwner({ "Debug" })
     , _shadowMappingProperties({
-        BoolProperty(ShadowMappingInfo, false),
-        FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
-        IntProperty(NumberShadowSamplesInfo, 5, 1, 7)
+        BoolProperty(ShadowMappingInfo),
+        FloatProperty(ZFightingPercentageInfo),
+        IntProperty(NumberShadowSamplesInfo)
     })
     , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
@@ -675,7 +743,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     setInteractionSphere(boundingSphere());
 
     // Init layer manager
-    std::map<layers::Group::ID, std::vector<ghoul::Dictionary>> layers;
+    std::map<layers::Group::ID, std::vector<Dictionary>> layers;
     if (p.layers.has_value()) {
         for (const auto& [key, value] : *p.layers) {
             layers[codegen::map<layers::Group::ID>(key)] = value;
@@ -750,13 +818,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _lodScaleFactorDirty = true;
     });
     addProperty(_targetLodScaleFactor);
-    _currentLodScaleFactor.setReadOnly(true);
     addProperty(_currentLodScaleFactor);
 
     _orenNayarRoughness = p.orenNayarRoughness.value_or(_orenNayarRoughness);
     addProperty(_orenNayarRoughness);
 
-    _nActiveLayers.setReadOnly(true);
+    _nActiveLayers.setMaxValue(OpenGLCap.maxTextureUnits() / 3);
     addProperty(_nActiveLayers);
 
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
@@ -933,7 +1000,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks&) {
                 }
             }
         }
-        catch (const ghoul::opengl::TextureUnit::TextureUnitError&) {
+        catch (const opengl::TextureUnit::TextureUnitError&) {
             const std::string& layer =
                 _lastChangedLayer ? _lastChangedLayer->guiName() : "";
 
@@ -970,7 +1037,7 @@ void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {
     try {
         _globeLabelsComponent.draw(data);
     }
-    catch (const ghoul::opengl::TextureUnit::TextureUnitError& e) {
+    catch (const opengl::TextureUnit::TextureUnitError& e) {
         LERROR(std::format("Error on drawing globe labels '{}'", e.message));
     }
 
@@ -987,7 +1054,7 @@ void RenderableGlobe::update(const UpdateData& data) {
 
         _localRenderer.program->setUniform("xSegments", _grid.xSegments);
 
-        ghoul::opengl::updateUniformLocations(
+        opengl::updateUniformLocations(
             *_localRenderer.program,
             _localRenderer.uniformCache
         );
@@ -1003,7 +1070,7 @@ void RenderableGlobe::update(const UpdateData& data) {
             glm::vec3(_ellipsoid.radii() * _ellipsoid.radii())
         );
 
-        ghoul::opengl::updateUniformLocations(
+        opengl::updateUniformLocations(
             *_globalRenderer.program,
             _globalRenderer.uniformCache
         );
@@ -1155,7 +1222,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
             // accurate shading)  [maybe]
             // It's easier to just try to set it and ignore the error, since this is only
             // happening on a few frames
-            using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+            using IgnoreError = opengl::ProgramObject::IgnoreError;
             _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
             _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
             _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
@@ -1195,7 +1262,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         const float dsf = static_cast<float>(
             _currentLodScaleFactor * _ellipsoid.minimumRadius()
         );
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        using IgnoreError = opengl::ProgramObject::IgnoreError;
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
         _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
@@ -1217,7 +1284,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         const float dsf = static_cast<float>(
             _currentLodScaleFactor * _ellipsoid.minimumRadius()
         );
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        using IgnoreError = opengl::ProgramObject::IgnoreError;
         _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
         _localRenderer.program->setUniform("distanceScaleFactor", dsf);
         _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
@@ -1252,7 +1319,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
             _cachedInverseModelTransform * glm::dvec4(data.camera.position(), 1.0)
         );
 
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        using IgnoreError = opengl::ProgramObject::IgnoreError;
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
         // The cameraPosition is not used if a globe only has a solid color, but it would
         // be costlier to figure that out and will only trigger rarely, so instead we just
@@ -1316,7 +1383,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         const glm::vec3 directionToSunObjSpace(_cachedInverseModelTransform *
             glm::dvec4(directionToSunWorldSpace, 0.0));
 
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        using IgnoreError = opengl::ProgramObject::IgnoreError;
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
         _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
@@ -1461,7 +1528,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     TracyGpuZone("renderChunkGlobally");
 
     const TileIndex& tileIndex = chunk.tileIndex;
-    ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
+    opengl::ProgramObject& program = *_globalRenderer.program;
 
     std::array<LayerGroup*, LayerManager::NumLayerGroups> layerGroups =
         _layerManager.layerGroups();
@@ -1471,13 +1538,10 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     // Setup shadow mapping uniforms
     std::vector<glm::dmat4> lightViewProjections;
-    std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
+    std::vector<std::pair<opengl::TextureUnit, GLuint>> depthmapTextureUnits;
     for (const DepthMapData& depthData : depthMapData) {
         lightViewProjections.push_back(depthData.viewProjection);
-        depthmapTextureUnits.emplace_back(
-            ghoul::opengl::TextureUnit(),
-            depthData.depthMap
-        );
+        depthmapTextureUnits.emplace_back(opengl::TextureUnit(), depthData.depthMap);
     }
 
     std::vector<GLint> boundUnits;
@@ -1515,7 +1579,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         // needed if a globe only has `SolidColor` layers, which is pretty rare, but a
         // check to see if we need it would need to iterate over all layers, which would
         // be relatively expensive
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        using IgnoreError = opengl::ProgramObject::IgnoreError;
         program.setIgnoreUniformLocationError(IgnoreError::Yes);
         program.setUniform("chunkLevel", chunk.tileIndex.level);
         program.setIgnoreUniformLocationError(IgnoreError::No);
@@ -1541,8 +1605,8 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     }
 
     // Shadow Mapping
-    ghoul::opengl::TextureUnit ringTextureColorUnit;
-    ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
+    opengl::TextureUnit ringTextureColorUnit;
+    opengl::TextureUnit ringTextureTransparencyUnit;
     if (_shadowMappingProperties.shadowMapping && _performShading) {
         // Bind ring textures for direct projection when rings component is available
         if (_ringsComponent && _ringsComponent->isEnabled()) {
@@ -1587,7 +1651,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     TracyGpuZone("renderChunkLocally");
 
     const TileIndex& tileIndex = chunk.tileIndex;
-    ghoul::opengl::ProgramObject& program = *_localRenderer.program;
+    opengl::ProgramObject& program = *_localRenderer.program;
 
     const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
         _layerManager.layerGroups();
@@ -1675,8 +1739,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
 
     // Shadow Mapping
-    ghoul::opengl::TextureUnit ringTextureColorUnit;
-    ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
+    opengl::TextureUnit ringTextureColorUnit;
+    opengl::TextureUnit ringTextureTransparencyUnit;
     if (_shadowMappingProperties.shadowMapping) {
         // Bind ring textures for direct projection when rings component is available
         if (_ringsComponent && _ringsComponent->isEnabled()) {
@@ -1699,10 +1763,10 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
 
     std::vector<glm::dmat4> lightViewProjections;
-    std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTexUnits;
+    std::vector<std::pair<opengl::TextureUnit, GLuint>> depthmapTexUnits;
     for (const DepthMapData& depthData : depthMapData) {
         lightViewProjections.push_back(depthData.viewProjection);
-        depthmapTexUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
+        depthmapTexUnits.emplace_back(opengl::TextureUnit(), depthData.depthMap);
     }
 
     std::vector<GLint> boundUnits;
@@ -1765,7 +1829,7 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
     }
 }
 
-void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
+void RenderableGlobe::setCommonUniforms(opengl::ProgramObject& programObject,
                                         const Chunk& chunk, const RenderData& data)
 {
     ZoneScoped;
@@ -1815,7 +1879,7 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
     }
 
     // Used by local and global renderer, as well as GeoJSON
-    using ghoul::opengl::ProgramObject;
+    using opengl::ProgramObject;
     programObject.setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
     programObject.setUniform("modelTransform", _cachedModelTransform);
     programObject.setIgnoreUniformLocationError(ProgramObject::IgnoreError::No);
@@ -1898,7 +1962,7 @@ void RenderableGlobe::recompileShaders() {
     // Create dictionary from layerpreprocessing data
     //
 
-    ghoul::Dictionary shaderDictionary;
+    Dictionary shaderDictionary;
 
     // Different layer types can be height layers or color layers for example.
     // These are used differently within the shaders
@@ -1966,7 +2030,7 @@ void RenderableGlobe::recompileShaders() {
         }
     }
 
-    ghoul::Dictionary layerGroupNames;
+    Dictionary layerGroupNames;
     for (size_t i = 0; i < layers::Groups.size(); i++) {
         layerGroupNames.setValue(
             std::to_string(i),
@@ -2009,15 +2073,12 @@ void RenderableGlobe::recompileShaders() {
         absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
         shaderDictionary
     );
-    ghoul_assert(_localRenderer.program, "Failed to initialize programObject");
+    assert_msg(_localRenderer.program, "Failed to initialize programObject");
     _localRenderer.updatedSinceLastCall = true;
 
     _localRenderer.program->setUniform("xSegments", _grid.xSegments);
 
-    ghoul::opengl::updateUniformLocations(
-        *_localRenderer.program,
-        _localRenderer.uniformCache
-    );
+    opengl::updateUniformLocations(*_localRenderer.program, _localRenderer.uniformCache);
 
 
     //
@@ -2030,7 +2091,7 @@ void RenderableGlobe::recompileShaders() {
         absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
         shaderDictionary
     );
-    ghoul_assert(_globalRenderer.program, "Failed to initialize programObject");
+    assert_msg(_globalRenderer.program, "Failed to initialize programObject");
 
     _globalRenderer.program->setUniform("xSegments", _grid.xSegments);
 
@@ -2040,7 +2101,7 @@ void RenderableGlobe::recompileShaders() {
         glm::vec3(_ellipsoid.radii() * _ellipsoid.radii())
     );
 
-    ghoul::opengl::updateUniformLocations(
+    opengl::updateUniformLocations(
         *_globalRenderer.program,
         _globalRenderer.uniformCache
     );
@@ -2135,7 +2196,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const int x = static_cast<int>(floor(xIndexSpace));
     const int y = static_cast<int>(floor(yIndexSpace));
 
-    ghoul_assert(chunkLevel < std::numeric_limits<uint8_t>::max(), "Too high level");
+    assert_msg(chunkLevel < std::numeric_limits<uint8_t>::max(), "Too high level");
     const TileIndex tileIndex(x, y, static_cast<uint8_t>(chunkLevel));
     const GeodeticPatch patch = GeodeticPatch(tileIndex);
 
@@ -2174,7 +2235,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
             return 0;
         }
 
-        ghoul::opengl::Texture* tileTexture = tile.texture;
+        opengl::Texture* tileTexture = tile.texture;
         if (!tileTexture) {
             return 0;
         }
@@ -2185,8 +2246,8 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
         );
 
         // Sample and do linear interpolation (could possibly be moved as a function in
-        // ghoul texture). Suggestion: a function in ghoul::opengl::Texture that takes uv
-        // coordinates in range [0,1] and uses the set interpolation method and clamping
+        // texture). Suggestion: a function in opengl::Texture that takes uv coordinates
+        // in range [0,1] and uses the set interpolation method and clamping
 
         const glm::uvec3 dimensions = tileTexture->dimensions();
 
@@ -2260,7 +2321,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     return height;
 }
 
-void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
+void RenderableGlobe::calculateEclipseShadows(opengl::ProgramObject& programObject,
                                               const RenderData& data,
                                               ShadowCompType stype)
 {
@@ -2268,7 +2329,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
 
     constexpr double KmToM = 1000.0;
 
-    ghoul_assert(
+    assert_msg(
         !_ellipsoid.shadowConfigurationArray().empty(),
         "Eclipse shadows must be enabled"
     );
@@ -2278,28 +2339,44 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         _ellipsoid.shadowConfigurationArray();
     shadowDataArray.reserve(shadowConfArray.size());
     double lt = 0.0;
+    const double time = data.time.j2000Seconds();
     for (const Ellipsoid::ShadowConfiguration& shadowConf : shadowConfArray) {
         // All distances and lengths in world coordinates are in meters. We need to move
         // this to view space.
-        // Getting source and caster
-        glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
-            shadowConf.source.first,
-            "SSB",
-            "GALACTIC",
-            {},
-            data.time.j2000Seconds(),
-            lt
-        );
-        sourcePos *= KmToM;
-        glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
+        // The shadow that reaches the planet now was cast by the caster one light time
+        // earlier. The caster moves fast relative to the solar system barycenter (about
+        // 30 km/s for the Moon), so ignoring the light time would place the shadow tens
+        // of kilometers behind its actual position. The light time between the source and
+        // the caster only has a negligible effect and is ignored
+        const glm::dvec3 currentCasterPos = SpiceManager::ref().targetPosition(
             shadowConf.caster.first,
             "SSB",
             "GALACTIC",
             {},
-            data.time.j2000Seconds(),
+            time,
             lt
-        );
-        casterPos *= KmToM;
+        ) * KmToM;
+        const double lightTime =
+            glm::length(currentCasterPos - data.modelTransform.translation) /
+            distanceconstants::LightSecond;
+
+        // Getting source and caster
+        const glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
+            shadowConf.source.first,
+            "SSB",
+            "GALACTIC",
+            {},
+            time - lightTime,
+            lt
+        ) * KmToM;
+        const glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
+            shadowConf.caster.first,
+            "SSB",
+            "GALACTIC",
+            {},
+            time - lightTime,
+            lt
+        ) * KmToM;
 
         const std::string source = shadowConf.source.first;
         SceneGraphNode* sourceNode =
@@ -2326,21 +2403,22 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             (glm::dot(planetCasterVec, sourceCasterVec) / (scLength * scLength)) *
             sourceCasterVec;
 
+        const double sourceRadius = shadowConf.source.second * sourceRadiusScale;
+        const double casterRadius = shadowConf.caster.second * casterRadiusScale;
+
         const double dTest  = glm::length(planetCasterVec - planetCasterProj);
-        const double xpTest = shadowConf.caster.second * casterRadiusScale *
-                scLength / (shadowConf.source.second * sourceRadiusScale +
-                             shadowConf.caster.second * casterRadiusScale);
-        const double rpTest = shadowConf.caster.second * casterRadiusScale *
-            (glm::length(planetCasterProj) + xpTest) / xpTest;
+        const double xpTest = casterRadius * scLength / (sourceRadius + casterRadius);
+        const double rpTest =
+            casterRadius * (glm::length(planetCasterProj) + xpTest) / xpTest;
 
         const glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
             "SUN",
             "SSB",
             "GALACTIC",
             {},
-            data.time.j2000Seconds(),
+            time,
             lt
-        );
+        ) * KmToM;
         const double casterDistSun = glm::length(casterPos - sunPos);
         const double planetDistSun =
             glm::length(data.modelTransform.translation - sunPos);
@@ -2355,19 +2433,19 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         {
             // The current caster is shadowing the current planet
             shadowData = {
-                .xu = shadowData.rc * scLength / (shadowData.rs - shadowData.rc),
+                .xu = casterRadius * scLength / (sourceRadius - casterRadius),
                 .xp = xpTest,
-                .rs = shadowConf.source.second * sourceRadiusScale,
-                .rc = shadowConf.caster.second * casterRadiusScale,
+                .rs = sourceRadius,
+                .rc = casterRadius,
                 .sourceCasterVec = glm::normalize(sourceCasterVec),
-                .casterPositionVec = casterPos,
+                // Relative to the globe to not lose precision in the shader
+                .casterPositionVec = planetCasterVec,
                 .isShadowing = true
             };
         }
         shadowDataArray.push_back(shadowData);
     }
 
-    const std::string uniformVarName("shadowDataArray[");
     unsigned int counter = 0;
     for (const ShadowRenderingStruct& sd : shadowDataArray) {
         constexpr std::string_view NameIsShadowing = "shadowDataArray[{}].isShadowing";
@@ -2708,7 +2786,8 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
             splitChunkNode(cn, 1);
         }
         else if (cn.status == Chunk::Status::DoNothing && !cn.colorTileOK) {
-            // Checking cn.heightTileOK caused always not avaiable for certain HiRISE data
+            // Checking cn.heightTileOK caused always not available for certain HiRISE
+            // data
             _allChunksAvailable = false;
         }
 

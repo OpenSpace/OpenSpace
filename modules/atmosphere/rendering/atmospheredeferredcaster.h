@@ -27,9 +27,9 @@
 
 #include <openspace/rendering/deferredcaster.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/textureunit.h>
+#include <openspace/opengl/uniformcache.h>
 #include <vector>
 
 namespace openspace {
@@ -56,15 +56,15 @@ public:
     void initialize();
     void deinitialize();
     void preRaycast(const RenderData& data, const DeferredcastData& deferredData,
-        ghoul::opengl::ProgramObject& program) override;
+        opengl::ProgramObject& program) override;
     void postRaycast(const RenderData& data, const DeferredcastData& deferredData,
-        ghoul::opengl::ProgramObject& program) override;
+        opengl::ProgramObject& program) override;
 
     std::filesystem::path deferredcastVSPath() const override;
     std::filesystem::path deferredcastFSPath() const override;
     std::filesystem::path helperPath() const override;
 
-    void initializeCachedVariables(ghoul::opengl::ProgramObject& program) override;
+    void initializeCachedVariables(opengl::ProgramObject& program) override;
 
     void update(const UpdateData&) override;
     float eclipseShadow(const glm::dvec3& position);
@@ -85,25 +85,23 @@ public:
     void setHardShadows(bool enabled);
 
 private:
-    void step3DTexture(ghoul::opengl::ProgramObject& prg, int layer) const;
+    void step3DTexture(opengl::ProgramObject& prg, int layer) const;
 
     void calculateTransmittance();
     GLuint calculateDeltaE();
     std::pair<GLuint, GLuint> calculateDeltaS();
     void calculateIrradiance();
     void calculateInscattering(GLuint deltaSRayleigh, GLuint deltaSMie) const;
-    void calculateDeltaJ(int scatteringOrder,
-        ghoul::opengl::ProgramObject& program, GLuint deltaJ, GLuint deltaE,
-        GLuint deltaSRayleigh, GLuint deltaSMie);
-    void calculateDeltaE(int scatteringOrder,
-        ghoul::opengl::ProgramObject& program, GLuint deltaE, GLuint deltaSRayleigh,
-        GLuint deltaSMie);
-    void calculateDeltaS(int scatteringOrder,
-        ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh, GLuint deltaJ);
-    void calculateIrradiance(int scatteringOrder,
-        ghoul::opengl::ProgramObject& program, GLuint deltaE);
-    void calculateInscattering(int scatteringOrder,
-        ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh) const;
+    void calculateDeltaJ(int scatteringOrder, opengl::ProgramObject& program,
+        GLuint deltaJ, GLuint deltaE, GLuint deltaSRayleigh, GLuint deltaSMie);
+    void calculateDeltaE(int scatteringOrder, opengl::ProgramObject& program,
+        GLuint deltaE, GLuint deltaSRayleigh, GLuint deltaSMie);
+    void calculateDeltaS(int scatteringOrder, opengl::ProgramObject& program,
+        GLuint deltaSRayleigh, GLuint deltaJ);
+    void calculateIrradiance(int scatteringOrder, opengl::ProgramObject& program,
+        GLuint deltaE);
+    void calculateInscattering(int scatteringOrder, opengl::ProgramObject& program,
+        GLuint deltaSRayleigh) const;
 
     UniformCache(cullAtmosphere, opacity, rPlanet, rAtmosphere, groundRadianceEmission,
         rayleighHeightScale, betaRayleigh, mieHeightScale, betaMieExtinction, mieG,
@@ -113,9 +111,9 @@ private:
         camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture,
         inscatterTexture, sunAngularSize) _uniformCache;
 
-    ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
-    ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
-    ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
+    opengl::TextureUnit _transmittanceTableTextureUnit;
+    opengl::TextureUnit _irradianceTableTextureUnit;
+    opengl::TextureUnit _inScatteringTableTextureUnit;
 
     GLuint _transmittanceTableTexture = 0;
     GLuint _irradianceTableTexture = 0;
@@ -141,7 +139,7 @@ private:
     glm::vec3 _mieScatteringCoeff = glm::vec3(0.f);
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
 
-    // Atmosphere Textures Dimmensions
+    // Atmosphere Textures Dimensions
     const glm::ivec2 _transmittanceTableSize;
     const glm::ivec2 _irradianceTableSize;
     const glm::ivec2 _deltaETableSize;
@@ -162,10 +160,17 @@ private:
     // Atmosphere Debugging
     const bool _saveCalculationTextures = false;
 
-    // Assuming < 1000 shadow casters, the longest uniform name that we are getting is
-    // shadowDataArray[999].casterPositionVec
-    // which needs to fit into the uniform buffer
-    char _uniformNameBuffer[40];
+    /// Uniform locations of the members of one `shadowDataArray` entry in the shader
+    struct ShadowUniformLocations {
+        GLint isShadowing = -1;
+        GLint xp = -1;
+        GLint xu = -1;
+        GLint rc = -1;
+        GLint sourceCasterVec = -1;
+        GLint casterPositionVec = -1;
+    };
+    /// One entry per shadow configuration, cached in #initializeCachedVariables
+    std::vector<ShadowUniformLocations> _shadowUniformLocations;
 };
 
 } // namespace openspace

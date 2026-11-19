@@ -27,7 +27,7 @@ local ToggleSpaceStations = {
   Name = "Toggle space stations",
   Command = [[openspace.toggleFade("{space_stations}.Renderable")]],
   Documentation = [[
-    Toggle visiblity of the space stations around Earth (including their trail).
+    Toggle visibility of the space stations around Earth (including their trail).
   ]],
   GuiPath = "/Solar System/Earth",
   IsLocal = false
@@ -38,7 +38,7 @@ local ToggleSpaceStationTrails = {
   Name = "Toggle space station trails",
   Command = [[openspace.toggleFade("{space_stations&trails}.Renderable")]],
   Documentation = [[
-    Toggle visiblity of the trails for the space stations around Earth.
+    Toggle visibility of the trails for the space stations around Earth.
   ]],
   GuiPath = "/Solar System/Earth",
   IsLocal = false

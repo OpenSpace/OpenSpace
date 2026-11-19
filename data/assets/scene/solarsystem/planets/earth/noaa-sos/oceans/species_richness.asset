@@ -43,9 +43,11 @@ local Colorbar = {
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "colorbar-speciesrichness.png",
-  FaceCamera = false,
-  Scale = 0.3,
-  CartesianPosition = { 0.0, -0.5, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    Scale = 0.3,
+    CartesianPosition = { 0.0, -0.5, -2.0 }
+  }
 }
 
 

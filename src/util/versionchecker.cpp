@@ -27,18 +27,19 @@
 #include <openspace/openspace.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/systemcapabilities/systemcapabilities.h>
-#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/systemcapabilities/systemcapabilities.h>
+#include <openspace/systemcapabilities/generalcapabilitiescomponent.h>
+#include <array>
+#include <charconv>
 #include <sstream>
 #include <string_view>
 #include <filesystem>
 #include <utility>
 #include <vector>
-#include <cstdlib>
 
 namespace {
     constexpr std::string_view _loggerCat = "VersionChecker";
@@ -51,9 +52,9 @@ VersionChecker::~VersionChecker() {
 }
 
 void VersionChecker::requestLatestVersion(const std::string& url) {
-    using GCC = ghoul::systemcapabilities::GeneralCapabilitiesComponent;
+    using GCC = systemcapabilities::GeneralCapabilitiesComponent;
     std::string operatingSystem = SysCap.component<GCC>().operatingSystemString();
-    operatingSystem = ghoul::encodeUrl(operatingSystem);
+    operatingSystem = encodeUrl(operatingSystem);
 
     std::string builtInProfiles = absPath("${PROFILES}").string();
 
@@ -67,6 +68,7 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     else {
         profile = "user-profile";
     }
+    profile = encodeUrl(profile);
 
     std::string fullUrl = std::format(
         "{}?client_version={}&commit_hash={}&operating_system={}&profile={}",
@@ -106,15 +108,26 @@ void VersionChecker::cancel() {
         const std::string versionString(data.begin(), data.end());
         std::istringstream versionData(versionString);
 
-        std::string token;
-        ghoul::getline(versionData, token, '.');
-        const int major = std::atoi(token.c_str());
-        ghoul::getline(versionData, token, '.');
-        const int minor = std::atoi(token.c_str());
-        ghoul::getline(versionData, token, '.');
-        const int patch = std::atoi(token.c_str());
+        // The response comes from a remote server, so it has to be validated
+        std::array<int, 3> version = { 0, 0, 0 };
+        for (int& component : version) {
+            std::string token;
+            openspace::getline(versionData, token, '.');
+            std::string_view t = token;
+            trimWhitespace(t);
+            const char* end = t.data() + t.size();
+            const auto [ptr, ec] = std::from_chars(t.data(), end, component);
+            if (ec != std::errc() || ptr != end) {
+                LWARNING(std::format(
+                    "Received malformed OpenSpace version information '{}' from {}",
+                    versionString, _request->url()
+                ));
+                _request = nullptr;
+                return false;
+            }
+        }
 
-        _latestVersion = { major, minor, patch };
+        _latestVersion = { version[0], version[1], version[2] };
         _request = nullptr;
 
         SemanticVersion currentVersion = {

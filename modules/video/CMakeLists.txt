@@ -104,5 +104,9 @@ else (WIN32)
 
   target_include_directories(openspace-module-video SYSTEM PRIVATE ${Libmpv_INCLUDE_DIRS})
   target_link_libraries(openspace-module-video PRIVATE ${Libmpv_LIBRARIES} Vulkan::Vulkan)
+  # libmpv uses its own Lua (LuaJIT) for its internal scripts. Without this, the linker
+  # exports the Lua symbols of our statically linked Lua from the executable, libmpv binds
+  # to those instead, and crashes as soon as it runs a script
+  target_link_options(openspace-module-video PUBLIC "LINKER:--exclude-libs,ALL")
   mark_as_advanced(LIBMPV_CONFIG Libmpv_INCLUDE_DIRS Libmpv_LIBRARIES)
 endif () # WIN32

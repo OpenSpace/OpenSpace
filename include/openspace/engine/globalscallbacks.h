@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_CORE___GLOBALSCALLBACKS___H__
 #define __OPENSPACE_CORE___GLOBALSCALLBACKS___H__
 
+#include <openspace/misc/boolean.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
-#include <ghoul/misc/boolean.h>
 #include <functional>
 #include <vector>
 
@@ -70,7 +70,7 @@ inline std::vector<std::function<void(TouchInput)>>* touchExit;
  * needs to perform its message loop work more frequently than once per frame. If this
  * method is not called frequently enough, the GUI will become much less responsive. A
  * future more long-term may decouple the browser's message work loop from the main render
- * loop altogehter using a separate thread. Currently, this method is called from within
+ * loop altogether using a separate thread. Currently, this method is called from within
  * the RenderEngine, between calls to individual renderables.
  */
 extern void (*webBrowserPerformanceHotfix)();

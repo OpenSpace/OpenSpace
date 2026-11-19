@@ -29,18 +29,19 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/programobject.h>
-#include <glm/gtx/projection.hpp>
+#include <glm/gtc/constants.hpp>
 #include <optional>
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <iterator>
 #include <limits>
@@ -52,87 +53,131 @@ namespace {
     constexpr int InterpolationSteps = 5;
     constexpr double Epsilon = 1e-4;
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the lines that connect the instrument to the corners of the field "
-        "of view.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the lines that connect the instrument to the "
+            "corners of the field of view.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr Property::PropertyInfo StandoffDistanceInfo = {
-        "StandOffDistance",
-        "Standoff distance factor",
-        "A standoff distance factor which influences the distance of the plane to the "
-        "focus object. If the value is 1, the field of view will be rendered exactly on "
-        "the surface of, for example, a planet. With a value of smaller than 1, the "
-        "field of view will hover of the surface, thus making it more visible.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo StandoffDistanceInfo = {
+        .identifier = "StandOffDistance",
+        .name = "Standoff distance factor",
+        .description = "A standoff distance factor which influences the distance of the "
+            "plane to the focus object. If the value is 1, the field of view will be "
+            "rendered exactly on the surface of, for example, a planet. With a value of "
+            "smaller than 1, the field of view will hover of the surface, thus making it "
+            "more visible.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.9999,
+            .minMax = { 0.99, 1.0 },
+            .stepSize = 0.000001
+        }
     };
 
-    constexpr Property::PropertyInfo AlwaysDrawFovInfo = {
-        "AlwaysDrawFov",
-        "Always draw FOV",
-        "If enabled, the field of view will always be drawn, regardless of whether image "
-        "information is currently available or not.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo AlwaysDrawFovInfo = {
+        .identifier = "AlwaysDrawFov",
+        .name = "Always draw FOV",
+        .description = "If enabled, the field of view will always be drawn, regardless "
+            "of whether image information is currently available or not.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo DefaultStartColorInfo = {
-        "DefaultStart",
-        "Default start",
-        "The color that is used for the field of view frustum close to the instrument. "
-        "The final colors are interpolated between this value and the end color.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo DefaultStartColorInfo = {
+        .identifier = "DefaultStart",
+        .name = "Default start",
+        .description = "The color that is used for the field of view frustum close to "
+            "the instrument. The final colors are interpolated between this value and "
+            "the end color.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.4f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorDefaultEndInfo = {
-        "DefaultEnd",
-        "Default end",
-        "The color that is used for the field of view frustum close to the target. The "
-        "final colors are interpolated between this value and the start color.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ColorDefaultEndInfo = {
+        .identifier = "DefaultEnd",
+        .name = "Default end",
+        .description = "The color that is used for the field of view frustum close to "
+            "the target. The final colors are interpolated between this value and the "
+            "start color.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.85f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorActiveInfo = {
-        "Active",
-        "Active",
-        "The color that is used when the instrument's field of view is active.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ColorActiveInfo = {
+        .identifier = "Active",
+        .name = "Active",
+        .description = "The color that is used when the instrument's field of view is "
+            "active.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 1.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorTargetInFovInfo = {
-        "TargetInFieldOfView",
-        "Target in field of view",
-        "The color that is used if the target is inside the field of view of the "
-        "instrument but the instrument is not yet active.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ColorTargetInFovInfo = {
+        .identifier = "TargetInFieldOfView",
+        .name = "Target in field of view",
+        .description = "The color that is used if the target is inside the field of view "
+            "of the instrument but the instrument is not yet active.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 0.5f, 0.7f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorIntersectionStartInfo = {
-        "IntersectionStart",
-        "Intersection start",
-        "The color that is used close to the instrument if one of the field of view "
-        "corners are intersecting the target object. The final color is an interpolation "
-        "of this color and the intersection end color.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ColorIntersectionStartInfo = {
+        .identifier = "IntersectionStart",
+        .name = "Intersection start",
+        .description = "The color that is used close to the instrument if one of the "
+            "field of view corners are intersecting the target object. The final color "
+            "is an interpolation of this color and the intersection end color.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(1.f, 0.89f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorIntersectionEndInfo = {
-        "IntersectionEnd",
-        "Intersection end",
-        "The color that is used close to the target if one of the field of view corners "
-        "is intersecting the target object. The final color is an interpolation of this "
-        "color and the intersection begin color.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ColorIntersectionEndInfo = {
+        .identifier = "IntersectionEnd",
+        .name = "Intersection end",
+        .description = "The color that is used close to the target if one of the field "
+            "of view corners is intersecting the target object. The final color is an "
+            "interpolation of this color and the intersection begin color.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(1.f, 0.29f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo SquareColorInfo = {
-        "Square",
-        "Orthogonal square",
-        "The color that is used for the field of view square when there is no "
-        "intersection and that the instrument is not currently active.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo SquareColorInfo = {
+        .identifier = "Square",
+        .name = "Orthogonal square",
+        .description = "The color that is used for the field of view square when there "
+            "is no intersection and that the instrument is not currently active.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.85f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     template <typename Func>
@@ -151,6 +196,38 @@ namespace {
         else {
             return 0.5 * bisect(p1, half, testFunction, half);
         }
+    }
+
+    // SPICE describes circular and elliptical fields of view with only one or two bound
+    // vectors. For a circle, the single vector lies on the edge of the field of view. For
+    // an ellipse, the first vector points to the end of the semi-major axis and the
+    // second vector to the end of the semi-minor axis. This function creates `nSegments`
+    // bound vectors that approximate the edge of the field of view
+    std::vector<glm::dvec3> approximateBounds(const SpiceManager::FieldOfViewResult& fov,
+                                              int nSegments)
+    {
+        assert_msg(!fov.bounds.empty(), "Bounds must not be empty");
+        const glm::dvec3 boresight = glm::normalize(fov.boresightVector);
+
+        // Scale the bound vectors so that they end in the plane that is orthogonal to the
+        // boresight at unit distance and only keep the components in that plane
+        auto inPlane = [&boresight](const glm::dvec3& v) {
+            return v / glm::dot(v, boresight) - boresight;
+        };
+
+        const glm::dvec3 major = inPlane(fov.bounds[0]);
+        const glm::dvec3 minor =
+            fov.shape == SpiceManager::FieldOfViewResult::Shape::Circle ?
+            glm::cross(boresight, major) :
+            inPlane(fov.bounds[1]);
+
+        std::vector<glm::dvec3> result;
+        result.reserve(nSegments);
+        for (int i = 0; i < nSegments; i++) {
+            const double a = glm::two_pi<double>() * static_cast<double>(i) / nSegments;
+            result.push_back(boresight + std::cos(a) * major + std::sin(a) * minor);
+        }
+        return result;
     }
 
     // Shows a visual representation of a spacecraft instrument's field-of-view.
@@ -179,8 +256,7 @@ namespace {
         // A table describing the instrument whose field of view should be rendered.
         Instrument instrument;
 
-        // [[codegen::verbatim(AlwaysDrawFovInfo.description)]]
-        std::optional<bool> alwaysDrawFov;
+        std::optional<bool> alwaysDrawFov [[codegen::Info(AlwaysDrawFovInfo)]];
 
         // A list of potential targets (specified as SPICE names) that the field of view
         // should be tested against.
@@ -189,16 +265,21 @@ namespace {
         // A list of frame conversions that should be registered with the SpiceManager.
         std::optional<std::map<std::string, std::string>> frameConversions;
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(StandoffDistanceInfo.description)]]
-        std::optional<float> standOffDistance;
+        std::optional<float> standOffDistance [[codegen::Info(StandoffDistanceInfo)]];
 
         // If true, the field of view's bounds values will be simplified on load. Bound
         // vectors will be removed if they are the strict linear interpolation between the
         // two neighboring vectors. This value is disabled by default.
         std::optional<bool> simplifyBounds;
+
+        // The number of segments that are used to approximate the edge of the field of
+        // view if the instrument has a circular or elliptical field of view. Higher
+        // values result in a smoother shape at the cost of performance. This value is
+        // ignored for all other field of view shapes. The default value is 32.
+        std::optional<int> circleSegments [[codegen::greaterequal(3)]];
     };
 } // namespace
 #include "renderablefov_codegen.cpp"
@@ -212,55 +293,20 @@ Documentation RenderableFov::Documentation() {
     );
 }
 
-RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
+RenderableFov::RenderableFov(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
-    , _standOffDistance(StandoffDistanceInfo, 0.9999, 0.99, 1.0, 0.000001)
-    , _alwaysDrawFov(AlwaysDrawFovInfo, false)
+    , _lineWidth(LineWidthInfo)
+    , _standOffDistance(StandoffDistanceInfo)
+    , _alwaysDrawFov(AlwaysDrawFovInfo)
     , _colors({
         .container = PropertyOwner({"Colors", "Colors"}),
-        .defaultStart = Vec3Property(
-            DefaultStartColorInfo,
-            glm::vec3(0.4f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .defaultEnd = Vec3Property(
-            ColorDefaultEndInfo,
-            glm::vec3(0.85f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .active = Vec3Property(
-            ColorActiveInfo,
-            glm::vec3(0.f, 1.f, 0.f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .targetInFieldOfView = Vec3Property(
-            ColorTargetInFovInfo,
-            glm::vec3(0.f, 0.5f, 0.7f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .intersectionStart = Vec3Property(
-            ColorIntersectionStartInfo,
-            glm::vec3(1.f, 0.89f, 0.f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .intersectionEnd = Vec3Property(
-            ColorIntersectionEndInfo,
-            glm::vec3(1.f, 0.29f, 0.f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        ),
-        .square = Vec3Property(
-            SquareColorInfo,
-            glm::vec3(0.85f),
-            glm::vec3(0.f),
-            glm::vec3(1.f)
-        )
+        .defaultStart = Vec3Property(DefaultStartColorInfo),
+        .defaultEnd = Vec3Property(ColorDefaultEndInfo),
+        .active = Vec3Property(ColorActiveInfo),
+        .targetInFieldOfView = Vec3Property(ColorTargetInFovInfo),
+        .intersectionStart = Vec3Property(ColorIntersectionStartInfo),
+        .intersectionEnd = Vec3Property(ColorIntersectionEndInfo),
+        .square = Vec3Property(SquareColorInfo)
     })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -298,6 +344,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     addProperty(_alwaysDrawFov);
 
     _simplifyBounds = p.simplifyBounds.value_or(_simplifyBounds);
+    _circleSegments = p.circleSegments.value_or(_circleSegments);
 
     _colors.defaultStart.setViewOption(Property::ViewOptions::Color, true);
     _colors.defaultEnd.setViewOption(Property::ViewOptions::Color, true);
@@ -320,7 +367,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 void RenderableFov::initializeGL() {
     _program = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "FovProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "FovProgram",
                 absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
@@ -329,23 +376,25 @@ void RenderableFov::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     // Fetch information about the specific instrument
     SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
         _instrument.name
     );
 
-    // Right now, we can only deal with rectangles or polygons. Circles and ellipses only
-    // return one or two bound vectors that have to used to construct an approximation
-    const bool supportedShape =
-        res.shape == SpiceManager::FieldOfViewResult::Shape::Polygon ||
-        res.shape == SpiceManager::FieldOfViewResult::Shape::Rectangle;
-    if (!supportedShape) {
-        throw ghoul::RuntimeError(
-            std::format("'{}' has unsupported shape", _instrument.name),
-            "RenderableFov"
-        );
+    // Circles and ellipses only return one or two bound vectors that have to be used to
+    // construct an approximation of the field of view
+    switch (res.shape) {
+        case SpiceManager::FieldOfViewResult::Shape::Polygon:
+        case SpiceManager::FieldOfViewResult::Shape::Rectangle:
+            break;
+        case SpiceManager::FieldOfViewResult::Shape::Circle:
+        case SpiceManager::FieldOfViewResult::Shape::Ellipse:
+            res.bounds = approximateBounds(res, _circleSegments);
+            break;
+        default:
+            throw MissingCaseException();
     }
 
     if (_simplifyBounds) {
@@ -471,7 +520,7 @@ void RenderableFov::initializeGL() {
 void RenderableFov::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         "FovProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -502,13 +551,16 @@ glm::dvec3 RenderableFov::orthogonalProjection(const glm::dvec3& vecFov, double 
             _instrument.aberrationCorrection,
             time
         );
+        // Place the point on the plane that is orthogonal to the boresight at the
+        // distance of the target
+        const double scale = glm::length(vecToTarget) /
+            glm::dot(vecFov, glm::normalize(_instrument.boresight));
         const glm::dvec3 fov = SpiceManager::ref().frameTransformationMatrix(
             _instrument.name,
             _instrument.referenceFrame,
             time
         ) * vecFov;
-        const glm::dvec3 p = glm::proj(vecToTarget, fov);
-        return p * 1000.0; // km -> m
+        return fov * scale * 1000.0; // km -> m
     }
 }
 
@@ -788,14 +840,14 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
             case BothIntersect:
                 break;
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }
 #endif
 }
 
 void RenderableFov::render(const RenderData& data, RendererTasks&) {
-    if (!_drawFOV) {
+    if (!_drawFOV && !_alwaysDrawFov) {
         return;
     }
 
@@ -847,7 +899,7 @@ void RenderableFov::update(const UpdateData& data) {
     }
 
     // TODO: figure out if time has changed
-    if (_drawFOV /* && time changed */) {
+    if (_drawFOV || _alwaysDrawFov) {
         const std::pair<std::string, bool>& t = determineTarget(data.time.j2000Seconds());
 
         computeIntercepts(data.time.j2000Seconds(), t.first, t.second);
@@ -868,7 +920,7 @@ void RenderableFov::update(const UpdateData& data) {
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 

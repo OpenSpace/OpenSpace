@@ -28,9 +28,9 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/touch.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <TUIO/TuioServer.h>
 #include <Windows.h>
 #include <chrono>

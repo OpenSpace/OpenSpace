@@ -25,11 +25,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeconstants.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
 #include <optional>
 #include <utility>
 #include <variant>
@@ -50,7 +50,7 @@ namespace {
 
 /**
  * Set the list of discrete delta time steps for the simulation speed that can be quickly
- * jumped between. The list will be sorted to be in increasing order. A negative verison
+ * jumped between. The list will be sorted to be in increasing order. A negative version
  * of each specified time step will be added per default as well.
  *
  * \param deltaTime The list of delta times, given in seconds per real time second. Should

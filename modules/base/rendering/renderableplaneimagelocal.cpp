@@ -28,36 +28,36 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/crc32.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/crc32.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <cstdlib>
 #include <limits>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "A path to an image file to use as a texture for the plane. During stereo "
-        "rendering, this texture is considered the left eye.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "A path to an image file to use as a texture for the plane. "
+            "During stereo rendering, this texture is considered the left eye.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo RightTextureInfo = {
-        "RightTexture",
-        "Right Eye Texture",
-        "Sets the path of the texture that is displayed on this plane for the right eye "
-        "during stereo rendering.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo RightTextureInfo = {
+        .identifier = "RightTexture",
+        .name = "Right Eye Texture",
+        .description = "Sets the path of the texture that is displayed on this plane for "
+            "the right eye during stereo rendering.",
+        .visibility = Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture is provided by a local file on disk.
@@ -65,11 +65,10 @@ namespace {
     // For stereo rendering, a second image can be specified using the `RightTexture`
     // property. This image will be used for the right eye.
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::filesystem::path texture;
+        std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
-        // [[codegen::verbatim(RightTextureInfo.description)]]
-        std::optional<std::filesystem::path> rightTexture;
+        std::optional<std::filesystem::path> rightTexture
+            [[codegen::Info(RightTextureInfo)]];
 
         // If this value is set to true, the image for this plane will not be loaded at
         // startup but rather when plane is shown for the first time. Additionally, if the
@@ -88,7 +87,7 @@ Documentation RenderablePlaneImageLocal::Documentation() {
     );
 }
 
-RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
+RenderablePlaneImageLocal::RenderablePlaneImageLocal(const Dictionary& dictionary)
     : RenderablePlane(dictionary, { .shouldUpdateIfDisabled = true })
     , _texturePath(TextureInfo)
     , _rightTexturePath(RightTextureInfo)
@@ -97,7 +96,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath = p.texture.string();
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+    _textureFile = std::make_unique<filesystem::File>(_texturePath.value());
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
     _texturePath.onChange([this]() { loadTexture(); });
@@ -107,7 +106,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
         _isStereo = true;
         _rightTexturePath = (*p.rightTexture).string();
         _rightTextureFile =
-            std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
+            std::make_unique<filesystem::File>(_rightTexturePath.value());
         _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });
 
         _rightTexturePath.onChange([this]() { loadTexture(); });
@@ -154,7 +153,7 @@ void RenderablePlaneImageLocal::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderablePlaneImageLocal::bindTexture(opengl::TextureUnit& unit) {
     switch (global::windowDelegate->frustumMode()) {
         case WindowDelegate::Frustum::Mono:
         case WindowDelegate::Frustum::LeftEye:
@@ -209,19 +208,18 @@ void RenderablePlaneImageLocal::loadTexture() {
         _isStereo = true;
     }
 
-    ghoul::opengl::Texture* t = _texture;
+    opengl::Texture* t = _texture;
 
-    const unsigned int hash = ghoul::hashCRC32File(_texturePath);
+    const unsigned int hash = hashCRC32File(_texturePath);
 
     _texture = BaseModule::TextureManager.request(
         std::to_string(hash),
-        [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::texture::loadTexture(
+        [path = _texturePath.value()]() -> std::unique_ptr<opengl::Texture> {
+            std::unique_ptr<opengl::Texture> texture = io::texture::loadTexture(
                     absPath(path),
                     2,
-                    ghoul::opengl::Texture::SamplerInit{
-                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                    opengl::Texture::SamplerInit{
+                        .filter = opengl::Texture::FilterMode::LinearMipMap
                     }
                 );
 
@@ -235,25 +233,24 @@ void RenderablePlaneImageLocal::loadTexture() {
 
     BaseModule::TextureManager.release(t);
 
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+    _textureFile = std::make_unique<filesystem::File>(_texturePath.value());
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
     if (_isStereo) {
-        ghoul::opengl::Texture* t = _rightTexture;
+        opengl::Texture* rt = _rightTexture;
 
-        const unsigned int hash = ghoul::hashCRC32File(_rightTexturePath);
+        const unsigned int rHash = hashCRC32File(_rightTexturePath);
 
         _rightTexture = BaseModule::TextureManager.request(
-            std::to_string(hash),
+            std::to_string(rHash),
             [path = _rightTexturePath.value()]() ->
-                std::unique_ptr<ghoul::opengl::Texture>
+                std::unique_ptr<opengl::Texture>
             {
-                std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::texture::loadTexture(
+                std::unique_ptr<opengl::Texture> texture = io::texture::loadTexture(
                         path,
                         2,
-                        ghoul::opengl::Texture::SamplerInit{
-                            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                        opengl::Texture::SamplerInit{
+                            .filter = opengl::Texture::FilterMode::LinearMipMap
                         }
                     );
 
@@ -265,10 +262,9 @@ void RenderablePlaneImageLocal::loadTexture() {
             }
         );
 
-        BaseModule::TextureManager.release(t);
+        BaseModule::TextureManager.release(rt);
 
-        _rightTextureFile =
-            std::make_unique<ghoul::filesystem::File>(_rightTexturePath.value());
+        _rightTextureFile = std::make_unique<filesystem::File>(_rightTexturePath.value());
         _rightTextureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 

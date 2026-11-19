@@ -8,7 +8,7 @@
     {
       "type": "property",
       "value": {
-        "property": "ScreenSpace.ScreenSpaceBrowser_Example.Scale",
+        "property": "ScreenSpace.ScreenSpaceBrowser_Example.Placement.Scale",
         "value": 1.0
       }
     },

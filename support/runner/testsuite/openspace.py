@@ -32,13 +32,17 @@ from .test import Test, TestResult
 
 
 
-def write_configuration_overwrite(base_path: Path, data_path: Path) -> None:
+def write_configuration_overwrite(base_path: Path, data_path: Path) -> str | None:
   """
   Creates a openspace.cfg override file that sets up a common testing environment. These
   are mostly for enabling caching to reduce the amount of testing and removing as much of
-  the logging as possible which would otherwise pollute the usage results
+  the logging as possible which would otherwise pollute the usage results. Returns the
+  previous content of the override file, or `None` if there was none, so that it can be
+  put back with `restore_configuration_overwrite`
   """
-  with open(base_path / "openspace.cfg.override", "w") as f:
+  override_file = base_path / "openspace.cfg.override"
+  previous = override_file.read_text() if override_file.exists() else None
+  with open(override_file, "w") as f:
     # Use a common sync folder outside of the build to prevent redownloading of data
     sync_location = (data_path / "sync").as_posix()
     f.write(f"Paths.SYNC = os.getenv([[OPENSPACE_SYNC]]) or [[{sync_location}]]\n")
@@ -60,8 +64,20 @@ def write_configuration_overwrite(base_path: Path, data_path: Path) -> None:
     # Setting this to true will cause OpenGL errors to appear in the log
     f.write("CheckOpenGLState = true\n")
 
-    # We can reduce the amount of time that we have to wait for OpenSpace to shut down
-    f.write("ShutdownCountdown = 0.25\n")
+  return previous
+
+
+
+def restore_configuration_overwrite(base_path: Path, previous: str | None) -> None:
+  """
+  Undoes `write_configuration_overwrite` by putting back the `previous` content of the
+  override file that it returned, or by removing the file if there was none
+  """
+  override_file = base_path / "openspace.cfg.override"
+  if previous is None:
+    override_file.unlink(missing_ok=True)
+  else:
+    override_file.write_text(previous)
 
 
 
@@ -112,7 +128,7 @@ async def internal_run(openspace: Any, os_api: Api, test: Test, shutdown: bool =
   commit = version["Commit"]
 
   if shutdown:
-    await openspace.toggleShutdown()
+    await openspace.toggleShutdown(0.25)
 
   return screenshot_folder, commit
 
@@ -142,8 +158,8 @@ def run_single_test(test_path: Path, executable: Path | None, per_profile_wait: 
   start_time = time.perf_counter()
 
   if launch_process:
-    print(f"  Starting OpenSpace (Profile: {test.profile})")
     executable_path = Path(executable).resolve()
+    print(f"  Starting OpenSpace (Executable: {executable_path}  Profile: {test.profile})")
     process = subprocess.Popen(
       [
         executable_path,

@@ -27,14 +27,14 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/font/font.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <chrono>
 #include <optional>
@@ -43,21 +43,29 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ActiveColorInfo = {
-        "ActiveColor",
-        "Active color",
-        "This value determines the color that the active instrument is rendered in. "
-        "Shortly after activation, the used color is mixture of this and the flash "
-        "color. The default value is (0.6, 1.0, 0.0).",
-        Property::Visibility::User
+    constexpr Vec3PropertyInfo ActiveColorInfo = {
+        .identifier = "ActiveColor",
+        .name = "Active color",
+        .description = "This value determines the color that the active instrument is "
+            "rendered in. Shortly after activation, the used color is mixture of this "
+            "and the flash color.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(0.6f, 1.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FlashColorInfo = {
-        "FlashColor",
-        "Flash color",
-        "This value determines the color that is used shortly after an instrument "
-        "activation. The default value is (0.9, 1.0, 0.75).",
-        Property::Visibility::User
+    constexpr Vec3PropertyInfo FlashColorInfo = {
+        .identifier = "FlashColor",
+        .name = "Flash color",
+        .description = "This value determines the color that is used shortly after an "
+            "instrument activation.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec3(0.9f, 1.f, 0.75f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     // Shows information about the status of individual instruments onboard a spacecraft
@@ -66,11 +74,11 @@ namespace {
     // visual representation on how much time has passed since the previous image capture
     // and how much time remains until the instrument captures the next image.
     struct [[codegen::Dictionary(DashboardItemInstruments)]] Parameters {
-        // [[codegen::verbatim(ActiveColorInfo.description)]]
-        std::optional<glm::vec3> activeColor [[codegen::color()]];
+        std::optional<glm::vec3> activeColor
+            [[codegen::Info(ActiveColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(FlashColorInfo.description)]]
-        std::optional<glm::vec3> flashColor [[codegen::color()]];
+        std::optional<glm::vec3> flashColor
+            [[codegen::Info(FlashColorInfo), codegen::color()]];
     };
 } // namespace
 #include "dashboarditeminstruments_codegen.cpp"
@@ -84,19 +92,10 @@ Documentation DashboardItemInstruments::Documentation() {
     );
 }
 
-DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dictionary)
+DashboardItemInstruments::DashboardItemInstruments(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _activeColor(
-        ActiveColorInfo,
-        glm::vec3(0.6f, 1.f, 0.f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
-    , _activeFlash(FlashColorInfo,
-        glm::vec3(0.9f, 1.f, 0.75f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
+    , _activeColor(ActiveColorInfo)
+    , _activeFlash(FlashColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -136,7 +135,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             penPosition,
             "Next instrument activity:",
             glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
-            ghoul::fontrendering::CrDirection::Down
+            fontrendering::CrDirection::Down
         );
 
         std::pair<double, std::string_view> remainingConv = simplifyTime(remaining);
@@ -160,7 +159,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                 t * 100
             ),
             glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
-            ghoul::fontrendering::CrDirection::Down
+            fontrendering::CrDirection::Down
         );
 
         std::string str = SpiceManager::ref().dateFromEphemerisTime(
@@ -173,7 +172,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             penPosition,
             std::format("Data acquisition time: {}", str),
             glm::vec4(_activeColor.value(), 1.f),
-            ghoul::fontrendering::CrDirection::Down
+            fontrendering::CrDirection::Down
         );
     }
     const std::pair<double, std::string>& nextTarget = sequencer.nextTarget(currentTime);
@@ -198,7 +197,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             "Next image: [{:02d}:{:02d}:{:02d}]", tlh.count(), tlm.count(), tls.count()
         ),
         targetColor,
-        ghoul::fontrendering::CrDirection::Down
+        fontrendering::CrDirection::Down
     );
 
     penPosition.y -= _font->height();
@@ -213,7 +212,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         penPosition,
         "Active Instruments:",
         glm::vec4(_activeColor.value(), 1.f),
-        ghoul::fontrendering::CrDirection::Down
+        fontrendering::CrDirection::Down
     );
 
     for (const std::pair<std::string, bool>& m : activeMap) {
@@ -227,7 +226,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                 penPosition,
                 std::format("    {:5s}", m.first),
                 glm::vec4(_activeColor.value(), 1.f),
-                ghoul::fontrendering::CrDirection::Down
+                fontrendering::CrDirection::Down
             );
         }
         else {
@@ -237,7 +236,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                 penPosition,
                 std::format("    {:5s}", m.first),
                 glm::vec4(0.3f, 0.3f, 0.3f, 1.f),
-                ghoul::fontrendering::CrDirection::Down
+                fontrendering::CrDirection::Down
             );
         }
     }

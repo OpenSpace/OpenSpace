@@ -40,7 +40,7 @@ public:
     LuaLibrary luaLibrary() const override;
 
 private:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
 };
 
 } // namespace openspace

@@ -27,31 +27,36 @@
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/topic/jsonconverters.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "LuaScriptTopic";
 
-    std::string formatLua(const nlohmann::json::const_iterator& it);
+    std::string formatLua(const nlohmann::json& value);
 
     std::string escapeLuaString(const std::string& s) {
         std::string output;
         for (const char& c : s) {
             switch (c) {
-                case '\a': output += "\\\a"; break;
-                case '\b': output += "\\\b"; break;
-                case '\f': output += "\\\f"; break;
-                case '\n' : output += "\\\n"; break;
-                case '\r' : output += "\\\r"; break;
-                case '\t' : output += "\\\t"; break;
-                case '\v' : output += "\\\v"; break;
+                // The escape sequence has to be spelled out, as a backslash that is
+                // followed by the raw control character is not valid in a Lua string
+                case '\0': output += "\\000"; break;
+                case '\a': output += "\\a"; break;
+                case '\b': output += "\\b"; break;
+                case '\f': output += "\\f"; break;
+                case '\n' : output += "\\n"; break;
+                case '\r' : output += "\\r"; break;
+                case '\t' : output += "\\t"; break;
+                case '\v' : output += "\\v"; break;
                 case '\\' : output += "\\\\"; break;
                 case '"' : output += "\\\""; break;
                 case '\'' : output += "\\'"; break;
@@ -66,7 +71,7 @@ namespace {
     }
 
     std::string formatKeyValuePair(const nlohmann::json::const_iterator& it) {
-        return "[" + formatLuaString(it.key()) + "] = " + formatLua(it);
+        return "[" + formatLuaString(it.key()) + "] = " + formatLua(it.value());
     }
 
     std::string formatObjectAsLuaTable(const nlohmann::json& json) {
@@ -85,7 +90,7 @@ namespace {
         std::string output = "{";
         auto it = json.begin();
         for (size_t i = 0; i < json.size(); i++, it++) {
-            output += formatLua(it);
+            output += formatLua(*it);
             if (i < json.size() - 1) {
                 output += ",";
             }
@@ -93,26 +98,26 @@ namespace {
         return output + "}";
     }
 
-    std::string formatLua(const nlohmann::json::const_iterator& it) {
-        if (it->is_object()) {
-            return formatObjectAsLuaTable(it->get<nlohmann::json>());
+    std::string formatLua(const nlohmann::json& value) {
+        if (value.is_object()) {
+            return formatObjectAsLuaTable(value);
         }
-        if (it->is_array()) {
-            return formatArrayAsLuaTable(it->get<nlohmann::json>());
+        if (value.is_array()) {
+            return formatArrayAsLuaTable(value);
         }
-        if (it->is_number()) {
-            return std::format("{}", it->get<double>());
+        if (value.is_number()) {
+            return std::format("{}", value.get<double>());
         }
-        if (it->is_string()) {
-            return formatLuaString(it->get<std::string>());
+        if (value.is_string()) {
+            return formatLuaString(value.get<std::string>());
         }
-        if (it->is_boolean()) {
-            return it->get<bool>() ? "true" : "false";
+        if (value.is_boolean()) {
+            return value.get<bool>() ? "true" : "false";
         }
-        if (it->is_null()) {
+        if (value.is_null()) {
             return "nil";
         }
-        throw ghoul::lua::LuaFormatException("Format error");
+        throw lua::LuaFormatException("Format error");
     }
 
     std::string generateScript(const std::string& function,
@@ -171,7 +176,7 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
             std::vector<std::string> formattedArgs;
             formattedArgs.reserve(args->size());
             for (auto it = args->begin(); it != args->end(); it++) {
-                formattedArgs.push_back(formatLua(it));
+                formattedArgs.push_back(formatLua(*it));
             }
 
             std::string luaScript = generateScript(luaFunction, formattedArgs);
@@ -184,12 +189,16 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     }
 }
 
+std::string LuaScriptTopic::jsonToLua(const nlohmann::json& value) {
+    return formatLua(value);
+}
+
 void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
                                bool shouldBeSynchronized)
 {
     ScriptEngine::Script::Callback callback;
     if (shouldReturn) {
-        callback = [this](const ghoul::Dictionary& data) {
+        callback = [this](const Dictionary& data) {
             if (_connection) {
                 sendData(data);
                 _waitingForReturnValue = false;

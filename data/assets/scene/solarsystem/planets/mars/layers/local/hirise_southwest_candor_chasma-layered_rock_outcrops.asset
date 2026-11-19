@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Southwest_Candor_Chasma",
   Name = "Southwest Candor Chasma [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Southwest_Candor_Chasma",
   Name = "Southwest Candor Chasma [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt"
 }
 

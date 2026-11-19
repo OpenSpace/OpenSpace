@@ -27,20 +27,20 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
 namespace openspace {
 
 class RenderableOrbitDisc : public Renderable {
 public:
-    explicit RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+    explicit RenderableOrbitDisc(const Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -63,7 +63,7 @@ private:
     Vec2Property _offset;
     Vec3Property _multiplyColor;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
+    std::unique_ptr<opengl::ProgramObject> _shader = nullptr;
     UniformCache(modelViewProjectionTransform, offset, opacity, discTexture,
         eccentricity, semiMajorAxis, multiplyColor) _uniformCache;
 

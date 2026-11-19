@@ -26,11 +26,11 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/astrocast.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
 
 namespace {
     using namespace openspace;

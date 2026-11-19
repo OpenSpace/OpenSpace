@@ -26,43 +26,51 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 #include <optional>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "The path to a file with a one-dimensional texture to be used for the disc "
-        "color. The leftmost color will be innermost color when rendering the disc, and "
-        "the rightmost color will be the outermost color.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "The path to a file with a one-dimensional texture to be used for "
+            "the disc color. The leftmost color will be innermost color when rendering "
+            "the disc, and the rightmost color will be the outermost color.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
-        "The outer radius of the disc, in meters.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size",
+        .description = "The outer radius of the disc, in meters.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.001f, 1e13f }
+        }
     };
 
-    constexpr Property::PropertyInfo WidthInfo = {
-        "Width",
-        "Width",
-        "The disc width, given as a ratio of the full disc radius. For example, a value "
-        "of 1 results in a full circle, while 0.5 results in a disc where the inner "
-        "radius is half of the full radius.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo WidthInfo = {
+        .identifier = "Width",
+        .name = "Width",
+        .description = "The disc width, given as a ratio of the full disc radius. For "
+            "example, a value of 1 results in a full circle, while 0.5 results in a disc "
+            "where the inner radius is half of the full radius.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.001f, 1.f }
+        }
     };
 
     // Renders a circular disc that is colored based on a one-dimensional texture.
@@ -70,14 +78,12 @@ namespace {
     // The disc will be filled i.e. a full circle, per default, but may also be made with
     // a hole in the center using the `Width` parameter.
     struct [[codegen::Dictionary(RenderableDisc)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::filesystem::path texture;
+        std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size [[codegen::greaterequal(0.f)]];
+        std::optional<float> size [[codegen::Info(SizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(WidthInfo.description)]]
-        std::optional<float> width [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> width
+            [[codegen::Info(WidthInfo), codegen::inrange(0.f, 1.f)]];
     };
 } // namespace
 #include "renderabledisc_codegen.cpp"
@@ -91,11 +97,11 @@ Documentation RenderableDisc::Documentation() {
     );
 }
 
-RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
+RenderableDisc::RenderableDisc(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
-    , _size(SizeInfo, 1.f, 0.001f, 1e13f)
-    , _width(WidthInfo, 1.f, 0.001f, 1.f)
+    , _size(SizeInfo)
+    , _width(WidthInfo)
     , _plane(glm::vec2(_size))
     , _planeIsDirty(true)
 {
@@ -121,8 +127,8 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
 
 void RenderableDisc::initialize() {
     _texture = std::make_unique<TextureComponent>(1);
-    _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+    _texture->setFilterMode(opengl::Texture::FilterMode::AnisotropicMipMap);
+    _texture->setWrapping(opengl::Texture::WrappingMode::ClampToEdge);
     _texture->setShouldWatchFileForChanges(true);
 }
 
@@ -154,7 +160,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.width, _width);
     _shader->setUniform(_uniformCache.opacity, opacity());
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_texture->texture());
     _shader->setUniform(_uniformCache.colorTexture, unit);
 
@@ -196,7 +202,7 @@ void RenderableDisc::initializeShader() {
 }
 
 void RenderableDisc::updateUniformLocations() {
-   ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+   opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 float RenderableDisc::planeSize() const {

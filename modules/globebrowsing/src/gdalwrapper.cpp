@@ -26,12 +26,12 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringhelper.h>
 #include <cpl_conv.h>
 #include <cpl_error.h>
 #include <gdal.h>
@@ -42,20 +42,28 @@ namespace {
 
     constexpr std::string_view _loggerCat = "GdalWrapper";
 
-    constexpr Property::PropertyInfo LogGdalErrorInfo = {
-        "LogGdalErrors",
-        "Log GDAL errors",
-        "If this value is enabled, any error that is raised by GDAL will be logged using "
-        "the logmanager. If this value is disabled, any error will be ignored.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo LogGdalErrorInfo = {
+        .identifier = "LogGdalErrors",
+        .name = "Log GDAL errors",
+        .description = "If this value is enabled, any error that is raised by GDAL will "
+            "be logged using the logmanager. If this value is disabled, any error will "
+            "be ignored.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo GdalMaximumCacheInfo = {
-        "GdalMaximumCacheSize",
-        "GDAL maximum cache size",
-        "This function sets the maximum amount of RAM memory in MB that GDAL is "
-        "permitted to use for caching.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo GdalMaximumCacheInfo = {
+        .identifier = "GdalMaximumCacheSize",
+        .name = "GDAL maximum cache size",
+        .description = "This function sets the maximum amount of RAM memory in MB that "
+            "GDAL is permitted to use for caching.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .minMax = { .min = 0 },
+            .stepSize = 1
+        }
     };
 
     void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {
@@ -87,7 +95,7 @@ void GdalWrapper::destroy() {
 }
 
 GdalWrapper& GdalWrapper::ref() {
-    ghoul_assert(_singleton, "GdalWrapper not created");
+    assert_msg(_singleton, "GdalWrapper not created");
     return *_singleton;
 }
 
@@ -97,17 +105,15 @@ bool GdalWrapper::logGdalErrors() const {
 
 GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize)
     : PropertyOwner({ "GdalWrapper", "Gdal Wrapper" })
-    , _logGdalErrors(LogGdalErrorInfo, false)
-    , _gdalMaximumCacheSize(
-        GdalMaximumCacheInfo,
-        static_cast<int>(maximumCacheSize / (1024ULL * 1024ULL)), // Default
-        0, // Minimum: No caching
-        static_cast<int>(maximumMaximumCacheSize / (1024ULL * 1024ULL)), // Maximum
-        1 // Step: One MB
-    )
+    , _logGdalErrors(LogGdalErrorInfo)
+    , _gdalMaximumCacheSize(GdalMaximumCacheInfo)
 {
     ZoneScoped;
 
+    _gdalMaximumCacheSize = static_cast<int>(maximumCacheSize / (1024ULL * 1024ULL));
+    _gdalMaximumCacheSize.setMaxValue(
+        static_cast<int>(maximumMaximumCacheSize / (1024ULL * 1024ULL))
+    );
     addProperty(_logGdalErrors);
     addProperty(_gdalMaximumCacheSize);
 
@@ -139,7 +145,7 @@ void GdalWrapper::setGdalProxyConfiguration() {
         const std::string user = global::configuration->httpProxy.user;
         const std::string password = global::configuration->httpProxy.password;
         std::string auth = global::configuration->httpProxy.authentication;
-        auth = ghoul::toUpperCase(auth);
+        auth = toUpperCase(auth);
 
         const std::string proxy = address + ":" + std::to_string(port);
         CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());

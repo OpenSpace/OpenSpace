@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_KAMELEON___KAMELEONWRAPPER___H__
 #define __OPENSPACE_MODULE_KAMELEON___KAMELEONWRAPPER___H__
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <glm/gtx/std_based_type.hpp>
 #include <array>
 #include <filesystem>

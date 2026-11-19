@@ -24,8 +24,10 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/managedmemoryuniqueptr.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/scene/scene.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/matrix/dmat2property.h>
@@ -60,9 +62,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <openspace/scene/scene.h>
 #include <algorithm>
 #include <execution>
 #include <stdexcept>
@@ -93,14 +93,14 @@ namespace {
         if (size_t i = tagToMatch.find(Intersection);  i != std::string_view::npos) {
             // We have an intersection instruction
             if (tagToMatch.contains(Negation)) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found an "
                     "intersection ('{}') and a negation instruction ('{}') in the query: "
                     "'{}'", Intersection, Negation, tagToMatch
                 ));
             }
             if (tagToMatch.contains(Union)) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found an "
                     "intersection ('{}') and a union instruction ('{}') in the query: "
                     "'{}'", Intersection, Union, tagToMatch
@@ -118,14 +118,14 @@ namespace {
         if (size_t i = tagToMatch.find(Negation);  i != std::string_view::npos) {
             // We have an negation instruction
             if (tagToMatch.contains(Intersection)) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found a "
                     "negation ('{}') and an intersection instruction ('{}') in the "
                     "query: '{}'", Negation, Intersection, tagToMatch
                 ));
             }
             if (tagToMatch.contains(Union)) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found a "
                     "negation ('{}') and a union instruction ('{}') in the query: '{}'",
                     Negation, Union, tagToMatch
@@ -143,14 +143,14 @@ namespace {
         if (size_t i = tagToMatch.find(Union);  i != std::string_view::npos) {
             // We have an union instruction
             if (tagToMatch.contains(Negation)) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found a "
                     "union ('{}') and a negation instruction ('{}') in the query: '{}'",
                     Union, Negation, tagToMatch
                 ));
             }
             if (tagToMatch.contains(Intersection)) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Only a single instruction to combine tags is supported. Found a "
                     "union ('{}') and an intersection instruction ('{}') in the query: "
                     "'{}'", Union, Intersection, tagToMatch
@@ -218,7 +218,7 @@ namespace {
 
         // If none then malformed regular expression
         if (preName.empty() && postName.empty()) [[unlikely]] {
-            throw ghoul::lua::LuaError(std::format(
+            throw lua::LuaError(std::format(
                 "Malformed regular expression: '{}': Empty both before and after '*'",
                 regex
             ));
@@ -226,7 +226,7 @@ namespace {
 
         // Currently do not support several wildcards
         if (regex.find_first_of("*", wildPos + 1) != std::string::npos) [[unlikely]] {
-            throw ghoul::lua::LuaError(std::format(
+            throw lua::LuaError(std::format(
                 "Malformed regular expression: '{}': Only one '*' is supported", regex
             ));
         }
@@ -385,8 +385,8 @@ namespace {
 
     void applyRegularExpression(lua_State* L, std::string_view regex,
                                 double interpolationDuration, std::string_view groupTag,
-                                ghoul::EasingFunction easingFunction,
-                                std::string postScript, bool isBouncing)
+                                EasingFunction easingFunction, std::string postScript,
+                                bool isBouncing)
     {
         //
         // 1. Retrieve all properties that match the regex
@@ -399,7 +399,7 @@ namespace {
         // 2. Remove all properties that don't match the provided type
         std::erase_if(
             matchingProps,
-            [L, type = ghoul::lua::fromLuaType(lua_type(L, -1))](Property* prop) {
+            [L, type = lua::fromLuaType(lua_type(L, -1))](Property* prop) {
                 const bool typeMatches = typeMatch(type, prop->typeLua());
                 if (!typeMatches) [[unlikely]] {
                     LERRORC(
@@ -407,7 +407,7 @@ namespace {
                         std::format(
                             "{}: Property '{}' does not accept input of type '{}'. "
                             "Requested type: {}",
-                            ghoul::lua::errorLocation(L), prop->uri(),
+                            lua::errorLocation(L), prop->uri(),
                             luaTypeToString(type), luaTypeToString(prop->typeLua())
                         )
                     );
@@ -422,7 +422,7 @@ namespace {
                 "property_setValue",
                 std::format(
                     "{}: No property matched the requested URI '{}'",
-                    ghoul::lua::errorLocation(L), regex
+                    lua::errorLocation(L), regex
                 )
             );
             return;
@@ -469,15 +469,15 @@ namespace {
     }
 
     int setPropertyCallSingle(Property& prop, const std::string& uri, lua_State* L,
-                              double duration, ghoul::EasingFunction easingFunction,
+                              double duration, EasingFunction easingFunction,
                               std::string postScript, bool isBouncing)
     {
-        using ghoul::lua::errorLocation;
-        using ghoul::lua::luaTypeToString;
+        using lua::errorLocation;
+        using lua::luaTypeToString;
 
-        const ghoul::lua::LuaTypes type = ghoul::lua::fromLuaType(lua_type(L, -1));
+        const lua::LuaTypes type = lua::fromLuaType(lua_type(L, -1));
         if (!typeMatch(type, prop.typeLua())) {
-            throw ghoul::lua::LuaError(std::format(
+            throw lua::LuaError(std::format(
                 "{}: Property '{}' does not accept input of type '{}'. Requested type: "
                 "{}",
                 errorLocation(L), uri, luaTypeToString(type),
@@ -513,20 +513,25 @@ namespace {
         return 0;
     }
 
-    template <typename T>
-    void createCustomProperty(Property::PropertyInfo info,
-                              std::optional<std::string> onChange)
-    {
-        T* p = new T(info);
+    void setEnabledCallSingle(Property& prop, bool isEnabled) {
+        if (global::sessionRecordingHandler->isRecording()) {
+            global::sessionRecordingHandler->savePropertyEnabledBaseline(prop);
+        }
+
+        prop.setIsEnabled(IsEnabled(isEnabled));
+    }
+
+    template <typename T, typename Info>
+    void createCustomProperty(Info info, std::optional<std::string> onChange) {
+        T* p = new T(std::move(info));
         if (onChange.has_value() && !onChange->empty()) {
             p->onChange(
                 [p, script = *onChange]() {
-                    using namespace ghoul::lua;
-                    LuaState s;
+                    lua::LuaState s;
                     global::scriptEngine->initializeLuaState(s);
-                    ghoul::lua::push(s, p->value());
+                    lua::push(s, p->value());
                     lua_setglobal(s, "value");
-                    ghoul::lua::runScript(s, script);
+                    lua::runScript(s, script);
                 }
             );
         }
@@ -534,17 +539,16 @@ namespace {
     }
 
     template <>
-    void createCustomProperty<TriggerProperty>(Property::PropertyInfo info,
-                                               std::optional<std::string> onChange)
+    void createCustomProperty<TriggerProperty, PropertyInfo>(PropertyInfo info,
+                                                      std::optional<std::string> onChange)
     {
         TriggerProperty* p = new TriggerProperty(info);
         if (onChange.has_value() && !onChange->empty()) {
             p->onChange(
                 [script = *onChange]() {
-                    using namespace ghoul::lua;
-                    LuaState s;
+                    lua::LuaState s;
                     global::scriptEngine->initializeLuaState(s);
-                    ghoul::lua::runScript(s, script);
+                    lua::runScript(s, script);
                 }
             );
         }
@@ -554,21 +558,20 @@ namespace {
 
 namespace openspace::luascriptfunctions {
 
-template <bool optimization>
+template <bool hasSingleUri>
 int propertySetValue(lua_State* L) {
     ZoneScoped;
 
-    int nParameters = ghoul::lua::checkArgumentsAndThrow(
+    int nParameters = lua::checkArgumentsAndThrow(
         L,
         { 2, 6 },
         "lua::property_setValue"
     );
 
-    std::string uriOrRegex =
-        ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
+    std::string uriOrRegex = lua::value<std::string>(L, 1, lua::PopValue::No);
     double interpolationDuration = 0.0;
     std::string easingMethodName;
-    ghoul::EasingFunction easingMethod = ghoul::EasingFunction::Linear;
+    EasingFunction easingMethod = EasingFunction::Linear;
     std::string postScript;
     bool isBouncing = false;
 
@@ -583,84 +586,80 @@ int propertySetValue(lua_State* L) {
         // Later functions expect the value to be at the last position on the stack
         lua_pushvalue(L, 2);
 
-        if (ghoul::lua::hasValue<double>(L, 3)) {
-            interpolationDuration =
-                ghoul::lua::value<double>(L, 3, ghoul::lua::PopValue::No);
+        if (lua::hasValue<double>(L, 3)) {
+            interpolationDuration = lua::value<double>(L, 3, lua::PopValue::No);
         }
         else {
             std::string msg = std::format(
                 "Unexpected type '{}' in argument 3",
-                ghoul::lua::luaTypeToString(lua_type(L, 3))
+                lua::luaTypeToString(lua_type(L, 3))
             );
-            return ghoul::lua::luaError(L, msg);
+            return lua::luaError(L, msg);
         }
     }
     if (nParameters >= 4) {
-        if (ghoul::lua::hasValue<std::string>(L, 4)) {
-            easingMethodName =
-                ghoul::lua::value<std::string>(L, 4, ghoul::lua::PopValue::No);
+        if (lua::hasValue<std::string>(L, 4)) {
+            easingMethodName = lua::value<std::string>(L, 4, lua::PopValue::No);
         }
         else {
             std::string msg = std::format(
                 "Unexpected type '{}' in argument 4",
-                ghoul::lua::luaTypeToString(lua_type(L, 4))
+                lua::luaTypeToString(lua_type(L, 4))
             );
-            return ghoul::lua::luaError(L, msg);
+            return lua::luaError(L, msg);
         }
     }
     if (nParameters >= 5) {
-        if (ghoul::lua::hasValue<std::string>(L, 5)) {
-            postScript = ghoul::lua::value<std::string>(L, 5, ghoul::lua::PopValue::No);
+        if (lua::hasValue<std::string>(L, 5)) {
+            postScript = lua::value<std::string>(L, 5, lua::PopValue::No);
         }
         else {
             std::string msg = std::format(
                 "Unexpected type '{}' in argument 5",
-                ghoul::lua::luaTypeToString(lua_type(L, 5))
+                lua::luaTypeToString(lua_type(L, 5))
             );
-            return ghoul::lua::luaError(L, msg);
+            return lua::luaError(L, msg);
         }
     }
     if (nParameters >= 6) {
-        if (ghoul::lua::hasValue<bool>(L, 6)) {
-            isBouncing = ghoul::lua::value<bool>(L, 6, ghoul::lua::PopValue::No);
+        if (lua::hasValue<bool>(L, 6)) {
+            isBouncing = lua::value<bool>(L, 6, lua::PopValue::No);
         }
         else {
             std::string msg = std::format(
                 "Unexpected type '{}' in argument 6",
-                ghoul::lua::luaTypeToString(lua_type(L, 6))
+                lua::luaTypeToString(lua_type(L, 6))
             );
-            return ghoul::lua::luaError(L, msg);
+            return lua::luaError(L, msg);
         }
 
     }
 
     if (!easingMethodName.empty()) {
-        bool correctName = ghoul::isValidEasingFunctionName(easingMethodName);
+        bool correctName = isValidEasingFunctionName(easingMethodName);
         if (!correctName) {
-            throw ghoul::lua::LuaError(std::format(
+            throw lua::LuaError(std::format(
                 "'{}' is not a valid easing method", easingMethodName
             ));
         }
 
-        easingMethod = ghoul::easingFunctionFromName(easingMethodName);
+        easingMethod = easingFunctionFromName(easingMethodName);
     }
 
     if (isBouncing && interpolationDuration == 0.0) {
-        throw ghoul::lua::LuaError(
-            "When bouncing, a duration of 0 seconds is not allowed"
-        );
+        throw lua::LuaError("When bouncing, a duration of 0 seconds is not allowed");
     }
 
     defer { lua_settop(L, 0); };
 
-    if constexpr (optimization) {
+    if constexpr (hasSingleUri) {
         Property* prop = property(uriOrRegex);
         if (!prop) {
             LERRORC(
                 "property_setValue",
                 std::format(
                     "{}: Property with URI '{}' was not found",
-                    ghoul::lua::errorLocation(L), uriOrRegex
+                    lua::errorLocation(L), uriOrRegex
                 )
             );
             return 0;
@@ -696,9 +695,84 @@ int propertySetValue(lua_State* L) {
     return 0;
 }
 
+template <bool hasSingleUri>
+int setPropertyEnabled(lua_State* L) {
+    ZoneScoped;
+
+    lua::checkArgumentsAndThrow(L, 2, "lua::setPropertyEnabled");
+
+    auto [uriOrRegex, isEnabled] = lua::values<std::string, bool>(L);
+
+    if constexpr (hasSingleUri) {
+        Property* prop = property(uriOrRegex);
+        if (!prop) {
+            LERRORC(
+                "setPropertyEnabled",
+                std::format(
+                    "{}: Property with URI '{}' was not found",
+                    lua::errorLocation(L), uriOrRegex
+                )
+            );
+            return 0;
+        }
+
+        if (!prop->isEnablable()) {
+            LERRORC(
+                "setPropertyEnabled",
+                std::format(
+                    "{}: Property with URI '{}' is not enablable",
+                    lua::errorLocation(L), uriOrRegex
+                )
+            );
+            return 0;
+        }
+
+        setEnabledCallSingle(*prop, isEnabled);
+        return 0;
+    }
+    else {
+        std::string tag = groupTag(uriOrRegex);
+        if (!tag.empty()) {
+            // Remove group tag from start of regex and replace with '*'
+            uriOrRegex = removeGroupTagFromUri(uriOrRegex);
+        }
+
+        //
+        // 1. Retrieve all properties that match the regex
+        std::vector<Property*> matchingProps = findMatchesInAllProperties(
+            uriOrRegex,
+            tag
+        );
+
+        //
+        // 2. Remove all properties that are not enablable
+        std::erase_if(
+            matchingProps,
+            [](Property* prop) { return !prop->isEnablable(); }
+        );
+
+        if (matchingProps.empty()) [[unlikely]] {
+            LERRORC(
+                "property_setPropertyEnabled",
+                std::format(
+                    "{}: No property matched the requested URI '{}'",
+                    lua::errorLocation(L), uriOrRegex
+                )
+            );
+            return 0;
+        }
+
+        for (Property* prop : matchingProps) {
+            setEnabledCallSingle(*prop, isEnabled);
+        }
+
+        return 0;
+    }
+}
+
 int propertyGetValue(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetValue");
-    const std::string uri = ghoul::lua::value<std::string>(L);
+    lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetValue");
+    const std::string uri = lua::value<std::string>(L);
 
     Property* prop = property(uri);
     if (!prop) {
@@ -706,7 +780,7 @@ int propertyGetValue(lua_State* L) {
             "propertyGetValue",
             std::format(
                 "{}: Property with URI '{}' was not found",
-                ghoul::lua::errorLocation(L), uri
+                lua::errorLocation(L), uri
             )
         );
         return 0;
@@ -715,6 +789,51 @@ int propertyGetValue(lua_State* L) {
     prop->getLuaValue(L);
     return 1;
 }
+
+int propertyGetEnabled(lua_State* L) {
+    lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetEnabled");
+    const std::string uri = lua::value<std::string>(L);
+
+    Property* prop = property(uri);
+    if (!prop) {
+        LERRORC(
+            "propertyGetEnabled",
+            std::format(
+                "{}: Property with URI '{}' was not found",
+                lua::errorLocation(L), uri
+            )
+        );
+        return 0;
+    }
+
+    bool isEnabled = prop->isEnabled();
+    lua::push(L, isEnabled);
+
+    return 1;
+}
+
+int propertyGetEnablable(lua_State* L) {
+    lua::checkArgumentsAndThrow(L, 1, "lua::propertyGetEnablable");
+    const std::string uri = lua::value<std::string>(L);
+
+    Property* prop = property(uri);
+    if (!prop) {
+        LERRORC(
+            "propertyGetEnablable",
+            std::format(
+                "{}: Property with URI '{}' was not found",
+                lua::errorLocation(L), uri
+            )
+        );
+        return 0;
+    }
+
+    bool isEnablable = prop->isEnablable();
+    lua::push(L, isEnablable);
+
+    return 1;
+}
+
 } // namespace openspace::luascriptfunctions
 
 namespace {
@@ -729,7 +848,7 @@ namespace {
 [[codegen::luawrap]] void stopPropertyBouncing(std::string uri) {
     Property* prop = property(uri);
     if (!prop) {
-        throw ghoul::lua::LuaError(std::format("Error finding property '{}'", uri));
+        throw lua::LuaError(std::format("Error finding property '{}'", uri));
     }
     global::renderEngine->scene()->stopBouncing(prop);
 }
@@ -825,14 +944,14 @@ namespace {
 /**
  * Loads the SceneGraphNode described in the table and adds it to the SceneGraph.
  */
-[[codegen::luawrap]] void addSceneGraphNode(ghoul::Dictionary node) {
+[[codegen::luawrap]] void addSceneGraphNode(Dictionary node) {
     ZoneScoped;
 
     try {
         SceneGraphNode* n = global::renderEngine->scene()->loadNode(node);
         if (!n) {
             LERRORC("Scene", "Could not load scene graph node");
-            throw ghoul::lua::LuaError("Error loading scene graph node");
+            throw lua::LuaError("Error loading scene graph node");
         }
 
         global::renderEngine->scene()->initializeNode(n);
@@ -844,14 +963,10 @@ namespace {
             "Scene";
         logError(e, cat);
 
-        throw ghoul::lua::LuaError(std::format(
-            "Error loading scene graph node: {}", e.what()
-        ));
+        throw lua::LuaError(std::format("Error loading scene graph node: {}", e.what()));
     }
-    catch (const ghoul::RuntimeError& e) {
-        throw ghoul::lua::LuaError(std::format(
-            "Error loading scene graph node: {}", e.what()
-        ));
+    catch (const RuntimeError& e) {
+        throw lua::LuaError(std::format("Error loading scene graph node: {}", e.what()));
     }
 }
 
@@ -859,17 +974,16 @@ namespace {
  * Removes the SceneGraphNode identified by name or by extracting the 'Identifier' key if
  * the parameter is a table.
  */
-[[codegen::luawrap]] void removeSceneGraphNode(
-                                        std::variant<std::string, ghoul::Dictionary> node)
+[[codegen::luawrap]] void removeSceneGraphNode(std::variant<std::string, Dictionary> node)
 {
     std::string identifier;
     if (std::holds_alternative<std::string>(node)) {
         identifier = std::get<std::string>(node);
     }
     else {
-        ghoul::Dictionary d = std::get<ghoul::Dictionary>(node);
+        Dictionary d = std::get<Dictionary>(node);
         if (!d.hasValue<std::string>("Identifier")) {
-            throw ghoul::lua::LuaError(
+            throw lua::LuaError(
                 "Table passed to removeSceneGraphNode does not contain an Identifier"
             );
         }
@@ -877,19 +991,19 @@ namespace {
     }
 
     if (identifier == "Root") {
-        throw ghoul::lua::LuaError("Cannot remove the 'Root' scene graph node");
+        throw lua::LuaError("Cannot remove the 'Root' scene graph node");
     }
 
     SceneGraphNode* foundNode = sceneGraphNode(identifier);
     if (!foundNode) {
-        throw ghoul::lua::LuaError(
+        throw lua::LuaError(
             std::format("Did not find a match for identifier: {}", identifier)
         );
     }
 
     SceneGraphNode* parent = foundNode->parent();
     if (!parent) {
-        throw ghoul::lua::LuaError("Cannot remove root node");
+        throw lua::LuaError("Cannot remove root node");
     }
 
     // Remove the node and all its children
@@ -908,10 +1022,8 @@ namespace {
 
         std::vector<SceneGraphNode*> children = localNode->children();
 
-        ghoul::mm_unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(
-            *localNode
-        );
-        ghoul_assert(n.get() == localNode, "Wrong node returned from detaching");
+        mm_unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(*localNode);
+        assert_msg(n.get() == localNode, "Wrong node returned from detaching");
 
         for (SceneGraphNode* c : children) {
             removeNode(c);
@@ -968,14 +1080,14 @@ namespace {
         }
 
         if (SceneGraphNode* parent = node->parent();  !parent) {
-            throw ghoul::lua::LuaError("Cannot remove root node");
+            throw lua::LuaError("Cannot remove root node");
         }
 
         markedList.push_back(node);
     }
 
     if (markedList.empty()) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Did not find a match for identifier: {}", nodeIdentifier
         ));
     }
@@ -1011,10 +1123,8 @@ namespace {
 
         std::vector<SceneGraphNode*> children = localNode->children();
 
-        ghoul::mm_unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(
-            *localNode
-        );
-        ghoul_assert(n.get() == localNode, "Wrong node returned from detaching");
+        mm_unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(*localNode);
+        assert_msg(n.get() == localNode, "Wrong node returned from detaching");
 
         for (SceneGraphNode* c : children) {
             removeNode(c);
@@ -1083,7 +1193,7 @@ namespace {
                                                std::optional<std::string> shadowGroup)
 {
     if (shadowGroup.has_value() && !shadowGroup->empty() && shadowGroup->at(0) == '_') {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "The 'shadowGroup' parameter must not start with '_': {}", *shadowGroup
         ));
     }
@@ -1094,25 +1204,23 @@ namespace {
         shadowGroup = std::format("_{}|{}|{}|{}", lightSource, shadower, shadowee, Count);
         Count++;
     }
-    ghoul_assert(shadowGroup.has_value(), "No shadowgroup specified");
+    assert_msg(shadowGroup.has_value(), "No shadowgroup specified");
 
     const Scene* scene = global::renderEngine->scene();
 
     const SceneGraphNode* ls = scene->sceneGraphNode(lightSource);
     if (!ls) {
-        throw ghoul::lua::LuaError(std::format(
-            "Could not find light source '{}'", lightSource
-        ));
+        throw lua::LuaError(std::format("Could not find light source '{}'", lightSource));
     }
 
     SceneGraphNode* shdr = scene->sceneGraphNode(shadower);
     if (!shdr) {
-        throw ghoul::lua::LuaError(std::format("Could not find shadower '{}'", shadower));
+        throw lua::LuaError(std::format("Could not find shadower '{}'", shadower));
     }
 
     SceneGraphNode* shdee = scene->sceneGraphNode(shadowee);
     if (!shdee) {
-        throw ghoul::lua::LuaError(std::format("Could not find shadowee '{}'", shadowee));
+        throw lua::LuaError(std::format("Could not find shadowee '{}'", shadowee));
     }
 
     global::renderEngine->registerShadowCaster(*shadowGroup, ls, shdr, shdee);
@@ -1141,7 +1249,7 @@ namespace {
                                              std::optional<std::string> shadowGroup)
 {
     if (shadowGroup.has_value() && !shadowGroup->empty() && shadowGroup->at(0) == '_') {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "The 'shadowGroup' parameter must not start with '_': {}", *shadowGroup
         ));
     }
@@ -1152,25 +1260,23 @@ namespace {
         shadowGroup = std::format("_{}|{}|{}|{}", lightSource, shadower, shadowee, Count);
         Count++;
     }
-    ghoul_assert(shadowGroup.has_value(), "No shadowgroup specified");
+    assert_msg(shadowGroup.has_value(), "No shadowgroup specified");
 
     const Scene* scene = global::renderEngine->scene();
 
     const SceneGraphNode* ls = scene->sceneGraphNode(lightSource);
     if (!ls) {
-        throw ghoul::lua::LuaError(std::format(
-            "Could not find light source '{}'", lightSource
-        ));
+        throw lua::LuaError(std::format("Could not find light source '{}'", lightSource));
     }
 
     SceneGraphNode* shdr = scene->sceneGraphNode(shadower);
     if (!shdr) {
-        throw ghoul::lua::LuaError(std::format("Could not find shadower '{}'", shadower));
+        throw lua::LuaError(std::format("Could not find shadower '{}'", shadower));
     }
 
     SceneGraphNode* shdee = scene->sceneGraphNode(shadowee);
     if (!shdee) {
-        throw ghoul::lua::LuaError(std::format("Could not find shadowee '{}'", shadowee));
+        throw lua::LuaError(std::format("Could not find shadowee '{}'", shadowee));
     }
 
     global::renderEngine->removeShadowCaster(*shadowGroup, shdr, shdee);
@@ -1213,7 +1319,7 @@ namespace {
 [[codegen::luawrap]] glm::dvec3 worldPosition(std::string identifier) {
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Did not find a match for identifier: {} ", identifier
         ));
     }
@@ -1229,7 +1335,7 @@ namespace {
 [[codegen::luawrap]] glm::dmat3 worldRotation(std::string identifier) {
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Did not find a match for identifier: {} ", identifier
         ));
     }
@@ -1245,13 +1351,13 @@ namespace {
 [[codegen::luawrap]] void setParent(std::string identifier, std::string newParent) {
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Did not find a match for identifier: {}", identifier
         ));
     }
     SceneGraphNode* newParentNode = sceneGraphNode(newParent);
     if (!newParentNode) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Did not find a match for new parent identifier: {}", newParent
         ));
     }
@@ -1267,7 +1373,7 @@ namespace {
 [[codegen::luawrap]] double boundingSphere(std::string identifier) {
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Did not find a match for identifier: {}", identifier
         ));
     }
@@ -1283,7 +1389,7 @@ namespace {
 [[codegen::luawrap]] double interactionSphere(std::string identifier) {
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Did not find a match for identifier: {}", identifier
         ));
     }
@@ -1349,11 +1455,11 @@ enum class [[codegen::enum]] CustomPropertyType {
                                             std::optional<std::string> onChange)
 {
     if (identifier.empty()) {
-        throw ghoul::lua::LuaError("Identifier must not empty");
+        throw lua::LuaError("Identifier must not empty");
     }
 
     if (global::userPropertyOwner->hasProperty(identifier)) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Failed to register property '{}' since a user-defined property with that "
             "name already exists",
             identifier
@@ -1370,101 +1476,205 @@ enum class [[codegen::enum]] CustomPropertyType {
         guiName->c_str() :
         identifier.c_str();
 
-    Property::PropertyInfo info = {
-        identifier.c_str(),
-        gui,
-        description.has_value() ? description->c_str() : ""
+    
+    auto toType = []<typename T>(PropertyInfo info) -> T {
+        return {
+            .identifier = info.identifier,
+            .name = info.name,
+            .description = info.description,
+            .visibility = info.visibility,
+            .isEnablable = info.isEnablable,
+            .needsConfirmation = info.needsConfirmation,
+            .isReadOnly = info.isReadOnly,
+            .defaults = { .isEnabled = info.defaults.isEnabled }
+        };
+    };
+
+    PropertyInfo info = {
+        .identifier = identifier.c_str(),
+        .name = gui,
+        .description = description.has_value() ? description->c_str() : ""
     };
     switch (type) {
         case CustomPropertyType::BoolProperty:
-            createCustomProperty<BoolProperty>(info, std::move(onChange));
+            createCustomProperty<BoolProperty>(
+                toType.template operator()<BoolPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DMat2Property:
-            createCustomProperty<DMat2Property>(info, std::move(onChange));
+            createCustomProperty<DMat2Property>(
+                toType.template operator()<DMat2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DMat3Property:
-            createCustomProperty<DMat3Property>(info, std::move(onChange));
+            createCustomProperty<DMat3Property>(
+                toType.template operator()<DMat3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DMat4Property:
-            createCustomProperty<DMat4Property>(info, std::move(onChange));
+            createCustomProperty<DMat4Property>(
+                toType.template operator()<DMat4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DoubleProperty:
-            createCustomProperty<DoubleProperty>(info, std::move(onChange));
+            createCustomProperty<DoubleProperty>(
+                toType.template operator()<DoublePropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DVec2Property:
-            createCustomProperty<DVec2Property>(info, std::move(onChange));
+            createCustomProperty<DVec2Property>(
+                toType.template operator()<DVec2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DVec3Property:
-            createCustomProperty<DVec3Property>(info, std::move(onChange));
+            createCustomProperty<DVec3Property>(
+                toType.template operator()<DVec3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::DVec4Property:
-            createCustomProperty<DVec4Property>(info, std::move(onChange));
+            createCustomProperty<DVec4Property>(
+                toType.template operator()<DVec4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::FloatProperty:
-            createCustomProperty<FloatProperty>(info, std::move(onChange));
+            createCustomProperty<FloatProperty>(
+                toType.template operator()<FloatPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::IntProperty:
-            createCustomProperty<IntProperty>(info, std::move(onChange));
+            createCustomProperty<IntProperty>(
+                toType.template operator()<IntPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::IVec2Property:
-            createCustomProperty<IVec2Property>(info, std::move(onChange));
+            createCustomProperty<IVec2Property>(
+                toType.template operator()<IVec2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::IVec3Property:
-            createCustomProperty<IVec3Property>(info, std::move(onChange));
+            createCustomProperty<IVec3Property>(
+                toType.template operator()<IVec3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::IVec4Property:
-            createCustomProperty<IVec4Property>(info, std::move(onChange));
+            createCustomProperty<IVec4Property>(
+                toType.template operator()<IVec4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::LongProperty:
-            createCustomProperty<LongProperty>(info, std::move(onChange));
+            createCustomProperty<LongProperty>(
+                toType.template operator()<LongPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Mat2Property:
-            createCustomProperty<Mat2Property>(info, std::move(onChange));
+            createCustomProperty<Mat2Property>(
+                toType.template operator()<Mat2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Mat3Property:
-            createCustomProperty<Mat3Property>(info, std::move(onChange));
+            createCustomProperty<Mat3Property>(
+                toType.template operator()<Mat3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Mat4Property:
-            createCustomProperty<Mat4Property>(info, std::move(onChange));
+            createCustomProperty<Mat4Property>(
+                toType.template operator()<Mat4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::ShortProperty:
-            createCustomProperty<ShortProperty>(info, std::move(onChange));
+            createCustomProperty<ShortProperty>(
+                toType.template operator()<ShortPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::StringProperty:
-            createCustomProperty<StringProperty>(info, std::move(onChange));
+            createCustomProperty<StringProperty>(
+                toType.template operator()<StringPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::StringListProperty:
-            createCustomProperty<StringListProperty>(info, std::move(onChange));
+            createCustomProperty<StringListProperty>(
+                toType.template operator()<StringListPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::TriggerProperty:
-            createCustomProperty<TriggerProperty>(info, std::move(onChange));
+            createCustomProperty<TriggerProperty>(
+                toType.template operator()<TriggerPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::UIntProperty:
-            createCustomProperty<UIntProperty>(info, std::move(onChange));
+            createCustomProperty<UIntProperty>(
+                toType.template operator()<UIntPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::ULongProperty:
-            createCustomProperty<ULongProperty>(info, std::move(onChange));
+            createCustomProperty<ULongProperty>(
+                toType.template operator()<ULongPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::UShortProperty:
-            createCustomProperty<UShortProperty>(info, std::move(onChange));
+            createCustomProperty<UShortProperty>(
+                toType.template operator()<UShortPropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::UVec2Property:
-            createCustomProperty<UVec2Property>(info, std::move(onChange));
+            createCustomProperty<UVec2Property>(
+                toType.template operator()<UVec2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::UVec3Property:
-            createCustomProperty<UVec3Property>(info, std::move(onChange));
+            createCustomProperty<UVec3Property>(
+                toType.template operator()<UVec3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::UVec4Property:
-            createCustomProperty<UVec4Property>(info, std::move(onChange));
+            createCustomProperty<UVec4Property>(
+                toType.template operator()<UVec4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Vec2Property:
-            createCustomProperty<Vec2Property>(info, std::move(onChange));
+            createCustomProperty<Vec2Property>(
+                toType.template operator()<Vec2PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Vec3Property:
-            createCustomProperty<Vec3Property>(info, std::move(onChange));
+            createCustomProperty<Vec3Property>(
+                toType.template operator()<Vec3PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
         case CustomPropertyType::Vec4Property:
-            createCustomProperty<Vec4Property>(info, std::move(onChange));
+            createCustomProperty<Vec4Property>(
+                toType.template operator()<Vec4PropertyInfo>(info),
+                std::move(onChange)
+            );
             return;
     }
     throw std::runtime_error("Missing case label");
@@ -1473,7 +1683,7 @@ enum class [[codegen::enum]] CustomPropertyType {
 [[codegen::luawrap]] void removeCustomProperty(std::string identifier) {
     Property* p = global::userPropertyOwner->property(identifier);
     if (!p) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Could not find user-defined property '{}'", identifier
         ));
     }
@@ -1510,7 +1720,7 @@ enum class [[codegen::enum]] CustomPropertyType {
  * tree. Each key in the dictionary corresponds to a branch in the tree, i.e. a specific
  * GUI path.
  */
-[[codegen::luawrap]] ghoul::Dictionary guiOrder() {
+[[codegen::luawrap]] Dictionary guiOrder() {
     return global::renderEngine->scene()->guiTreeOrder();
 }
 

@@ -136,32 +136,28 @@ local PolyCamFov = {
   }
 }
 
--- Commenting this out as REXIS' shape is circle, which is currently not supported in
--- the RenderableFOV class
--- local RexisFov = {
---   Identifier = "REXIS FOV",
---   Parent = Rexis.Identifier,
---   Renderable = {
---     Type = "RenderableFov",
---     Enabled = asset.enabled,
---     Body = kernels.Frame.OsirisRex,
---     Frame = kernels.Frame.Rexis,
---     RGB = { 0.8, 0.7, 0.7 },
---     Instrument = {
---       Name = "ORX_REXIS",
---       Method = "ELLIPSOID",
---       Aberration = "NONE"
---     },
---     PotentialTargets = { kernels.ID.Bennu },
---     FrameConversions = {
---       [kernels.ID.Bennu] = kernels.Frame.Bennu
---     }
---   },
---   GUI = {
---     Name = "REXIS FOV",
---     Path = "/Solar System/Missions/OSIRIS REx/Instruments"
---   }
--- }
+local RexisFov = {
+  Identifier = "REXIS_FOV",
+  Parent = Rexis.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.OsirisRex,
+    Frame = kernels.Frame.Rexis,
+    Instrument = {
+      Name = kernels.Frame.Rexis,
+      Aberration = "NONE"
+    },
+    PotentialTargets = { kernels.ID.Bennu },
+    FrameConversions = {
+      [kernels.ID.Bennu] = kernels.Frame.Bennu
+    }
+  },
+  GUI = {
+    Name = "REXIS FOV",
+    Path = "/Solar System/Missions/OSIRIS REx/Instruments",
+    Focusable = false
+  }
+}
 
 
 asset.onInitialize(function()
@@ -169,11 +165,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(PolyCam)
   openspace.addSceneGraphNode(Rexis)
   openspace.addSceneGraphNode(PolyCamFov)
-  -- openspace.addSceneGraphNode(RexisFov)
+  openspace.addSceneGraphNode(RexisFov)
 end)
 
 asset.onDeinitialize(function()
-  -- openspace.removeSceneGraphNode(RexisFov)
+  openspace.removeSceneGraphNode(RexisFov)
   openspace.removeSceneGraphNode(PolyCamFov)
   openspace.removeSceneGraphNode(Rexis)
   openspace.removeSceneGraphNode(PolyCam)
@@ -184,4 +180,4 @@ asset.export(OsirisRex)
 asset.export(PolyCam)
 asset.export(Rexis)
 asset.export(PolyCamFov)
--- asset.export(RexisFov)
+asset.export(RexisFov)

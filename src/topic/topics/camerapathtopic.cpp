@@ -27,11 +27,11 @@
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/misc/assert.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/topic/server.h>
-#include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <cmath>
 
@@ -118,7 +118,7 @@ void CameraPathTopic::sendCameraPathData() {
     const Path* path = pathNavigator.currentPath();
 
     if (!path) {
-        ghoul_assert(path, "Path must exist");
+        assert_msg(path, "Path must exist");
         return;
     }
 

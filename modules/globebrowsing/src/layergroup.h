@@ -31,10 +31,9 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <functional>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 class Layer;
 
 /**
@@ -51,7 +50,7 @@ struct LayerGroup : public PropertyOwner {
      */
     void update();
 
-    Layer* addLayer(const ghoul::Dictionary& layerDict);
+    Layer* addLayer(const Dictionary& layerDict);
     void deleteLayer(const std::string& layerName);
 
     /**

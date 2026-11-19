@@ -26,12 +26,12 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <optional>
 
 namespace {
@@ -39,18 +39,22 @@ namespace {
 
     using namespace openspace;
 
-    constexpr Property::PropertyInfo IntensityInfo = {
-        "Intensity",
-        "Intensity",
-        "The intensity of this light source.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo IntensityInfo = {
+        .identifier = "Intensity",
+        .name = "Intensity",
+        .description = "The intensity of this light source.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo NodeInfo = {
-        "Node",
-        "Node",
-        "The identifier of the scene graph node to follow.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo NodeInfo = {
+        .identifier = "Node",
+        .name = "Node",
+        .description = "The identifier of the scene graph node to follow.",
+        .visibility = Visibility::AdvancedUser
     };
 
     // Represents a light source placed at the position of a scene graph node. That is,
@@ -61,11 +65,9 @@ namespace {
     // distance between the two scene graph nodes. Only the `Intensity` value has an
     // impact on the brightness.
     struct [[codegen::Dictionary(SceneGraphLightSource)]] Parameters {
-        // [[codegen::verbatim(IntensityInfo.description)]]
-        std::optional<float> intensity;
+        std::optional<float> intensity [[codegen::Info(IntensityInfo)]];
 
-        // [[codegen::verbatim(NodeInfo.description)]]
-        std::string node [[codegen::identifier()]];
+        std::string node [[codegen::Info(NodeInfo), codegen::identifier()]];
     };
 } // namespace
 #include "scenegraphlightsource_codegen.cpp"
@@ -79,10 +81,10 @@ Documentation SceneGraphLightSource::Documentation() {
     );
 }
 
-SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)
+SceneGraphLightSource::SceneGraphLightSource(const Dictionary& dictionary)
     : LightSource(dictionary)
-    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-    , _nodeIdentifier(NodeInfo, "")
+    , _intensity(IntensityInfo)
+    , _nodeIdentifier(NodeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

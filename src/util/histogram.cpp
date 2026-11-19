@@ -24,8 +24,8 @@
 
 #include <openspace/util/histogram.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
 #include <algorithm>
 #include <cmath>
 #include <string_view>
@@ -193,7 +193,7 @@ float Histogram::interpolate(float bin) const {
 }
 
 float Histogram::sample(int binIndex) const {
-    ghoul_assert(binIndex >= 0 && binIndex < _numBins, "binIndex out of range");
+    assert_msg(binIndex >= 0 && binIndex < _numBins, "binIndex out of range");
     return _data[binIndex];
 }
 

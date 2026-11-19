@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <modules/globebrowsing/src/prioritizingconcurrentjobmanager.h>
 
 namespace openspace {
@@ -68,7 +68,7 @@ void PrioritizingConcurrentJobManager<P, KeyType>::clearEnqueuedJobs() {
 
 template <typename P, typename KeyType>
 std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishedJob() {
-    ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop");
+    assert_msg(!_finishedJobs.empty(), "There is no finished job to pop");
 
     const std::unique_lock lock(_finishedJobsMutex);
     std::shared_ptr<Job<P>> result = _finishedJobs.pop();

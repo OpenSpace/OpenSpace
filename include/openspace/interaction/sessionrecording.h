@@ -32,9 +32,9 @@
 #include <variant>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
+
+class Dictionary;
 
 enum class DataMode {
     Ascii = 0,
@@ -81,8 +81,7 @@ SessionRecording loadSessionRecording(const std::filesystem::path& filename);
 void saveSessionRecording(const std::filesystem::path& filename,
     const SessionRecording& sessionRecording, DataMode dataMode);
 
-std::vector<ghoul::Dictionary> sessionRecordingToDictionary(
-    const SessionRecording& recording);
+std::vector<Dictionary> sessionRecordingToDictionary(const SessionRecording& recording);
 
 } // namespace openspace
 

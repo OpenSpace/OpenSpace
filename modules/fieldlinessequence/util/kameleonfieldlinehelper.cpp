@@ -26,11 +26,11 @@
 
 #include <modules/fieldlinessequence/util/commons.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
 #include <cctype>
 #include <cmath>
 #include <memory>
@@ -108,8 +108,8 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     bool success = addLinesToState(kameleon.get(), seedPoints, tracingVar, state);
     if (success) {
         // The line points are in their RAW format (unscaled & maybe spherical). Before
-        // we scale to meters (and maybe cartesian) we must extract the extraQuantites, as
-        // the iterpolator needs the unaltered positions
+        // we scale to meters (and maybe cartesian) we must extract the extraQuantities,
+        // as the iterpolator needs the unaltered positions
         addExtraQuantities(kameleon.get(), extraVars, extraMagVars, state);
         switch (state.model()) {
             case Model::Batsrus:
@@ -158,7 +158,7 @@ extractSeedPointsFromFiles(std::filesystem::path path)
         LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath));
         std::string line;
         std::vector<glm::vec3> outVec;
-        while (ghoul::getline(seedFile, line)) {
+        while (openspace::getline(seedFile, line)) {
             std::stringstream ss = std::stringstream(line);
             glm::vec3 point;
             ss >> point.x;
@@ -198,7 +198,7 @@ extractMagnitudeVarsFromStrings(std::vector<std::string> vars)
         std::istringstream ss = std::istringstream(str.substr(2, str.size() - 4));
         std::string magVar;
         size_t counter = 0;
-        while (ghoul::getline(ss, magVar, ',')) {
+        while (openspace::getline(ss, magVar, ',')) {
             std::erase_if(magVar, ::isspace);
             extraMagVars.push_back(magVar);
             counter++;
@@ -235,7 +235,7 @@ bool traceFromListOfPoints(FieldlinesState& state, const std::string& cdfPath,
     bool success = addLinesToState(kameleon.get(), seedPoints, tracingVar, state);
     if (success) {
         // The line points are in their RAW format (unscaled & maybe spherical). Before we
-        // scale to meters (and maybe cartesian) we must extract the extraQuantites, as
+        // scale to meters (and maybe cartesian) we must extract the extraQuantities, as
         // the iterpolator needs the unaltered positions
         addExtraQuantities(kameleon.get(), extraVars, extraMagVars, state);
         switch (state.model()) {
@@ -323,7 +323,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
  *
  * \param kameleon Raw pointer to an already opened Kameleon object
  * \param extraScalarVars Vector of strings. Strings should be names of a scalar
- *        quantities to load into _extraQuantites; such as: "T" for temperature or "rho"
+ *        quantities to load into _extraQuantities; such as: "T" for temperature or "rho"
  *        for density
  * \param extraMagVars Vector of strings. Size must be multiple of 3. Strings should be
  *        names of the components needed to calculate magnitude. E.g. {"ux", "uy", "uz"}

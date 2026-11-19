@@ -27,22 +27,28 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <limits>
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::dmat3x3> {
+    static constexpr glm::dmat3x3 Min =
+        createFillMat3x3<double>(std::numeric_limits<double>::lowest());
+    static constexpr glm::dmat3x3 Max =
+        createFillMat3x3<double>(std::numeric_limits<double>::max());
+    static constexpr glm::dmat3x3 Step = createFillMat3x3<double>(0.01);
+};
+
+using DMat3PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::dmat3x3>>;
+
 class DMat3Property : public NumericalProperty<glm::dmat3x3> {
 public:
-    explicit DMat3Property(PropertyInfo info, glm::dmat3x3 value = glm::dmat3x3(0.0),
-        glm::dmat3x3 minValue =
-            ghoul::createFillMat3x3<double>(std::numeric_limits<double>::lowest()),
-        glm::dmat3x3 maxValue =
-            ghoul::createFillMat3x3<double>(std::numeric_limits<double>::max()),
-        glm::dmat3x3 stepValue = ghoul::createFillMat3x3<double>(0.01));
+    explicit DMat3Property(DMat3PropertyInfo info);
 
     std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+    lua::LuaTypes typeLua() const override final;
 
     void getLuaValue(lua_State* state) const override final;
 

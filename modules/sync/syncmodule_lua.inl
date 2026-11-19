@@ -35,7 +35,7 @@ namespace {
  * is being downloaded.
  */
 [[codegen::luawrap]] bool syncResource(std::string identifier, int version) {
-    ghoul::Dictionary dict;
+    Dictionary dict;
     dict.setValue("Type", std::string("HttpSynchronization"));
     dict.setValue("Identifier", identifier);
     dict.setValue("Version", version);

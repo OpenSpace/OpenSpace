@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Part_of_Area_Traversed_by_the_Mars_Exploration",
   Name = "Part of Area Traversed by the Mars Exploration [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Part_of_Area_Traversed_by_the_Mars_Exploration",
   Name = "Part of Area Traversed by the Mars Exploration [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt"
 }
 

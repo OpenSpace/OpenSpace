@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/glm.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <openspace/glm.h>
+#include <openspace/misc/dictionaryjsonformatter.h>
 #include <type_traits>
 
 namespace openspace {
@@ -64,8 +64,8 @@ std::string formatJson(T value) {
     else if constexpr (std::is_same_v<T, std::string>) {
         return escapedJson(value);
     }
-    else if constexpr (std::is_same_v<T, ghoul::Dictionary>) {
-        return ghoul::formatJson(value);
+    else if constexpr (std::is_same_v<T, Dictionary>) {
+        return formatJson(value);
     }
     else if constexpr (internal::isGlmVector<T>()) {
         std::string v = std::format("{}", value);

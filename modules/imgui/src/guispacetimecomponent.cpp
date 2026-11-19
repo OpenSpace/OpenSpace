@@ -28,6 +28,8 @@
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -36,8 +38,6 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timeconstants.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
@@ -49,7 +49,7 @@ namespace {
     const ImVec2 Size = ImVec2(350, 500);
 
     void showTooltip(const std::string& message, double delay) {
-        // Hackish way to enfore a window size for TextWrapped (SetNextWindowSize did not
+        // Hackish way to enforce a window size for TextWrapped (SetNextWindowSize did not
         // do the trick)
         constexpr std::string::size_type FirstLineLength = 64;
         if (!ImGui::IsItemHovered() || GImGui->HoveredIdTimer <= delay) {
@@ -141,11 +141,11 @@ void GuiSpaceTimeComponent::render() {
     if (!nodes.empty()) {
         // Only check if we found the current focus node if we have any nodes at all only
         // then it would be a real error
-        ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
+        assert_msg(iCurrentFocus != nodes.end(), "Focus node not found");
     }
     int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
 
-    const bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
+    const bool hasChanged = ImGui::Combo("Anchor", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
         const std::string script = std::format(
             "openspace.setPropertyValue('{}', '{}');"

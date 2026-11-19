@@ -29,20 +29,20 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <filesystem>
 #include <iterator>
@@ -56,7 +56,7 @@ namespace {
 
     double extractTriggerTimeFromFilename(const std::filesystem::path& filePath) {
         // Number of characters in filename (excluding '.osfls')
-        std::string fileName = filePath.stem().string(); // excludes extention
+        std::string fileName = filePath.stem().string(); // excludes extension
 
         // Ensure the separators are correct
         fileName.replace(4, 1, "-");
@@ -68,172 +68,224 @@ namespace {
         return Time::convertTime(fileName);
     }
 
-    constexpr Property::PropertyInfo ColorMethodInfo = {
-        "ColorMethod",
-        "Color method",
-        "Color lines uniformly or using color tables based on extra quantities like, for "
-        "examples, temperature or particle density.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo ColorMethodInfo = {
+        .identifier = "ColorMethod",
+        .name = "Color method",
+        .description = "Color lines uniformly or using color tables based on extra "
+            "quantities like, for examples, temperature or particle density.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo ColorQuantityInfo = {
-        "ColorQuantity",
-        "Quantity to color by",
-        "Quantity used to color lines if the 'By Quantity' color method is selected.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo ColorQuantityInfo = {
+        .identifier = "ColorQuantity",
+        .name = "Quantity to color by",
+        .description = "Quantity used to color lines if the 'By Quantity' color method "
+            "is selected.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo ColorMinMaxInfo = {
-        "ColorMinMaxRange",
-        "Color min max range",
-        "A min-max range for what the lowest and highest values of the color table can "
-        "be set to.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo ColorMinMaxInfo = {
+        .identifier = "ColorMinMaxRange",
+        .name = "Color min max range",
+        .description = "A min-max range for what the lowest and highest values of the "
+            "color table can be set to.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f, 100.f),
+            .minMax = { glm::vec2(-5000.f), glm::vec2(5000.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorTablePathInfo = {
-        "ColorTablePath",
-        "Path to color table",
-        "Color Table/Transfer Function to use for 'By Quantity' coloring.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo ColorTablePathInfo = {
+        .identifier = "ColorTablePath",
+        .name = "Path to color table",
+        .description = "Color Table/Transfer Function to use for 'By Quantity' coloring.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorUniformInfo = {
-        "Color",
-        "Uniform line color",
-        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'.",
-        Property::Visibility::NoviceUser
+    constexpr Vec4PropertyInfo ColorUniformInfo = {
+        .identifier = "Color",
+        .name = "Uniform line color",
+        .description = "The uniform color of lines shown when 'Color Method' is set to "
+            "'Uniform'.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec4(0.3f, 0.57f, 0.75f, 0.5f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorUseABlendingInfo = {
-        "ABlendingEnabled",
-        "Additive blending",
-        "Activate/deactivate additive blending.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ColorUseABlendingInfo = {
+        .identifier = "ABlendingEnabled",
+        .name = "Additive blending",
+        .description = "Activate/deactivate additive blending.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo DomainEnabledInfo = {
-        "DomainEnabled",
-        "Domain limits",
-        "Enable/Disable domain limits.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo DomainEnabledInfo = {
+        .identifier = "DomainEnabled",
+        .name = "Domain limits",
+        .description = "Enable/Disable domain limits.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo DomainXInfo = {
-        "LimitsX",
-        "X-limits",
-        "Valid range along the X-axis. [Min, Max].",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo DomainXInfo = {
+        .identifier = "LimitsX",
+        .name = "X-limits",
+        .description = "Valid range along the X-axis. [Min, Max].",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DomainYInfo = {
-        "LimitsY",
-        "Y-limits",
-        "Valid range along the Y-axis. [Min, Max].",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo DomainYInfo = {
+        .identifier = "LimitsY",
+        .name = "Y-limits",
+        .description = "Valid range along the Y-axis. [Min, Max].",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DomainZInfo = {
-        "LimitsZ",
-        "Z-limits",
-        "Valid range along the Z-axis. [Min, Max].",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo DomainZInfo = {
+        .identifier = "LimitsZ",
+        .name = "Z-limits",
+        .description = "Valid range along the Z-axis. [Min, Max].",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DomainRInfo = {
-        "LimitsR",
-        "Radial limits",
-        "Valid radial range. [Min, Max].",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo DomainRInfo = {
+        .identifier = "LimitsR",
+        .name = "Radial limits",
+        .description = "Valid radial range. [Min, Max].",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FlowEnabledInfo = {
-        "FlowEnabled",
-        "Flow enabled",
-        "Toggles the rendering of moving particles along the lines. Can, for example, "
-        "illustrate magnetic flow.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo FlowEnabledInfo = {
+        .identifier = "FlowEnabled",
+        .name = "Flow enabled",
+        .description = "Toggles the rendering of moving particles along the lines. Can, "
+            "for example, illustrate magnetic flow.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo FlowColorInfo = {
-        "FlowColor",
-        "Flow color",
-        "Color of particles flow direction indication.",
-        Property::Visibility::NoviceUser
+    constexpr Vec4PropertyInfo FlowColorInfo = {
+        .identifier = "FlowColor",
+        .name = "Flow color",
+        .description = "Color of particles flow direction indication.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FlowReversedInfo = {
-        "ReversedFlow",
-        "Reversed flow",
-        "Toggle to make the flow move in the opposite direction.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo FlowReversedInfo = {
+        .identifier = "ReversedFlow",
+        .name = "Reversed flow",
+        .description = "Toggle to make the flow move in the opposite direction.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo FlowParticleSizeInfo = {
-        "ParticleSize",
-        "Particle size",
-        "Size of the particles.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo FlowParticleSizeInfo = {
+        .identifier = "ParticleSize",
+        .name = "Particle size",
+        .description = "Size of the particles.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 5,
+            .minMax = { 0, 500 }
+        }
     };
 
-    constexpr Property::PropertyInfo FlowParticleSpacingInfo = {
-        "ParticleSpacing",
-        "Particle spacing",
-        "Spacing inbetween particles.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo FlowParticleSpacingInfo = {
+        .identifier = "ParticleSpacing",
+        .name = "Particle spacing",
+        .description = "Spacing in between particles.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 60,
+            .minMax = { 0, 500 }
+        }
     };
 
-    constexpr Property::PropertyInfo FlowSpeedInfo = {
-        "FlowSpeed",
-        "Speed",
-        "Speed of the flow.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo FlowSpeedInfo = {
+        .identifier = "FlowSpeed",
+        .name = "Speed",
+        .description = "Speed of the flow.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 20,
+            .minMax = { 0, 1000 }
+        }
     };
 
-    constexpr Property::PropertyInfo MaskingEnabledInfo = {
-        "MaskingEnabled",
-        "Masking enabled",
-        "Enable/disable masking. Use masking to show lines where a given quantity is "
-        "within a given range, for example, if you only want to see where the "
-        "temperature is between 10 and 20 degrees. Also used for masking out line "
-        "topologies like solar wind & closed lines.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo MaskingEnabledInfo = {
+        .identifier = "MaskingEnabled",
+        .name = "Masking enabled",
+        .description = "Enable/disable masking. Use masking to show lines where a given "
+            "quantity is within a given range, for example, if you only want to see "
+            "where the temperature is between 10 and 20 degrees. Also used for masking "
+            "out line topologies like solar wind & closed lines.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo MaskingMinMaxInfo = {
-        "MaskingMinLimit",
-        "Lower limit",
-        "Lower and upper limit of the valid masking range.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo MaskingMinMaxInfo = {
+        .identifier = "MaskingMinLimit",
+        .name = "Lower limit",
+        .description = "Lower and upper limit of the valid masking range.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f, 100.f),
+            .minMax = { glm::vec2(-5000.f), glm::vec2(5000.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo MaskingQuantityInfo = {
-        "MaskingQuantity",
-        "Quantity used for masking",
-        "Quantity used for masking.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo MaskingQuantityInfo = {
+        .identifier = "MaskingQuantity",
+        .name = "Quantity used for masking",
+        .description = "Quantity used for masking.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "This value specifies the line width of the fieldlines.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "This value specifies the line width of the fieldlines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr Property::PropertyInfo TimeJumpButtonInfo = {
-        "TimeJumpToStart",
-        "Jump to start of sequence",
-        "Performs a time jump to the start of the sequence.",
-        Property::Visibility::NoviceUser
+    constexpr TriggerPropertyInfo TimeJumpButtonInfo = {
+        .identifier = "TimeJumpToStart",
+        .name = "Jump to start of sequence",
+        .description = "Performs a time jump to the start of the sequence.",
+        .visibility = Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo SaveDownloadsOnShutdown = {
-        "SaveDownloadsOnShutdown",
-        "Save downloads on shutdown",
-        "This is an option for if dynamically downloaded should be saved between runs or "
-        "not.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo SaveDownloadsOnShutdown = {
+        .identifier = "SaveDownloadsOnShutdown",
+        .name = "Save downloads on shutdown",
+        .description = "This is an option for if dynamically downloaded should be saved "
+            "between runs or not.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
     // Visualizes field lines, typically across a sequence of time steps, but also
@@ -265,14 +317,12 @@ namespace {
             ByQuantity [[codegen::key("By Quantity")]]
         };
 
-        // [[codegen::verbatim(ColorMethodInfo.description)]]
-        std::optional<ColorMethod> colorMethod;
+        std::optional<ColorMethod> colorMethod [[codegen::Info(ColorMethodInfo)]];
 
-        // [[codegen::verbatim(ColorQuantityInfo.description)]]
-        std::optional<int> colorQuantity;
+        std::optional<int> colorQuantity [[codegen::Info(ColorQuantityInfo)]];
 
-        // [[codegen::verbatim(ColorUniformInfo.description)]]
-        std::optional<glm::vec4> color [[codegen::color()]];
+        std::optional<glm::vec4> color
+            [[codegen::Info(ColorUniformInfo), codegen::color()]];
 
         // A list of paths to transferfunction .txt files containing color tables
         // used for colorizing the fieldlines according to different parameters.
@@ -282,32 +332,24 @@ namespace {
         // Should be entered as min value, max value.
         std::optional<std::vector<glm::vec2>> colorTableRanges;
 
-        // [[codegen::verbatim(ColorMinMaxInfo.description)]]
-        std::optional<glm::vec2> colorMinMaxRange;
+        std::optional<glm::vec2> colorMinMaxRange [[codegen::Info(ColorMinMaxInfo)]];
 
-        // [[codegen::verbatim(FlowEnabledInfo.description)]]
-        std::optional<bool> flowEnabled;
+        std::optional<bool> flowEnabled [[codegen::Info(FlowEnabledInfo)]];
 
-        // [[codegen::verbatim(FlowColorInfo.description)]]
-        std::optional<glm::vec4> flowColor [[codegen::color()]];
+        std::optional<glm::vec4> flowColor
+            [[codegen::Info(FlowColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(FlowReversedInfo.description)]]
-        std::optional<bool> reversedFlow;
+        std::optional<bool> reversedFlow [[codegen::Info(FlowReversedInfo)]];
 
-        // [[codegen::verbatim(FlowParticleSizeInfo.description)]]
-        std::optional<int> particleSize;
+        std::optional<int> particleSize [[codegen::Info(FlowParticleSizeInfo)]];
 
-        // [[codegen::verbatim(FlowParticleSpacingInfo.description)]]
-        std::optional<int> particleSpacing;
+        std::optional<int> particleSpacing [[codegen::Info(FlowParticleSpacingInfo)]];
 
-        // [[codegen::verbatim(FlowSpeedInfo.description)]]
-        std::optional<int> flowSpeed;
+        std::optional<int> flowSpeed [[codegen::Info(FlowSpeedInfo)]];
 
-        // [[codegen::verbatim(MaskingEnabledInfo.description)]]
-        std::optional<bool> maskingEnabled;
+        std::optional<bool> maskingEnabled [[codegen::Info(MaskingEnabledInfo)]];
 
-        // [[codegen::verbatim(MaskingQuantityInfo.description)]]
-        std::optional<int> maskingQuantity;
+        std::optional<int> maskingQuantity [[codegen::Info(MaskingQuantityInfo)]];
 
         // Ranges for which their corresponding quantity parameter value will be masked
         // by. Should be entered as a list of min value, max value pairs.
@@ -317,14 +359,11 @@ namespace {
         // Should be entered as a min value, max value pair.
         std::optional<glm::vec2> maskingMinMaxRange;
 
-        // [[codegen::verbatim(DomainEnabledInfo.description)]]
-        std::optional<bool> domainEnabled;
+        std::optional<bool> domainEnabled [[codegen::Info(DomainEnabledInfo)]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::Info(LineWidthInfo)]];
 
-        // [[codegen::verbatim(ColorUseABlendingInfo.description)]]
-        std::optional<bool> alphaBlendingEnabled;
+        std::optional<bool> alphaBlendingEnabled [[codegen::Info(ColorUseABlendingInfo)]];
 
         // Set if first/last file should render when time is outside of the sequence
         // interval. This can be used regardless of LoadingType. If this value is not
@@ -421,56 +460,35 @@ Documentation RenderableFieldlinesSequence::Documentation() {
     );
 }
 
-RenderableFieldlinesSequence::RenderableFieldlinesSequence(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableFieldlinesSequence::RenderableFieldlinesSequence(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorGroup({ "Color" })
     , _colorMethod(ColorMethodInfo)
     , _colorQuantity(ColorQuantityInfo)
-    , _selectedColorRange(
-        ColorMinMaxInfo,
-        glm::vec2(0.f, 100.f),
-        glm::vec2(-5000.f),
-        glm::vec2(5000.f)
-    )
+    , _selectedColorRange(ColorMinMaxInfo)
     , _colorTablePath(ColorTablePathInfo)
-    , _colorUniform(
-        ColorUniformInfo,
-        glm::vec4(0.3f, 0.57f, 0.75f, 0.5f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _colorABlendEnabled(ColorUseABlendingInfo, true)
-    , _domainEnabled(DomainEnabledInfo, false)
+    , _colorUniform(ColorUniformInfo)
+    , _colorABlendEnabled(ColorUseABlendingInfo)
+    , _domainEnabled(DomainEnabledInfo)
     , _domainGroup({ "Domain" })
     , _domainX(DomainXInfo)
     , _domainY(DomainYInfo)
     , _domainZ(DomainZInfo)
     , _domainR(DomainRInfo)
-    , _flowEnabled(FlowEnabledInfo, false)
+    , _flowEnabled(FlowEnabledInfo)
     , _flowGroup({ "Flow" })
-    , _flowColor(
-        FlowColorInfo,
-        glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _flowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
-    , _flowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
-    , _flowReversed(FlowReversedInfo, false)
-    , _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
-    , _maskingEnabled(MaskingEnabledInfo, false)
+    , _flowColor(FlowColorInfo)
+    , _flowParticleSize(FlowParticleSizeInfo)
+    , _flowParticleSpacing(FlowParticleSpacingInfo)
+    , _flowReversed(FlowReversedInfo)
+    , _flowSpeed(FlowSpeedInfo)
+    , _maskingEnabled(MaskingEnabledInfo)
     , _maskingGroup({ "Masking" })
-    , _selectedMaskingRange(
-        MaskingMinMaxInfo,
-        glm::vec2(0.f, 100.f),
-        glm::vec2(-5000.f),
-        glm::vec2(5000.f)
-    )
+    , _selectedMaskingRange(MaskingMinMaxInfo)
     , _maskingQuantity(MaskingQuantityInfo)
-    , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
+    , _lineWidth(LineWidthInfo)
     , _jumpToStart(TimeJumpButtonInfo)
-    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown, false)
+    , _saveDownloadsOnShutdown(SaveDownloadsOnShutdown)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -487,13 +505,13 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     if (_loadingType == LoadingType::DynamicDownloading &&
         _inputFileType == SourceFileType::Cdf)
     {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "Dynamic loading (or downloading) is only supported for .osfls and .json "
             "files"
         );
     }
     if (_loadingType == LoadingType::StaticLoading && !p.sourceFolder.has_value()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "Either dynamic downloading parameters or a sync folder must be specified"
         );
     }
@@ -513,7 +531,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     if (_loadingType == LoadingType::DynamicDownloading) {
         if (!p.dataID.has_value()) {
-            throw ghoul::RuntimeError(
+            throw RuntimeError(
                 "If running with dynamic downloading, DataID needs to be specified"
             );
         }
@@ -524,17 +542,17 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         );
 
         if (!p.infoURL.has_value()) {
-            throw ghoul::RuntimeError("InfoURL has to be provided");
+            throw RuntimeError("InfoURL has to be provided");
         }
         _infoURL = *p.infoURL;
 
         if (!p.dataURL.has_value()) {
-            throw ghoul::RuntimeError("DataURL has to be provided");
+            throw RuntimeError("DataURL has to be provided");
         }
         _dataURL = *p.dataURL;
     }
     else {
-        ghoul_assert(
+        assert_msg(
             p.sourceFolder.has_value(),
             "sourceFolder not specified though it should not be able to get here"
         );
@@ -551,7 +569,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             };
             _files.push_back(std::move(file));
             if (_files[0].path.empty()) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Error finding file '{}' in folder '{}'",
                     e.path().filename(), path
                 ));
@@ -585,7 +603,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     if (p.colorTablePaths.has_value()) {
         for (const std::filesystem::path& path : *p.colorTablePaths) {
             if (!std::filesystem::exists(path)) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Color table path '{}' is not a valid file", path
                 ));
             }
@@ -730,14 +748,14 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
             _tracingVariable = tracingVariable.value_or(_tracingVariable);
             for (File& file : _files) {
                 if (!tracingVariable.has_value()) {
-                    throw ghoul::RuntimeError("No tracing variable specified");
+                    throw RuntimeError("No tracing variable specified");
                 }
                 std::vector<std::string> extraMagVars =
                     extractMagnitudeVarsFromStrings(_extraVars);
                 std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
                     extractSeedPointsFromFiles(_seedPointDirectory);
                 if (seedsPerFiles.empty()) {
-                    throw ghoul::RuntimeError("No seed files found");
+                    throw RuntimeError("No seed files found");
                 }
                 convertCdfToFieldlinesState(
                     file.state,
@@ -761,7 +779,7 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
             }
             break;
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 
     _isLoadingStateFromDisk = false;
@@ -909,7 +927,7 @@ void RenderableFieldlinesSequence::computeSequenceEndTime() {
     else if (_files.size() == 1) {
         _sequenceEndTime = _files[0].timestamp + 7200.f;
         if (_loadingType == LoadingType::StaticLoading && !_renderForever) {
-            // TODO (2025-06-10, Elon) Alternativly check at construction and throw
+            // TODO (2025-06-10, Elon) Alternatively check at construction and throw
             // exception
             LWARNING(
                 "Only one file in data set, but ShowAtAllTimes set to false. Using a 2h "
@@ -942,7 +960,7 @@ void RenderableFieldlinesSequence::loadFile(File& file) {
             );
         }
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERRORC(e.component, e.message);
     }
 }
@@ -961,7 +979,7 @@ void RenderableFieldlinesSequence::trackOldest(File& file) {
         {
             File* oldest = _loadedFiles.front();
             // The edge case of when queue just got full and user jumped back to where
-            // they started which would make the oldes file in queue to be the active
+            // they started which would make the oldest file in queue to be the active
             // file. In that case we need to make sure we do not unload it
             if (oldest == &file) {
                 return;
@@ -1257,7 +1275,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
     if (_colorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
         _transferFunction->update();
-        ghoul::opengl::TextureUnit textureUnit;
+        opengl::TextureUnit textureUnit;
         textureUnit.bind(_transferFunction->texture());
         _shaderProgram->setUniform("transferFunction", textureUnit);
         _shaderProgram->setUniform("selectedColorRange", _selectedColorRange);

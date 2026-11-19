@@ -27,19 +27,19 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/programobject.h>
 #include <memory>
 
 namespace {
@@ -53,54 +53,97 @@ namespace {
         glm::vec3 headOfLight;
     };
 
-    constexpr Property::PropertyInfo SpeedInfo = {
-        "TravelSpeed",
-        "Speed of travel",
-        "A value for how fast the speed indicator should travel, in meters per second. "
-        "The default value is the speed of light.",
-        Property::Visibility::NoviceUser
+    constexpr DoublePropertyInfo SpeedInfo = {
+        .identifier = "TravelSpeed",
+        .name = "Speed of travel",
+        .description = "A value for how fast the speed indicator should travel, in "
+            "meters per second.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = distanceconstants::LightSecond,
+            .minMax = { 1.0, distanceconstants::LightSecond }
+        }
     };
 
-    constexpr Property::PropertyInfo TargetInfo = {
-        "TargetNode",
-        "Target object",
-        "The identifier of the scene graph node to target with the speed indicator. The "
-        "speed indicator will travel from the parent node to this scene graph node.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TargetInfo = {
+        .identifier = "TargetNode",
+        .name = "Target object",
+        .description = "The identifier of the scene graph node to target with the speed "
+            "indicator. The speed indicator will travel from the parent node to this "
+            "scene graph node.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
-        "An RGB color for the line.",
-        Property::Visibility::NoviceUser
+    constexpr TriggerPropertyInfo ResetLineInfo = {
+        .identifier = "ResetLine",
+        .name = "Reset Line",
+        .description = "When triggered, the line will start again from the beginning.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "This value specifies the line width.",
-        Property::Visibility::NoviceUser
+    constexpr DoublePropertyInfo EpochInfo = {
+        .identifier = "Epoch",
+        .name = "Epoch",
+        .description = "The epoch for the indicator, that is the time modulo the travel "
+            "time in which the length of the indicator is exactly 0. Due to the way the "
+            "indicator is calculated, this value will stay the same even as the "
+            "indicator finishes each trip. So for a trip duration of 1s the epochs of "
+            "2.5, 3.5, 6.5, 10.5 are all equivalent.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = -1.0
+        }
     };
 
-    constexpr Property::PropertyInfo IndicatorLengthInfo = {
-        "IndicatorLength",
-        "Indicator length",
-        "The length of the speed indicator line, given in seconds. The length will be "
-        "computed as the speed times this value. For example, a value of 1 will make it "
-        "as long as the distance it would travel over one second with the specified "
-        "speed.",
-        Property::Visibility::User
+    constexpr Vec3PropertyInfo LineColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "An RGB color for the line.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FadeLengthInfo = {
-        "FadeLength",
-        "Fade length",
-        "The length of the faded tail of the speed indicator, given in seconds. The "
-        "length of the tail will be computed as the speed times this value. For example, "
-        "a value of 1 will make it as long as the distance it would travel over one "
-        "second. A linear fade will be applied over this distance to create the tail.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "This value specifies the line width.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 1.f, 20.f }
+        }
+    };
+
+    constexpr FloatPropertyInfo IndicatorLengthInfo = {
+        .identifier = "IndicatorLength",
+        .name = "Indicator length",
+        .description = "The length of the speed indicator line, given in seconds. The "
+            "length will be computed as the speed times this value. For example, a value "
+            "of 1 will make it as long as the distance it would travel over one second "
+            "with the specified speed.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 360.f }
+        }
+    };
+
+    constexpr FloatPropertyInfo FadeLengthInfo = {
+        .identifier = "FadeLength",
+        .name = "Fade length",
+        .description = "The length of the faded tail of the speed indicator, given in "
+            "seconds. The length of the tail will be computed as the speed times this "
+            "value. For example, a value of 1 will make it as long as the distance it "
+            "would travel over one second. A linear fade will be applied over this "
+            "distance to create the tail.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 360.f }
+        }
     };
 
     // Visualizes a certain travel speed using a line that moves at the provided speed
@@ -117,23 +160,21 @@ namespace {
     // set simulation time and the set `TravelSpeed`. That is, increasing the simulation
     // speed makes the indicator move faster.
     struct [[codegen::Dictionary(RenderableTravelSpeed)]] Parameters {
-        // [[codegen::verbatim(TargetInfo.description)]]
-        std::string target [[codegen::identifier()]];
+        std::string target [[codegen::Info(TargetInfo), codegen::identifier()]];
 
-        // [[codegen::verbatim(SpeedInfo.description)]]
-        std::optional<double> travelSpeed [[codegen::greater(0.f)]];
+        std::optional<double> travelSpeed
+            [[codegen::Info(SpeedInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(LineColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(LineColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greater(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(IndicatorLengthInfo.description)]]
-        std::optional<float> indicatorLength [[codegen::greater(0.f)]];
+        std::optional<float> indicatorLength
+            [[codegen::Info(IndicatorLengthInfo), codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(FadeLengthInfo.description)]]
-        std::optional<float> fadeLength [[codegen::greater(0.f)]];
+        std::optional<float> fadeLength
+            [[codegen::Info(FadeLengthInfo), codegen::greater(0.f)]];
     };
 } // namespace
 #include "renderabletravelspeed_codegen.cpp"
@@ -144,24 +185,29 @@ Documentation RenderableTravelSpeed::Documentation() {
     return codegen::doc<Parameters>("space_renderable_travelspeed");
 }
 
-RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary)
+RenderableTravelSpeed::RenderableTravelSpeed(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _targetIdentifier(TargetInfo)
-    , _travelSpeed(
-        SpeedInfo,
-        distanceconstants::LightSecond,
-        1.0,
-        distanceconstants::LightSecond
-      )
-    , _indicatorLength(IndicatorLengthInfo, 1.f, 0.f, 360.f)
-    , _fadeLength(FadeLengthInfo, 0.f, 0.f, 360.f)
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _resetLine(ResetLineInfo)
+    , _epoch(EpochInfo)
+    , _travelSpeed(SpeedInfo)
+    , _indicatorLength(IndicatorLengthInfo)
+    , _fadeLength(FadeLengthInfo)
+    , _lineWidth(LineWidthInfo)
+    , _lineColor(LineColorInfo)
 {
     addProperty(Fadeable::_opacity);
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
     setRenderBin(RenderBin::Overlay);
+
+    _epoch.onChange([this]() { reinitiateTravel(_epoch); });
+    addProperty(_epoch);
+
+    _resetLine.onChange([this]() {
+        reinitiateTravel(global::timeManager->time().j2000Seconds());
+    });
+    addProperty(_resetLine);
 
     _lineColor = p.color.value_or(_lineColor);
     _lineColor.setViewOption(Property::ViewOptions::Color);
@@ -200,14 +246,14 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
 void RenderableTravelSpeed::initialize() {
     _targetNode = sceneGraphNode(_targetIdentifier);
     if (!_targetNode) {
-        throw ghoul::RuntimeError("Could not find Target Node");
+        throw RuntimeError("Could not find Target Node");
     }
 }
 
 void RenderableTravelSpeed::initializeGL() {
     _shaderProgram = BaseModule::ProgramObjectManager.request(
         "Travelspeed",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "Travelspeed",
                 absPath("${MODULE_SPACE}/shaders/travelspeed_vs.glsl"),
@@ -226,13 +272,13 @@ void RenderableTravelSpeed::initializeGL() {
     glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, 0, 0);
 
-    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
+    opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
 }
 
 void RenderableTravelSpeed::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         "Travelspeed",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -246,7 +292,7 @@ void RenderableTravelSpeed::updateVertexData() {
     // 3: start of light, 2: start of fade, 1: end of fade
     positions.headOfLight = _travelSpeed * _timeSinceStart * _directionVector;
 
-    // This if statment is there to not start the line from behind the source node
+    // This if statement is there to not start the line from behind the source node
     if (_timeSinceStart < _indicatorLength) {
         positions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0);
     }
@@ -255,7 +301,7 @@ void RenderableTravelSpeed::updateVertexData() {
             _travelSpeed * (_timeSinceStart - _indicatorLength) * _directionVector;
     }
 
-    // This if statment is there to not start the line from behind the source node
+    // This if statement is there to not start the line from behind the source node
     if (_timeSinceStart < (_indicatorLength + _fadeLength)) {
         positions.endOfFade = glm::vec3(0.0, 0.0, 0.0);
     }
@@ -267,18 +313,25 @@ void RenderableTravelSpeed::updateVertexData() {
     glNamedBufferSubData(_vbo, 0, sizeof(positions), &positions);
 }
 
-void RenderableTravelSpeed::reinitiateTravel() {
-    _initiationTime = global::timeManager->time().j2000Seconds();
+void RenderableTravelSpeed::reinitiateTravel(std::optional<double> time) {
+    if (time.has_value()) {
+        _epoch = *time;
+        _initiationTime = _epoch;
+    }
+    else {
+        _initiationTime = global::timeManager->time().j2000Seconds();
+    }
     _arrivalTime = _initiationTime + _travelTime;
 }
 
 void RenderableTravelSpeed::update(const UpdateData& data) {
-    if (_initiationTime == -1.0) {
-        _initiationTime = data.time.j2000Seconds();
+    if (_epoch == -1.0) {
+        _epoch = data.time.j2000Seconds();
+        _initiationTime = _epoch;
     }
 
     SceneGraphNode* sourceNode = parent();
-    ghoul_assert(sourceNode, "Renderable have to be owned by scene graph node");
+    assert_msg(sourceNode, "Renderable have to be owned by scene graph node");
 
     // Target position, in the reference frame of the source node (to correctly inherit
     // parent transform)

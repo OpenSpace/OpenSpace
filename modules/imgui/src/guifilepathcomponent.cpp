@@ -25,7 +25,7 @@
 #include <modules/imgui/include/guifilepathcomponent.h>
 
 #include <modules/imgui/include/imgui_include.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/filesystem/filesystem.h>
 
 namespace openspace {
 

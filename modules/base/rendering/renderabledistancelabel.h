@@ -35,7 +35,7 @@ namespace openspace {
 
 class RenderableDistanceLabel : public RenderableLabel {
 public:
-    explicit RenderableDistanceLabel(const ghoul::Dictionary& dictionary);
+    explicit RenderableDistanceLabel(const Dictionary& dictionary);
 
      void update(const UpdateData& data) override;
      static openspace::Documentation Documentation();

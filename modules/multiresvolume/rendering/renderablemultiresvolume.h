@@ -51,7 +51,7 @@ class TSP;
 
 class RenderableMultiresVolume : public Renderable {
 public:
-    explicit RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
+    explicit RenderableMultiresVolume(const Dictionary& dictionary);
     ~RenderableMultiresVolume();
 
     enum Selector {

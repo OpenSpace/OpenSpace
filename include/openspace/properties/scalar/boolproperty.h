@@ -29,15 +29,17 @@
 
 namespace openspace {
 
+using BoolPropertyInfo = BasicPropertyInfo<ValueDefaults<bool>>;
+
 /**
  * This class is a concrete implementation of TemplateProperty with the type `bool`.
  */
 class BoolProperty : public TemplateProperty<bool> {
 public:
-    explicit BoolProperty(PropertyInfo info, bool value = false);
+    explicit BoolProperty(BoolPropertyInfo info);
 
     std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+    lua::LuaTypes typeLua() const override final;
 
     void getLuaValue(lua_State* state) const override final;
 

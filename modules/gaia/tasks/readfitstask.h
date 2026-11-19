@@ -34,7 +34,7 @@ namespace openspace {
 
 class ReadFitsTask : public Task {
 public:
-    explicit ReadFitsTask(const ghoul::Dictionary& dictionary);
+    explicit ReadFitsTask(const Dictionary& dictionary);
     ~ReadFitsTask() override = default;
 
     std::string description() override;

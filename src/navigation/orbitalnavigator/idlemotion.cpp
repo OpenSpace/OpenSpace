@@ -38,72 +38,99 @@ namespace {
 
     constexpr double AngleEpsilon = 1e-7;
 
-    constexpr Property::PropertyInfo ApplyInfo = {
-        "Apply",
-        "Apply idle motion",
-        "When set to true, the chosen idle motion will be applied to the camera, moving "
-        "the camera accordingly.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ApplyInfo = {
+        .identifier = "Apply",
+        .name = "Apply idle motion",
+        .description = "When set to true, the chosen idle motion will be applied to the "
+            "camera, moving the camera accordingly.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo MotionInfo = {
-        "Motion",
-        "Motion",
-        "The chosen camera motion that will be triggered when the idle motion is applied. "
-        "Each option represents a predefined camera motion.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo MotionInfo = {
+        .identifier = "Motion",
+        .name = "Motion",
+        .description = "The chosen camera motion that will be triggered when the idle "
+            "motion is applied. Each option represents a predefined camera motion.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ShouldTriggerWhenIdleInfo = {
-        "ShouldTriggerWhenIdle",
-        "Should trigger when idle",
-        "If true, the chosen idle motion will trigger automatically after a certain time "
-        "(see 'IdleWaitTime' property).",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShouldTriggerWhenIdleInfo = {
+        .identifier = "ShouldTriggerWhenIdle",
+        .name = "Should trigger when idle",
+        .description = "If true, the chosen idle motion will trigger automatically after "
+            "a certain time (see 'IdleWaitTime' property).",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo IdleWaitTimeInfo = {
-        "IdleWaitTime",
-        "Idle wait time",
-        "The time (seconds) until idle motion starts, if no camera interaction has been "
-        "performed. Note that friction counts as camera interaction.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo IdleWaitTimeInfo = {
+        .identifier = "IdleWaitTime",
+        .name = "Idle wait time",
+        .description = "The time (seconds) until idle motion starts, if no camera "
+            "interaction has been performed. Note that friction counts as camera "
+            "interaction.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 5.f,
+            .minMax = { 0.f, 3600.f },
+            .stepSize = 1.f
+        }
     };
 
-    constexpr Property::PropertyInfo SpeedFactorInfo = {
-        "SpeedFactor",
-        "Speed factor",
-        "A factor that can be used to increase or slow down the speed of an applied idle "
-        "motion. A negative value will invert the direction. Note that a speed of exactly "
-        "0 leads to no movement at all.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo SpeedFactorInfo = {
+        .identifier = "SpeedFactor",
+        .name = "Speed factor",
+        .description = "A factor that can be used to increase or slow down the speed of "
+            "an applied idle motion. A negative value will invert the direction. Note "
+            "that a speed of exactly 0 leads to no movement at all.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { -5.f, 5.f }
+        }
     };
 
-    constexpr Property::PropertyInfo InvertInfo = {
-        "Invert",
-        "Invert direction",
-        "If true, the direction of the idle motion motion will be inverted compared to "
-        "the default. For example, the 'Orbit' option rotates to the right per default, "
-        "and will rotate to the left when inverted.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo InvertInfo = {
+        .identifier = "Invert",
+        .name = "Invert direction",
+        .description = "If true, the direction of the idle motion motion will be "
+            "inverted compared to the default. For example, the 'Orbit' option rotates "
+            "to the right per default, and will rotate to the left when inverted.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AbortOnCameraInteractionInfo = {
-        "AbortOnCameraInteraction",
-        "Abort on camera interaction",
-        "If set to true, the idle motion is aborted on camera interaction. If false, the "
-        "motion will be reapplied after the interaction. Examples of camera interaction "
-        "are: changing the anchor node, starting a camera path or session recording "
-        "playback, or navigating manually using an input device.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo AbortOnCameraInteractionInfo = {
+        .identifier = "AbortOnCameraInteraction",
+        .name = "Abort on camera interaction",
+        .description = "If set to true, the idle motion is aborted on camera "
+            "interaction. If false, the motion will be reapplied after the interaction. "
+            "Examples of camera interaction are: changing the anchor node, starting a "
+            "camera path or session recording playback, or navigating manually using an "
+            "input device.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo DampenInterpolationTimeInfo = {
-        "DampenInterpolationTime",
-        "Start/end dampen interpolation time",
-        "The time to interpolate to/from full speed when an idle motion is triggered or "
-        "canceled, in seconds.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo DampenInterpolationTimeInfo = {
+        .identifier = "DampenInterpolationTime",
+        .name = "Start/end dampen interpolation time",
+        .description = "The time to interpolate to/from full speed when an idle motion "
+            "is triggered or canceled, in seconds.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 } // namespace
 
@@ -116,13 +143,13 @@ IdleMotion::IdleMotion()
         "Triggers a chosen type of automatic camera motion, which is aborted when the "
         "user starts navigating."
     })
-    , _apply(ApplyInfo, false)
-    , _shouldTriggerWhenIdle(ShouldTriggerWhenIdleInfo, false)
-    , _idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f, 1.f)
-    , _abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
-    , _invert(InvertInfo, false)
-    , _speedScaleFactor(SpeedFactorInfo, 1.f, -5.f, 5.f)
-    , _dampenInterpolationTime(DampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
+    , _apply(ApplyInfo)
+    , _shouldTriggerWhenIdle(ShouldTriggerWhenIdleInfo)
+    , _idleWaitTime(IdleWaitTimeInfo)
+    , _abortOnCameraInteraction(AbortOnCameraInteractionInfo)
+    , _invert(InvertInfo)
+    , _speedScaleFactor(SpeedFactorInfo)
+    , _dampenInterpolationTime(DampenInterpolationTimeInfo)
     , _defaultMotion(MotionInfo)
 {
     _apply.onChange([this]() {
@@ -178,7 +205,7 @@ IdleMotion::IdleMotion()
     });
     addProperty(_dampenInterpolationTime);
 
-    _dampenInterpolator.setTransferFunction(ghoul::quadraticEaseInOut<double>);
+    _dampenInterpolator.setTransferFunction(quadraticEaseInOut<double>);
 }
 
 void IdleMotion::resetIdleMotionOnCamera() {
@@ -254,7 +281,7 @@ void IdleMotion::apply(const SceneGraphNode* anchor, double deltaTime, double sp
             break;
         }
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 
@@ -275,7 +302,7 @@ void IdleMotion::triggerIdleMotion(std::string_view motionKey) {
             motion = IdleMotion::Motion::OrbitAroundUpVector;
         }
         else {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "No existing IdleMotion with identifier '{}'", motionKey
             ));
         }
@@ -288,7 +315,7 @@ void IdleMotion::triggerIdleMotion(std::string_view motionKey) {
 void IdleMotion::orbitAnchor(const SceneGraphNode* anchor, double angle,
                              glm::dvec3& position, glm::dquat& globalRotation)
 {
-    ghoul_assert(anchor != nullptr, "Node to orbit must be set");
+    assert_msg(anchor != nullptr, "Node to orbit must be set");
 
     // Apply a rotation to the right, in camera space
     const glm::dvec3 eulerAngles = glm::dvec3(0.0, -1.0, 0.0) * angle;
@@ -310,7 +337,7 @@ void IdleMotion::orbitAroundAxis(const SceneGraphNode* anchor, const glm::dvec3&
                                  double angle, glm::dvec3& position,
                                  glm::dquat& globalRotation)
 {
-    ghoul_assert(anchor != nullptr, "Node to orbit must be set");
+    assert_msg(anchor != nullptr, "Node to orbit must be set");
 
     if (std::abs(angle) < AngleEpsilon) {
         return;

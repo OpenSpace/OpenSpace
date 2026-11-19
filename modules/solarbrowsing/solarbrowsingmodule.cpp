@@ -28,12 +28,12 @@
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 #include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/task.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
@@ -41,18 +41,18 @@ SolarBrowsingModule::SolarBrowsingModule()
     : OpenSpaceModule(Name)
 {}
 
-void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+void SolarBrowsingModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    assert_msg(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableSolarImagery>("RenderableSolarImagery");
     fRenderable->registerClass<RenderableSolarImageryProjection>(
         "RenderableSolarImageryProjection"
     );
 
-    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
+    TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    assert_msg(fTask, "No task factory existed");
 
     fTask->registerClass<HelioviewerDownloadTask>("HelioviewerDownloadTask");
 
@@ -64,17 +64,17 @@ void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
         std::filesystem::create_directories(cacheDirectory);
     }
 
-    ghoul_assert(
+    assert_msg(
         std::filesystem::is_directory(cacheDirectory),
         "Cache directory did not exist"
     );
-    ghoul_assert(!_cacheManager, "CacheManager was already created");
+    assert_msg(!_cacheManager, "CacheManager was already created");
 
-    _cacheManager = std::make_unique<ghoul::filesystem::CacheManager>(cacheDirectory);
-    ghoul_assert(_cacheManager, "CacheManager creation failed");
+    _cacheManager = std::make_unique<filesystem::CacheManager>(cacheDirectory);
+    assert_msg(_cacheManager, "CacheManager creation failed");
 }
 
-ghoul::filesystem::CacheManager* SolarBrowsingModule::cacheManager() const {
+filesystem::CacheManager* SolarBrowsingModule::cacheManager() const {
     return _cacheManager.get();
 }
 

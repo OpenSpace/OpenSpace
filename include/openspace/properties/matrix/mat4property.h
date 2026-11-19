@@ -27,22 +27,28 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <limits>
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::mat4> {
+    static constexpr glm::mat4 Min =
+        createFillMat4x4<float>(std::numeric_limits<float>::lowest());
+    static constexpr glm::mat4 Max =
+        createFillMat4x4<float>(std::numeric_limits<float>::max());
+    static constexpr glm::mat4 Step = createFillMat4x4<float>(0.01f);
+};
+
+using Mat4PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::mat4>>;
+
 class Mat4Property : public NumericalProperty<glm::mat4> {
 public:
-    explicit Mat4Property(PropertyInfo info, glm::mat4 value = glm::mat4(0.f),
-        glm::mat4 minValue =
-            ghoul::createFillMat4x4<float>(std::numeric_limits<float>::lowest()),
-        glm::mat4 maxValue =
-            ghoul::createFillMat4x4<float>(std::numeric_limits<float>::max()),
-        glm::mat4 stepValue = ghoul::createFillMat4x4<float>(0.01f));
+    explicit Mat4Property(Mat4PropertyInfo info);
 
     std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+    lua::LuaTypes typeLua() const override final;
 
     void getLuaValue(lua_State* state) const override final;
 

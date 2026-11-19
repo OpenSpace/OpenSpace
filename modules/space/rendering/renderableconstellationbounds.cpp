@@ -26,15 +26,15 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/programobject.h>
 #include "SpiceUsr.h"
 #include <algorithm>
 #include <array>
@@ -54,19 +54,23 @@ namespace {
         return glm::radians(rightAscension * 15);
     }
 
-    constexpr Property::PropertyInfo VertexInfo = {
-        "File",
-        "Vertex file path",
-        "A file that contains the vertex locations of the constellations bounds, as RA "
-        "Dec coordinates on the celestial sphere.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo VertexInfo = {
+        .identifier = "File",
+        .name = "Vertex file path",
+        .description = "A file that contains the vertex locations of the constellations "
+            "bounds, as RA Dec coordinates on the celestial sphere.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color of the lines.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color of the lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f, 0.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     // Can be used to draw bounding shapes on the night sky, where each shape encapsulates
@@ -95,11 +99,9 @@ namespace {
     // of the constellation, the text of that label is replaced with the full name from
     // the `NamesFile`.
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
-        // [[codegen::verbatim(VertexInfo.description)]]
-        std::filesystem::path file;
+        std::filesystem::path file [[codegen::Info(VertexInfo)]];
 
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
     };
 } // namespace
 #include "renderableconstellationbounds_codegen.cpp"
@@ -113,11 +115,10 @@ Documentation RenderableConstellationBounds::Documentation() {
     );
 }
 
-RenderableConstellationBounds::RenderableConstellationBounds(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableConstellationBounds::RenderableConstellationBounds(const Dictionary& dictionary)
     : RenderableConstellationsBase(dictionary)
     , _vertexFilename(VertexInfo)
-    , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _color(ColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -173,7 +174,7 @@ void RenderableConstellationBounds::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/constellationbounds_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     glCreateBuffers(1, &_vbo);
     glNamedBufferStorage(
@@ -246,7 +247,7 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
 bool RenderableConstellationBounds::loadData() {
     const bool success = loadVertexFile();
     if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
+        throw RuntimeError("Error loading data");
     }
     return success;
 }
@@ -272,7 +273,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
     // new constellation name, at which point the currentBound is stored away, a new,
     // empty ConstellationBound is created and set at the currentBound
     while (file.good()) {
-        ghoul::getline(file, currentLine);
+        openspace::getline(file, currentLine);
         if (currentLine.empty()) {
             continue;
         }

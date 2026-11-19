@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/src/skirtedgrid.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <algorithm>
 #include <array>
 #include <string>
@@ -40,7 +40,7 @@ namespace {
     }
 
     void validate([[maybe_unused]] int xSegments, [[maybe_unused]] int ySegments) {
-        ghoul_assert(
+        assert_msg(
             xSegments > 0 && ySegments > 0,
             std::format("Resolution must be at least 1x1. ({}, {})", xSegments, ySegments)
         );
@@ -152,7 +152,7 @@ void SkirtedGrid::initializeGL() {
     glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, 1, 0);
 
-    ghoul_assert(
+    assert_msg(
         static_cast<int>(elementData.size()) == _elementSize,
         "Wrong element size. The correct number is assumed in the render method"
     );

@@ -24,11 +24,11 @@
 
 #include <modules/spacecraftinstruments/util/targetdecoder.h>
 
-#include <ghoul/misc/dictionary.h>
+#include <openspace/misc/dictionary.h>
 
 namespace openspace {
 
-TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) {
+TargetDecoder::TargetDecoder(const Dictionary& dictionary) {
     _names.resize(dictionary.size());
     for (size_t i = 0; i < _names.size(); i++) {
         const std::string key = std::to_string(i + 1);

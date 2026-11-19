@@ -32,6 +32,13 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
@@ -42,13 +49,6 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
 #include <algorithm>
 #include <cmath>
 #include <memory>
@@ -60,185 +60,248 @@ namespace {
 
     constexpr std::string_view _loggerCat = "SceneGraphNode";
 
-    constexpr Property::PropertyInfo ComputeScreenSpaceInfo = {
-        "ComputeScreenSpaceData",
-        "Compute screen space data",
-        "If this value is set to 'true', the screenspace-based properties are calculated "
-        "at regular intervals. If these values are set to 'false', they are not updated.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo ComputeScreenSpaceInfo = {
+        .identifier = "ComputeScreenSpaceData",
+        .name = "Compute screen space data",
+        .description = "If this value is set to 'true', the screenspace-based properties "
+            "are calculated at regular intervals. If these values are set to 'false', "
+            "they are not updated.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ScreenSpacePositionInfo = {
-        "ScreenSpacePosition",
-        "ScreenSpace position",
-        "The x,y position in screen space. Can be used for placing GUI elements.",
-        Property::Visibility::Developer
+    constexpr IVec2PropertyInfo ScreenSpacePositionInfo = {
+        .identifier = "ScreenSpacePosition",
+        .name = "ScreenSpace position",
+        .description = "The x,y position in screen space. Can be used for placing GUI "
+            "elements.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::ivec2(-1, -1)
+        }
     };
 
-    constexpr Property::PropertyInfo ScreenVisibilityInfo = {
-        "ScreenVisibility",
-        "Screen visibility",
-        "Determines if the node is currently visible on screen.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ScreenVisibilityInfo = {
+        .identifier = "ScreenVisibility",
+        .name = "Screen visibility",
+        .description = "Determines if the node is currently visible on screen.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo DistanceFromCamToNodeInfo = {
-        "DistanceFromCamToNode",
-        "Distance from camera to node",
-        "The distance from the camera to the node surface.",
-        Property::Visibility::Developer
+    constexpr DoublePropertyInfo DistanceFromCamToNodeInfo = {
+        .identifier = "DistanceFromCamToNode",
+        .name = "Distance from camera to node",
+        .description = "The distance from the camera to the node surface.",
+        .visibility = Visibility::Developer,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = -1.0
+        }
     };
 
-    constexpr Property::PropertyInfo ScreenSizeRadiusInfo = {
-        "ScreenSizeRadius",
-        "Screen size radius",
-        "The screen size of the radius of the node.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo ScreenSizeRadiusInfo = {
+        .identifier = "ScreenSizeRadius",
+        .name = "Screen size radius",
+        .description = "The screen size of the radius of the node.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0
+        }
     };
 
-    constexpr Property::PropertyInfo VisibilityDistanceInfo = {
-        "VisibilityDistance",
-        "Visibility distance",
-        "The distace in world coordinates between node and camera at which the "
-        "screenspace object will become visible.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo VisibilityDistanceInfo = {
+        .identifier = "VisibilityDistance",
+        .name = "Visibility distance",
+        .description = "The distance in world coordinates between node and camera at "
+            "which the screenspace object will become visible.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 6e10f
+        }
     };
 
-    constexpr Property::PropertyInfo BoundingSphereInfo = {
-        "BoundingSphere",
-        "Bounding sphere",
-        "The bounding sphere of the scene graph node meaning that everything that this "
-        "scene graph node renders must be contained within this sphere. This value is "
-        "only used as an override to the bounding sphere calculated by the Renderable, "
-        "if present. If this value is -1, the Renderable's computed bounding sphere is "
-        "used.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo BoundingSphereInfo = {
+        .identifier = "BoundingSphere",
+        .name = "Bounding sphere",
+        .description = "The bounding sphere of the scene graph node meaning that "
+            "everything that this scene graph node renders must be contained within this "
+            "sphere. This value is only used as an override to the bounding sphere "
+            "calculated by the Renderable, if present. If this value is -1, the "
+            "Renderable's computed bounding sphere is used.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = -1.0,
+            .minMax = { -1.0, 1e12 }
+        }
     };
 
-    constexpr Property::PropertyInfo InteractionSphereInfo = {
-        "InteractionSphere",
-        "Interaction sphere",
-        "The minimum radius that the camera is allowed to get close to this scene graph "
-        "node. This value is only used as an override to the bounding sphere calculated "
-        "by the Renderable, if present. If this value is -1, the Renderable's computed "
-        "interaction sphere is used.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo InteractionSphereInfo = {
+        .identifier = "InteractionSphere",
+        .name = "Interaction sphere",
+        .description = "The minimum radius that the camera is allowed to get close to "
+            "this scene graph node. This value is only used as an override to the "
+            "bounding sphere calculated by the Renderable, if present. If this value is "
+            "-1, the Renderable's computed interaction sphere is used.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = -1.0,
+            .minMax = { -1.0, 1e12 }
+        }
     };
 
-    constexpr Property::PropertyInfo EvalBoundingSphereInfo = {
-        "EvaluatedBoundingSphere",
-        "Evaluated bounding sphere",
-        "This read-only property contains the evaluated value for the bounding sphere. "
-        "This is the actual value that is used internally within the software. If the "
-        "BoundingSphere property is set to -1, it is the computed value, otherwise it "
-        "matches the one set in the property.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo EvalBoundingSphereInfo = {
+        .identifier = "EvaluatedBoundingSphere",
+        .name = "Evaluated bounding sphere",
+        .description = "This read-only property contains the evaluated value for the "
+            "bounding sphere. This is the actual value that is used internally within "
+            "the software. If the BoundingSphere property is set to -1, it is the "
+            "computed value, otherwise it matches the one set in the property.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo EvalInteractionSphereInfo = {
-        "EvaluatedInteractionSphere",
-        "Evaluated interaction sphere",
-        "This read-only property contains the evaluated value for the interaction "
-        "sphere. This is the actual value that is used internally within the software. "
-        "If the InteractionSphere property is set to -1, it is the computed value, "
-        "otherwise it matches the one set in the property.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo EvalInteractionSphereInfo = {
+        .identifier = "EvaluatedInteractionSphere",
+        .name = "Evaluated interaction sphere",
+        .description = "This read-only property contains the evaluated value for the "
+            "interaction sphere. This is the actual value that is used internally within "
+            "the software. If the InteractionSphere property is set to -1, it is the "
+            "computed value, otherwise it matches the one set in the property.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo ApproachFactorInfo = {
-        "ApproachFactor",
-        "Approach factor",
-        "This value is a multiplication factor for the interaction sphere that "
-        "determines when the camera is 'approaching' the scene graph node.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo ApproachFactorInfo = {
+        .identifier = "ApproachFactor",
+        .name = "Approach factor",
+        .description = "This value is a multiplication factor for the interaction sphere "
+            "that determines when the camera is 'approaching' the scene graph node.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 5.0,
+            .minMax = { 0.0, 1e4 }
+        }
     };
 
-    constexpr Property::PropertyInfo ReachFactorInfo = {
-        "ReachFactor",
-        "Reach factor",
-        "This value is a multiplication factor for the interaction sphere that "
-        "determines when the camera has 'reached' the scene graph node.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo ReachFactorInfo = {
+        .identifier = "ReachFactor",
+        .name = "Reach factor",
+        .description = "This value is a multiplication factor for the interaction sphere "
+            "that determines when the camera has 'reached' the scene graph node.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.25,
+            .minMax = { 0.0, 1e4 }
+        }
     };
 
-    constexpr Property::PropertyInfo GuiPathInfo = {
-        "GuiPath",
-        "GUI path",
-        "This is the path for the scene graph node in the gui example: "
-        "/Solar System/Planets/Earth.",
-        Property::Visibility::Hidden
+    constexpr StringPropertyInfo GuiPathInfo = {
+        .identifier = "GuiPath",
+        .name = "GUI path",
+        .description = "This is the path for the scene graph node in the gui example: "
+            "/Solar System/Planets/Earth.",
+        .visibility = Visibility::Hidden,
+        .defaults = {
+            .value = "/"
+        }
     };
 
-    constexpr Property::PropertyInfo GuiNameInfo = {
-        "GuiName",
-        "GUI name",
-        "This is the name for the scene graph node in the gui. Example: Earth.",
-        Property::Visibility::Hidden
+    constexpr StringPropertyInfo GuiNameInfo = {
+        .identifier = "GuiName",
+        .name = "GUI name",
+        .description = "This is the name for the scene graph node in the GUI. Example: "
+            "Earth.",
+        .visibility = Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo GuiDescriptionInfo = {
-        "GuiDescription",
-        "GUI description",
-        "This is the description for the scene graph node to be shown in the GUI. "
-        "Example: Earth is a special place.",
-        Property::Visibility::Hidden
+    constexpr StringPropertyInfo GuiDescriptionInfo = {
+        .identifier = "GuiDescription",
+        .name = "GUI description",
+        .description = "This is the description for the scene graph node to be shown in "
+            "the GUI. Example: Earth is a special place.",
+        .visibility = Visibility::Hidden
     };
 
-    constexpr Property::PropertyInfo GuiHiddenInfo = {
-        "GuiHidden",
-        "GUI hidden",
-        "This represents if the scene graph node should be shown in the GUI. Example: "
-        "false.",
-        Property::Visibility::Hidden
+    constexpr BoolPropertyInfo GuiHiddenInfo = {
+        .identifier = "GuiHidden",
+        .name = "GUI hidden",
+        .description = "This represents if the scene graph node should be shown in the "
+            "GUI. Example: false.",
+        .visibility = Visibility::Hidden,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo GuiOrderInfo = {
-        "GuiOrderingNumber",
-        "GUI ordering number",
-        "This is an optional numerical value that will affect the sorting of this scene "
-        "graph node in relation to its neighbors in the GUI. Nodes with the same value "
-        "will be sorted alphabetically.",
-        Property::Visibility::Hidden
+    constexpr FloatPropertyInfo GuiOrderInfo = {
+        .identifier = "GuiOrderingNumber",
+        .name = "GUI ordering number",
+        .description = "This is an optional numerical value that will affect the sorting "
+            "of this scene graph node in relation to its neighbors in the GUI. Nodes "
+            "with the same value will be sorted alphabetically.",
+        .visibility = Visibility::Hidden,
+        .defaults = {
+            .value = 0.f
+        }
     };
 
-    constexpr Property::PropertyInfo UseGuiOrderInfo = {
-        "UseGuiOrdering",
-        "Use GUI ordering",
-        "If true, use the 'GuiOrderingNumber' to place this scene graph node in a sorted "
-        "way in relation to its neighbors in the GUI.",
-        Property::Visibility::Hidden
+    constexpr BoolPropertyInfo UseGuiOrderInfo = {
+        .identifier = "UseGuiOrdering",
+        .name = "Use GUI ordering",
+        .description = "If true, use the 'GuiOrderingNumber' to place this scene graph "
+            "node in a sorted way in relation to its neighbors in the GUI.",
+        .visibility = Visibility::Hidden,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo GuiFocusableInfo = {
-        "Focusable",
-        "Focusable Hint",
-        "This value serves as a hint to determine if it makes sense to focus the camera "
-        "on this scene graph node. It only serves as a hint and does not actually "
-        "prevent the focussing. The default value is `true`.",
-        Property::Visibility::Hidden
+    constexpr BoolPropertyInfo GuiFocusableInfo = {
+        .identifier = "Focusable",
+        .name = "Focusable Hint",
+        .description = "This value serves as a hint to determine if it makes sense to "
+            "focus the camera on this scene graph node. It only serves as a hint and "
+            "does not actually prevent the focussing.",
+        .visibility = Visibility::Hidden,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ShowDebugSphereInfo = {
-        "ShowDebugSphere",
-        "Show debug sphere",
-        "If enabled the bounding sphere of this scene graph node is rendered as a debug "
-        "method. The interaction sphere is rendered in cyan and the bounding sphere in "
-        "purple. If only one is visible, this may be because the spheres have equal size "
-        "and are overlapping.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShowDebugSphereInfo = {
+        .identifier = "ShowDebugSphere",
+        .name = "Show debug sphere",
+        .description = "If enabled the bounding sphere of this scene graph node is "
+            "rendered as a debug method. The interaction sphere is rendered in cyan and "
+            "the bounding sphere in purple. If only one is visible, this may be because "
+            "the spheres have equal size and are overlapping.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo SupportsDirectInteractionInfo = {
-        "SupportsDirectInteraction",
-        "Supports direct interaction",
-        "Only relevant when using touch interaction. If true, the \'direct "
-        "manipulation\' scheme will be used when interacting with this scene graph node, "
-        "meaning that the positions on the interaction sphere that intersects with the "
-        "touch points will directly follow the motion of the touch points. Works best "
-        "for objects that have an interaction sphere of about the same size as the "
-        "bounding sphere, and that are somewhat spherical. Note that using this feature "
-        "might significalty reduce the performance.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo SupportsDirectInteractionInfo = {
+        .identifier = "SupportsDirectInteraction",
+        .name = "Supports direct interaction",
+        .description = "Only relevant when using touch interaction. If true, the "
+            "\'direct manipulation\' scheme will be used when interacting with this "
+            "scene graph node, meaning that the positions on the interaction sphere that "
+            "intersects with the touch points will directly follow the motion of the "
+            "touch points. Works best for objects that have an interaction sphere of "
+            "about the same size as the bounding sphere, and that are somewhat "
+            "spherical. Note that using this feature might significalty reduce the "
+            "performance.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     struct [[codegen::Dictionary(SceneGraphNode)]] Parameters {
@@ -259,35 +322,31 @@ namespace {
         // Renderable is specified, this scene graph node is an internal node and can be
         // used for either group children, or apply common transformations to a group of
         // children.
-        std::optional<ghoul::Dictionary> renderable
-            [[codegen::reference("core_renderable")]];
+        std::optional<Dictionary> renderable [[codegen::reference("core_renderable")]];
 
-        // [[codegen::verbatim(BoundingSphereInfo.description)]]
-        std::optional<double> boundingSphere;
+        std::optional<double> boundingSphere [[codegen::Info(BoundingSphereInfo)]];
 
-        // [[codegen::verbatim(InteractionSphereInfo.description)]]
-        std::optional<double> interactionSphere;
+        std::optional<double> interactionSphere [[codegen::Info(InteractionSphereInfo)]];
 
-        // [[codegen::verbatim(SupportsDirectInteractionInfo.description)]]
-        std::optional<bool> supportsDirectInteraction;
+        std::optional<bool> supportsDirectInteraction
+            [[codegen::Info(SupportsDirectInteractionInfo)]];
 
         struct Transform {
             // This node describes a translation that is applied to the scene graph node
             // and all its children. Depending on the 'Type' of the translation, this can
             // either be a static translation or a time-varying one.
-            std::optional<ghoul::Dictionary> translation
+            std::optional<Dictionary> translation
                 [[codegen::reference("core_translation")]];
 
             // This nodes describes a rotation that is applied to the scene graph node and
             // all its children. Depending on the 'Type' of the rotation, this can either
             // be a static rotation or a time-varying one.
-            std::optional<ghoul::Dictionary> rotation
-                [[codegen::reference("core_rotation")]];
+            std::optional<Dictionary> rotation [[codegen::reference("core_rotation")]];
 
             // This node describes a scaling that is applied to the scene graph node and
             // all its children. Depending on the 'Type' of the scaling, this can either
             // be a static scaling or a time-varying one.
-            std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
+            std::optional<Dictionary> scale [[codegen::reference("core_scale")]];
         };
 
         // This describes a set of transformations that are applied to this scene graph
@@ -328,8 +387,7 @@ namespace {
         std::optional<std::variant<std::string, std::vector<std::string>>> onExit;
 
         // Specifies the time frame for when this node should be active.
-        std::optional<ghoul::Dictionary> timeFrame
-            [[codegen::reference("core_timeframe")]];
+        std::optional<Dictionary> timeFrame [[codegen::reference("core_timeframe")]];
 
         // A tag or list of tags that can be used to reference to a group of scene graph
         // nodes.
@@ -353,8 +411,7 @@ namespace {
             // not display, for example, barycenters.
             std::optional<bool> hidden;
 
-            // [[codegen::verbatim(GuiFocusableInfo.description)]]
-            std::optional<bool> focusable;
+            std::optional<bool> focusable [[codegen::Info(GuiFocusableInfo)]];
 
             // If this value is specified, the scene graph node will be ordered in
             // relation to its neighbors in the GUI based on this value, so that nodes
@@ -378,15 +435,15 @@ namespace openspace {
 int SceneGraphNode::nextIndex = 0;
 #endif // Debugging_Core_SceneGraphNode_Indices
 
-ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
+                                                             const Dictionary& dictionary)
 {
     ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     SceneGraphNode* n = global::memoryManager->PersistentMemory.alloc<SceneGraphNode>();
-    ghoul::mm_unique_ptr<SceneGraphNode> result = ghoul::mm_unique_ptr<SceneGraphNode>(n);
+    mm_unique_ptr<SceneGraphNode> result = mm_unique_ptr<SceneGraphNode>(n);
 
 #ifdef Debugging_Core_SceneGraphNode_Indices
     result->index = nextIndex++;
@@ -413,7 +470,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
         if (p.gui->path.has_value()) {
             if (!p.gui->path->starts_with('/')) {
-                throw ghoul::RuntimeError("GuiPath must start with /");
+                throw RuntimeError("GuiPath must start with /");
             }
             result->_guiPath = *p.gui->path;
         }
@@ -438,6 +495,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             result->_transform.translation = Translation::createFromDictionary(
                 *p.transform->translation
             );
+            result->_transform.translation->setOwnerNode(result.get());
 
             LDEBUG(std::format(
                 "Successfully created ephemeris for '{}'", result->identifier()
@@ -448,6 +506,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             result->_transform.rotation = Rotation::createFromDictionary(
                 *p.transform->rotation
             );
+            result->_transform.rotation->setOwnerNode(result.get());
 
             LDEBUG(std::format(
                 "Successfully created rotation for '{}'", result->identifier()
@@ -483,7 +542,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ZoneScopedN("Renderable");
 
         result->_renderable = Renderable::createFromDictionary(*p.renderable);
-        ghoul_assert(result->_renderable, "Failed to create Renderable");
+        assert_msg(result->_renderable, "Failed to create Renderable");
         result->_renderable->_parent = result.get();
         result->addPropertySubOwner(result->_renderable.get());
     }
@@ -559,60 +618,58 @@ Documentation SceneGraphNode::Documentation() {
     return codegen::doc<Parameters>("core_scenegraphnode");
 }
 
-ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
+opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
 
 SceneGraphNode::SceneGraphNode()
     : PropertyOwner({ "" })
-    , _guiHidden(GuiHiddenInfo, false)
-    , _guiPath(GuiPathInfo, "/")
+    , _guiHidden(GuiHiddenInfo)
+    , _guiPath(GuiPathInfo)
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
-    , _useGuiOrdering(UseGuiOrderInfo, false)
-    , _guiFocusable(GuiFocusableInfo, true)
-    , _guiOrderingNumber(GuiOrderInfo, 0.f)
-    , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
+    , _useGuiOrdering(UseGuiOrderInfo)
+    , _guiFocusable(GuiFocusableInfo)
+    , _guiOrderingNumber(GuiOrderInfo)
+    , _boundingSphere(BoundingSphereInfo)
     , _evaluatedBoundingSphere(EvalBoundingSphereInfo)
-    , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
+    , _interactionSphere(InteractionSphereInfo)
     , _evaluatedInteractionSphere(EvalInteractionSphereInfo)
-    , _approachFactor(ApproachFactorInfo, 5.0, 0.0, 1e4)
-    , _reachFactor(ReachFactorInfo, 1.25, 0.0, 1e4)
-    , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
-    , _screenSpacePosition(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
-    , _screenVisibility(ScreenVisibilityInfo, false)
-    , _distFromCamToNode(DistanceFromCamToNodeInfo, -1.0)
-    , _screenSizeRadius(ScreenSizeRadiusInfo, 0)
-    , _visibilityDistance(VisibilityDistanceInfo, 6e10f)
-    , _supportsDirectInteraction(SupportsDirectInteractionInfo, false)
-    , _showDebugSphere(ShowDebugSphereInfo, false)
+    , _approachFactor(ApproachFactorInfo)
+    , _reachFactor(ReachFactorInfo)
+    , _computeScreenSpaceValues(ComputeScreenSpaceInfo)
+    , _screenSpacePosition(ScreenSpacePositionInfo)
+    , _screenVisibility(ScreenVisibilityInfo)
+    , _distFromCamToNode(DistanceFromCamToNodeInfo)
+    , _screenSizeRadius(ScreenSizeRadiusInfo)
+    , _visibilityDistance(VisibilityDistanceInfo)
+    , _supportsDirectInteraction(SupportsDirectInteractionInfo)
+    , _showDebugSphere(ShowDebugSphereInfo)
 {
     {
-        ghoul::Dictionary translation;
+        Dictionary translation;
         translation.setValue("Type", std::string("StaticTranslation"));
         translation.setValue("Position", glm::dvec3(0.0));
-        _transform.translation = ghoul::mm_unique_ptr<Translation>(
+        _transform.translation = mm_unique_ptr<Translation>(
             global::memoryManager->PersistentMemory.alloc<StaticTranslation>(translation)
         );
 
-        ghoul::Dictionary rotation;
+        Dictionary rotation;
         rotation.setValue("Type", std::string("StaticRotation"));
         rotation.setValue("Rotation", glm::dvec3(0.0));
-        _transform.rotation = ghoul::mm_unique_ptr<Rotation>(
+        _transform.rotation = mm_unique_ptr<Rotation>(
             global::memoryManager->PersistentMemory.alloc<StaticRotation>(rotation)
         );
 
-        ghoul::Dictionary scale;
+        Dictionary scale;
         scale.setValue("Type", std::string("StaticScale"));
         scale.setValue("Scale", 1.0);
-        _transform.scale = ghoul::mm_unique_ptr<Scale>(
+        _transform.scale = mm_unique_ptr<Scale>(
             global::memoryManager->PersistentMemory.alloc<StaticScale>(scale)
         );
     }
 
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
-    _screenVisibility.setReadOnly(true);
     addProperty(_screenVisibility);
-    _distFromCamToNode.setReadOnly(true);
     addProperty(_distFromCamToNode);
     addProperty(_screenSizeRadius);
     addProperty(_visibilityDistance);
@@ -632,7 +689,6 @@ SceneGraphNode::SceneGraphNode()
     // negative values
     //_boundingSphere.setExponent(10.f);
     addProperty(_boundingSphere);
-    _evaluatedBoundingSphere.setReadOnly(true);
     addProperty(_evaluatedBoundingSphere);
 
     _interactionSphere.onChange(
@@ -650,7 +706,6 @@ SceneGraphNode::SceneGraphNode()
     // negative values
     //_interactionSphere.setExponent(10.f);
     addProperty(_interactionSphere);
-    _evaluatedInteractionSphere.setReadOnly(true);
     addProperty(_evaluatedInteractionSphere);
 
     _reachFactor.setExponent(3.f);
@@ -697,6 +752,10 @@ void SceneGraphNode::initialize() {
     if (_transform.scale) {
         _transform.scale->initialize();
     }
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
+
     _state = State::Initialized;
 
     // Want this computed after the renderable and transforms have been initialized
@@ -723,7 +782,7 @@ void SceneGraphNode::initializeGL() {
 
     // The first one to get here will create program shared between all scene graph nodes
     if (_debugSphereProgram == nullptr) {
-        std::unique_ptr<ghoul::opengl::ProgramObject> shader =
+        std::unique_ptr<opengl::ProgramObject> shader =
             global::renderEngine->buildRenderProgram(
                 "DebugSphere",
                 absPath("${SHADERS}/core/xyzuvrgba_vs.glsl"),
@@ -735,13 +794,13 @@ void SceneGraphNode::initializeGL() {
         // benefit that we would gain from it
         _debugSphereProgram = shader.release();
         _debugSphereProgram->setIgnoreUniformLocationError(
-            ghoul::opengl::ProgramObject::IgnoreError::Yes
+            opengl::ProgramObject::IgnoreError::Yes
         );
     }
 
     _state = State::GLInitialized;
 
-    LDEBUG(std::format("Finished initializating GL: {}", identifier()));
+    LDEBUG(std::format("Finished initializing GL: {}", identifier()));
 }
 
 void SceneGraphNode::deinitialize() {
@@ -776,13 +835,13 @@ void SceneGraphNode::deinitializeGL() {
 
 void SceneGraphNode::traversePreOrder(const std::function<void(SceneGraphNode*)>& fn) {
     fn(this);
-    for (ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
+    for (mm_unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePreOrder(fn);
     }
 }
 
 void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)>& fn) {
-    for (ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
+    for (mm_unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePostOrder(fn);
     }
     fn(this);
@@ -808,13 +867,13 @@ void SceneGraphNode::update(const UpdateData& data) {
         return;
     }
 
-    ghoul_assert(_transform.translation, "No translation exists");
+    assert_msg(_transform.translation, "No translation exists");
     _transform.translation->update(data);
 
-    ghoul_assert(_transform.rotation, "No rotation exists");
+    assert_msg(_transform.rotation, "No rotation exists");
     _transform.rotation->update(data);
 
-    ghoul_assert(_transform.scale, "No scale exists");
+    assert_msg(_transform.scale, "No scale exists");
     _transform.scale->update(data);
     UpdateData newUpdateData = data;
 
@@ -939,18 +998,18 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
 }
 
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
-    ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
+    assert_msg(_parent != nullptr, "Node must be attached to a parent");
 
     // 1. Remove `this` from its currents parent's children
     auto iter = std::find_if(
         _parent->_children.begin(),
         _parent->_children.end(),
-        [this](const ghoul::mm_unique_ptr<SceneGraphNode>& node) {
+        [this](const mm_unique_ptr<SceneGraphNode>& node) {
             return node.get() == this;
         }
     );
-    ghoul_assert(iter != _parent->_children.end(), "This was not a child of its parent");
-    ghoul::mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
+    assert_msg(iter != _parent->_children.end(), "This was not a child of its parent");
+    mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
     _parent->_children.erase(iter);
 
     // 2. Reparent `this`
@@ -960,9 +1019,9 @@ void SceneGraphNode::setParent(SceneGraphNode& parent) {
     _parent->_children.push_back(std::move(c));
 }
 
-void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {
-    ghoul_assert(child != nullptr, "Child may not be null");
-    ghoul_assert(child->parent() == nullptr, "Child may not already have a parent");
+void SceneGraphNode::attachChild(mm_unique_ptr<SceneGraphNode> child) {
+    assert_msg(child != nullptr, "Child may not be null");
+    assert_msg(child->parent() == nullptr, "Child may not already have a parent");
 
     // Create link between parent and child
     child->_parent = this;
@@ -973,26 +1032,27 @@ void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {
     childRaw->setScene(_scene);
 }
 
-ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
-    ghoul_assert(
+mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
+    assert_msg(
         child._dependentNodes.empty(),
         "Nodes cannot depend on a node being detached"
     );
-    ghoul_assert(child._parent != nullptr, "Node must be attached to a parent");
+    assert_msg(child._parent != nullptr, "Node must be attached to a parent");
 
     const auto iter = std::find_if(
         _children.begin(),
         _children.end(),
-        [&child] (const ghoul::mm_unique_ptr<SceneGraphNode>& c) {
+        [&child] (const mm_unique_ptr<SceneGraphNode>& c) {
             return &child == c.get();
         }
     );
 
     if (iter == _children.end()) {
         LERROR("Trying to detach a non-existing child");
+        return nullptr;
     }
 
-    traversePreOrder([](SceneGraphNode* node) {
+    child.traversePreOrder([](SceneGraphNode* node) {
         node->clearDependencies();
     });
 
@@ -1003,7 +1063,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode&
 
     // Remove link between parent and child
     child._parent = nullptr;
-    ghoul::mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
+    mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
     _children.erase(iter);
 
     return c;
@@ -1011,7 +1071,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode&
 
 void SceneGraphNode::clearChildren() {
     traversePreOrder([](SceneGraphNode* node) { node->clearDependencies(); });
-    for (const ghoul::mm_unique_ptr<SceneGraphNode>& c : _children) {
+    for (const mm_unique_ptr<SceneGraphNode>& c : _children) {
         if (_scene) {
             c->setScene(nullptr);
         }
@@ -1091,7 +1151,7 @@ void SceneGraphNode::computeScreenSpaceData(const RenderData& newData) {
     const Camera& cam = newData.camera;
     const glm::dvec3& worldPos = _worldPositionCached;
     const glm::dvec4 clipSpace = glm::dmat4(cam.projectionMatrix()) *
-                                 cam.combinedViewMatrix() * glm::vec4(worldPos, 1.0);
+                                 cam.combinedViewMatrix() * glm::dvec4(worldPos, 1.0);
     const glm::dvec2 worldPosNDC = glm::dvec2(clipSpace / clipSpace.w);
 
     const bool visible = worldPosNDC.x >= -1.0 && worldPosNDC.x <= 1.0 &&
@@ -1123,7 +1183,7 @@ void SceneGraphNode::computeScreenSpaceData(const RenderData& newData) {
     const glm::dvec3 lookUp = glm::normalize(cam.lookUpVectorWorldSpace());
     const glm::dvec3 radiusPos = worldPos + (nodeRadius * lookUp);
     const glm::dvec4 clipSpaceRadius = glm::dmat4(cam.projectionMatrix()) *
-                                    cam.combinedViewMatrix() * glm::vec4(radiusPos, 1.0);
+                                    cam.combinedViewMatrix() * glm::dvec4(radiusPos, 1.0);
     const glm::dvec3 radiusNDC = clipSpaceRadius / clipSpaceRadius.w;
 
     const glm::ivec2 centerScreenSpace = glm::ivec2(
@@ -1161,7 +1221,7 @@ void SceneGraphNode::computeScreenSpaceData(const RenderData& newData) {
 SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
-    ghoul_assert(glm::length(targetModelSpace) > 0.0, "Cannot have degenerate vector");
+    assert_msg(glm::length(targetModelSpace) > 0.0, "Cannot have degenerate vector");
 
     if (_renderable) {
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
@@ -1311,7 +1371,7 @@ void SceneGraphNode::setScene(Scene* scene) {
 std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     std::vector<SceneGraphNode*> nodes;
     nodes.reserve(_children.size());
-    for (const ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
+    for (const mm_unique_ptr<SceneGraphNode>& child : _children) {
         nodes.push_back(child.get());
     }
     return nodes;
@@ -1393,7 +1453,7 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& id) {
         return this;
     }
     else {
-        for (ghoul::mm_unique_ptr<SceneGraphNode>& it : _children) {
+        for (mm_unique_ptr<SceneGraphNode>& it : _children) {
             SceneGraphNode* tmp = it->childNode(id);
             if (tmp) {
                 return tmp;

@@ -82,9 +82,14 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/CMakeLists.txt DESTINATION ${C
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/cmake/cef_variables.cmake DESTINATION ${CEF_ROOT}/cmake)
 
-# CEF does not provide RelWithDebInfo libs, so we use the ones without Debug information
+# CEF does not provide RelWithDebInfo/MinSizeRel libs, so we use the ones without Debug
+# information
 file(COPY ${CEF_ROOT}/Release/
   DESTINATION ${CEF_ROOT}/RelWithDebInfo
+  FILES_MATCHING PATTERN *
+)
+file(COPY ${CEF_ROOT}/Release/
+  DESTINATION ${CEF_ROOT}/MinSizeRel
   FILES_MATCHING PATTERN *
 )
 
@@ -98,6 +103,7 @@ if (UNIX)
     "${CEF_ROOT}/Debug/libvulkan.so.1"
     "${CEF_ROOT}/Release/libvulkan.so.1"
     "${CEF_ROOT}/RelWithDebInfo/libvulkan.so.1"
+    "${CEF_ROOT}/MinSizeRel/libvulkan.so.1"
   )
 endif ()
 
@@ -118,6 +124,15 @@ if (WIN32)
   target_compile_options(libcef_dll_wrapper PRIVATE "/W0")
 elseif (UNIX)
   target_compile_options(libcef_dll_wrapper PRIVATE "-w")
+  # Chromium changes the stack canary in forked subprocesses (--change-stack-guard-on-fork)
+  # so `CefExecuteProcess`, which is on the stack at that point, must not be protected
+  set_source_files_properties(
+    "${CEF_LIBCEF_DLL_WRAPPER_PATH}/wrapper/libcef_dll_wrapper.cc"
+    TARGET_DIRECTORY libcef_dll_wrapper
+    PROPERTIES
+      COMPILE_OPTIONS "-fno-stack-protector"
+      SKIP_PRECOMPILE_HEADERS ON
+  )
 endif ()
 
 target_precompile_headers(libcef_dll_wrapper PRIVATE
@@ -229,11 +244,10 @@ if (OS_MACOSX)
     endif ()
   endforeach()
 
-  set_target_properties(${CEF_HELPER_TARGET_GPU} PROPERTIES FOLDER "Helper")
-  set_target_properties(${CEF_HELPER_TARGET_RENDERER} PROPERTIES FOLDER "Helper")
+  set_target_properties(${CEF_HELPER_TARGET_GPU} PROPERTIES FOLDER "support")
+  set_target_properties(${CEF_HELPER_TARGET_RENDERER} PROPERTIES FOLDER "support")
 else ()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
-  set_openspace_cef_target_out_dir()
   add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
 
   if (WIN32)
@@ -249,11 +263,11 @@ else ()
   target_link_libraries(${CEF_HELPER_TARGET} PRIVATE libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
   if (OS_WINDOWS)
     # Add the custom manifest files to the executable.
-    add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
+    add_windows_cef_manifest("${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
   endif (OS_WINDOWS)
 endif ()
 
-set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "Helper")
+set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "support")
 set_openspace_compile_settings(${CEF_HELPER_TARGET})
 
 ##########################################################################################
@@ -300,8 +314,10 @@ target_precompile_headers(${webbrowser_module} PRIVATE
   <include/wrapper/cef_helpers.h>
 )
 
-set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "Helper")
-set_openspace_compile_settings(libcef_dll_wrapper)
+set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "support")
+# This is third-party code, so it only gets the language standard and not the warnings
+# that `set_openspace_compile_settings` would enable
+target_compile_features(libcef_dll_wrapper PRIVATE cxx_std_23)
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()
@@ -311,9 +327,13 @@ target_include_directories(${webbrowser_module} SYSTEM PUBLIC ${CEF_ROOT})
 set_modules_dependency_on_cef_libraries(${webbrowser_module})
 
 set(deps "")
-foreach (i ${CEF_BINARY_FILES})
-  list(APPEND deps "${CEF_BINARY_DIR}/${i}")
-endforeach()
+if (WIN32)
+  # On Linux the executables find libcef.so in the CEF folder through their RUNPATH, so
+  # only the resource files have to be copied next to them
+  foreach (i ${CEF_BINARY_FILES})
+    list(APPEND deps "${CEF_BINARY_DIR}/${i}")
+  endforeach()
+endif ()
 foreach (j ${CEF_RESOURCE_FILES})
   list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
 endforeach()

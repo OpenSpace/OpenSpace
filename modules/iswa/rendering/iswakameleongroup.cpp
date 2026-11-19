@@ -27,11 +27,11 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <exception>
 #include <fstream>
@@ -42,18 +42,22 @@ namespace {
 
     constexpr std::string_view _loggerCat = "IswaDataGroup";
 
-    constexpr Property::PropertyInfo ResolutionInfo = {
-        "Resolution",
-        "Resolution",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ResolutionInfo = {
+        .identifier = "Resolution",
+        .name = "Resolution",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 100.f,
+            .minMax = { 10.f, 200.f }
+        }
     };
 
-    constexpr Property::PropertyInfo FieldlineSeedInfo = {
-        "FieldlineSeedsIndexFile",
-        "Fieldline seedpoints",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr SelectionPropertyInfo FieldlineSeedInfo = {
+        .identifier = "FieldlineSeedsIndexFile",
+        .name = "Fieldline seedpoints",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer
     };
 } // namespace
 
@@ -61,7 +65,7 @@ namespace openspace {
 
 IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
     : IswaDataGroup(name, type)
-    , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
+    , _resolution(ResolutionInfo)
     , _fieldlines(FieldlineSeedInfo)
 {
     addProperty(_resolution);
@@ -98,7 +102,7 @@ void IswaKameleonGroup::setFieldlineInfo(std::filesystem::path fieldlineIndexFil
 void IswaKameleonGroup::registerProperties() {
     _resolution.onChange([this]() {
         LDEBUG(std::format("Group {} published resolutionChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("resolution", static_cast<double>(_resolution));
         _groupEvent.publish("resolutionChanged", d);
     });
@@ -118,7 +122,7 @@ void IswaKameleonGroup::readFieldlinePaths(const std::filesystem::path& indexFil
 
     std::string line;
     std::string fileContent;
-    while (ghoul::getline(seedFile, line)) {
+    while (openspace::getline(seedFile, line)) {
         fileContent += line;
     }
 
@@ -200,7 +204,7 @@ void IswaKameleonGroup::changeCdf(std::string path) {
     clearFieldlines();
     updateFieldlineSeeds();
 
-    ghoul::Dictionary d;
+    Dictionary d;
     d.setValue("path", std::move(path));
     _groupEvent.publish("cdfChanged", d);
 }

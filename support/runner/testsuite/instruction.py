@@ -49,7 +49,7 @@ class Instruction:
   instructions. At least one of the instructions should be a screenshot instruction that
   causes the creation of a testable image. See the README file for more information about
   which types of instructions are supported and what parameters they take. In general,
-  each paramater needs a `type` that identifies which kind of instruction it is and most
+  each parameter needs a `type` that identifies which kind of instruction it is and most
   instructions need a `value` that contains parameters for the instruction.
   """
   instruction_type: InstructionType

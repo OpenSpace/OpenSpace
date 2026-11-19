@@ -30,16 +30,16 @@
 #include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <algorithm>
 #include <optional>
 
@@ -48,20 +48,28 @@ namespace {
 
     constexpr std::string_view _loggerCat = "WebBrowser";
 
-    constexpr Property::PropertyInfo UpdateBrowserBetweenRenderablesInfo = {
-        "UpdateBrowserBetweenRenderables",
-        "Update browser between renderables",
-        "Run the message loop of the browser between calls to render individual "
-        "renderables. When disabled, the browser message loop only runs once per frame.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo UpdateBrowserBetweenRenderablesInfo = {
+        .identifier = "UpdateBrowserBetweenRenderables",
+        .name = "Update browser between renderables",
+        .description = "Run the message loop of the browser between calls to render "
+            "individual renderables. When disabled, the browser message loop only runs "
+            "once per frame.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo BrowserUpdateIntervalInfo = {
-        "BrowserUpdateInterval",
-        "Browser update interval",
-        "The time in microseconds between running the message loop of the browser. Only "
-        "used if UpdateBrowserBetweenRenderables is true.",
-        Property::Visibility::Developer
+    constexpr FloatPropertyInfo BrowserUpdateIntervalInfo = {
+        .identifier = "BrowserUpdateInterval",
+        .name = "Browser update interval",
+        .description = "The time in microseconds between running the message loop of the "
+            "browser. Only used if UpdateBrowserBetweenRenderables is true.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 1.f, 1000.f }
+        }
     };
 
     /**
@@ -95,18 +103,18 @@ namespace {
         // Determines whether the WebBrowser module is enabled.
         std::optional<bool> enabled;
 
-        // [[codegen::verbatim(UpdateBrowserBetweenRenderablesInfo.description)]]
-        std::optional<bool> updateBrowserBetweenRenderables;
+        std::optional<bool> updateBrowserBetweenRenderables
+            [[codegen::Info(UpdateBrowserBetweenRenderablesInfo)]];
 
-        // [[codegen::verbatim(BrowserUpdateIntervalInfo.description)]]
-        std::optional<float> browserUpdateInterval [[codegen::greaterequal(0.f)]];
+        std::optional<float> browserUpdateInterval
+            [[codegen::Info(BrowserUpdateIntervalInfo), codegen::greaterequal(0.f)]];
 
         // If this value is set to `true`, it is possible to remote debug the CEF browser
         // through port 8088. If it is set to `false` (the default), the remote debugging
         // is not available.
         std::optional<bool> enableRemoteDebugging;
 
-        // Forcably disables accelerated rendering, even if other preconditions would
+        // Forcibly disables accelerated rendering, even if other preconditions would
         // otherwise allow the use of it to speed up the rendering of the user interface.
         // This setting can be used to circumvent an otherwise fatal crash that is caused
         // by the accelerated rendering.
@@ -123,8 +131,8 @@ Documentation WebBrowserModule::Documentation() {
 
 WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
-    , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
-    , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.f, 1000.f)
+    , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo)
+    , _browserUpdateInterval(BrowserUpdateIntervalInfo)
     , _eventHandler(std::make_unique<EventHandler>())
 {
     global::callback::deinitialize->emplace_back([this]() {
@@ -154,7 +162,7 @@ WebBrowserModule::WebBrowserModule()
 
 WebBrowserModule::~WebBrowserModule() {}
 
-void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
+void WebBrowserModule::internalInitialize(const Dictionary& dictionary) {
     ZoneScoped;
 
     // Remove any previously existing cache folder
@@ -184,9 +192,9 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _eventHandler->initialize();
 
     // Register ScreenSpaceBrowser
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+    TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+    assert_msg(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }
 
@@ -210,7 +218,7 @@ void WebBrowserModule::internalDeinitialize() {
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
     ZoneScoped;
 
-    ghoul_assert(browser, "Browser must not be a nullptr");
+    assert_msg(browser, "Browser must not be a nullptr");
     if (_enabled) {
         _browsers.push_back(browser);
         if (_updateBrowserBetweenRenderables) {
@@ -257,7 +265,7 @@ bool WebBrowserModule::isEnabled() const {
 bool WebBrowserModule::canUseAcceleratedRendering() {
 // Linux doesn't have a problem with the rendering
 #ifdef WIN32
-    ghoul::systemcapabilities::Version acceleratedVersion = {
+    systemcapabilities::Version acceleratedVersion = {
         .major = 4, .minor = 5, .release = 0
     };
     auto it = std::find(
@@ -269,7 +277,7 @@ bool WebBrowserModule::canUseAcceleratedRendering() {
     bool isExtensionsOk = it != OpenGLCap.extensions().end();
     bool isVendorOk =
         OpenGLCap.gpuVendor() ==
-        ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Vendor::Nvidia;
+        systemcapabilities::OpenGLCapabilitiesComponent::Vendor::Nvidia;
     return isVersionOk && isExtensionsOk &&
            isVendorOk && !_disableAcceleratedRendering;
 #else  // ^^^^ WIN32 // !WIN32 vvvv

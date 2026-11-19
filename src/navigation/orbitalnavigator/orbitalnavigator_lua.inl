@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/lua/lua_helper.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <ghoul/lua/lua_helper.h>
 
 using namespace openspace;
 
@@ -36,7 +36,7 @@ namespace {
 [[codegen::luawrap]] void setRelativeMinDistance(float multiplier) {
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
-        throw ghoul::lua::LuaError("Could not determine current focus node");
+        throw lua::LuaError("Could not determine current focus node");
     }
 
     double is = node->interactionSphere();
@@ -52,7 +52,7 @@ namespace {
 [[codegen::luawrap]] void setRelativeMaxDistance(float multiplier) {
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
-        throw ghoul::lua::LuaError("Could not determine current focus node");
+        throw lua::LuaError("Could not determine current focus node");
     }
 
     double is = node->interactionSphere();

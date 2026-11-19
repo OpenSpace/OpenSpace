@@ -27,16 +27,16 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/programobject.h>
 #include <filesystem>
 #include <fstream>
 #include <optional>
@@ -48,9 +48,6 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableFieldlines";
 
-    constexpr float DefaultFieldlineStepSize = 0.5f;
-    const glm::vec4 DefaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
-
     constexpr std::string_view VectorFieldKameleonVariableLorentz = "Lorentz";
 
     enum class SeedPointSource {
@@ -58,39 +55,50 @@ namespace {
         Table = 1
     };
 
-    constexpr Property::PropertyInfo StepSizeInfo = {
-        "Stepsize",
-        "Fieldline step size.",
-        "", // @TODO Missing documentation
-        Property::Visibility::User
+    constexpr FloatPropertyInfo StepSizeInfo = {
+        .identifier = "Stepsize",
+        .name = "Fieldline step size.",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo Classification = {
-        "Classification",
-        "Fieldline classification",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo Classification = {
+        .identifier = "Classification",
+        .name = "Fieldline classification",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo FieldlineColorInfo = {
-        "FieldlineColor",
-        "Fieldline color",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr Vec4PropertyInfo FieldlineColorInfo = {
+        .identifier = "FieldlineColor",
+        .name = "Fieldline color",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec4(1.f, 0.f, 0.f, 1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo SeedPointSourceInfo = {
-        "Source",
-        "SeedPoint source",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo SeedPointSourceInfo = {
+        .identifier = "Source",
+        .name = "SeedPoint source",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SeedPointFileInfo = {
-        "SourceFile",
-        "SeedPoint file",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo SeedPointFileInfo = {
+        .identifier = "SourceFile",
+        .name = "SeedPoint file",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableFieldlines)]] Parameters {
@@ -142,16 +150,11 @@ Documentation RenderableFieldlines::Documentation() {
     );
 }
 
-RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
+RenderableFieldlines::RenderableFieldlines(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _stepSize(StepSizeInfo, DefaultFieldlineStepSize, 0.f, 10.f)
-    , _classification(Classification, true)
-    , _fieldlineColor(
-        FieldlineColorInfo,
-        DefaultFieldlineColor,
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _stepSize(StepSizeInfo)
+    , _classification(Classification)
+    , _fieldlineColor(FieldlineColorInfo)
     , _seedPointSource(SeedPointSourceInfo)
     , _seedPointSourceFile(SeedPointFileInfo)
 {
@@ -177,7 +180,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
             case Parameters::SeedPoints::SourceType::File:
                 _seedPointSource = static_cast<int>(SeedPointSource::File);
                 if (!p.seedPoints.file.has_value()) {
-                    throw ghoul::RuntimeError("Missing key 'File'");
+                    throw RuntimeError("Missing key 'File'");
                 }
                 _seedPointSourceFile = p.seedPoints.file->string();
                 break;
@@ -342,7 +345,7 @@ void RenderableFieldlines::loadSeedPointsFromFile() {
     }
 
     std::string line;
-    while (ghoul::getline(seedFile, line)) {
+    while (openspace::getline(seedFile, line)) {
         std::stringstream s = std::stringstream(line);
 
         glm::vec3 point;
@@ -361,7 +364,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         _variables.size() == 1 && _variables[0] == VectorFieldKameleonVariableLorentz;
 
     if (!threeVariables && !lorentzForce) {
-        LERROR(std::format("Illformed variables: '{}'", ghoul::join(_variables, ",")));
+        LERROR(std::format("Illformed variables: '{}'", join(_variables, ",")));
         return {};
     }
 
@@ -381,7 +384,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         return kw.lorentzTrajectories(_seedPoints, _fieldlineColor, _stepSize);
     }
 
-    ghoul_assert(false, "Should not reach this");
+    assert_msg(false, "Should not reach this");
     return {};
 }
 

@@ -20,7 +20,6 @@ local ScaleModel = {
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = earthAsset.Earth.Identifier,
       Latitude = Location[1],
       Longitude = Location[2],
       Altitude = 0.0,
@@ -28,7 +27,6 @@ local ScaleModel = {
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = earthAsset.Earth.Identifier,
       Latitude = Location[1],
       Longitude = Location[2]
     },

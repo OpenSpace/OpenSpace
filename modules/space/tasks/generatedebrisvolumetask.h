@@ -30,8 +30,8 @@
 
 #include <modules/space/rendering/renderableorbitalkepler.h>
 #include <modules/space/translation/keplertranslation.h>
+#include <openspace/glm.h>
 #include <openspace/util/time.h>
-#include <ghoul/glm.h>
 #include <string>
 #include <vector>
 
@@ -39,7 +39,7 @@ namespace openspace {
 
 class GenerateDebrisVolumeTask : public Task {
 public:
-    GenerateDebrisVolumeTask(const ghoul::Dictionary& dictionary);
+    GenerateDebrisVolumeTask(const Dictionary& dictionary);
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static Documentation documentation();

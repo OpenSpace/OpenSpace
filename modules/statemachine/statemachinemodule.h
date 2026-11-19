@@ -40,8 +40,7 @@ public:
     StateMachineModule();
     ~StateMachineModule() override = default;
 
-    void initializeStateMachine(const ghoul::Dictionary& states,
-        const ghoul::Dictionary& transitions,
+    void initializeStateMachine(const Dictionary& states, const Dictionary& transitions,
         std::optional<std::string> startState = std::nullopt);
     void deinitializeStateMachine();
 

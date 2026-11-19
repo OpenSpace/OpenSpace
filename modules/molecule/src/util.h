@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_MOLECULE___UTIL___H__
 
 #include <modules/molecule/src/def.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 
 struct md_bitfield_t;
 struct md_gl_representation_t;

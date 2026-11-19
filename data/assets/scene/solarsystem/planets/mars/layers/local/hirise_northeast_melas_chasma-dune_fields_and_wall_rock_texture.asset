@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Northeast_Melas_Chasma",
   Name = "Northeast Melas Chasma [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "northeast_melas_chasma_dune_fields_and_wall_rock_texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Northeast_Melas_Chasma",
   Name = "Northeast Melas Chasma [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "northeast_melas_chasma_dune_fields_and_wall_rock_heightmap.vrt"
 }
 

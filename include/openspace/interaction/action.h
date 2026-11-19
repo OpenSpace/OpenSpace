@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___ACTION___H__
 #define __OPENSPACE_CORE___ACTION___H__
 
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
 #include <optional>
 #include <string>
 

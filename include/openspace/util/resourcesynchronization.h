@@ -30,10 +30,9 @@
 #include <memory>
 #include <string>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 /**
@@ -69,7 +68,7 @@ public:
      *        `Identifier`, and a `Name`
      */
     static std::unique_ptr<ResourceSynchronization> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+        const Dictionary& dictionary);
 
     /**
      * Generates a unique identifying string for ResourceSynchronization.

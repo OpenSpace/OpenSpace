@@ -227,11 +227,11 @@ create_new_module(
 target_precompile_headers(${base_module} PRIVATE
   <openspace/documentation/documentation.h>
   <openspace/documentation/verifier.h>
+  <openspace/opengl/programobject.h>
+  <openspace/opengl/shaderobject.h>
+  <openspace/opengl/uniformcache.h>
   <openspace/properties/numericalproperty.h>
   <openspace/rendering/renderable.h>
-  <ghoul/opengl/programobject.h>
-  <ghoul/opengl/shaderobject.h>
-  <ghoul/opengl/uniformcache.h>
   <future>
   <map>
 )

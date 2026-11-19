@@ -25,13 +25,13 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <utility>
 
@@ -46,11 +46,11 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
     : PropertyOwner({ std::move(name) })
 {}
 
-void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
+void OpenSpaceModule::initialize(const Dictionary& configuration) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    const std::string upperIdentifier = ghoul::toUpperCase(identifier());
+    const std::string upperIdentifier = toUpperCase(identifier());
 
     std::string moduleToken = std::format("${{{}{}}}", ModuleBaseToken, upperIdentifier);
 
@@ -106,14 +106,14 @@ std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {
 }
 
 std::filesystem::path OpenSpaceModule::modulePath() const {
-    const std::string moduleIdentifier = ghoul::toLowerCase(identifier());
+    const std::string moduleIdentifier = toLowerCase(identifier());
 
     // First try the internal module directory
     const std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);
     return std::filesystem::is_directory(path) ? path : "";
 }
 
-void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}
+void OpenSpaceModule::internalInitialize(const Dictionary&) {}
 
 void OpenSpaceModule::internalInitializeGL() {}
 

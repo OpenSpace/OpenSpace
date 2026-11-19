@@ -59,7 +59,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void internalInitialize(const Dictionary& dictionary) override;
     void internalDeinitialize() override;
 
 private:

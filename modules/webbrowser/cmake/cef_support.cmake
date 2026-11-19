@@ -108,31 +108,10 @@ function(download_cef platform version download_dir)
   endif ()
 endfunction ()
 
-macro(set_openspace_cef_target_out_dir)
-  if (${CMAKE_GENERATOR} STREQUAL "Ninja" OR
-      ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
-    # By default Ninja and Make builds don't create a subdirectory named after
-    # the configuration.
-    # set(CEF_TARGET_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
-    set(CEF_TARGET_OUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}")
-
-    # Output binaries (executables, libraries) to the correct directory.
-    # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CEF_TARGET_OUT_DIR})
-    # set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CEF_TARGET_OUT_DIR})
-  else ()
-    # set(CEF_TARGET_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>")
-    set(CEF_TARGET_OUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>")
-  endif ()
-endmacro ()
-
-macro(add_windows_cef_manifest target_dir manifest_path target extension)
-  add_custom_command(
-      TARGET ${target}
-      POST_BUILD
-      COMMAND "mt.exe" -nologo
-      -manifest \"${manifest_path}/${target}.${extension}.manifest\" \"${manifest_path}/compatibility.manifest\"
-      -outputresource:"${target_dir}/${target}.${extension}"\;\#1
-      COMMENT "Adding manifest..."
+macro(add_windows_cef_manifest manifest_path target extension)
+  target_sources(${target} PRIVATE
+    "${manifest_path}/${target}.${extension}.manifest"
+    "${manifest_path}/compatibility.manifest"
   )
 endmacro ()
 

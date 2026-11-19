@@ -30,26 +30,26 @@ namespace {
  * Adds the given list of planets to the PlanetsSonification internal list of Planets
  * and Moons.
  */
-[[codegen::luawrap]] void addPlanets(ghoul::Dictionary planets) {
+[[codegen::luawrap]] void addPlanets(Dictionary planets) {
     TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
     if (!module) {
-        throw ghoul::lua::LuaError("Could not find the Telemetry Module");
+        throw lua::LuaError("Could not find the Telemetry Module");
         return;
     }
     TelemetryBase* ptr = module->telemetry("PlanetsSonification");
     if (!ptr) {
-        throw ghoul::lua::LuaError("Could not find the Planets Sonification");
+        throw lua::LuaError("Could not find the Planets Sonification");
         return;
     }
 
     PlanetsSonification* planetsSonification = dynamic_cast<PlanetsSonification*>(ptr);
 
     if (!planetsSonification) {
-        throw ghoul::lua::LuaError("Could not cast to PlanetsSonification");
+        throw lua::LuaError("Could not cast to PlanetsSonification");
     }
 
     for (const std::string_view& k : planets.keys()) {
-        const ghoul::Dictionary& planet = planets.value<ghoul::Dictionary>(k);
+        const Dictionary& planet = planets.value<Dictionary>(k);
         planetsSonification->addPlanet(planet);
     }
 }

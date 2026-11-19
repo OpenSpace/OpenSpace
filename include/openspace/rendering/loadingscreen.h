@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___LOADINGSCREEN___H__
 #define __OPENSPACE_CORE___LOADINGSCREEN___H__
 
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
 #include <openspace/util/screenlog.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
 #include <chrono>
 #include <cstdint>
 #include <memory>
@@ -38,16 +38,13 @@
 
 // #define LOADINGSCREEN_DEBUGGING
 
-namespace ghoul {
-    namespace fontrendering { class Font; }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    } // namespace ghoul::opengl
-} // namespace ghoul
-
 namespace openspace {
 
+namespace fontrendering { class Font; }
+namespace opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace opengl
 class AssetManager;
 class Scene;
 
@@ -106,12 +103,12 @@ private:
 
     Phase _phase = Phase::PreStart;
 
-    std::unique_ptr<ghoul::opengl::Texture> _logoTexture;
+    std::unique_ptr<opengl::Texture> _logoTexture;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _loadingFont;
-    std::shared_ptr<ghoul::fontrendering::Font> _messageFont;
-    std::shared_ptr<ghoul::fontrendering::Font> _itemFont;
-    std::shared_ptr<ghoul::fontrendering::Font> _logFont;
+    std::shared_ptr<fontrendering::Font> _loadingFont;
+    std::shared_ptr<fontrendering::Font> _messageFont;
+    std::shared_ptr<fontrendering::Font> _itemFont;
+    std::shared_ptr<fontrendering::Font> _logFont;
 
     bool _hasCatastrophicErrorOccurred = false;
     std::string _message;

@@ -63,7 +63,7 @@ public:
     float estimatedRemainingTimeInPath() const;
 
     void updateCamera(double deltaTime);
-    void createPath(ghoul::Dictionary dictionary);
+    void createPath(Dictionary dictionary);
     void clearPath();
     void startPath();
     void abortPath();

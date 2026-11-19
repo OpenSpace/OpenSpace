@@ -27,21 +27,21 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/io/model/modelgeometry.h>
+#include <openspace/io/model/modelreader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/model/modelgeometry.h>
-#include <ghoul/io/model/modelreader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 #include <utility>
 #include <variant>
@@ -49,12 +49,15 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo PerformShadingInfo = {
-        "PerformShading",
-        "Perform shading",
-        "If true, the model will be shaded based on the location of the Sun. If false, "
-        "shading is disabled and the model is fully illuminated.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo PerformShadingInfo = {
+        .identifier = "PerformShading",
+        .name = "Perform shading",
+        .description = "If true, the model will be shaded based on the location of the "
+            "Sun. If false, shading is disabled and the model is fully illuminated.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     // A 3D model that acts as a projection target for spacecraft instrument images,
@@ -97,11 +100,10 @@ namespace {
         std::optional<bool> invertModelScale;
 
         // Contains information about projecting onto this planet.
-        ghoul::Dictionary projection
+        Dictionary projection
             [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 
-        // [[codegen::verbatim(PerformShadingInfo.description)]]
-        std::optional<bool> performShading;
+        std::optional<bool> performShading [[codegen::Info(PerformShadingInfo)]];
     };
 } // namespace
 #include "renderablemodelprojection_codegen.cpp"
@@ -115,17 +117,17 @@ Documentation RenderableModelProjection::Documentation() {
     );
 }
 
-RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
+RenderableModelProjection::RenderableModelProjection(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _performShading(PerformShadingInfo, true)
+    , _performShading(PerformShadingInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     const std::filesystem::path file = absPath(p.geometryFile);
-    _geometry = ghoul::io::ModelReader::ref().loadModel(
+    _geometry = io::ModelReader::ref().loadModel(
         file,
-        ghoul::io::ModelReader::ForceRenderInvisible::No,
-        ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
+        io::ModelReader::ForceRenderInvisible::No,
+        io::ModelReader::NotifyInvisibleDropped::Yes
     );
 
     _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
@@ -141,7 +143,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
             _modelScale = std::get<double>(*p.modelScale);
         }
         else {
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
         }
 
         if (_invertModelScale) {
@@ -165,9 +167,9 @@ void RenderableModelProjection::initializeGL() {
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodel_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
+    opengl::updateUniformLocations(*_programObject, _mainUniformCache);
 
-    _fboProgramObject = ghoul::opengl::ProgramObject::Build(
+    _fboProgramObject = opengl::ProgramObject::Build(
         "ProjectionPass",
         absPath(
             "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodelprojection_vs.glsl"
@@ -177,15 +179,15 @@ void RenderableModelProjection::initializeGL() {
         )
     );
 
-    ghoul::opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
+    opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
 
-    _depthFboProgramObject = ghoul::opengl::ProgramObject::Build(
+    _depthFboProgramObject = opengl::ProgramObject::Build(
         "DepthPass",
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodeldepth_vs.glsl"),
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodeldepth_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_depthFboProgramObject, _depthFboUniformCache);
+    opengl::updateUniformLocations(*_depthFboProgramObject, _depthFboUniformCache);
 
     _projectionComponent.initializeGL();
 
@@ -210,7 +212,7 @@ void RenderableModelProjection::deinitializeGL() {
     _programObject = nullptr;
 }
 
-ghoul::opengl::Texture& RenderableModelProjection::baseTexture() const {
+opengl::Texture& RenderableModelProjection::baseTexture() const {
     return _projectionComponent.projectionTexture();
 }
 
@@ -225,7 +227,7 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
         for (const Image& i : _imageTimes) {
             try {
                 const glm::mat4 projectorMat = attitudeParameters(i.timeRange.start, up);
-                const std::shared_ptr<ghoul::opengl::Texture> t =
+                const std::shared_ptr<opengl::Texture> t =
                     _projectionComponent.loadProjectionTexture(i.path, i.isPlaceholder);
                 imageProjectGPU(*t, projectorMat);
             }
@@ -279,10 +281,10 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
         _projectionComponent.projectionFading()
     );
 
-    ghoul::opengl::TextureUnit baseUnit;
+    opengl::TextureUnit baseUnit;
     _programObject->setUniform(_mainUniformCache.baseTexture, baseUnit);
 
-    ghoul::opengl::TextureUnit projectionUnit;
+    opengl::TextureUnit projectionUnit;
     projectionUnit.bind(_projectionComponent.projectionTexture());
     _programObject->setUniform(_mainUniformCache.projectionTexture, projectionUnit);
 
@@ -295,13 +297,13 @@ void RenderableModelProjection::update(const UpdateData& data) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
+        opengl::updateUniformLocations(*_programObject, _mainUniformCache);
     }
 
     if (_fboProgramObject->isDirty()) {
         _fboProgramObject->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
+        opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
     }
 
     _projectionComponent.update();
@@ -309,10 +311,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
     if (_depthFboProgramObject->isDirty()) {
         _depthFboProgramObject->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(
-            *_depthFboProgramObject,
-            _depthFboUniformCache
-        );
+        opengl::updateUniformLocations(*_depthFboProgramObject, _depthFboUniformCache);
     }
 
     const double time = data.time.j2000Seconds();
@@ -348,9 +347,8 @@ void RenderableModelProjection::update(const UpdateData& data) {
     }
 }
 
-void RenderableModelProjection::imageProjectGPU(
-                                          const ghoul::opengl::Texture& projectionTexture,
-                                                         const glm::mat4& projectorMatrix)
+void RenderableModelProjection::imageProjectGPU(const opengl::Texture& projectionTexture,
+                                                const glm::mat4& projectorMatrix)
 {
     if (_projectionComponent.needsShadowMap()) {
         _projectionComponent.depthMapRenderBegin();
@@ -373,7 +371,7 @@ void RenderableModelProjection::imageProjectGPU(
     _projectionComponent.imageProjectBegin();
     _fboProgramObject->activate();
 
-    ghoul::opengl::TextureUnit unitFbo;
+    opengl::TextureUnit unitFbo;
     unitFbo.bind(projectionTexture);
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
@@ -382,7 +380,7 @@ void RenderableModelProjection::imageProjectGPU(
         _projectionComponent.needsShadowMap()
     );
 
-    ghoul::opengl::TextureUnit unitDepthFbo;
+    opengl::TextureUnit unitDepthFbo;
     if (_projectionComponent.needsShadowMap()) {
         unitDepthFbo.bind(_projectionComponent.depthTexture());
         _fboProgramObject->setUniform(_fboUniformCache.depthTexture, unitDepthFbo);

@@ -25,7 +25,7 @@
 #include "profile/timedialog.h"
 
 #include "profile/line.h"
-#include <ghoul/format.h>
+#include <openspace/format.h>
 #include <QCheckBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>

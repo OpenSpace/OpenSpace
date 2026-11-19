@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 #define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
 #include <openspace/util/timeline.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
 #include <string>
 
 namespace openspace {

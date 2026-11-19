@@ -82,7 +82,7 @@ void main() {
   vec4 prismoid2 = vec4(p2 + normals2 * width, 0.0);
   vec4 prismoid3 = vec4(p2 + normals3 * width, 0.0);
 
-  // Send normals and verticies to fragment shader
+  // Send normals and vertices to fragment shader
   out_data.normal = normals0;
   emitVertex(prismoid0);
 

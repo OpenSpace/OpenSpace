@@ -40,33 +40,38 @@ namespace {
     constexpr int TimeSpeedUnitIndex = 1;
     constexpr int CurrentTimeIndex = 2;
 
-    static const PropertyOwner::PropertyOwnerInfo TimeTelemetryInfo = {
-        "TimeTelemetry",
-        "Time Telemetry",
-        "Telemetry that sends out time information to the Open Sound Control receiver."
+    constexpr PropertyOwner::PropertyOwnerInfo TimeTelemetryInfo = {
+        .identifier = "TimeTelemetry",
+        .name = "Time Telemetry",
+        .description = "Telemetry that sends out time information to the Open Sound "
+            "Control receiver."
     };
 
-    constexpr Property::PropertyInfo TimeUnitOptionInfo = {
-        "TimeUnit",
-        "Time unit",
-        "The time unit that the telemetry should use for the time speed. For example, if "
-        "the unit is set to 'Hour' then the unit for the time speed is simulation hours "
-        "per real life second.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo TimeUnitOptionInfo = {
+        .identifier = "TimeUnit",
+        .name = "Time unit",
+        .description = "The time unit that the telemetry should use for the time speed. "
+            "For example, if the unit is set to 'Hour' then the unit for the time speed "
+            "is simulation hours per real life second.",
+        .visibility = Visibility::User
     };
 
-    const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
-        "Precision",
-        "Precision",
-        "Settings for the precision of the telemetry information."
+    constexpr PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+        .identifier = "Precision",
+        .name = "Precision",
+        .description = "Settings for the precision of the telemetry information."
     };
 
-    constexpr Property::PropertyInfo TimePrecisionInfo = {
-        "TimePrecision",
-        "Time precision",
-        "The precision in seconds used to determine when to send updated time data to "
-        "the Open Sound Control receiver.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo TimePrecisionInfo = {
+        .identifier = "TimePrecision",
+        .name = "Time precision",
+        .description = "The precision in seconds used to determine when to send updated "
+            "time data to the Open Sound Control receiver.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.0001,
+            .minMax = { 0.0, 1.0e8 }
+        }
     };
 } // namespace
 
@@ -90,7 +95,7 @@ TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
 TimeTelemetry::PrecisionProperties::PrecisionProperties(
                                            PropertyOwner::PropertyOwnerInfo precisionInfo)
     : PropertyOwner(precisionInfo)
-    , timePrecision(TimePrecisionInfo, 0.0001, 0.0, 1.0e8)
+    , timePrecision(TimePrecisionInfo)
 {
     timePrecision.setExponent(10.f);
     addProperty(timePrecision);

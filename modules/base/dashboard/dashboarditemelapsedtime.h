@@ -35,7 +35,7 @@ namespace openspace {
 
 class DashboardItemElapsedTime : public DashboardTextItem {
 public:
-    explicit DashboardItemElapsedTime(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemElapsedTime(const Dictionary& dictionary);
     ~DashboardItemElapsedTime() override = default;
 
     void update() override;

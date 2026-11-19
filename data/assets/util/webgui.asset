@@ -4,7 +4,7 @@ local guiCustomization = asset.require("customization/gui")
 
 
 -- Select which commit hashes to use for the UI frontend
-local frontendHash = "f798c78352bd5f6fae01b3429efd12f1fb1fd74f"
+local frontendHash = "64a003d0b49436b1ac37ebdc08f066b916cea4c6"
 
 -- The name of the file to download from the server
 local frontendFile = "frontend.zip"
@@ -77,6 +77,10 @@ asset.onInitialize(function()
   -- Add asset folders
   directories[#directories + 1] = "assets/maps"
   directories[#directories + 1] = maps
+
+  -- Serve the log files (log.html, ScriptLog.txt)
+  directories[#directories + 1] = "logs"
+  directories[#directories + 1] = openspace.absPath("${LOGS}")
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "gui")

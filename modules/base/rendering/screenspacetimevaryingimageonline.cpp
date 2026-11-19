@@ -26,16 +26,16 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <fstream>
 #include <iterator>
@@ -46,12 +46,42 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ScreenSpaceTimeVaryingImageOnline";
 
-    constexpr Property::PropertyInfo FileInfo = {
-        "FilePath",
-        "File path",
-        "The file path to the data containing information about when to display which "
-        "image.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo FileInfo = {
+        .identifier = "FilePath",
+        .name = "File path",
+        .description = "The file path to the data containing information about when to "
+            "display which image.",
+        .visibility = Visibility::User
+    };
+
+    constexpr BoolPropertyInfo ShowBeforeInfo = {
+        .identifier = "ShowBefore",
+        .name = "Show image before first time",
+        .description = "If enabled, the image with the earliest timestamp is shown when "
+            "the simulation time is before the first timestamp specified in the data "
+            "file.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
+    };
+
+    constexpr BoolPropertyInfo ShowAfterInfo = {
+        .identifier = "ShowAfter",
+        .name = "Show image after last time",
+        .description = "If enabled, the image with the latest timestamp is shown when "
+            "the simulation time is after the last timestamp specified in the data file.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
+    };
+
+    constexpr TriggerPropertyInfo JumpToFirstTimeInfo = {
+        .identifier = "JumpToFirstTime",
+        .name = "Jump to first time",
+        .description = "Performs a time jump to the first timestamp in the loaded file.",
+        .visibility = Visibility::NoviceUser
     };
 
     // Displays an image based on the current in-game simulation time. The image shown is
@@ -66,8 +96,11 @@ namespace {
     //   ]
     // }
     struct [[codegen::Dictionary(ScreenSpaceTimeVaryingImageOnline)]] Parameters {
-        // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path filePath;
+        std::filesystem::path filePath [[codegen::Info(FileInfo)]];
+
+        std::optional<bool> showBefore [[codegen::Info(ShowBeforeInfo)]];
+
+        std::optional<bool> showAfter [[codegen::Info(ShowAfterInfo)]];
     };
 } // namespace
 #include "screenspacetimevaryingimageonline_codegen.cpp"
@@ -82,15 +115,34 @@ Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
 }
 
 ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _jsonFilePath(FileInfo, "")
+    , _jsonFilePath(FileInfo)
+    , _showBefore(ShowBeforeInfo)
+    , _showAfter(ShowAfterInfo)
+    , _jumpToFirstTime(JumpToFirstTimeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _jsonFilePath = p.filePath.string();
     _jsonFilePath.onChange([this]() { loadJsonData(_jsonFilePath.value()); });
     addProperty(_jsonFilePath);
+
+    _showBefore = p.showBefore.value_or(_showBefore);
+    addProperty(_showBefore);
+
+    _showAfter = p.showAfter.value_or(_showAfter);
+    addProperty(_showAfter);
+
+    _jumpToFirstTime.onChange([this]() {
+        if (_timestamps.empty()) {
+            LWARNING("Cannot jump to first time because no times were loaded");
+        }
+        else {
+            global::timeManager->setTimeNextFrame(Time(_timestamps[0]));
+        }
+    });
+    addProperty(_jumpToFirstTime);
 }
 
 void ScreenSpaceTimeVaryingImageOnline::initialize() {
@@ -108,14 +160,14 @@ void ScreenSpaceTimeVaryingImageOnline::deinitializeGL() {
 void ScreenSpaceTimeVaryingImageOnline::loadJsonData(const std::filesystem::path& path) {
     std::ifstream file = std::ifstream(path);
     if (!file.is_open()) {
-        throw ghoul::RuntimeError(std::format("Could not open JSON file at '{}'", path));
+        throw RuntimeError(std::format("Could not open JSON file at '{}'", path));
     }
 
     nlohmann::json json;
     file >> json;
 
     if (json.find("files") == json.end()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error loading JSON file. No 'files' was found in '{}'", path
         ));
     }
@@ -146,6 +198,13 @@ void ScreenSpaceTimeVaryingImageOnline::computeSequenceEndTime() {
     _sequenceEndTime = last + avg;
 }
 
+void ScreenSpaceTimeVaryingImageOnline::render(const RenderData& renderData) {
+    if (!_texture) {
+        return;
+    }
+    ScreenSpaceRenderable::render(renderData);
+}
+
 void ScreenSpaceTimeVaryingImageOnline::update() {
     if (_timestamps.empty()) {
         return;
@@ -153,29 +212,27 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
 
     const double current = global::timeManager->time().j2000Seconds();
 
-    if (current < _timestamps.front() || current >= _sequenceEndTime) {
+    const bool timeIsBeforeFirst = current < _timestamps.front();
+    const bool timeIsLastOrLater = current >= _sequenceEndTime;
+
+    if ((!_showBefore && timeIsBeforeFirst) || (!_showAfter && timeIsLastOrLater)) {
         _activeIndex = -1;
         _texture = nullptr;
         _currentUrl.clear();
         return;
     }
 
-    if (current >= _timestamps.front() && current < _sequenceEndTime) {
-        if (int idx = activeIndex(current);  idx != _activeIndex) {
-            _activeIndex = idx;
-            std::string url = _urls[_timestamps[_activeIndex]];
-            if (_currentUrl != url) {
-                _currentUrl = url;
-                loadImage(url);
-            }
+    if (int idx = activeIndex(current);  idx != _activeIndex) {
+        _activeIndex = idx;
+        std::string url = _urls[_timestamps[_activeIndex]];
+        if (_currentUrl != url) {
+            _currentUrl = url;
+            loadImage(url);
         }
-    }
-    else {
-        _activeIndex = -1;
     }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        DownloadManager::MemoryFile imageFile = _imageFuture.get();
         _imageFuture = std::future<DownloadManager::MemoryFile>();
         if (imageFile.corrupted) {
             LERROR(std::format("Error loading image from URL '{}'", _currentUrl));
@@ -183,21 +240,21 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
         }
 
         try {
-            _texture = ghoul::io::texture::loadTexture(
-                reinterpret_cast<void*>(imageFile.buffer),
-                imageFile.size,
+            _texture = io::texture::loadTexture(
+                imageFile.buffer.data(),
+                imageFile.buffer.size(),
                 2,
-                ghoul::opengl::Texture::SamplerInit{
+                opengl::Texture::SamplerInit{
                     // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-                    //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                    //.filter = opengl::Texture::FilterMode::AnisotropicMipMap,
+                    .filter = opengl::Texture::FilterMode::LinearMipMap
                 },
                 imageFile.format
             );
 
             _objectSize = _texture->dimensions();
         }
-        catch (const ghoul::io::texture::InvalidLoadException& e) {
+        catch (const io::texture::InvalidLoadException& e) {
             LERRORC(e.component, e.message);
         }
     }
@@ -234,7 +291,7 @@ void ScreenSpaceTimeVaryingImageOnline::loadImage(const std::string& imageUrl) {
     );
 }
 
-void ScreenSpaceTimeVaryingImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceTimeVaryingImageOnline::bindTexture(opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
         unit.bind(*_texture);
     }

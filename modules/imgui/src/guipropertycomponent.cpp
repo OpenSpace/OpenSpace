@@ -28,9 +28,9 @@
 #include <modules/imgui/include/renderproperties.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <memory>
 #include <type_traits>
@@ -43,13 +43,14 @@ namespace {
 
     const ImVec2 Size = ImVec2(350, 500);
 
-    constexpr Property::PropertyInfo UseTreeInfo = {
-        "TreeLayout",
-        "Use tree layout",
-        "If this value is checked, this component will display the properties using a "
-        "tree layout, rather than using a flat map. This value should only be set on "
-        "property windows that display SceneGraphNodes, or the application might crash.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseTreeInfo = {
+        .identifier = "TreeLayout",
+        .name = "Use tree layout",
+        .description = "If this value is checked, this component will display the "
+            "properties using a tree layout, rather than using a flat map. This value "
+            "should only be set on property windows that display SceneGraphNodes, or the "
+            "application might crash.",
+        .visibility = Visibility::AdvancedUser
     };
 
     int nVisibleProperties(const std::vector<Property*>& props) {
@@ -57,7 +58,7 @@ namespace {
             props.begin(),
             props.end(),
             [](Property* p) {
-                using V = Property::Visibility;
+                using V = Visibility;
                 const V visFilter = global::openSpaceEngine->visibility();
                 return static_cast<std::underlying_type_t<V>>(visFilter) >=
                        static_cast<std::underlying_type_t<V>>(p->visibility());
@@ -176,8 +177,9 @@ namespace openspace {
 GuiPropertyComponent::GuiPropertyComponent(std::string identifier, std::string guiName,
                                            UseTreeLayout useTree)
     : GuiComponent(std::move(identifier), std::move(guiName))
-    , _useTreeLayout(UseTreeInfo, useTree)
+    , _useTreeLayout(UseTreeInfo)
 {
+    _useTreeLayout = useTree;
     addProperty(_useTreeLayout);
 }
 
@@ -281,7 +283,7 @@ void GuiPropertyComponent::render() {
 
     if (_useTreeLayout) {
         for ([[maybe_unused]] PropertyOwner* owner : owners) {
-            ghoul_assert(
+            assert_msg(
                 dynamic_cast<SceneGraphNode*>(owner),
                 "When using the tree layout, all owners must be SceneGraphNodes"
             );
@@ -307,9 +309,9 @@ void GuiPropertyComponent::render() {
         );
     }
 
-    // If the owners list is empty, we wnat to do the normal thing (-> nothing).
+    // If the owners list is empty, we want to do the normal thing (-> nothing).
     // Otherwise, check if the first owner has a GUI group. This makes the assumption that
-    // the tree layout is only used if the owners are SceenGraphNodes (checked above)
+    // the tree layout is only used if the owners are ScreenGraphNodes (checked above)
     const bool noGuiGroups =
         owners.empty() ||
         (dynamic_cast<SceneGraphNode*>(*owners.begin()) &&
@@ -358,16 +360,13 @@ void GuiPropertyComponent::render() {
                 // We know that we are done now since we stable_sort:ed them above
                 break;
             }
-            const std::vector<std::string> paths =
-                ghoul::tokenizeString(gui.substr(1), '/');
+            const std::vector<std::string> paths = tokenizeString(gui.substr(1), '/');
             addPathToTree(root, paths, nOwner);
         }
 
         simplifyTree(root);
 
         renderTree(root, renderProp);
-
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 
         for (PropertyOwner* pOwner : owners) {
             // We checked above that pOwner is a SceneGraphNode
@@ -413,31 +412,24 @@ void GuiPropertyComponent::renderProperty(Property* prop, PropertyOwner* owner) 
     };
 
     // Check if the visibility of the property is high enough to be displayed
-    using Vis = Property::Visibility;
-    const Vis visibilityFilter = global::openSpaceEngine->visibility();
-    const auto v = static_cast<std::underlying_type_t<Vis>>(visibilityFilter);
-    const auto propV = static_cast<std::underlying_type_t<Vis>>(prop->visibility());
-    if (v >= propV) {
-        auto it = FunctionMapping.find(std::string(prop->className()));
-        if (it != FunctionMapping.end()) {
-            if (owner) {
-                it->second(
-                    prop,
-                    owner->identifier(),
-                    ShowToolTip(_showHelpTooltip),
-                    _tooltipDelay
-                );
-            }
-            else {
-                it->second(
-                    prop,
-                    "",
-                    ShowToolTip(_showHelpTooltip),
-                    _tooltipDelay
-                );
-            }
-        }
+    const Visibility visibilityFilter = global::openSpaceEngine->visibility();
+    const auto v = static_cast<std::underlying_type_t<Visibility>>(visibilityFilter);
+    const auto pV = static_cast<std::underlying_type_t<Visibility>>(prop->visibility());
+    if (v < pV) {
+        return;
     }
+
+    auto it = FunctionMapping.find(std::string(prop->className()));
+    if (it == FunctionMapping.end()) {
+        return;
+    }
+
+    it->second(
+        prop,
+        owner ? owner->identifier() : "",
+        ShowToolTip(_showHelpTooltip),
+        _tooltipDelay
+    );
 }
 
 } // namespace openspace

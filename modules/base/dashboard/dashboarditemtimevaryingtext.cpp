@@ -26,12 +26,12 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -41,20 +41,23 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo FormatStringInfo = {
-        "FormatString",
-        "Format string",
-        "The format text describing how this dashboard item renders its text. This text "
-        "must contain exactly one {} which is a placeholder that will be replaced "
-        "with the values read from the file provided in `DataFile`.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FormatStringInfo = {
+        .identifier = "FormatString",
+        .name = "Format string",
+        .description = "The format text describing how this dashboard item renders its "
+            "text. This text must contain exactly one {} which is a placeholder that "
+            "will be replaced with the values read from the file provided in `DataFile`.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "{}"
+        }
     };
 
-    constexpr Property::PropertyInfo DataFileInfo = {
-        "DataFile",
-        "Data file path",
-        "The file path to the JSON data.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo DataFileInfo = {
+        .identifier = "DataFile",
+        .name = "Data file path",
+        .description = "The file path to the JSON data.",
+        .visibility = Visibility::User
     };
 
     // This `DashboardItem` displays text based on the content of a provided data file.
@@ -63,11 +66,9 @@ namespace {
     // The JSON must contain a 'data' array with timestamp-value pairs. Example format:
     // { \"data\": [[\"2024-05-10T00:00:00Z\", 2.33], [\"2024-05-10T03:00:00Z\", 3.0]] }.
     struct [[codegen::Dictionary(DashboardItemTimeVaryingText)]] Parameters {
-        // [[codegen::verbatim(FormatStringInfo.description)]]
-        std::optional<std::string> formatString;
+        std::optional<std::string> formatString [[codegen::Info(FormatStringInfo)]];
 
-        // [[codegen::verbatim(DataFileInfo.description)]]
-        std::filesystem::path dataFile;
+        std::filesystem::path dataFile [[codegen::Info(DataFileInfo)]];
     };
 } // namespace
 #include "dashboarditemtimevaryingtext_codegen.cpp"
@@ -81,11 +82,10 @@ Documentation DashboardItemTimeVaryingText::Documentation() {
     );
 }
 
-DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(
-                                                      const ghoul::Dictionary& dictionary)
+DashboardItemTimeVaryingText::DashboardItemTimeVaryingText(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _formatString(FormatStringInfo, "{}")
-    , _dataFile(DataFileInfo, "")
+    , _formatString(FormatStringInfo)
+    , _dataFile(DataFileInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -171,7 +171,7 @@ void DashboardItemTimeVaryingText::update() {
 void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath) {
     std::ifstream file = std::ifstream(filePath);
     if (!file.is_open()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Time varying text, '{}' is not a valid JSON file", filePath
         ));
     }
@@ -180,7 +180,7 @@ void DashboardItemTimeVaryingText::loadDataFromJson(const std::string& filePath)
     file >> jsonData;
 
     if (jsonData.find("data") == jsonData.end()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error loading JSON file. No 'data' was found in '{}'", filePath
         ));
     }

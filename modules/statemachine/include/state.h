@@ -27,15 +27,14 @@
 
 #include <string>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 class State {
 public:
-    explicit State(const ghoul::Dictionary& dictionary);
+    explicit State(const Dictionary& dictionary);
 
     void enter() const;
     void exit() const;

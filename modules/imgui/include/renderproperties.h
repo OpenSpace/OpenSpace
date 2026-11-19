@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_IMGUI___RENDERPROPERTIES___H__
 #define __OPENSPACE_MODULE_IMGUI___RENDERPROPERTIES___H__
 
-#include <ghoul/misc/boolean.h>
+#include <openspace/misc/boolean.h>
 #include <string>
 
 namespace openspace {

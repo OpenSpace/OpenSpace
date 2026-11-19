@@ -198,7 +198,7 @@ public:
      * Returns `true` if this Asset has been #initialize%d successfully.
      *
      * \return `true` if this Asset has been #initialize%d successfully. It returns
-     *         `false` both if this initialization failed as well as if thie #initialize
+     *         `false` both if this initialization failed as well as if the #initialize
      *         function has not been called on this Asset
      */
     bool isInitialized() const;
@@ -307,7 +307,7 @@ private:
      * Sets the \p state of this Asset to the new state. Depending on the current state of
      * this Asset, if \p state is a state related to the synchronization, it will
      * potentially propagate to this Asset's parents and cause them to be set to be
-     * successfully synchronized or faild.
+     * successfully synchronized or failed.
      *
      * \param state The new State that this Asset is set to
      */
@@ -320,7 +320,7 @@ private:
 
     /**
      * Returns whether the Asset has been successfully synchronized, meaning that both its
-     * own resource synchronizations are finished as well as all requiered assets are
+     * own resource synchronizations are finished as well as all required assets are
      * finished synchronizing.
      */
     bool isSyncResolveReady() const;

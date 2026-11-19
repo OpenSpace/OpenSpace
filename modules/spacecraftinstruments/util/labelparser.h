@@ -29,14 +29,13 @@
 
 #include <filesystem>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
+
+class Dictionary;
 
 class LabelParser : public SequenceParser {
 public:
-    LabelParser(std::filesystem::path fileName,
-        const ghoul::Dictionary& translationDictionary);
+    LabelParser(std::filesystem::path fileName, const Dictionary& translationDictionary);
 
     bool create() override;
 

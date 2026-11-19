@@ -23,8 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/space/kepler.h>
+#include <openspace/lua/lua_helper.h>
 #include <openspace/util/coordinateconversion.h>
-#include <ghoul/lua/lua_helper.h>
 
 using namespace openspace;
 
@@ -58,7 +58,7 @@ namespace {
         );
     }
     else {
-        throw ghoul::lua::LuaError(
+        throw lua::LuaError(
             "Ra and Dec have to be of the same type, either String or Number"
         );
     }
@@ -81,8 +81,7 @@ namespace {
 }
 
 [[codegen::luawrap]]
-std::vector<ghoul::Dictionary> readKeplerFile(std::filesystem::path p, std::string type)
-{
+std::vector<Dictionary> readKeplerFile(std::filesystem::path p, std::string type) {
     kepler::Format f;
     if (type == "TLE") {
         f = kepler::Format::TLE;
@@ -97,14 +96,14 @@ std::vector<ghoul::Dictionary> readKeplerFile(std::filesystem::path p, std::stri
         f = kepler::Format::SBDB;
     }
     else {
-        throw ghoul::lua::LuaError(std::format("Unsupported format '{}'", type));
+        throw lua::LuaError(std::format("Unsupported format '{}'", type));
     }
 
     std::vector<kepler::Parameters> params = kepler::readFile(p, f);
-    std::vector<ghoul::Dictionary> res;
+    std::vector<Dictionary> res;
     res.reserve(params.size());
     for (const kepler::Parameters& param : params) {
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("Name", param.name);
         d.setValue("ID", param.id);
         d.setValue("inclination", param.inclination);

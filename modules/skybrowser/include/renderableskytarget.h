@@ -27,16 +27,16 @@
 
 #include <modules/base/rendering/renderableplane.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/glm.h>
 
 namespace openspace {
 
 class RenderableSkyTarget : public RenderablePlane {
 public:
-    explicit RenderableSkyTarget(const ghoul::Dictionary& dictionary);
+    explicit RenderableSkyTarget(const Dictionary& dictionary);
 
     void initializeGL() override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;

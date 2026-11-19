@@ -27,7 +27,7 @@
 in Data {
   vec4 positionViewSpace;
   vec2 texCoords;
-  flat float screenSpaceDepth;
+  float screenSpaceDepth;
 } in_data;
 
 uniform sampler2D pointTexture;

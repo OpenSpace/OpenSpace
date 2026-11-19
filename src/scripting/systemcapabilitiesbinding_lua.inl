@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/stringconversion.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-#include <ghoul/systemcapabilities/version.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/stringconversion.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/systemcapabilities/generalcapabilitiescomponent.h>
+#include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
+#include <openspace/systemcapabilities/version.h>
 #include <cctype>
 #include <vector>
 #include <string>
@@ -41,7 +41,8 @@ namespace {
  * For any other operating system, this function returns 'other'.
  */
 [[codegen::luawrap("os")]] std::string operatingSystem() {
-    using OS = ghoul::systemcapabilities::GeneralCapabilitiesComponent::OperatingSystem;
+    using OS =
+        openspace::systemcapabilities::GeneralCapabilitiesComponent::OperatingSystem;
     OS os = CpuCap.operatingSystem();
 
     switch (os) {
@@ -138,15 +139,17 @@ namespace {
  * has to have the form 'X.Y' or 'X.Y.Z'.
  */
 [[codegen::luawrap]] bool hasOpenGLVersion(std::string version) {
-    std::vector<std::string> components = ghoul::tokenizeString(version);
+    using namespace openspace;
+
+    std::vector<std::string> components = tokenizeString(version);
     if (components.size() != 2 && components.size() != 3) {
-        throw ghoul::lua::LuaError("Malformed version string");
+        throw lua::LuaError("Malformed version string");
     }
 
     for (const std::string& i : components) {
         for (char c : i) {
             if (!std::isdigit(c)) {
-                throw ghoul::lua::LuaError("Malformed version string");
+                throw lua::LuaError("Malformed version string");
             }
         }
     }
@@ -154,7 +157,7 @@ namespace {
     const int major = std::stoi(components[0]);
     const int minor = std::stoi(components[1]);
     const int release = components.size() == 3 ? std::stoi(components[2]) : 0;
-    const ghoul::systemcapabilities::Version ver = { major, minor, release };
+    const systemcapabilities::Version ver = { major, minor, release };
 
     const bool supported = OpenGLCap.openGLVersion() >= ver;
     return supported;
@@ -164,8 +167,10 @@ namespace {
  * Returns the maximum OpenGL version that is supported on this platform.
  */
 [[codegen::luawrap]] std::string openGLVersion() {
-    ghoul::systemcapabilities::Version version = OpenGLCap.openGLVersion();
-    return ghoul::to_string(version);
+    using namespace openspace;
+
+    systemcapabilities::Version version = OpenGLCap.openGLVersion();
+    return to_string(version);
 }
 
 /**

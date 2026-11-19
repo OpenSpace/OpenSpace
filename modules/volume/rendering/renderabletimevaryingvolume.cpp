@@ -31,19 +31,19 @@
 #include <modules/volume/volumegridtype.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/histogram.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/opengl/texture.h>
 #include <optional>
 #include <type_traits>
 #include <utility>
@@ -55,111 +55,139 @@ namespace {
 
     constexpr float SecondsInOneDay = 60 * 60 * 24;
 
-    constexpr Property::PropertyInfo StepSizeInfo = {
-        "StepSize",
-        "Step size",
-        "Specifies how often to sample during raycasting. Lower step size leads to "
-        "higher resolution.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo StepSizeInfo = {
+        .identifier = "StepSize",
+        .name = "Step size",
+        .description = "Specifies how often to sample during raycasting. Lower step size "
+            "leads to higher resolution.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.02f,
+            .minMax = { 0.001f, 0.1f }
+        }
     };
 
-    constexpr Property::PropertyInfo GridTypeInfo = {
-        "GridType",
-        "Grid type",
-        "The grid type to use for the volume.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo GridTypeInfo = {
+        .identifier = "GridType",
+        .name = "Grid type",
+        .description = "The grid type to use for the volume.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SecondsBeforeInfo = {
-        "SecondsBefore",
-        "Seconds before",
-        "The number of seconds to show the first timestep before its actual time.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo SecondsBeforeInfo = {
+        .identifier = "SecondsBefore",
+        .name = "Seconds before",
+        .description = "The number of seconds to show the first timestep before its "
+            "actual time.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.01f, SecondsInOneDay }
+        }
     };
 
-    constexpr Property::PropertyInfo SecondsAfterInfo = {
-        "SecondsAfter",
-        "Seconds after",
-        "The number of seconds to show the the last timestep after its actual time.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo SecondsAfterInfo = {
+        .identifier = "SecondsAfter",
+        .name = "Seconds after",
+        .description = "The number of seconds to show the the last timestep after its "
+            "actual time.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.01f, SecondsInOneDay }
+        }
     };
 
-    constexpr Property::PropertyInfo SourceDirectoryInfo = {
-        "SourceDirectory",
-        "Source directory",
-        "A directory from where to load the data files for the different time steps.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo SourceDirectoryInfo = {
+        .identifier = "SourceDirectory",
+        .name = "Source directory",
+        .description = "A directory from where to load the data files for the different "
+            "time steps.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TransferFunctionInfo = {
-        "TransferFunctionPath",
-        "Transfer function path",
-        "The path to the transfer function file.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TransferFunctionInfo = {
+        .identifier = "TransferFunctionPath",
+        .name = "Transfer function path",
+        .description = "The path to the transfer function file.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TriggerTimeJumpInfo = {
-        "TriggerTimeJump",
-        "Jump",
-        "Sets the time to be the first time of the volume sequence.",
-        Property::Visibility::User
+    constexpr TriggerPropertyInfo TriggerTimeJumpInfo = {
+        .identifier = "TriggerTimeJump",
+        .name = "Jump",
+        .description = "Sets the time to be the first time of the volume sequence.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo JumpToTimestepInfo = {
-        "JumpToTimestep",
-        "Jump to timestep",
-        "Setting this value lets you scrub through the sequence's time steps.",
-        Property::Visibility::User
+    constexpr IntPropertyInfo JumpToTimestepInfo = {
+        .identifier = "JumpToTimestep",
+        .name = "Jump to timestep",
+        .description = "Setting this value lets you scrub through the sequence's time "
+            "steps.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 256 }
+        }
     };
 
-    constexpr Property::PropertyInfo BrightnessInfo = {
-        "Brightness",
-        "Brightness",
-        "A value that affects the general brightness of the volume rendering.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo BrightnessInfo = {
+        .identifier = "Brightness",
+        .name = "Brightness",
+        .description = "A value that affects the general brightness of the volume "
+            "rendering.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.33f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo rNormalizationInfo = {
-        "RNormalization",
-        "Radius normalization",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo rNormalizationInfo = {
+        .identifier = "RNormalization",
+        .name = "Radius normalization",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 2.f }
+        }
     };
 
-    constexpr Property::PropertyInfo rUpperBoundInfo = {
-        "RUpperBound",
-        "Radius upper bound",
-        "Limit the volume's radius.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo rUpperBoundInfo = {
+        .identifier = "RUpperBound",
+        .name = "Radius upper bound",
+        .description = "Limit the volume's radius.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 2.f }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
-        // [[codegen::verbatim(SourceDirectoryInfo.description)]]
-        std::filesystem::path sourceDirectory [[codegen::directory()]];
+        std::filesystem::path sourceDirectory
+            [[codegen::Info(SourceDirectoryInfo), codegen::directory()]];
 
-        // [[codegen::verbatim(TransferFunctionInfo.description)]]
-        std::filesystem::path transferFunction;
+        std::filesystem::path transferFunction [[codegen::Info(TransferFunctionInfo)]];
 
-        // [[codegen::verbatim(SecondsBeforeInfo.description)]]
-        std::optional<float> secondsBefore;
+        std::optional<float> secondsBefore [[codegen::Info(SecondsBeforeInfo)]];
 
-        // [[codegen::verbatim(SecondsAfterInfo.description)]]
-        float secondsAfter;
+        float secondsAfter [[codegen::Info(SecondsAfterInfo)]];
 
         // If true, the volume data will be inverted at its z-axis.
         std::optional<bool> invertDataAtZ;
 
-        // [[codegen::verbatim(BrightnessInfo.description)]]
-        std::optional<float> brightness;
+        std::optional<float> brightness [[codegen::Info(BrightnessInfo)]];
 
-        // [[codegen::verbatim(StepSizeInfo.description)]]
-        std::optional<float> stepSize;
+        std::optional<float> stepSize [[codegen::Info(StepSizeInfo)]];
 
-        // [[codegen::verbatim(GridTypeInfo.description)]]
-        std::optional<std::string> gridType [[codegen::inlist("Spherical", "Cartesian")]];
+        std::optional<std::string> gridType
+            [[codegen::Info(GridTypeInfo), codegen::inlist("Spherical", "Cartesian")]];
 
         // @TODO Missing documentation
-        std::optional<ghoul::Dictionary> clipPlanes;
+        std::optional<Dictionary> clipPlanes;
     };
 } // namespace
 #include "renderabletimevaryingvolume_codegen.cpp"
@@ -173,20 +201,19 @@ Documentation RenderableTimeVaryingVolume::Documentation() {
     );
 }
 
-RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridType(GridTypeInfo)
-    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
-    , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
-    , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
-    , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
-    , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
-    , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
+    , _stepSize(StepSizeInfo)
+    , _brightness(BrightnessInfo)
+    , _rNormalization(rNormalizationInfo)
+    , _rUpperBound(rUpperBoundInfo)
+    , _secondsBefore(SecondsBeforeInfo)
+    , _secondsAfter(SecondsAfterInfo)
     , _sourceDirectory(SourceDirectoryInfo)
     , _transferFunctionPath(TransferFunctionInfo)
     , _triggerTimeJump(TriggerTimeJumpInfo)
-    , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
+    , _jumpToTimestep(JumpToTimestepInfo)
     , _invertDataAtZ(false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -212,7 +239,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
     _secondsAfter = p.secondsAfter;
 
-    const ghoul::Dictionary clipPlanesDict = p.clipPlanes.value_or(ghoul::Dictionary());
+    const Dictionary clipPlanesDict = p.clipPlanes.value_or(Dictionary());
     _clipPlanes = std::make_shared<VolumeClipPlanes>(clipPlanesDict);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
@@ -265,15 +292,15 @@ void RenderableTimeVaryingVolume::initializeGL() {
         }
         // TODO: handle normalization properly for different timesteps + transfer function
 
-        t.texture = std::make_shared<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
+        t.texture = std::make_shared<opengl::Texture>(
+            opengl::Texture::FormatInit {
                 .dimensions = t.metadata.dimensions,
                 .type = GL_TEXTURE_3D,
-                .format = ghoul::opengl::Texture::Format::Red,
+                .format = opengl::Texture::Format::Red,
                 .dataType = GL_FLOAT
             },
-            ghoul::opengl::Texture::SamplerInit {
-                .wrapping = ghoul::opengl::Texture::WrappingMode::Clamp
+            opengl::Texture::SamplerInit {
+                .wrapping = opengl::Texture::WrappingMode::Clamp
             },
             reinterpret_cast<std::byte*>(data)
         );
@@ -336,10 +363,10 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::pa
     RawVolumeMetadata metadata;
 
     try {
-        const ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
+        const Dictionary dictionary = lua::loadDictionaryFromFile(path);
         metadata = RawVolumeMetadata::createFromDictionary(dictionary);
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERRORC(e.component, e.message);
         return;
     }

@@ -26,8 +26,8 @@
 #define __OPENSPACE_CORE___EVENTENGINE___H__
 
 #include <openspace/events/event.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/memorypool.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/memorypool.h>
 #include <functional>
 #include <optional>
 #include <string>
@@ -40,14 +40,14 @@ struct LuaLibrary;
 
 class EventEngine {
 public:
-    using ScriptCallback = std::function<void(ghoul::Dictionary)>;
+    using ScriptCallback = std::function<void(Dictionary)>;
 
     struct ActionInfo {
-        Event::Type type;
+        openspace::Event::Type type;
         uint32_t id = std::numeric_limits<uint32_t>::max();
         bool isEnabled = true;
         std::string action;
-        std::optional<ghoul::Dictionary> filter;
+        std::optional<Dictionary> filter;
     };
 
     struct TopicInfo {
@@ -96,7 +96,7 @@ public:
      *        triggered
      */
     void registerEventAction(Event::Type type, std::string identifier,
-        std::optional<ghoul::Dictionary> filter = std::nullopt);
+        std::optional<Dictionary> filter = std::nullopt);
 
     /**
      * Registers a new topic for a specific event type.
@@ -115,7 +115,7 @@ public:
      * \param filter The optional filter applied to the event-action combination
      */
     void unregisterEventAction(Event::Type type, const std::string& identifier,
-        const std::optional<ghoul::Dictionary>& filter = std::nullopt);
+        const std::optional<Dictionary>& filter = std::nullopt);
 
     /**
      * Removing registration for a specific event identified by the \p identifier.
@@ -179,7 +179,7 @@ public:
 
 private:
     /// The storage space in which Events are stored
-    ghoul::MemoryPool<4096> _memory;
+    MemoryPool<4096> _memory;
     /// The first event in the chain of events stored in the memory pool
     Event* _firstEvent = nullptr;
     /// The last event in the chain of events stored in the memory pool

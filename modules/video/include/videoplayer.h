@@ -28,14 +28,14 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/syncable.h>
 
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
 #include <client.h>
 #include <render.h>
 #include <chrono>
@@ -43,10 +43,9 @@
 #include <filesystem>
 #include <memory>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 enum class PlaybackMode {
@@ -58,7 +57,7 @@ class VideoPlayer : public PropertyOwner, public Syncable {
 public:
     BooleanType(PlayAfterSeek);
 
-    explicit VideoPlayer(const ghoul::Dictionary& dictionary);
+    explicit VideoPlayer(const Dictionary& dictionary);
     ~VideoPlayer() override;
 
     void initialize();
@@ -70,7 +69,7 @@ public:
     void seekToTime(double time, PlayAfterSeek playAfter = PlayAfterSeek::No);
     void toggleMute();
 
-    const std::unique_ptr<ghoul::opengl::Texture>& frameTexture() const;
+    const std::unique_ptr<opengl::Texture>& frameTexture() const;
     bool isInitialized() const;
 
     void reload();
@@ -173,7 +172,7 @@ private:
     StringProperty _startTime;
     StringProperty _endTime;
 
-    // Variables used when syncronizing play, pause and looping behavior
+    // Variables used when synchronizing play, pause and looping behavior
     // (should only be modified by Master)
     SyncFlags _syncFlags;
     PlaybackState _playbackState = PlaybackState::Undefined;
@@ -206,10 +205,10 @@ private:
     // Libmpv
     mpv_handle* _mpvHandle = nullptr;
     mpv_render_context* _mpvRenderContext = nullptr;
-    std::unique_ptr<ghoul::opengl::Texture> _frameTexture;
+    std::unique_ptr<opengl::Texture> _frameTexture;
     /// Our OpenGL framebuffer where mpv renders to
     GLuint _fbo = 0;
-    /// If libmpv has been inititalized
+    /// If libmpv has been initialized
     bool _isInitialized = false;
     /// Prevent seeking while already seeking
     bool _isSeeking = false;

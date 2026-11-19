@@ -26,11 +26,11 @@
 #define __OPENSPACE_CORE___SPICEMANAGER___H__
 
 #include <openspace/engine/globals.h>
+#include <openspace/glm.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/boolean.h>
+#include <openspace/misc/exception.h>
 #include <openspace/util/memorymanager.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/exception.h>
 #include <array>
 #include <filesystem>
 #include <map>
@@ -68,7 +68,7 @@ public:
     using TransformMatrix = std::array<double, 36>;
     using KernelHandle = unsigned int;
 
-    struct SpiceException final : public ghoul::RuntimeError {
+    struct SpiceException final : public RuntimeError {
         explicit SpiceException(std::string msg);
     };
 
@@ -272,6 +272,7 @@ public:
      * \pre \p target must not be empty
      */
     bool hasSpkCoverage(const std::string& target, double et) const;
+    bool hasSpkCoverage(int target, double et) const;
 
     /**
      * Returns a list of loaded SPK coverage intervals for \p target.
@@ -300,6 +301,7 @@ public:
      * \pre \p target must not be empty
      */
     bool hasCkCoverage(const std::string& frame, double et) const;
+    bool hasCkCoverage(int frame, double et) const;
 
     /**
      * Returns a list of loaded CK coverage intervals for \p target.
@@ -435,7 +437,7 @@ public:
         const char (&format)[N] = "YYYY MON DDTHR:MN:SC.### ::RND") const
     {
         static_assert(N != 0, "Format must not be empty");
-        ghoul_assert(N >= bufferSize - 1, "Buffer size too small");
+        assert_msg(N >= bufferSize - 1, "Buffer size too small");
 
         timout_c(ephemerisTime, format, bufferSize, outBuf);
         if (failed_c()) {
@@ -820,7 +822,7 @@ public:
     FieldOfViewResult fieldOfView(int instrument) const;
 
     /**
-     * The structure retuned by the #terminatorEllipse method.
+     * The structure returned by the #terminatorEllipse method.
      */
     struct TerminatorEllipseResult {
         /// The vector from the target body at #targetEphemerisTime to the observer at the
@@ -907,7 +909,7 @@ public:
      * function, all subsequent calls will not throw an error, but fail silently instead.
      * If set to UseException::Yes, a SpiceException is thrown whenever an error occurs.
      *
-     * \param useException The new exeception handling method that the SpiceManager should
+     * \param useException The new exception handling method that the SpiceManager should
      *        use
      */
     void setExceptionHandling(UseException useException);

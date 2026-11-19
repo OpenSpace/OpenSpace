@@ -1,0 +1,13 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Threads)
+
+include("${CMAKE_CURRENT_LIST_DIR}/mold-targets.cmake")
+
+# Directory holding mdlib's GLSL sources. md_gl.c compiles these at runtime, and
+# runtime-shader-path.patch makes it look for them relative to the running executable, so
+# the consumer has to copy them into place itself; see modules/molecule/CMakeLists.txt.
+set(MOLD_SHADER_DIR "${CMAKE_CURRENT_LIST_DIR}/shaders")
+
+check_required_components(mold)

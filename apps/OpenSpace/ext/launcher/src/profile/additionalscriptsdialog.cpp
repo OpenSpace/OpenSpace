@@ -26,7 +26,7 @@
 
 #include "profile/line.h"
 #include "profile/scriptlogdialog.h"
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/misc/stringhelper.h>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -98,7 +98,7 @@ void AdditionalScriptsDialog::parseScript() {
     std::istringstream iss(_textScripts->toPlainText().toStdString());
     while (!iss.eof()) {
         std::string s;
-        ghoul::getline(iss, s);
+        openspace::getline(iss, s);
         additionalScripts.push_back(std::move(s));
     }
     *_scripts = std::move(additionalScripts);

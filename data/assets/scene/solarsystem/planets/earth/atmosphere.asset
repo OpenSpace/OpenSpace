@@ -3,6 +3,12 @@ local moonAsset = asset.require("./moon/globe")
 local globe = asset.require("./globe")
 
 
+local squash_factor = globe.Earth.Renderable.Radii[3] / globe.Earth.Renderable.Radii[1]
+local Radius = {
+  6377.0,
+  6377.0,
+  6377.0 * squash_factor
+}
 
 local Atmosphere = {
   Identifier = "EarthAtmosphere",
@@ -11,7 +17,9 @@ local Atmosphere = {
     Type = "RenderableAtmosphere",
     -- Atmosphere radius in Km
     AtmosphereHeight = 6447.0 - 6377.0,
-    PlanetRadius = 6377.0,
+    -- The atmosphere's ground has the same shape as the Earth's ellipsoid, scaled so
+    -- that it is 6377 km along the equator
+    PlanetRadius = Radius,
     PlanetAverageGroundReflectance = 0.1,
     GroundRadianceEmission = 0.6,
     SunIntensity = 6.9,
@@ -54,10 +62,13 @@ local Atmosphere = {
     },
     ShadowGroup = {
       Sources = {
-        { Name = sunAsset.Sun.Identifier, Radius = 696300000 }
+        -- The solar radius used by NASA's eclipse predictions (959.63" at 1 AU)
+        { Name = sunAsset.Sun.Identifier, Radius = 695990000 }
       },
       Casters = {
-        { Name = moonAsset.Moon.Identifier, Radius = 1737000 }
+        -- The umbral radius of the Moon used by NASA's eclipse predictions (k = 0.272281
+        -- Earth equatorial radii), which accounts for the valleys along the lunar limb
+        { Name = moonAsset.Moon.Identifier, Radius = 1736645.5 }
       }
     }
   },

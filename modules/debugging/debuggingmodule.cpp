@@ -30,17 +30,17 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 
 #include "debuggingmodule_lua.inl"
 
@@ -49,37 +49,53 @@ namespace {
 
     constexpr std::string_view KeyFontMono = "Mono";
 
-    constexpr Property::PropertyInfo ShowStatisticsInfo = {
-        "ShowStatistics",
-        "Show statistics",
-        "Show updating, rendering, and network statistics on all rendering nodes.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShowStatisticsInfo = {
+        .identifier = "ShowStatistics",
+        .name = "Show statistics",
+        .description = "Show updating, rendering, and network statistics on all "
+            "rendering nodes.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo StatisticsScaleInfo = {
-        "StatisticsScale",
-        "Statistics scale",
-        "This value is scaling the statistics window by the provided amount. For flat "
-        "projections this is rarely necessary, but it is important when using a setup "
-        "where the corners of the image are masked out.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo StatisticsScaleInfo = {
+        .identifier = "StatisticsScale",
+        .name = "Statistics scale",
+        .description = "This value is scaling the statistics window by the provided "
+            "amount. For flat projections this is rarely necessary, but it is important "
+            "when using a setup where the corners of the image are masked out.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo StatisticsOffsetInfo = {
-        "StatisticsOffset",
-        "Statistics offset",
-        "This value is offsetting the center of the statistics window by the provided "
-        "amount. For flat projections this is rarely necessary, but it is important when "
-        "using a setup the center of the image is distorted in some form.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo StatisticsOffsetInfo = {
+        .identifier = "StatisticsOffset",
+        .name = "Statistics offset",
+        .description = "This value is offsetting the center of the statistics window by "
+            "the provided amount. For flat projections this is rarely necessary, but it "
+            "is important when using a setup the center of the image is distorted in "
+            "some form.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(-2.f), glm::vec2(2.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ShowFrameNumberInfo = {
-        "ShowFrameInformation",
-        "Show frame information",
-        "If this value is enabled, the current frame number and frame times are rendered "
-        "into the window.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo ShowFrameNumberInfo = {
+        .identifier = "ShowFrameInformation",
+        .name = "Show frame information",
+        .description = "If this value is enabled, the current frame number and frame "
+            "times are rendered into the window.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 } // namespace
 
@@ -87,15 +103,10 @@ namespace openspace {
 
 DebuggingModule::DebuggingModule()
     : OpenSpaceModule(Name)
-    , _showStatistics(ShowStatisticsInfo, false)
-    , _statisticsScale(StatisticsScaleInfo, 1.f, 0.f, 1.f)
-    , _statisticsOffset(
-        StatisticsOffsetInfo,
-        glm::vec2(0.f),
-        glm::vec2(-2.f),
-        glm::vec2(2.f)
-    )
-    , _showFrameInformation(ShowFrameNumberInfo, false)
+    , _showStatistics(ShowStatisticsInfo)
+    , _statisticsScale(StatisticsScaleInfo)
+    , _statisticsOffset(StatisticsOffsetInfo)
+    , _showFrameInformation(ShowFrameNumberInfo)
 {
     _showStatistics.onChange([this]() {
         global::windowDelegate->showStatistics(_showStatistics);
@@ -139,7 +150,7 @@ DebuggingModule::DebuggingModule()
                     case WindowDelegate::Frustum::Mono:     return "";
                     case WindowDelegate::Frustum::LeftEye:  return "(left)";
                     case WindowDelegate::Frustum::RightEye: return "(right)";
-                    default:                          throw ghoul::MissingCaseException();
+                    default:                                throw MissingCaseException();
 
                 }
             }(frustum);
@@ -158,10 +169,10 @@ DebuggingModule::DebuggingModule()
     );
 }
 
-void DebuggingModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
+void DebuggingModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
+    assert_msg(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
     fSsRenderable->registerClass<ScreenSpaceDebugPlane>("ScreenSpaceDebugPlane");
 }

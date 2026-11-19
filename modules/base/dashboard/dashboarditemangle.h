@@ -37,7 +37,7 @@ class SceneGraphNode;
 
 class DashboardItemAngle : public DashboardTextItem {
 public:
-    explicit DashboardItemAngle(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemAngle(const Dictionary& dictionary);
     ~DashboardItemAngle() override = default;
 
     void update() override;
@@ -56,8 +56,6 @@ private:
     Component _source;
     Component _reference;
     Component _destination;
-
-    std::vector<char> _localBuffer;
 };
 
 } // namespace openspace

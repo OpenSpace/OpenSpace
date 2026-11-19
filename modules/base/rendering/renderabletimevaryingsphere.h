@@ -31,13 +31,13 @@
 #include <filesystem>
 #include <limits>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
+
+namespace opengl { class Texture; }
 
 class RenderableTimeVaryingSphere : public RenderableSphere {
 public:
-    explicit RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableTimeVaryingSphere(const Dictionary& dictionary);
 
     void deinitializeGL() override;
 
@@ -46,13 +46,13 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
 private:
     struct FileData {
         std::filesystem::path path;
         double time;
-        std::unique_ptr<ghoul::opengl::Texture> texture;
+        std::unique_ptr<opengl::Texture> texture;
     };
 
     void loadTexture();
@@ -66,7 +66,7 @@ private:
     int _activeTriggerTimeIndex = 0;
 
     StringProperty _textureSourcePath;
-    ghoul::opengl::Texture* _texture = nullptr;
+    opengl::Texture* _texture = nullptr;
     bool _textureIsDirty = false;
 };
 

@@ -49,7 +49,7 @@ public:
     ~TouchModule();
 
 protected:
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void internalInitialize(const Dictionary& dictionary) override;
 
 private:
     /**

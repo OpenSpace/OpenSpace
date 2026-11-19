@@ -28,15 +28,14 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
-#include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-} // namespace ghoul::fontrendering
+#include <openspace/opengl/gl.h>
 
 namespace openspace {
 
+namespace fontrendering {
+    class Font;
+    class FontRenderer;
+} // namespace fontrendering
 class MemoryAwareTileCache;
 
 class TextTileProvider : public TileProvider {
@@ -53,8 +52,8 @@ protected:
 
     const TileTextureInitData initData;
 
-    std::unique_ptr<ghoul::fontrendering::FontRenderer> fontRenderer;
-    std::shared_ptr<ghoul::fontrendering::Font> font;
+    std::unique_ptr<fontrendering::FontRenderer> fontRenderer;
+    std::shared_ptr<fontrendering::Font> font;
     size_t fontSize = 0;
 
     GLuint fbo = 0;

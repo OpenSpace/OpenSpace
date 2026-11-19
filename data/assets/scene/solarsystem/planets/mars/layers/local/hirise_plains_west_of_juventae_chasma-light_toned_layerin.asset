@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Juventae_Chasma",
   Name = "Juventae Chasma [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "Light-toned_Layering_in_Plains_West_of_Juventae_Chasma_Texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Juventae_Chasma",
   ame = "Juventae Chasma [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "Light-toned_Layering_in_Plains_West_of_Juventae_Chasma_Heightmap.vrt"
 }
 

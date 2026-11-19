@@ -26,8 +26,8 @@
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include <openspace/engine/configuration.h>
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/json.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <nlohmann/json-schema.hpp>
 #include <sgct/config.h>
 #include <filesystem>
@@ -199,7 +199,7 @@ R"({
     );
 }
 
-TEST_CASE("SgctEdit: missingMasterAddress", "[sgctedit]") {
+TEST_CASE("SgctEdit: missingServerAddress", "[sgctedit]") {
     constexpr std::string_view Source =
 R"({
   "generator": {
@@ -280,8 +280,8 @@ R"({
             "\"CylindricalProjection\"},\"size\":{\"x\":1.0,\"y\":1.0},\"tracked\":"
             "true}]}]}],\"scene\":{\"orientation\":{\"w\":0.0,\"x\":0.0,\"y\":0.0,"
             "\"z\":0.0}},\"users\":[{\"eyeseparation\":0.06499999761581421,\"pos\":"
-            "{\"x\":0.0,\"y\":0.0,\"z\":4.0}}],\"version\":1} - required property "
-            "'masteraddress' not found in object\n"
+            "{\"x\":0.0,\"y\":0.0,\"z\":4.0}}],\"version\":2} - required property "
+            "'serveraddress' not found in object\n"
         )
     );
 }

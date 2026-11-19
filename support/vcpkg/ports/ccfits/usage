@@ -1,0 +1,4 @@
+ccfits provides CMake targets:
+
+    find_package(ccfits CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE CCfits::CCfits)

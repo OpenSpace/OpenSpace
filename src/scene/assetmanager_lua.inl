@@ -30,6 +30,18 @@ using namespace openspace;
 
 namespace {
 
+const Asset* findAsset(const std::string& assetName) {
+    const AssetManager& manager = global::openSpaceEngine->assetManager();
+    std::vector<const Asset*> allAssets = manager.allAssets();
+    const std::filesystem::path path = manager.resolveAssetPath(assetName);
+    auto it = std::find_if(
+        allAssets.begin(),
+        allAssets.end(),
+        [&path](const Asset* a) { return a->path() == path; }
+    );
+    return it != allAssets.end() ? *it : nullptr;
+}
+
 /**
  * Adds an asset to the current scene. The parameter passed into this function is the path
  * to the file that should be loaded.
@@ -39,18 +51,18 @@ namespace {
 }
 
 /**
- * Removes the asset with the specfied name from the scene. The parameter to this function
- * is the same that was originally used to load this asset, i.e. the path to the asset
- * file.
+ * Removes the asset with the specified name from the scene. The parameter to this
+ * function is the same that was originally used to load this asset, i.e. the path to the
+ * asset file.
  */
 [[codegen::luawrap]] void remove(std::string assetName) {
     global::openSpaceEngine->assetManager().remove(assetName);
 }
 
 /**
- * Reloads the asset with the specified name. If the asset was previously loaded explicity
- * it will be removed and then re-added. If the asset was not previously loaded, it will
- * only be loaded instead.
+ * Reloads the asset with the specified name. If the asset was previously loaded
+ * explicitly it will be removed and then re-added. If the asset was not previously
+ * loaded, it will only be loaded instead.
  */
 [[codegen::luawrap]] void reload(std::string assetName) {
     global::openSpaceEngine->assetManager().reload(assetName);
@@ -73,13 +85,7 @@ namespace {
  * tested.
  */
 [[codegen::luawrap]] bool isLoaded(std::string assetName) {
-    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
-    for (const Asset* a : as) {
-        if (a->path() == assetName) {
-            return true;
-        }
-    }
-    return false;
+    return findAsset(assetName) != nullptr;
 }
 
 /**
@@ -101,13 +107,7 @@ namespace {
  * either through a profile or by calling the `openspace.asset.add` method.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> rootAssets() {
-    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().rootAssets();
-    std::vector<std::filesystem::path> res;
-    res.reserve(as.size());
-    for (const Asset* a : as) {
-        res.push_back(a->path());
-    }
-    return res;
+    return global::openSpaceEngine->assetManager().rootAssetPaths();
 }
 
 /**
@@ -115,13 +115,8 @@ namespace {
  * 'asset.require()'.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> parents(std::string assetName) {
-    std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
-    for (const Asset* a : as) {
-        if (a->path() == assetName) {
-            return a->initializedParents();
-        }
-    }
-    return std::vector<std::filesystem::path>();
+    const Asset* asset = findAsset(assetName);
+    return asset ? asset->initializedParents() : std::vector<std::filesystem::path>();
 }
 
 } // namespace

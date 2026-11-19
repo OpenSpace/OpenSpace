@@ -47,49 +47,62 @@ namespace {
     constexpr int CameraSpeedIndex = 7;
     constexpr int CameraSpeedUnitIndex = 8;
 
-    static const PropertyOwner::PropertyOwnerInfo CameraTelemetryInfo = {
-        "CameraTelemetryInfo",
-        "Camera Telemetry",
-        "Telemetry that sends out camera information to the Open Sound Control receiver."
+    constexpr PropertyOwner::PropertyOwnerInfo CameraTelemetryInfo = {
+        .identifier = "CameraTelemetryInfo",
+        .name = "Camera Telemetry",
+        .description = "Telemetry that sends out camera information to the Open Sound "
+            "Control receiver."
     };
 
-    constexpr Property::PropertyInfo CameraSpeedDistanceUnitInfo = {
-        "CameraSpeedDistanceUnit",
-        "Camera speed unit (distance)",
-        "Choose a distance unit that is used for the camera speed. "
-        "For example, if the distacne unit 'Kilometer' is chosen, then the unit used for "
-        "the camera speed will be kilometers per second.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo CameraSpeedDistanceUnitInfo = {
+        .identifier = "CameraSpeedDistanceUnit",
+        .name = "Camera speed unit (distance)",
+        .description = "Choose a distance unit that is used for the camera speed. For "
+            "example, if the distance unit 'Kilometer' is chosen, then the unit used for "
+            "the camera speed will be kilometers per second.",
+        .visibility = Visibility::User
     };
 
-    const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
-        "Precision",
-        "Precision",
-        "Settings for the precision of the camera telemetry information."
+    constexpr PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+        .identifier = "Precision",
+        .name = "Precision",
+        .description = "Settings for the precision of the camera telemetry information."
     };
 
-    constexpr Property::PropertyInfo PositionPrecisionInfo = {
-        "PositionPrecision",
-        "Position precision",
-        "The precision in meters used to determin when to send updated camera positional "
-        "data to the Open Sound Control receiver.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo PositionPrecisionInfo = {
+        .identifier = "PositionPrecision",
+        .name = "Position precision",
+        .description = "The precision in meters used to determine when to send updated "
+            "camera positional data to the Open Sound Control receiver.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1000.0,
+            .minMax = { 0.0, 1.0e+25 }
+        }
     };
 
-    constexpr Property::PropertyInfo RotationPrecisionInfo = {
-        "RotationPrecision",
-        "Rotation precision",
-        "The precision used to determin when to send updated camera rotational data to "
-        "the Open Sound Control receiver.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo RotationPrecisionInfo = {
+        .identifier = "RotationPrecision",
+        .name = "Rotation precision",
+        .description = "The precision used to determine when to send updated camera "
+            "rotational data to the Open Sound Control receiver.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.05,
+            .minMax = { 0.0, 10.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo SpeedPrecisionInfo = {
-        "SpeedPrecision",
-        "Speed precision",
-        "The precision in meters per second used to determin when to send updated camera "
-        "speed data to the Open Sound Control receiver.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo SpeedPrecisionInfo = {
+        .identifier = "SpeedPrecision",
+        .name = "Speed precision",
+        .description = "The precision in meters per second used to determine when to "
+            "send updated camera speed data to the Open Sound Control receiver.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1000.0,
+            .minMax = { 0.0, std::numeric_limits<double>::max() }
+        }
     };
 } // namespace
 
@@ -116,9 +129,9 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
 CameraTelemetry::PrecisionProperties::PrecisionProperties(
                                PropertyOwner::PropertyOwnerInfo precisionInfo)
     : PropertyOwner(precisionInfo)
-    , positionPrecision(PositionPrecisionInfo, 1000.0, 0.0, 1.0e+25)
-    , rotationPrecision(RotationPrecisionInfo, 0.05, 0.0, 10.0)
-    , speedPrecision(SpeedPrecisionInfo, 1000.0, 0.0, std::numeric_limits<double>::max())
+    , positionPrecision(PositionPrecisionInfo)
+    , rotationPrecision(RotationPrecisionInfo)
+    , speedPrecision(SpeedPrecisionInfo)
 {
     positionPrecision.setExponent(20.f);
     addProperty(positionPrecision);
@@ -135,7 +148,7 @@ bool CameraTelemetry::updateData(const Camera* camera) {
 
     const glm::dquat cameraRotation = camera->rotationQuaternion();
     // To check if the rotation has changed above the precision threshold, check the angle
-    // and axis of the quaternion seperatly
+    // and axis of the quaternion separately
     const double rotationAngleDifference = std::abs(_cameraRotation.w - cameraRotation.w);
     const double rotationAxisDifference = glm::length(
         glm::dvec3(_cameraRotation.x, _cameraRotation.y, _cameraRotation.z) -

@@ -28,16 +28,20 @@
 #include <openspace/properties/templateproperty.h>
 
 #include <set>
+#include <span>
+#include <string_view>
 
 namespace openspace {
 
-class SelectionProperty : public TemplateProperty<std::set<std::string>> {
+using SelectionPropertyInfo =
+    BasicPropertyInfo<ValueDefaults<std::span<std::string_view>>>;
 
+class SelectionProperty : public TemplateProperty<std::set<std::string>> {
 public:
-    SelectionProperty(Property::PropertyInfo info);
+    explicit SelectionProperty(SelectionPropertyInfo info);
 
     std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+    lua::LuaTypes typeLua() const override final;
 
     /**
      * This method sets the stored value to the provided value `val`. If the value is

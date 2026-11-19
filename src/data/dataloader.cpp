@@ -27,14 +27,14 @@
 #include <openspace/data/colormaploader.h>
 #include <openspace/data/csvloader.h>
 #include <openspace/data/speckloader.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringhelper.h>
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -56,7 +56,7 @@ namespace {
     template <typename T, typename U>
     void checkSize(U value, std::string_view message) {
         if (value > std::numeric_limits<U>::max()) {
-            throw ghoul::RuntimeError(std::format("Error saving file '{}'", message));
+            throw RuntimeError(std::format("Error saving file '{}'", message));
         }
     }
 
@@ -129,14 +129,14 @@ namespace data {
     Dataset loadFile(std::filesystem::path path, std::optional<DataMapping> specs) {
         ZoneScoped;
 
-        ghoul_assert(std::filesystem::exists(path), "File must exist");
+        assert_msg(std::filesystem::exists(path), "File must exist");
 
         const std::ifstream file = std::ifstream(path);
         if (!file.good()) {
-            throw ghoul::RuntimeError(std::format("Failed to open data file '{}'", path));
+            throw RuntimeError(std::format("Failed to open data file '{}'", path));
         }
 
-        const std::string extension = ghoul::toLowerCase(path.extension().string());
+        const std::string extension = toLowerCase(path.extension().string());
 
         Dataset res;
         if (extension == ".csv") {
@@ -288,7 +288,7 @@ namespace data {
             valuesIdx += nValues;
 
             if (e.comment.has_value()) {
-                ghoul_assert(commentIdx < commentBuffer.size(), "Index too large");
+                assert_msg(commentIdx < commentBuffer.size(), "Index too large");
 
                 // If we have a comment, we need to extract its length's worth of
                 // characters from the buffer
@@ -436,16 +436,14 @@ namespace label {
     Labelset loadFile(std::filesystem::path path, std::optional<DataMapping>) {
         ZoneScoped;
 
-        ghoul_assert(std::filesystem::exists(path), "File must exist");
+        assert_msg(std::filesystem::exists(path), "File must exist");
 
         const std::ifstream file = std::ifstream(path);
         if (!file.good()) {
-            throw ghoul::RuntimeError(std::format(
-                "Failed to open dataset file '{}'", path
-            ));
+            throw RuntimeError(std::format("Failed to open dataset file '{}'", path));
         }
 
-        const std::string extension = ghoul::toLowerCase(path.extension().string());
+        const std::string extension = toLowerCase(path.extension().string());
 
         Labelset res;
         if (extension == ".label") {
@@ -577,16 +575,14 @@ namespace label {
 
 namespace color {
     ColorMap loadFile(std::filesystem::path path, std::optional<DataMapping>) {
-        ghoul_assert(std::filesystem::exists(path), "File must exist");
+        assert_msg(std::filesystem::exists(path), "File must exist");
 
         const std::ifstream file = std::ifstream(path);
         if (!file.good()) {
-            throw ghoul::RuntimeError(std::format(
-                "Failed to open colormap file '{}'", path
-            ));
+            throw RuntimeError(std::format("Failed to open colormap file '{}'", path));
         }
 
-        const std::string extension = ghoul::toLowerCase(path.extension().string());
+        const std::string extension = toLowerCase(path.extension().string());
 
         ColorMap res;
         if (extension == ".cmap") {

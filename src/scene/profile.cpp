@@ -25,17 +25,17 @@
 #include <openspace/scene/profile.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -88,7 +88,7 @@ namespace {
                     else if (c == &nlohmann::json::is_object) { return "an object"; }
                     else if (c == &nlohmann::json::is_array) { return "an array"; }
                     else if (c == &nlohmann::json::is_boolean) { return "a boolean"; }
-                    else { throw ghoul::MissingCaseException(); }
+                    else { throw MissingCaseException(); }
                 }(checkFunc);
 
                 throw Profile::ParsingError(
@@ -160,11 +160,11 @@ static void to_json(nlohmann::json& j, const Addon& v) {
 }
 
 Addon loadAddonFromFile(const std::filesystem::path& path) {
-    ghoul_assert(std::filesystem::is_regular_file(path), "Path must exist");
+    assert_msg(std::filesystem::is_regular_file(path), "Path must exist");
 
     std::ifstream inFile = std::ifstream(path, std::ifstream::in);
     if (!inFile.is_open()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Exception opening addon file for read '{}'", path
         ));
     }
@@ -289,7 +289,7 @@ static void to_json(nlohmann::json& j, const Profile::Property::SetType& v) {
             case Profile::Property::SetType::SetPropertyValueSingle:
                 return "setPropertyValueSingle";
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }(v);
 }
@@ -376,7 +376,7 @@ static void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
         switch (t) {
             case Profile::Time::Type::Absolute: return "absolute";
             case Profile::Time::Type::Relative: return "relative";
-            default:                            throw ghoul::MissingCaseException();
+            default:                            throw MissingCaseException();
         }
     }(v);
 }
@@ -423,7 +423,7 @@ static void to_json(nlohmann::json& j, const Profile::CameraGoToNode& v) {
 }
 
 static void from_json(const nlohmann::json& j, Profile::CameraGoToNode& v) {
-    ghoul_assert(
+    assert_msg(
         j.at("type").get<std::string>() == Profile::CameraGoToNode::Type,
         "Wrong type for Camera"
     );
@@ -511,7 +511,7 @@ static void to_json(nlohmann::json& j, const Profile::Addons& v) {
 }
 
 static void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
-    ghoul_assert(
+    assert_msg(
         j.at("type").get<std::string>() == Profile::CameraNavState::Type,
         "Wrong type for Camera"
     );
@@ -578,7 +578,7 @@ static void to_json(nlohmann::json& j, const Profile::CameraGoToGeo& v) {
 }
 
 static void from_json(const nlohmann::json& j, Profile::CameraGoToGeo& v) {
-    ghoul_assert(
+    assert_msg(
         j.at("type").get<std::string>() == Profile::CameraGoToGeo::Type,
         "Wrong type for Camera"
     );
@@ -750,8 +750,35 @@ static void convertVersion14to15(nlohmann::json& profile) {
 
 } // namespace version14
 
+namespace version15 {
+
+static void convertVersion15to16(nlohmann::json& profile) {
+    // Issue #4281 surfaced a bug in which the asset panel was incorrectly named
+    // (assetsFolderPanel instead of assetsPanel) and the state of the devPanel
+    // was stored as well which only exists in debug builds of the UI.
+
+    profile["version"] = Profile::Version{ 1, 6 };
+    if (profile.find("panel_visibility") == profile.end()) {
+        // No visibility exists, nothing to do here
+        return;
+    }
+
+    nlohmann::json& panelVisibility = profile["panel_visibility"];
+    if (panelVisibility.contains("assetsFolderPanel")) {
+        // Rename assetsFolderPanel to assetsPanel
+        panelVisibility["assetsPanel"] = panelVisibility["assetsFolderPanel"];
+        panelVisibility.erase("assetsFolderPanel");
+    }
+
+    if (panelVisibility.contains("devPanel")) {
+        panelVisibility.erase("devPanel");
+    }
+}
+
+} // namespace version15
+
 Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
-    : ghoul::RuntimeError(std::move(msg), "profile")
+    : RuntimeError(std::move(msg), "profile")
     , severity(severity_)
 {}
 
@@ -878,11 +905,11 @@ std::string Profile::serialize() const {
 }
 
 Profile::Profile(const std::filesystem::path& path) {
-    ghoul_assert(std::filesystem::is_regular_file(path), "Path must exist");
+    assert_msg(std::filesystem::is_regular_file(path), "Path must exist");
 
     std::ifstream inFile = std::ifstream(path, std::ifstream::in);
     if (!inFile.is_open()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Exception opening profile file for read '{}'", path
         ));
     }
@@ -919,6 +946,11 @@ Profile::Profile(const std::filesystem::path& path) {
 
         if (version.major == 1 && version.minor == 4) {
             version14::convertVersion14to15(profile);
+            profile["version"].get_to(version);
+        }
+
+        if (version.major == 1 && version.minor == 5) {
+            version15::convertVersion15to16(profile);
             profile["version"].get_to(version);
         }
 
@@ -978,10 +1010,10 @@ Profile::Profile(const std::filesystem::path& path) {
         }
 
         // Load the general addon files
-        std::vector<std::filesystem::path> coreAddons = ghoul::filesystem::walkDirectory(
+        std::vector<std::filesystem::path> coreAddons = filesystem::walkDirectory(
             absPath("${PROFILES}"),
-            ghoul::filesystem::Recursive::Yes,
-            ghoul::filesystem::Sorted::No,
+            filesystem::Recursive::Yes,
+            filesystem::Sorted::No,
             [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
         );
         for (const std::filesystem::path& p : coreAddons) {
@@ -989,10 +1021,10 @@ Profile::Profile(const std::filesystem::path& path) {
             addons.general.push_back(std::move(addon));
         }
 
-        std::vector<std::filesystem::path> userAddons = ghoul::filesystem::walkDirectory(
+        std::vector<std::filesystem::path> userAddons = filesystem::walkDirectory(
             absPath("${USER_PROFILES}"),
-            ghoul::filesystem::Recursive::Yes,
-            ghoul::filesystem::Sorted::No,
+            filesystem::Recursive::Yes,
+            filesystem::Sorted::No,
             [](const std::filesystem::path& p) { return p.extension() == ".addon"; }
         );
         for (const std::filesystem::path& p : userAddons) {

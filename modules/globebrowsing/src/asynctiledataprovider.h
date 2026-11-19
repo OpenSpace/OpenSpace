@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/src/prioritizingconcurrentjobmanager.h>
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileindex.h>
-#include <ghoul/misc/boolean.h>
+#include <openspace/misc/boolean.h>
 #include <memory>
 #include <optional>
 #include <set>

@@ -95,7 +95,7 @@ Fragment getFragment() {
   //    pow(screenPos.y, 2.0)
   //);
 
-  // Make use of the following flag this to toggle betweeen circular and elliptic
+  // Make use of the following flag this to toggle between circular and elliptic
   // distribution.
   bool useCircleDist = false;
 

@@ -25,9 +25,9 @@
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
 
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/progressbar.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>

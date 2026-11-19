@@ -27,12 +27,12 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/listproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <md_gl.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>
@@ -41,7 +41,7 @@ namespace openspace {
 
 class RenderableSimulationBox : public Renderable {
 public:
-    explicit RenderableSimulationBox(const ghoul::Dictionary& dictionary);
+    explicit RenderableSimulationBox(const Dictionary& dictionary);
     ~RenderableSimulationBox() override;
 
     void initializeGL() override;
@@ -85,7 +85,7 @@ private:
     bool _renderableInView = true;
 
     struct {
-        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        std::unique_ptr<opengl::ProgramObject> program;
         UniformCache(transform, strokeWidth, strokeFalloffExp, fragDepth,
             strokeColor, opacity) uniforms;
         GLuint vao = 0;

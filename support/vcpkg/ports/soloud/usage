@@ -1,0 +1,4 @@
+soloud provides CMake targets:
+
+    find_package(soloud CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE soloud::soloud)

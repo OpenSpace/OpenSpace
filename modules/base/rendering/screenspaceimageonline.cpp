@@ -25,12 +25,12 @@
 #include <modules/base/rendering/screenspaceimageonline.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <optional>
 #include <utility>
 
@@ -39,13 +39,14 @@ namespace {
 
     constexpr std::string_view _loggerCat = "ScreenSpaceImageOnline";
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "URL",
-        "Image URL",
-        "The URL of the texture to be displayed on this screen space plane. If changed, "
-        "the image at the new path will automatically be loaded and displayed. The "
-        "default size of the plane will be set based on the size of the image.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "URL",
+        .name = "Image URL",
+        .description = "The URL of the texture to be displayed on this screen space "
+            "plane. If changed, the image at the new path will automatically be loaded "
+            "and displayed. The default size of the plane will be set based on the size "
+            "of the image.",
+        .visibility = Visibility::User
     };
 
     // Displays an image from a web URL on a plane in screen space.
@@ -55,8 +56,8 @@ namespace {
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
         std::optional<std::string> identifier [[codegen::identifier()]];
 
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::optional<std::string> url [[codegen::key("URL")]];
+        std::optional<std::string> url
+            [[codegen::Info(TextureInfo), codegen::key("URL")]];
     };
 } // namespace
 #include "screenspaceimageonline_codegen.cpp"
@@ -70,7 +71,7 @@ Documentation ScreenSpaceImageOnline::Documentation() {
     );
 }
 
-ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
+ScreenSpaceImageOnline::ScreenSpaceImageOnline(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _textureIsDirty(false)
     , _texturePath(TextureInfo)
@@ -108,9 +109,12 @@ void ScreenSpaceImageOnline::update() {
     }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
+            // The download is not attempted again until the URL changes, as it would
+            // otherwise be restarted in every frame
+            _textureIsDirty = false;
             LERROR(std::format(
                 "Error loading image from URL '{}'", _texturePath.value()
             ));
@@ -118,14 +122,14 @@ void ScreenSpaceImageOnline::update() {
         }
 
         try {
-            _texture = ghoul::io::texture::loadTexture(
-                reinterpret_cast<void*>(imageFile.buffer),
-                imageFile.size,
+            _texture = io::texture::loadTexture(
+                imageFile.buffer.data(),
+                imageFile.buffer.size(),
                 2,
-                ghoul::opengl::Texture::SamplerInit{
+                opengl::Texture::SamplerInit{
                     // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-                    //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
-                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                    //.filter = opengl::Texture::FilterMode::AnisotropicMipMap,
+                    .filter = opengl::Texture::FilterMode::LinearMipMap
                 },
                 imageFile.format
             );
@@ -133,7 +137,7 @@ void ScreenSpaceImageOnline::update() {
             _objectSize = _texture->dimensions();
             _textureIsDirty = false;
         }
-        catch (const ghoul::io::texture::InvalidLoadException& e) {
+        catch (const io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }
@@ -156,7 +160,7 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
     );
 }
 
-void ScreenSpaceImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceImageOnline::bindTexture(opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
         unit.bind(*_texture);
     }

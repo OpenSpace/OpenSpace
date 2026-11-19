@@ -25,28 +25,27 @@
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
 #include <limits>
 #include <optional>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo FilePathInfo = {
-        "FilePath",
-        "File path",
-        "The file path that is used for this image provider. The file must point to an "
-        "image that is then loaded and used for all tiles.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo FilePathInfo = {
+        .identifier = "FilePath",
+        .name = "File path",
+        .description = "The file path that is used for this image provider. The file "
+            "must point to an image that is then loaded and used for all tiles.",
+        .visibility = Visibility::User
     };
 
     struct [[codegen::Dictionary(SingleImageProvider)]] Parameters {
-        // [[codegen::verbatim(FilePathInfo.description)]]
-        std::filesystem::path filePath;
+        std::filesystem::path filePath [[codegen::Info(FilePathInfo)]];
     };
 } // namespace
 #include "singleimagetileprovider_codegen.cpp"
@@ -57,7 +56,7 @@ Documentation SingleImageProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_singleimage");
 }
 
-SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
+SingleImageProvider::SingleImageProvider(const Dictionary& dictionary)
     : _filePath(FilePathInfo)
 {
     ZoneScoped;
@@ -89,15 +88,13 @@ void SingleImageProvider::reset() {
         return;
     }
 
-    _tileTexture = ghoul::io::texture::loadTexture(
+    _tileTexture = io::texture::loadTexture(
         _filePath.value(),
         2,
-        { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
+        { .filter = opengl::Texture::FilterMode::AnisotropicMipMap }
     );
     if (!_tileTexture) {
-        throw ghoul::RuntimeError(std::format(
-            "Unable to load texture '{}'", _filePath.value()
-        ));
+        throw RuntimeError(std::format("Unable to load texture '{}'", _filePath.value()));
     }
 
     _tile = {

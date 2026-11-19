@@ -31,61 +31,81 @@
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 
 namespace {
     using namespace openspace;
 
     constexpr std::string_view _loggerCat = "IswaDataGroup";
 
-    constexpr Property::PropertyInfo UseLogInfo = {
-        "UseLog",
-        "Use logarithm",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseLogInfo = {
+        .identifier = "UseLog",
+        .name = "Use logarithm",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo UseHistogramInfo = {
-        "UseHistogram",
-        "Auto contrast",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseHistogramInfo = {
+        .identifier = "UseHistogram",
+        .name = "Auto contrast",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AutoFilterInfo = {
-        "AutoFilter",
-        "Auto filter",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo AutoFilterInfo = {
+        .identifier = "AutoFilter",
+        .name = "Auto filter",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo NormalizeValues = {
-        "NormValues",
-        "Normalize values",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr Vec2PropertyInfo NormalizeValues = {
+        .identifier = "NormValues",
+        .name = "Normalize values",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::vec2(1.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(5.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo BackgroundInfo = {
-        "BackgroundValues",
-        "Background values",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr Vec2PropertyInfo BackgroundInfo = {
+        .identifier = "BackgroundValues",
+        .name = "Background values",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo TransferFunctionInfo = {
-        "Transferfunctions",
-        "Transfer functions",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr StringPropertyInfo TransferFunctionInfo = {
+        .identifier = "Transferfunctions",
+        .name = "Transfer functions",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = "${SCENE}/iswa/tfs/default.tf"
+        }
     };
 
-    constexpr Property::PropertyInfo DataOptionsInfo = {
-        "DataOptions",
-        "Data options",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr SelectionPropertyInfo DataOptionsInfo = {
+        .identifier = "DataOptions",
+        .name = "Data options",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser
     };
 } // namespace
 
@@ -93,12 +113,12 @@ namespace openspace {
 
 IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     : IswaBaseGroup(name, type)
-    , _useLog(UseLogInfo, false)
-    , _useHistogram(UseHistogramInfo, false)
-    , _autoFilter(AutoFilterInfo, true)
-    , _normValues(NormalizeValues, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(5.f))
-    , _backgroundValues(BackgroundInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _transferFunctionsFile(TransferFunctionInfo, "${SCENE}/iswa/tfs/default.tf")
+    , _useLog(UseLogInfo)
+    , _useHistogram(UseHistogramInfo)
+    , _autoFilter(AutoFilterInfo)
+    , _normValues(NormalizeValues)
+    , _backgroundValues(BackgroundInfo)
+    , _transferFunctionsFile(TransferFunctionInfo)
     , _dataOptions(DataOptionsInfo)
 {
     addProperty(_useLog);
@@ -118,14 +138,14 @@ IswaDataGroup::~IswaDataGroup() {}
 void IswaDataGroup::registerProperties() {
     _useLog.onChange([this]() {
         LDEBUG(std::format("Group {} published useLogChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("useLog", _useLog.value());
         _groupEvent.publish("useLogChanged", d);
     });
 
     _useHistogram.onChange([this]() {
         LDEBUG(std::format("Group {} published useHistogramChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("useHistogram", _useHistogram.value());
         _groupEvent.publish("useHistogramChanged", d);
     });
@@ -137,41 +157,41 @@ void IswaDataGroup::registerProperties() {
         // unregister backgroundvalues property
         if (_autoFilter) {
             _backgroundValues = _dataProcessor->filterValues();
-            _backgroundValues.setVisibility(Property::Visibility::Hidden);
+            _backgroundValues.setVisibility(Visibility::Hidden);
         }
         else {
             // If autofilter is turned off, register backgroundValues
-            _backgroundValues.setVisibility(Property::Visibility::Always);
+            _backgroundValues.setVisibility(Visibility::Always);
         }
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("autoFilter", _autoFilter.value());
         _groupEvent.publish("autoFilterChanged", d);
     });
 
     _normValues.onChange([this]() {
         LDEBUG(std::format("Group {} published normValuesChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("normValues", glm::dvec2(_normValues.value()));
         _groupEvent.publish("normValuesChanged", d);
     });
 
     _backgroundValues.onChange([this]() {
         LDEBUG(std::format("Group {} published backgroundValuesChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("backgroundValues", glm::dvec2(_backgroundValues.value()));
         _groupEvent.publish("backgroundValuesChanged", d);
     });
 
     _transferFunctionsFile.onChange([this]() {
         LDEBUG(std::format("Group {} published transferFunctionsChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("transferFunctionsChanged", _transferFunctionsFile.value());
         _groupEvent.publish("transferFunctionsChanged", d);
     });
 
     _dataOptions.onChange([this]() {
         LDEBUG(std::format("Group {} published dataOptionsChanged", identifier()));
-        ghoul::Dictionary dict;
+        Dictionary dict;
         std::set<std::string> set = _dataOptions;
         std::vector<std::string> vec(set.begin(), set.end());
         dict.setValue("dataOptions", vec);

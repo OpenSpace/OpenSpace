@@ -38,7 +38,7 @@ namespace openspace {
 
 class ScreenSpaceSkyBrowser : public ScreenSpaceBrowser {
 public:
-    explicit ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceSkyBrowser(const Dictionary& dictionary);
     ~ScreenSpaceSkyBrowser() override;
 
     void render(const RenderData& renderData) override;
@@ -78,7 +78,7 @@ public:
     std::vector<std::pair<std::string, glm::dvec3>> displayCopies() const;
     std::vector<std::pair<std::string, bool>> showDisplayCopies() const;
 
-    ghoul::Dictionary data() const;
+    Dictionary data() const;
 
     WwtCommunicator* worldWideTelescope();
 

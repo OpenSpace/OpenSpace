@@ -26,18 +26,18 @@
 #define __OPENSPACE_CORE___CONNECTION___H__
 
 #include <openspace/json.h>
+#include <atomic>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
 
-namespace ghoul::io { class Socket; }
-
 namespace openspace {
 
 using TopicId = size_t;
 
+namespace io { class Socket; }
 class Topic;
 
 // @TODO (abock, 2022-05-06) This is not really elegant as there is no need for a
@@ -49,7 +49,7 @@ class Topic;
 // and the execution, the _connection will be an invalid pointer and the program will
 // crash. Making this a shared_ptr circumvents that problem my having the lamdba retain
 // ownership of the _connection and keeping it alive until the message is sent. The
-// message doesn't go anywhere since noone is listening, but it's better than a crash.
+// message doesn't go anywhere since no one is listening, but it's better than a crash.
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
     struct ApiVersion {
@@ -58,7 +58,7 @@ public:
         int patch = 0;
     };
 
-    Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address,
+    Connection(std::unique_ptr<io::Socket> s, std::string address,
         bool authorized = false, const std::string& password = "");
 
     void handleMessage(const std::string& message);
@@ -66,11 +66,19 @@ public:
     void handleJson(const nlohmann::json& json);
     void sendJson(const nlohmann::json& json);
     void setAuthorized(bool status);
+
+    /**
+     * Registers a failed attempt to authorize this connection. The connection is closed
+     * once too many attempts have failed, which limits how quickly a client can guess
+     * the password.
+     */
+    void reportFailedAuthorization();
+
     Topic* findTopicByType(const std::string& type);
 
     bool isAuthorized() const;
 
-    ghoul::io::Socket* socket();
+    io::Socket* socket();
     std::thread& thread();
     void setThread(std::thread&& thread);
 
@@ -79,12 +87,14 @@ public:
 
 private:
     std::map<TopicId, std::unique_ptr<Topic>> _topics;
-    std::unique_ptr<ghoul::io::Socket> _socket;
+    std::unique_ptr<io::Socket> _socket;
     std::thread _thread;
     std::mutex _mutex;
 
     std::string _address;
-    bool _isAuthorized = false;
+    // Written by the main thread and read by the thread that receives the messages
+    std::atomic_bool _isAuthorized = false;
+    int _nFailedAuthorizations = 0;
     std::optional<ApiVersion> _connectedApiVersion;
     std::string _password;
 };

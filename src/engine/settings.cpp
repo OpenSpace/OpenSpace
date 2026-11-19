@@ -25,7 +25,7 @@
 #include <openspace/engine/settings.h>
 
 #include <openspace/json.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/misc/stringhelper.h>
 #include <fstream>
 #include <sstream>
 
@@ -46,7 +46,7 @@ namespace openspace {
 
 namespace version1 {
     static Settings parseSettings(nlohmann::json json) {
-        ghoul_assert(json.at("version").get<int>() == 1, "Wrong value");
+        assert_msg(json.at("version").get<int>() == 1, "Wrong value");
 
         Settings settings = {
             .hasStartedBefore = get_to<bool>(json, "started-before"),
@@ -59,25 +59,25 @@ namespace version1 {
         };
         // Normalize the path separate to the generic separator
         if (settings.profile.has_value()) {
-            settings.profile = ghoul::replaceAll(*settings.profile, "\\", "/");
+            settings.profile = replaceAll(*settings.profile, "\\", "/");
         }
 
         std::optional<std::string> visibility = get_to<std::string>(json, "visibility");
         if (visibility.has_value()) {
             if (*visibility == "NoviceUser") {
-                settings.visibility = Property::Visibility::NoviceUser;
+                settings.visibility = Visibility::NoviceUser;
             }
             else if (*visibility == "User") {
-                settings.visibility = Property::Visibility::User;
+                settings.visibility = Visibility::User;
             }
             else if (*visibility == "AdvancedUser") {
-                settings.visibility = Property::Visibility::AdvancedUser;
+                settings.visibility = Visibility::AdvancedUser;
             }
             else if (*visibility == "Developer") {
-                settings.visibility = Property::Visibility::Developer;
+                settings.visibility = Visibility::Developer;
             }
             else {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Unknown visibility value '{}'", *visibility
                 ));
             }
@@ -90,7 +90,7 @@ namespace version1 {
 
         if (auto it = json.find("mrf");  it != json.end()) {
             if (!it->is_object()) {
-                throw ghoul::RuntimeError("'mrf' is not an object");
+                throw RuntimeError("'mrf' is not an object");
             }
             Settings::MRF mrf = {
                 .isEnabled = get_to<bool>(*it, "enabled"),
@@ -142,9 +142,7 @@ Settings loadSettings(const std::filesystem::path& filename) {
         return version1::parseSettings(setting);
     }
 
-    throw ghoul::RuntimeError(std::format(
-        "Unrecognized version for setting: {}", version
-    ));
+    throw RuntimeError(std::format("Unrecognized version for setting: {}", version));
 }
 
 void saveSettings(const Settings& settings, const std::filesystem::path& filename) {
@@ -175,20 +173,20 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
     }
     if (settings.visibility.has_value()) {
         switch (*settings.visibility) {
-            case Property::Visibility::NoviceUser:
+            case Visibility::NoviceUser:
                 json["visibility"] = "NoviceUser";
                 break;
-            case Property::Visibility::User:
+            case Visibility::User:
                 json["visibility"] = "User";
                 break;
-            case Property::Visibility::AdvancedUser:
+            case Visibility::AdvancedUser:
                 json["visibility"] = "AdvancedUser";
                 break;
-            case Property::Visibility::Developer:
+            case Visibility::Developer:
                 json["visibility"] = "Developer";
                 break;
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }
     if (settings.bypassLauncher.has_value()) {

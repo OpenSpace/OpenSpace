@@ -27,12 +27,12 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/glm.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
@@ -41,7 +41,7 @@ namespace openspace {
  */
 class RenderableNodeLine : public Renderable {
 public:
-    explicit RenderableNodeLine(const ghoul::Dictionary& dictionary);
+    explicit RenderableNodeLine(const Dictionary& dictionary);
     ~RenderableNodeLine() override = default;
 
     static openspace::Documentation Documentation();
@@ -61,7 +61,7 @@ private:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    ghoul::opengl::ProgramObject* _program = nullptr;
+    opengl::ProgramObject* _program = nullptr;
     GLuint _vao = 0;
     GLuint _vbo = 0;
 

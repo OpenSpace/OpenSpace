@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <filesystem>
 #include <map>
 #include <optional>

@@ -25,8 +25,8 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 

@@ -26,18 +26,18 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <cstddef>
 #include <filesystem>
@@ -53,63 +53,78 @@ namespace {
         GLfloat t;
     };
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "The path to a texture on disk that contains a one-dimensional texture to use "
-        "for these rings.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "The path to a texture on disk that contains a one-dimensional "
+            "texture to use for these rings.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
-        "The radius of the rings in meters.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Size",
+        .description = "The radius of the rings in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1e25f }
+        }
     };
 
-    constexpr Property::PropertyInfo OffsetInfo = {
-        "Offset",
-        "Offset",
-        "A value that is used to limit the width of the rings. Each of the two values is "
-        "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
-        "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
-        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo OffsetInfo = {
+        .identifier = "Offset",
+        .name = "Offset",
+        .description = "A value that is used to limit the width of the rings. Each of "
+            "the two values is a value between 0 and 1, where 0 is the center of the "
+            "ring and 1 is the maximum extent at the radius. For example, if the value "
+            "is {0.5, 1.0}, the ring is only shown between radius/2 and radius.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f, 1.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo NightFactorInfo = {
-        "NightFactor",
-        "Night factor",
-        "A multiplicative factor that is applied to the side of the rings that is facing "
-        "away from the Sun. If it is 1, no darkening of the night side occurs.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo NightFactorInfo = {
+        .identifier = "NightFactor",
+        .name = "Night factor",
+        .description = "A multiplicative factor that is applied to the side of the rings "
+            "that is facing away from the Sun. If it is 1, no darkening of the night "
+            "side occurs.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.33f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorFilterInfo = {
-        "ColorFilter",
-        "Color filter",
-        "A value that affects the filtering out of part of the rings depending on the "
-        "color values of the texture. The higher value, the more rings are filtered out.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo ColorFilterInfo = {
+        .identifier = "ColorFilter",
+        .name = "Color filter",
+        .description = "A value that affects the filtering out of part of the rings "
+            "depending on the color values of the texture. The higher value, the more "
+            "rings are filtered out.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.15f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableRings)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::filesystem::path texture;
+        std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        float size [[codegen::greaterequal(0.f)]];
+        float size [[codegen::Info(SizeInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(OffsetInfo.description)]]
-        std::optional<glm::vec2> offset
-            [[codegen::inrange(glm::vec2(0.f), glm::vec2(1.f))]];
+        std::optional<glm::vec2> offset [[codegen::Info(OffsetInfo),
+            codegen::inrange(glm::vec2(0.f), glm::vec2(1.f))]];
 
-        // [[codegen::verbatim(NightFactorInfo.description)]]
-        std::optional<float> nightFactor [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> nightFactor
+            [[codegen::Info(NightFactorInfo), codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(ColorFilterInfo.description)]]
-        std::optional<float> colorFilter [[codegen::inrange(0.f, 1.f)]];
+        std::optional<float> colorFilter
+            [[codegen::Info(ColorFilterInfo), codegen::inrange(0.f, 1.f)]];
     };
 } // namespace
 #include "renderablerings_codegen.cpp"
@@ -123,15 +138,15 @@ Documentation RenderableRings::Documentation() {
     );
 }
 
-RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
+RenderableRings::RenderableRings(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
-    , _size(SizeInfo, 1.f, 0.f, 1e25f)
-    , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
-    , _colorFilter(ColorFilterInfo, 0.15f, 0.f, 1.f)
+    , _size(SizeInfo)
+    , _offset(OffsetInfo)
+    , _nightFactor(NightFactorInfo)
+    , _colorFilter(ColorFilterInfo)
 {
-    using ghoul::filesystem::File;
+    using filesystem::File;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -166,7 +181,7 @@ void RenderableRings::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/rings_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+    opengl::updateUniformLocations(*_shader, _uniformCache);
 
     glCreateBuffers(1, &_vbo);
     glCreateVertexArrays(1, &_vao);
@@ -208,9 +223,9 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
     _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
 
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_texture);
-    _shader->setUniform(_uniformCache.texture, unit);
+    _shader->setUniform(_uniformCache.tex, unit);
 
     glDisable(GL_CULL_FACE);
 
@@ -224,7 +239,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
 void RenderableRings::update(const UpdateData& data) {
     if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+        opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     if (_planeIsDirty) [[unlikely]] {
@@ -248,12 +263,10 @@ void RenderableRings::update(const UpdateData& data) {
 }
 
 void RenderableRings::loadTexture() {
-    using namespace ghoul::io;
-    using namespace ghoul::opengl;
-    _texture = texture::loadTexture(
+    _texture = io::texture::loadTexture(
         _texturePath.value(),
         1,
-        { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
+        { .filter = opengl::Texture::FilterMode::AnisotropicMipMap }
     );
 
     LDEBUGC(
@@ -261,7 +274,7 @@ void RenderableRings::loadTexture() {
         std::format("Loaded texture from '{}'", _texturePath.value())
     );
 
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+    _textureFile = std::make_unique<filesystem::File>(_texturePath.value());
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 }
 

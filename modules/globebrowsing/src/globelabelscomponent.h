@@ -28,24 +28,21 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
+#include <openspace/glm.h>
+#include <openspace/font/font.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/glm.h>
-#include <ghoul/font/font.h>
 #include <filesystem>
 #include <memory>
 
-namespace ghoul {
-    namespace opengl { class ProgramObject; }
-    class Dictionary;
-} // namespace ghoul
-
 namespace openspace {
 
+namespace opengl { class ProgramObject; }
+class Dictionary;
 struct Documentation;
 class RenderableGlobe;
 struct RenderData;
@@ -55,7 +52,7 @@ public:
     GlobeLabelsComponent();
     ~GlobeLabelsComponent() override = default;
 
-    void initialize(const ghoul::Dictionary& dictionary, RenderableGlobe* globe);
+    void initialize(const Dictionary& dictionary, RenderableGlobe* globe);
 
     void initializeFonts();
 
@@ -101,7 +98,7 @@ private:
     Labels _labels;
 
     // Font
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::shared_ptr<fontrendering::Font> _font;
 
     // Globe
     RenderableGlobe* _globe = nullptr;

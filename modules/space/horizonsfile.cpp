@@ -24,12 +24,12 @@
 
 #include <modules/space/horizonsfile.h>
 
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/httprequest.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/stringhelper.h>
 #include <cmath>
 #include <fstream>
 #include <ios>
@@ -67,7 +67,7 @@ HorizonsFile::HorizonsFile(std::filesystem::path filePath, std::string result)
 {
     // Write the response into a new file and save it
     std::ofstream file(_file);
-    file << ghoul::replaceAll(std::move(result), "\\n", "\n") << '\n';
+    file << replaceAll(std::move(result), "\\n", "\n") << '\n';
 }
 
 void HorizonsFile::setFile(std::filesystem::path file) {
@@ -99,19 +99,15 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
 
     url += std::format(
         "{}'{}'{}'{}'{}'{}'{}'{}'",
-        Command, ghoul::encodeUrl(target),
-        Center, ghoul::encodeUrl(observer),
-        StartTime, ghoul::encodeUrl(startTime),
-        StopTime, ghoul::encodeUrl(stopTime)
+        Command, encodeUrl(target), Center, encodeUrl(observer),
+        StartTime, encodeUrl(startTime), StopTime, encodeUrl(stopTime)
     );
 
     if (unit.empty()) {
-        url += std::format("{}'{}'", StepSize, ghoul::encodeUrl(stepSize));
+        url += std::format("{}'{}'", StepSize, encodeUrl(stepSize));
     }
     else {
-        url += std::format(
-            "{}'{}%20{}'", StepSize, ghoul::encodeUrl(stepSize), unit
-        );
+        url += std::format("{}'{}%20{}'", StepSize, encodeUrl(stepSize), unit);
     }
 
     return url;
@@ -263,9 +259,11 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
     // tell us if the file is valid or not. The line $$SOE indicates start of data
     std::string line;
     bool foundTarget = false;
-    ghoul::getline(fileStream, line);
-    // First line is just stars (*) no information, skip
-    ghoul::getline(fileStream, line);
+    openspace::getline(fileStream, line);
+    if (line.find_first_not_of('*') == std::string::npos) {
+        // First line is just stars (*) no information, skip
+        openspace::getline(fileStream, line);
+    }
 
     // Valid Target?
     if (fileStream.good() && (line.contains("Revised") || line.contains("JPL"))) {
@@ -281,7 +279,7 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
             return HorizonsResultCode::ErrorSize;
         }
 
-        // Selected time range too big for avalable time span?
+        // Selected time range too big for available time span?
         if (line.contains("STEP_SIZE too big")) {
             return HorizonsResultCode::ErrorSpan;
         }
@@ -338,7 +336,7 @@ HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file) {
             return HorizonsResultCode::ErrorNoTarget;
         }
 
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
     }
 
     if (result != HorizonsResultCode::UnknownError) {
@@ -474,7 +472,7 @@ void HorizonsFile::displayErrorMessage(HorizonsResultCode code) const {
             break;
         }
         case HorizonsResultCode::UnknownError:
-            LERROR("An unknown error occured");
+            LERROR("An unknown error occurred");
             break;
         default:
             LERROR("Unknown result type");
@@ -504,14 +502,14 @@ HorizonsResult readHorizonsFile(std::filesystem::path file) {
     //   X     Y     Z
     // " Before data starts, Observer table doesn't
     std::string line;
-    ghoul::getline(fileStream, line);
+    openspace::getline(fileStream, line);
     while (line[0] != '$') {
         if (line.starts_with("JDTDB")) {
             fileStream.close();
             return readHorizonsVectorFile(file);
         }
 
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
     }
 
     fileStream.close();
@@ -535,12 +533,12 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
     // the row marked by $$SOE (i.e. Start Of Ephemerides)
     std::string line;
     do {
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
     } while (line[0] != '$');
 
     // Read data line by line until $$EOE (i.e. End Of Ephemerides).
     // Skip the rest of the file
-    ghoul::getline(fileStream, line); // Skip the line with the $$EOE
+    openspace::getline(fileStream, line); // Skip the line with the $$EOE
     while (line[0] != '$') {
         HorizonsKeyframe dataPoint;
         std::stringstream str1(line);
@@ -554,7 +552,7 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
         str1 >> temp >> temp >> temp >> date >> time >> temp;
 
         // Get next line of same data point
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
         if (!fileStream.good()) {
             LERROR(std::format("Malformed Horizons file '{}'", file));
             return HorizonsResult();
@@ -580,7 +578,7 @@ HorizonsResult readHorizonsVectorFile(std::filesystem::path file) {
         dataPoint.position = pos;
         data.push_back(dataPoint);
 
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
     }
 
     result.data = data;
@@ -604,12 +602,12 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
     // the row marked by $$SOE (i.e. Start Of Ephemerides)
     std::string line;
     do {
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
     } while (line[0] != '$');
 
     // Read data line by line until $$EOE (i.e. End Of Ephemerides).
     // Skip the rest of the file
-    ghoul::getline(fileStream, line); // Skip the line with the $$EOE
+    openspace::getline(fileStream, line); // Skip the line with the $$EOE
     while (line[0] != '$') {
         HorizonsKeyframe dataPoint;
         std::stringstream str(line);
@@ -641,7 +639,7 @@ HorizonsResult readHorizonsObserverFile(std::filesystem::path file) {
         );
         data.push_back(dataPoint);
 
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
     }
 
     LWARNING(
@@ -678,7 +676,7 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
             break;
         }
 
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
     }
 
     if (!fileStream.good()) {
@@ -687,8 +685,8 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
     }
 
     // There will be one empty line before the list of matches, skip
-    ghoul::getline(fileStream, line);
-    ghoul::getline(fileStream, line);
+    openspace::getline(fileStream, line);
+    openspace::getline(fileStream, line);
     while (fileStream.good()) {
         // End of matches or file
         if (line == " " || line.empty() || line.contains(endPhrase)) {
@@ -697,7 +695,7 @@ std::vector<std::string> HorizonsFile::parseMatches(const std::string& startPhra
         }
 
         matches.push_back(line);
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
     }
 
     fileStream.close();
@@ -747,7 +745,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
 
     // Ignore everything until head of time range list
     std::string line;
-    ghoul::getline(fileStream, line);
+    openspace::getline(fileStream, line);
     while (fileStream.good()) {
         // Add the line with the start phrase first, to give context
         if (line.contains(startPhrase)) {
@@ -758,7 +756,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
             break;
         }
 
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
     }
 
     if (!fileStream.good()) {
@@ -766,13 +764,13 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
     }
 
     // There will be one empty line before the list of time ranges, skip
-    ghoul::getline(fileStream, line);
+    openspace::getline(fileStream, line);
 
     // In the first file parse both start and end time
     // From the first line get the start time
     std::string startTime;
     std::string endTime;
-    ghoul::getline(fileStream, line);
+    openspace::getline(fileStream, line);
     if (fileStream.good()) {
         std::stringstream str(line);
 
@@ -836,7 +834,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
             return std::pair("", "");
         }
 
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
     }
 
     return std::pair("", "");

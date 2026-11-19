@@ -35,7 +35,7 @@ class Property;
 
 class DashboardItemPropertyValue : public DashboardTextItem {
 public:
-    DashboardItemPropertyValue(const ghoul::Dictionary& dictionary);
+    DashboardItemPropertyValue(const Dictionary& dictionary);
     ~DashboardItemPropertyValue() override = default;
 
     void update() override;

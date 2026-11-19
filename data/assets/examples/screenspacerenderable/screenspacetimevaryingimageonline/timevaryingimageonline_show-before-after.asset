@@ -1,0 +1,25 @@
+-- Show Before and After
+-- Create a time-varying screenspace image plane that displays images from web URLs
+-- based on the in-game simulation time. In this example, the first image is also shown
+-- before the first timestamp, and the last image is shown after the last timestamp.
+-- Images are selected according to timestamp information provided in a data file.
+--
+-- The data in this example contains images shown on 2024-05-10 between 15:00:00
+-- and 15:20:00.
+
+local Item = {
+  Type = "ScreenSpaceTimeVaryingImageOnline",
+  Identifier = "ScreenSpaceTimeVaryingImageOnline_Example_ShowBeforeAfter",
+  FilePath = asset.resource("data/example.json"),
+  ShowBefore = true,
+  ShowAfter = true
+}
+
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Item)
+end)

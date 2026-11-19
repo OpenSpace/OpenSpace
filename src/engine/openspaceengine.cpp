@@ -38,6 +38,10 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/format.h>
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionhandler.h>
@@ -45,10 +49,27 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/interaction/tasks/convertrecformattask.h>
+#include <openspace/logging/loglevel.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/logging/visualstudiooutputlog.h>
+#include <openspace/lua/luastate.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stacktrace.h>
+#include <openspace/misc/stringconversion.h>
+#include <openspace/misc/stringhelper.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/network/astrocast.h>
+#include <openspace/opengl/debugcontext.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/shaderpreprocessor.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
@@ -60,40 +81,21 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/systemcapabilities/generalcapabilitiescomponent.h>
+#include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
+#include <openspace/systemcapabilities/systemcapabilities.h>
+#include <openspace/systemcapabilities/systemcapabilitiescomponent.h>
+#include <openspace/systemcapabilities/version.h>
 #include <openspace/topic/server.h>
+#include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/loglevel.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stacktrace.h>
-#include <ghoul/misc/stringconversion.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/opengl/debugcontext.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/shaderpreprocessor.h>
-#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-#include <ghoul/systemcapabilities/systemcapabilities.h>
-#include <ghoul/systemcapabilities/systemcapabilitiescomponent.h>
-#include <ghoul/systemcapabilities/version.h>
 #include <date/date.h>
 #include <glbinding/glbinding.h>
 #include <glbinding-aux/types_to_string.h>
@@ -135,57 +137,84 @@ namespace {
             case Mode::CameraPath: return "CameraPath";
             case Mode::SessionRecordingPlayback: return "SessionRecording";
         }
-        throw ghoul::MissingCaseException();
+        throw MissingCaseException();
     }
 
-    constexpr Property::PropertyInfo PrintEventsInfo = {
-        "PrintEvents",
-        "Print events",
-        "If this is enabled, all events that are propagated through the system are "
-        "printed to the log.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo PrintEventsInfo = {
+        .identifier = "PrintEvents",
+        .name = "Print events",
+        .description = "If this is enabled, all events that are propagated through the "
+            "system are printed to the log.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo VisibilityInfo = {
-        "PropertyVisibility",
-        "Property visibility",
-        "Hides or displays different settings in the GUI depending on how advanced they "
-        "are.",
-        Property::Visibility::Always
+    constexpr OptionPropertyInfo VisibilityInfo = {
+        .identifier = "PropertyVisibility",
+        .name = "Property visibility",
+        .description = "Hides or displays different settings in the GUI depending on how "
+            "advanced they are.",
+        .visibility = Visibility::Always
     };
 
-    constexpr Property::PropertyInfo FadeDurationInfo = {
-        "FadeDuration",
-        "Fade duration (seconds)",
-        "Controls how long time the fading in/out takes when enabling/disabling an "
-        "object through a checkbox in the UI. Holding SHIFT while clicking the checkbox "
-        "will enable/disable the renderable without fading, as will setting this value "
-        "to zero.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo FadeDurationInfo = {
+        .identifier = "FadeDuration",
+        .name = "Fade duration (seconds)",
+        .description = "Controls how long time the fading in/out takes when "
+            "enabling/disabling an object through a checkbox in the UI. Holding SHIFT "
+            "while clicking the checkbox will enable/disable the renderable without "
+            "fading, as will setting this value to zero.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DisableMouseInputInfo = {
-        "DisableMouseInputs",
-        "Disable all mouse inputs",
-        "Disables all mouse inputs. Useful when using touch interaction, to prevent "
-        "double inputs on touch (from both touch input and inserted mouse inputs).",
-        Property::Visibility::User,
-        Property::NeedsConfirmation::Yes
+    constexpr BoolPropertyInfo DisableMouseInputInfo = {
+        .identifier = "DisableMouseInputs",
+        .name = "Disable all mouse inputs",
+        .description = "Disables all mouse inputs. Useful when using touch interaction, "
+            "to prevent double inputs on touch (from both touch input and inserted mouse "
+            "inputs).",
+        .visibility = Visibility::User,
+        .needsConfirmation = NeedsConfirmation::Yes,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ShowPropertyConfirmationDialogInfo = {
-        "ShowPropertyConfirmation",
-        "Show property confirmation",
-        "Controls whether confirmation dialogs are shown when making changes to certain "
-        "properties. If checked, the dialogs will be shown for properties that require "
-        "it. If unchecked, no dialogs will be shown.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo DefaultShutdownCountdownInfo = {
+        .identifier = "DefaultShutdownCountdown",
+        .name = "Default Shutdown Countdown",
+        .description = "The default shutdown countdown timer (in seconds). Unless some "
+            "other time is specified in the 'toggleShutdown' function, this is the "
+            "number of seconds the application will wait before shutting down",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 3.f,
+            .minMax = { 0.f, 60.f }
+        }
+    };
+
+    constexpr BoolPropertyInfo ShowPropertyConfirmationDialogInfo = {
+        .identifier = "ShowPropertyConfirmation",
+        .name = "Show property confirmation",
+        .description = "Controls whether confirmation dialogs are shown when making "
+            "changes to certain properties. If checked, the dialogs will be shown for "
+            "properties that require it. If unchecked, no dialogs will be shown.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     void viewportChanged() {
         // Needs to be updated since each render call potentially targets a different
         // window and/or viewport
-        using FR = ghoul::fontrendering::FontRenderer;
+        using FR = fontrendering::FontRenderer;
         FR::defaultRenderer().setFramebufferSize(global::renderEngine->fontResolution());
 
         FR::defaultProjectionRenderer().setFramebufferSize(
@@ -223,11 +252,12 @@ class Scene;
 
 OpenSpaceEngine::OpenSpaceEngine()
     : PropertyOwner({ "OpenSpaceEngine", "OpenSpace Engine" })
-    , _printEvents(PrintEventsInfo, false)
+    , _printEvents(PrintEventsInfo)
     , _visibility(VisibilityInfo)
-    , _showPropertyConfirmationDialog(ShowPropertyConfirmationDialogInfo, true)
-    , _fadeOnEnableDuration(FadeDurationInfo, 1.f, 0.f, 5.f)
-    , _disableAllMouseInputs(DisableMouseInputInfo, false)
+    , _showPropertyConfirmationDialog(ShowPropertyConfirmationDialogInfo)
+    , _fadeOnEnableDuration(FadeDurationInfo)
+    , _disableAllMouseInputs(DisableMouseInputInfo)
+    , _defaultShutdownCountdown(DefaultShutdownCountdownInfo)
 {
     FactoryManager::initialize();
     SpiceManager::initialize();
@@ -236,11 +266,11 @@ OpenSpaceEngine::OpenSpaceEngine()
     addProperty(_printEvents);
 
     _visibility.addOptions({
-        { static_cast<int>(Property::Visibility::NoviceUser), "Novice User" },
-        { static_cast<int>(Property::Visibility::User), "User" },
-        { static_cast<int>(Property::Visibility::AdvancedUser), "Advanced User" },
-        { static_cast<int>(Property::Visibility::Developer), "Developer" },
-        { static_cast<int>(Property::Visibility::Hidden), "Everything" }
+        { static_cast<int>(Visibility::NoviceUser), "Novice User" },
+        { static_cast<int>(Visibility::User), "User" },
+        { static_cast<int>(Visibility::AdvancedUser), "Advanced User" },
+        { static_cast<int>(Visibility::Developer), "Developer" },
+        { static_cast<int>(Visibility::Hidden), "Everything" }
     });
     addProperty(_visibility);
 
@@ -249,9 +279,11 @@ OpenSpaceEngine::OpenSpaceEngine()
     addProperty(_fadeOnEnableDuration);
     addProperty(_disableAllMouseInputs);
 
+    addProperty(_defaultShutdownCountdown);
 
-    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
+
+    TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    assert_msg(fTask, "No task factory existed");
     fTask->registerClass<ConvertRecFormatTask>("ConvertRecFormatTask");
 
 #ifdef WIN32
@@ -286,7 +318,7 @@ void OpenSpaceEngine::initialize() {
     global::initialize();
     // Initialize the general capabilities component
     SysCap.addComponent(
-        std::make_unique<ghoul::systemcapabilities::GeneralCapabilitiesComponent>()
+        std::make_unique<systemcapabilities::GeneralCapabilitiesComponent>()
     );
 
     _printEvents = global::configuration->isPrintingEvents;
@@ -304,7 +336,7 @@ void OpenSpaceEngine::initialize() {
         FileSys.registerPathToken(
             "${CACHE}",
             cacheFolder,
-            ghoul::filesystem::FileSystem::Override::Yes
+            filesystem::FileSystem::Override::Yes
         );
     }
 
@@ -318,7 +350,7 @@ void OpenSpaceEngine::initialize() {
     try {
         FileSys.createCacheManager(cacheFolder);
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LFATAL("Could not create Cache Manager");
         LFATALC(e.component, e.message);
     }
@@ -327,19 +359,19 @@ void OpenSpaceEngine::initialize() {
     // Initialize the requested logs from the configuration file. We previously
     // initialized the LogManager with a console log to provide some logging until we know
     // which logs should be added
-    if (ghoul::logging::LogManager::isInitialized()) {
-        ghoul::logging::LogManager::deinitialize();
+    if (logging::LogManager::isInitialized()) {
+        logging::LogManager::deinitialize();
     }
 
-    const ghoul::logging::LogLevel level = ghoul::from_string<ghoul::logging::LogLevel>(
+    const logging::LogLevel level = from_string<logging::LogLevel>(
         global::configuration->logging.level
     );
     const bool immediateFlush = global::configuration->logging.forceImmediateFlush;
 
-    using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
-    ghoul::logging::LogManager::initialize(level, ImmediateFlush(immediateFlush));
+    using ImmediateFlush = logging::LogManager::ImmediateFlush;
+    logging::LogManager::initialize(level, ImmediateFlush(immediateFlush));
 
-    for (const ghoul::Dictionary& log : global::configuration->logging.logs) {
+    for (const Dictionary& log : global::configuration->logging.logs) {
         try {
             LogMgr.addLog(createLog(log));
         }
@@ -352,18 +384,18 @@ void OpenSpaceEngine::initialize() {
 
 #ifdef WIN32
     if (IsDebuggerPresent()) {
-        LogMgr.addLog(std::make_unique<ghoul::logging::VisualStudioOutputLog>());
+        LogMgr.addLog(std::make_unique<logging::VisualStudioOutputLog>());
     }
 #endif // WIN32
 
-#ifndef GHOUL_LOGGING_ENABLE_TRACE
-    if (level == ghoul::logging::LogLevel::Trace) {
+#ifndef OPENSPACE_LOGGING_ENABLE_TRACE
+    if (level == logging::LogLevel::Trace) {
         LWARNING(
             "Desired logging level is set to 'Trace' but application was "
             "compiled without Trace support"
         );
     }
-#endif // GHOUL_LOGGING_ENABLE_TRACE
+#endif // OPENSPACE_LOGGING_ENABLE_TRACE
 
     if (!global::configuration->scriptLog.empty() &&
         global::configuration->scriptLogRotation > 0)
@@ -420,7 +452,7 @@ void OpenSpaceEngine::initialize() {
     DocEng.addDocumentation(Configuration::Documentation());
 
     // Register the provided shader directories
-    ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
+    opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
 
     if (!global::configuration->sandboxedLua) {
         // The Lua state is sandboxed by default, so if the user wants an unsandboxed one,
@@ -455,7 +487,7 @@ void OpenSpaceEngine::initialize() {
             profile = profileCandidate;
         }
         else {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Could not load profile '{}': File does not exist",
                 global::configuration->profile.profile
             ));
@@ -532,8 +564,6 @@ void OpenSpaceEngine::initialize() {
 
     global::scriptEngine->initialize();
 
-    _shutdown.waitTime = global::configuration->shutdownCountdown;
-
     global::navigationHandler->initialize();
 
     global::renderEngine->initialize();
@@ -559,14 +589,14 @@ void OpenSpaceEngine::initializeGL() {
     LDEBUG("Adding OpenGL capabilities components");
     // Detect and log OpenCL and OpenGL versions and available devices
     SysCap.addComponent(
-        std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
+        std::make_unique<systemcapabilities::OpenGLCapabilitiesComponent>()
     );
 
     LDEBUG("Detecting capabilities");
     SysCap.detectCapabilities();
 
-    using Verbosity = ghoul::systemcapabilities::SystemCapabilitiesComponent::Verbosity;
-    const Verbosity verbosity = ghoul::from_string<Verbosity>(
+    using Verbosity = systemcapabilities::SystemCapabilitiesComponent::Verbosity;
+    const Verbosity verbosity = from_string<Verbosity>(
         global::configuration->logging.capabilitiesVerbosity
     );
     SysCap.logCapabilities(verbosity);
@@ -579,7 +609,7 @@ void OpenSpaceEngine::initializeGL() {
     // Check the available OpenGL extensions against the required extensions
     for (OpenSpaceModule* m : global::moduleEngine->modules()) {
         for (const std::string& ext : m->requiredOpenGLExtensions()) {
-            using OCC = ghoul::systemcapabilities::OpenGLCapabilitiesComponent;
+            using OCC = systemcapabilities::OpenGLCapabilitiesComponent;
             if (!SysCap.component<OCC>().isExtensionSupported(ext)) {
                 LFATAL(std::format(
                     "Module '{}' required OpenGL extension '{}' which is not available "
@@ -613,7 +643,7 @@ void OpenSpaceEngine::initializeGL() {
         global::luaConsole->initialize();
         global::luaConsole->setCommandInputButton(global::configuration->consoleKey);
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERROR("Error initializing Console with error:");
         LERRORC(e.component, e.message);
     }
@@ -623,7 +653,7 @@ void OpenSpaceEngine::initializeGL() {
     bool debugActive = global::configuration->openGLDebugContext.isActive;
 
     // Debug output is not available before 4.3
-    const ghoul::systemcapabilities::Version minVersion = {
+    const systemcapabilities::Version minVersion = {
         .major = 4,
         .minor = 3,
         .release = 0
@@ -634,7 +664,7 @@ void OpenSpaceEngine::initializeGL() {
     }
 
     if (debugActive) {
-        using namespace ghoul::opengl;
+        using namespace opengl;
 
         const bool synchronous = global::configuration->openGLDebugContext.isSynchronous;
         setDebugOutput(DebugOutput(debugActive), SynchronousOutput(synchronous));
@@ -643,8 +673,8 @@ void OpenSpaceEngine::initializeGL() {
             global::configuration->openGLDebugContext.identifierFilters)
         {
             setDebugMessageControl(
-                ghoul::from_string<Source>(f.source),
-                ghoul::from_string<Type>(f.type),
+                from_string<Source>(f.source),
+                from_string<Type>(f.type),
                 { f.identifier },
                 Enabled::No
             );
@@ -657,7 +687,7 @@ void OpenSpaceEngine::initializeGL() {
             setDebugMessageControl(
                 Source::DontCare,
                 Type::DontCare,
-                ghoul::from_string<Severity>(sev),
+                from_string<Severity>(sev),
                 Enabled::No
             );
         }
@@ -675,8 +705,8 @@ void OpenSpaceEngine::initializeGL() {
                 }
 
 
-                const std::string s = ghoul::to_string(source);
-                const std::string t = ghoul::to_string(type);
+                const std::string s = to_string(source);
+                const std::string t = to_string(type);
 
                 const std::string cat = std::format("OpenGL ({}) [{}] {{{}}}", s, t, id);
                 switch (severity) {
@@ -693,12 +723,12 @@ void OpenSpaceEngine::initializeGL() {
                         LDEBUGC(cat, message);
                         break;
                     default:
-                        throw ghoul::MissingCaseException();
+                        throw MissingCaseException();
                 }
 
                 if (global::configuration->openGLDebugContext.printStacktrace) {
                     std::string stackString = "Stacktrace\n";
-                    std::vector<std::string> stack = ghoul::stackTrace();
+                    std::vector<std::string> stack = stackTrace();
                     for (size_t i = 0; i < stack.size(); i++) {
                         stackString += std::format("{}: {}\n", i, stack[i]);
                     }
@@ -767,10 +797,8 @@ void OpenSpaceEngine::initializeGL() {
     }
 
     if (global::configuration->isLoggingOpenGLCalls) {
-        using namespace ghoul::logging;
-        const LogLevel lvl = ghoul::from_string<LogLevel>(
-            global::configuration->logging.level
-        );
+        using namespace logging;
+        const LogLevel lvl = from_string<LogLevel>(global::configuration->logging.level);
         if (lvl > LogLevel::Trace) {
             LWARNING(
                 "Logging OpenGL calls is enabled, but the selected log level does not "
@@ -933,7 +961,7 @@ void OpenSpaceEngine::deinitialize() {
 
     {
         // We are storing the `hasStartedBefore` setting here instead of in the
-        // intialization phase as otherwise we'd always think that OpenSpace had been
+        // initialization phase as otherwise we'd always think that OpenSpace had been
         // started before
         Settings settings = loadSettings();
 
@@ -982,9 +1010,9 @@ void OpenSpaceEngine::deinitialize() {
         logAllEvents(e);
     }
 
-    ghoul::fontrendering::FontRenderer::deinitialize();
+    fontrendering::FontRenderer::deinitialize();
 
-    ghoul::logging::LogManager::deinitialize();
+    logging::LogManager::deinitialize();
 
     LTRACE("deinitialize(end)");
     LTRACE("OpenSpaceEngine::deinitialize(end)");
@@ -1089,9 +1117,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
     ZoneScoped;
 
     LINFO("Running Global initialization scripts");
-    const ghoul::lua::LuaState state = ghoul::lua::LuaState(
-        ghoul::lua::LuaState::Sandboxed::No
-    );
+    const lua::LuaState state = lua::LuaState(lua::LuaState::Sandboxed::No);
     global::scriptEngine->initializeLuaState(state);
 
     for (const std::string& script : global::configuration->globalCustomizationScripts) {
@@ -1099,9 +1125,9 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
         if (std::filesystem::is_regular_file(s)) {
             try {
                 LINFO(std::format("Running global customization script: {}", s));
-                ghoul::lua::runScriptFile(state, s);
+                lua::runScriptFile(state, s);
             }
-            catch (const ghoul::RuntimeError& e) {
+            catch (const RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -1129,9 +1155,9 @@ void OpenSpaceEngine::loadFonts() {
     }
 
     try {
-        ghoul::fontrendering::FontRenderer::initialize();
+        fontrendering::FontRenderer::initialize();
     }
-    catch (const ghoul::RuntimeError& err) {
+    catch (const RuntimeError& err) {
         LERRORC(err.component, err.message);
     }
 }
@@ -1219,7 +1245,12 @@ void OpenSpaceEngine::preSynchronization() {
     }
 
     if (_isRenderingFirstFrame) {
-        setCameraFromProfile(*global::profile);
+        // Setting the initial camera is not treated as a camera interaction, as that
+        // would, for example, abort an idle motion that was enabled by the profile
+        setCameraFromProfile(
+            *global::profile,
+            OrbitalNavigator::IsCameraInteraction::No
+        );
         setAdditionalScriptsFromProfile(*global::profile);
     }
 
@@ -1284,10 +1315,10 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     // Testing this every frame has minimal impact on the performance --- abock
     // Debug build: 1-2 us ; Release build: <= 1 us
-    using ghoul::logging::LogManager;
-    int warningCounter = LogMgr.messageCounter(ghoul::logging::LogLevel::Warning);
-    int errorCounter = LogMgr.messageCounter(ghoul::logging::LogLevel::Error);
-    int fatalCounter = LogMgr.messageCounter(ghoul::logging::LogLevel::Fatal);
+    using logging::LogManager;
+    int warningCounter = LogMgr.messageCounter(logging::LogLevel::Warning);
+    int errorCounter = LogMgr.messageCounter(logging::LogLevel::Error);
+    int fatalCounter = LogMgr.messageCounter(logging::LogLevel::Fatal);
 
     if (warningCounter > 0) {
         LWARNINGC("Logging", std::format("Number of Warnings: {}", warningCounter));
@@ -1629,7 +1660,7 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     }
 #endif // WIN32
 
-    const ghoul::lua::LuaState s;
+    const lua::LuaState s;
 
     // This function will handle a specific file by providing the Lua script with
     // information about the dropped file and then executing the drag_drop handler. The
@@ -1651,17 +1682,17 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
         }
 #endif // WIN32
 
-        ghoul::lua::push(s, f);
+        lua::push(s, f);
         lua_setglobal(s, "Filename");
 
         std::filesystem::path basename = f.filename();
-        ghoul::lua::push(s, std::move(basename));
+        lua::push(s, std::move(basename));
         lua_setglobal(s, "Basename");
 
         std::string extension = f.extension().string();
-        extension = ghoul::toLowerCase(extension);
+        extension = toLowerCase(extension);
 
-        ghoul::lua::push(s, extension);
+        lua::push(s, extension);
         lua_setglobal(s, "Extension");
 
         int callStatus = lua_pcall(s, 0, 1, 0);
@@ -1670,8 +1701,8 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
             LERROR(error);
         }
 
-        if (ghoul::lua::hasValue<std::string>(s)) {
-            std::string script = ghoul::lua::value<std::string>(s);
+        if (lua::hasValue<std::string>(s)) {
+            std::string script = lua::value<std::string>(s);
             global::scriptEngine->queueScript(std::move(script));
             lua_settop(s, 0);
             return true;
@@ -1692,10 +1723,10 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     else if (std::filesystem::is_directory(file)) {
         // If the file is a directory, we want to recursively get all files and handle
         // each of the files contained in the directory
-        std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
+        std::vector<std::filesystem::path> files = filesystem::walkDirectory(
             file,
-            ghoul::filesystem::Recursive::Yes,
-            ghoul::filesystem::Sorted::No,
+            filesystem::Recursive::Yes,
+            filesystem::Sorted::No,
             [](const std::filesystem::path& f) {
                 return std::filesystem::is_regular_file(f);
             }
@@ -1721,11 +1752,11 @@ void OpenSpaceEngine::decode(std::vector<std::byte> data) {
     global::syncEngine->decodeSyncables(std::move(data));
 }
 
-Property::Visibility OpenSpaceEngine::visibility() const {
-    return static_cast<Property::Visibility>(_visibility.value());
+Visibility OpenSpaceEngine::visibility() const {
+    return static_cast<Visibility>(_visibility.value());
 }
 
-void OpenSpaceEngine::toggleShutdownMode() {
+void OpenSpaceEngine::toggleShutdownMode(std::optional<float> timer) {
     if (_shutdown.inShutdown) {
         // If we are already in shutdown mode, we want to disable it
         _shutdown.inShutdown = false;
@@ -1735,7 +1766,8 @@ void OpenSpaceEngine::toggleShutdownMode() {
     }
     else {
         // Else, we have to enable it
-        _shutdown.timer = _shutdown.waitTime;
+        _shutdown.timer = timer.value_or(_defaultShutdownCountdown);
+        _shutdown.waitTime = timer.value_or(_defaultShutdownCountdown);
         _shutdown.inShutdown = true;
         global::eventEngine->publishEvent<EventApplicationShutdown>(
             EventApplicationShutdown::State::Started
@@ -1754,7 +1786,7 @@ bool OpenSpaceEngine::setMode(Mode newMode) {
         return true;
     }
     else if (newMode == _currentMode) {
-        LERROR("Cannot switch to the currectly active mode");
+        LERROR("Cannot switch to the correctly active mode");
         return false;
     }
     else if (_currentMode != Mode::UserControl && newMode != Mode::UserControl) {
@@ -1793,7 +1825,7 @@ void OpenSpaceEngine::removeModeChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _modeChangeCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -1808,10 +1840,10 @@ LuaLibrary OpenSpaceEngine::luaLibrary() {
 
     // Add user defined scripts
     if (FileSys.hasRegisteredToken("${USER_SCRIPTS}")) {
-        std::vector<std::filesystem::path> userFiles = ghoul::filesystem::walkDirectory(
+        std::vector<std::filesystem::path> userFiles = filesystem::walkDirectory(
             absPath("${USER_SCRIPTS}"),
-            ghoul::filesystem::Recursive::Yes,
-            ghoul::filesystem::Sorted::Yes,
+            filesystem::Recursive::Yes,
+            filesystem::Sorted::Yes,
             [](const std::filesystem::path& p) {
                 return p.extension() == ".lua" && std::filesystem::is_directory(p);
             }
@@ -1878,23 +1910,29 @@ const std::vector<PropertyOwner*>& OpenSpaceEngine::allPropertyOwners() const {
 }
 
 AssetManager& OpenSpaceEngine::assetManager() {
-    ghoul_assert(_assetManager, "Asset Manager must not be nullptr");
+    assert_msg(_assetManager, "Asset Manager must not be nullptr");
     return *_assetManager;
 }
 
-void setCameraFromProfile(const Profile& p) {
+void setCameraFromProfile(const Profile& p,
+                          OrbitalNavigator::IsCameraInteraction isCameraInteraction)
+{
     if (!p.camera.has_value()) {
         // If the camera is not specified, we want to set it to a sensible default value
         NavigationState nav;
         nav.anchor = "Root";
         nav.referenceFrame = "Root";
-        global::navigationHandler->setNavigationStateNextFrame(nav);
+        global::navigationHandler->setNavigationStateNextFrame(
+            nav,
+            false,
+            isCameraInteraction
+        );
         return;
     }
 
     auto checkNodeExists = [](const std::string& node) {
         if (!global::renderEngine->scene()->sceneGraphNode(node)) {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "Error when setting camera from profile. Could not find node '{}'", node
             ));
         }
@@ -1902,7 +1940,9 @@ void setCameraFromProfile(const Profile& p) {
 
     std::visit(
         overloaded {
-            [&checkNodeExists](const Profile::CameraNavState& navStateProfile) {
+            [&checkNodeExists, isCameraInteraction](
+                                           const Profile::CameraNavState& navStateProfile)
+            {
                 NavigationState nav;
                 nav.anchor = navStateProfile.anchor;
                 checkNodeExists(nav.anchor);
@@ -1927,30 +1967,45 @@ void setCameraFromProfile(const Profile& p) {
                 if (navStateProfile.pitch.has_value()) {
                     nav.pitch = navStateProfile.pitch.value();
                 }
-                global::navigationHandler->setNavigationStateNextFrame(nav);
+                global::navigationHandler->setNavigationStateNextFrame(
+                    nav,
+                    false,
+                    isCameraInteraction
+                );
             },
-            [&checkNodeExists](const Profile::CameraGoToGeo& geo) {
-                // Instead of direct calls to navigation state code, Lua commands with
-                // globebrowsing goToGeo are used because this prevents a module
-                // dependency in this core code. Eventually, goToGeo will be incorporated
-                // in the OpenSpace core and this code will change
+            [&checkNodeExists, isCameraInteraction](const Profile::CameraGoToGeo& geo) {
                 checkNodeExists(geo.anchor);
-                std::string geoScript;
-                if (geo.altitude.has_value()) {
-                    geoScript = std::format(
-                        "openspace.navigation.flyToGeo([[{}]], {}, {}, {}, 0)",
-                        geo.anchor, geo.latitude, geo.longitude, *geo.altitude
-                    );
-                }
-                else {
-                    geoScript = std::format(
-                        "openspace.navigation.flyToGeo2([[{}]], {}, {}, false, 0)",
-                        geo.anchor, geo.latitude, geo.longitude
-                    );
-                }
-                global::scriptEngine->queueScript(geoScript);
+                const SceneGraphNode* node =
+                    global::renderEngine->scene()->sceneGraphNode(geo.anchor);
+
+                // If no altitude is specified, use the same default height as is used for
+                // camera paths that target the node
+                const double altitude = geo.altitude.value_or(
+                    global::navigationHandler->pathNavigator().defaultArrivalHeight(
+                        geo.anchor
+                    )
+                );
+                const Geodetic3 position = {
+                    .geodetic2 = {
+                        .lat = glm::radians(geo.latitude),
+                        .lon = glm::radians(geo.longitude)
+                    },
+                    .height = altitude
+                };
+
+                NavigationState nav;
+                nav.anchor = geo.anchor;
+                nav.referenceFrame = geo.anchor;
+                nav.position = node->ellipsoid().cartesianPosition(position);
+                // For globes, the up-direction is always the positive Z axis
+                nav.up = glm::dvec3(0.0, 0.0, 1.0);
+                global::navigationHandler->setNavigationStateNextFrame(
+                    nav,
+                    false,
+                    isCameraInteraction
+                );
             },
-            [&checkNodeExists](const Profile::CameraGoToNode& node) {
+            [&checkNodeExists, isCameraInteraction](const Profile::CameraGoToNode& node) {
                 checkNodeExists(node.anchor);
 
                 NodeCameraStateSpec spc = {
@@ -1958,7 +2013,10 @@ void setCameraFromProfile(const Profile& p) {
                     .height = node.height,
                     .useTargetUpDirection = true
                 };
-                global::navigationHandler->setCameraFromNodeSpecNextFrame(std::move(spc));
+                global::navigationHandler->setCameraFromNodeSpecNextFrame(
+                    std::move(spc),
+                    isCameraInteraction
+                );
             }
         },
         p.camera.value()

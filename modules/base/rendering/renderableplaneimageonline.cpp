@@ -27,12 +27,12 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <cstdlib>
 #include <limits>
 #include <utility>
@@ -40,23 +40,23 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "URL",
-        "Image URL",
-        "Sets the URL of the texture that is displayed on this screen space plane. If "
-        "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. During stereo rendering, this texture is considered the left "
-        "eye.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "URL",
+        .name = "Image URL",
+        .description = "Sets the URL of the texture that is displayed on this screen "
+            "space plane. If this value is changed, the image at the new path will "
+            "automatically be loaded and displayed. During stereo rendering, this "
+            "texture is considered the left eye.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo RightTextureInfo = {
-        "RightTexture",
-        "Right Eye Image URL",
-        "Sets the URL of the texture that is displayed on this plane for the right eye "
-        "during stereo rendering. If this value is changed, the image at the new path "
-        "will automatically be loaded and displayed.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo RightTextureInfo = {
+        .identifier = "RightTexture",
+        .name = "Right Eye Image URL",
+        .description = "Sets the URL of the texture that is displayed on this plane for "
+            "the right eye during stereo rendering. If this value is changed, the image "
+            "at the new path will automatically be loaded and displayed.",
+        .visibility = Visibility::User
     };
 
     // Creates a textured 3D plane, where the texture image is loaded from the internet
@@ -65,11 +65,10 @@ namespace {
     // For stereo rendering, a second image can be specified using the `RightURL`
     // property. This image will be used for the right eye.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::string url [[codegen::key("URL")]];
+        std::string url [[codegen::Info(TextureInfo), codegen::key("URL")]];
 
-        // [[codegen::verbatim(RightTextureInfo.description)]]
-        std::optional<std::string> rightUrl [[codegen::key("RightURL")]];
+        std::optional<std::string> rightUrl
+            [[codegen::Info(RightTextureInfo), codegen::key("RightURL")]];
     };
 } // namespace
 #include "renderableplaneimageonline_codegen.cpp"
@@ -83,8 +82,7 @@ Documentation RenderablePlaneImageOnline::Documentation() {
     );
 }
 
-RenderablePlaneImageOnline::RenderablePlaneImageOnline(
-                                                      const ghoul::Dictionary& dictionary)
+RenderablePlaneImageOnline::RenderablePlaneImageOnline(const Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
     , _rightTexturePath(RightTextureInfo)
@@ -117,7 +115,7 @@ void RenderablePlaneImageOnline::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderablePlaneImageOnline::bindTexture(opengl::TextureUnit& unit) {
     switch (global::windowDelegate->frustumMode()) {
         case WindowDelegate::Frustum::Mono:
         case WindowDelegate::Frustum::LeftEye:
@@ -162,9 +160,12 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
     }
 
     if (!_texture && _imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
+            // The download is not attempted again until the URL changes, as it would
+            // otherwise be restarted in every frame
+            _textureIsDirty = false;
             LERRORC(
                 "RenderablePlaneImageOnline",
                 std::format("Error loading image from URL '{}'", _texturePath.value())
@@ -173,17 +174,17 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            _texture = ghoul::io::texture::loadTexture(
-                reinterpret_cast<void*>(imageFile.buffer),
-                imageFile.size,
+            _texture = io::texture::loadTexture(
+                imageFile.buffer.data(),
+                imageFile.buffer.size(),
                 2,
-                ghoul::opengl::Texture::SamplerInit{
-                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                opengl::Texture::SamplerInit{
+                    .filter = opengl::Texture::FilterMode::LinearMipMap
                 },
                 imageFile.format
             );
         }
-        catch (const ghoul::io::texture::InvalidLoadException& e) {
+        catch (const io::texture::InvalidLoadException& e) {
             _textureIsDirty = false;
             LERRORC(e.component, e.message);
         }
@@ -201,9 +202,12 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         if (!_rightTexture && _rightImageFuture.valid() &&
             DownloadManager::futureReady(_rightImageFuture))
         {
-            const DownloadManager::MemoryFile imageFile = _rightImageFuture.get();
+            DownloadManager::MemoryFile imageFile = _rightImageFuture.get();
 
             if (imageFile.corrupted) {
+                // The download is not attempted again until the URL changes, as it would
+                // otherwise be restarted in every frame
+                _textureIsDirty = false;
                 LERRORC(
                     "RenderablePlaneImageOnline",
                     std::format("Error loading right image from URL '{}'",
@@ -214,17 +218,17 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
             }
 
             try {
-                _rightTexture = ghoul::io::texture::loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
+                _rightTexture = io::texture::loadTexture(
+                    imageFile.buffer.data(),
+                    imageFile.buffer.size(),
                     2,
-                    ghoul::opengl::Texture::SamplerInit{
-                        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                    opengl::Texture::SamplerInit{
+                        .filter = opengl::Texture::FilterMode::LinearMipMap
                     },
                     imageFile.format
                 );
             }
-            catch (const ghoul::io::texture::InvalidLoadException& e) {
+            catch (const io::texture::InvalidLoadException& e) {
                 _textureIsDirty = false;
                 LERRORC(e.component, e.message);
             }

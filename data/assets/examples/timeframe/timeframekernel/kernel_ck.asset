@@ -16,13 +16,7 @@ local Node = {
   Identifier = "TimeFrameKernel_Example_CK",
   TimeFrame = {
     Type = "TimeFrameKernel",
-    CK = {
-      Kernels = {
-        data .. "nh_apf_20150404_20150420_001.bc",
-        data .. "new-horizons_1121.tsc",
-      },
-      Reference = "-98000"
-    }
+    Reference = "-98000"
   },
   Renderable = {
     Type = "RenderableCartesianAxes"
@@ -35,9 +29,13 @@ local Node = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(pck .. "nh_apf_20150404_20150420_001.bc")
+  openspace.spice.loadKernel(pck .. "new-horizons_1121.tsc")
   openspace.addSceneGraphNode(Node)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Node)
+  openspace.spice.unloadKernel(spk .. "new-horizons_1121.tsc")
+  openspace.spice.unloadKernel(spk .. "nh_apf_20150404_20150420_001.bc")
 end)

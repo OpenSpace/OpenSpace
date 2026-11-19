@@ -29,14 +29,14 @@
 
 #include <filesystem>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
+
+class Dictionary;
 
 class HongKangParser : public SequenceParser {
 public:
     HongKangParser(std::string name, std::filesystem::path fileName,
-        std::string spacecraft, const ghoul::Dictionary& translationDictionary,
+        std::string spacecraft, const Dictionary& translationDictionary,
         std::vector<std::string> potentialTargets);
 
     bool create() override;

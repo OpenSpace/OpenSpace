@@ -27,16 +27,16 @@
 
 #include <modules/base/rendering/renderabledisc.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <ghoul/glm.h>
 
 namespace openspace {
 
 class RenderableHabitableZone : public RenderableDisc {
 public:
-    explicit RenderableHabitableZone(const ghoul::Dictionary& dictionary);
+    explicit RenderableHabitableZone(const Dictionary& dictionary);
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
@@ -53,7 +53,7 @@ private:
      *
      * \param teff The effective temperature of the star, in Kelvin
      * \param luminosity The luminosity of the star, in solar luminosities
-     * \return A vec4 with the boundaries in atronomical units, in the order: optimistic
+     * \return A vec4 with the boundaries in astronomical units, in the order: optimistic
      *         inner, conservative inner, conservative outer, optimistic outer
      *
      * \sa https://arxiv.org/abs/1404.5292

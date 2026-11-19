@@ -1,0 +1,16 @@
+diff --git a/src/core/md_os.c b/src/core/md_os.c
+--- a/src/core/md_os.c
++++ b/src/core/md_os.c
+@@ -300,7 +300,11 @@
+ 
+ // ### FILE ###
++// `md_file_o*` is never anything other than a type-punned `FILE*`: the struct is never
++// instantiated, `handle` is never read, and every function below casts straight to
++// `FILE*`. A `FILE` member requires the definition of `struct _IO_FILE`, which glibc
++// exposes but musl (Alpine Linux) deliberately keeps private, so hold a pointer instead.
+ struct md_file_o {
+-    FILE handle;
++    FILE* handle;
+ };
+ 
+ md_file_o* md_file_open(str_t filename, uint32_t flags) {

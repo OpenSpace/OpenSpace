@@ -24,14 +24,15 @@
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
+#include <random>
 #include <sstream>
 #include <string_view>
 #include <utility>
@@ -250,12 +251,15 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     );
 
     if (!table) {
-        throw ghoul::RuntimeError(std::format("Failed to open Fits file '{}'", filePath));
+        throw RuntimeError(std::format("Failed to open Fits file '{}'", filePath));
     }
 
     int nStars = table->readRows - firstRow + 1;
 
     int nNullArr = 0;
+    // A fixed seed is used so that reading the same file always produces the same data
+    std::mt19937 randomEngine;
+    std::uniform_real_distribution<float> randomFactor(0.f, 1.f);
     const int nColumnsRead = static_cast<int>(allColumnNames.size());
     const int defaultCols = 17; // Number of columns that are copied by predefined code
     if (nColumnsRead != defaultCols) {
@@ -344,8 +348,8 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
 
         // Read extra columns, if any. This will slow down the sorting tremendously
         for (int col = defaultCols; col < nColumnsRead; col++) {
-            std::vector<float> vecData = std::move(tableContent[allColumnNames[col]]);
-            values[idx++] = vecData[i];
+            const std::vector<float>& vecData = tableContent[allColumnNames[col]];
+            values[idx++] = vecData[i % nStars];
         }
 
         for (int j = 0; j < nValuesPerStar; j++) {
@@ -354,7 +358,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
                 values[j] = 0.f;
             }
             else if (multiplier > 1) {
-                values[j] *= static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                values[j] *= randomFactor(randomEngine);
             }
         }
 
@@ -386,7 +390,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
     std::string line;
     while (true) {
         const std::streampos position = fileStream.tellg();
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
 
         if (line.empty() || line[0] == '#') {
             continue;
@@ -442,7 +446,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
         std::vector<float> readValues(nValuesPerStar);
         nStars++;
 
-        ghoul::getline(fileStream, line);
+        openspace::getline(fileStream, line);
         std::stringstream str = std::stringstream(line);
 
         // Read values

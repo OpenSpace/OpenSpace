@@ -24,8 +24,8 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <utility>
 
 namespace {
@@ -33,25 +33,32 @@ namespace {
 
     constexpr std::string_view _loggerCat = "IswaBaseGroup";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "", // @TODO Missing documentation
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo AlphaInfo = {
-        "Alpha",
-        "Alpha",
-        "", // @TODO Missing documentation
-        Property::Visibility::User
+    constexpr FloatPropertyInfo AlphaInfo = {
+        .identifier = "Alpha",
+        .name = "Alpha",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.9f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DeleteInfo = {
-        "Delete",
-        "Delete",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr TriggerPropertyInfo DeleteInfo = {
+        .identifier = "Delete",
+        .name = "Delete",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer
     };
 } // namespace
 
@@ -59,8 +66,8 @@ namespace openspace {
 
 IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     : PropertyOwner({ std::move(name) })
-    , _enabled(EnabledInfo, true)
-    , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
+    , _enabled(EnabledInfo)
+    , _alpha(AlphaInfo)
     , _delete(DeleteInfo)
     , _iswaType(std::move(type))
 {
@@ -79,11 +86,11 @@ bool IswaBaseGroup::isType(const std::string& type) const {
 
 void IswaBaseGroup::updateGroup() {
     LDEBUG(std::format("Group {} published updateGroup", identifier()));
-    _groupEvent.publish("updateGroup", ghoul::Dictionary());
+    _groupEvent.publish("updateGroup", Dictionary());
 }
 
 void IswaBaseGroup::clearGroup() {
-    _groupEvent.publish("clearGroup", ghoul::Dictionary());
+    _groupEvent.publish("clearGroup", Dictionary());
     LDEBUG(std::format("Group {} published clearGroup", identifier()));
     unregisterProperties();
 }
@@ -92,21 +99,21 @@ std::shared_ptr<DataProcessor> IswaBaseGroup::dataProcessor() {
     return _dataProcessor;
 }
 
-ghoul::Event<ghoul::Dictionary>& IswaBaseGroup::groupEvent() {
+SynchronousEvent<Dictionary>& IswaBaseGroup::groupEvent() {
     return _groupEvent;
 }
 
 void IswaBaseGroup::registerProperties() {
     _enabled.onChange([this]() {
         LDEBUG(std::format("Group {} published enabledChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("enabled", _enabled.value());
         _groupEvent.publish("enabledChanged", d);
     });
 
     _alpha.onChange([this]() {
         LDEBUG(std::format("Group {} published alphaChanged", identifier()));
-        ghoul::Dictionary d;
+        Dictionary d;
         d.setValue("alpha", static_cast<double>(_alpha));
         _groupEvent.publish("alphaChanged", d);
     });

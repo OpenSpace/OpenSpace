@@ -28,11 +28,11 @@
 #include <modules/fieldlinessequence/tasks/findlastclosedfieldlinestask.h>
 #include <modules/fieldlinessequence/tasks/kameleonvolumetofieldlinestask.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <fstream>
 #include <string_view>
 #include <vector>
@@ -64,16 +64,16 @@ FieldlinesSequenceModule::FieldlinesSequenceModule()
     file << DefaultTransferfunctionSource;
 }
 
-void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+void FieldlinesSequenceModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    assert_msg(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableFieldlinesSequence>(
         "RenderableFieldlinesSequence"
     );
 
-    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
+    TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    assert_msg(fTask, "No task factory existed");
     fTask->registerClass<KameleonVolumeToFieldlinesTask>(
         "KameleonVolumeToFieldlinesTask"
     );

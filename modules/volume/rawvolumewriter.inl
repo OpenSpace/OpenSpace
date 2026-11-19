@@ -24,8 +24,8 @@
 
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/volumeutils.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/format.h>
+#include <openspace/misc/exception.h>
 #include <algorithm>
 #include <fstream>
 #include <utility>
@@ -102,7 +102,7 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     std::ofstream file = std::ofstream(_path, std::ios::binary);
 
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format("Could not create file '{}'", _path));
+        throw RuntimeError(std::format("Could not create file '{}'", _path));
     }
 
     file.write(buffer, length);

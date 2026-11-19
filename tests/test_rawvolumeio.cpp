@@ -27,10 +27,10 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/glm.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
-#include <ghoul/glm.h>
-#include <ghoul/filesystem/filesystem.h>
 
 using namespace openspace;
 

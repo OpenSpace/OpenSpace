@@ -27,18 +27,18 @@
 
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <unordered_map>
 
 namespace openspace {
 
 class RenderableConstellationLines : public RenderableConstellationsBase {
 public:
-    explicit RenderableConstellationLines(const ghoul::Dictionary& dictionary);
+    explicit RenderableConstellationLines(const Dictionary& dictionary);
     ~RenderableConstellationLines() override = default;
 
     void initialize() override;
@@ -76,7 +76,7 @@ private:
     StringProperty _speckFile;
     BoolProperty _drawElements;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
+    std::unique_ptr<opengl::ProgramObject> _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, opacity,
         color) _uniformCache;
 

@@ -13,61 +13,60 @@ local speck = asset.resource({
 })
 
 
-local Object = {
-  Identifier = "2dF",
-  Renderable = {
-    Type = "RenderablePointCloud",
-    Enabled = false,
-    Opacity = 1.0,
-    File = speck .. "2dF.speck",
-    Unit = "Mpc",
-    Texture = {
-      File = textures .. "point3A.png",
-    },
-    Coloring = {
-      ColorMapping = {
-        File = speck .. "2dF.cmap",
-        ParameterOptions = {
-          { Key = "proximity", Range = { 1.0, 25.0 } },
-          { Key = "redshift", Range = { 0.0, 0.075 } }
-        }
-      }
-    },
-    SizeSettings = {
-      ScaleExponent = 22.6,
-      MaxSize = 0.2,
-      EnableMaxSizeControl = true
+local renderable = Renderable.RenderablePointCloud()
+renderable.Enabled = false
+renderable.Opacity = 1.0
+renderable.File = speck .. "2dF.speck"
+renderable.Unit = "Mpc"
+renderable.Texture = {
+  File = textures .. "point3A.png"
+}
+renderable.Coloring = {
+  ColorMapping = {
+    File = speck .. "2dF.cmap",
+    ParameterOptions = {
+      { Key = "proximity", Range = { 1.0, 25.0 } },
+      { Key = "redshift", Range = { 0.0, 0.075 } }
     }
-  },
-  GUI = {
-    Name = "2dF Galaxies",
-    Path = "/Universe/Deep Sky Surveys",
-    Focusable = false,
-    Description = [[The Two-degree Field (2dF) Survey was a project designed to map
-      portions of the extragalactic universe. The 2dF survey has three main components:
-      the North Galactic Pole strip, the South Galactic Pole strip, and the random fields
-      that surround the South Galactic Pole strip. Colors: Orange galaxies show dense
-      regions of galaxies, aqua galaxies are areas of intermediate density, and green
-      galaxies are areas of lower density. Census: 229,293 galaxies.]]
   }
+}
+renderable.SizeSettings = {
+  ScaleExponent = 22.6,
+  MaxSize = 0.2,
+  EnableMaxSizeControl = true
+}
+
+local object = SceneGraphNode()
+object.Identifier = "2dF"
+object.Renderable = renderable
+object.GUI = {
+  Name = "2dF Galaxies",
+  Path = "/Universe/Deep Sky Surveys",
+  Focusable = false,
+  Description = [[The Two-degree Field (2dF) Survey was a project designed to map
+    portions of the extragalactic universe. The 2dF survey has three main components:
+    the North Galactic Pole strip, the South Galactic Pole strip, and the random fields
+    that surround the South Galactic Pole strip. Colors: Orange galaxies show dense
+    regions of galaxies, aqua galaxies are areas of intermediate density, and green
+    galaxies are areas of lower density. Census: 229,293 galaxies.]]
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Object)
+  openspace.addSceneGraphNode(object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Object)
+  openspace.removeSceneGraphNode(object)
 end)
 
-asset.export(Object)
+asset.export(object)
 
 
 
 asset.meta = {
   Name = "2dF Galaxies",
-  Description = Object.GUI.Description,
+  Description = object.GUI.Description,
   Author = "Brian Abbott (AMNH), Eric Gawiser (Rutgers U)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

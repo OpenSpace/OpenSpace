@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 
-#include <ghoul/format.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/format.h>
+#include <openspace/misc/exception.h>
 #include <algorithm>
 #include <array>
 #include <string_view>
@@ -202,7 +202,7 @@ constexpr std::array<Blend, 6> Blends = {
 
 } // namespace openspace::layers
 
-namespace ghoul {
+namespace openspace {
 
 template <>
 constexpr openspace::layers::Layer::ID from_string(std::string_view string)
@@ -219,9 +219,7 @@ constexpr openspace::layers::Layer::ID from_string(std::string_view string)
         return it->id;
     }
     else {
-        throw ghoul::RuntimeError(std::format(
-            "Could not find Layer of type '{}'", string
-        ));
+        throw RuntimeError(std::format("Could not find Layer of type '{}'", string));
     }
 }
 
@@ -240,9 +238,7 @@ constexpr openspace::layers::Group::ID from_string(std::string_view string)
         return it->id;
     }
     else {
-        throw ghoul::RuntimeError(std::format(
-            "Could not find Group of type '{}'", string
-        ));
+        throw RuntimeError(std::format("Could not find Group of type '{}'", string));
     }
 }
 
@@ -274,6 +270,6 @@ constexpr openspace::layers::Blend::ID from_string(std::string_view string) {
         openspace::layers::Blend::ID::Normal;
 }
 
-} // ghoul
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__

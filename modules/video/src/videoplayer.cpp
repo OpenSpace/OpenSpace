@@ -28,19 +28,19 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/framebufferobject.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <render_gl.h>
-#include <ghoul/opengl/texture.h>
 #include <cstdlib>
 #include <optional>
 
@@ -49,78 +49,86 @@ namespace {
 
     constexpr std::string_view _loggerCat = "VideoPlayer";
 
-    constexpr Property::PropertyInfo VideoInfo = {
-        "Video",
-        "Video",
-        "The video file that is played."
+    constexpr TriggerPropertyInfo PlayInfo = {
+        .identifier = "Play",
+        .name = "Play",
+        .description = "Play video."
     };
 
-    constexpr Property::PropertyInfo PlayInfo = {
-        "Play",
-        "Play",
-        "Play video."
+    constexpr TriggerPropertyInfo PauseInfo = {
+        .identifier = "Pause",
+        .name = "Pause",
+        .description = "Pause video."
     };
 
-    constexpr Property::PropertyInfo PauseInfo = {
-        "Pause",
-        "Pause",
-        "Pause video."
+    constexpr TriggerPropertyInfo GoToStartInfo = {
+        .identifier = "GoToStart",
+        .name = "Go To start",
+        .description = "Sets the time to the beginning of the video and pauses it."
     };
 
-    constexpr Property::PropertyInfo GoToStartInfo = {
-        "GoToStart",
-        "Go To start",
-        "Sets the time to the beginning of the video and pauses it."
+    constexpr TriggerPropertyInfo ReloadInfo = {
+        .identifier = "Reload",
+        .name = "Reload",
+        .description = "Reloads the video and creates a new texture. This might be "
+            "useful in case there was an error loading the video."
     };
 
-    constexpr Property::PropertyInfo ReloadInfo = {
-        "Reload",
-        "Reload",
-        "Reloads the video and creates a new texture. This might be useful in case there "
-        "was an error loading the video."
+    constexpr BoolPropertyInfo AudioInfo = {
+        .identifier = "PlayAudio",
+        .name = "Play audio",
+        .description = "Decides whether to play audio when playing back the video.",
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AudioInfo = {
-        "PlayAudio",
-        "Play audio",
-        "Decides whether to play audio when playing back the video."
+    constexpr StringPropertyInfo StartTimeInfo = {
+        .identifier = "StartTime",
+        .name = "Start time",
+        .description = "The date and time that the video should start in the format "
+            "'YYYY MM DD hh:mm:ss'."
     };
 
-    constexpr Property::PropertyInfo StartTimeInfo = {
-        "StartTime",
-        "Start time",
-        "The date and time that the video should start in the format "
-        "'YYYY MM DD hh:mm:ss'."
+    constexpr StringPropertyInfo EndTimeInfo = {
+        .identifier = "EndTime",
+        .name = "End time",
+        .description = "The date and time that the video should end in the format 'YYYY "
+            "MM DD hh:mm:ss'."
     };
 
-    constexpr Property::PropertyInfo EndTimeInfo = {
-        "EndTime",
-        "End time",
-        "The date and time that the video should end in the format "
-        "'YYYY MM DD hh:mm:ss'."
+    constexpr BoolPropertyInfo LoopVideoInfo = {
+        .identifier = "LoopVideo",
+        .name = "Loop video",
+        .description = "If checked, the video is continues playing from the start when "
+            "it reaches the end of the video.",
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo LoopVideoInfo = {
-        "LoopVideo",
-        "Loop video",
-        "If checked, the video is continues playing from the start when it reaches the "
-        "end of the video."
+    constexpr BoolPropertyInfo IsPlayingInfo = {
+        .identifier = "IsPlaying",
+        .name = "Is Playing",
+        .description = "Indicates whether the video is currently playing.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo IsPlayingInfo = {
-        "IsPlaying",
-        "Is Playing",
-        "Indicates whether the video is currently playing.",
-        Property::Visibility::Developer
-    };
-
-    constexpr Property::PropertyInfo PlayDelayInfo = {
-        "PlayDelay",
-        "Play Delay",
-        "The delay, in milliseconds, that the system will wait before issuing the play "
-        "command. A higher value will increase the time it takes for the video to start "
-        "but may result in a more synchronized playback start.",
-        Property::Visibility::Developer
+    constexpr IntPropertyInfo PlayDelayInfo = {
+        .identifier = "PlayDelay",
+        .name = "Play Delay",
+        .description = "The delay, in milliseconds, that the system will wait before "
+            "issuing the play command. A higher value will increase the time it takes "
+            "for the video to start but may result in a more synchronized playback "
+            "start.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = 250,
+            .minMax = { 0, 1000 }
+        }
     };
 
     bool checkMpvError(int status) {
@@ -132,23 +140,20 @@ namespace {
     }
 
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
-        // [[codegen::verbatim(VideoInfo.description)]]
+        // The video file that is played.
         std::filesystem::path video;
 
-        // [[codegen::verbatim(AudioInfo.description)]]
-        std::optional<bool> playAudio;
+        std::optional<bool> playAudio [[codegen::Info(AudioInfo)]];
 
-        // [[codegen::verbatim(LoopVideoInfo.description)]]
-        std::optional<bool> loopVideo;
+        std::optional<bool> loopVideo [[codegen::Info(LoopVideoInfo)]];
 
-        // [[codegen::verbatim(PlayDelayInfo.description)]] 
-        std::optional<int> playDelay;
+        std::optional<int> playDelay [[codegen::Info(PlayDelayInfo)]];
 
-        // [[codegen::verbatim(StartTimeInfo.description)]]
-        std::optional<std::string> startTime [[codegen::datetime()]];
+        std::optional<std::string> startTime
+            [[codegen::Info(StartTimeInfo), codegen::datetime()]];
 
-        // [[codegen::verbatim(EndTimeInfo.description)]]
-        std::optional<std::string> endTime [[codegen::datetime()]];
+        std::optional<std::string> endTime
+            [[codegen::Info(EndTimeInfo), codegen::datetime()]];
 
         enum class PlaybackMode {
             MapToSimulationTime = 0,
@@ -249,18 +254,18 @@ Documentation VideoPlayer::Documentation() {
     return codegen::doc<Parameters>("video_videoplayer");
 }
 
-VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
+VideoPlayer::VideoPlayer(const Dictionary& dictionary)
     : PropertyOwner({ "VideoPlayer", "Video Player"})
     , _play(PlayInfo)
     , _pause(PauseInfo)
     , _goToStart(GoToStartInfo)
     , _reload(ReloadInfo)
-    , _playAudio(AudioInfo, false)
-    , _loopVideo(LoopVideoInfo, true)
-    , _playDelay(PlayDelayInfo, 250, 0, 1000)
-    , _isPlaying(IsPlayingInfo, false)
-    , _startTime(StartTimeInfo, "")
-    , _endTime(EndTimeInfo, "")
+    , _playAudio(AudioInfo)
+    , _loopVideo(LoopVideoInfo)
+    , _playDelay(PlayDelayInfo)
+    , _isPlaying(IsPlayingInfo)
+    , _startTime(StartTimeInfo)
+    , _endTime(EndTimeInfo)
 {
     ZoneScoped;
 
@@ -300,15 +305,14 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
 
     if (_playbackMode == PlaybackMode::MapToSimulationTime) {
         if (!p.startTime.has_value() || !p.endTime.has_value()) {
-            LERROR(
+            throw RuntimeError(
                 "Video tile layer tried to map to simulation time but lacked start or "
                 "end time"
             );
-            return;
         }
         _startJ200Time = Time::convertTime(*p.startTime);
         _endJ200Time = Time::convertTime(*p.endTime);
-        ghoul_assert(_endJ200Time > _startJ200Time, "Invalid times for video");
+        assert_msg(_endJ200Time > _startJ200Time, "Invalid times for video");
 
         // @TODO (2026-05-05, emmbr) Adding these properties as read-only so we can show
         // them in the UI. In the future, we should also allow editing them, but that
@@ -433,6 +437,11 @@ void VideoPlayer::initializeMpv() {
     // https://mpv.io/manual/master/#options-gpu-api
     setPropertyStringMpv("gpu-api", "opengl");
 
+    // Render through the render API into our own FBO. Newer versions of mpv no longer
+    // probe this video output first and would otherwise create their own window
+    // https://mpv.io/manual/master/#video-output-drivers-libmpv
+    setPropertyStringMpv("vo", "libmpv");
+
     // Keep open the file. Even when we reach EOF we want to keep the video player
     // running, in case the user starts the video from the beginning again
     // https://mpv.io/manual/stable/#options-keep-open
@@ -461,8 +470,12 @@ void VideoPlayer::initializeMpv() {
     // Starting MPV in a paused state seems to reduce problems with initialization
     setPropertyStringMpv("pause", "");
 
-    // Allow alpha channels
-    setPropertyStringMpv("alpha", "yes");
+    // Allow alpha channels. Newer versions of mpv replaced the `alpha` option with
+    // `background=none`. Older versions only know `alpha` and treat `background` as a
+    // color
+    if (mpv_set_property_string(_mpvHandle, "background", "none") < 0) {
+        setPropertyStringMpv("alpha", "yes");
+    }
 
     // Verbose mode for debug purposes
     // setPropertyStringMpv("msg-level", "all=v");
@@ -592,7 +605,7 @@ void VideoPlayer::renderMpv() {
 
 void VideoPlayer::renderFrame() {
     // Save the currently bound FBO
-    const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+    const GLint defaultFBO = opengl::FramebufferObject::getActiveObject();
 
     // See render_gl.h on what OpenGL environment mpv expects, and other API details. This
     // function fills the fbo and texture with data, after it we can get the data on the
@@ -844,7 +857,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             break;
         }
         default:
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
     }
 }
 
@@ -950,7 +963,7 @@ void VideoPlayer::postSync(bool isMaster) {
     }
 }
 
-const std::unique_ptr<ghoul::opengl::Texture>& VideoPlayer::frameTexture() const {
+const std::unique_ptr<opengl::Texture>& VideoPlayer::frameTexture() const {
     return _frameTexture;
 }
 
@@ -1014,14 +1027,14 @@ void VideoPlayer::createTexture(glm::ivec2 size) {
     // Update resolution of video
     _videoResolution = size;
 
-    _frameTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _frameTexture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size, 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
 
     // Bind texture to framebuffer

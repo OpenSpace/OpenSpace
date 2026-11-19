@@ -33,7 +33,7 @@ namespace openspace {
 
 class CameraLightSource : public LightSource {
 public:
-    explicit CameraLightSource(const ghoul::Dictionary& dictionary);
+    explicit CameraLightSource(const Dictionary& dictionary);
 
     glm::vec3 directionViewSpace(const RenderData& renderData) const override;
     float intensity() const override;

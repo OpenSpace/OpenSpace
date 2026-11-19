@@ -27,14 +27,14 @@
 
 #include <openspace/util/task.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <filesystem>
 
 namespace openspace {
 
 class KameleonVolumeToRawTask : public Task {
 public:
-    explicit KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary);
+    explicit KameleonVolumeToRawTask(const Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;

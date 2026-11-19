@@ -25,13 +25,11 @@ local Node = {
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = "GlobeRotation_Example_Angle_Globe",
       Latitude = 20.0,
       Longitude = -45.0
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = "GlobeRotation_Example_Angle_Globe",
       Latitude = 20.0,
       Longitude = -45.0,
       Angle = 45.0

@@ -31,18 +31,24 @@
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<long> {
+    static constexpr long Min = std::numeric_limits<long>::lowest();
+    static constexpr long Max = std::numeric_limits<long>::max();
+    static constexpr long Step = long(1);
+};
+
+using LongPropertyInfo = BasicPropertyInfo<NumericalDefaults<long>>;
+
 /**
  * This class is a concrete implementation of TemplateProperty with the type `long`.
  */
 class LongProperty : public NumericalProperty<long> {
 public:
-    explicit LongProperty(PropertyInfo info, long value = long(0),
-        long minValue = std::numeric_limits<long>::lowest(),
-        long maxValue = std::numeric_limits<long>::max(),
-        long stepValue = long(1));
+    explicit LongProperty(LongPropertyInfo info);
 
     std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+    lua::LuaTypes typeLua() const override final;
 
     void getLuaValue(lua_State* state) const override final;
 

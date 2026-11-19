@@ -127,7 +127,7 @@ vec4 jitter(vec2 uv) {
 float computeAo(vec2 fullResUv, float radiusPixels, vec4 jitter, vec3 viewPosition,
                 vec3 viewNormal)
 {
-  // -4.3 is recomended in the Intel ASSAO implementation
+  // -4.3 is recommended in the Intel ASSAO implementation
   const float GlobalMipOffset = -4.3;
   float mipOffset = log2(radiusPixels) + GlobalMipOffset;
 

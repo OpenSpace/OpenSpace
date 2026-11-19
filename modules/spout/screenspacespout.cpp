@@ -27,24 +27,17 @@
 #include <modules/spout/screenspacespout.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/textureunit.h>
 #include <optional>
 #include <utility>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo NameInfo = {
-        "SpoutName",
-        "Spout sender name",
-        "This value explicitly sets the Spout receiver to use a specific name. If this "
-        "is not a valid name, an empty image is used.",
-        Property::Visibility::AdvancedUser
-    };
-
     struct [[codegen::Dictionary(ScreenSpaceSpout)]] Parameters {
-        // [[codegen::verbatim(NameInfo.description)]]
+        // This value explicitly sets the Spout receiver to use a specific name. If this
+        // is not a valid name, an empty image is used.
         std::optional<std::string> spoutName;
     };
 } // namespace
@@ -60,7 +53,7 @@ Documentation ScreenSpaceSpout::Documentation() {
     );
 }
 
-ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
+ScreenSpaceSpout::ScreenSpaceSpout(const Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _spoutReceiver(*this, dictionary)
 {
@@ -86,7 +79,7 @@ void ScreenSpaceSpout::update() {
     _spoutReceiver.updateReceiver();
 }
 
-void ScreenSpaceSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void ScreenSpaceSpout::bindTexture(opengl::TextureUnit& unit) {
     if (_spoutReceiver.isReceiving()) {
         unit.bind(_spoutReceiver.spoutTexture());
     }

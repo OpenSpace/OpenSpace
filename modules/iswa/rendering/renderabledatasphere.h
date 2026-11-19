@@ -38,7 +38,7 @@ class Sphere;
  */
 class RenderableDataSphere : public RenderableDataCygnet {
 public:
-    explicit RenderableDataSphere(const ghoul::Dictionary& dictionary);
+    explicit RenderableDataSphere(const Dictionary& dictionary);
     ~RenderableDataSphere();
 
     void initializeGL() override;

@@ -27,18 +27,20 @@
 #include <modules/spacecraftinstruments/util/decoder.h>
 #include <modules/spacecraftinstruments/util/image.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timerange.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <fstream>
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "InstrumentTimesParser";
 
     constexpr std::string_view KeyInstrument = "Instrument";
@@ -46,7 +48,7 @@ namespace {
 
     struct [[codegen::Dictionary(InstrumentTimesParser)]] Parameters {
         std::string target;
-        std::map<std::string, ghoul::Dictionary> instruments;
+        std::map<std::string, Dictionary> instruments;
     };
 } // namespace
 #include "instrumenttimesparser_codegen.cpp"
@@ -55,7 +57,7 @@ namespace openspace {
 
 InstrumentTimesParser::InstrumentTimesParser(std::string name,
                                              std::filesystem::path sequenceSource,
-                                             ghoul::Dictionary& inputDict)
+                                             Dictionary& inputDict)
     : _pattern("\"(.{23})\" \"(.{23})\"")
     , _name(std::move(name))
     , _fileName(std::move(sequenceSource))
@@ -63,10 +65,8 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name,
     const Parameters p = codegen::bake<Parameters>(inputDict);
 
     _target = p.target;
-    for (const std::pair<const std::string, ghoul::Dictionary>& ps : p.instruments) {
-        const ghoul::Dictionary files = ps.second.value<ghoul::Dictionary>(
-            KeyInstrumentFiles
-        );
+    for (const std::pair<const std::string, Dictionary>& ps : p.instruments) {
+        const Dictionary files = ps.second.value<Dictionary>(KeyInstrumentFiles);
         _fileTranslation[ps.first] = Decoder::createFromDictionary(
             ps.second,
             KeyInstrument
@@ -103,7 +103,7 @@ bool InstrumentTimesParser::create() {
             std::smatch matches;
             TimeRange instrumentActiveTimeRange;
             bool successfulRead = true;
-            while (ghoul::getline(inFile, line)) {
+            while (openspace::getline(inFile, line)) {
                 if (!std::regex_match(line, matches, _pattern)) {
                     continue;
                 }

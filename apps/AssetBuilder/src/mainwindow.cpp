@@ -27,8 +27,8 @@
 #include "asseteditorwidget.h"
 #include "path.h"
 #include "welcomedialog.h"
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QLabel>
@@ -38,7 +38,7 @@
 #include <QSettings>
 #include <QVBoxLayout>
 
-// This is the overall organization of the widgets invloved in this application
+// This is the overall organization of the widgets involved in this application
 // MainWindow(QMainWindow)
 // └── AssetEditorWidget(QWidget)
 //     ├── SidePanel(QWidget)

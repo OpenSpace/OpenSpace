@@ -32,15 +32,14 @@
 #include <string>
 #include <vector>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
 
+namespace opengl { class ProgramObject; }
 class SceneGraphNode;
 
 class RenderableSolarImageryProjection : public Renderable {
 public:
-    explicit RenderableSolarImageryProjection(const ghoul::Dictionary& dictionary);
+    explicit RenderableSolarImageryProjection(const Dictionary& dictionary);
     ~RenderableSolarImageryProjection() override = default;
 
     void initializeGL() override;
@@ -56,7 +55,7 @@ private:
 
     std::vector<SceneGraphNode*> _solarImageryDependencies;
     std::vector<std::string> _solarImageryDependencyNames;
-    ghoul::opengl::ProgramObject* _shader  = nullptr;
+    opengl::ProgramObject* _shader  = nullptr;
     Sphere _sphere;
 };
 

@@ -33,11 +33,11 @@
 #include <memory>
 #include <string>
 
-namespace ghoul { class Dictionary; }
 struct CPLXMLNode;
 
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 struct TileIndex;
 
@@ -59,7 +59,7 @@ struct TileProvider : public PropertyOwner {
     static unsigned int NumTileProviders;
 
     static std::unique_ptr<TileProvider> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+        const Dictionary& dictionary);
 
     static void initializeDefaultTile();
     static void deinitializeDefaultTile();
@@ -81,7 +81,7 @@ struct TileProvider : public PropertyOwner {
 
     /**
      * Get the associated depth transform for this TileProvider. This is necessary for
-     * TileProviders serving height map data, in order to correcly map pixel values to
+     * TileProviders serving height map data, in order to correctly map pixel values to
      * meters.
      */
     virtual TileDepthTransform depthTransform() = 0;

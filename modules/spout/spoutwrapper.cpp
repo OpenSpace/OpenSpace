@@ -25,63 +25,69 @@
 #include "modules/spout/spoutwrapper.h"
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/texture.h>
 #include <optional>
 #include <string_view>
 #include <utility>
 
-#define SPOUT_NO_GL_INCLUDE
-#include <SpoutLibrary.h>
+// gl.h (included above) pulls in glbinding and does `using namespace gl;`, bringing
+// the scoped enum `gl::GLenum` into scope unqualified. SpoutLibrary.h would otherwise
+// unconditionally redeclare a plain `typedef unsigned int GLenum;` in the global
+// namespace (and `#define GL_RGBA`, corrupting glbinding's own `GL_RGBA` enumerator) to
+// avoid needing a real GL header; SPOUT_NO_GL_TYPEDEFS (added by
+// support/vcpkg/ports/spout2/fix-gl-typedefs.patch) suppresses that so glbinding's real
+// types are used instead. This only works with glbinding included first, as above.
+#define SPOUT_NO_GL_TYPEDEFS
+#include <SpoutLibrary/SpoutLibrary.h>
 
 namespace {
     using namespace openspace;
 
     constexpr std::string_view _loggerCat = "Spout";
 
-    constexpr Property::PropertyInfo NameSenderInfo = {
-        "SpoutName",
-        "Spout sender name",
-        "This value sets the Spout sender to use a specific name.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo NameSenderInfo = {
+        .identifier = "SpoutName",
+        .name = "Spout sender name",
+        .description = "This value sets the Spout sender to use a specific name.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NameReceiverInfo = {
-        "SpoutName",
-        "Spout receiver name",
-        "This value explicitly sets the Spout receiver to use a specific name. If this "
-        "is not a valid name, the first Spout image is used instead.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo NameReceiverInfo = {
+        .identifier = "SpoutName",
+        .name = "Spout receiver name",
+        .description = "This value explicitly sets the Spout receiver to use a specific "
+            "name. If this is not a valid name, the first Spout image is used instead.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo SelectionInfo = {
-        "SpoutSelection",
-        "Spout selection",
-        "This property displays all available Spout sender on the system. If one them is "
-        "selected, its value is stored in the 'SpoutName' property, overwriting its "
-        "previous value.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo SelectionInfo = {
+        .identifier = "SpoutSelection",
+        .name = "Spout selection",
+        .description = "This property displays all available Spout sender on the system. "
+            "If one them is selected, its value is stored in the 'SpoutName' property, "
+            "overwriting its previous value.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo UpdateInfo = {
-        "UpdateSelection",
-        "Update selection",
-        "If this property is trigged, the 'SpoutSelection' options will be refreshed.",
-        Property::Visibility::AdvancedUser
+    constexpr TriggerPropertyInfo UpdateInfo = {
+        .identifier = "UpdateSelection",
+        .name = "Update selection",
+        .description = "If this property is triggered, the 'SpoutSelection' options will "
+            "be refreshed.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SpoutReceiver)]] ReceiverParameters {
-        // [[codegen::verbatim(NameReceiverInfo.description)]]
-        std::optional<std::string> spoutName;
+        std::optional<std::string> spoutName [[codegen::Info(NameReceiverInfo)]];
     };
 
     struct [[codegen::Dictionary(SpoutSender)]] SenderParameters {
-        // [[codegen::verbatim(NameSenderInfo.description)]]
-        std::string spoutName;
+        std::string spoutName [[codegen::Info(NameSenderInfo)]];
     };
 } // namespace
 #include "spoutwrapper_codegen.cpp"
@@ -124,7 +130,7 @@ const std::vector<std::string>& SpoutReceiver::spoutReceiverList() {
 
     for (int i = 0; i < nSenders; i++) {
         char Name[256];
-        _spoutHandle->GetSenderName(i, Name, 256);
+        _spoutHandle->GetSender(i, Name, 256);
         _receiverList.push_back(Name);
     }
 
@@ -156,9 +162,6 @@ bool SpoutReceiver::updateReceiver() {
         saveGLState();
 
         _spoutHandle->ReceiveTexture(
-            currentSpoutName,
-            width,
-            height,
             static_cast<GLuint>(*_spoutTexture),
             static_cast<GLuint>(GL_TEXTURE_2D),
             true
@@ -267,14 +270,14 @@ unsigned int SpoutReceiver::spoutTexture() const {
 bool SpoutReceiver::updateTexture(unsigned int width, unsigned int height) {
     if (width != _spoutWidth || height != _spoutHeight) {
         releaseTexture();
-        _spoutTexture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
+        _spoutTexture = std::make_unique<opengl::Texture>(
+            opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(width, height, 1),
                 .type = GL_TEXTURE_2D,
-                .format = ghoul::opengl::Texture::Format::RGBA,
+                .format = opengl::Texture::Format::RGBA,
                 .dataType = GL_UNSIGNED_BYTE
             },
-            ghoul::opengl::Texture::SamplerInit {}
+            opengl::Texture::SamplerInit {}
         );
 
         if (_spoutTexture) {
@@ -308,15 +311,15 @@ void SpoutReceiver::releaseTexture() {
     _spoutTexture.release();
 }
 
-const Property::PropertyInfo& SpoutReceiverPropertyProxy::NameInfoProperty() {
+const StringPropertyInfo& SpoutReceiverPropertyProxy::NameInfoProperty() {
     return NameReceiverInfo;
 }
 
-const Property::PropertyInfo& SpoutReceiverPropertyProxy::SelectionInfoProperty() {
+const OptionPropertyInfo& SpoutReceiverPropertyProxy::SelectionInfoProperty() {
     return SelectionInfo;
 }
 
-const Property::PropertyInfo& SpoutReceiverPropertyProxy::UpdateInfoProperty() {
+const TriggerPropertyInfo& SpoutReceiverPropertyProxy::UpdateInfoProperty() {
     return UpdateInfo;
 }
 
@@ -325,7 +328,7 @@ Documentation SpoutReceiverPropertyProxy::Documentation() {
 }
 
 SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(PropertyOwner& owner,
-                                                      const ghoul::Dictionary& dictionary)
+                                                       const Dictionary& dictionary)
     : _spoutName(NameReceiverInfo)
     , _spoutSelection(SelectionInfo)
     , _updateSelection(UpdateInfo)
@@ -424,7 +427,7 @@ bool SpoutSender::updateSenderStatus() {
             return false;
         }
 
-        ghoul_assert(_currentSpoutName.size() < 256, "Spout name must be < 256");
+        assert_msg(_currentSpoutName.size() < 256, "Spout name must be < 256");
         char name[256] = { 0 };
         std::memcpy(name, _currentSpoutName.data(), _currentSpoutName.size());
 
@@ -556,7 +559,7 @@ void SpoutSender::onReleaseSender(std::function<void()> callback) {
     _onReleaseSenderCallback = std::move(callback);
 }
 
-const Property::PropertyInfo& SpoutSenderPropertyProxy::NameInfoProperty() {
+const StringPropertyInfo& SpoutSenderPropertyProxy::NameInfoProperty() {
     return NameSenderInfo;
 }
 
@@ -565,7 +568,7 @@ Documentation SpoutSenderPropertyProxy::Documentation() {
 }
 
 SpoutSenderPropertyProxy::SpoutSenderPropertyProxy(PropertyOwner& owner,
-                                                   const ghoul::Dictionary& dictionary)
+                                                   const Dictionary& dictionary)
     : _spoutName(NameSenderInfo)
 {
     const SenderParameters p = codegen::bake<SenderParameters>(dictionary);

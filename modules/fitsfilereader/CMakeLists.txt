@@ -46,29 +46,13 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 
-# CCfits is dependent on cfitsio, let it handle the internal linking
-add_subdirectory(ext/cfitsio SYSTEM)
-set_target_properties(cfitsio PROPERTIES FOLDER "External")
-
-add_subdirectory(ext/CCfits SYSTEM)
-set_target_properties(CCfits PROPERTIES FOLDER "External")
-
-if (MSVC)
-  target_compile_options(cfitsio PRIVATE "/W0")
-  target_compile_definitions(cfitsio PRIVATE "_SCL_SECURE_NO_WARNINGS")
-
-  target_compile_options(CCfits PRIVATE "/W0")
-  target_compile_definitions(CCfits PRIVATE "_SCL_SECURE_NO_WARNINGS")
-else ()
-  target_compile_options(cfitsio PRIVATE "-w")
-  target_compile_options(CCfits PRIVATE "-w")
-endif ()
-
-
-target_include_directories(openspace-module-fitsfilereader SYSTEM PRIVATE ext ext/CCfits ext/cfitsio)
-target_link_libraries(openspace-module-fitsfilereader PRIVATE cfitsio CCfits)
-
-target_precompile_headers(CCfits PRIVATE
-  <istream>
-  <ostream>
-)
+begin_dependency("CCfits")
+find_package(ccfits CONFIG REQUIRED)
+target_link_libraries(openspace-module-fitsfilereader PRIVATE CCfits::CCfits)
+# vcpkg's CCfits::CCfits target does not propagate CCFITS_STATIC_DEFINE, which its generated
+# ccfits_export.h needs to avoid declaring header-only methods as __declspec(dllimport) when
+# CCfits is built statically (as it is under this triplet). Without it, MSVC never emits those
+# methods anywhere, causing unresolved externals for e.g. FITS::extension() and
+# FITS::setVerboseMode().
+target_compile_definitions(openspace-module-fitsfilereader PRIVATE CCFITS_STATIC_DEFINE)
+end_dependency("CCfits")

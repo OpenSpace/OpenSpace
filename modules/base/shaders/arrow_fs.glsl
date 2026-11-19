@@ -64,7 +64,7 @@ Fragment getFragment() {
     vec3 refDir = reflect(l, n);
     c += specularIntensity * pow(max(dot(viewDir, refDir), 0.0), SpecularPower) * color;
 
-    // Light contribution (one light soruce)
+    // Light contribution (one light source)
     frag.color.rgb = c * LightIntensity * LightColor;
   }
 

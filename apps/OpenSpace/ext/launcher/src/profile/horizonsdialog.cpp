@@ -26,9 +26,9 @@
 
 #include "profile/line.h"
 #include <modules/space/horizonsfile.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
@@ -102,18 +102,20 @@ std::filesystem::path HorizonsDialog::file() const {
 }
 
 void HorizonsDialog::openSaveAs() {
-    const QString filename = QFileDialog::getSaveFileName(
+    QFileDialog dialog = QFileDialog(
         this,
         "Choose a file path where the generated Horizons file will be saved",
         QString::fromStdString(absPath("${USER}").string()),
-        "Horizons data file (*.hrz)",
-        nullptr
-#ifdef __linux__
-        // Linux in Qt5 and Qt6 crashes when trying to access the native dialog here
-        , QFileDialog::DontUseNativeDialog
-#endif // __linux__
+        "Horizons data file (*.hrz)"
     );
-    _fileEdit->setText(filename);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    // Without this, the non-native dialog does not add the extension of the filter
+    dialog.setDefaultSuffix("hrz");
+
+    if (dialog.exec() != QDialog::Accepted || dialog.selectedFiles().isEmpty()) {
+        return;
+    }
+    _fileEdit->setText(dialog.selectedFiles().first());
 }
 
 void HorizonsDialog::typeOnChange(int index) {
@@ -690,7 +692,7 @@ std::pair<std::string, std::string> HorizonsDialog::readTimeRange() {
             else {
                 const std::string msg = std::format(
                     "Could not find all time range information. Latest Horizons "
-                    "mesage: {}", _latestHorizonsError
+                    "message: {}", _latestHorizonsError
                 );
                 appendLog(msg, LogLevel::Warning);
             }
@@ -1083,7 +1085,7 @@ bool HorizonsDialog::handleResult(HorizonsResultCode& result) {
         }
         case HorizonsResultCode::News: {
             std::string msg = std::format(
-                "The target '{}' is too simlar to the Horizons command 'NEWS'",
+                "The target '{}' is too similar to the Horizons command 'NEWS'",
                 _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
@@ -1198,7 +1200,7 @@ bool HorizonsDialog::handleResult(HorizonsResultCode& result) {
                 );
                 appendLog(msg, LogLevel::Error);
             }
-            QMessageBox::critical(this, "Error", "An unknown error occured");
+            QMessageBox::critical(this, "Error", "An unknown error occurred");
             break;
         }
         default: {

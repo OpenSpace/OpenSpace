@@ -29,7 +29,14 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/interaction/actionmanager.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/invariants.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/network/astrocast.h>
 #include <openspace/query/query.h>
@@ -39,13 +46,6 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <fstream>
 #include <format>
@@ -64,22 +64,29 @@ namespace {
 
     constexpr std::string_view _loggerCat = "NavigationHandler";
 
-    constexpr Property::PropertyInfo FrameInfo = {
-        "UseKeyFrameInteraction",
-        "Use keyframe interaction",
-        "If this is set to 'true' the entire interaction is based off key frames rather "
-        "than using the mouse interaction.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo FrameInfo = {
+        .identifier = "UseKeyFrameInteraction",
+        .name = "Use keyframe interaction",
+        .description = "If this is set to 'true' the entire interaction is based off key "
+            "frames rather than using the mouse interaction.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo JumpToFadeDurationInfo = {
-        "JumpToFadeDuration",
-        "Jump to fade duration",
-        "The number of seconds the fading of the rendering should take per default when "
-        "navigating through a 'jump' transition. This is when the rendering is first "
-        "faded to black, then the camera is moved, and then the rendering fades in "
-        "again.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo JumpToFadeDurationInfo = {
+        .identifier = "JumpToFadeDuration",
+        .name = "Jump to fade duration",
+        .description = "The number of seconds the fading of the rendering should take "
+            "per default when navigating through a 'jump' transition. This is when the "
+            "rendering is first faded to black, then the camera is moved, and then the "
+            "rendering fades in again.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 } // namespace
 
@@ -87,8 +94,8 @@ namespace openspace {
 
 NavigationHandler::NavigationHandler()
     : PropertyOwner({ "NavigationHandler", "Navigation Handler" })
-    , _useKeyFrameInteraction(FrameInfo, false)
-    , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.f, 10.f)
+    , _useKeyFrameInteraction(FrameInfo)
+    , _jumpToFadeDuration(JumpToFadeDurationInfo)
 {
     addPropertySubOwner(_orbitalNavigator);
     addPropertySubOwner(_pathNavigator);
@@ -119,7 +126,7 @@ void NavigationHandler::deinitialize() {
 }
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {
-    ghoul_assert(node, "Focus node must not be nullptr");
+    assert_msg(node, "Focus node must not be nullptr");
     _orbitalNavigator.setFocusNode(node);
     _camera->setPosition(anchorNode()->worldPosition());
 }
@@ -130,17 +137,22 @@ void NavigationHandler::setCamera(Camera* camera) {
 }
 
 void NavigationHandler::setNavigationStateNextFrame(const NavigationState& state,
-                                                    bool useTimeStamp)
+                                                    bool useTimeStamp,
+                                OrbitalNavigator::IsCameraInteraction isCameraInteraction)
 {
     _pendingState = state;
+    _pendingStateIsCameraInteraction = isCameraInteraction;
 
     if (useTimeStamp && state.timestamp.has_value()) {
         global::timeManager->setTimeNextFrame(Time(*state.timestamp));
     }
 }
 
-void NavigationHandler::setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec) {
+void NavigationHandler::setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec,
+                                OrbitalNavigator::IsCameraInteraction isCameraInteraction)
+{
     _pendingState = std::move(spec);
+    _pendingStateIsCameraInteraction = isCameraInteraction;
 }
 
 OrbitalNavigator& NavigationHandler::orbitalNavigator() {
@@ -207,7 +219,7 @@ void NavigationHandler::triggerFadeToTransition(std::string transitionScript,
 }
 
 void NavigationHandler::updateCamera(double deltaTime) {
-    ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
+    assert_msg(_camera != nullptr, "Camera must not be nullptr");
 
     // If there is a state to set, do so immediately and then return
     if (_pendingState.has_value()) {
@@ -242,12 +254,12 @@ void NavigationHandler::updateCamera(double deltaTime) {
 }
 
 void NavigationHandler::applyPendingState() {
-    ghoul_assert(_pendingState.has_value(), "Pending pose must have a value");
+    assert_msg(_pendingState.has_value(), "Pending pose must have a value");
 
     std::variant<NodeCameraStateSpec, NavigationState> pending = *_pendingState;
     if (std::holds_alternative<NavigationState>(pending)) {
         const NavigationState ns = std::get<NavigationState>(pending);
-        _orbitalNavigator.setAnchorNode(ns.anchor);
+        _orbitalNavigator.setAnchorNode(ns.anchor, _pendingStateIsCameraInteraction);
         _orbitalNavigator.setAimNode(ns.aim);
         _camera->setPose(ns.cameraPose());
     }
@@ -255,13 +267,17 @@ void NavigationHandler::applyPendingState() {
         const NodeCameraStateSpec spec = std::get<NodeCameraStateSpec>(pending);
         const Waypoint wp = computeWaypointFromNodeInfo(spec);
 
-        _orbitalNavigator.setAnchorNode(wp.nodeIdentifier());
+        _orbitalNavigator.setAnchorNode(
+            wp.nodeIdentifier(),
+            _pendingStateIsCameraInteraction
+        );
         _orbitalNavigator.setAimNode("");
         _camera->setPose(wp.pose());
     }
 
     resetNavigationUpdateVariables();
     _pendingState.reset();
+    _pendingStateIsCameraInteraction = OrbitalNavigator::IsCameraInteraction::Yes;
 }
 
 void NavigationHandler::updateCameraTransitions() {
@@ -305,7 +321,7 @@ void NavigationHandler::updateCameraTransitions() {
     auto triggerApproachEvent = [this](const SceneGraphNode* node) {
         using namespace std::string_literals;
         if (!node->onApproachAction().empty()) {
-            ghoul::Dictionary dict;
+            Dictionary dict;
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Approaching"s);
             for (const std::string& action : node->onApproachAction()) {
@@ -329,7 +345,7 @@ void NavigationHandler::updateCameraTransitions() {
     auto triggerReachEvent = [this](const SceneGraphNode* node) {
         using namespace std::string_literals;
         if (!node->onReachAction().empty()) {
-            ghoul::Dictionary dict;
+            Dictionary dict;
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Reaching"s);
             for (const std::string& action : node->onReachAction()) {
@@ -353,7 +369,7 @@ void NavigationHandler::updateCameraTransitions() {
     auto triggerRecedeEvent = [this](const SceneGraphNode* node) {
         using namespace std::string_literals;
         if (!node->onRecedeAction().empty()) {
-            ghoul::Dictionary dict;
+            Dictionary dict;
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Receding"s);
             for (const std::string& action : node->onRecedeAction()) {
@@ -377,7 +393,7 @@ void NavigationHandler::updateCameraTransitions() {
     auto triggerExitEvent = [this](const SceneGraphNode* node) {
         using namespace std::string_literals;
         if (!node->onExitAction().empty()) {
-            ghoul::Dictionary dict;
+            Dictionary dict;
             dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Exiting"s);
             for (const std::string& action : node->onExitAction()) {
@@ -461,7 +477,7 @@ NavigationState NavigationHandler::navigationState() const {
     const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
         _orbitalNavigator.anchorNode() :
         sceneGraph()->root();
-    ghoul_assert(
+    assert_msg(
         referenceFrame,
         "The root will always exist and the anchor node ought to be reset when removed"
     );
@@ -517,7 +533,7 @@ NavigationState NavigationHandler::navigationState(
 void NavigationHandler::saveNavigationState(const std::filesystem::path& filepath,
                                         const std::string& referenceFrameIdentifier) const
 {
-    ghoul_precondition(!filepath.empty(), "File path must not be empty");
+    precondition(!filepath.empty(), "File path must not be empty");
 
     NavigationState state;
     if (!referenceFrameIdentifier.empty()) {
@@ -545,7 +561,7 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
     std::ofstream ofs(absolutePath);
 
     if (!ofs.good()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error saving navigation state to '{}'", filepath
         ));
     }
@@ -564,7 +580,7 @@ NavigationState NavigationHandler::loadNavigationState(const std::string& filepa
     }
 
     if (!std::filesystem::is_regular_file(absolutePath)) {
-        throw ghoul::FileNotFoundError(absolutePath, "NavigationState");
+        throw FileNotFoundError(absolutePath, "NavigationState");
     }
 
     std::ifstream f = std::ifstream(absolutePath);
@@ -574,7 +590,7 @@ NavigationState NavigationHandler::loadNavigationState(const std::string& filepa
     );
 
     if (contents.empty()) {
-        throw::ghoul::RuntimeError(std::format(
+        throw::RuntimeError(std::format(
             "Failed reading camera state from file: {}. File is empty", absolutePath
         ));
     }

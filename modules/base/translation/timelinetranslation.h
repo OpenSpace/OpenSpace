@@ -34,16 +34,17 @@ namespace openspace {
 
 class TimelineTranslation : public Translation {
 public:
-    explicit TimelineTranslation(const ghoul::Dictionary& dictionary);
+    explicit TimelineTranslation(const Dictionary& dictionary);
 
     void initialize() override;
 
     void update(const UpdateData& data) override;
+    void setOwnerNode(SceneGraphNode* node) override;
     glm::dvec3 position(const UpdateData& data) const override;
     static openspace::Documentation Documentation();
 
 private:
-    Timeline<ghoul::mm_unique_ptr<Translation>> _timeline;
+    Timeline<mm_unique_ptr<Translation>> _timeline;
     BoolProperty _shouldInterpolate;
 };
 

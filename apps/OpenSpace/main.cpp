@@ -22,30 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/cmdparser/commandlineparser.h>
+#include <openspace/cmdparser/multiplecommand.h>
+#include <openspace/cmdparser/singlecommand.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/glm.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/logging/visualstudiooutputlog.h>
+#include <openspace/misc/defer.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stacktrace.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/openspace.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/task.h>
 #include <openspace/util/taskloader.h>
-#include <openspace/openspace.h>
-#include <ghoul/format.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/glm.h>
-#include <ghoul/cmdparser/commandlineparser.h>
-#include <ghoul/cmdparser/multiplecommand.h>
-#include <ghoul/cmdparser/singlecommand.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/stacktrace.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif // WIN32
@@ -60,7 +60,8 @@
 #include <sgct/user.h>
 #include <sgct/window.h>
 #include <stb_image.h>
-#include <tracy/Tracy.hpp>
+#include <cstdint>
+#include <format>
 #include <iostream>
 #include <string_view>
 
@@ -156,13 +157,53 @@ std::vector<SpoutWindow> SpoutWindows;
 //  MiniDump generation
 //
 #ifdef WIN32
+/**
+ * Returns the name of the \p code of an exception if it is one of the ones that are
+ * commonly encountered, or an empty string view otherwise.
+ */
+std::string_view exceptionCodeName(DWORD code) {
+    switch (code) {
+        case EXCEPTION_ACCESS_VIOLATION:      return "EXCEPTION_ACCESS_VIOLATION";
+        case EXCEPTION_DATATYPE_MISALIGNMENT: return "EXCEPTION_DATATYPE_MISALIGNMENT";
+        case EXCEPTION_ILLEGAL_INSTRUCTION:   return "EXCEPTION_ILLEGAL_INSTRUCTION";
+        case EXCEPTION_IN_PAGE_ERROR:         return "EXCEPTION_IN_PAGE_ERROR";
+        case EXCEPTION_INT_DIVIDE_BY_ZERO:    return "EXCEPTION_INT_DIVIDE_BY_ZERO";
+        case EXCEPTION_FLT_DIVIDE_BY_ZERO:    return "EXCEPTION_FLT_DIVIDE_BY_ZERO";
+        case EXCEPTION_FLT_INVALID_OPERATION: return "EXCEPTION_FLT_INVALID_OPERATION";
+        case EXCEPTION_FLT_OVERFLOW:          return "EXCEPTION_FLT_OVERFLOW";
+        case EXCEPTION_STACK_OVERFLOW:        return "EXCEPTION_STACK_OVERFLOW";
+        case EXCEPTION_PRIV_INSTRUCTION:      return "EXCEPTION_PRIV_INSTRUCTION";
+        case EXCEPTION_NONCONTINUABLE_EXCEPTION:
+                                              return "EXCEPTION_NONCONTINUABLE_EXCEPTION";
+        default:                              return "";
+    }
+}
+
 LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
     SYSTEMTIME stLocalTime;
     GetLocalTime(&stLocalTime);
 
+    if (exceptionPointers && exceptionPointers->ExceptionRecord) {
+        const EXCEPTION_RECORD& record = *exceptionPointers->ExceptionRecord;
+        const std::string_view name = exceptionCodeName(record.ExceptionCode);
+        LFATAL(std::format(
+            "Exception 0x{:08X}{} at address 0x{:016X}",
+            record.ExceptionCode,
+            name.empty() ? std::string() : std::format(" ({})", name),
+            reinterpret_cast<std::uintptr_t>(record.ExceptionAddress)
+        ));
+    }
+
     LFATAL("Printing Stack Trace that lead to the crash:");
-    std::vector<std::string> stackTrace = ghoul::stackTrace();
-    for (const std::string& s : stackTrace) {
+    std::vector<std::string> trace = stackTraceFromContext(
+        exceptionPointers ? exceptionPointers->ContextRecord : nullptr
+    );
+    if (trace.empty()) {
+        // Better than nothing, even though the frames of the filter itself will be at
+        // the top of this
+        trace = stackTrace();
+    }
+    for (const std::string& s : trace) {
         LINFO(s);
     }
 
@@ -219,7 +260,11 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         GetCurrentProcess(),
         GetCurrentProcessId(),
         hDumpFile,
-        MiniDumpWithDataSegs,
+        static_cast<MINIDUMP_TYPE>(
+            MiniDumpWithDataSegs |
+            MiniDumpWithIndirectlyReferencedMemory |
+            MiniDumpWithThreadInfo
+        ),
         &exceptionParameter,
         nullptr,
         nullptr
@@ -454,7 +499,7 @@ void mainPreSyncFunc() {
     try {
         global::openSpaceEngine->preSynchronization();
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LFATALC(e.component, e.message);
         Engine::instance().terminate();
     }
@@ -494,25 +539,12 @@ void mainRenderFunc(const sgct::RenderData& data) {
     currentWindow = &data.window;
     currentViewport = &data.viewport;
     currentFrustumMode = data.frustumMode;
-    currentDrawResolution = glm::ivec2(data.bufferSize.x, data.bufferSize.y);
+    currentDrawResolution = data.bufferSize;
 
-    glm::vec3 pos;
-    std::memcpy(glm::value_ptr(pos), &Engine::defaultUser().posMono().x, sizeof(vec3));
+    const glm::vec3 pos = Engine::defaultUser().posMono();
+    const glm::mat4 viewMatrix = data.viewMatrix * glm::translate(glm::mat4(1.f), pos);
 
-    glm::mat4 viewMatrix;
-    std::memcpy(
-        glm::value_ptr(viewMatrix),
-        data.viewMatrix.values.data(),
-        sizeof(mat4)
-    );
-    viewMatrix = viewMatrix * glm::translate(glm::mat4(1.f), pos);
-
-    glm::mat4 projectionMatrix;
-    std::memcpy(
-        glm::value_ptr(projectionMatrix),
-        data.projectionMatrix.values.data(),
-        sizeof(mat4)
-    );
+    glm::mat4 projectionMatrix = data.projectionMatrix;
 #ifdef OPENVR_SUPPORT
     bool currentWindowIsHMD = FirstOpenVRWindow == SgctEngine->getCurrentWindowPtr();
     if (sgct::SGCTOpenVR::isHMDActive() && currentWindowIsHMD) {
@@ -523,14 +555,8 @@ void mainRenderFunc(const sgct::RenderData& data) {
 #endif // OPENVR_SUPPORT
 
     try {
-        glm::mat4 modelMatrix;
-        std::memcpy(
-            glm::value_ptr(modelMatrix),
-            data.modelMatrix.values.data(),
-            sizeof(mat4)
-        );
-        currentModelMatrix = modelMatrix;
-        global::openSpaceEngine->render(modelMatrix, viewMatrix, projectionMatrix);
+        currentModelMatrix = data.modelMatrix;
+        global::openSpaceEngine->render(data.modelMatrix, viewMatrix, projectionMatrix);
 
 #ifdef OPENSPACE_HAS_SPOUT
         for (SpoutWindow& w : SpoutWindows) {
@@ -555,7 +581,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
         }
 #endif // OPENSPACE_HAS_SPOUT
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERRORC(e.component, e.message);
     }
 
@@ -571,12 +597,12 @@ void mainDraw2DFunc(const sgct::RenderData& data) {
     currentWindow = &data.window;
     currentViewport = &data.viewport;
     currentFrustumMode = data.frustumMode;
-    currentDrawResolution = glm::ivec2(data.bufferSize.x, data.bufferSize.y);
+    currentDrawResolution = data.bufferSize;
 
     try {
         global::openSpaceEngine->drawOverlays();
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERRORC(e.component, e.message);
     }
 
@@ -784,7 +810,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentWindowSize = []() {
         ZoneScoped;
 
-        return glm::ivec2(currentWindow->windowSize().x, currentWindow->windowSize().y);
+        return currentWindow->windowSize();
     };
     sgctDelegate.currentSubwindowSize = []() {
         ZoneScoped;
@@ -804,8 +830,7 @@ void setSgctDelegateFunctions() {
                 );
             default:
                 return glm::ivec2(
-                    currentWindow->windowSize().x * currentViewport->size().x,
-                    currentWindow->windowSize().y * currentViewport->size().y
+                    glm::vec2(currentWindow->windowSize()) * currentViewport->size()
                 );
         }
     };
@@ -815,12 +840,10 @@ void setSgctDelegateFunctions() {
         const Viewport* viewport = dynamic_cast<const Viewport*>(currentViewport);
         if (viewport) {
             if (viewport->hasSubViewports() && viewport->nonLinearProjection()) {
-                const ivec2 dim = viewport->nonLinearProjection()->cubemapResolution();
-                return glm::ivec2(dim.x, dim.y);
+                return viewport->nonLinearProjection()->cubemapResolution();
             }
             else {
-                const ivec2 dim = currentWindow->framebufferResolution();
-                return glm::ivec2(dim.x, dim.y);
+                return currentWindow->framebufferResolution();
             }
         }
         else {
@@ -831,8 +854,7 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         if (currentViewport) {
-            const vec2 size = currentViewport->size();
-            return glm::ivec2(size.x, size.y);
+            return glm::ivec2(currentViewport->size());
         }
         return glm::ivec2(-1, -1);
     };
@@ -840,22 +862,20 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         if (currentViewport) {
-            const ivec2 res = currentWindow->windowSize();
-            const vec2 size = currentViewport->size();
-            return glm::ivec2(size.x * res.x, size.y * res.y);
+            const glm::ivec2 res = currentWindow->windowSize();
+            const glm::vec2 size = currentViewport->size();
+            return glm::ivec2(size * glm::vec2(res));
         }
         return glm::ivec2(-1, -1);
     };
     sgctDelegate.dpiScaling = []() {
         ZoneScoped;
 
-        const vec2 scale = currentWindow->scale();
-        return glm::vec2(scale.x, scale.y);
+        return currentWindow->scale();
     };
     sgctDelegate.firstWindowResolution = []() {
         ZoneScoped;
-        sgct::Window* window = Engine::instance().windows().front().get();
-        return glm::ivec2(window->windowSize().x, window->windowSize().y);
+        return Engine::instance().windows().front()->windowSize();
     };
     sgctDelegate.guiWindowResolution = []() {
         ZoneScoped;
@@ -871,7 +891,7 @@ void setSgctDelegateFunctions() {
             guiWin = Engine::instance().windows().front().get();
         }
 
-        return glm::ivec2(guiWin->windowSize().x, guiWin->windowSize().y);
+        return guiWin->windowSize();
     };
     sgctDelegate.osDpiScaling = []() {
         ZoneScoped;
@@ -921,7 +941,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.isMaster = []() {
         ZoneScoped;
 
-        return Engine::instance().isMaster();
+        return Engine::instance().isServer();
     };
     sgctDelegate.modelMatrix = []() {
         ZoneScoped;
@@ -976,7 +996,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.nameForWindow = [](size_t windowIdx) {
         ZoneScoped;
 
-        ghoul_assert(
+        assert_msg(
             windowIdx < Engine::instance().windows().size(),
             "Invalid window index"
         );
@@ -990,7 +1010,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.horizFieldOfView = [](size_t windowIdx) {
         ZoneScoped;
 
-        ghoul_assert(
+        assert_msg(
             windowIdx < Engine::instance().windows().size(),
             "Invalid window index"
         );
@@ -999,7 +1019,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setHorizFieldOfView = [](size_t windowIdx, float hFovDeg) {
         ZoneScoped;
 
-        ghoul_assert(
+        assert_msg(
             windowIdx < Engine::instance().windows().size(),
             "Invalid window index"
         );
@@ -1049,10 +1069,10 @@ void setSgctDelegateFunctions() {
                 continue;
             }
 
-            const sgct::ivec2 res = window->windowSize();
+            const glm::ivec2 res = window->windowSize();
             for (const std::unique_ptr<Viewport>& viewport : window->viewports()) {
-                const sgct::vec2 pos = viewport->position();
-                const sgct::vec2 size = viewport->size();
+                const glm::vec2 pos = viewport->position();
+                const glm::vec2 size = viewport->size();
                 const glm::vec4 bounds = glm::vec4(
                     pos.x * res.x,
                     (1.0 - pos.y - size.y) * res.y,
@@ -1077,7 +1097,7 @@ void setSgctDelegateFunctions() {
         sgct::Engine::instance().setStatsGraphScale(scale);
     };
     sgctDelegate.setStatisticsGraphOffset = [](glm::vec2 offset) {
-        sgct::Engine::instance().setStatsGraphOffset(sgct::vec2{ offset.x, offset.y });
+        sgct::Engine::instance().setStatsGraphOffset(offset);
     };
     sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
         auto createGLFWCursor = [](int shape) {
@@ -1138,7 +1158,7 @@ void setSgctDelegateFunctions() {
                 createGLFWCursor(GLFW_NOT_ALLOWED_CURSOR)
             },
         };
-        ghoul_assert(
+        assert_msg(
             Cursors.find(mouse) != Cursors.end(), "Tried to create non-existent cursor"
         );
         glfwSetCursor(glfwGetCurrentContext(), Cursors[mouse]);
@@ -1186,16 +1206,16 @@ int main(int argc, char* argv[]) {
     // configuration file, we will deinitialize this LogManager and reinitialize it later
     // with the correct LogLevel
     {
-        using namespace ghoul::logging;
+        using namespace openspace::logging;
         LogManager::initialize(LogLevel::Debug, LogManager::ImmediateFlush::Yes);
 #ifdef WIN32
         if (IsDebuggerPresent()) {
-            LogMgr.addLog(std::make_unique<ghoul::logging::VisualStudioOutputLog>());
+            LogMgr.addLog(std::make_unique<logging::VisualStudioOutputLog>());
         }
 #endif // WIN32
     }
 
-    ghoul::initialize();
+    initialize();
     global::create();
 
     // Register the path of the executable, to make it possible to find other files in the
@@ -1203,7 +1223,7 @@ int main(int argc, char* argv[]) {
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
+        filesystem::FileSystem::Override::Yes
     );
     LDEBUG(std::format("Registering ${{BIN}} to '{}'", absPath("${BIN}")));
 
@@ -1211,13 +1231,13 @@ int main(int argc, char* argv[]) {
     // Parse commandline arguments
     //
     char* prgName = argv[0];
-    ghoul::cmdparser::CommandlineParser parser(
+    cmdparser::CommandlineParser parser(
         std::string(prgName),
-        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+        cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
     CommandlineArguments commandlineArguments;
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.configuration,
         "--file",
         "-f",
@@ -1225,7 +1245,7 @@ int main(int argc, char* argv[]) {
         "path token is available and any other path has to be specified relative to the "
         "current working directory."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.windowConfig,
         "--config",
         "-c",
@@ -1234,14 +1254,14 @@ int main(int argc, char* argv[]) {
         "settings. This value can include path tokens, so for example "
         "`${CONFIG}/single.json` is a valid value."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.profile,
         "--profile",
         "-p",
         "Specifies the profile that should be used to start OpenSpace and that overrides "
         "the profile specified in the `openspace.cfg` and the settings."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.profileAddons,
         "--addons",
         "-a",
@@ -1250,7 +1270,7 @@ int main(int argc, char* argv[]) {
         "with a \";\", for example \"--addons abc;def\" specifies the addons \"abc\" and "
         "\"def\"."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.propertyVisibility,
         "--propertyVisibility",
         "",
@@ -1260,7 +1280,7 @@ int main(int argc, char* argv[]) {
         "values for this parameter are: `Developer`, `AdvancedUser`, `User`, and "
         "`NoviceUser`."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommand<std::string>>(
         commandlineArguments.task,
         "--task",
         "-t",
@@ -1268,7 +1288,7 @@ int main(int argc, char* argv[]) {
         "the task finishes, the application will automatically close again. All other "
         "commandline arguments are ignored, if a task is specified."
     ));
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommandZeroArguments>(
+    parser.addCommand(std::make_unique<cmdparser::SingleCommandZeroArguments>(
         commandlineArguments.bypassLauncher,
         "--bypassLauncher",
         "-b",
@@ -1285,7 +1305,7 @@ int main(int argc, char* argv[]) {
             exit(EXIT_SUCCESS);
         }
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LFATALC(e.component, e.message);
         exit(EXIT_FAILURE);
     }
@@ -1349,27 +1369,27 @@ int main(int argc, char* argv[]) {
         }
         if (commandlineArguments.profileAddons.has_value()) {
             global::configuration->profile.addons =
-                ghoul::tokenizeString(*commandlineArguments.profileAddons, ';');
+                tokenizeString(*commandlineArguments.profileAddons, ';');
         }
         if (commandlineArguments.propertyVisibility.has_value()) {
             if (commandlineArguments.propertyVisibility == "NoviceUser") {
                 global::configuration->propertyVisibility =
-                    Property::Visibility::NoviceUser;
+                    Visibility::NoviceUser;
             }
             else if (commandlineArguments.propertyVisibility == "User") {
                 global::configuration->propertyVisibility =
-                    Property::Visibility::User;
+                    Visibility::User;
             }
             else if (commandlineArguments.propertyVisibility == "AdvancedUser") {
                 global::configuration->propertyVisibility =
-                    Property::Visibility::AdvancedUser;
+                    Visibility::AdvancedUser;
             }
             else if (commandlineArguments.propertyVisibility == "Developer") {
                 global::configuration->propertyVisibility =
-                    Property::Visibility::Developer;
+                    Visibility::Developer;
             }
             else {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "Unknown property visibility value '{}'",
                     *commandlineArguments.propertyVisibility
                 ));
@@ -1384,16 +1404,16 @@ int main(int argc, char* argv[]) {
     catch (const SpecificationError& e) {
         LFATALC("main", "Loading of configuration file failed");
         logError(e);
-        ghoul::deinitialize();
+        deinitialize();
         exit(EXIT_FAILURE);
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         // Write out all of the information about the exception and flush the logs
         LFATALC(e.component, e.message);
-        if (ghoul::logging::LogManager::isInitialized()) {
+        if (logging::LogManager::isInitialized()) {
             LogMgr.flushLogs();
         }
-        ghoul::deinitialize();
+        deinitialize();
         return EXIT_FAILURE;
     }
 
@@ -1493,11 +1513,11 @@ int main(int argc, char* argv[]) {
 
         const std::filesystem::path profile = global::configuration->profile.profile;
 
-        const bool isDefaultProfile = ghoul::filesystem::isSubdirectory(
+        const bool isDefaultProfile = filesystem::isSubdirectory(
             profile,
             absPath("${PROFILES}")
         );
-        const bool isUserProfile = ghoul::filesystem::isSubdirectory(
+        const bool isUserProfile = filesystem::isSubdirectory(
             profile,
             absPath("${USER_PROFILES}")
         );
@@ -1595,12 +1615,12 @@ int main(int argc, char* argv[]) {
         LFATALC("main", e.what());
         Engine::destroy();
         global::openSpaceEngine->deinitialize();
-        ghoul::deinitialize();
+        deinitialize();
         exit(EXIT_FAILURE);
     }
     catch (...) {
         global::openSpaceEngine->deinitialize();
-        ghoul::deinitialize();
+        deinitialize();
         Engine::destroy();
         exit(EXIT_FAILURE);
     }
@@ -1631,6 +1651,6 @@ int main(int argc, char* argv[]) {
     }
 #endif // OPENSPACE_HAS_SPOUT
 
-    ghoul::deinitialize();
+    deinitialize();
     exit(EXIT_SUCCESS);
 }

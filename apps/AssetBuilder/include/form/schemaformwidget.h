@@ -73,7 +73,8 @@ public:
 
     /**
      * Cross-connects the field identified by \p memberName between this form and \p other
-     * so that text edits and optional-field toggles stay in sync.
+     * so that text changes (both user edits and programmatic) and optional-field toggles
+     * stay in sync.
      *
      * \param memberName The schema member name present in both forms
      * \param other The other SchemaFormWidget to sync with

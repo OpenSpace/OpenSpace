@@ -27,17 +27,17 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/invariants.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -56,30 +56,46 @@ namespace {
     // These are used when setting the time from Lua time interpolation functions when
     // called without arguments
 
-    constexpr Property::PropertyInfo DefaultTimeInterpolationDurationInfo = {
-        "DefaultTimeInterpolationDuration",
-        "Default time interpolation duration",
-        "The default duration taken to interpolate between times."
+    constexpr FloatPropertyInfo DefaultTimeInterpolationDurationInfo = {
+        .identifier = "DefaultTimeInterpolationDuration",
+        .name = "Default time interpolation duration",
+        .description = "The default duration taken to interpolate between times.",
+        .defaults = {
+            .value = 2.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DefaultDeltaTimeInterpolationDurationInfo = {
-        "DefaultDeltaTimeInterpolationDuration",
-        "Default delta time interpolation duration",
-        "The default duration taken to interpolate between delta times."
+    constexpr FloatPropertyInfo DefaultDeltaTimeInterpolationDurationInfo = {
+        .identifier = "DefaultDeltaTimeInterpolationDuration",
+        .name = "Default delta time interpolation duration",
+        .description = "The default duration taken to interpolate between delta times.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DefaultPauseInterpolationDurationInfo = {
-        "DefaultPauseInterpolationDuration",
-        "Default pause interpolation duration",
-        "The default duration taken to transition to the paused state, when "
-        "interpolating."
+    constexpr FloatPropertyInfo DefaultPauseInterpolationDurationInfo = {
+        .identifier = "DefaultPauseInterpolationDuration",
+        .name = "Default pause interpolation duration",
+        .description = "The default duration taken to transition to the paused state, "
+            "when interpolating.",
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DefaultUnpauseInterpolationDurationInfo = {
-        "DefaultUnpauseInterpolationDuration",
-        "Default unpause interpolation duration",
-        "The default duration taken to transition to the unpaused state, when "
-        "interpolating."
+    constexpr FloatPropertyInfo DefaultUnpauseInterpolationDurationInfo = {
+        .identifier = "DefaultUnpauseInterpolationDuration",
+        .name = "Default unpause interpolation duration",
+        .description = "The default duration taken to transition to the unpaused state, "
+            "when interpolating.",
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 5.f }
+        }
     };
 
     constexpr std::string_view DeltaTimeStepsGuiPath = "/Time/Simulation Speed/Steps";
@@ -104,30 +120,10 @@ namespace openspace {
 
 TimeManager::TimeManager()
     : PropertyOwner({ "TimeManager", "Time Manager" })
-    , _defaultTimeInterpolationDuration(
-        DefaultTimeInterpolationDurationInfo,
-        2.f,
-        0.f,
-        5.f
-    )
-    , _defaultDeltaTimeInterpolationDuration(
-        DefaultDeltaTimeInterpolationDurationInfo,
-        1.f,
-        0.f,
-        5.f
-    )
-    , _defaultPauseInterpolationDuration(
-        DefaultPauseInterpolationDurationInfo,
-        0.5f,
-        0.f,
-        5.f
-    )
-    , _defaultUnpauseInterpolationDuration(
-        DefaultUnpauseInterpolationDurationInfo,
-        1.f,
-        0.f,
-        5.f
-    )
+    , _defaultTimeInterpolationDuration(DefaultTimeInterpolationDurationInfo)
+    , _defaultDeltaTimeInterpolationDuration(DefaultDeltaTimeInterpolationDurationInfo)
+    , _defaultPauseInterpolationDuration(DefaultPauseInterpolationDurationInfo)
+    , _defaultUnpauseInterpolationDuration(DefaultUnpauseInterpolationDurationInfo)
 {
     addProperty(_defaultTimeInterpolationDuration);
     addProperty(_defaultDeltaTimeInterpolationDuration);
@@ -136,7 +132,7 @@ TimeManager::TimeManager()
 }
 
 void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
-    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
+    precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
     const OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::CameraPath) {
@@ -166,7 +162,7 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
 }
 
 void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) {
-    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
+    precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
     const float duration = global::timeManager->defaultTimeInterpolationDuration();
 
@@ -542,19 +538,21 @@ void TimeManager::addDeltaTimesKeybindings() {
 
     const int nKeys = static_cast<int>(Keys.size());
     const int nSteps = static_cast<int>(steps.size());
+    const int maxKeyBinds = 3 * nKeys;
 
     // For each key, add upp to three keybinds (no modifier, then SHIFT and then CTRL),
-    // plus inverted version of each time step one using the ALT modifier
-    for (int i = 0; i < nSteps; i++) {
+    // plus inverted version of each time step one using the ALT modifier. Steps beyond
+    // that would reuse already bound keys, so they are not mapped
+    for (int i = 0; i < std::min(nSteps, maxKeyBinds); i++) {
         const Key key = Keys[i % nKeys];
         const double deltaTimeStep = steps[i];
 
         KeyModifier modifier = KeyModifier::None;
-        if (i > nKeys - 1) {
-            modifier = KeyModifier::Shift;
-        }
-        else if (i > 2 * nKeys - 1) {
+        if (i >= 2 * nKeys) {
             modifier = KeyModifier::Control;
+        }
+        else if (i >= nKeys) {
+            modifier = KeyModifier::Shift;
         }
 
         const KeyModifier negativeModifier = modifier | KeyModifier::Alt;
@@ -564,7 +562,6 @@ void TimeManager::addDeltaTimesKeybindings() {
     }
 
     LINFO("Added keybindings for specified delta time steps");
-    const int maxKeyBinds = 3 * nKeys;
     if (nSteps > maxKeyBinds) {
         LWARNING(std::format(
             "Error settings delta time keys: Too many delta times, so not all could be "
@@ -596,7 +593,7 @@ void TimeManager::clearDeltaTimesKeybindings() {
             LWARNING(std::format(
                 "Updating keybindings for new delta time steps: More than one action "
                 "was bound to key '{}'. The following actions are removed: {}",
-                ghoul::to_string(kb), names
+                to_string(kb), names
             ));
         }
         global::keybindingManager->removeKeyBinding(kb);
@@ -667,7 +664,7 @@ void TimeManager::removeTimeChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _timeChangeCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -684,7 +681,7 @@ void TimeManager::removeDeltaTimeChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _deltaTimeChangeCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -701,7 +698,7 @@ void TimeManager::removeDeltaTimeStepsChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _deltaTimeStepsChangeCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -718,7 +715,7 @@ void TimeManager::removeTimeJumpCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _timeJumpCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -735,7 +732,7 @@ void TimeManager::removeTimelineChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _timelineChangeCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -964,7 +961,7 @@ void TimeManager::setTimeFromProfile(const Profile& p) {
         {
             const std::string t = Time::currentWallTime();
             std::variant<std::string, double> t2 = Time::advancedTime(t, p.time->value);
-            ghoul_assert(std::holds_alternative<std::string>(t2), "Wrong type");
+            assert_msg(std::holds_alternative<std::string>(t2), "Wrong type");
             _currentTime.data() = Time(std::get<std::string>(t2));
             break;
         }

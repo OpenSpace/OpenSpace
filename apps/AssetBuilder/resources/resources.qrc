@@ -1,6 +1,9 @@
 <RCC>
   <qresource prefix="/">
     <file>qss/assetbuilder.qss</file>
-    <file>images/dropdown-arrow.svg</file>
+    <file>images/dropdown-arrow.png</file>
+    <file>images/dropdown-arrow@2x.png</file>
+    <file>images/dropdown-arrow-up.png</file>
+    <file>images/dropdown-arrow-up@2x.png</file>
   </qresource>
 </RCC>

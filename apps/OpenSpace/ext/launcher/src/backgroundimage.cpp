@@ -24,8 +24,8 @@
 
 #include "backgroundimage.h"
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
 #include <QPainter>
 #include <QPixmap>
 #include <random>
@@ -77,10 +77,10 @@ BackgroundImage::BackgroundImage(QRect size, const std::filesystem::path& syncFo
     }
 
     // Now we know which folder to use, we will pick an image at random
-    std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
+    std::vector<std::filesystem::path> files = openspace::filesystem::walkDirectory(
         latest.path,
-        ghoul::filesystem::Recursive::No,
-        ghoul::filesystem::Sorted::No,
+        openspace::filesystem::Recursive::No,
+        openspace::filesystem::Sorted::No,
         [](const std::filesystem::path& p) {
             return p.extension() == ".png" && p.filename() != "overlay.png";
         }

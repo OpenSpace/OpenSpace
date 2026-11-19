@@ -27,19 +27,19 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
 
 class RenderableShadowCylinder : public Renderable {
 public:
-    explicit RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
+    explicit RenderableShadowCylinder(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -69,7 +69,7 @@ private:
     StringProperty _bodyFrame;
     OptionProperty _aberration;
 
-    ghoul::opengl::ProgramObject* _shader = nullptr;
+    opengl::ProgramObject* _shader = nullptr;
     UniformCache(modelViewProjectionTransform, shadowColor, opacity) _uniformCache;
 
     glm::dmat3 _stateMatrix = glm::dmat3(1.0);

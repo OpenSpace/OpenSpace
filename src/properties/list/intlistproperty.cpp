@@ -24,29 +24,32 @@
 
 #include <openspace/properties/list/intlistproperty.h>
 
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-IntListProperty::IntListProperty(PropertyInfo info, std::vector<int> values)
-    : ListProperty(std::move(info), std::move(values))
+IntListProperty::IntListProperty(IntListPropertyInfo info)
+    : ListProperty(
+        info,
+        std::vector<int>(info.defaults.value.begin(), info.defaults.value.end())
+    )
 {}
 
 std::string_view IntListProperty::className() const {
     return "IntListProperty";
 }
 
-ghoul::lua::LuaTypes IntListProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes IntListProperty::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void IntListProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 std::vector<int> IntListProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<std::vector<int>>(state);
+    return lua::value<std::vector<int>>(state);
 }
 
 std::string IntListProperty::stringValue() const {
@@ -65,6 +68,7 @@ nlohmann::json IntListProperty::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": {
               "type": "array",
               "items": { "type": "number" }

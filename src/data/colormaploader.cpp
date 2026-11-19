@@ -24,20 +24,22 @@
 
 #include <openspace/data/colormaploader.h>
 
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/stringhelper.h>
 #include <format>
 #include <fstream>
 #include <sstream>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ColorMapLoader";
 
     bool startsWith(std::string lhs, std::string_view rhs) noexcept {
-        lhs = ghoul::toLowerCase(lhs);
+        lhs = toLowerCase(lhs);
         return (rhs.size() <= lhs.size()) && (lhs.substr(0, rhs.size()) == rhs);
     }
 
@@ -68,20 +70,18 @@ namespace {
 namespace openspace::dataloader::colormap {
 
 ColorMap loadCmapFile(std::filesystem::path path) {
-    ghoul_assert(std::filesystem::exists(path), "File must exist");
+    assert_msg(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file = std::ifstream(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(std::format(
-            "Failed to open color map file '{}'", path
-        ));
+        throw RuntimeError(std::format("Failed to open color map file '{}'", path));
     }
 
     ColorMap res;
     int nColorLines = -1;
 
     std::string line;
-    while (ghoul::getline(file, line)) {
+    while (openspace::getline(file, line)) {
         // Ignore empty line or commented-out lines
         if (line.empty() || line[0] == '#') {
             continue;
@@ -147,16 +147,16 @@ ColorMap loadCmapFile(std::filesystem::path path) {
     return res;
 }
 
-std::unique_ptr<ghoul::opengl::Texture>
-loadColorMapTexture(const std::filesystem::path& filename,
-                    ghoul::opengl::Texture::SamplerInit samplerSettings)
+std::unique_ptr<opengl::Texture> loadColorMapTexture(
+                                                    const std::filesystem::path& filename,
+                                             opengl::Texture::SamplerInit samplerSettings)
 {
     std::string extension = std::filesystem::path(filename).extension().string();
     if (!extension.empty()) {
         extension = extension.substr(1);
     }
-    ghoul_assert(!extension.empty(), "Filename must have an extension");
-    extension = ghoul::toLowerCase(extension);
+    assert_msg(!extension.empty(), "Filename must have an extension");
+    extension = toLowerCase(extension);
 
     if (extension == "cmap") {
         const ColorMap colorMap = loadCmapFile(filename);
@@ -168,11 +168,15 @@ loadColorMapTexture(const std::filesystem::path& filename,
             return nullptr;
         }
 
-        return std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit {
-                .dimensions = glm::uvec3(static_cast<unsigned int>(colorMap.entries.size()), 1, 1),
+        return std::make_unique<opengl::Texture>(
+            opengl::Texture::FormatInit {
+                .dimensions = glm::uvec3(
+                    static_cast<unsigned int>(colorMap.entries.size()),
+                    1,
+                    1
+                ),
                 .type = GL_TEXTURE_1D,
-                .format = ghoul::opengl::Texture::Format::RGBA,
+                .format = opengl::Texture::Format::RGBA,
                 .dataType = GL_FLOAT
             },
             samplerSettings,
@@ -181,11 +185,11 @@ loadColorMapTexture(const std::filesystem::path& filename,
         // @TODO (emmbr, 2026-04-08) Consider including nanColor, below and above range.
         // These are now ignored in the texture
     }
-    else if (ghoul::io::texture::isSupportedReadExtension(extension)) {
-        return ghoul::io::texture::loadTexture(filename, 1, samplerSettings);
+    else if (io::texture::isSupportedReadExtension(extension)) {
+        return io::texture::loadTexture(filename, 1, samplerSettings);
     }
     else {
-        throw ghoul::io::texture::MissingReaderException(extension, filename);
+        throw io::texture::MissingReaderException(extension, filename);
     }
 }
 

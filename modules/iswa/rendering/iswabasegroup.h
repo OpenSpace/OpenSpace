@@ -27,17 +27,16 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/designpattern/synchronousevent.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/designpattern/event.h>
 #include <memory>
-
-namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
 class DataProcessor;
+class Dictionary;
 
 class IswaBaseGroup : public PropertyOwner {
 public:
@@ -50,7 +49,7 @@ public:
     virtual void clearGroup();
 
     std::shared_ptr<DataProcessor> dataProcessor();
-    ghoul::Event<ghoul::Dictionary>& groupEvent();
+    SynchronousEvent<Dictionary>& groupEvent();
 
 protected:
     void registerProperties();
@@ -60,7 +59,7 @@ protected:
     FloatProperty _alpha;
     TriggerProperty _delete;
 
-    ghoul::Event<ghoul::Dictionary> _groupEvent;
+    SynchronousEvent<Dictionary> _groupEvent;
     std::shared_ptr<DataProcessor> _dataProcessor;
 
     bool _registered = false;

@@ -31,6 +31,8 @@
 
 namespace openspace {
 
+void initialize();
+void deinitialize();
 std::string licenseText();
 
 #ifdef OPENSPACE_RELEASE_BUILD

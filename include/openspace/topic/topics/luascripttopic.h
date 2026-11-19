@@ -27,6 +27,8 @@
 
 #include <openspace/topic/topics/topic.h>
 
+#include <string>
+
 namespace openspace {
 
 struct Schema;
@@ -37,6 +39,17 @@ public:
     bool isDone() const override;
 
     static openspace::Schema Schema();
+
+    /**
+     * Converts the provided \p value into the text of a Lua value that is equivalent to
+     * it. Objects and arrays are converted into tables. This is used to pass the
+     * arguments of a function call to Lua.
+     *
+     * \param value The JSON value that is converted
+     * \return The Lua representation of the \p value
+     * \throw lua::LuaFormatException If the \p value cannot be represented in Lua
+     */
+    static std::string jsonToLua(const nlohmann::json& value);
 
 private:
     void runScript(std::string script, bool shouldReturn, bool shouldBeSynchronized);

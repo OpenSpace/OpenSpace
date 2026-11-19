@@ -27,48 +27,63 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringhelper.h>
 #include <optional>
 #include <utility>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ShowWhenEnabledInfo = {
-        "ShowWhenEnabled",
-        "Show when enabled",
-        "Show text when the input is enabled.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowWhenEnabledInfo = {
+        .identifier = "ShowWhenEnabled",
+        .name = "Show when enabled",
+        .description = "Show text when the input is enabled.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ShowWhenDisabledInfo = {
-        "ShowWhenDisabled",
-        "Show when disabled",
-        "Show text when the input is disabled.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowWhenDisabledInfo = {
+        .identifier = "ShowWhenDisabled",
+        .name = "Show when disabled",
+        .description = "Show text when the input is disabled.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ShowKeyboardInfo = {
-        "ShowKeyboard",
-        "Show keyboard information",
-        "Display the state of the keyboard input.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowKeyboardInfo = {
+        .identifier = "ShowKeyboard",
+        .name = "Show keyboard information",
+        .description = "Display the state of the keyboard input.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ShowMouseInfo = {
-        "ShowMouse",
-        "Show mouse information",
-        "Display the state of the mouse input.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowMouseInfo = {
+        .identifier = "ShowMouse",
+        .name = "Show mouse information",
+        .description = "Display the state of the mouse input.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ShowJoystickInfo = {
-        "ShowJoystick",
-        "Show joystick information",
-        "Display the state of the joystick input.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShowJoystickInfo = {
+        .identifier = "ShowJoystick",
+        .name = "Show joystick information",
+        .description = "Display the state of the joystick input.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
     // Shows the current state of the different methods to provide user input: keyboard,
@@ -77,20 +92,15 @@ namespace {
     // Each input method has the ability to be selectively disabled, meaning that all
     // inputs from that input method are ignored by the system entirely.
     struct [[codegen::Dictionary(DashboardItemInputState)]] Parameters {
-        // [[codegen::verbatim(ShowWhenEnabledInfo.description)]]
-        std::optional<bool> showWhenEnabled;
+        std::optional<bool> showWhenEnabled [[codegen::Info(ShowWhenEnabledInfo)]];
 
-        // [[codegen::verbatim(ShowWhenDisabledInfo.description)]]
-        std::optional<bool> showWhenDisabled;
+        std::optional<bool> showWhenDisabled [[codegen::Info(ShowWhenDisabledInfo)]];
 
-        // [[codegen::verbatim(ShowKeyboardInfo.description)]]
-        std::optional<bool> showKeyboard;
+        std::optional<bool> showKeyboard [[codegen::Info(ShowKeyboardInfo)]];
 
-        // [[codegen::verbatim(ShowMouseInfo.description)]]
-        std::optional<bool> showMouse;
+        std::optional<bool> showMouse [[codegen::Info(ShowMouseInfo)]];
 
-        // [[codegen::verbatim(ShowJoystickInfo.description)]]
-        std::optional<bool> showJoystick;
+        std::optional<bool> showJoystick [[codegen::Info(ShowJoystickInfo)]];
     };
 } // namespace
 #include "dashboarditeminputstate_codegen.cpp"
@@ -104,13 +114,13 @@ Documentation DashboardItemInputState::Documentation() {
     );
 }
 
-DashboardItemInputState::DashboardItemInputState(const ghoul::Dictionary& dictionary)
+DashboardItemInputState::DashboardItemInputState(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
-    , _showWhenEnabled(ShowWhenEnabledInfo, true)
-    , _showWhenDisabled(ShowWhenDisabledInfo, true)
-    , _showKeyboard(ShowKeyboardInfo, true)
-    , _showMouse(ShowMouseInfo, true)
-    , _showJoystick(ShowJoystickInfo, true)
+    , _showWhenEnabled(ShowWhenEnabledInfo)
+    , _showWhenDisabled(ShowWhenDisabledInfo)
+    , _showKeyboard(ShowKeyboardInfo)
+    , _showMouse(ShowMouseInfo)
+    , _showJoystick(ShowJoystickInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -173,7 +183,7 @@ void DashboardItemInputState::update() {
         }
     }
 
-    _buffer = ghoul::join(std::move(text), "\n");
+    _buffer = join(std::move(text), "\n");
 }
 
 } // namespace openspace

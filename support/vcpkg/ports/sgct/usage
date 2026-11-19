@@ -1,0 +1,4 @@
+sgct provides CMake targets:
+
+  find_package(sgct CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE sgct::sgct unofficial::stbimage::stbimage-read-impl)

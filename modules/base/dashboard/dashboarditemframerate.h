@@ -34,7 +34,7 @@ namespace openspace {
 
 class DashboardItemFramerate : public DashboardTextItem {
 public:
-    explicit DashboardItemFramerate(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemFramerate(const Dictionary& dictionary);
 
     void update() override;
 

@@ -25,7 +25,7 @@
 #include "contentslistwidget.h"
 
 #include "jasset.h"
-#include <ghoul/misc/assert.h>
+#include <openspace/misc/assert.h>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QListWidget>
@@ -201,7 +201,7 @@ void ContentsListWidget::addSceneGraphNode() {
 }
 
 void ContentsListWidget::duplicateSceneGraphNode(int row) {
-    ghoul_assert(
+    assert_msg(
         row >= 0 && row < static_cast<int>(_asset.contents.size()),
         "Invalid index"
     );
@@ -241,7 +241,7 @@ void ContentsListWidget::duplicateSceneGraphNode(int row) {
 }
 
 void ContentsListWidget::removeSceneGraphNode(int row) {
-    ghoul_assert(
+    assert_msg(
         row >= 0 && row < static_cast<int>(_asset.contents.size()),
         "Invalid index"
     );

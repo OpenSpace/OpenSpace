@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__
 #define __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__
 
+#include <openspace/glm.h>
 #include <openspace/util/timeline.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 #include <memory>
 #include <string>

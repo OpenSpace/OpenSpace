@@ -26,12 +26,12 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/rendering/helper.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <functional>
 #include <utility>
@@ -47,7 +47,7 @@ GeoJsonManager::GeoJsonManager()
 {}
 
 void GeoJsonManager::initialize(RenderableGlobe* globe) {
-    ghoul_assert(globe, "No globe provided");
+    assert_msg(globe, "No globe provided");
     _parentGlobe = globe;
 }
 
@@ -65,7 +65,7 @@ bool GeoJsonManager::isReady() const {
     );
 }
 
-void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
+void GeoJsonManager::addGeoJsonLayer(const Dictionary& layerDict) {
     ZoneScoped;
 
     try {
@@ -90,7 +90,7 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
     catch (const SpecificationError& e) {
         logError(e);
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERRORC(e.component, e.message);
     }
 }

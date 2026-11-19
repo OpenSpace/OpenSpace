@@ -25,8 +25,8 @@
 #include <modules/iswa/util/dataprocessorjson.h>
 
 #include <openspace/json.h>
+#include <openspace/misc/assert.h>
 #include <openspace/properties/misc/selectionproperty.h>
-#include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <iterator>
 #include <utility>
@@ -112,7 +112,7 @@ std::vector<std::vector<float>> DataProcessorJson::processData(const std::string
     std::vector<int> selectedOptionsIndices;
     for (const std::string& option : selectedOptions) {
         auto it = std::find(options.begin(), options.end(), option);
-        ghoul_assert(it != options.end(), "Selected option must be in all options");
+        assert_msg(it != options.end(), "Selected option must be in all options");
         int idx = static_cast<int>(std::distance(options.begin(), it));
         selectedOptionsIndices.push_back(idx);
     }

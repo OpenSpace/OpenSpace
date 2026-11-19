@@ -28,14 +28,14 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/invariants.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <memory>
 #include <utility>
@@ -67,15 +67,15 @@ namespace {
 namespace openspace {
 
 PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
-    : _identifier(std::move(info.identifier))
-    , _guiName(std::move(info.guiName))
-    , _description(std::move(info.description))
+    : _identifier(std::string(info.identifier))
+    , _name(std::string(info.name))
+    , _description(std::string(info.description))
 {
-    ghoul_precondition(
+    precondition(
         _identifier.find_first_of("\t\n ") == std::string::npos,
         "Identifier must contain any whitespaces"
     );
-    ghoul_precondition(
+    precondition(
         _identifier.find_first_of('.') == std::string::npos,
         "Identifier must contain any dots"
     );
@@ -185,7 +185,7 @@ PropertyOwner* PropertyOwner::owner() const {
 }
 
 bool PropertyOwner::hasProperty(const Property* prop) const {
-    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+    precondition(prop != nullptr, "prop must not be nullptr");
 
     std::vector<Property*>::const_iterator it = std::find(
         _properties.begin(),
@@ -226,7 +226,7 @@ std::string PropertyOwner::propertyGroupName(const std::string& groupID) const {
 void PropertyOwner::addProperty(Property* prop) {
     ZoneScoped;
 
-    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+    precondition(prop != nullptr, "prop must not be nullptr");
 
     if (prop->identifier().empty()) {
         LERROR("No property identifier specified");
@@ -277,8 +277,8 @@ void PropertyOwner::addProperty(Property& prop) {
 void PropertyOwner::addPropertySubOwner(PropertyOwner* owner) {
     ZoneScoped;
 
-    ghoul_precondition(owner != nullptr, "owner must not be nullptr");
-    ghoul_precondition(
+    precondition(owner != nullptr, "owner must not be nullptr");
+    precondition(
         !owner->identifier().empty(),
         "PropertyOwner must have an identifier"
     );
@@ -330,7 +330,7 @@ void PropertyOwner::addPropertySubOwner(PropertyOwner& owner) {
 }
 
 void PropertyOwner::removeProperty(Property* prop) {
-    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+    precondition(prop != nullptr, "prop must not be nullptr");
 
     // See if we can find the identifier of the property to add in the properties list
     std::vector<Property*>::const_iterator it = std::find_if(
@@ -362,7 +362,7 @@ void PropertyOwner::removeProperty(Property& prop) {
 }
 
 void PropertyOwner::removePropertySubOwner(PropertyOwner* owner) {
-    ghoul_precondition(owner != nullptr, "owner must not be nullptr");
+    precondition(owner != nullptr, "owner must not be nullptr");
 
     // See if we can find the name of the PropertyOwner to add
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
@@ -382,11 +382,17 @@ void PropertyOwner::removePropertySubOwner(PropertyOwner* owner) {
     }
 
     for (Property* prop : (*it)->propertiesRecursive()) {
-        global::renderEngine->scene()->removePropertyInterpolation(prop);
+        // The scene might be a nullptr if we are in the middle of switching the global
+        // scene that we are representing
+        if (global::renderEngine->scene()) {
+            global::renderEngine->scene()->removePropertyInterpolation(prop);
+        }
     }
 
     // Notify the change so the UI can update
     publishPropertyTreePrunedEvent(owner->uri());
+
+    owner->setPropertyOwner(nullptr);
 
     // When a PropertyOwner is removed as a subowner, it means that it will probably be
     // deleted soon and we wouldn't need to invalidate the cache, but we can't be 100%
@@ -408,7 +414,7 @@ void PropertyOwner::removePropertySubOwner(PropertyOwner& owner) {
 
 void PropertyOwner::setIdentifier(std::string identifier) {
     if (identifier.find_first_of(". \t\n") != std::string::npos) {
-        throw ghoul::RuntimeError("Identifier must not contain any dots or whitespaces");
+        throw RuntimeError("Identifier must not contain any dots or whitespaces");
     }
     _identifier = std::move(identifier);
 }
@@ -421,12 +427,12 @@ const std::string& PropertyOwner::type() const {
     return _type;
 }
 
-void PropertyOwner::setGuiName(std::string guiName) {
-    _guiName = std::move(guiName);
+void PropertyOwner::setGuiName(std::string name) {
+    _name = std::move(name);
 }
 
 const std::string& PropertyOwner::guiName() const {
-    return _guiName.empty() ? _identifier : _guiName;
+    return _name.empty() ? _identifier : _name;
 }
 
 void PropertyOwner::setDescription(std::string description) {

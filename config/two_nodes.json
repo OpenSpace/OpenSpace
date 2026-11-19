@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "masteraddress": "127.0.0.1",
+  "version": 2,
+  "serveraddress": "127.0.0.1",
   "nodes": [
     {
       "address": "127.0.0.1",

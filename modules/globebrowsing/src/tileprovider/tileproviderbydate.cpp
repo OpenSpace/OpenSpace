@@ -26,15 +26,17 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     struct [[codegen::Dictionary(TileProviderByDate)]] Parameters {
         // The layer needs to know about the LayerGroupID this but we don't want it to be
         // part of the parameters struct as that would mean it would be visible to the end
@@ -47,7 +49,7 @@ namespace {
         // date and the provider with the latest time will be used for all dates
         // afterwards. In between, a provider is used from the specified time until the
         // time of the next provider.
-        std::map<std::string, ghoul::Dictionary> providers;
+        std::map<std::string, Dictionary> providers;
     };
 } // namespace
 #include "tileproviderbydate_codegen.cpp"
@@ -58,12 +60,12 @@ Documentation TileProviderByDate::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_bydate");
 }
 
-TileProviderByDate::TileProviderByDate(const ghoul::Dictionary& dictionary) {
+TileProviderByDate::TileProviderByDate(const Dictionary& dictionary) {
     ZoneScoped;
 
     Parameters p = codegen::bake<Parameters>(dictionary);
 
-    for (std::pair<const std::string, ghoul::Dictionary>& prov : p.providers) {
+    for (std::pair<const std::string, Dictionary>& prov : p.providers) {
         prov.second.setValue("LayerGroupID", p.layerGroupID);
 
         // Pass down the caching information from the enclosing dictionary
@@ -138,7 +140,7 @@ void TileProviderByDate::update() {
 
     // Then check update our current tile provider pointer
     const double time = global::timeManager->time().j2000Seconds();
-    ghoul_assert(!_tileProviders.empty(), "There should be tile providers at this point");
+    assert_msg(!_tileProviders.empty(), "There should be tile providers at this point");
 
     // We use the first tileprovider for all times before the beginning start
     if (time < _tileProviders.begin()->startTime) {

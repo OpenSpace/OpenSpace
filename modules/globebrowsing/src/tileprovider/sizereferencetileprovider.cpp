@@ -28,10 +28,10 @@
 #include <modules/globebrowsing/src/layergroupid.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <cmath>
 #include <limits>
 #include <optional>
@@ -50,7 +50,7 @@ Documentation SizeReferenceTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileprovider_sizereference");
 }
 
-SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
+SizeReferenceTileProvider::SizeReferenceTileProvider(const Dictionary& dictionary)
     : TextTileProvider(tileTextureInitData(layers::Group::ID::ColorLayers, false))
 {
     ZoneScoped;

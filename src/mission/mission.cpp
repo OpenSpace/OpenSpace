@@ -25,17 +25,19 @@
 #include <openspace/mission/mission.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <filesystem>
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     struct [[codegen::Dictionary(MissionPhase)]] Parameters {
         // The human readable name of this mission or mission phase that is displayed to
         // the user.
@@ -58,7 +60,7 @@ namespace {
         std::optional<TimeRange> timeRange;
 
         // The phases into which this mission or mission phase is separated.
-        std::optional<std::vector<ghoul::Dictionary>> phases
+        std::optional<std::vector<Dictionary>> phases
             [[codegen::reference("core_mission_mission")]];
 
         // An image that can be presented to the user during this phase of a mission.
@@ -89,7 +91,7 @@ Documentation MissionPhase::Documentation() {
     return codegen::doc<Parameters>("core_mission_mission");
 }
 
-MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
+MissionPhase::MissionPhase(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _name = p.name;
@@ -100,7 +102,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
     if (p.phases.has_value() && !p.phases->empty()) {
         _subphases.reserve(p.phases->size());
-        for (const ghoul::Dictionary& phase : *p.phases) {
+        for (const Dictionary& phase : *p.phases) {
             _subphases.emplace_back(phase);
         }
 
@@ -129,7 +131,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
             );
 
             if (!overallTimeRange.includes(timeRangeSubPhases)) {
-                throw ghoul::RuntimeError(std::format(
+                throw RuntimeError(std::format(
                     "User specified time range must at least include its subphases. ",
                     "Mission ({})", _name
                 ));
@@ -154,7 +156,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
             );
         }
         else {
-            throw ghoul::RuntimeError(std::format(
+            throw RuntimeError(std::format(
                 "If there are no subphases specified, the time range has to be specified",
                 "Mission ({})", _name
             ));
@@ -245,12 +247,12 @@ void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
 }
 
 Mission missionFromFile(const std::string& filename) {
-    ghoul_assert(!filename.empty(), "filename must not be empty");
-    ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
-    ghoul_assert(std::filesystem::is_regular_file(filename), "filename must exist");
+    assert_msg(!filename.empty(), "filename must not be empty");
+    assert_msg(!FileSys.containsToken(filename), "filename must not contain tokens");
+    assert_msg(std::filesystem::is_regular_file(filename), "filename must exist");
 
-    ghoul::Dictionary missionDict;
-    ghoul::lua::loadDictionaryFromFile(filename, missionDict);
+    Dictionary missionDict;
+    lua::loadDictionaryFromFile(filename, missionDict);
 
     testSpecificationAndThrow(MissionPhase::Documentation(), missionDict, "Mission");
     return MissionPhase(missionDict);

@@ -25,9 +25,9 @@
 #include <openspace/scene/jasset.h>
 
 #include <openspace/json.h>
+#include <openspace/misc/dictionaryluaformatter.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/json_helper.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
-#include <ghoul/misc/stringhelper.h>
 #include <format>
 #include <fstream>
 #include <iterator>
@@ -37,7 +37,7 @@ namespace {
     using namespace openspace;
 
     struct JAsset {
-        std::vector<ghoul::Dictionary> sceneGraphNodes;
+        std::vector<Dictionary> sceneGraphNodes;
 
         std::vector<std::string> dependencies;
         struct Metadata {
@@ -62,7 +62,7 @@ namespace {
         std::vector<nlohmann::json> sceneGraphNodes =
             j["scenegraphnodes"].get<std::vector<nlohmann::json>>();
         for (const nlohmann::json& json : sceneGraphNodes) {
-            ghoul::Dictionary d = jsonToDictionary(json);
+            Dictionary d = jsonToDictionary(json);
             d.removeValue("type");
             jasset.sceneGraphNodes.push_back(d);
         }
@@ -75,14 +75,17 @@ namespace {
         std::vector<std::string> lines;
 
         for (const std::string& dep : jasset.dependencies) {
-            lines.push_back(std::format("asset.require([[./{}]])", dep));
+            // Pass the dependency through unchanged so that asset.require resolves it
+            // according to its encoded path type: data-relative (no prefix),
+            // jasset-relative (./ or ../), or absolute.
+            lines.push_back(std::format("asset.require([[{}]])", dep));
         }
 
         std::vector<std::string> sgns;
         for (size_t i = 0; i < jasset.sceneGraphNodes.size(); i++) {
-            const ghoul::Dictionary& d = jasset.sceneGraphNodes[i];
+            const Dictionary& d = jasset.sceneGraphNodes[i];
             std::string variable = std::format("sgn{}", i);
-            std::string sgn = ghoul::formatLua(d);
+            std::string sgn = formatLua(d);
             lines.push_back(std::format("local {} = {}", variable, sgn));
             sgns.push_back(variable);
         }
@@ -106,7 +109,7 @@ namespace {
             jasset.metadata.license, jasset.metadata.version
         ));
 
-        std::string res = ghoul::join(lines, "\n");
+        std::string res = join(lines, "\n");
         return res;
     }
 } // namespace
@@ -114,11 +117,11 @@ namespace {
 namespace openspace {
 
 std::string jassetToLua(const std::filesystem::path& path) {
-    ghoul_assert(std::filesystem::exists(path), "Path must exist");
+    assert_msg(std::filesystem::exists(path), "Path must exist");
 
     std::ifstream inFile = std::ifstream(path, std::ifstream::in);
     if (!inFile.good()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "Error opening file '{}' path for loading jasset file",
             path
         ));
@@ -135,7 +138,7 @@ std::string jassetToLua(const std::filesystem::path& path) {
     }
     catch (const nlohmann::json::exception& e) {
         std::string err = e.what();
-        throw ghoul::RuntimeError(std::move(err), "JAsset");
+        throw RuntimeError(std::move(err), "JAsset");
     }
 }
 

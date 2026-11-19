@@ -25,9 +25,9 @@
 #include <modules/video/include/renderablevideoplane.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/textureunit.h>
 #include <cstdlib>
 #include <limits>
 
@@ -55,7 +55,7 @@ Documentation RenderableVideoPlane::Documentation() {
     );
 }
 
-RenderableVideoPlane::RenderableVideoPlane(const ghoul::Dictionary& dictionary)
+RenderableVideoPlane::RenderableVideoPlane(const Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _videoPlayer(dictionary)
 {
@@ -106,7 +106,7 @@ void RenderableVideoPlane::update(const UpdateData& data) {
     RenderablePlane::update(data);
 }
 
-void RenderableVideoPlane::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderableVideoPlane::bindTexture(opengl::TextureUnit& unit) {
     unit.bind(*_videoPlayer.frameTexture());
 }
 

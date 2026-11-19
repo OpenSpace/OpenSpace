@@ -25,23 +25,24 @@
 #include <modules/statemachine/include/statemachine.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
 #include <fstream>
 #include <optional>
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "StateMachine";
 
     struct [[codegen::Dictionary(StateMachine)]] Parameters {
         // A list of states.
-        std::vector<ghoul::Dictionary> states
-            [[codegen::reference("statemachine_state")]];
+        std::vector<Dictionary> states [[codegen::reference("statemachine_state")]];
 
         // A list of transitions between the different states.
-        std::vector<ghoul::Dictionary> transitions
+        std::vector<Dictionary> transitions
             [[codegen::reference("statemachine_transition")]];
 
         // The initial state of the state machine. Defaults to the first in the list.
@@ -56,16 +57,16 @@ Documentation StateMachine::Documentation() {
     return codegen::doc<Parameters>("statemachine_statemachine");
 }
 
-StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
+StateMachine::StateMachine(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _states.reserve(p.states.size());
-    for (const ghoul::Dictionary& s : p.states) {
+    for (const Dictionary& s : p.states) {
         _states.emplace_back(s);
     }
 
     _transitions.reserve(p.transitions.size());
-    for (const ghoul::Dictionary& t : p.transitions) {
+    for (const Dictionary& t : p.transitions) {
         const Transition trans = Transition(t);
 
         // Check so transition has valid identifiers

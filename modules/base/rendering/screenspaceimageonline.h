@@ -31,13 +31,13 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <future>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
+
+namespace opengl { class Texture; }
 
 class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
 public:
-    explicit ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceImageOnline(const Dictionary& dictionary);
     ~ScreenSpaceImageOnline() override;
 
     void deinitializeGL() override;
@@ -53,12 +53,12 @@ protected:
     StringProperty _texturePath;
 
 private:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(
         const std::string& url);
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<opengl::Texture> _texture;
 };
 
 } // namespace openspace

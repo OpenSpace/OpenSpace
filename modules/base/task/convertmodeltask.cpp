@@ -25,9 +25,9 @@
 #include <modules/base/task/convertmodeltask.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/io/model/modelgeometry.h>
-#include <ghoul/io/model/modelreaderassimp.h>
-#include <ghoul/misc/dictionary.h>
+#include <openspace/io/model/modelgeometry.h>
+#include <openspace/io/model/modelreaderassimp.h>
+#include <openspace/misc/dictionary.h>
 
 namespace {
     // Converts a 3D model format from a format that is natively supported both by
@@ -56,7 +56,7 @@ Documentation ConvertModelTask::Documentation() {
     return codegen::doc<Parameters>("base_task_convertmodel", Task::Documentation());
 }
 
-ConvertModelTask::ConvertModelTask(const ghoul::Dictionary& dictionary) {
+ConvertModelTask::ConvertModelTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _inFilePath = p.inputFilePath;
@@ -72,9 +72,9 @@ std::string ConvertModelTask::description() {
 }
 
 void ConvertModelTask::perform(const Task::ProgressCallback&) {
-    ghoul::io::ModelReaderAssimp reader;
+    io::ModelReaderAssimp reader;
 
-    std::unique_ptr<ghoul::modelgeometry::ModelGeometry> geometry =
+    std::unique_ptr<modelgeometry::ModelGeometry> geometry =
         reader.loadModel(_inFilePath, false, true);
     geometry->saveToCacheFile(_outFilePath);
 }

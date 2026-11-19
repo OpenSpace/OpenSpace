@@ -25,9 +25,9 @@
 #include <openspace/util/task.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace {
     // The base class of all tasks. Specify the Type property to create one of the
@@ -41,7 +41,7 @@ namespace {
     struct [[codegen::Dictionary(Task)]] Parameters {
         // This key specifies the type of Task that gets created. It has to be one of the
         // valid Tasks that are available for creation (see the FactoryDocumentation for a
-        // list of possible Tasks), which depends on the configration of the application.
+        // list of possible Tasks), which depends on the configuration of the application.
         std::string type [[codegen::annotation("A valid Task created by a factory"),
             codegen::private()]];
     };
@@ -54,10 +54,10 @@ Documentation Task::Documentation() {
     return codegen::doc<Parameters>("core_task");
 }
 
-std::unique_ptr<Task> Task::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Task> Task::createFromDictionary(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    ghoul::TemplateFactory<Task>* factory = FactoryManager::ref().factory<Task>();
+    TemplateFactory<Task>* factory = FactoryManager::ref().factory<Task>();
     Task* task = factory->create(p.type, dictionary);
     return std::unique_ptr<Task>(task);
 }

@@ -22,38 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <iostream>
-#include <string>
-#include <ghoul/glm.h>
-
-#include <ghoul/ghoul.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/logging/consolelog.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/cmdparser/commandlineparser.h>
-#include <ghoul/cmdparser/singlecommand.h>
-
+#include <openspace/cmdparser/commandlineparser.h>
+#include <openspace/cmdparser/singlecommand.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/glm.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/consolelog.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/openspace.h>
+#include <openspace/scene/translation.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/util/progressbar.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/util/taskloader.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/task.h>
-#include <openspace/scene/translation.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
-#include <openspace/engine/moduleengine.h>
+#include <iostream>
+#include <string>
 #ifdef WIN32
 #include <Windows.h>
 #endif // WIN32
@@ -94,11 +91,11 @@ void performTasks(const std::string& path) {
 int main(int argc, char** argv) {
     using namespace openspace;
 
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
+    logging::LogManager::initialize(
+        logging::LogLevel::Debug,
+        logging::LogManager::ImmediateFlush::Yes
     );
-    ghoul::initialize();
+    initialize();
     global::create();
 
     // Register the path of the executable,
@@ -106,7 +103,7 @@ int main(int argc, char** argv) {
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
+        filesystem::FileSystem::Override::Yes
     );
 
     std::filesystem::path configFile = findConfiguration();
@@ -121,14 +118,14 @@ int main(int argc, char** argv) {
     registerPathTokens(*global::configuration);
     global::openSpaceEngine->initialize();
 
-    ghoul::cmdparser::CommandlineParser commandlineParser(
+    cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",
-        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+        cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
     std::optional<std::string> tasksPath;
     commandlineParser.addCommand(
-        std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        std::make_unique<cmdparser::SingleCommand<std::string>>(
             tasksPath,
             "--task",
             "-t",
@@ -157,6 +154,6 @@ int main(int argc, char** argv) {
     }
 
     global::destroy();
-    ghoul::deinitialize();
+    deinitialize();
     return 0;
 };

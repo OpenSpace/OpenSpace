@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___HTTPREQUEST___H__
 #define __OPENSPACE_CORE___HTTPREQUEST___H__
 
-#include <ghoul/logging/loglevel.h>
-#include <ghoul/misc/boolean.h>
+#include <openspace/logging/loglevel.h>
+#include <openspace/misc/boolean.h>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -120,7 +120,7 @@ public:
      * \pre \p url must not be empty
      */
     explicit HttpRequest(std::string url,
-        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
+        logging::LogLevel failureVerbosity = logging::LogLevel::Error);
 
     /**
      * Registers a callback that will be called when the header for the request has been
@@ -193,7 +193,7 @@ private:
     std::string _url;
 
     /// The verbosity of the log message that is used if the download fails
-    const ghoul::logging::LogLevel _failureVerbosity;
+    const logging::LogLevel _failureVerbosity;
 };
 
 /**
@@ -217,7 +217,7 @@ public:
      * \pre \p url must not be empty
      */
     explicit HttpDownload(std::string url,
-        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
+        logging::LogLevel failureVerbosity = logging::LogLevel::Error);
 
     /**
      * Virtual destructor that will cancel the ongoing download and block until the
@@ -337,16 +337,16 @@ private:
     HttpRequest::ProgressCallback _onProgress;
 
     /// Value indicating whether the HttpDownload is currently downloading a file
-    bool _isDownloading = false;
+    std::atomic_bool _isDownloading = false;
 
     /// Value indicating whether the download is finished
-    bool _isFinished = false;
+    std::atomic_bool _isFinished = false;
 
     /// Value indicated whether the download was successful
-    bool _isSuccessful = false;
+    std::atomic_bool _isSuccessful = false;
 
     /// Marker telling the downloading thread that the download should be cancelled
-    bool _shouldCancel = false;
+    std::atomic_bool _shouldCancel = false;
 
     /// The HttpRequest class that will be used for the download
     HttpRequest _httpRequest;
@@ -357,6 +357,9 @@ private:
     /// This condition variable is used by the #wait function to be able to wait for
     /// completion of the downloading thread
     std::condition_variable _downloadFinishCondition;
+
+    /// The mutex used together with the #_downloadFinishCondition
+    std::mutex _downloadFinishMutex;
 };
 
 /**
@@ -377,7 +380,7 @@ public:
      */
     HttpFileDownload(std::string url, std::filesystem::path destinationPath,
         Overwrite overwrite = Overwrite::No,
-        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
+        logging::LogLevel failureVerbosity = logging::LogLevel::Error);
 
     /**
      * This destructor will cancel any ongoing download and wait for its completion, so it
@@ -453,7 +456,7 @@ public:
      * \param failureVerbosity The level at which error should be logged if they appear
      */
     explicit HttpMemoryDownload(std::string url,
-        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
+        logging::LogLevel failureVerbosity = logging::LogLevel::Error);
 
     /**
      * This destructor will cancel any ongoing download and wait for its completion, so it

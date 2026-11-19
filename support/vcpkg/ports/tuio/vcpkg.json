@@ -1,0 +1,15 @@
+{
+  "name": "tuio",
+  "version-date": "2022-08-25",
+  "port-version": 2,
+  "description": [
+    "TUIO is a protocol for tangible multitouch surfaces, transported as OSC (Open Sound Control) messages. This is the TUIO C++ client/server library.",
+    "Overlay port. TUIO has no registry port, and the OpenSpace fork of the library (OpenSpace/TUIO11_CPP, previously vendored as the modules/touch/ext/libTUIO11 git submodule) ships no CMake build at all -- only a Makefile and Windows/macOS IDE project files. CMakeLists.txt and tuioConfig.cmake.in in this overlay port are OpenSpace-authored and build the TUIO client sources together with the bundled oscpack OSC implementation into a single static tuio::tuio target, matching the find_package(<pkg> CONFIG REQUIRED) + namespaced-target pattern used by every other dependency in this project's vcpkg migration."
+  ],
+  "homepage": "https://github.com/OpenSpace/TUIO11_CPP",
+  "license": "LGPL-3.0-or-later",
+  "dependencies": [
+    { "name": "vcpkg-cmake", "host": true },
+    { "name": "vcpkg-cmake-config", "host": true }
+  ]
+}

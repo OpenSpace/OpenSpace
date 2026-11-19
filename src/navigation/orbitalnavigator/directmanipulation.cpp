@@ -30,14 +30,14 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/levmarqsolver.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/levmarqsolver.h>
 #include <glm/gtx/intersect.hpp>
 #include <algorithm>
 #include <format>
@@ -66,11 +66,11 @@ namespace {
         int nDOF = 0;
         const Camera* camera = nullptr;
         const SceneGraphNode* node = nullptr;
-        ghoul::LMstat stats;
+        LMstat stats;
     };
 
     /**
-     * Extract the camera parameters from the lsit of parameters, `par`.
+     * Extract the camera parameters from the list of parameters, `par`.
      *
      * \param par The list of parameters, in the order of orbit.x, orbit.y, zoom, roll,
      *        pan.x, pan.y. The number of parameters should match the number of degrees
@@ -85,18 +85,18 @@ namespace {
     DirectManipulation::VelocityStates parseCameraParameterList(std::vector<double>& par,
                                                                 int nDof)
     {
-        ghoul_assert(par.size() >= 2, "There should be at least 2 camera parameters");
+        assert_msg(par.size() >= 2, "There should be at least 2 camera parameters");
 
         DirectManipulation::VelocityStates result;
         result.orbit = glm::dvec2(par[0], par[1]);
 
         if (nDof > 2) {
-            ghoul_assert(par.size() >= 4, "There should be at least 4 camera parameters");
+            assert_msg(par.size() >= 4, "There should be at least 4 camera parameters");
             result.zoom = par[2];
             result.roll = par[3];
 
             if (nDof > 4) {
-                ghoul_assert(par.size() == 6, "There should be 6 camera parameters");
+                assert_msg(par.size() == 6, "There should be 6 camera parameters");
                 result.roll = 0.0;
                 result.pan = glm::dvec2(par[4], par[5]);
             }
@@ -128,7 +128,7 @@ namespace {
      * optimization to find camera parameters that keep touch points stationary on the
      * object's surface.
      */
-    double distToMinimize(double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
+    double distToMinimize(double* par, int x, void* fdata, LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
 
         // Apply transform to camera and find the screen point of the updated camera state
@@ -166,7 +166,7 @@ namespace {
     /**
      * Gradient of distToMinimize w.r.t `par` (using forward difference).
      */
-    void gradient(double* g, double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
+    void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
         double f0 = distToMinimize(par, x, fdata, lmstat);
         // Scale value to find minimum step size h, dependent on planet size
@@ -240,45 +240,62 @@ namespace {
         }
     }
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enable direct manipulation",
-        "Decides whether the direct manipulation mode should be enabled or not.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enable direct manipulation",
+        .description = "Decides whether the direct manipulation mode should be enabled "
+            "or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo IsActiveInfo = {
-        "IsActive",
-        "Is active",
-        "True if the direct manipulation interaction scheme is currently being applied.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo IsActiveInfo = {
+        .identifier = "IsActive",
+        .name = "Is active",
+        .description = "True if the direct manipulation interaction scheme is currently "
+            "being applied.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AllowMouseInputInfo = {
-        "AllowMouseInput",
-        "Allow mouse input",
-        "Decides whether direct manipulation should be applied when using mouse input."
-        "Otherwise, it is only applied for touch input.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo AllowMouseInputInfo = {
+        .identifier = "AllowMouseInput",
+        .name = "Allow mouse input",
+        .description = "Decides whether direct manipulation should be applied when using "
+            "mouse input. Otherwise, it is only applied for touch input.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo DistanceThresholdInfo = {
-        "DistanceThreshold",
-        "Distance threshold factor",
-        "This threshold affects the distance from the interaction sphere at which the "
-        "direct manipulation interaction mode starts being active. The value is given as "
-        "a factor times the interaction sphere.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo DistanceThresholdInfo = {
+        .identifier = "DistanceThreshold",
+        .name = "Distance threshold factor",
+        .description = "This threshold affects the distance from the interaction sphere "
+            "at which the direct manipulation interaction mode starts being active. The "
+            "value is given as a factor times the interaction sphere.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 5.f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DefaultRenderableTypesInfo = {
-        "DefaultRenderableTypes",
-        "Default renderable types",
-        "A list of renderable types that will automatically use the direct manipulation "
-        "scheme when interacted with, keeping the finger on a static position on the "
-        "interaction sphere of the object when touching. Good for relatively spherical "
-        "objects. Per default, it's set to RenderableGlobes.",
-        Property::Visibility::AdvancedUser
+    constexpr StringListPropertyInfo DefaultRenderableTypesInfo = {
+        .identifier = "DefaultRenderableTypes",
+        .name = "Default renderable types",
+        .description = "A list of renderable types that will automatically use the "
+            "direct manipulation scheme when interacted with, keeping the finger on a "
+            "static position on the interaction sphere of the object when touching. Good "
+            "for relatively spherical objects. Per default, it's set to "
+            "RenderableGlobes.",
+        .visibility = Visibility::AdvancedUser
     };
 
     constexpr std::string_view Description =
@@ -298,25 +315,21 @@ DirectManipulation::DirectManipulation()
         "Direct Manipulation",
         std::string(Description)
       })
-    , _enabled(EnabledInfo, true)
-    , _isActive(IsActiveInfo, false)
-    , _allowMouseInput(AllowMouseInputInfo, false)
-    , _distanceThreshold(DistanceThresholdInfo, 5.f, 0.f, 10.f)
+    , _enabled(EnabledInfo)
+    , _isActive(IsActiveInfo)
+    , _allowMouseInput(AllowMouseInputInfo)
+    , _distanceThreshold(DistanceThresholdInfo)
     , _defaultRenderableTypes(DefaultRenderableTypesInfo)
 {
     addProperty(_enabled);
-
-    _isActive.setReadOnly(true);
     addProperty(_isActive);
-
     addProperty(_allowMouseInput);
-
     addProperty(_distanceThreshold);
 
     // @TODO (2026-03-31, emmbr) This is a bit of a hack, to apply this setting to
     // RenderableGlobes per default. It's done manually before the onchange, as the
     // RenderableGlobe type has not yet been registered when this constructor is run, so
-    // the existance check fails... In the future we want to remove this and ideally,
+    // the existence check fails... In the future we want to remove this and ideally,
     // this property should not be needed at all. Direct manipulation should be made to
     // work fine for all renderable types
     _defaultRenderableTypes = std::vector<std::string>({ "RenderableGlobe" });
@@ -325,7 +338,7 @@ DirectManipulation::DirectManipulation()
     _defaultRenderableTypes.onChange([this]() {
         _sortedDefaultRenderableTypes.clear();
         for (const std::string& s : _defaultRenderableTypes.value()) {
-            ghoul::TemplateFactory<Renderable>* fRenderable =
+            TemplateFactory<Renderable>* fRenderable =
                 FactoryManager::ref().factory<Renderable>();
 
             if (!fRenderable->hasClass(s)) {
@@ -344,7 +357,7 @@ DirectManipulation::DirectManipulation()
     global::callback::touchDetected->emplace_back(
         [this](TouchInput input) {
             const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
-            ghoul_assert(anchor != nullptr, "Must have an anchor");
+            assert_msg(anchor != nullptr, "Must have an anchor");
 
             std::optional<glm::dvec3> sp = computeSurfacePoint(input.pos, anchor);
             bool isValid = sp.has_value();
@@ -385,7 +398,7 @@ void DirectManipulation::updateCameraFromInput() {
         global::interactionHandler->touchInputState().touchPoints();
 
     const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
-    ghoul_assert(anchor != nullptr, "Must have an anchor");
+    assert_msg(anchor != nullptr, "Must have an anchor");
 
     std::vector<TouchPoint> touchPoints;
     touchPoints.reserve(touchInputs.size());
@@ -552,8 +565,8 @@ CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& ve
                                                         const Camera* camera,
                                                         const SceneGraphNode* anchor)
 {
-    ghoul_assert(camera != nullptr, "Camera must not be null");
-    ghoul_assert(anchor != nullptr, "Anchor node must not be null");
+    assert_msg(camera != nullptr, "Camera must not be null");
+    assert_msg(anchor != nullptr, "Anchor node must not be null");
 
     const glm::dvec3 anchorPos = anchor->worldPosition();
 
@@ -598,7 +611,7 @@ CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& ve
         const glm::dvec3 lookUpWhenFacingCenter = rot.globalRotation *
             camera->lookUpVectorCameraSpace();
 
-        rot.globalRotation = ghoul::lookAtQuaternion(
+        rot.globalRotation = lookAtQuaternion(
             glm::dvec3(0.0),
             newPositionToCenter,
             lookUpWhenFacingCenter
@@ -662,13 +675,13 @@ DirectManipulation::solveVelocitiesFromTouchPoints(
 {
     ZoneScopedN("Direct touch input solver");
 
-    ghoul_assert(
+    assert_msg(
         _selectedNodeSurfacePoints.size() >= touchPoints.size(),
         "Number of touch inputs must match the number of 'selected bodies'"
     );
 
     // Initialize LM solver
-    ghoul::LMstat lmStat;
+    LMstat lmStat;
     initializeLevmarqStats(&lmStat);
 
     int nFingers = std::min(static_cast<int>(touchPoints.size()), 3);
@@ -699,7 +712,7 @@ DirectManipulation::solveVelocitiesFromTouchPoints(
     // Find best transform values for the new camera state and store them in parameters
     std::vector<double> param(6, 0.0);
 
-    bool lmSuccess = ghoul::levmarq(
+    bool lmSuccess = levmarq(
         nDof,
         param.data(),
         static_cast<int>(screenPoints.size()),

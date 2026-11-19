@@ -27,16 +27,16 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
+#include <openspace/misc/managedmemoryuniqueptr.h>
 #include <openspace/scene/timeframe.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <limits>
-
-namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
+class SceneGraphNode;
 struct UpdateData;
 
 /**
@@ -52,20 +52,30 @@ struct UpdateData;
  * every time it is called.
  *
  * Generally, when implementing a new type of this class, only the
- * matrix(const UpdateDate&) verison needs to be implemented as this base class will
+ * matrix(const UpdateDate&) version needs to be implemented as this base class will
  * handle the caching.
  */
 class Rotation : public PropertyOwner {
 public:
-    static ghoul::mm_unique_ptr<Rotation> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+    static mm_unique_ptr<Rotation> createFromDictionary(const Dictionary& dictionary);
 
-    explicit Rotation(const ghoul::Dictionary& dictionary);
+    explicit Rotation(const Dictionary& dictionary);
     ~Rotation() override = default;
 
     virtual void initialize();
 
     virtual void update(const UpdateData& data);
+
+    /**
+     * Sets the scene graph node that owns this rotation. This is called by the
+     * SceneGraphNode after it has created the rotation. Rotations that need to reference
+     * their owner node can override this method to store the reference. The default
+     * implementation does nothing.
+     *
+     * \param node The scene graph node that owns this rotation
+     */
+    virtual void setOwnerNode(SceneGraphNode* node);
+
     const glm::dmat3& matrix() const;
     virtual glm::dmat3 matrix(const UpdateData& time) const = 0;
 
@@ -76,7 +86,7 @@ protected:
 
 private:
     bool _needsUpdate = true;
-    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
+    mm_unique_ptr<TimeFrame> _timeFrame;
     double _cachedTime = -std::numeric_limits<double>::max();
     glm::dmat3 _cachedMatrix = glm::dmat3(1.0);
 };

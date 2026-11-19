@@ -30,6 +30,14 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/messagestructures.h>
@@ -44,14 +52,6 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <array>
 #include <iterator>
@@ -74,35 +74,45 @@ namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    struct SessionRecordingError final : public ghoul::RuntimeError {
+    struct SessionRecordingError final : public RuntimeError {
         explicit SessionRecordingError(std::string msg)
-            : ghoul::RuntimeError(std::move(msg), "SessionRecording")
+            : RuntimeError(std::move(msg), "SessionRecording")
         {}
     };
 
-    constexpr Property::PropertyInfo RenderPlaybackInfo = {
-        "RenderInfo",
-        "Render playback information",
-        "If enabled, information about a currently played back session recording is "
-        "rendering to screen.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo RenderPlaybackInfo = {
+        .identifier = "RenderInfo",
+        .name = "Render playback information",
+        .description = "If enabled, information about a currently played back session "
+            "recording is rendering to screen.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo IgnoreRecordedScaleInfo = {
-        "IgnoreRecordedScale",
-        "Ignore recorded scale",
-        "If this value is enabled, the scale value from a recording is ignored and the "
-        "computed values are used instead.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo IgnoreRecordedScaleInfo = {
+        .identifier = "IgnoreRecordedScale",
+        .name = "Ignore recorded scale",
+        .description = "If this value is enabled, the scale value from a recording is "
+            "ignored and the computed values are used instead.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AddModelMatrixinAsciiInfo = {
-        "AddModelMatrixinAscii",
-        "Add model matrix in ASCII recording",
-        "If this is 'true', the model matrix is written into the ASCII recording format "
-        "in the line before each camera keyframe. The model matrix is the full matrix "
-        "that converts the position into a J2000+Galactic reference frame.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo AddModelMatrixinAsciiInfo = {
+        .identifier = "AddModelMatrixinAscii",
+        .name = "Add model matrix in ASCII recording",
+        .description = "If this is 'true', the model matrix is written into the ASCII "
+            "recording format in the line before each camera keyframe. The model matrix "
+            "is the full matrix that converts the position into a J2000+Galactic "
+            "reference frame.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 } // namespace
 
@@ -110,9 +120,9 @@ namespace openspace {
 
 SessionRecordingHandler::SessionRecordingHandler()
     : PropertyOwner({ "SessionRecording", "Session Recording" })
-    , _renderPlaybackInformation(RenderPlaybackInfo, false)
-    , _ignoreRecordedScale(IgnoreRecordedScaleInfo, false)
-    , _addModelMatrixinAscii(AddModelMatrixinAsciiInfo, false)
+    , _renderPlaybackInformation(RenderPlaybackInfo)
+    , _ignoreRecordedScale(IgnoreRecordedScaleInfo)
+    , _addModelMatrixinAscii(AddModelMatrixinAsciiInfo)
 {
     addProperty(_renderPlaybackInformation);
     addProperty(_ignoreRecordedScale);
@@ -233,7 +243,7 @@ void SessionRecordingHandler::tickPlayback(double dt) {
     );
 
     if (isSavingFramesDuringPlayback()) {
-        ghoul_assert(
+        assert_msg(
             dt == _playback.saveScreenshots.deltaTime || dt == 0.0,
             "Misaligned delta times"
         );
@@ -297,7 +307,7 @@ void SessionRecordingHandler::render() const {
 
     constexpr std::string_view FontName = "Mono";
     constexpr float FontSizeFrameinfo = 32.f;
-    const std::shared_ptr<ghoul::fontrendering::Font> font =
+    const std::shared_ptr<fontrendering::Font> font =
         global::fontManager->font(FontName, FontSizeFrameinfo);
 
     glm::vec2 penPosition = global::renderEngine->fontResolution() - glm::ivec2(150, 0);
@@ -315,12 +325,12 @@ void SessionRecordingHandler::render() const {
         _playback.waitForLoading ? "true" : "false",
         global::navigationHandler->camera()->scaling()
     );
-    ghoul::fontrendering::RenderFont(
+    fontrendering::RenderFont(
         *font,
         penPosition,
         text,
         glm::vec4(1.f),
-        ghoul::fontrendering::CrDirection::Down
+        fontrendering::CrDirection::Down
     );
 }
 
@@ -620,6 +630,20 @@ void SessionRecordingHandler::savePropertyBaseline(Property& prop) {
     }
 }
 
+void SessionRecordingHandler::savePropertyEnabledBaseline(Property& prop) {
+    assert_msg(prop.isEnablable(), "Property not enablable");
+
+    // The enabled state is stored under a separate key so that it does not collide with
+    // the baseline of the property value. Matching how the dummy time key is written
+    const std::string key = std::format("{}._isEnabled", prop.uri());
+    if (!_savePropertiesBaseline.contains(key)) {
+        _savePropertiesBaseline[key] = std::format(
+            "openspace.propertySetEnabled(\"{}\", {})",
+            prop.uri(), prop.isEnabled() ? "true" : "false"
+        );
+    }
+}
+
 bool SessionRecordingHandler::isRecording() const {
     return _state == SessionState::Recording;
 }
@@ -769,7 +793,7 @@ void SessionRecordingHandler::removeStateChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(it != _stateChangeCallbacks.end(), "handle must be a valid callback");
+    assert_msg(it != _stateChangeCallbacks.end(), "handle must be a valid callback");
     _stateChangeCallbacks.erase(it);
 }
 
@@ -790,7 +814,7 @@ std::vector<std::string> SessionRecordingHandler::playbackList() const {
         std::filesystem::path p = std::filesystem::proximate(e.path(), path);
         std::string filename = p.string();
         // Normalize the paths
-        filename = ghoul::replaceAll(filename, "\\", "/");
+        filename = replaceAll(filename, "\\", "/");
 #ifdef WIN32
         DWORD attributes = GetFileAttributes(e.path().string().c_str());
         bool isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;

@@ -26,20 +26,19 @@
 #define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__
 
 #include <modules/volume/volumegridtype.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <string>
-
-namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 struct RawVolumeMetadata {
-    static RawVolumeMetadata createFromDictionary(const ghoul::Dictionary& dictionary);
+    static RawVolumeMetadata createFromDictionary(const Dictionary& dictionary);
     static openspace::Documentation Documentation();
 
-    ghoul::Dictionary dictionary() const;
+    Dictionary dictionary() const;
 
     glm::uvec3 dimensions = glm::uvec3(0);
     VolumeGridType gridType;

@@ -27,11 +27,12 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/uniformcache.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
 
@@ -39,7 +40,7 @@ class SceneGraphNode;
 
 class RenderableTravelSpeed : public Renderable {
 public:
-    explicit RenderableTravelSpeed(const ghoul::Dictionary& dictionary);
+    explicit RenderableTravelSpeed(const Dictionary& dictionary);
 
     static openspace::Documentation Documentation();
     void initializeGL() override;
@@ -51,12 +52,14 @@ public:
 
 private:
     void updateVertexData();
-    void reinitiateTravel();
+    void reinitiateTravel(std::optional<double> time = std::nullopt);
 
     UniformCache(lineColor, opacity) _uniformCache;
 
     StringProperty _targetIdentifier;
     SceneGraphNode* _targetNode = nullptr;
+    TriggerProperty _resetLine;
+    DoubleProperty _epoch;
     DoubleProperty _travelSpeed;
     FloatProperty _indicatorLength;
     FloatProperty _fadeLength;
@@ -69,7 +72,7 @@ private:
     double _arrivalTime = -1.0;
     double _timeSinceStart = -1.0;
 
-    ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
+    opengl::ProgramObject* _shaderProgram = nullptr;
     // The vertex attribute location for position must correlate to layout location in
     // vertex shader
     GLuint _vao = 0;

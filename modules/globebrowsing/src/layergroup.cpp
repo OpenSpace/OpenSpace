@@ -31,11 +31,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <algorithm>
 #include <memory>
 #include <utility>
@@ -45,13 +45,16 @@ namespace {
 
     constexpr std::string_view _loggerCat = "LayerGroup";
 
-    constexpr Property::PropertyInfo BlendTileInfo = {
-        "BlendTileLevels",
-        "Blend between levels",
-        "If this value is enabled, images between different levels are interpolated, "
-        "rather than switching between levels abruptly. This makes transitions smoother "
-        "and more visually pleasing.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo BlendTileInfo = {
+        .identifier = "BlendTileLevels",
+        .name = "Blend between levels",
+        .description = "If this value is enabled, images between different levels are "
+            "interpolated, rather than switching between levels abruptly. This makes "
+            "transitions smoother and more visually pleasing.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 } // namespace
 
@@ -60,7 +63,7 @@ namespace openspace {
 LayerGroup::LayerGroup(layers::Group group)
     : PropertyOwner({ std::string(group.identifier), std::string(group.name)})
     , _groupId(group.id)
-    , _levelBlendingEnabled(BlendTileInfo, true)
+    , _levelBlendingEnabled(BlendTileInfo)
 {
     addProperty(_levelBlendingEnabled);
 }
@@ -99,12 +102,12 @@ void LayerGroup::update() {
     }
 }
 
-Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
+Layer* LayerGroup::addLayer(const Dictionary& layerDict) {
     ZoneScoped;
 
     const TestResult res = testSpecification(Layer::Documentation(), layerDict);
     if (!res.success) {
-        LERROR("Error adding layer. " + ghoul::to_string(res));
+        LERROR("Error adding layer. " + to_string(res));
     }
 
     if (!layerDict.hasValue<std::string>("Identifier")) {
@@ -114,7 +117,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     const std::string identifier = layerDict.value<std::string>("Identifier");
     if (hasPropertySubOwner(identifier)) {
         LINFO("Layer with identifier '" + identifier + "' already exists");
-        _levelBlendingEnabled.setVisibility(Property::Visibility::User);
+        _levelBlendingEnabled.setVisibility(Visibility::User);
         return nullptr;
     }
 
@@ -148,14 +151,14 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     auto compareZIndexSubOwners = [](const PropertyOwner* a, const PropertyOwner* b) {
         const Layer* aLayer = dynamic_cast<const Layer*>(a);
         const Layer* bLayer = dynamic_cast<const Layer*>(b);
-        ghoul_assert(aLayer, "a is not a layer");
-        ghoul_assert(bLayer, "b is not a layer");
+        assert_msg(aLayer, "a is not a layer");
+        assert_msg(bLayer, "b is not a layer");
 
         return aLayer->zIndex() < bLayer->zIndex();
     };
     std::stable_sort(_subOwners.begin(), _subOwners.end(), compareZIndexSubOwners);
 
-    _levelBlendingEnabled.setVisibility(Property::Visibility::User);
+    _levelBlendingEnabled.setVisibility(Visibility::User);
     return ptr;
 }
 
@@ -184,7 +187,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
         LINFO(std::format("Deleted layer {}", lName));
 
         if (_layers.empty()) {
-            _levelBlendingEnabled.setVisibility(Property::Visibility::Hidden);
+            _levelBlendingEnabled.setVisibility(Visibility::Hidden);
         }
         return;
     }
@@ -197,7 +200,7 @@ void LayerGroup::scheduleDeleteLayer(const std::string& layerName) {
 
 void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     if (_layers.size() == 1) {
-        ghoul_assert(
+        assert_msg(
             oldPosition == newPosition,
             "There is only one item but different positions"
         );
@@ -223,7 +226,7 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
 
     // There is a separate check at the top of the function to ensure that there is more
     // than one item
-    ghoul_assert(!_layers.empty(), "The list should not be empty at this point");
+    assert_msg(!_layers.empty(), "The list should not be empty at this point");
     if (newLayerPos == _layers.begin()) {
         // If the layer is moved to the first spot in the list
         Layer* nextLayer = _layers.begin()->get();
@@ -243,7 +246,7 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     }
 
     _layers.insert(newLayerPos, std::move(layer));
-    ghoul_assert(
+    assert_msg(
         std::is_sorted(
             _layers.cbegin(),
             _layers.cend(),
@@ -266,9 +269,9 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     // two layers with different types and the uniforms between the two types are not
     // compatible
     LayerManager* manager = dynamic_cast<LayerManager*>(_owner);
-    ghoul_assert(manager, "Hierarchy error: Layer. Owner is not LayerManager");
+    assert_msg(manager, "Hierarchy error: Layer. Owner is not LayerManager");
     RenderableGlobe* renderable = dynamic_cast<RenderableGlobe*>(manager->owner());
-    ghoul_assert(manager, "Hierarchy error: LayerManager. Owner is not RenderableGlobe");
+    assert_msg(manager, "Hierarchy error: LayerManager. Owner is not RenderableGlobe");
     renderable->invalidateShader();
 
     // Notify that the layers are in a different order

@@ -29,14 +29,14 @@
 #include <modules/gaia/tasks/readfitstask.h>
 #include <modules/gaia/tasks/readspecktask.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/task.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <vector>
 
 namespace openspace {
@@ -45,14 +45,14 @@ GaiaModule::GaiaModule()
     : OpenSpaceModule(Name)
 {}
 
-void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+void GaiaModule::internalInitialize(const Dictionary&) {
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    assert_msg(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
 
-    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fRenderable, "No task factory existed");
+    TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    assert_msg(fRenderable, "No task factory existed");
     fTask->registerClass<ReadFitsTask>("ReadFitsTask");
     fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
     fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");

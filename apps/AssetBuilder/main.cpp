@@ -28,9 +28,9 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/openspace.h>
 #include <QApplication>
 #include <QFile>
 #include <QMessageBox>
@@ -38,12 +38,12 @@
 using namespace openspace;
 
 int main(int argc, char* argv[]) {
-    ghoul::logging::LogManager::initialize(
-        ghoul::logging::LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
+    logging::LogManager::initialize(
+        logging::LogLevel::Debug,
+        logging::LogManager::ImmediateFlush::Yes
     );
 
-    ghoul::initialize();
+    initialize();
     global::create();
 
     // Register the path of the executable, to make it possible to find other files in the
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
-        ghoul::filesystem::FileSystem::Override::Yes
+        filesystem::FileSystem::Override::Yes
     );
 
     std::filesystem::path cfgPath = findConfiguration();

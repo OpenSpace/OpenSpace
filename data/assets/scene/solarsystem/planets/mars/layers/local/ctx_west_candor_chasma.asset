@@ -24,6 +24,7 @@ local HeightLayer = {
   Name = "West Candor [Local]",
   Enabled = asset.enabled,
   ZIndex = 65,
+  TilePixelSize = 64,
   FilePath = data .. "west_candor_chasma_dem.vrt"
 }
 

@@ -29,9 +29,9 @@
 
 #include <memory>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
+
+namespace opengl { class ProgramObject; }
 
 class GUIRenderHandler : public WebRenderHandler {
 public:
@@ -42,7 +42,7 @@ public:
     void render() override;
 
 private:
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    std::unique_ptr<opengl::ProgramObject> _programObject;
     GLuint _vao = 0;
     GLuint _vbo = 0;
 };

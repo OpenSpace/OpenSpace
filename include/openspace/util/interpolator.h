@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INTERPOLATOR___H__
-#define __OPENSPACE_CORE___INTERPOLATOR___H__
+#ifndef __OPENSPACE_CORE___MISC_INTERPOLATOR___H__
+#define __OPENSPACE_CORE___MISC_INTERPOLATOR___H__
 
 #include <functional>
 
@@ -60,4 +60,4 @@ private:
 
 #include "interpolator.inl"
 
-#endif // __OPENSPACE_CORE___INTERPOLATOR___H__
+#endif // __OPENSPACE_CORE___MISC_INTERPOLATOR___H__

@@ -29,15 +29,24 @@ set_source_files_properties(
   PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
 )
 
-set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
-
 create_new_application(TaskRunner MACOSX_BUNDLE
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
   ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
 )
 
-target_link_libraries(TaskRunner PRIVATE openspace-core openspace-module-collection)
+# stb_image is a bit weird in which it required _exactly_ one instatiation of the
+# implementation. All other parts in the system are only using the header-includes of the
+# project. Since this is the top-level application we need to include the impl version
+# here to have exactly one implementation. Less than 1: Linker error. More than 1: ODR
+# violation
+#
+# OpenSpace only links the *write* half (stbi_write_*): the *read* half (stbi_load, ...)
+# is already satisfied by assimp, which vendors its own stb_image copy, so linking the
+# stbimage port's read implementation too would be a duplicate-symbol conflict
+find_package(stbimage CONFIG REQUIRED)
+
+target_link_libraries(TaskRunner PRIVATE openspace-core openspace-module-collection unofficial::stbimage::stbimage-write-impl)
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the

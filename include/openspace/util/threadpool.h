@@ -65,7 +65,7 @@ private:
 
     std::deque<std::function<void()>> _tasks;
 
-    std::mutex _queueMutex;
+    mutable std::mutex _queueMutex;
     std::condition_variable _condition;
 
     bool _shouldStop = false;

@@ -64,7 +64,7 @@ Checks: >-
 
 CheckOptions:
   - key:    bugprone-assert-side-effect.AssertMacros
-    value:  ghoul_assert,ghoul_precondition
+    value:  assert_msg,precondition
   - key:    cppcoreguidelines-rvalue-reference-param-not-moved.AllowPartialMove
     value:  True
   - key:    misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic

@@ -111,7 +111,7 @@ namespace {
     return global::keyframeRecording->hasKeyframeRecording();
 }
 
-[[codegen::luawrap]] std::vector<ghoul::Dictionary> keyframes() {
+[[codegen::luawrap]] std::vector<Dictionary> keyframes() {
     return global::keyframeRecording->keyframes();
 }
 

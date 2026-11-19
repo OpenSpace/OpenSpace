@@ -25,19 +25,22 @@
 #include <openspace/scene/lightsource.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <optional>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Whether the light source is enabled or not.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Whether the light source is enabled or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
     // This is the base class of all `LightSource` types, which are components that can be
@@ -61,8 +64,7 @@ namespace {
         // the identifier is used.
         std::optional<std::string> name;
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
     };
 } // namespace
 #include "lightsource_codegen.cpp"
@@ -78,11 +80,11 @@ Documentation LightSource::Documentation() {
 }
 
 std::unique_ptr<LightSource> LightSource::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    ghoul::TemplateFactory<LightSource>* factory =
+    TemplateFactory<LightSource>* factory =
         FactoryManager::ref().factory<LightSource>();
 
     LightSource* source = factory->create(p.type, dictionary);
@@ -90,9 +92,9 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
     return std::unique_ptr<LightSource>(source);
 }
 
-LightSource::LightSource(const ghoul::Dictionary& dictionary)
+LightSource::LightSource(const Dictionary& dictionary)
     : PropertyOwner({ "LightSource" })
-    , _enabled(EnabledInfo, true)
+    , _enabled(EnabledInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -101,7 +103,7 @@ LightSource::LightSource(const ghoul::Dictionary& dictionary)
 
     _type = p.type;
     _identifier = p.identifier;
-    _guiName = p.name.value_or(_identifier);
+    _name = p.name.value_or(_identifier);
 }
 
 bool LightSource::initialize() {

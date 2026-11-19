@@ -31,11 +31,11 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 
-namespace ghoul { class Dictionary; }
 namespace osc { struct Blob; }
 
 namespace openspace {
 
+class Dictionary;
 struct LuaLibrary;
 
 class PlanetsSonification : public TelemetryBase {
@@ -63,7 +63,7 @@ public:
      *
      * \param dict The planet that should be added
      */
-    void addPlanet(const ghoul::Dictionary& dict);
+    void addPlanet(const Dictionary& dict);
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the
@@ -106,7 +106,7 @@ private:
     /**
      * For this sonification, a more advanced custom updateData function is needed with
      * additional arguments. Therefore, this implementation is left empty and the update
-     * function is overriden to use the custom updateData function instead.
+     * function is overridden to use the custom updateData function instead.
      *
      * \param camera The camera in the scene (not used in this case)
      * \return Always return `false` (this function is empty)
@@ -116,7 +116,7 @@ private:
     /**
      * For this sonification, a more advanced custom sendData function is needed with
      * additional arguments. Therefore, this implementation is left empty and the update
-     * function is overriden to use the custom updateData function instead.
+     * function is overridden to use the custom updateData function instead.
      */
     void sendData() override;
 

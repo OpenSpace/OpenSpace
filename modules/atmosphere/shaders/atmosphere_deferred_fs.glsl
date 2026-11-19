@@ -125,7 +125,7 @@ uniform bool hardShadows;
 // Returns whether there is an eclipse in the x component and the strength of the
 // shadowing in the y component
 vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[NumberOfShadows], dvec3 position,
-                bool ground)
+                bool ground, float daylightFactor)
 {
   if (!shadowInfoArray[0].isShadowing) {
     return vec2(0.0, 1.0);
@@ -146,23 +146,26 @@ vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[NumberOfShadows], dvec3 po
     shadowInfoArray[0].rc * (shadowInfoArray[0].xu - lengthPcProj) / shadowInfoArray[0].xu
   );
 
+  float shadowStrength = 1.0;
   if (lengthD < rUmbra) {
     // umbra
     if (hardShadows) {
-      return ground ? vec2(1.0, 0.2) : vec2(1.0, 0.5);
+      shadowStrength = ground ? 0.2 : 0.5;
     }
     else {
       // butterworth function
-      return vec2(1.0, sqrt(rUmbra / (rUmbra + pow(lengthD, 4.0))));
+      shadowStrength = sqrt(rUmbra / (rUmbra + pow(lengthD, 4.0)));
     }
   }
   else if (lengthD < rPenumbra) {
     // penumbra
-    return hardShadows ? vec2(1.0, 0.5) : vec2(1.0, lengthD / rPenumbra);
+    shadowStrength = hardShadows ? 0.5 : lengthD / rPenumbra;
   }
-  else {
-    return vec2(1.0, 1.0);
-  }
+
+  // We don't want a shadow on the antipodal side of the eclipse
+  shadowStrength = mix(1.0, shadowStrength, daylightFactor);
+
+  return vec2(1.0, shadowStrength);
 }
 
 float opticalDepth(float localH, float r, float mu, float d, float rPlanet) {
@@ -191,6 +194,12 @@ vec3 analyticTransmittance(float r, float mu, float d) {
     betaMieExtinction * opticalDepth(mieHeightScale, r, mu, d, rPlanet)
   );
 }
+
+// The lookup tables are only defined for positions above the planet radius, but the
+// planet's surface can be lower than that, for example if the camera is close to the
+// ground or if the planet's shape does not exactly match the atmosphere's. In these cases
+// the positions are clamped to this distance above the planet radius (in km)
+const float MinimumAltitude = 0.01;
 
 vec3 irradiance(sampler2D s, float r, float muSun) {
   float u_r = (r - rPlanet) / (rAtmosphere - rPlanet);
@@ -282,7 +291,7 @@ Ray calculateRayRenderableGlobe(vec2 st) {
 }
 
 /*
- * Calculates the light scattering in the view direction comming from other light rays
+ * Calculates the light scattering in the view direction coming from other light rays
  * scattered in the atmosphere.
  * Following the paper:  S[L]|x - T(x,xs) * S[L]|xs
  * The view direction here is the ray: x + tv, s is the sun direction, r and mu the
@@ -328,7 +337,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 
   // After removing the initial path from camera pos to top of atmosphere (for an
   // observer in the space) we test if the light ray is hitting the atmosphere
-  float r0 = length(fragPosObj);
+  float r0 = max(length(fragPosObj), rPlanet + MinimumAltitude);
   float invr0 = 1.0 / r0;
   float muSun0 = dot(fragPosObj, s) * invr0;
   float mu0 = dot(fragPosObj, v) * invr0;
@@ -347,7 +356,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // Here we use the idea of S[L](a->b) = S[L](b->a), and get the S[L](x0, v, s)
     // Then we calculate S[L] = S[L]|x - T(x, x0)*S[L]|x0
     // The "infinite" ray hist something inside the atmosphere, so we need to remove
-    // the unsused contribution to the final radiance.
+    // the unused contribution to the final radiance.
     vec4 inscatterFromSurface = texture4D(inscatterTexture, r0, mu0, muSun0, nu, rPlanet,
       muSamples, rAtmosphere, rSamples, muSSamples, nuSamples);
     inscatterRadiance = max(
@@ -384,7 +393,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // r0 = sqrt(r2 + t2 + 2.0 * r * t * mu);
     float halfCosineLaw1 = r2 + (t * t);
     float halfCosineLaw2 = 2.0 * r * t;
-    r0 = sqrt(halfCosineLaw1 + halfCosineLaw2 * mu);
+    r0 = max(sqrt(halfCosineLaw1 + halfCosineLaw2 * mu), rPlanet + MinimumAltitude);
 
     // From the dot product: cos(theta0) = (x0 dot v)/(||ro||*||v||)
     // mu0 = ((x + t) dot v) / r0
@@ -401,7 +410,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 
     // Below Horizon
     mu = muHorizon + InterpolationEpsilon;
-    r0 = sqrt(halfCosineLaw1 + halfCosineLaw2 * mu);
+    r0 = max(sqrt(halfCosineLaw1 + halfCosineLaw2 * mu), rPlanet + MinimumAltitude);
 
     mu0 = (r * mu + t) * (1.0 / r0);
 
@@ -437,13 +446,13 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 }
 
 /*
- * Calculates the light reflected in the view direction comming from other light rays
+ * Calculates the light reflected in the view direction coming from other light rays
  * integrated over the hemispehre plus the direct light (L0) from Sun.
  * Following the paper: R[L]= R[L0]+R[L*]
  * The ray is x + tv, v the view direction, s is the sun direction, r and mu the position
  * and zenith cosine angle as in the paper.
  * As for all calculations in the atmosphere, the center of the coordinate system is the
- * planet's center of coordiante system, i.e., the planet's position is (0,0,0).
+ * planet's center of coordinate system, i.e., the planet's position is (0,0,0).
  * Arguments:
  * x := camera position
  * t := ray displacement variable. Here, differently from the inScatter light calculation,
@@ -459,7 +468,7 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, vec3 attenuationXtoX0, vec3 gr
                  float sunIntensity)
 {
   // First we obtain the ray's end point on the surface
-  float r0 = length(x + t * v);
+  float r0 = max(length(x + t * v), rPlanet + MinimumAltitude);
 
   vec3 groundReflectance = groundColor * groundRadianceEmission;
 
@@ -505,7 +514,7 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, vec3 attenuationXtoX0, vec3 gr
  * Calculates the Sun color. The ray is x + tv, v the view direction, s is the sun
  * direction, r and mu the position and zenith cosine angle as in the paper. As for all
  * calculations in the atmosphere, the center of the coordinate system is the planet's
- * center of coordiante system, i.e., the planet's position is (0,0,0). Arguments:
+ * center of coordinate system, i.e., the planet's position is (0,0,0). Arguments:
  * v := view direction (ray's direction) (normalized)
  * s := Sun direction (normalized)
  * r := ||x|| inside atmosphere (or top of atmosphere). r <= Rt here.
@@ -574,7 +583,13 @@ void main() {
   vec4 normalViewSpaceAndWaterReflectance = texture(mainNormalTexture, st);
   dvec4 normalViewSpace = vec4(normalViewSpaceAndWaterReflectance.xyz, 0.0);
   dvec4 normalWorldSpace = viewToWorldMatrix * normalViewSpace;
-  vec4 normal = vec4(inverseModelTransformMatrix * normalWorldSpace);
+  // Normals transform with the inverse transpose of the world-to-object matrix, which is
+  // the transpose of the model matrix. This is only different from transforming with the
+  // inverse model matrix if the model matrix has a non-uniform scale
+  vec4 normal = vec4(
+    transpose(dmat3(modelTransformMatrix)) * normalWorldSpace.xyz,
+    0.0
+  );
   normal.xyz = normalize(normal.xyz);
   normal.w = normalViewSpaceAndWaterReflectance.w;
 
@@ -622,7 +637,7 @@ void main() {
   // Moving observer from camera location to top atmosphere. If the observer is already
   // inside the atm, offset = 0.0 and no changes at all
   vec3 x = vec3(ray.origin + t * ray.direction);
-  float r = length(x);
+  float r = max(length(x), rPlanet + MinimumAltitude);
   vec3 v = vec3(ray.direction);
   float mu = 0.0; // dot(x, v) / r;
   vec3 s = vec3(sunDirectionObj);
@@ -634,7 +649,13 @@ void main() {
   pixelDepth -= offset;
 
   dvec3 onATMPos = (modelTransformMatrix * dvec4(x * 1000.0, 1.0)).xyz;
-  vec2 eclipseShadowATM = calcShadow(shadowDataArray, onATMPos, false);
+  // Daylight factor: 1 in full daylight, 0 in full night. Used to gate the
+  // eclipse darkening so it only affects the day side of the planet
+  dvec3 sunDirectionWorld =
+    normalize((modelTransformMatrix * dvec4(sunDirectionObj, 0.0)).xyz);
+  float daylightFactor = float(clamp(
+    dot(normalize(normalWorldSpace.xyz), sunDirectionWorld) * 4.0 + 0.5, 0.0, 1.0));
+  vec2 eclipseShadowATM = calcShadow(shadowDataArray, onATMPos, false, daylightFactor);
   float sunIntensityInscatter = sunRadiance * eclipseShadowATM.y;
 
   float irradianceFactor = 0.0;
@@ -647,7 +668,8 @@ void main() {
     mu, attenuation, groundHit);
   vec3 atmColor = vec3(0.0);
   if (groundHit) {
-    vec2 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
+    vec2 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true,
+      daylightFactor);
     float sunIntensityGround = sunRadiance * eclipseShadowPlanet.y;
     atmColor = groundColor(x, tF, v, s, attenuation, color.rgb, normal.xyz,
       irradianceFactor, normal.w, sunIntensityGround);

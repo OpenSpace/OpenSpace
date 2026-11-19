@@ -30,20 +30,20 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/texture/texturereader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/systemcapabilities/generalcapabilitiescomponent.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -61,220 +61,305 @@ namespace {
     constexpr size_t ColorSize = 2;
     constexpr size_t VelocitySize = 3;
 
-    constexpr Property::PropertyInfo FilePathInfo = {
-        "File",
-        "File path",
-        "The path to the file with data for the stars to be rendered.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo FilePathInfo = {
+        .identifier = "File",
+        .name = "File path",
+        .description = "The path to the file with data for the stars to be rendered.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FileReaderOptionInfo = {
-        "FileReaderOption",
-        "File reader option",
-        "This value tells the renderable what format the input data file has. 'Fits' "
-        "will read a FITS file, construct an Octree from it and render full data. "
-        "'Speck' will read a SPECK file, construct an Octree from it and render full "
-        "data. 'BinaryRaw' will read a preprocessed binary file with ordered star data, "
-        "construct an Octree and render it. 'BinaryOctree' will read a constructed "
-        "Octree from binary file and render full data. 'StreamOctree' will read an index "
-        "file with full Octree structure and then stream nodes during runtime. (This "
-        "option is suited for bigger datasets).",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo FileReaderOptionInfo = {
+        .identifier = "FileReaderOption",
+        .name = "File reader option",
+        .description = "This value tells the renderable what format the input data file "
+            "has. 'Fits' will read a FITS file, construct an Octree from it and render "
+            "full data. 'Speck' will read a SPECK file, construct an Octree from it and "
+            "render full data. 'BinaryRaw' will read a preprocessed binary file with "
+            "ordered star data, construct an Octree and render it. 'BinaryOctree' will "
+            "read a constructed Octree from binary file and render full data. "
+            "'StreamOctree' will read an index file with full Octree structure and then "
+            "stream nodes during runtime. (This option is suited for bigger datasets).",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RenderModeInfo = {
-        "RenderMode",
-        "Render mode",
-        "This value determines which predefined columns to use in rendering. If 'Static' "
-        "only the position of the stars is used. 'Color' uses position + color "
-        "parameters and 'Motion' uses pos, color as well as velocity for the stars.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo RenderModeInfo = {
+        .identifier = "RenderMode",
+        .name = "Render mode",
+        .description = "This value determines which predefined columns to use in "
+            "rendering. If 'Static' only the position of the stars is used. 'Color' uses "
+            "position + color parameters and 'Motion' uses pos, color as well as "
+            "velocity for the stars.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo LuminosityMultiplierInfo = {
-        "LuminosityMultiplier",
-        "Luminosity multiplier",
-        "Factor by which to multiply the luminosity with. [Works in Color and Motion "
-        "modes].",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo LuminosityMultiplierInfo = {
+        .identifier = "LuminosityMultiplier",
+        .name = "Luminosity multiplier",
+        .description = "Factor by which to multiply the luminosity with. [Works in Color "
+            "and Motion modes].",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 35.f,
+            .minMax = { 1.f, 250.f }
+        }
     };
 
-    constexpr Property::PropertyInfo CutOffThresholdInfo = {
-        "CutOffThreshold",
-        "Cut off threshold",
-        "Set threshold for when to cut off star rendering. Stars closer than this "
-        "threshold are given full opacity. Farther away, stars dim proportionally to the "
-        "4-logarithm of their distance.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo CutOffThresholdInfo = {
+        .identifier = "CutOffThreshold",
+        .name = "Cut off threshold",
+        .description = "Set threshold for when to cut off star rendering. Stars closer "
+            "than this threshold are given full opacity. Farther away, stars dim "
+            "proportionally to the 4-logarithm of their distance.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 38.f,
+            .minMax = { 0.f, 50.f }
+        }
     };
 
-    constexpr Property::PropertyInfo TmPointFilterSizeInfo = {
-        "FilterSize",
-        "Filter size [px]",
-        "Set the filter size in pixels used in tonemapping for point splatting "
-        "rendering.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo TmPointFilterSizeInfo = {
+        .identifier = "FilterSize",
+        .name = "Filter size [px]",
+        .description = "Set the filter size in pixels used in tonemapping for point "
+            "splatting rendering.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 7,
+            .minMax = { 1, 19 }
+        }
     };
 
-    constexpr Property::PropertyInfo TmPointSigmaInfo = {
-        "Sigma",
-        "Normal distribution sigma",
-        "Set the normal distribution sigma used in tonemapping for point splatting "
-        "rendering.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo TmPointSigmaInfo = {
+        .identifier = "Sigma",
+        .name = "Normal distribution sigma",
+        .description = "Set the normal distribution sigma used in tonemapping for point "
+            "splatting rendering.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.7f,
+            .minMax = { 0.1f, 3.f }
+        }
     };
 
-    constexpr Property::PropertyInfo AdditionalNodesInfo = {
-        "AdditionalNodes",
-        "Additional nodes",
-        "Determines how many additional nodes around the camera that will be fetched "
-        "from disk. The first value determines how many additional layers of parents "
-        "that will be fetched. The second value determines how many layers of descendant "
-        "that will be fetched from the found parents.",
-        Property::Visibility::AdvancedUser
+    constexpr IVec2PropertyInfo AdditionalNodesInfo = {
+        .identifier = "AdditionalNodes",
+        .name = "Additional nodes",
+        .description = "Determines how many additional nodes around the camera that will "
+            "be fetched from disk. The first value determines how many additional layers "
+            "of parents that will be fetched. The second value determines how many "
+            "layers of descendant that will be fetched from the found parents.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::ivec2(1),
+            .minMax = { glm::ivec2(0), glm::ivec2(4) }
+        }
     };
 
-    constexpr Property::PropertyInfo TmPointPxThresholdInfo = {
-        "PixelWeightThreshold",
-        "Pixel weight threshold",
-        "Set the threshold for how big the elliptic weight of a pixel has to be to "
-        "contribute to the final elliptic shape. A smaller value gives a more visually "
-        "pleasing result while a bigger value will speed up the rendering on skewed "
-        "frustums (aka Domes).",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo TmPointPxThresholdInfo = {
+        .identifier = "PixelWeightThreshold",
+        .name = "Pixel weight threshold",
+        .description = "Set the threshold for how big the elliptic weight of a pixel has "
+            "to be to contribute to the final elliptic shape. A smaller value gives a "
+            "more visually pleasing result while a bigger value will speed up the "
+            "rendering on skewed frustums (aka Domes).",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.001f,
+            .minMax = { 0.000001f, 0.01f }
+        }
     };
 
-    constexpr Property::PropertyInfo ColorTextureInfo = {
-        "ColorMap",
-        "Color texture",
-        "The path to the texture that is used to convert from the magnitude of the star "
-        "to its color. The texture is used as a one dimensional lookup function.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo ColorTextureInfo = {
+        .identifier = "ColorMap",
+        .name = "Color texture",
+        .description = "The path to the texture that is used to convert from the "
+            "magnitude of the star to its color. The texture is used as a one "
+            "dimensional lookup function.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo FirstRowInfo = {
-        "FirstRow",
-        "First row to read",
-        "Defines the first row that will be read from the specified FITS file No need to "
-        "define if data already has been processed. [Works only with "
-        "FileReaderOption::Fits].",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo FirstRowInfo = {
+        .identifier = "FirstRow",
+        .name = "First row to read",
+        .description = "Defines the first row that will be read from the specified FITS "
+            "file No need to define if data already has been processed. [Works only with "
+            "FileReaderOption::Fits].",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 2539913 }
+        }
     };
 
-    constexpr Property::PropertyInfo LastRowInfo = {
-        "LastRow",
-        "Last row to read",
-        "Defines the last row that will be read from the specified FITS file; has to be "
-        "equal to or greater than FirstRow. No need to define if data already has been "
-        "processed. [Works only with FileReaderOption::Fits].",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo LastRowInfo = {
+        .identifier = "LastRow",
+        .name = "Last row to read",
+        .description = "Defines the last row that will be read from the specified FITS "
+            "file; has to be equal to or greater than FirstRow. No need to define if "
+            "data already has been processed. [Works only with FileReaderOption::Fits].",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 2539913 }
+        }
     };
 
-    constexpr Property::PropertyInfo NumRenderedStarsInfo = {
-        "NumRenderedStars",
-        "Rendered stars",
-        "The number of rendered stars in the current frame.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo NumRenderedStarsInfo = {
+        .identifier = "NumRenderedStars",
+        .name = "Rendered stars",
+        .description = "The number of rendered stars in the current frame.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 2000000000 }
+        }
     };
 
-    constexpr Property::PropertyInfo CpuRamBudgetInfo = {
-        "CpuRamBudget",
-        "CPU RAM budget",
-        "Current remaining budget (bytes) on the CPU RAM for loading more node data "
-        "files.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo CpuRamBudgetInfo = {
+        .identifier = "CpuRamBudget",
+        .name = "CPU RAM budget",
+        .description = "Current remaining budget (bytes) on the CPU RAM for loading more "
+            "node data files.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo GpuStreamBudgetInfo = {
-        "GpuStreamBudget",
-        "GPU stream budget",
-        "Current remaining memory budget [in number of chunks] on the GPU for streaming "
-        "additional stars.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo GpuStreamBudgetInfo = {
+        .identifier = "GpuStreamBudget",
+        .name = "GPU stream budget",
+        .description = "Current remaining memory budget [in number of chunks] on the GPU "
+            "for streaming additional stars.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo LodPixelThresholdInfo = {
-        "LodPixelThreshold",
-        "LOD pixel threshold",
-        "The number of total pixels a nodes AABB can have in clipping space before its "
-        "parent is fetched as LOD cache.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo LodPixelThresholdInfo = {
+        .identifier = "LodPixelThreshold",
+        .name = "LOD pixel threshold",
+        .description = "The number of total pixels a nodes AABB can have in clipping "
+            "space before its parent is fetched as LOD cache.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 250.f,
+            .minMax = { 0.f, 5000.f }
+        }
     };
 
-    constexpr Property::PropertyInfo MaxGpuMemoryPercentInfo = {
-        "MaxGpuMemoryPercent",
-        "Max GPU memory",
-        "Sets the max percent of existing GPU memory budget that the streaming will use.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo MaxGpuMemoryPercentInfo = {
+        .identifier = "MaxGpuMemoryPercent",
+        .name = "Max GPU memory",
+        .description = "Sets the max percent of existing GPU memory budget that the "
+            "streaming will use.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.45f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo MaxCpuMemoryPercentInfo = {
-        "MaxCpuMemoryPercent",
-        "Max CPU memory",
-        "Sets the max percent of existing CPU memory budget that the streaming of files "
-        "will use.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo MaxCpuMemoryPercentInfo = {
+        .identifier = "MaxCpuMemoryPercent",
+        .name = "Max CPU memory",
+        .description = "Sets the max percent of existing CPU memory budget that the "
+            "streaming of files will use.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo FilterPosXInfo = {
-        "FilterPosX",
-        "PosX threshold",
-        "If defined then only stars with Position X values between [min, max] will be "
-        "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
-        "read as +Inf). Measured in KiloParsec.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo FilterPosXInfo = {
+        .identifier = "FilterPosX",
+        .name = "PosX threshold",
+        .description = "If defined then only stars with Position X values between [min, "
+            "max] will be rendered (if min is set to 0.0 it is read as -Inf, if max is "
+            "set to 0.0 it is read as +Inf). Measured in KiloParsec.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(-10.f), glm::vec2(10.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FilterPosYInfo = {
-        "FilterPosY",
-        "PosY threshold",
-        "If defined then only stars with Position Y values between [min, max] will be "
-        "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
-        "read as +Inf). Measured in KiloParsec.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo FilterPosYInfo = {
+        .identifier = "FilterPosY",
+        .name = "PosY threshold",
+        .description = "If defined then only stars with Position Y values between [min, "
+            "max] will be rendered (if min is set to 0.0 it is read as -Inf, if max is "
+            "set to 0.0 it is read as +Inf). Measured in KiloParsec.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(-10.f), glm::vec2(10.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FilterPosZInfo = {
-        "FilterPosZ",
-        "PosZ threshold",
-        "If defined then only stars with Position Z values between [min, max] will be "
-        "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
-        "read as +Inf). Measured in KiloParsec.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo FilterPosZInfo = {
+        .identifier = "FilterPosZ",
+        .name = "PosZ threshold",
+        .description = "If defined then only stars with Position Z values between [min, "
+            "max] will be rendered (if min is set to 0.0 it is read as -Inf, if max is "
+            "set to 0.0 it is read as +Inf). Measured in KiloParsec.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(-10.f), glm::vec2(10.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FilterGMagInfo = {
-        "FilterGMag",
-        "GMag threshold",
-        "If defined then only stars with G mean magnitude values between [min, max] will "
-        "be rendered (if min is set to 20.0 it is read as -Inf, if max is set to 20.0 it "
-        "is read as +Inf). If min = max then all values equal min|max will be filtered "
-        "away.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo FilterGMagInfo = {
+        .identifier = "FilterGMag",
+        .name = "GMag threshold",
+        .description = "If defined then only stars with G mean magnitude values between "
+            "[min, max] will be rendered (if min is set to 20.0 it is read as -Inf, if "
+            "max is set to 20.0 it is read as +Inf). If min = max then all values equal "
+            "min|max will be filtered away.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(20.f),
+            .minMax = { glm::vec2(-10.f), glm::vec2(30.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FilterBpRpInfo = {
-        "FilterBpRp",
-        "Bp-Rp threshold",
-        "If defined then only stars with Bp-Rp color values between [min, max] will be "
-        "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
-        "read as +Inf). If min = max then all values equal min|max will be filtered "
-        "away.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo FilterBpRpInfo = {
+        .identifier = "FilterBpRp",
+        .name = "Bp-Rp threshold",
+        .description = "If defined then only stars with Bp-Rp color values between [min, "
+            "max] will be rendered (if min is set to 0.0 it is read as -Inf, if max is "
+            "set to 0.0 it is read as +Inf). If min = max then all values equal min|max "
+            "will be filtered away.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(-10.f), glm::vec2(30.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FilterDistInfo = {
-        "FilterDist",
-        "Dist threshold",
-        "If defined then only stars with Distances values between [min, max] will be "
-        "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
-        "read as +Inf). Measured in KiloParsec.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec2PropertyInfo FilterDistInfo = {
+        .identifier = "FilterDist",
+        .name = "Dist threshold",
+        .description = "If defined then only stars with Distances values between [min, "
+            "max] will be rendered (if min is set to 0.0 it is read as -Inf, if max is "
+            "set to 0.0 it is read as +Inf). Measured in KiloParsec.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec2(0.f),
+            .minMax = { glm::vec2(0.f), glm::vec2(100.f) }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableGaiaStars)]] Parameters {
-        // [[codegen::verbatim(FilePathInfo.description)]]
-        std::string file;
+        std::string file [[codegen::Info(FilePathInfo)]];
 
         enum class [[codegen::map(openspace::FileReaderOption)]] FileReader {
             Fits,
@@ -283,78 +368,59 @@ namespace {
             BinaryOctree,
             StreamOctree
         };
-        // [[codegen::verbatim(FileReaderOptionInfo.description)]]
-        FileReader fileReaderOption;
+        FileReader fileReaderOption [[codegen::Info(FileReaderOptionInfo)]];
 
         enum class [[codegen::map(openspace::RenderMode)]] RenderMode {
             Static,
             Color,
             Motion
         };
-        // [[codegen::verbatim(RenderModeInfo.description)]]
-        std::optional<RenderMode> renderMode;
+        std::optional<RenderMode> renderMode [[codegen::Info(RenderModeInfo)]];
 
-        // [codegen::verbatim(ColorTextureInfo.description)]]
-        std::string colorMap;
+        std::string colorMap [[codegen::Info(ColorTextureInfo)]];
 
-        // [codegen::verbatim(LuminosityMultiplierInfo.description)]]
-        std::optional<float> luminosityMultiplier;
+        std::optional<float> luminosityMultiplier
+            [[codegen::Info(LuminosityMultiplierInfo)]];
 
-        // [codegen::verbatim(CutOffThresholdInfo.description)]]
-        std::optional<float> cutOffThreshold;
+        std::optional<float> cutOffThreshold [[codegen::Info(CutOffThresholdInfo)]];
 
-        // [codegen::verbatim(TmPointFilterSizeInfo.description)]]
-        std::optional<int> filterSize;
+        std::optional<int> filterSize [[codegen::Info(TmPointFilterSizeInfo)]];
 
-        // [codegen::verbatim(TmPointSigmaInfo.description)]]
-        std::optional<float> sigma;
+        std::optional<float> sigma [[codegen::Info(TmPointSigmaInfo)]];
 
-        // [codegen::verbatim(AdditionalNodesInfo.description)]]
-        std::optional<glm::ivec2> additionalNodes;
+        std::optional<glm::ivec2> additionalNodes [[codegen::Info(AdditionalNodesInfo)]];
 
-        // [codegen::verbatim(TmPointPxThresholdInfo.description)]]
-        std::optional<float> pixelWeightThreshold;
+        std::optional<float> pixelWeightThreshold
+            [[codegen::Info(TmPointPxThresholdInfo)]];
 
-        // [codegen::verbatim(FirstRowInfo.description)]]
-        std::optional<int> firstRow;
+        std::optional<int> firstRow [[codegen::Info(FirstRowInfo)]];
 
-        // [codegen::verbatim(LastRowInfo.description)]]
-        std::optional<int> lastRow;
+        std::optional<int> lastRow [[codegen::Info(LastRowInfo)]];
 
         // A list of strings with the names of all the columns that are to be read from
         // the specified FITS file. No need to define if data already has been processed.
         // [Works only with FileReaderOption::Fits].
-        std::optional<ghoul::Dictionary> columnNames;
+        std::optional<Dictionary> columnNames;
 
-        // [codegen::verbatim(LodPixelThresholdInfo.description)]]
-        std::optional<float> lodPixelThreshold;
+        std::optional<float> lodPixelThreshold [[codegen::Info(LodPixelThresholdInfo)]];
 
-        // [codegen::verbatim(MaxGpuMemoryPercentInfo.description)]]
-        std::optional<float> maxGpuMemoryPercent;
+        std::optional<float> maxGpuMemoryPercent
+            [[codegen::Info(MaxGpuMemoryPercentInfo)]];
 
-        // [codegen::verbatim(MaxCpuMemoryPercentInfo.description)]]
-        std::optional<float> maxCpuMemoryPercent;
+        std::optional<float> maxCpuMemoryPercent
+            [[codegen::Info(MaxCpuMemoryPercentInfo)]];
 
-        // [codegen::verbatim(FilterPosXInfo.description)]]
-        std::optional<glm::vec2> filterPosX;
+        std::optional<glm::vec2> filterPosX [[codegen::Info(FilterPosXInfo)]];
 
-        // [codegen::verbatim(FilterPosYInfo.description)]]
-        std::optional<glm::vec2> filterPosY;
+        std::optional<glm::vec2> filterPosY [[codegen::Info(FilterPosYInfo)]];
 
-        // [codegen::verbatim(FilterPosZInfo.description)]]
-        std::optional<glm::vec2> filterPosZ;
+        std::optional<glm::vec2> filterPosZ [[codegen::Info(FilterPosZInfo)]];
 
-        // [codegen::verbatim(FilterGMagInfo.description)]]
-        std::optional<glm::vec2> filterGMag;
+        std::optional<glm::vec2> filterGMag [[codegen::Info(FilterGMagInfo)]];
 
-        // [codegen::verbatim(FilterBpRpInfo.description)]]
-        std::optional<glm::vec2> filterBpRp;
+        std::optional<glm::vec2> filterBpRp [[codegen::Info(FilterBpRpInfo)]];
 
-        // [codegen::verbatim(FilterDistInfo.description)]]
-        std::optional<glm::vec2> filterDist;
-
-        // [codegen::verbatim(ReportGlErrorsInfo.description)]]
-        std::optional<bool> reportGlErrors;
+        std::optional<glm::vec2> filterDist [[codegen::Info(FilterDistInfo)]];
     };
 } // namespace
 #include "renderablegaiastars_codegen.cpp"
@@ -368,39 +434,39 @@ Documentation RenderableGaiaStars::Documentation() {
     );
 }
 
-RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
+RenderableGaiaStars::RenderableGaiaStars(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _filePath(FilePathInfo)
     , _colorTexturePath(ColorTextureInfo)
-    , _luminosityMultiplier(LuminosityMultiplierInfo, 35.f, 1.f, 250.f)
-    , _cutOffThreshold(CutOffThresholdInfo, 38.f, 0.f, 50.f)
-    , _tmPointFilterSize(TmPointFilterSizeInfo, 7, 1, 19)
-    , _tmPointSigma(TmPointSigmaInfo, 0.7f, 0.1f, 3.f)
-    , _additionalNodes(AdditionalNodesInfo, glm::ivec2(1), glm::ivec2(0), glm::ivec2(4))
-    , _tmPointPixelWeightThreshold(TmPointPxThresholdInfo, 0.001f, 0.000001f, 0.01f)
-    , _lodPixelThreshold(LodPixelThresholdInfo, 250.f, 0.f, 5000.f)
-    , _posXThreshold(FilterPosXInfo, glm::vec2(0.f), glm::vec2(-10.f), glm::vec2(10.f))
-    , _posYThreshold(FilterPosYInfo, glm::vec2(0.f), glm::vec2(-10.f), glm::vec2(10.f))
-    , _posZThreshold(FilterPosZInfo, glm::vec2(0.f), glm::vec2(-10.f), glm::vec2(10.f))
-    , _gMagThreshold(FilterGMagInfo, glm::vec2(20.f), glm::vec2(-10.f), glm::vec2(30.f))
-    , _bpRpThreshold(FilterBpRpInfo, glm::vec2(0.f), glm::vec2(-10.f), glm::vec2(30.f))
-    , _distThreshold(FilterDistInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(100.f))
-    , _firstRow(FirstRowInfo, 0, 0, 2539913) // DR1-max: 2539913
-    , _lastRow(LastRowInfo, 0, 0, 2539913)
+    , _luminosityMultiplier(LuminosityMultiplierInfo)
+    , _cutOffThreshold(CutOffThresholdInfo)
+    , _tmPointFilterSize(TmPointFilterSizeInfo)
+    , _tmPointSigma(TmPointSigmaInfo)
+    , _additionalNodes(AdditionalNodesInfo)
+    , _tmPointPixelWeightThreshold(TmPointPxThresholdInfo)
+    , _lodPixelThreshold(LodPixelThresholdInfo)
+    , _posXThreshold(FilterPosXInfo)
+    , _posYThreshold(FilterPosYInfo)
+    , _posZThreshold(FilterPosZInfo)
+    , _gMagThreshold(FilterGMagInfo)
+    , _bpRpThreshold(FilterBpRpInfo)
+    , _distThreshold(FilterDistInfo)
+    , _firstRow(FirstRowInfo)
+    , _lastRow(LastRowInfo)
     , _fileReaderOption(FileReaderOptionInfo)
     , _renderMode(RenderModeInfo)
-    , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2000000000) // 2 Billion stars
-    , _cpuRamBudgetProperty(CpuRamBudgetInfo, 0.f, 0.f, 1.f)
-    , _gpuStreamBudgetProperty(GpuStreamBudgetInfo, 0.f, 0.f, 1.f)
-    , _maxGpuMemoryPercent(MaxGpuMemoryPercentInfo, 0.45f, 0.f, 1.f)
-    , _maxCpuMemoryPercent(MaxCpuMemoryPercentInfo, 0.5f, 0.f, 1.f)
+    , _nRenderedStars(NumRenderedStarsInfo)
+    , _cpuRamBudgetProperty(CpuRamBudgetInfo)
+    , _gpuStreamBudgetProperty(GpuStreamBudgetInfo)
+    , _maxGpuMemoryPercent(MaxGpuMemoryPercentInfo)
+    , _maxCpuMemoryPercent(MaxCpuMemoryPercentInfo)
     , _accumulatedIndices(1, 0)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(Fadeable::_opacity);
 
-    _dataFile = std::make_unique<ghoul::filesystem::File>(p.file);
+    _dataFile = std::make_unique<filesystem::File>(p.file);
     _dataFile->setCallback([this]() { _dataIsDirty = true; });
 
     _filePath = p.file;
@@ -434,7 +500,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _renderMode.onChange([this]() { _buffersAreDirty = true; });
     addProperty(_renderMode);
 
-    _colorTextureFile = std::make_unique<ghoul::filesystem::File>(p.colorMap);
+    _colorTextureFile = std::make_unique<filesystem::File>(p.colorMap);
     _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
     _colorTexturePath = p.colorMap;
     _colorTexturePath.onChange([this]() { _colorTextureIsDirty = true; });
@@ -473,7 +539,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         }
 
         // Find out our new budget. Use dedicated video memory instead of current
-        // available to always be consistant with previous call(s)
+        // available to always be consistent with previous call(s)
         GLint nDedicatedVidMemoryInKB = 0;
         glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &nDedicatedVidMemoryInKB);
         const float dedicatedVidMem = static_cast<float>(
@@ -519,7 +585,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         _lastRow.onChange([this]() { _dataIsDirty = true; });
         addProperty(_lastRow);
 
-        const ghoul::Dictionary d = p.columnNames.value_or(ghoul::Dictionary());
+        const Dictionary d = p.columnNames.value_or(Dictionary());
 
         // Ugly fix for ASCII sorting when there are more columns read than 10
         std::set<int> intKeys;
@@ -532,37 +598,30 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         }
 
         if (_firstRow > _lastRow) {
-            throw ghoul::RuntimeError("User defined FirstRow is bigger than LastRow");
+            throw RuntimeError("User defined FirstRow is bigger than LastRow");
         }
     }
 
-    // Add a read-only property for the number of rendered stars per frame
-    _nRenderedStars.setReadOnly(true);
     addProperty(_nRenderedStars);
-
-    // Add CPU RAM Budget Property and GPU Stream Budget Property to menu
-    _cpuRamBudgetProperty.setReadOnly(true);
     addProperty(_cpuRamBudgetProperty);
-
-    _gpuStreamBudgetProperty.setReadOnly(true);
     addProperty(_gpuStreamBudgetProperty);
 }
 
 void RenderableGaiaStars::initializeGL() {
-    _program = ghoul::opengl::ProgramObject::Build(
+    _program = opengl::ProgramObject::Build(
         "GaiaStar",
         absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
         absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
         absPath("${MODULE_GAIA}/shaders/gaia_point_gs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     _programTM = global::renderEngine->buildRenderProgram(
         "ToneMapping",
         absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
         absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_point_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_programTM, _uniformCacheTM);
+    opengl::updateUniformLocations(*_programTM, _uniformCacheTM);
 
     glCreateVertexArrays(1, &_vaoEmpty);
     glCreateBuffers(1, &_ssboIdx);
@@ -589,14 +648,14 @@ void RenderableGaiaStars::initializeGL() {
 
     glCreateFramebuffers(1, &_fbo);
     // Generate a new texture and attach it to our FBO
-    _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit {
+    _fboTexture = std::make_unique<opengl::Texture>(
+        opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(global::renderEngine->renderingResolution(), 1),
             .type = GL_TEXTURE_2D,
-            .format = ghoul::opengl::Texture::Format::RGBA,
+            .format = opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit {}
+        opengl::Texture::SamplerInit {}
     );
     glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
     const GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
@@ -787,7 +846,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.bpRpThreshold, _bpRpThreshold);
     _program->setUniform(_uniformCache.distThreshold, _distThreshold);
 
-    ghoul::opengl::TextureUnit colorUnit;
+    opengl::TextureUnit colorUnit;
     if (_colorTexture) {
         colorUnit.bind(*_colorTexture);
         _program->setUniform(_uniformCache.colorTexture, colorUnit);
@@ -809,7 +868,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     // Use ToneMapping shaders and render to default FBO again
     _programTM->activate();
 
-    ghoul::opengl::TextureUnit fboTexUnit;
+    opengl::TextureUnit fboTexUnit;
     if (_fboTexture) {
         fboTexUnit.bind(*_fboTexture);
         _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
@@ -845,7 +904,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Reload data file. This may reconstruct the Octree as well
         const bool success = readDataFile();
         if (!success) {
-            throw ghoul::RuntimeError("Error loading Gaia Star data");
+            throw RuntimeError("Error loading Gaia Star data");
         }
         _dataIsDirty = false;
         // Make sure we regenerate buffers if data has reloaded
@@ -854,14 +913,14 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
     if (_program->isDirty()) [[unlikely]] {
         global::renderEngine->removeRenderProgram(_program.get());
-        _program = ghoul::opengl::ProgramObject::Build(
+        _program = opengl::ProgramObject::Build(
             "GaiaStar",
             absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
             absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
             absPath("${MODULE_GAIA}/shaders/gaia_point_gs.glsl")
         );
 
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
 
         _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
         _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
@@ -874,7 +933,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
             absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_point_fs.glsl")
         );
-        ghoul::opengl::updateUniformLocations(*_programTM, _uniformCacheTM);
+        opengl::updateUniformLocations(*_programTM, _uniformCacheTM);
     }
 
     if (_buffersAreDirty) {
@@ -921,8 +980,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Index)
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
 
-        _ssboIdxBinding = std::make_unique<ghoul::opengl::BufferBinding<
-            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>
+        _ssboIdxBinding = std::make_unique<opengl::BufferBinding<
+            opengl::bufferbinding::Buffer::ShaderStorage>
         >();
         glBindBufferBase(
             GL_SHADER_STORAGE_BUFFER,
@@ -934,8 +993,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Combined SSBO with all data
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
 
-        _ssboDataBinding = std::make_unique<ghoul::opengl::BufferBinding<
-            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>
+        _ssboDataBinding = std::make_unique<opengl::BufferBinding<
+            opengl::bufferbinding::Buffer::ShaderStorage>
         >();
         glBindBufferBase(
             GL_SHADER_STORAGE_BUFFER,
@@ -958,7 +1017,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             );
             LDEBUG(std::format("Loaded texture from '{}'", _colorTexturePath.value()));
 
-            _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
+            _colorTextureFile = std::make_unique<filesystem::File>(
                 _colorTexturePath.value()
             );
             _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
@@ -976,14 +1035,14 @@ void RenderableGaiaStars::update(const UpdateData&) {
         );
 
         if (hasChanged) {
-            _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-                ghoul::opengl::Texture::FormatInit {
+            _fboTexture = std::make_unique<opengl::Texture>(
+                opengl::Texture::FormatInit {
                     .dimensions = glm::uvec3(screenSize, 1),
                     .type = GL_TEXTURE_2D,
-                    .format = ghoul::opengl::Texture::Format::RGBA,
+                    .format = opengl::Texture::Format::RGBA,
                     .dataType = GL_FLOAT
                 },
-                ghoul::opengl::Texture::SamplerInit {}
+                opengl::Texture::SamplerInit {}
             );
             LDEBUG("Re-Generating Gaia Framebuffer Texture");
 

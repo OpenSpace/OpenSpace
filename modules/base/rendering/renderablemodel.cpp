@@ -28,31 +28,31 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/io/model/modelgeometry.h>
+#include <openspace/io/model/modelreader.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/framebufferobject.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
+#include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/distanceconversion.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timeconversion.h>
-#include <openspace/util/updatestructures.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/io/model/modelgeometry.h>
-#include <ghoul/io/model/modelreader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/util/distanceconversion.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timeconversion.h>
+#include <openspace/util/updatestructures.h>
 #include <array>
 #include <cmath>
 #include <cstdlib>
@@ -78,143 +78,183 @@ namespace {
 
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
-    static const PropertyOwner::PropertyOwnerInfo CustomNodeTransformsInfo = {
-        "CustomNodeTransforms",
-        "Custom Node Transforms",
-        "Custom transformations for internal model nodes."
+    constexpr PropertyOwner::PropertyOwnerInfo CustomNodeTransformsInfo = {
+        .identifier = "CustomNodeTransforms",
+        .name = "Custom Node Transforms",
+        .description = "Custom transformations for internal model nodes."
     };
 
-    static const PropertyOwner::PropertyOwnerInfo CustomNodeTransformInfo = {
-        "CustomNodeTransform",
-        "Custom Node Transform",
-        "Custom transformation for an internal model node."
+    constexpr PropertyOwner::PropertyOwnerInfo CustomNodeTransformInfo = {
+        .identifier = "CustomNodeTransform",
+        .name = "Custom Node Transform",
+        .description = "Custom transformation for an internal model node."
     };
 
-    constexpr Property::PropertyInfo EnableAnimationInfo = {
-        "EnableAnimation",
-        "Enable animation",
-        "Enable or disable the animation for the model if it has any.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo EnableAnimationInfo = {
+        .identifier = "EnableAnimation",
+        .name = "Enable animation",
+        .description = "Enable or disable the animation for the model if it has any.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo AmbientIntensityInfo = {
-        "AmbientIntensity",
-        "Ambient intensity",
-        "A multiplier for ambient lighting.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo AmbientIntensityInfo = {
+        .identifier = "AmbientIntensity",
+        .name = "Ambient intensity",
+        .description = "A multiplier for ambient lighting.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.2f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo DiffuseIntensityInfo = {
-        "DiffuseIntensity",
-        "Diffuse intensity",
-        "A multiplier for diffuse lighting.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo DiffuseIntensityInfo = {
+        .identifier = "DiffuseIntensity",
+        .name = "Diffuse intensity",
+        .description = "A multiplier for diffuse lighting.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SpecularIntensityInfo = {
-        "SpecularIntensity",
-        "Specular intensity",
-        "A multiplier for specular lighting.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo SpecularIntensityInfo = {
+        .identifier = "SpecularIntensity",
+        .name = "Specular intensity",
+        .description = "A multiplier for specular lighting.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SpecularPowerInfo = {
-        "SpecularPower",
-        "Specular Power",
-        "Power factor for specular component, higher value gives narrower specularity.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo SpecularPowerInfo = {
+        .identifier = "SpecularPower",
+        .name = "Specular Power",
+        .description = "Power factor for specular component, higher value gives narrower "
+            "specularity.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 100.f,
+            .minMax = { 0.5f, 1000.f }
+        }
     };
 
-    constexpr Property::PropertyInfo ShadingInfo = {
-        "PerformShading",
-        "Perform shading",
-        "Determines whether shading should be applied to this model, based on the "
-        "provided list of light sources. If false, the model will be fully illuminated.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo ShadingInfo = {
+        .identifier = "PerformShading",
+        .name = "Perform shading",
+        .description = "Determines whether shading should be applied to this model, "
+            "based on the provided list of light sources. If false, the model will be "
+            "fully illuminated.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo EnableFaceCullingInfo = {
-        "EnableFaceCulling",
-        "Enable face culling",
-        "Enable OpenGL automatic face culling optimization.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnableFaceCullingInfo = {
+        .identifier = "EnableFaceCulling",
+        .name = "Enable face culling",
+        .description = "If enabled, all parts of the model that are facing away from the "
+            "camera will automatically be removed.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ModelTransformInfo = {
-        "ModelTransform",
-        "Model transform",
-        "An extra model transform matrix that is applied to the model before all other "
-        "transformations are applied.",
-        Property::Visibility::Developer
+    constexpr DMat4PropertyInfo ModelTransformInfo = {
+        .identifier = "ModelTransform",
+        .name = "Model transform",
+        .description = "An extra model transform matrix that is applied to the model "
+            "before all other transformations are applied.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::dmat4(1.0),
+            .minMax = { createFillMat4x4(-1.0), createFillMat4x4(1.0) }
+        }
     };
 
-    constexpr Property::PropertyInfo PivotInfo = {
-        "Pivot",
-        "Pivot",
-        "A vector that moves the place of origin for the model.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo PivotInfo = {
+        .identifier = "Pivot",
+        .name = "Pivot",
+        .description = "A vector that moves the place of origin for the model.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ModelScaleInfo = {
-        "ModelScale",
-        "Model scale",
-        "The scale of the model. If a numeric value is provided in the asset file, the "
-        "scale will be that exact value. If instead a unit name is provided, this is the "
-        "value that that name represents. For example 'Centimeter' becomes 0.01.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo ModelScaleInfo = {
+        .identifier = "ModelScale",
+        .name = "Model scale",
+        .description = "The scale of the model. If a numeric value is provided in the "
+            "asset file, the scale will be that exact value. If instead a unit name is "
+            "provided, this is the value that that name represents. For example "
+            "'Centimeter' becomes 0.01.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.0,
+            .minMax = { std::numeric_limits<double>::epsilon(), 4e+27 },
+            .exponent = 20.f
+        }
     };
 
-    constexpr Property::PropertyInfo RotationVecInfo = {
-        "RotationVector",
-        "Rotation vector",
-        "A rotation vector with Euler angles, specified in degrees.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo RotationVecInfo = {
+        .identifier = "RotationVector",
+        .name = "Rotation vector",
+        .description = "A rotation vector with Euler angles, specified in degrees.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(360.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo LightSourcesInfo = {
-        "LightSources",
-        "Light sources",
-        "A list of light sources that this model should accept light from.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnableDepthTestInfo = {
+        .identifier = "EnableDepthTest",
+        .name = "Enable depth test",
+        .description = "If true, depth testing is enabled for the model. This means that "
+            "parts of the model that are occluded by other parts will not be rendered. "
+            "If disabled, the depth of the model part will not be taken into account in "
+            "rendering and some parts that should be hidden behind a model might be "
+            "rendered in front.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo EnableDepthTestInfo = {
-        "EnableDepthTest",
-        "Enable depth test",
-        "If true, depth testing is enabled for the model. This means that parts of the "
-        "model that are occluded by other parts will not be rendered. If disabled, the "
-        "depth of the model part will not be taken into account in rendering and some "
-        "parts that should be hidden behind a model might be rendered in front.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo RenderWireframeInfo = {
+        .identifier = "RenderWireframe",
+        .name = "Enable Wireframe Rendering",
+        .description = "Enable Wireframe rendering for the Model.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo RenderWireframeInfo = {
-        "RenderWireframe",
-        "Enable Wireframe Rendering",
-        "Enable Wireframe rendering for the Model.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo BlendingOptionInfo = {
+        .identifier = "BlendingOption",
+        .name = "Blending options",
+        .description = "Controls the blending function used to calculate the colors of "
+            "the model with respect to the opacity.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BlendingOptionInfo = {
-        "BlendingOption",
-        "Blending options",
-        "Controls the blending function used to calculate the colors of the model with "
-        "respect to the opacity.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo UseOverrideColorInfo = {
-        "UseOverrideColor",
-        "Use Override Color",
-        "Whether or not to render model with a single color.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo OverrideColorInfo = {
-        "OverrideColor",
-        "Override Color",
-        "The single color to use for entire model (RGBA).",
-        Property::Visibility::AdvancedUser
+    constexpr Vec4PropertyInfo OverrideColorInfo = {
+        .identifier = "OverrideColor",
+        .name = "Override color",
+        .description = "The single color to use for entire model (RGBA).",
+        .visibility = Visibility::AdvancedUser,
+        .isEnablable = IsEnablable::Yes,
+        .defaults = {
+            .value = glm::vec4(1.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
     // Renders a 3D model. The provided model may contain textures and animations and is
@@ -247,8 +287,7 @@ namespace {
         // should be forced to render or not.
         std::optional<bool> forceRenderInvisible;
 
-        // [[codegen::verbatim(EnableAnimationInfo.description)]]
-        std::optional<bool> enableAnimation;
+        std::optional<bool> enableAnimation [[codegen::Info(EnableAnimationInfo)]];
 
         // The date and time that the model animation should start. In format
         // `'YYYY MM DD hh:mm:ss'`.
@@ -271,43 +310,32 @@ namespace {
         // animation is played back once at the start time.
         std::optional<AnimationMode> animationMode;
 
-        // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<float> ambientIntensity;
+        std::optional<float> ambientIntensity [[codegen::Info(AmbientIntensityInfo)]];
 
-        // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
-        std::optional<float> diffuseIntensity;
+        std::optional<float> diffuseIntensity [[codegen::Info(DiffuseIntensityInfo)]];
 
-        // [[codegen::verbatim(SpecularIntensityInfo.description)]]
-        std::optional<float> specularIntensity;
+        std::optional<float> specularIntensity [[codegen::Info(SpecularIntensityInfo)]];
 
-        // [[codegen::verbatim(SpecularPowerInfo.description)]]
-        std::optional<float> specularPower;
+        std::optional<float> specularPower [[codegen::Info(SpecularPowerInfo)]];
 
-        // [[codegen::verbatim(ShadingInfo.description)]]
-        std::optional<bool> performShading;
+        std::optional<bool> performShading [[codegen::Info(ShadingInfo)]];
 
-        // [[codegen::verbatim(EnableFaceCullingInfo.description)]]
-        std::optional<bool> enableFaceCulling;
+        std::optional<bool> enableFaceCulling [[codegen::Info(EnableFaceCullingInfo)]];
 
-        // [[codegen::verbatim(ModelTransformInfo.description)]]
-        std::optional<glm::dmat4x4> modelTransform;
+        std::optional<glm::dmat4x4> modelTransform [[codegen::Info(ModelTransformInfo)]];
 
-        // [[codegen::verbatim(PivotInfo.description)]]
-        std::optional<glm::vec3> pivot;
+        std::optional<glm::vec3> pivot [[codegen::Info(PivotInfo)]];
 
-        // [[codegen::verbatim(RotationVecInfo.description)]]
-        std::optional<glm::dvec3> rotationVector
-            [[codegen::inrange(glm::dvec3(-360.0), glm::dvec3(360.0))]];
+        std::optional<glm::dvec3> rotationVector [[codegen::Info(RotationVecInfo),
+            codegen::inrange(glm::dvec3(-360.0), glm::dvec3(360.0))]];
 
-        // [[codegen::verbatim(LightSourcesInfo.description)]]
-        std::optional<std::vector<ghoul::Dictionary>> lightSources
+        // A list of light sources that this model should accept light from.
+        std::optional<std::vector<Dictionary>> lightSources
             [[codegen::reference("core_lightsource")]];
 
-        // [[codegen::verbatim(EnableDepthTestInfo.description)]]
-        std::optional<bool> enableDepthTest;
+        std::optional<bool> enableDepthTest [[codegen::Info(EnableDepthTestInfo)]];
 
-        // [[codegen::verbatim(RenderWireframeInfo.description)]]
-        std::optional<bool> renderWireframe;
+        std::optional<bool> renderWireframe [[codegen::Info(RenderWireframeInfo)]];
 
         enum class Blending {
             Default,
@@ -317,8 +345,7 @@ namespace {
             ColorAdding [[codegen::key("Color Adding")]]
         };
 
-        // [[codegen::verbatim(BlendingOptionInfo.description)]]
-        std::optional<Blending> blendingOption;
+        std::optional<Blending> blendingOption [[codegen::Info(BlendingOptionInfo)]];
 
         // The path to a vertex shader program to use instead of the default shader.
         std::optional<std::filesystem::path> vertexShader;
@@ -326,29 +353,25 @@ namespace {
         // The path to a fragment shader program to use instead of the default shader.
         std::optional<std::filesystem::path> fragmentShader;
 
-        // [[codegen::verbatim(UseOverrideColorInfo.description)]]
-        std::optional<bool> useOverrideColor;
-
-        // [[codegen::verbatim(OverrideColorInfo.description)]]
-        std::optional<glm::vec4> overrideColor [[codegen::color()]];
+        std::optional<glm::vec4> overrideColor
+            [[codegen::Info(OverrideColorInfo), codegen::color()]];
 
         struct NodeTransform {
             // This describes a translation that is applied to an internal model node
             // identified with name and all its children. Depending on the 'Type' of the
             // translation, this can either be a static translation or a time-varying one.
-            std::optional<ghoul::Dictionary> translation
+            std::optional<Dictionary> translation
                 [[codegen::reference("core_translation")]];
 
             // This describes a rotation that is applied to an internal model node
             // identified with name and all its children. Depending on the 'Type' of the
             // rotation, this can either be a static rotation or a time-varying one.
-            std::optional<ghoul::Dictionary> rotation
-                [[codegen::reference("core_rotation")]];
+            std::optional<Dictionary> rotation [[codegen::reference("core_rotation")]];
 
             // This describes a scaling that is applied to an internal model node
             // identified with name and all its children. Depending on the 'Type' of the
             // scaling, this can either be a static scaling or a time-varying one.
-            std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
+            std::optional<Dictionary> scale [[codegen::reference("core_scale")]];
         };
 
         // A map of custom transformations to apply to internal model nodes. The keys of
@@ -376,45 +399,24 @@ Documentation RenderableModel::Documentation() {
     );
 }
 
-RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
+RenderableModel::RenderableModel(const Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
     , Shadower(dictionary)
-    , _enableAnimation(EnableAnimationInfo, false)
-    , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
-    , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
-    , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
-    , _specularPower(SpecularPowerInfo, 100.f, 0.5f, 1000.f)
-    , _performShading(ShadingInfo, true)
-    , _enableFaceCulling(EnableFaceCullingInfo, true)
-    , _modelTransform(
-        ModelTransformInfo,
-        glm::dmat4(1.0),
-        glm::dmat4(
-            -1.0, -1.0, -1.0, -1.0,
-            -1.0, -1.0, -1.0, -1.0,
-            -1.0, -1.0, -1.0, -1.0,
-            -1.0, -1.0, -1.0, -1.0
-        ),
-        glm::dmat4(
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0
-        )
-    )
-    , _pivot(
-        PivotInfo,
-        glm::vec3(0.f),
-        glm::vec3(-std::numeric_limits<float>::max()),
-        glm::vec3(std::numeric_limits<float>::max())
-    )
-    , _modelScale(ModelScaleInfo, 1.0, std::numeric_limits<double>::epsilon(), 4e+27)
-    , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
-    , _enableDepthTest(EnableDepthTestInfo, true)
+    , _enableAnimation(EnableAnimationInfo)
+    , _ambientIntensity(AmbientIntensityInfo)
+    , _diffuseIntensity(DiffuseIntensityInfo)
+    , _specularIntensity(SpecularIntensityInfo)
+    , _specularPower(SpecularPowerInfo)
+    , _performShading(ShadingInfo)
+    , _enableFaceCulling(EnableFaceCullingInfo)
+    , _modelTransform(ModelTransformInfo)
+    , _pivot(PivotInfo)
+    , _modelScale(ModelScaleInfo)
+    , _rotationVec(RotationVecInfo)
+    , _enableDepthTest(EnableDepthTestInfo)
     , _blendingFuncOption(BlendingOptionInfo)
-    , _renderWireframe(RenderWireframeInfo, false)
-    , _useOverrideColor(UseOverrideColorInfo, false)
-    , _overrideColor(OverrideColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+    , _renderWireframe(RenderWireframeInfo)
+    , _overrideColor(OverrideColorInfo)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _customNodeTransformsOwner(CustomNodeTransformsInfo)
 {
@@ -431,7 +433,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _file = p.geometryFile;
     if (!std::filesystem::exists(_file)) {
-        throw ghoul::RuntimeError(std::format("Cannot find model file '{}'", _file));
+        throw RuntimeError(std::format("Cannot find model file '{}'", _file));
     }
 
     _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
@@ -457,7 +459,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             _modelScale = std::get<double>(*p.modelScale);
         }
         else {
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
         }
 
         if (_invertModelScale) {
@@ -490,7 +492,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             }
         }
         else {
-            throw ghoul::MissingCaseException();
+            throw MissingCaseException();
         }
     }
 
@@ -527,9 +529,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _fragmentShaderPath = p.fragmentShader.value_or(_fragmentShaderPath);
 
     if (p.lightSources.has_value()) {
-        const std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
+        const std::vector<Dictionary> lightsources = *p.lightSources;
 
-        for (const ghoul::Dictionary& lsDictionary : lightsources) {
+        for (const Dictionary& lsDictionary : lightsources) {
             std::unique_ptr<LightSource> lightSource =
                 LightSource::createFromDictionary(lsDictionary);
             _lightSourcePropertyOwner.addPropertySubOwner(lightSource.get());
@@ -537,7 +539,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    _useOverrideColor = p.useOverrideColor.value_or(_useOverrideColor);
     _overrideColor = p.overrideColor.value_or(_overrideColor);
 
     addProperty(_enableAnimation);
@@ -555,12 +556,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_modelTransform);
     addProperty(_pivot);
     addProperty(_rotationVec);
-    addProperty(_useOverrideColor);
     _overrideColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_overrideColor);
 
     addProperty(_modelScale);
-    _modelScale.setExponent(20.f);
 
     _modelScale.onChange([this]() {
         if (!_geometry) {
@@ -683,7 +682,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 ));
             }
             else {
-                ghoul::Dictionary translation;
+                Dictionary translation;
                 translation.setValue("Type", std::string("StaticTranslation"));
                 translation.setValue("Position", glm::dvec3(0.0));
                 _customNodeTransforms[nodeName].translation =
@@ -701,7 +700,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 ));
             }
             else {
-                ghoul::Dictionary rotation;
+                Dictionary rotation;
                 rotation.setValue("Type", std::string("StaticRotation"));
                 rotation.setValue("Rotation", glm::dvec3(0.0));
                 _customNodeTransforms[nodeName].rotation =
@@ -718,7 +717,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 ));
             }
             else {
-                ghoul::Dictionary scale;
+                Dictionary scale;
                 scale.setValue("Type", std::string("StaticScale"));
                 scale.setValue("Scale", 1.0);
                 _customNodeTransforms[nodeName].scale =
@@ -765,10 +764,10 @@ void RenderableModel::initializeGL() {
     ZoneScoped;
 
     // Load model
-    _geometry = ghoul::io::ModelReader::ref().loadModel(
+    _geometry = io::ModelReader::ref().loadModel(
         _file,
-        ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
-        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+        io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
+        io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
     );
     _modelHasAnimation = _geometry->hasAnimation();
     _geometry->setReplaceWithCustomTransforms(_replaceWithCustomNodeTransforms);
@@ -824,7 +823,7 @@ void RenderableModel::initializeGL() {
     }
     _program = BaseModule::ProgramObjectManager.request(
         program,
-        [this, program]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [this, program]() -> std::unique_ptr<opengl::ProgramObject> {
             const std::filesystem::path vs =
                 _vertexShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
@@ -840,14 +839,14 @@ void RenderableModel::initializeGL() {
     // We don't really know what kind of shader the user provides us with, so we can't
     // make the assumption that we are going to use all uniforms
     _program->setIgnoreUniformLocationError(
-        ghoul::opengl::ProgramObject::IgnoreError::Yes
+        opengl::ProgramObject::IgnoreError::Yes
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+    opengl::updateUniformLocations(*_program, _uniformCache);
 
     _quadProgram = BaseModule::ProgramObjectManager.request(
         "ModelOpacityProgram",
-        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [&]() -> std::unique_ptr<opengl::ProgramObject> {
             const std::filesystem::path vs =
                 absPath("${MODULE_BASE}/shaders/modelopacity_vs.glsl");
             const std::filesystem::path fs =
@@ -860,7 +859,7 @@ void RenderableModel::initializeGL() {
             );
         }
     );
-    ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
+    opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
 
     // Screen quad VAO
     glCreateBuffers(1, &_vbo);
@@ -969,21 +968,21 @@ void RenderableModel::deinitializeGL() {
     }
     BaseModule::ProgramObjectManager.release(
         program,
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
 
     BaseModule::ProgramObjectManager.release(
         "ModelOpacityProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
 
     _program = nullptr;
     _quadProgram = nullptr;
-    ghoul::opengl::FramebufferObject::deactivate();
+    opengl::FramebufferObject::deactivate();
 
     if (_castShadow) {
         releaseDepthMapResources();
@@ -991,21 +990,19 @@ void RenderableModel::deinitializeGL() {
 }
 
 void RenderableModel::createDepthMapResources() {
-    using ProgramObject = ghoul::opengl::ProgramObject;
-
     _depthMapProgram = BaseModule::ProgramObjectManager.request(
         "ModelDepthMapProgram",
-        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [&]() -> std::unique_ptr<opengl::ProgramObject> {
             std::filesystem::path vs =
                 absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl");
             std::filesystem::path fs =
                 absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl");
 
-            std::unique_ptr<ProgramObject> prog =
+            std::unique_ptr<opengl::ProgramObject> p =
                 global::renderEngine->buildRenderProgram("ModelDepthMapProgram", vs, fs);
-            prog->setIgnoreAttributeLocationError(ProgramObject::IgnoreError::Yes);
-            prog->setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
-            return prog;
+            p->setIgnoreAttributeLocationError(opengl::ProgramObject::IgnoreError::Yes);
+            p->setIgnoreUniformLocationError(opengl::ProgramObject::IgnoreError::Yes);
+            return p;
         }
     );
 }
@@ -1013,7 +1010,7 @@ void RenderableModel::createDepthMapResources() {
 void RenderableModel::releaseDepthMapResources() {
     BaseModule::ProgramObjectManager.release(
         "ModelDepthMapProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -1125,7 +1122,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     // Does only really need to be set when _castShadow changes
     _program->setUniform(_uniformCache.has_shadow_depth_map, _castShadow);
 
-    ghoul::opengl::TextureUnit shadowUnit;
+    opengl::TextureUnit shadowUnit;
     if (_castShadow && _lightSource) {
         ShadowInfo sm = global::renderEngine->renderer().shadowInformation(_shadowGroup);
 
@@ -1136,8 +1133,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.shadow_depth_map, shadowUnit);
     }
 
-    _program->setUniform(_uniformCache.has_override_color, _useOverrideColor);
-    if (_useOverrideColor) {
+    _program->setUniform(_uniformCache.has_override_color, _overrideColor.isEnabled());
+    if (_overrideColor.isEnabled()) {
         _program->setUniform(_uniformCache.override_color, _overrideColor);
     }
 
@@ -1166,7 +1163,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     }
     else {
         // Prepare framebuffer
-        const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+        const GLint defaultFBO = opengl::FramebufferObject::getActiveObject();
 
         // Re-bind first texture to use the currently not used Ping-Pong texture in the
         // FramebufferRenderer
@@ -1204,7 +1201,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Bind the G-buffer depth texture for a manual depth test towards the rest of the
         // scene
-        ghoul::opengl::TextureUnit gBufferDepthTextureUnit;
+        opengl::TextureUnit gBufferDepthTextureUnit;
         gBufferDepthTextureUnit.bind(
             global::renderEngine->renderer().gBufferDepthTexture()
         );
@@ -1247,11 +1244,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _quadProgram->setUniform(_uniformOpacityCache.opacity, opacity());
 
         // Bind textures
-        ghoul::opengl::TextureUnit colorTextureUnit;
+        opengl::TextureUnit colorTextureUnit;
         colorTextureUnit.bind(global::renderEngine->renderer().additionalColorTexture1());
         _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
 
-        ghoul::opengl::TextureUnit depthTextureUnit;
+        opengl::TextureUnit depthTextureUnit;
         depthTextureUnit.bind(global::renderEngine->renderer().additionalDepthTexture());
         _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
 
@@ -1284,12 +1281,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 void RenderableModel::update(const UpdateData& data) {
     if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
+        opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
     if (_quadProgram->isDirty()) [[unlikely]] {
         _quadProgram->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
+        opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
     }
 
     if (!hasOverrideRenderBin()) {

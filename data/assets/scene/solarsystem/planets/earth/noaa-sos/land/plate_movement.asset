@@ -46,9 +46,11 @@ local AgeScale = {
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "age_scale.png",
-  FaceCamera = false,
-  Scale = 0.35,
-  CartesianPosition = { 0.0, -0.5, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    Scale = 0.35,
+    CartesianPosition = { 0.0, -0.5, -2.0 }
+  }
 }
 
 

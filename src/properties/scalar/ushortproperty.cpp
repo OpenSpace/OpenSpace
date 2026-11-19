@@ -24,36 +24,28 @@
 
 #include <openspace/properties/scalar/ushortproperty.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-UShortProperty::UShortProperty(PropertyInfo info, unsigned short value,
-                               unsigned short minValue, unsigned short maxValue,
-                               unsigned short stepValue)
-    : NumericalProperty<unsigned short>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue
-    )
+UShortProperty::UShortProperty(UShortPropertyInfo info)
+    : NumericalProperty<unsigned short>(std::move(info))
 {}
 
 std::string_view UShortProperty::className() const {
     return "UShortProperty";
 }
 
-ghoul::lua::LuaTypes UShortProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes UShortProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void UShortProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 unsigned short UShortProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<unsigned short>(state);
+    return lua::value<unsigned short>(state);
 }
 
 std::string UShortProperty::stringValue() const {
@@ -71,6 +63,7 @@ nlohmann::json UShortProperty::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": { "type": "number" }
           },
           "additionalProperties": false,

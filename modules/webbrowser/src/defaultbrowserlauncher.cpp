@@ -24,7 +24,7 @@
 
 #include <modules/webbrowser/include/defaultbrowserlauncher.h>
 
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
 
 #ifdef WIN32
 #include <shellapi.h>

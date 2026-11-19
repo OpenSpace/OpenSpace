@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
@@ -35,7 +36,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 #include <functional>
 #include <optional>
@@ -94,12 +94,16 @@ public:
      * Set camera state from a provided navigation state next frame. The actual position
      * will computed from the scene in the same frame as it is set.
      *
-     * \param state The navigation state to compute a camera positon from
+     * \param state The navigation state to compute a camera position from
      * \param useTimeStamp If `true`, also set the time based on the time stamp in the
      *        navigation state, if it is provided. If `false`, do not change time
+     * \param isCameraInteraction If `IsCameraInteraction::Yes`, a change of the anchor
+     *        node caused by the new state is treated as a camera interaction
      */
     void setNavigationStateNextFrame(const NavigationState& state,
-        bool useTimeStamp = false);
+        bool useTimeStamp = false,
+        OrbitalNavigator::IsCameraInteraction isCameraInteraction =
+            OrbitalNavigator::IsCameraInteraction::Yes);
 
     /**
      * Set camera state from a provided node based camera specification structure, next
@@ -108,8 +112,12 @@ public:
      * is set.
      *
      * \param spec The node specification from which to compute the resulting camera pose
+     * \param isCameraInteraction If `IsCameraInteraction::Yes`, a change of the anchor
+     *        node caused by the new state is treated as a camera interaction
      */
-    void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
+    void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec,
+        OrbitalNavigator::IsCameraInteraction isCameraInteraction =
+            OrbitalNavigator::IsCameraInteraction::Yes);
 
     /**
      * Trigger a transition script after first fading out the rendering, and fading in the
@@ -145,6 +153,8 @@ private:
     PathNavigator _pathNavigator;
 
     std::optional<std::variant<NodeCameraStateSpec, NavigationState>> _pendingState;
+    OrbitalNavigator::IsCameraInteraction _pendingStateIsCameraInteraction =
+        OrbitalNavigator::IsCameraInteraction::Yes;
 
     BoolProperty _useKeyFrameInteraction;
     FloatProperty _jumpToFadeDuration;

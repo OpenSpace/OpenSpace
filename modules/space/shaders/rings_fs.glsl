@@ -30,7 +30,7 @@ in Data {
   vec2 texCoords;
 } in_data;
 
-uniform sampler1D texture1;
+uniform sampler1D tex;
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
 uniform bool hasSunPosition;
@@ -59,7 +59,7 @@ Fragment getFragment() {
     discard;
   }
 
-  vec4 diffuse = texture(texture1, texCoords);
+  vec4 diffuse = texture(tex, texCoords);
   // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
   // to normalize the alpha value to [0,1]
   float colorValue = length(diffuse.rgb) / 3.0;

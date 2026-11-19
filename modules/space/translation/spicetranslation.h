@@ -35,7 +35,7 @@ namespace openspace {
 
 class SpiceTranslation : public Translation {
 public:
-    explicit SpiceTranslation(const ghoul::Dictionary& dictionary);
+    explicit SpiceTranslation(const Dictionary& dictionary);
 
     glm::dvec3 position(const UpdateData& data) const override;
 

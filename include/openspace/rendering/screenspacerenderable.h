@@ -28,25 +28,22 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
-#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/glm.h>
+#include <openspace/opengl/uniformcache.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <memory>
-
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-        class TextureUnit;
-    } // namespace opengl
-    class Dictionary;
-} // namespace ghoul
 
 namespace openspace {
 
+namespace opengl {
+    class ProgramObject;
+    class TextureUnit;
+} // namespace opengl
+class Dictionary;
 struct Documentation;
 struct RenderData;
 
@@ -60,12 +57,12 @@ struct RenderData;
 class ScreenSpaceRenderable : public PropertyOwner, public Fadeable {
 public:
     static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+        const Dictionary& dictionary);
 
     static constexpr std::string_view KeyName = "Name";
     static constexpr std::string_view KeyIdentifier = "Identifier";
 
-    explicit ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceRenderable(const Dictionary& dictionary);
     ~ScreenSpaceRenderable() override;
 
     struct RenderData {
@@ -104,7 +101,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void createShaders(ghoul::Dictionary dict = ghoul::Dictionary());
+    void createShaders(Dictionary dict = Dictionary());
     std::string makeUniqueIdentifier(std::string name);
 
     virtual glm::mat4 scaleMatrix();
@@ -121,7 +118,7 @@ protected:
     void draw(const glm::mat4& modelTransform, const RenderData& renderData,
         bool useAcceleratedRendering = false);
 
-    virtual void bindTexture(ghoul::opengl::TextureUnit& unit) = 0;
+    virtual void bindTexture(opengl::TextureUnit& unit) = 0;
     virtual void unbindTexture();
 
     /**
@@ -134,38 +131,46 @@ protected:
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
 
     BoolProperty _enabled;
+    StringProperty _renderableType;
+
+    struct {
+        PropertyOwner owner;
+        BoolProperty useRadiusAzimuthElevation;
+        // x, y, z
+        Vec3Property cartesian;
+        // Radius, azimuth, elevation, where azimuth is relative to negative y axis and
+        // elevation is angle from plane with normal z
+        Vec3Property rae;
+
+        FloatProperty scale;
+        // Local rotation (roll, pitch, yaw)
+        Vec3Property localRotation;
+
+        BoolProperty faceCamera;
+    } _placement;
+
+    struct {
+        PropertyOwner owner;
+        Vec3Property multiplyColor;
+        Vec4Property backgroundColor;
+        FloatProperty gammaOffset;
+
+        struct {
+            PropertyOwner owner;
+            FloatProperty width;
+            Vec3Property color;
+            BoolProperty feather;
+        } border;
+    } _style;
+
     BoolProperty _renderDuringBlackout;
-    BoolProperty _usePerspectiveProjection;
-    BoolProperty _useRadiusAzimuthElevation;
-    BoolProperty _faceCamera;
-
-    // x, y, z
-    Vec3Property _cartesianPosition;
-
-    // Radius, azimuth, elevation, where azimuth is relative to negative y axis and
-    // elevation is angle from plane with normal z.
-    Vec3Property _raePosition;
-
-    // Local rotation (roll, pitch, yaw)
-    Vec3Property _localRotation;
-
-    // Border
-    FloatProperty _borderWidth;
-    Vec3Property _borderColor;
-    BoolProperty _borderFeather;
-
-    FloatProperty _scale;
-    FloatProperty _gammaOffset;
-    Vec3Property _multiplyColor;
-    Vec4Property _backgroundColor;
-    TriggerProperty _delete;
 
     // A hint to the user interface to hide this screen space renderable
     BoolProperty _guiIsHidden;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<opengl::ProgramObject> _shader;
 
 private:
     UniformCache(color, opacity, blackoutFactor, hue, value, saturation, mvpMatrix, tex,

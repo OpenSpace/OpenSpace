@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Tartarus_Montes",
   Name = "Tartarus Montes [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "Field_of_Cones_in_the_Tartarus_Montes_Texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Tartarus_Montes",
   Name = "Tartarus Montes [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "Field_of_Cones_in_the_Tartarus_Montes_Heightmap.vrt"
 }
 

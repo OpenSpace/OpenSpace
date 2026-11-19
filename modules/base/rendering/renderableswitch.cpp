@@ -25,20 +25,25 @@
 #include <modules/base/rendering/renderableswitch.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <optional>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo DistanceThresholdInfo = {
-        "DistanceThreshold",
-        "Distance threshold",
-        "Threshold in meters for when the switch happens between the two renderables.",
-        Property::Visibility::AdvancedUser
+    constexpr DoublePropertyInfo DistanceThresholdInfo = {
+        .identifier = "DistanceThreshold",
+        .name = "Distance threshold",
+        .description = "Threshold in meters for when the switch happens between the two "
+            "renderables.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.f, 1e25f }
+        }
     };
 
     // Can be used to render one of two renderables depending on the distance between the
@@ -53,15 +58,14 @@ namespace {
     struct [[codegen::Dictionary(RenderableSwitch)]] Parameters {
         // The renderable to show when the camera is closer to the object than the
         // threshold.
-        std::optional<ghoul::Dictionary>
+        std::optional<Dictionary>
             renderableNear [[codegen::reference("core_renderable")]];
 
         // The renderable to show when the camera is further away than the threshold.
-        std::optional<ghoul::Dictionary>
-            renderableFar [[codegen::reference("core_renderable")]];
+        std::optional<Dictionary> renderableFar [[codegen::reference("core_renderable")]];
 
-        // [[codegen::verbatim(DistanceThresholdInfo.description)]]
-        std::optional<double> distanceThreshold [[codegen::greaterequal(0.0)]];
+        std::optional<double> distanceThreshold
+            [[codegen::Info(DistanceThresholdInfo), codegen::greaterequal(0.0)]];
     };
 } // namespace
 #include "renderableswitch_codegen.cpp"
@@ -75,14 +79,14 @@ Documentation RenderableSwitch::Documentation() {
     );
 }
 
-RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
+RenderableSwitch::RenderableSwitch(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _distanceThreshold(DistanceThresholdInfo, 1.f, 0.f, 1e25f)
+    , _distanceThreshold(DistanceThresholdInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     if (!p.renderableNear.has_value() && !p.renderableFar.has_value()) {
-        throw ghoul::RuntimeError(
+        throw RuntimeError(
             "Either a RenderableNear or a RenderableFar (or both) has to be provided, "
             "but omitting both is invalid"
         );
@@ -107,7 +111,7 @@ RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableSwitch::initialize() {
-    ghoul_assert(_renderableNear || _renderableFar, "No renderable");
+    assert_msg(_renderableNear || _renderableFar, "No renderable");
 
     if (_renderableNear) {
         _renderableNear->initialize();
@@ -119,7 +123,7 @@ void RenderableSwitch::initialize() {
 }
 
 void RenderableSwitch::deinitialize() {
-    ghoul_assert(_renderableNear || _renderableFar, "No renderable");
+    assert_msg(_renderableNear || _renderableFar, "No renderable");
 
     if (_renderableNear) {
         _renderableNear->deinitialize();
@@ -131,7 +135,7 @@ void RenderableSwitch::deinitialize() {
 }
 
 void RenderableSwitch::initializeGL() {
-    ghoul_assert(_renderableNear || _renderableFar, "No renderable");
+    assert_msg(_renderableNear || _renderableFar, "No renderable");
 
     if (_renderableNear) {
         _renderableNear->initializeGL();
@@ -143,7 +147,7 @@ void RenderableSwitch::initializeGL() {
 }
 
 void RenderableSwitch::deinitializeGL() {
-    ghoul_assert(_renderableNear || _renderableFar, "No renderable");
+    assert_msg(_renderableNear || _renderableFar, "No renderable");
 
     if (_renderableNear) {
         _renderableNear->deinitializeGL();
@@ -155,7 +159,7 @@ void RenderableSwitch::deinitializeGL() {
 }
 
 void RenderableSwitch::update(const UpdateData& data) {
-    ghoul_assert(_renderableNear || _renderableFar, "No renderable");
+    assert_msg(_renderableNear || _renderableFar, "No renderable");
 
     if (_renderableNear) {
         _renderableNear->update(data);

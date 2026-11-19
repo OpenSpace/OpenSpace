@@ -24,6 +24,8 @@
 
 #include <modules/globebrowsing/src/layergroup.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/lua/lua_helper.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -31,8 +33,6 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/stringhelper.h>
 
 using namespace openspace;
 
@@ -51,24 +51,24 @@ namespace {
  *        details on what fields and settings the dictionary may contain
  */
 [[codegen::luawrap]] void addLayer(std::string globeIdentifier, std::string layerGroup,
-                                   ghoul::Dictionary layer)
+                                   Dictionary layer)
 {
     // Get the node and make sure it exists
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
+        throw lua::LuaError("Unknown globe name: " + globeIdentifier);
     }
 
     // Get the renderable globe
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
-        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeIdentifier);
+        throw lua::LuaError("Renderable is not a globe: " + globeIdentifier);
     }
 
     // Get the layer group
-    layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroup);
+    layers::Group::ID groupID = from_string<layers::Group::ID>(layerGroup);
     if (groupID == layers::Group::ID::Unknown) {
-        throw ghoul::lua::LuaError("Unknown layer group: " + layerGroup);
+        throw lua::LuaError("Unknown layer group: " + layerGroup);
     }
 
     // Add the name of the enclosing globe to layer dict, it is used to identify a cache
@@ -92,24 +92,24 @@ namespace {
  *        `Identifier` key that is used instead
  */
 [[codegen::luawrap]] void deleteLayer(std::string globeIdentifier, std::string layerGroup,
-                                 std::variant<std::string, ghoul::Dictionary> layerOrName)
+                                 std::variant<std::string, Dictionary> layerOrName)
 {
     // Get the node and make sure it exists
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
+        throw lua::LuaError("Unknown globe name: " + globeIdentifier);
     }
 
     // Get the renderable globe
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
-        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeIdentifier);
+        throw lua::LuaError("Renderable is not a globe: " + globeIdentifier);
     }
 
     // Get the layer group
-    layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroup);
+    layers::Group::ID groupID = from_string<layers::Group::ID>(layerGroup);
     if (groupID == layers::Group::ID::Unknown) {
-        throw ghoul::lua::LuaError("Unknown layer group: " + layerGroup);
+        throw lua::LuaError("Unknown layer group: " + layerGroup);
     }
 
     std::string layerName;
@@ -117,9 +117,9 @@ namespace {
         layerName = std::get<std::string>(layerOrName);
     }
     else {
-        ghoul::Dictionary d = std::get<ghoul::Dictionary>(layerOrName);
+        Dictionary d = std::get<Dictionary>(layerOrName);
         if (!d.hasValue<std::string>("Identifier")) {
-            throw ghoul::lua::LuaError(
+            throw lua::LuaError(
                 "Table passed to deleteLayer does not contain an Identifier"
             );
         }
@@ -140,17 +140,17 @@ namespace {
 {
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
+        throw lua::LuaError("Unknown globe name: " + globeIdentifier);
     }
 
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
-        throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
+        throw lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layerGroup);
+    layers::Group::ID group = from_string<layers::Group::ID>(layerGroup);
     if (group == layers::Group::ID::Unknown) {
-        throw ghoul::lua::LuaError("Unknown layer group: " + layerGroup);
+        throw lua::LuaError("Unknown layer group: " + layerGroup);
     }
 
     const LayerGroup& lg = globe->layerManager().layerGroup(group);
@@ -189,22 +189,22 @@ namespace {
 
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError(std::format("Unknown globe '{}'", globeIdentifier));
+        throw lua::LuaError(std::format("Unknown globe '{}'", globeIdentifier));
     }
 
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
-        throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
+        throw lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
-    layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layerGroup);
+    layers::Group::ID group = from_string<layers::Group::ID>(layerGroup);
     if (group == layers::Group::ID::Unknown) {
-        throw ghoul::lua::LuaError(std::format("Unknown layer group '{}'", layerGroup));
+        throw lua::LuaError(std::format("Unknown layer group '{}'", layerGroup));
     }
 
     LayerGroup& lg = globe->layerManager().layerGroup(group);
     if (std::holds_alternative<int>(source) && std::holds_alternative<int>(destination)) {
-        // Short circut here, no need to get the layers
+        // Short circuit here, no need to get the layers
         lg.moveLayer(std::get<int>(source), std::get<int>(destination));
         return;
     }
@@ -223,7 +223,7 @@ namespace {
             }
         );
         if (it == layers.cend()) {
-            throw ghoul::lua::LuaError(std::format(
+            throw lua::LuaError(std::format(
                 "Could not find source layer '{}'", std::get<std::string>(source)
             ));
         }
@@ -243,7 +243,7 @@ namespace {
             }
         );
         if (it == layers.cend()) {
-            throw ghoul::lua::LuaError(std::format(
+            throw lua::LuaError(std::format(
                 "Could not find destination layer '{}'", std::get<std::string>(source)
             ));
         }
@@ -267,12 +267,12 @@ namespace {
 {
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
+        throw lua::LuaError("Unknown globe name: " + globeIdentifier);
     }
 
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
-        throw ghoul::lua::LuaError("Identifier must be a RenderableGlobe");
+        throw lua::LuaError("Identifier must be a RenderableGlobe");
     }
 
     global::moduleEngine->module<GlobeBrowsingModule>()->goToChunk(*n, x, y, level);
@@ -292,7 +292,7 @@ namespace {
     // focus vs anchor
     const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
     if (!globe) {
-        throw ghoul::lua::LuaError("Focus node must be a RenderableGlobe");
+        throw lua::LuaError("Focus node must be a RenderableGlobe");
     }
     Camera* camera = global::navigationHandler->camera();
 
@@ -311,7 +311,7 @@ namespace {
     // asset
     if (useEyePosition) {
         const glm::dvec3 anchorPos = anchor->worldPosition();
-        const glm::dvec3 cameraDir = ghoul::viewDirection(camera->rotationQuaternion());
+        const glm::dvec3 cameraDir = viewDirection(camera->rotationQuaternion());
         const double anchorToPosDistance = glm::distance(
             anchorPos + globe->boundingSphere(),
             cameraPosition
@@ -369,18 +369,19 @@ namespace {
  * Returns an array of tables that describe the available layers that are supported by the
  * WMS server identified by the provided name. The `URL` component of the returned table
  * can be used in the `FilePath` argument for a call to the `addLayer` function to add the
- * value to a globe.
+ * value to a globe. If the capabilities of the server are still being downloaded, an
+ * empty array is returned.
  *
  * \param name The name of the WMS server for which to get the information
  */
-[[codegen::luawrap]] std::vector<ghoul::Dictionary> capabilitiesWMS(std::string name) {
+[[codegen::luawrap]] std::vector<Dictionary> capabilitiesWMS(std::string name) {
     GlobeBrowsingModule::Capabilities cap =
         global::moduleEngine->module<GlobeBrowsingModule>()->capabilities(name);
 
-    std::vector<ghoul::Dictionary> res;
+    std::vector<Dictionary> res;
     res.reserve(cap.size());
     for (size_t i = 0; i < cap.size(); i++) {
-        ghoul::Dictionary c;
+        Dictionary c;
         c.setValue("Name", cap[i].name);
         c.setValue("URL", cap[i].url);
         res.push_back(c);
@@ -396,18 +397,17 @@ namespace {
  *        [this page](#globebrowsing_geojsoncomponent) for details on what fields and
  *        settings the table may contain
  */
-[[codegen::luawrap]] void addGeoJson(std::string globeIdentifier, ghoul::Dictionary table)
-{
+[[codegen::luawrap]] void addGeoJson(std::string globeIdentifier, Dictionary table) {
     // Get the node and make sure it exists
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
+        throw lua::LuaError("Unknown globe name: " + globeIdentifier);
     }
 
     // Get the renderable globe
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
-        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeIdentifier);
+        throw lua::LuaError("Renderable is not a globe: " + globeIdentifier);
     }
 
     // Get the dictionary defining the layer
@@ -423,18 +423,18 @@ namespace {
  *        table that includes the identifier
  */
 [[codegen::luawrap]] void deleteGeoJson(std::string globeIdentifier,
-                          std::variant<std::string, ghoul::Dictionary> tableOrIdentifier)
+                          std::variant<std::string, Dictionary> tableOrIdentifier)
 {
     // Get the node and make sure it exists
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError("Unknown globe name: " + globeIdentifier);
+        throw lua::LuaError("Unknown globe name: " + globeIdentifier);
     }
 
     // Get the renderable globe
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
-        throw ghoul::lua::LuaError("Renderable is not a globe: " + globeIdentifier);
+        throw lua::LuaError("Renderable is not a globe: " + globeIdentifier);
     }
 
     std::string identifier;
@@ -442,9 +442,9 @@ namespace {
         identifier = std::get<std::string>(tableOrIdentifier);
     }
     else {
-        ghoul::Dictionary d = std::get<ghoul::Dictionary>(tableOrIdentifier);
+        Dictionary d = std::get<Dictionary>(tableOrIdentifier);
         if (!d.hasValue<std::string>("Identifier")) {
-            throw ghoul::lua::LuaError(
+            throw lua::LuaError(
                 "Table passed to deleteLayer does not contain an Identifier"
             );
         }
@@ -467,16 +467,16 @@ namespace {
 {
     std::filesystem::path path = absPath(filename);
     if (!std::filesystem::is_regular_file(path)) {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Could not find the provided file '{}'", filename
         ));
     }
 
     std::string extension = path.extension().string();
-    extension = ghoul::toLowerCase(extension);
+    extension = toLowerCase(extension);
 
     if (extension != ".geojson" && extension != ".json") {
-        throw ghoul::lua::LuaError(std::format(
+        throw lua::LuaError(std::format(
             "Unexpected file type '{}'. Expected '.geojson' or '.json' file", filename
         ));
     }
@@ -485,18 +485,18 @@ namespace {
         global::navigationHandler->anchorNode()->identifier()
     );
     if (!n) {
-        throw ghoul::lua::LuaError("Invalid anchor node");
+        throw lua::LuaError("Invalid anchor node");
     }
 
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
-        throw ghoul::lua::LuaError(
+        throw lua::LuaError(
             "Current anchor is not a globe (Expected 'RenderableGlobe')"
         );
     }
 
     // Make a minimal dictionary to represent the geojson component
-    ghoul::Dictionary d;
+    Dictionary d;
 
     std::string identifier = makeIdentifier(name.value_or(path.stem().string()));
     d.setValue("Identifier", identifier);
@@ -517,7 +517,7 @@ namespace {
  * \return Table containing a list of `renderableGlobe` identifiers, and an index
  *         indicating the first item in the list that does not have a WMS server
  */
-[[codegen::luawrap]] ghoul::Dictionary globes() {
+[[codegen::luawrap]] Dictionary globes() {
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
 
     std::vector<SceneGraphNode*> nodes =
@@ -570,7 +570,7 @@ namespace {
 
     int index = static_cast<int>(firstWithoutUrl - nodes.begin());
 
-    ghoul::Dictionary e;
+    Dictionary e;
     e.setValue("identifiers", globeIdentifiers);
     e.setValue("firstIndexWithoutUrl", index);
     return e;
@@ -582,13 +582,13 @@ namespace {
  * \param globe The identifier of the `renderableGlobe` to fetch WMS servers for
  * \return A list of WMS server info containing its name and URL
  */
-[[codegen::luawrap]] std::vector<ghoul::Dictionary> urlInfo(std::string globe) {
+[[codegen::luawrap]] std::vector<Dictionary> urlInfo(std::string globe) {
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
     std::vector<GlobeBrowsingModule::UrlInfo> info = module->urlInfo(globe);
 
-    std::vector<ghoul::Dictionary> res;
+    std::vector<Dictionary> res;
     for (const GlobeBrowsingModule::UrlInfo& i : info) {
-        ghoul::Dictionary e;
+        Dictionary e;
         e.setValue("name", i.name);
         e.setValue("url", i.url);
         res.push_back(std::move(e));

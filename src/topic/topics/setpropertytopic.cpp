@@ -26,9 +26,9 @@
 
 #include <openspace/documentation/schema.h>
 #include <openspace/engine/globals.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
 #include <stdexcept>
 #include <string_view>
 
@@ -123,7 +123,7 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
         LERROR("Could not set property -- key or value is missing in payload");
         LERROR(e.what());
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const RuntimeError& e) {
         LERROR("Could not set property -- runtime error:");
         LERROR(e.what());
     }

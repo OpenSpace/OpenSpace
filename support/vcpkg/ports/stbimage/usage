@@ -1,0 +1,16 @@
+stbimage provides three CMake targets:
+
+    find_package(stbimage CONFIG REQUIRED)
+
+    # A library that only calls stbi_* functions needs the declarations, but must
+    # not itself compile the implementation (only one translation unit ever may):
+    target_link_libraries(mylib PRIVATE unofficial::stbimage::stbimage)
+
+    # The final executable that needs the read functions (stbi_load, ...) resolved
+    # links the read implementation once. Skip this if something else already links a
+    # stb_image read implementation (e.g. assimp vendors its own copy):
+    target_link_libraries(myexe PRIVATE unofficial::stbimage::stbimage-read-impl)
+
+    # The final executable that needs the write functions (stbi_write_png, ...)
+    # resolved links the write implementation once:
+    target_link_libraries(myexe PRIVATE unofficial::stbimage::stbimage-write-impl)

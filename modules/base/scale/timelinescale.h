@@ -34,7 +34,7 @@ namespace openspace {
 
 class TimelineScale : public Scale {
 public:
-    explicit TimelineScale(const ghoul::Dictionary& dictionary);
+    explicit TimelineScale(const Dictionary& dictionary);
 
     void initialize() override;
 
@@ -43,7 +43,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    Timeline<ghoul::mm_unique_ptr<Scale>> _timeline;
+    Timeline<mm_unique_ptr<Scale>> _timeline;
     BoolProperty _shouldInterpolate;
 };
 

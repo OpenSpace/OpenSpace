@@ -69,7 +69,7 @@ vec4 pscTransform(inout vec4 vertexPosition, mat4 modelTransform) {
   // project using the rescaled coordinates,
   tmp = psc_to_meter(tmp, scaling);
 
-  // Return the vertex tranformed to OS Camera Rig Space in meters
+  // Return the vertex transformed to OS Camera Rig Space in meters
   return tmp;
 }
 

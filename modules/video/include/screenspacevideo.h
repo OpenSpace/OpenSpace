@@ -33,7 +33,7 @@ namespace openspace {
 
 class ScreenSpaceVideo : public ScreenSpaceRenderable {
 public:
-    explicit ScreenSpaceVideo(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceVideo(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -44,7 +44,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
     VideoPlayer _videoPlayer;
 };

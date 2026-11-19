@@ -30,13 +30,10 @@
 #include <openspace/properties/list/stringlistproperty.h>
 #include <memory>
 
-namespace ghoul {
-    namespace systemcapabilities { struct Version; }
-    class Dictionary;
-} // namespace ghoul
-
 namespace openspace {
 
+namespace systemcapabilities { struct Version; }
+class Dictionary;
 struct Documentation;
 struct LuaLibrary;
 class OpenSpaceModule;
@@ -58,9 +55,9 @@ public:
      * and stored in the `moduleregistration.h` file. For all of those modules the
      * OpenSpaceModule::initialize method with will called.
      *
-     * \throw ghoul::RuntimeError If two modules in the default modules have the same name
+     * \throw RuntimeError If two modules in the default modules have the same name
     */
-    void initialize(const std::map<std::string, ghoul::Dictionary>& moduleConfigurations);
+    void initialize(const std::map<std::string, Dictionary>& moduleConfigurations);
 
     /**
      * Calls the initializeGL functions of all registered OpenSpaceModule%s.
@@ -84,8 +81,7 @@ public:
      *
      * \param module The OpenSpaceModule that is to be registered
      *
-     * \throw ghoul::RuntimeError If the name of the \p module was already registered
-     *        previously
+     * \throw RuntimeError If the name of the \p module was already registered previously
      * \pre \p module must not be `nullptr`
      */
     void registerModule(std::unique_ptr<OpenSpaceModule> module);

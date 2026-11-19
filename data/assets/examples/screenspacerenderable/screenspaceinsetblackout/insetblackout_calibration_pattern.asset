@@ -20,7 +20,9 @@ local Item = {
     CalibrationTexturePath = texturePath .. "calibration-pattern.png",
     EnableCalibrationPattern = true
   },
-  Scale = 1.0
+  Placement = {
+    Scale = 1.0
+  }
 }
 
 

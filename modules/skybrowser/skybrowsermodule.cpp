@@ -35,6 +35,12 @@
 #include <openspace/topic/server.h>
 #include <openspace/topic/connection.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringconversion.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
@@ -44,12 +50,6 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringconversion.h>
-#include <ghoul/misc/templatefactory.h>
 #include <algorithm>
 #include <memory>
 #include <optional>
@@ -59,105 +59,147 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo AllowRotationInfo = {
-        "AllowCameraRotation",
-        "Allow camera rotation",
-        "Toggles if the camera should rotate to look at the sky target if it is going "
-        "outside of the current field of view.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo AllowRotationInfo = {
+        .identifier = "AllowCameraRotation",
+        .name = "Allow camera rotation",
+        .description = "Toggles if the camera should rotate to look at the sky target if "
+            "it is going outside of the current field of view.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo CameraRotSpeedInfo = {
-        "CameraRotationSpeed",
-        "Camera rotation speed",
-        "The speed of the rotation of the camera when the camera rotates to look at a "
-        "coordinate which is outside of the field of view.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo CameraRotSpeedInfo = {
+        .identifier = "CameraRotationSpeed",
+        .name = "Camera rotation speed",
+        .description = "The speed of the rotation of the camera when the camera rotates "
+            "to look at a coordinate which is outside of the field of view.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.5,
+            .minMax = { 0.0, 1.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo TargetSpeedInfo = {
-        "TargetAnimationSpeed",
-        "Target animation speed",
-        "This determines the speed of the animation of the sky target.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo TargetSpeedInfo = {
+        .identifier = "TargetAnimationSpeed",
+        .name = "Target animation speed",
+        .description = "This determines the speed of the animation of the sky target.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.2,
+            .minMax = { 0.0, 1.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo BrowserSpeedInfo = {
-        "BrowserAnimationSpeed",
-        "Field of view animation speed",
-        "This determines the speed of the animation of the field of view in the browser.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo BrowserSpeedInfo = {
+        .identifier = "BrowserAnimationSpeed",
+        .name = "Field of view animation speed",
+        .description = "This determines the speed of the animation of the field of view "
+            "in the browser.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 5.0,
+            .minMax = { 0.0, 10.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo HideWithGuiInfo = {
-        "HideTargetsBrowsersWithGui",
-        "Hide targets and browsers with GUI",
-        "If checked, the targets and browsers will be disabled when the sky browser "
-        "panel is minimized.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo HideWithGuiInfo = {
+        .identifier = "HideTargetsBrowsersWithGui",
+        .name = "Hide targets and browsers with GUI",
+        .description = "If checked, the targets and browsers will be disabled when the "
+            "sky browser panel is minimized.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo InverseZoomInfo = {
-        "InverseZoomDirection",
-        "Inverse zoom direction",
-        "If checked, the zoom direction of the scroll over the AAS WWT browser will be "
-        "inversed.",
-        Property::Visibility::NoviceUser
+    constexpr BoolPropertyInfo InverseZoomInfo = {
+        .identifier = "InverseZoomDirection",
+        .name = "Inverse zoom direction",
+        .description = "If checked, the zoom direction of the scroll over the AAS WWT "
+            "browser will be inversed.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo SynchronizeAimInfo = {
-        "SynchronizeAim",
-        "Synchronize aim",
-        "If checked, the target and the browser will have synchronized aim.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo SynchronizeAimInfo = {
+        .identifier = "SynchronizeAim",
+        .name = "Synchronize aim",
+        .description = "If checked, the target and the browser will have synchronized "
+            "aim.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo SpaceCraftTimeInfo = {
-        "SpaceCraftAnimationTime",
-        "Spacecraft animation time",
-        "Sets the duration (in seconds) of the animation of the spacecraft when it is "
-        "pointed to where the target is aiming.",
-        Property::Visibility::User
+    constexpr DoublePropertyInfo SpaceCraftTimeInfo = {
+        .identifier = "SpaceCraftAnimationTime",
+        .name = "Spacecraft animation time",
+        .description = "Sets the duration (in seconds) of the animation of the "
+            "spacecraft when it is pointed to where the target is aiming.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 2.0,
+            .minMax = { 0.0, 10.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo ImageCollectionInfo = {
-       "WwtImageCollectionUrl",
-       "AAS worldwide telescope image collection URL",
-       "The url of the image collection which is loaded into AAS WorldWide Telescope.",
-       Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo ImageCollectionInfo = {
+        .identifier = "WwtImageCollectionUrl",
+        .name = "AAS worldwide telescope image collection URL",
+        .description = "The url of the image collection which is loaded into AAS "
+            "WorldWide Telescope.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = "https://data.openspaceproject.com/wwt/1/imagecollection.wtml"
+        }
+    };
+
+    constexpr StringPropertyInfo BrowserUrlInfo = {
+        .identifier = "WwtBrowserUrl",
+        .name = "AAS WorldWide Telescope Browser URL",
+        .description = "The URL of the AAS WorldWide Telescope wrapper page that is "
+            "loaded into the SkyBrowser instances.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = "https://wwt.openspaceproject.com/2/openspace/"
+        }
     };
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
-        // [[codegen::verbatim(AllowRotationInfo.description)]]
-        std::optional<bool> allowCameraRotation;
+        std::optional<bool> allowCameraRotation [[codegen::Info(AllowRotationInfo)]];
 
-        // [[codegen::verbatim(CameraRotSpeedInfo.description)]]
-        std::optional<double> cameraRotSpeed;
+        std::optional<double> cameraRotSpeed [[codegen::Info(CameraRotSpeedInfo)]];
 
-        // [[codegen::verbatim(TargetSpeedInfo.description)]]
-        std::optional<double> targetSpeed;
+        std::optional<double> targetSpeed [[codegen::Info(TargetSpeedInfo)]];
 
-        // [[codegen::verbatim(BrowserSpeedInfo.description)]]
-        std::optional<double> browserSpeed;
+        std::optional<double> browserSpeed [[codegen::Info(BrowserSpeedInfo)]];
 
-        // [[codegen::verbatim(HideWithGuiInfo.description)]]
-        std::optional<bool> hideTargetsBrowsersGui;
+        std::optional<bool> hideTargetsBrowsersGui [[codegen::Info(HideWithGuiInfo)]];
 
-        // [[codegen::verbatim(InverseZoomInfo.description)]]
-        std::optional<bool> inverseZoomDirection;
+        std::optional<bool> inverseZoomDirection [[codegen::Info(InverseZoomInfo)]];
 
-        // [[codegen::verbatim(SynchronizeAimInfo.description)]]
-        std::optional<bool> synchronizeAim;
+        std::optional<bool> synchronizeAim [[codegen::Info(SynchronizeAimInfo)]];
 
-        // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
-        std::optional<double> spaceCraftAnimationTime;
+        std::optional<double> spaceCraftAnimationTime
+            [[codegen::Info(SpaceCraftTimeInfo)]];
 
-        // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
-        std::optional<std::string> wwtImageCollectionUrl;
+        std::optional<std::string> wwtImageCollectionUrl
+            [[codegen::Info(ImageCollectionInfo)]];
 
-        // How often the SkyBrowser module should send updates to the UI.
-        // Set in milliseconds, so for example a value of 100 will result in
-        //  an update sent every 0.1 second (10 updates per second).
+        std::optional<std::string> wwtBrowserUrl [[codegen::Info(BrowserUrlInfo)]];
+
+        // How often the SkyBrowser module should send updates to the UI. Set in
+        // milliseconds, so for example a value of 100 will result in an update sent every
+        // 0.1 second (10 updates per second).
         std::optional<int> updateInterval;
     };
 } // namespace
@@ -171,18 +213,16 @@ Documentation SkyBrowserModule::Documentation() {
 
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
-    , _allowCameraRotation(AllowRotationInfo, true)
-    , _cameraRotationSpeed(CameraRotSpeedInfo, 0.5, 0.0, 1.0)
-    , _targetAnimationSpeed(TargetSpeedInfo, 0.2, 0.0, 1.0)
-    , _browserAnimationSpeed(BrowserSpeedInfo, 5.0, 0.0, 10.0)
-    , _hideTargetsBrowsersWithGui(HideWithGuiInfo, false)
-    , _inverseZoomDirection(InverseZoomInfo, false)
-    , _synchronizeAim(SynchronizeAimInfo, true)
-    , _spaceCraftAnimationTime(SpaceCraftTimeInfo, 2.0, 0.0, 10.0)
-    , _wwtImageCollectionUrl(
-        ImageCollectionInfo,
-        "https://data.openspaceproject.com/wwt/1/imagecollection.wtml"
-    )
+    , _allowCameraRotation(AllowRotationInfo)
+    , _cameraRotationSpeed(CameraRotSpeedInfo)
+    , _targetAnimationSpeed(TargetSpeedInfo)
+    , _browserAnimationSpeed(BrowserSpeedInfo)
+    , _hideTargetsBrowsersWithGui(HideWithGuiInfo)
+    , _inverseZoomDirection(InverseZoomInfo)
+    , _synchronizeAim(SynchronizeAimInfo)
+    , _spaceCraftAnimationTime(SpaceCraftTimeInfo)
+    , _wwtImageCollectionUrl(ImageCollectionInfo)
+    , _wwtBrowserUrl(BrowserUrlInfo)
 {
     addProperty(_allowCameraRotation);
     addProperty(_cameraRotationSpeed);
@@ -191,8 +231,8 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_hideTargetsBrowsersWithGui);
     addProperty(_inverseZoomDirection);
     addProperty(_spaceCraftAnimationTime);
-    _wwtImageCollectionUrl.setReadOnly(true);
     addProperty(_wwtImageCollectionUrl);
+    addProperty(_wwtBrowserUrl);
     addProperty(_synchronizeAim);
 
     // Set callback functions
@@ -250,7 +290,7 @@ SkyBrowserModule::SkyBrowserModule()
     });
 }
 
-void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
+void SkyBrowserModule::internalInitialize(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
 
     _allowCameraRotation = p.allowCameraRotation.value_or(_allowCameraRotation);
@@ -259,6 +299,7 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     _browserAnimationSpeed = p.browserSpeed.value_or(_browserAnimationSpeed);
     _inverseZoomDirection = p.inverseZoomDirection.value_or(_inverseZoomDirection);
     _wwtImageCollectionUrl = p.wwtImageCollectionUrl.value_or(_wwtImageCollectionUrl);
+    _wwtBrowserUrl = p.wwtBrowserUrl.value_or(_wwtBrowserUrl);
     _synchronizeAim = p.synchronizeAim.value_or(_synchronizeAim);
     _hideTargetsBrowsersWithGui = p.hideTargetsBrowsersGui.value_or(
         _hideTargetsBrowsersWithGui
@@ -268,18 +309,18 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     );
     _topicUpdateInterval = p.updateInterval.value_or(_topicUpdateInterval);
 
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+    TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+    assert_msg(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
 
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    assert_msg(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderableSkyTarget>("RenderableSkyTarget");
 
-    ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
-    ghoul_assert(fTopic, "Topic factory was not created");
+    TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
+    assert_msg(fTopic, "Topic factory was not created");
     fTopic->registerClass<SkyBrowserTopic>("skybrowser");
 
     DocEng.addSchema(SkyBrowserTopic::Schema());
@@ -329,7 +370,7 @@ void SkyBrowserModule::lookAtTarget(const std::string& id) {
 }
 
 void SkyBrowserModule::setHoverIndicator(SceneGraphNode* circle) {
-    ghoul_assert(circle, "No indicator specified");
+    assert_msg(circle, "No indicator specified");
     _hoverIndicator = circle;
 
     // Always disable it per default. It should only be visible on interaction
@@ -371,7 +412,7 @@ void SkyBrowserModule::moveHoverIndicator(const std::string& imageUrl, bool useS
     // Note that the position can only be set through the script engine
     const std::string script = std::format(
         "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
-        id, ghoul::to_string(pos)
+        id, to_string(pos)
     );
     global::scriptEngine->queueScript(script);
 }
@@ -391,7 +432,7 @@ void SkyBrowserModule::disableHoverIndicator(bool useScript) {
     else {
         Property* prop = _hoverIndicator->renderable()->property("Fade");
         FloatProperty* floatProp = dynamic_cast<FloatProperty*>(prop);
-        ghoul_assert(floatProp, "Fade property is not a float property");
+        assert_msg(floatProp, "Fade property is not a float property");
         *floatProp = 0.f;
     }
 }
@@ -478,6 +519,10 @@ double SkyBrowserModule::spaceCraftAnimationTime() const {
 
 std::string SkyBrowserModule::wwtImageCollectionUrl() const {
     return _wwtImageCollectionUrl;
+}
+
+std::string SkyBrowserModule::wwtBrowserUrl() const {
+    return _wwtBrowserUrl;
 }
 
 void SkyBrowserModule::setSelectedBrowser(std::string_view id) {

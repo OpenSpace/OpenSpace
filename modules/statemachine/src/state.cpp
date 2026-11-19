@@ -26,8 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {
@@ -53,7 +53,7 @@ Documentation State::Documentation() {
     return codegen::doc<Parameters>("statemachine_state");
 }
 
-State::State(const ghoul::Dictionary& dictionary) {
+State::State(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _name = p.identifier;

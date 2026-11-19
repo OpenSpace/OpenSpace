@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___ERRORHISTOGRAMMANAGER___H__
 
 #include <openspace/util/histogram.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <filesystem>
 #include <fstream>
 #include <map>

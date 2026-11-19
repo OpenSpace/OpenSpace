@@ -26,13 +26,13 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
 #include <limits>
 #include <optional>
 #include <utility>
@@ -40,46 +40,65 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TimeInfo = {
-        "Time",
-        "Time",
-        "The time (in J2000 seconds) that is used to calculate transformations and the "
-        "renderable's data."
+    constexpr DoublePropertyInfo TimeInfo = {
+        .identifier = "Time",
+        .name = "Time",
+        .description = "The time (in J2000 seconds) that is used to calculate "
+            "transformations and the renderable's data.",
+        .defaults = {
+            .value = 0.0
+        }
     };
 
-    constexpr Property::PropertyInfo CameraPositionInfo = {
-        "CameraPosition",
-        "Camera position",
-        "Specifies the location of the virtual camera that is showing the renderable "
-        "class. This position is provided in meters."
+    constexpr Vec3PropertyInfo CameraPositionInfo = {
+        .identifier = "CameraPosition",
+        .name = "Camera position",
+        .description = "Specifies the location of the virtual camera that is showing the "
+            "renderable class. This position is provided in meters.",
+        .defaults = {
+            .value = glm::vec3(0.f, 2.f, 2.f),
+            .minMax = { glm::vec3(-10.f), glm::vec3(10.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo CameraCenterInfo = {
-        "CameraCenter",
-        "Camera center",
-        "The location of the camera's focal point. The camera's view direction will "
-        "always be pointing at the provided center location. This position is provided "
-        "in meters."
+    constexpr Vec3PropertyInfo CameraCenterInfo = {
+        .identifier = "CameraCenter",
+        .name = "Camera center",
+        .description = "The location of the camera's focal point. The camera's view "
+            "direction will always be pointing at the provided center location. This "
+            "position is provided in meters.",
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(-1.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo CameraUpInfo = {
-        "CameraUp",
-        "Camera up",
-        "The direction that is 'up' for the provided camera. This value does not have "
-        "any units."
+    constexpr Vec3PropertyInfo CameraUpInfo = {
+        .identifier = "CameraUp",
+        .name = "Camera up",
+        .description = "The direction that is 'up' for the provided camera. This value "
+            "does not have any units.",
+        .defaults = {
+            .value = glm::vec3(0.f, 1.f, 0.f),
+            .minMax = { glm::vec3(-1.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo CameraFovInfo = {
-        "CameraFov",
-        "Camera field of view",
-        "The camera's field of view in degrees."
+    constexpr FloatPropertyInfo CameraFovInfo = {
+        .identifier = "CameraFov",
+        .name = "Camera field of view",
+        .description = "The camera's field of view in degrees.",
+        .defaults = {
+            .value = 45.f,
+            .minMax = { 5.f, 90.f }
+        }
     };
 
-    const PropertyOwner::PropertyOwnerInfo TransformInfo = {
-        "Transform",
-        "Transform",
-        "The Translation, Rotation, and Scale that are applied to the rendered "
-        "Renderable."
+    constexpr PropertyOwner::PropertyOwnerInfo TransformInfo = {
+        .identifier = "Transform",
+        .name = "Transform",
+        .description = "The Translation, Rotation, and Scale that are applied to the "
+            "rendered Renderable."
     };
 
     // Renders any [Renderable](#core_renderable) type into an image that is shown in
@@ -100,25 +119,25 @@ namespace {
         // The [Renderable](#core_renderable) object that is shown in this ScreenSpace
         // object. See the list of creatable renderable objects for options that can be
         // used for this type.
-        ghoul::Dictionary renderable [[codegen::reference("core_renderable")]];
+        Dictionary renderable [[codegen::reference("core_renderable")]];
 
         struct Transform {
             // The [Translation](#core_translation) object that is used for the provided
             // [Renderable](#core_renderable). If no value is specified, a
             // [StaticTranslation](#base_translation_static) is created instead.
-            std::optional<ghoul::Dictionary> translation
+            std::optional<Dictionary> translation
                 [[codegen::reference("core_translation")]];
 
             // The [Rotation](#core_rotation) object that is used for the provided
             // [Renderable](#core_renderable). If no value is specified, a
             // [StaticRotation](#base_rotation_static) is created instead.
-            std::optional<ghoul::Dictionary> rotation
+            std::optional<Dictionary> rotation
                 [[codegen::reference("core_rotation")]];
 
             // The [Scale](#core_scale) object that is used for the provided
             // [Renderable](#core_renderable). If no value is specified, a
             // [StaticScale](#base_scale_static) is created instead.
-            std::optional<ghoul::Dictionary> scale [[codegen::reference("core_scale")]];
+            std::optional<Dictionary> scale [[codegen::reference("core_scale")]];
         };
         // The collection of transformations that are applied to the
         // [Renderable](#core_renderable) before it is shown on screen.
@@ -129,17 +148,13 @@ namespace {
         // instead.
         std::optional<std::string> time [[codegen::datetime()]];
 
-        // [[codegen::verbatim(CameraPositionInfo.description)]]
-        std::optional<glm::vec3> cameraPosition;
+        std::optional<glm::vec3> cameraPosition [[codegen::Info(CameraPositionInfo)]];
 
-        // [[codegen::verbatim(CameraCenterInfo.description)]]
-        std::optional<glm::vec3> cameraCenter;
+        std::optional<glm::vec3> cameraCenter [[codegen::Info(CameraCenterInfo)]];
 
-        // [[codegen::verbatim(CameraUpInfo.description)]]
-        std::optional<glm::vec3> cameraUp;
+        std::optional<glm::vec3> cameraUp [[codegen::Info(CameraUpInfo)]];
 
-        // [[codegen::verbatim(CameraFovInfo.description)]]
-        std::optional<float> cameraFov;
+        std::optional<float> cameraFov [[codegen::Info(CameraFovInfo)]];
     };
 } // namespace
 #include "screenspacerenderablerenderable_codegen.cpp"
@@ -154,23 +169,13 @@ Documentation ScreenSpaceRenderableRenderable::Documentation() {
 }
 
 ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
     : ScreenSpaceRenderableFramebuffer(dictionary)
-    , _time(
-        TimeInfo,
-        0.0,
-        -std::numeric_limits<double>::max(),
-        std::numeric_limits<double>::max()
-    )
-    , _cameraPosition(
-        CameraPositionInfo,
-        glm::vec3(0.f, 2.f, 2.f),
-        glm::vec3(-10.f, -10.f, -10.f),
-        glm::vec3(10.f, 10.f, 10.f)
-    )
-    , _cameraCenter(CameraCenterInfo, glm::vec3(0.f), glm::vec3(-1.f), glm::vec3(1.f))
-    , _cameraUp(CameraUpInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(-1.f), glm::vec3(1.f))
-    , _cameraFov(CameraFovInfo, 45.f, 5.f, 90.f)
+    , _time(TimeInfo)
+    , _cameraPosition(CameraPositionInfo)
+    , _cameraCenter(CameraCenterInfo)
+    , _cameraUp(CameraUpInfo)
+    , _cameraFov(CameraFovInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -195,9 +200,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
     _renderable = Renderable::createFromDictionary(p.renderable);
     addPropertySubOwner(_renderable.get());
 
-    _transform.parent = ghoul::mm_unique_ptr<PropertyOwner>(
-        new PropertyOwner(TransformInfo)
-    );
+    _transform.parent = mm_unique_ptr<PropertyOwner>(new PropertyOwner(TransformInfo));
     addPropertySubOwner(_transform.parent.get());
 
     if (p.transform.has_value() && p.transform->translation.has_value()) {
@@ -205,7 +208,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
             Translation::createFromDictionary(*p.transform->translation);
     }
     else {
-        ghoul::Dictionary translation;
+        Dictionary translation;
         translation.setValue("Type", std::string("StaticTranslation"));
         translation.setValue("Position", glm::dvec3(0.0));
         _transform.translation = Translation::createFromDictionary(translation);
@@ -216,7 +219,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
         _transform.rotation = Rotation::createFromDictionary(*p.transform->rotation);
     }
     else {
-        ghoul::Dictionary rotation;
+        Dictionary rotation;
         rotation.setValue("Type", std::string("StaticRotation"));
         rotation.setValue("Rotation", glm::dvec3(0.0));
         _transform.rotation = Rotation::createFromDictionary(rotation);
@@ -227,7 +230,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
         _transform.scale = Scale::createFromDictionary(*p.transform->scale);
     }
     else {
-        ghoul::Dictionary scale;
+        Dictionary scale;
         scale.setValue("Type", std::string("StaticScale"));
         scale.setValue("Scale", 1.0);
         _transform.scale = Scale::createFromDictionary(scale);
@@ -251,7 +254,7 @@ void ScreenSpaceRenderableRenderable::initializeGL() {
     _renderable->initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec4 bg = _backgroundColor;
+        glm::vec4 bg = _style.backgroundColor;
         glClearColor(bg.r, bg.g, bg.b, bg.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

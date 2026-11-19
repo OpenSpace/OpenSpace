@@ -25,14 +25,13 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
 
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/opengl/textureunit.h>
+#include <openspace/opengl/uniformcache.h>
 #include <vector>
-
-namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
+namespace opengl { class ProgramObject; }
 struct LayerGroup;
 struct TileIndex;
 
@@ -45,15 +44,15 @@ public:
      * Sets the value of `LayerGroup` to its corresponding GPU struct. OBS! Users must
      * ensure bind has been called before setting using this method.
      */
-    void setValue(ghoul::opengl::ProgramObject& programObject,
-        const LayerGroup& layerGroup, const TileIndex& tileIndex);
+    void setValue(opengl::ProgramObject& programObject, const LayerGroup& layerGroup,
+        const TileIndex& tileIndex);
 
     /**
      * Binds this object with GLSL variables with identifiers starting with nameBase
      * within the provided shader program. After this method has been called, users may
      * invoke setValue.
      */
-    void bind(ghoul::opengl::ProgramObject& programObject, const LayerGroup& layerGroup);
+    void bind(opengl::ProgramObject& programObject, const LayerGroup& layerGroup);
 
     /**
      * Deactivates any `TextureUnit`s assigned by this object. This method should be
@@ -64,7 +63,7 @@ public:
 private:
     struct GPULayer {
         struct GPUChunkTile {
-            ghoul::opengl::TextureUnit texUnit;
+            opengl::TextureUnit texUnit;
             UniformCache(texture, uvOffset, uvScale) uniformCache;
         };
         std::vector<GPUChunkTile> gpuChunkTiles;

@@ -27,8 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <ghoul/opengl/programobjectmanager.h>
-#include <ghoul/opengl/texturemanager.h>
+#include <openspace/opengl/programobjectmanager.h>
+#include <openspace/opengl/texturemanager.h>
 
 namespace openspace {
 
@@ -42,11 +42,11 @@ public:
     std::vector<openspace::Documentation> documentations() const override;
     std::vector<LuaLibrary> luaLibraries() const override;
 
-    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
-    static ghoul::opengl::TextureManager TextureManager;
+    static opengl::ProgramObjectManager ProgramObjectManager;
+    static opengl::TextureManager TextureManager;
 
 protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const Dictionary&) override;
     void internalDeinitializeGL() override;
 };
 

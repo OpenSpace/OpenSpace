@@ -24,29 +24,32 @@
 
 #include <openspace/properties/list/doublelistproperty.h>
 
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-DoubleListProperty::DoubleListProperty(PropertyInfo info, std::vector<double> values)
-    : ListProperty(std::move(info), std::move(values))
+DoubleListProperty::DoubleListProperty(DoubleListPropertyInfo info)
+    : ListProperty(
+        info,
+        std::vector<double>(info.defaults.value.begin(), info.defaults.value.end())
+    )
 {}
 
 std::string_view DoubleListProperty::className() const {
     return "DoubleListProperty";
 }
 
-ghoul::lua::LuaTypes DoubleListProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes DoubleListProperty::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void DoubleListProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 std::vector<double> DoubleListProperty::toValue(lua_State* state) const {
-    return ghoul::lua::value<std::vector<double>>(state);
+    return lua::value<std::vector<double>>(state);
 }
 
 std::string DoubleListProperty::stringValue() const {
@@ -65,6 +68,7 @@ nlohmann::json DoubleListProperty::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": {
               "type": "array",
               "items": { "type": "number" }

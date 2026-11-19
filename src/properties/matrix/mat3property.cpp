@@ -24,35 +24,28 @@
 
 #include <openspace/properties/matrix/mat3property.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-Mat3Property::Mat3Property(PropertyInfo info, glm::mat3x3 value, glm::mat3x3 minValue,
-                           glm::mat3x3 maxValue, glm::mat3x3 stepValue)
-    : NumericalProperty<glm::mat3x3>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+Mat3Property::Mat3Property(Mat3PropertyInfo info)
+    : NumericalProperty<glm::mat3x3>(std::move(info))
 {}
 
 std::string_view Mat3Property::className() const {
     return "Mat3Property";
 }
 
-ghoul::lua::LuaTypes Mat3Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes Mat3Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void Mat3Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::mat3 Mat3Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::mat3>(state);
+    return lua::value<glm::mat3>(state);
 }
 
 std::string Mat3Property::stringValue() const {
@@ -70,6 +63,7 @@ nlohmann::json Mat3Property::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": {
               "type": "array",
               "items": { "type": "number" },

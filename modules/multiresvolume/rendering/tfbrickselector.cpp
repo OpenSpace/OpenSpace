@@ -27,10 +27,10 @@
 #include <modules/multiresvolume/rendering/brickcover.h>
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/misc/assert.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/histogram.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <cmath>
 
@@ -408,8 +408,8 @@ bool TfBrickSelector::calculateBrickErrors() {
             for (size_t i = 0; i < gradients.size(); i++) {
                 float x = (i + 0.5f) / tfWidth;
                 float sample = histogram->interpolate(x);
-                ghoul_assert(sample >= 0, "@MISSING");
-                ghoul_assert(gradients[i] >= 0, "@MISSING");
+                assert_msg(sample >= 0, "@MISSING");
+                assert_msg(gradients[i] >= 0, "@MISSING");
                 error += sample * gradients[i];
             }
             _brickErrors[brickIndex] = error;

@@ -34,7 +34,7 @@ namespace openspace {
 
 class RenderableSphereImageLocal : public RenderableSphere {
 public:
-    explicit RenderableSphereImageLocal(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphereImageLocal(const Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -45,7 +45,7 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
 private:
     StringProperty _texturePath;

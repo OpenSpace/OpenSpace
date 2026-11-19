@@ -27,10 +27,9 @@
 
 #include <limits>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 struct TimeRange {
@@ -46,16 +45,15 @@ struct TimeRange {
     TimeRange(double startTime, double endTime);
 
     /**
-     * Throws exception if unable to parse the provided ghoul::Dictionary.
+     * Throws exception if unable to parse the provided Dictionary.
      */
-    explicit TimeRange(const ghoul::Dictionary& dict);
+    explicit TimeRange(const Dictionary& dict);
 
     /**
      * \return `true` if \p timeRange could be initialized from the dictionary, `false`
      *         otherwise
      */
-    static bool initializeFromDictionary(const ghoul::Dictionary& dict,
-        TimeRange& timeRange);
+    static bool initializeFromDictionary(const Dictionary& dict, TimeRange& timeRange);
 
     void include(double val);
 

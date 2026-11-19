@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSHELPER___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSHELPER___H__
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <string>
 
 namespace openspace {

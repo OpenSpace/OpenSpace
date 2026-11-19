@@ -118,7 +118,7 @@ args.startOS = str2bool(args.startOS)
 # Finding the root OpenSpace folder
 rootDir = Path(__file__).resolve().parents[2]
 
-# Find the exectuable location and its name
+# Find the executable location and its name
 if os.name == "nt":
   # Windows
   executable = rootDir / "bin" / "RelWithDebInfo" / "OpenSpace.exe"
@@ -132,7 +132,11 @@ if not executable.exists():
 files = list(Path(rootDir / "data" / "assets").rglob("*.asset"))
 if args.filter:
   p = re.compile(args.filter)
-  files = [x for x in files if re.search(p, str(x))]
+  assetRoot = rootDir / "data" / "assets"
+  files = [
+    x for x in files
+    if re.search(p, str(x.relative_to(assetRoot)).replace("\\", "/"))
+  ]
 
 # Sort files to make sure the files we've gotten are consistent between runs, this way we
 # can start from a specific index

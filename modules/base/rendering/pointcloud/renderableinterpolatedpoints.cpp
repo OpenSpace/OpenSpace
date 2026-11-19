@@ -27,15 +27,15 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
 #include <filesystem>
 #include <limits>
 
@@ -58,85 +58,106 @@ namespace {
         });
     }
 
-    constexpr Property::PropertyInfo InterpolationValueInfo = {
-        "Value",
-        "Value",
-        "The value used for interpolation. The max value is set from the number of steps "
-        "in the dataset, so a step of one corresponds to one step in the dataset and "
-        "values in-between will be determined using interpolation.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo InterpolationValueInfo = {
+        .identifier = "Value",
+        .name = "Value",
+        .description = "The value used for interpolation. The max value is set from the "
+            "number of steps in the dataset, so a step of one corresponds to one step in "
+            "the dataset and values in-between will be determined using interpolation.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo StepsInfo = {
-        "NumberOfSteps",
-        "Number of steps",
-        "The number of steps available in the dataset, including the initial positions.",
-        Property::Visibility::User
+    constexpr UIntPropertyInfo StepsInfo = {
+        .identifier = "NumberOfSteps",
+        .name = "Number of steps",
+        .description = "The number of steps available in the dataset, including the "
+            "initial positions.",
+        .visibility = Visibility::User,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 1
+        }
     };
 
-    constexpr Property::PropertyInfo JumpToNextInfo = {
-        "JumpToNext",
-        "Jump to next",
-        "Immediately set the interpolation value to correspond to the next set of point "
-        "positions compared to the current.",
-        Property::Visibility::User
+    constexpr TriggerPropertyInfo JumpToNextInfo = {
+        .identifier = "JumpToNext",
+        .name = "Jump to next",
+        .description = "Immediately set the interpolation value to correspond to the "
+            "next set of point positions compared to the current.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo JumpToPrevInfo = {
-        "JumpToPrevious",
-        "Jump to previous",
-        "Immediately set the interpolation value to correspond to the previous set of "
-        "point positions compared to the current.",
-        Property::Visibility::User
+    constexpr TriggerPropertyInfo JumpToPrevInfo = {
+        .identifier = "JumpToPrevious",
+        .name = "Jump to previous",
+        .description = "Immediately set the interpolation value to correspond to the "
+            "previous set of point positions compared to the current.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo InterpolateToNextInfo = {
-        "InterpolateToNext",
-        "Interpolate to next",
-        "Trigger an interpolation to the next set of point positions. The duration of "
-        "the interpolation is set based on the Interpolaton Speed property.",
-        Property::Visibility::User
+    constexpr TriggerPropertyInfo InterpolateToNextInfo = {
+        .identifier = "InterpolateToNext",
+        .name = "Interpolate to next",
+        .description = "Trigger an interpolation to the next set of point positions. The "
+            "duration of the interpolation is set based on the Interpolation Speed "
+            "property.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo InterpolateToPrevInfo = {
-        "InterpolateToPrevious",
-        "Interpolate to previous",
-        "Trigger an interpolation to the previous set of point positions. The duration "
-        "of the interpolation is set based on the Interpolaton Speed property.",
-        Property::Visibility::User
+    constexpr TriggerPropertyInfo InterpolateToPrevInfo = {
+        .identifier = "InterpolateToPrevious",
+        .name = "Interpolate to previous",
+        .description = "Trigger an interpolation to the previous set of point positions. "
+            "The duration of the interpolation is set based on the Interpolation Speed "
+            "property.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo InterpolateToEndInfo = {
-        "InterpolateToEnd",
-        "Interpolate to end",
-        "Trigger an interpolation all the way to the final set of positions. The "
-        "duration of the interpolation is set based on the Interpolaton Speed property.",
-        Property::Visibility::NoviceUser
+    constexpr TriggerPropertyInfo InterpolateToEndInfo = {
+        .identifier = "InterpolateToEnd",
+        .name = "Interpolate to end",
+        .description = "Trigger an interpolation all the way to the final set of "
+            "positions. The duration of the interpolation is set based on the "
+            "Interpolation Speed property.",
+        .visibility = Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo InterpolateToStartInfo = {
-        "InterpolateToStart",
-        "Interpolate to start",
-        "Trigger an inverted interpolation to the initial set of positions. The duration "
-        "of the interpolation is set based on the Interpolaton Speed property.",
-        Property::Visibility::NoviceUser
+    constexpr TriggerPropertyInfo InterpolateToStartInfo = {
+        .identifier = "InterpolateToStart",
+        .name = "Interpolate to start",
+        .description = "Trigger an inverted interpolation to the initial set of "
+            "positions. The duration of the interpolation is set based on the "
+            "Interpolation Speed property.",
+        .visibility = Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo InterpolationSpeedInfo = {
-        "Speed",
-        "Interpolation speed",
-        "Affects how long the interpolation takes when triggered using one of the "
-        "trigger properties. A value of 1 means that a step takes 1 second.",
-        Property::Visibility::NoviceUser
+    constexpr FloatPropertyInfo InterpolationSpeedInfo = {
+        .identifier = "Speed",
+        .name = "Interpolation speed",
+        .description = "Affects how long the interpolation takes when triggered using "
+            "one of the trigger properties. A value of 1 means that a step takes 1 "
+            "second.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.01f, 100.f }
+        }
     };
 
-    constexpr Property::PropertyInfo UseSplineInfo = {
-        "UseSplineInterpolation",
-        "Use spline interpolation",
-        "If true, the points will be interpolated using a Catmull-Rom spline instead of "
-        "linearly. This leads to a smoother transition at the breakpoints, i.e. between "
-        "each step.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo UseSplineInfo = {
+        .identifier = "UseSplineInterpolation",
+        .name = "Use spline interpolation",
+        .description = "If true, the points will be interpolated using a Catmull-Rom "
+            "spline instead of linearly. This leads to a smoother transition at the "
+            "breakpoints, i.e. between each step.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // This is a version of the [RenderablePointCloud](#base_renderable_pointcloud) where
@@ -157,14 +178,13 @@ namespace {
         int numberOfObjects [[codegen::greaterequal(1)]];
 
         struct Interpolation {
-            // [[codegen::verbatim(InterpolationValueInfo.description)]]
-            std::optional<float> value [[codegen::inrange(0.f, 1.f)]];
+            std::optional<float> value
+                [[codegen::Info(InterpolationValueInfo), codegen::inrange(0.f, 1.f)]];
 
-            // [[codegen::verbatim(InterpolationSpeedInfo.description)]]
-            std::optional<float> speed [[codegen::greater(0.f)]];
+            std::optional<float> speed
+                [[codegen::Info(InterpolationSpeedInfo), codegen::greater(0.f)]];
 
-            // [[codegen::verbatim(UseSplineInfo.description)]]
-            std::optional<bool> useSplineInterpolation;
+            std::optional<bool> useSplineInterpolation [[codegen::Info(UseSplineInfo)]];
         };
         // Initial settings for the interpolation.
         std::optional<Interpolation> interpolation;
@@ -183,16 +203,16 @@ Documentation RenderableInterpolatedPoints::Documentation() {
 
 RenderableInterpolatedPoints::Interpolation::Interpolation()
     : PropertyOwner({ "Interpolation", "Interpolation", "" })
-    , value(InterpolationValueInfo, 0.f, 0.f, 1.f)
-    , nSteps(StepsInfo, 1)
+    , value(InterpolationValueInfo)
+    , nSteps(StepsInfo)
     , goToNextStep(JumpToNextInfo)
     , goToPrevStep(JumpToPrevInfo)
     , interpolateToNextStep(InterpolateToNextInfo)
     , interpolateToPrevStep(InterpolateToPrevInfo)
     , interpolateToEnd(InterpolateToEndInfo)
     , interpolateToStart(InterpolateToStartInfo)
-    , speed(InterpolationSpeedInfo, 1.f, 0.01f, 100.f)
-    , useSpline(UseSplineInfo, false)
+    , speed(InterpolationSpeedInfo)
+    , useSpline(UseSplineInfo)
 {
     addProperty(value);
 
@@ -243,14 +263,11 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     });
     addProperty(goToPrevStep);
 
-    nSteps.setReadOnly(true);
     addProperty(nSteps);
-
     addProperty(useSpline);
 }
 
-RenderableInterpolatedPoints::RenderableInterpolatedPoints(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableInterpolatedPoints::RenderableInterpolatedPoints(const Dictionary& dictionary)
     : RenderablePointCloud(dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -291,8 +308,8 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
     }
 }
 
-void RenderableInterpolatedPoints::initialize() {
-    RenderablePointCloud::initialize();
+void RenderableInterpolatedPoints::loadDataset() {
+    RenderablePointCloud::loadDataset();
 
     // At this point, the dataset has been loaded and we know how many data points it
     // contains => we can compute the number of interpolation steps
@@ -307,11 +324,16 @@ void RenderableInterpolatedPoints::initialize() {
     if (_nObjectsInDataset > 0) {
         _interpolation.nSteps = _nDataPoints / _nObjectsInDataset;
     }
-    _interpolation.value.setMaxValue(static_cast<float>(_interpolation.nSteps - 1));
+    const float maxValue = static_cast<float>(_interpolation.nSteps - 1);
+    _interpolation.value.setMaxValue(maxValue);
+    // A newly loaded dataset might have fewer steps than the previous one
+    _interpolation.value = std::min(_interpolation.value.value(), maxValue);
 
     // This is the property that is shown in the user interface, so update it so the user
     // can get an idea of how many points will be rendered
     _nDataPoints = _nObjectsInDataset;
+
+    _shouldReinitializeBufferdata = true;
 }
 
 void RenderableInterpolatedPoints::initializeShadersAndGlExtras() {
@@ -334,7 +356,7 @@ void RenderableInterpolatedPoints::initializeShadersAndGlExtras() {
 void RenderableInterpolatedPoints::deinitializeShaders() {
     BaseModule::ProgramObjectManager.release(
         "RenderablePointCloud_Interpolated",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
@@ -371,6 +393,7 @@ int RenderableInterpolatedPoints::nAttributesPerPoint() const {
     }
     // And potentially some more color and size data
     n += hasColorData() ? 1 : 0;
+    n += hasPointColorData() ? 3 : 0;
     n += hasSizeData() ? 1 : 0;
 
     return n;
@@ -442,6 +465,15 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
         result.push_back(e1.data[colorParamIndex]);
     }
 
+    if (hasPointColorData()) {
+        for (int i : _pointColorIndices) {
+            result.push_back(e0.data[i]);
+        }
+        for (int i : _pointColorIndices) {
+            result.push_back(e1.data[i]);
+        }
+    }
+
     if (hasSizeData()) {
         const int sizeParamIndex = currentSizeParameterIndex();
         // @TODO: Consider more detailed control over the scaling. Currently the value is
@@ -507,6 +539,11 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     if (hasColorData()) {
         offset = bufferVertexAttribute("in_colorParameter0", 1, attibsPerPoint, offset);
         offset = bufferVertexAttribute("in_colorParameter1", 1, attibsPerPoint, offset);
+    }
+
+    if (hasPointColorData()) {
+        offset = bufferVertexAttribute("in_pointColor0", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_pointColor1", 3, attibsPerPoint, offset);
     }
 
     if (hasSizeData()) {

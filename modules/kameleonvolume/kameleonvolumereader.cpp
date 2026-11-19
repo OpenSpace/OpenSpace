@@ -27,9 +27,9 @@
 #include <modules/kameleon/include/kameleonhelper.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/volume/rawvolume.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <limits>
 #include <utility>
 
@@ -76,7 +76,7 @@ KameleonVolumeReader::KameleonVolumeReader(std::filesystem::path path)
     : _path(std::move(path))
 {
     if (!std::filesystem::is_regular_file(_path)) {
-        throw ghoul::FileNotFoundError(_path);
+        throw FileNotFoundError(_path);
     }
     _kameleon = createKameleonObject(_path.string());
 
@@ -210,7 +210,7 @@ std::array<std::string, 3> KameleonVolumeReader::gridVariableNames() const {
     return gridVariables(_kameleon->model);
 }
 
-void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionary,
+void KameleonVolumeReader::addAttributeToDictionary(Dictionary& dictionary,
                                                     const std::string& key,
                                                     ccmc::Attribute& attr)
 {
@@ -228,17 +228,17 @@ void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionar
     }
 }
 
-ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
-    ghoul::Dictionary globalAttributesDictionary;
+Dictionary KameleonVolumeReader::readMetaData() const {
+    Dictionary globalAttributesDictionary;
     for (const std::string& attributeName : globalAttributeNames()) {
         ccmc::Attribute attribute = _kameleon->model->getGlobalAttribute(attributeName);
         addAttributeToDictionary(globalAttributesDictionary, attributeName, attribute);
     }
 
-    ghoul::Dictionary variableDictionary;
+    Dictionary variableDictionary;
     std::vector<std::string> varAttrNames = variableAttributeNames();
     for (const std::string& variableName : variableNames()) {
-        ghoul::Dictionary variableAttributesDictionary;
+        Dictionary variableAttributesDictionary;
         for (const std::string& attributeName : varAttrNames) {
             ccmc::Attribute attribute = _kameleon->model->getVariableAttribute(
                 variableName,
@@ -253,7 +253,7 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
         variableDictionary.setValue(variableName, variableAttributesDictionary);
     }
 
-    ghoul::Dictionary res;
+    Dictionary res;
     res.setValue("globalAttributes", std::move(globalAttributesDictionary));
     res.setValue("variableAttributes", std::move(variableDictionary));
     return res;

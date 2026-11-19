@@ -27,38 +27,50 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/glm.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
 #include <array>
 #include <memory>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo XColorInfo = {
-        "XColor",
-        "X color",
-        "The color of the x-axis.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo XColorInfo = {
+        .identifier = "XColor",
+        .name = "X color",
+        .description = "The color of the x-axis.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(1.f, 0.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo YColorInfo = {
-        "YColor",
-        "Y color",
-        "The color of the y-axis.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo YColorInfo = {
+        .identifier = "YColor",
+        .name = "Y color",
+        .description = "The color of the y-axis.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 1.f, 0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo ZColorInfo = {
-        "ZColor",
-        "Z color",
-        "The color of the z-axis.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ZColorInfo = {
+        .identifier = "ZColor",
+        .name = "Z color",
+        .description = "The color of the z-axis.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.f, 0.f, 1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
     // Can be used to render the local Cartesian coordinate system, or reference frame,
@@ -71,14 +83,11 @@ namespace {
     // be scaled to match the parent object for the axes to be visible in the scene, for
     // example using a [StaticScale](#base_scale_static).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
-        // [[codegen::verbatim(XColorInfo.description)]]
-        std::optional<glm::vec3> xColor [[codegen::color()]];
+        std::optional<glm::vec3> xColor [[codegen::Info(XColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(YColorInfo.description)]]
-        std::optional<glm::vec3> yColor [[codegen::color()]];
+        std::optional<glm::vec3> yColor [[codegen::Info(YColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(ZColorInfo.description)]]
-        std::optional<glm::vec3> zColor [[codegen::color()]];
+        std::optional<glm::vec3> zColor [[codegen::Info(ZColorInfo), codegen::color()]];
     };
 } // namespace
 #include "renderablecartesianaxes_codegen.cpp"
@@ -92,12 +101,12 @@ Documentation RenderableCartesianAxes::Documentation() {
     );
 }
 
-RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictionary)
+RenderableCartesianAxes::RenderableCartesianAxes(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _program(nullptr)
-    , _xColor(XColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _yColor(YColorInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _zColor(ZColorInfo, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _xColor(XColorInfo)
+    , _yColor(YColorInfo)
+    , _zColor(ZColorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -119,7 +128,7 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
 void RenderableCartesianAxes::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
         "CartesianAxesProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "CartesianAxesProgram",
                 absPath("${MODULE_BASE}/shaders/axes_vs.glsl"),
@@ -163,7 +172,7 @@ void RenderableCartesianAxes::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "CartesianAxesProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

@@ -33,7 +33,9 @@ local Item = {
       }
     }
   },
-  Scale = 1.25,
+  Placement = {
+    Scale = 1.25
+  },
   CameraPosition = { 0.0, 1.0, 2.0 },
   CameraCenter = { 0.0, 0.5, 0.0 }
 }

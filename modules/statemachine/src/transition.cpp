@@ -26,8 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/misc/dictionary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {
@@ -52,7 +52,7 @@ Documentation Transition::Documentation() {
     return codegen::doc<Parameters>("statemachine_transition");
 }
 
-Transition::Transition(const ghoul::Dictionary& dictionary) {
+Transition::Transition(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _from = p.from;
     _to = p.to;

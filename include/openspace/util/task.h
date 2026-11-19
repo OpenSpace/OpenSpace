@@ -29,19 +29,16 @@
 #include <memory>
 #include <string>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 class Task {
 public:
     using ProgressCallback = std::function<void(float)>;
 
-    static std::unique_ptr<Task> createFromDictionary(
-        const ghoul::Dictionary& dictionary
-    );
+    static std::unique_ptr<Task> createFromDictionary(const Dictionary& dictionary);
 
     virtual ~Task() = default;
     virtual void perform(const ProgressCallback& onProgress) = 0;

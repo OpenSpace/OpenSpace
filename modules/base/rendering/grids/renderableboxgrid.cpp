@@ -27,37 +27,50 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/glm.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
 #include <memory>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color used for the grid lines.",
-        Property::Visibility::NoviceUser
+    constexpr Vec3PropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color used for the grid lines.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = glm::vec3(0.5f),
+            .minMax = { glm::vec3(0.f), glm::vec3(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line width",
-        "The width of the grid lines. The larger number, the thicker the lines.",
-        Property::Visibility::User
+    constexpr FloatPropertyInfo LineWidthInfo = {
+        .identifier = "LineWidth",
+        .name = "Line width",
+        .description = "The width of the grid lines. The larger number, the thicker the "
+            "lines.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.5f,
+            .minMax = { 1.f, 20.f }
+        }
     };
 
-    constexpr Property::PropertyInfo SizeInfo = {
-        "Size",
-        "Grid size",
-        "The size of each dimension of the box, in meters.",
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo SizeInfo = {
+        .identifier = "Size",
+        .name = "Grid size",
+        .description = "The size of each dimension of the box, in meters.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.0001f), glm::vec3(100.f) }
+        }
     };
 
     // Creates a 3D box that is rendered using grid lines.
@@ -65,14 +78,12 @@ namespace {
     // Per default the box is given a uniform size of 1x1x1 meters. It can then be scaled
     // to the desired size. Alternatively, the size in each dimension can be specified.
     struct [[codegen::Dictionary(RenderableBoxGrid)]] Parameters {
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
+        std::optional<glm::vec3> color [[codegen::Info(ColorInfo), codegen::color()]];
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth [[codegen::greaterequal(0.f)]];
+        std::optional<float> lineWidth
+            [[codegen::Info(LineWidthInfo), codegen::greaterequal(0.f)]];
 
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<glm::vec3> size;
+        std::optional<glm::vec3> size [[codegen::Info(SizeInfo)]];
     };
 } // namespace
 #include "renderableboxgrid_codegen.cpp"
@@ -86,11 +97,11 @@ Documentation RenderableBoxGrid::Documentation() {
     );
 }
 
-RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
+RenderableBoxGrid::RenderableBoxGrid(const Dictionary& dictionary)
     : Renderable(dictionary)
-    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
-    , _size(SizeInfo, glm::vec3(1.f), glm::vec3(0.0001f), glm::vec3(100.f))
+    , _color(ColorInfo)
+    , _lineWidth(LineWidthInfo)
+    , _size(SizeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -111,7 +122,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
 void RenderableBoxGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
         "GridProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        []() -> std::unique_ptr<opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "GridProgram",
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
@@ -137,7 +148,7 @@ void RenderableBoxGrid::deinitializeGL() {
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
-        [](ghoul::opengl::ProgramObject* p) {
+        [](opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );

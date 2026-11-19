@@ -28,9 +28,9 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/json.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/topic/server.h>
-#include <ghoul/misc/profiling.h>
 #include <algorithm>
 
 namespace openspace {
@@ -44,17 +44,20 @@ uint64_t Property::Identifier = 0;
 
 Property::Property(PropertyInfo info)
     : _identifier(info.identifier)
-    , _guiName(info.guiName)
+    , _guiName(info.name)
     , _description(info.description)
+    , _isEnabled(info.defaults.isEnabled)
 #ifdef _DEBUG
     , _id(Identifier++)
 #endif // _DEBUG
 {
-    ghoul_assert(!_identifier.empty(), "Identifier must not be empty");
-    ghoul_assert(!_guiName.empty(), "guiName must not be empty");
+    assert_msg(!_identifier.empty(), "Identifier must not be empty");
+    assert_msg(!_guiName.empty(), "guiName must not be empty");
 
     setVisibility(info.visibility);
     setNeedsConfirmation(info.needsConfirmation);
+    setReadOnly(info.isReadOnly);
+    _metaData.isEnablable = info.isEnablable;
 }
 
 Property::~Property() {
@@ -76,8 +79,8 @@ const std::type_info& Property::type() const {
     return typeid(void);
 }
 
-ghoul::lua::LuaTypes Property::typeLua() const {
-    return ghoul::lua::LuaTypes::None;
+lua::LuaTypes Property::typeLua() const {
+    return lua::LuaTypes::None;
 }
 
 std::string Property::stringValue() const {
@@ -113,7 +116,7 @@ void Property::setVisibility(Visibility visibility) {
     }
 }
 
-Property::Visibility Property::visibility() const {
+Visibility Property::visibility() const {
     return _metaData.visibility;
 }
 
@@ -141,6 +144,25 @@ bool Property::viewOption(const std::string& option, bool defaultValue) const {
     return it != _metaData.viewOptions.end() ? it->second : defaultValue;
 }
 
+IsEnablable Property::isEnablable() const {
+    return IsEnablable(_metaData.isEnablable);
+}
+
+IsEnabled Property::isEnabled() const {
+    if (!_metaData.isEnablable) {
+        throw RuntimeError("Tried to get enabled on a property that is not enablable");
+    }
+    return _isEnabled;
+}
+
+void Property::setIsEnabled(IsEnabled isEnabled) {
+    if (!_metaData.isEnablable) {
+        throw RuntimeError("Tried to set enabled on a property that is not enablable");
+    }
+    _isEnabled = isEnabled;
+    notifyChangeListeners();
+}
+
 std::string Property::jsonValue() const {
     std::string value = stringValue();
     if (value[0] == '{') {
@@ -153,7 +175,7 @@ std::string Property::jsonValue() const {
 }
 
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
-    ghoul_assert(callback, "The callback must not be empty");
+    assert_msg(callback, "The callback must not be empty");
 
     const OnChangeHandle handle = _currentHandleValue++;
     _onChangeCallbacks.emplace_back(handle, std::move(callback));
@@ -161,7 +183,7 @@ Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
 }
 
 Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
-    ghoul_assert(callback, "The callback must not be empty");
+    assert_msg(callback, "The callback must not be empty");
 
     const OnDeleteHandle handle = _currentHandleValue++;
     _onDeleteCallbacks.emplace_back(handle, std::move(callback));
@@ -171,7 +193,7 @@ Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
 Property::OnMetaDataChangeHandle Property::onMetaDataChange(
                                                            std::function<void()> callback)
 {
-    ghoul_assert(callback, "The callback must not be empty");
+    assert_msg(callback, "The callback must not be empty");
 
     const OnMetaDataChangeHandle handle = _currentHandleValue++;
     _onMetaDataChangeCallbacks.emplace_back(handle, std::move(callback));
@@ -191,7 +213,7 @@ void Property::removeOnChange(OnChangeHandle handle) {
             }
         );
 
-        ghoul_assert(
+        assert_msg(
             it != _onChangeCallbacks.end(),
             "handle must be a valid callback handle"
         );
@@ -209,7 +231,7 @@ void Property::removeOnDelete(OnDeleteHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _onDeleteCallbacks.end(),
         "handle must be a valid callback handle"
     );
@@ -230,7 +252,7 @@ void Property::removeOnMetaDataChange(OnMetaDataChangeHandle handle) {
             }
         );
 
-        ghoul_assert(
+        assert_msg(
             it != _onMetaDataChangeCallbacks.end(),
             "handle must be a valid callback handle"
         );
@@ -258,6 +280,10 @@ void Property::notifyChangeListeners() {
     nlohmann::json payload;
     payload["uri"] = uri();
     payload["value"] = nlohmann::json::parse(jsonValue());
+    // If the property is enablable we send true false, otherwise it will be undefined
+    if (_metaData.isEnablable) {
+        payload["isEnabled"] = _isEnabled.value;
+    }
     payload["type"] = "value";
     global::server->passDataToTopic("propertyTree", payload);
 }
@@ -313,6 +339,7 @@ nlohmann::json Property::generateJsonDescription() const {
         { "group", groupId },
         { "isReadOnly", isReadOnly },
         { "needsConfirmation", _metaData.needsConfirmation },
+        { "isEnablable", _metaData.isEnablable },
         { "type", className() },
         { "visibility", vis }
     };
@@ -338,7 +365,7 @@ nlohmann::json Property::generateAdditionalJsonDescription() const {
 }
 
 void Property::setLuaInterpolationTarget(lua_State*) {}
-void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
+void Property::interpolateValue(float, EasingFunc<float>) {}
 
 nlohmann::json Property::MetaDataSchema() {
     return nlohmann::json::parse(R"(
@@ -359,6 +386,7 @@ nlohmann::json Property::MetaDataSchema() {
             "group": { "type": "string" },
             "isReadOnly": { "type": "boolean" },
             "needsConfirmation": { "type": "boolean" },
+            "isEnablable": { "type": "boolean" },
             "visibility": { "$ref": "#/$defs/PropertyVisibility" }
           },
           "additionalProperties": false,
@@ -369,6 +397,7 @@ nlohmann::json Property::MetaDataSchema() {
             "group",
             "isReadOnly",
             "needsConfirmation",
+            "isEnablable",
             "visibility"
           ]
         }

@@ -29,6 +29,10 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/format.h>
+#include <openspace/io/socket/tcpsocket.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
@@ -38,13 +42,9 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
-#include <ghoul/format.h>
-#include <ghoul/io/socket/tcpsocket.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
+#include <charconv>
 #include <cmath>
 #include <cstdint>
-#include <cstdlib>
 #include <limits>
 #include <string_view>
 #include <utility>
@@ -62,10 +62,10 @@ namespace {
 
     BooleanType(ShouldLogError);
 
-    class ConnectionLostError final : public ghoul::RuntimeError {
+    class ConnectionLostError final : public RuntimeError {
     public:
         explicit ConnectionLostError(ShouldLogError shouldLogError_ = ShouldLogError::Yes)
-            : ghoul::RuntimeError("Astrocast connection lost", "Astrocast")
+            : RuntimeError("Astrocast connection lost", "Astrocast")
             , shouldLogError(shouldLogError_)
         {}
 
@@ -151,7 +151,7 @@ namespace {
         );
     }
 
-    bool sendMessage(const Astrocast::Message& message, ghoul::io::TcpSocket& socket) {
+    bool sendMessage(const Astrocast::Message& message, io::TcpSocket& socket) {
         const uint8_t messageTypeOut = static_cast<uint8_t>(message.type);
         const uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
         std::vector<char> payload;
@@ -185,8 +185,7 @@ namespace {
         return res;
     }
 
-    void sendDataMessage(const Astrocast::DataMessage& dataMessage,
-                         ghoul::io::TcpSocket& socket)
+    void sendDataMessage(const Astrocast::DataMessage& dataMessage, io::TcpSocket& socket)
     {
         const uint8_t dataMessageTypeOut = static_cast<uint8_t>(dataMessage.type);
         const double dataMessageTimestamp = dataMessage.timestamp;
@@ -215,78 +214,91 @@ namespace {
         );
     }
 
-    constexpr Property::PropertyInfo PasswordInfo = {
-        "Password",
-        "Password",
-        "The general password that allows this OpenSpace instance access to the Wormhole "
-        "server.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo PasswordInfo = {
+        .identifier = "Password",
+        .name = "Password",
+        .description = "The general password that allows this OpenSpace instance access "
+            "to the Wormhole server.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo HostPasswordInfo = {
-        "HostPassword",
-        "Host password",
-        "The password that is required to take control of the joint session and thus "
-        "send all commands to connected clients.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo HostPasswordInfo = {
+        .identifier = "HostPassword",
+        .name = "Host password",
+        .description = "The password that is required to take control of the joint "
+            "session and thus send all commands to connected clients.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo PortInfo = {
-        "Port",
-        "Port",
-        "The port on which the Wormhole server is listening to connections from "
-        "OpenSpace.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo PortInfo = {
+        .identifier = "Port",
+        .name = "Port",
+        .description = "The port on which the Wormhole server is listening to "
+            "connections from OpenSpace.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AddressInfo = {
-        "Address",
-        "Address",
-        "The address of the Wormhole server either as a DNS name or an IP address.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo AddressInfo = {
+        .identifier = "Address",
+        .name = "Address",
+        .description = "The address of the Wormhole server either as a DNS name or an IP "
+            "address.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo NameInfo = {
-        "Name",
-        "Connection name",
-        "The name of this OpenSpace instance that will be potentially broadcast to other "
-        "connected instances.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo NameInfo = {
+        .identifier = "Name",
+        .name = "Connection name",
+        .description = "The name of this OpenSpace instance that will be potentially "
+            "broadcast to other connected instances.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ServerNameInfo = {
-        "ServerName",
-        "Server name",
-        "The name of the server instance to join.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo ServerNameInfo = {
+        .identifier = "ServerName",
+        .name = "Server name",
+        .description = "The name of the server instance to join.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo BufferTimeInfo = {
-        "BufferTime",
-        "Buffer time",
-        "This is the number of seconds that received keyframes are buffered before they "
-        "get applied to the rendering. A higher value leads to smoother rendering, "
-        "particularly when the internet connection is unstable, but also leads to higher "
-        "delay.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo BufferTimeInfo = {
+        .identifier = "BufferTime",
+        .name = "Buffer time",
+        .description = "This is the number of seconds that received keyframes are "
+            "buffered before they get applied to the rendering. A higher value leads to "
+            "smoother rendering, particularly when the internet connection is unstable, "
+            "but also leads to higher delay.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.2f,
+            .minMax = { 0.01f, 5.0f }
+        }
     };
 
-    constexpr Property::PropertyInfo TimeKeyFrameInfo = {
-        "TimeKeyframeInterval",
-        "Time keyframe interval",
-        "Determines how often the information about the simulation time is sent (in "
-        "seconds). Lower values mean more accurate representation of the time, but also "
-        "require higher internet bandwidth.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo TimeKeyFrameInfo = {
+        .identifier = "TimeKeyframeInterval",
+        .name = "Time keyframe interval",
+        .description = "Determines how often the information about the simulation time "
+            "is sent (in seconds). Lower values mean more accurate representation of the "
+            "time, but also require higher internet bandwidth.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.1f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 
-    constexpr Property::PropertyInfo CameraKeyFrameInfo = {
-        "CameraKeyframeInterval",
-        "Camera keyframe interval",
-        "Determines how often the information about the camera position and orientation "
-        "is sent (in seconds). Lower values mean more accurate representation of the "
-        "time, but also more internet traffic.",
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo CameraKeyFrameInfo = {
+        .identifier = "CameraKeyframeInterval",
+        .name = "Camera keyframe interval",
+        .description = "Determines how often the information about the camera position "
+            "and orientation is sent (in seconds). Lower values mean more accurate "
+            "representation of the time, but also more internet traffic.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0.1f,
+            .minMax = { 0.f, 1.f }
+        }
     };
 } // namespace
 
@@ -300,10 +312,10 @@ Astrocast::Astrocast()
     , _port(PortInfo)
     , _address(AddressInfo)
     , _name(NameInfo)
-    , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
-    , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
-    , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
-    , _connectionEvent(std::make_shared<ghoul::Event<>>())
+    , _bufferTime(BufferTimeInfo)
+    , _timeKeyframeInterval(TimeKeyFrameInfo)
+    , _cameraKeyframeInterval(CameraKeyFrameInfo)
+    , _connectionEvent(std::make_shared<SynchronousEvent<>>())
 {
     addProperty(_name);
     addProperty(_serverName);
@@ -330,8 +342,15 @@ void Astrocast::connect() {
 
     setStatus(Status::Connecting);
 
-    std::string p = _port.value();
-    _socket = std::make_unique<ghoul::io::TcpSocket>(_address, std::atoi(p.c_str()));
+    const std::string p = _port.value();
+    int port = 0;
+    const auto [ptr, ec] = std::from_chars(p.data(), p.data() + p.size(), port);
+    if (ec != std::errc() || ptr != p.data() + p.size() || port <= 0 || port > 65535) {
+        LERROR(std::format("Invalid port '{}'", p));
+        setStatus(Status::Disconnected);
+        return;
+    }
+    _socket = std::make_unique<io::TcpSocket>(_address, port);
 
     _socket->connect();
 
@@ -554,7 +573,7 @@ void Astrocast::dataMessageReceived(const std::vector<char>& message) {
             datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
 
-            // No send because this has already been recived by a peer, don't send it
+            // No send because this has already been received by a peer, don't send it
             // back again
             global::scriptEngine->queueScript({
                 .code = sm._script,
@@ -866,7 +885,7 @@ const std::string& Astrocast::hostName() {
     return _hostName;
 }
 
-ghoul::Event<>& Astrocast::connectionEvent() {
+SynchronousEvent<>& Astrocast::connectionEvent() {
     return *_connectionEvent;
 }
 

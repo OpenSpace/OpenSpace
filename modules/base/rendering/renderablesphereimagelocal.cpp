@@ -25,20 +25,20 @@
 #include <modules/base/rendering/renderablesphereimagelocal.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/texture.h>
+#include <openspace/opengl/textureunit.h>
 #include <filesystem>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "The path to an image on disk to use as a texture for this sphere. The image is "
-        "expected to be an equirectangular projection.",
-        Property::Visibility::User
+    constexpr StringPropertyInfo TextureInfo = {
+        .identifier = "Texture",
+        .name = "Texture",
+        .description = "The path to an image on disk to use as a texture for this "
+            "sphere. The image is expected to be an equirectangular projection.",
+        .visibility = Visibility::User
     };
 
     // Shows a sphere with an image provided by a local file on disk. To show a sphere
@@ -49,8 +49,7 @@ namespace {
     // and hence expects an equirectangular image. However, it can also be used to show
     // fisheye images by changing the `TextureProjection`.
     struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
-        std::filesystem::path texture;
+        std::filesystem::path texture [[codegen::Info(TextureInfo)]];
 
         // If this value is set to true, the image for this sphere will not be loaded at
         // startup but rather when sphere is shown for the first time. Additionally, if
@@ -69,8 +68,7 @@ Documentation RenderableSphereImageLocal::Documentation() {
     );
 }
 
-RenderableSphereImageLocal::RenderableSphereImageLocal(
-                                                      const ghoul::Dictionary& dictionary)
+RenderableSphereImageLocal::RenderableSphereImageLocal(const Dictionary& dictionary)
     : RenderableSphere(dictionary, { .shouldUpdateIfDisabled = true })
     , _texturePath(TextureInfo)
     , _textureIsDirty(_enabled)
@@ -96,8 +94,8 @@ RenderableSphereImageLocal::RenderableSphereImageLocal(
 
 void RenderableSphereImageLocal::initialize() {
     _texture = std::make_unique<TextureComponent>(2);
-    _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+    _texture->setFilterMode(opengl::Texture::FilterMode::LinearMipMap);
+    _texture->setWrapping(opengl::Texture::WrappingMode::ClampToEdge);
 }
 
 void RenderableSphereImageLocal::initializeGL() {
@@ -131,7 +129,7 @@ void RenderableSphereImageLocal::update(const UpdateData& data) {
     _texture->update();
 }
 
-void RenderableSphereImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
+void RenderableSphereImageLocal::bindTexture(opengl::TextureUnit& unit) {
     unit.bind(*_texture->texture());
 }
 

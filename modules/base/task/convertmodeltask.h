@@ -33,7 +33,7 @@ namespace openspace {
 
 class ConvertModelTask : public Task {
 public:
-    explicit ConvertModelTask(const ghoul::Dictionary& dictionary);
+    explicit ConvertModelTask(const Dictionary& dictionary);
     ~ConvertModelTask() override = default;
 
     std::string description() override;

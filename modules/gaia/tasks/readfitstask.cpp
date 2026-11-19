@@ -27,12 +27,12 @@
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <modules/gaia/tasks/readfilejob.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
 #include <openspace/util/concurrentjobmanager.h>
 #include <openspace/util/threadpool.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
 #include <algorithm>
 #include <cstdint>
 #include <fstream>
@@ -42,6 +42,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ReadFitsTask";
 
     struct [[codegen::Dictionary(ReadFitsTask)]] Parameters {
@@ -74,7 +76,7 @@ namespace {
         // A list of strings with the names of all the additional columns that are to be
         // read from the specified FITS file(s). These columns can be used for filtering
         // while constructing Octree later.
-        std::optional<ghoul::Dictionary> filterColumnNames;
+        std::optional<Dictionary> filterColumnNames;
     };
 } // namespace
 #include "readfitstask_codegen.cpp"
@@ -85,7 +87,7 @@ Documentation ReadFitsTask::Documentation() {
     return codegen::doc<Parameters>("gaia_task_readfits", Task::Documentation());
 }
 
-ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
+ReadFitsTask::ReadFitsTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _inFileOrFolderPath = absPath(p.inFileOrFolderPath);
@@ -96,7 +98,7 @@ ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
     _lastRow = p.lastRow.value_or(_lastRow);
 
     if (p.filterColumnNames.has_value()) {
-        const ghoul::Dictionary d = *p.filterColumnNames;
+        const Dictionary d = *p.filterColumnNames;
 
         // Ugly fix for ASCII sorting when there are more columns read than 10
         std::set<int> intKeys;

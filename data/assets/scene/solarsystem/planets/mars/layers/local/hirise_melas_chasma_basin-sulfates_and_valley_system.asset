@@ -14,7 +14,7 @@ local ColorLayer = {
   Identifier = "Melas_Chasma_Basin",
   Name = "Melas Chasma Basin [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
   FilePath = data .. "Sulfates_and_Valley_System_in_Melas_Chasma_Basin_Texture.vrt",
   BlendMode = "Color"
 }
@@ -23,7 +23,8 @@ local HeightLayer = {
   Identifier = "Melas_Chasma_Basin",
   Name = "Melas Chasma Basin [Local]",
   Enabled = asset.enabled,
-  ZIndex = 65,
+  ZIndex = 70,
+  TilePixelSize = 64,
   FilePath = data .. "Sulfates_and_Valley_System_in_Melas_Chasma_Basin_Heightmap.vrt"
 }
 

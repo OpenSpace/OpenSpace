@@ -36,9 +36,11 @@ local Legend = {
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "legend.png",
-  FaceCamera = false,
-  Scale = 0.2,
-  CartesianPosition = { 0.75, 0.0, -2.0 }
+  Placement = {
+    FaceCamera = false,
+    Scale = 0.2,
+    CartesianPosition = { 0.75, 0.0, -2.0 }
+  }
 }
 
 

@@ -27,7 +27,7 @@
 
 #include <modules/gaia/rendering/gaiaoptions.h>
 #include <modules/gaia/rendering/octreeculler.h>
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <array>
 #include <filesystem>
 #include <fstream>
@@ -239,7 +239,7 @@ private:
         int& deltaStars, bool recursive = true);
 
     /**
-     * Contruct default children nodes for specified node.
+     * Construct default children nodes for specified node.
      */
     void createNodeChildren(OctreeNode& node);
 

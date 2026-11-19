@@ -27,15 +27,15 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
 class RenderableBoxGrid : public Renderable {
 public:
-    explicit RenderableBoxGrid(const ghoul::Dictionary& dictionary);
+    explicit RenderableBoxGrid(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -50,7 +50,7 @@ protected:
         float location[3];
     };
 
-    ghoul::opengl::ProgramObject* _gridProgram = nullptr;
+    opengl::ProgramObject* _gridProgram = nullptr;
 
     Vec3Property _color;
     FloatProperty _lineWidth;

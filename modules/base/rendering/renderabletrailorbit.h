@@ -44,7 +44,7 @@ namespace openspace {
  */
 class RenderableTrailOrbit : public RenderableTrail {
 public:
-    explicit RenderableTrailOrbit(const ghoul::Dictionary& dictionary);
+    explicit RenderableTrailOrbit(const Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;

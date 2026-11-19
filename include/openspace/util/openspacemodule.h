@@ -27,12 +27,11 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <ghoul/systemcapabilities/version.h>
-
-namespace ghoul { class Dictionary; }
+#include <openspace/systemcapabilities/version.h>
 
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 struct LuaLibrary;
 class ModuleEngine;
@@ -65,7 +64,7 @@ public:
      * constructor. This method will call the #internalInitialize method for further
      * customization for each subclass.
      */
-    void initialize(const ghoul::Dictionary& configuration);
+    void initialize(const Dictionary& configuration);
 
     /**
      * This method calls the #internalInitializeGL method for further customization for
@@ -131,7 +130,7 @@ protected:
      * \param configuration The configuration options that were read from the
      *        configuration file
      */
-    virtual void internalInitialize(const ghoul::Dictionary& configuration);
+    virtual void internalInitialize(const Dictionary& configuration);
 
     /**
      * Customization point for each derived class. The #internalInitializeGL method is
@@ -154,8 +153,8 @@ protected:
     virtual void internalDeinitializeGL();
 
     /**
-     * Returns the path for this module, possibly containing ghoul::filesystem::FileSystem
-     * path tokens.
+     * Returns the path for this module, possibly containing filesystem::FileSystem path
+     * tokens.
      */
     std::filesystem::path modulePath() const;
 };

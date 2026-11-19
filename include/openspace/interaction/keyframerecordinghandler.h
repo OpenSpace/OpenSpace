@@ -30,10 +30,9 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <filesystem>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct LuaLibrary;
 
 class KeyframeRecordingHandler : public PropertyOwner {
@@ -50,7 +49,7 @@ public:
     void loadSequence(std::filesystem::path filename);
     void play();
     bool hasKeyframeRecording() const;
-    std::vector<ghoul::Dictionary> keyframes() const;
+    std::vector<Dictionary> keyframes() const;
 
     static LuaLibrary luaLibrary();
 

@@ -24,25 +24,16 @@
 
 #include <modules/base/timeframe/timeframeunion.h>
 
-#include <openspace/properties/property.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/properties/property.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <functional>
 
 namespace {
     using namespace openspace;
-
-    constexpr Property::PropertyInfo TimeFramesInfo = {
-        "TimeFrames",
-        "Time frames",
-        "A vector of time frames to combine into one. The time frame is active when any "
-        "of the contained time frames are, but not in gaps between contained time "
-        "frames.",
-        Property::Visibility::AdvancedUser
-    };
 
     // This `TimeFrame` class will accept the union of all passed-in TimeFrames. This
     // means that this TimeFrame will be active if at least one of the child TimeFrames is
@@ -51,9 +42,10 @@ namespace {
     // This can be used to create more complex TimeFrames that are made up of several,
     // simpler TimeFrames themselves.
     struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {
-        // [[codegen::verbatim(TimeFramesInfo.description)]]
-        std::vector<ghoul::Dictionary> timeFrames
-            [[codegen::reference("core_timeframe")]];
+        // A vector of time frames to combine into one. The time frame is active when any
+        // of the contained time frames are, but not in gaps between contained time
+        // frames.
+        std::vector<Dictionary> timeFrames [[codegen::reference("core_timeframe")]];
     };
 } // namespace
 #include "timeframeunion_codegen.cpp"
@@ -67,11 +59,11 @@ Documentation TimeFrameUnion::Documentation() {
     );
 }
 
-TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {
+TimeFrameUnion::TimeFrameUnion(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     for (size_t i = 0; i < p.timeFrames.size(); i++) {
-        const ghoul::Dictionary& frame = p.timeFrames[i];
+        const Dictionary& frame = p.timeFrames[i];
         _timeFrames.push_back(TimeFrame::createFromDictionary(frame));
         TimeFrame& subFrame = *_timeFrames.back();
         subFrame.setIdentifier(std::format("{}", i));
@@ -84,7 +76,7 @@ TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {
 }
 
 void TimeFrameUnion::update(const Time& time) {
-    for (const ghoul::mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
+    for (const mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
         tf->update(time);
     }
 

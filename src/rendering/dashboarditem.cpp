@@ -25,10 +25,10 @@
 #include <openspace/rendering/dashboarditem.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 #include <optional>
 
 namespace {
@@ -36,11 +36,14 @@ namespace {
 
     constexpr std::string_view KeyType = "Type";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "If this value is set to 'true' this dashboard item is shown in the dashboard. "
-        "Otherwise it will be hidden."
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "If this value is set to 'true' this dashboard item is shown in "
+            "the dashboard. Otherwise it will be hidden.",
+        .defaults = {
+            .value = true
+        }
     };
 
     // A `DashboardItem` is an item that is rendered in a dashboard. There are multiple
@@ -61,8 +64,7 @@ namespace {
         // interface.
         std::optional<std::string> guiName;
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
     };
 } // namespace
 #include "dashboarditem_codegen.cpp"
@@ -74,11 +76,11 @@ Documentation DashboardItem::Documentation() {
 }
 
 std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
-    ghoul::TemplateFactory<DashboardItem>* factory =
+    TemplateFactory<DashboardItem>* factory =
         FactoryManager::ref().factory<DashboardItem>();
-    ghoul_assert(factory, "DashboardItem factory did not exist");
+    assert_msg(factory, "DashboardItem factory did not exist");
 
     const std::string& dashboardType = dictionary.value<std::string>(KeyType);
 
@@ -88,9 +90,9 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
     return std::unique_ptr<DashboardItem>(item);
 }
 
-DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
+DashboardItem::DashboardItem(const Dictionary& dictionary)
     : PropertyOwner({ "", "" })
-    , _enabled(EnabledInfo, true)
+    , _enabled(EnabledInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

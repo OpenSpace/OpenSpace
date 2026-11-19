@@ -30,12 +30,12 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <md_filter.h>
 #include <md_util.h>
 
@@ -95,92 +95,138 @@ namespace {
         return frame;
     }
 
-    constexpr Property::PropertyInfo MoleculeFileInfo = {
-        "MoleculeFile",
-        "Molecule file",
-        "The path to the file from which the molecular structure is read."
+    constexpr StringPropertyInfo MoleculeFileInfo = {
+        .identifier = "MoleculeFile",
+        .name = "Molecule file",
+        .description = "The path to the file from which the molecular structure is read.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo TrajectoryFileInfo = {
-        "TrajectoryFile",
-        "Trajectory file",
-        "The path to the file from which the trajectory information is read."
+    constexpr StringPropertyInfo TrajectoryFileInfo = {
+        .identifier = "TrajectoryFile",
+        .name = "Trajectory file",
+        .description = "The path to the file from which the trajectory information is "
+            "read.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo CoarseGrainedInfo = {
-        "CoarseGrained",
-        "Coarse grained",
-        "Enable if the dataset should be interpreted as coarse grained."
+    constexpr BoolPropertyInfo CoarseGrainedInfo = {
+        .identifier = "CoarseGrained",
+        .name = "Coarse grained",
+        .description = "Enable if the dataset should be interpreted as coarse grained.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo ApplyPbcOnLoadInfo = {
-        "ApplyPbcOnLoad",
-        "Apply PBC on load",
-        "Applies Periodic Boundary Constraints upon loading trajectory frames."
+    constexpr BoolPropertyInfo ApplyPbcOnLoadInfo = {
+        .identifier = "ApplyPbcOnLoad",
+        .name = "Apply PBC on load",
+        .description = "Applies Periodic Boundary Constraints upon loading trajectory "
+            "frames.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo ApplyPbcPerFrameInfo = {
-        "ApplyPbcPerFrame",
-        "Apply PBC per frame",
-        "Applies Periodic Boundary Constraints for each interpolated frame (can be "
-        "CPU-intensive)."
+    constexpr BoolPropertyInfo ApplyPbcPerFrameInfo = {
+        .identifier = "ApplyPbcPerFrame",
+        .name = "Apply PBC per frame",
+        .description = "Applies Periodic Boundary Constraints for each interpolated "
+            "frame (can be CPU-intensive).",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Enables the representation."
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Enables the representation.",
+        .visibility = Visibility::User,
     };
 
-    constexpr Property::PropertyInfo TypeInfo = {
-        "Type",
-        "Type",
-        "The visual representation type to use for the molecule."
+    constexpr OptionPropertyInfo TypeInfo = {
+        .identifier = "Type",
+        .name = "Type",
+        .description = "The visual representation type to use for the molecule.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color mapping for the atoms."
+    constexpr OptionPropertyInfo ColorInfo = {
+        .identifier = "Color",
+        .name = "Color",
+        .description = "The color mapping for the atoms.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo UniformColorInfo = {
-        "UniformColor",
-        "Uniform color",
-        "The uniform color to apply for the representation if that color mode is "
-        "selected."
+    constexpr Vec4PropertyInfo UniformColorInfo = {
+        .identifier = "UniformColor",
+        .name = "Uniform color",
+        .description = "The uniform color to apply for the representation if that color "
+            "mode is selected.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = glm::vec4(0.f),
+            .minMax = { glm::vec4(0.f), glm::vec4(1.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo FilterInfo = {
-        "Filter",
-        "Filter",
-        "The filter used to remove parts of the dataset."
+    constexpr StringPropertyInfo FilterInfo = {
+        .identifier = "Filter",
+        .name = "Filter",
+        .description = "The filter used to remove parts of the dataset.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo ScaleInfo = {
-        "Scale",
-        "Scale",
-        "Scale for the geometric representation of atoms."
+    constexpr FloatPropertyInfo ScaleInfo = {
+        .identifier = "Scale",
+        .name = "Scale",
+        .description = "Scale for the geometric representation of atoms.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0.f,
+            .minMax = { 0.f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo AnimationBaseScaleInfo = {
-        "AnimationBaseScale",
-        "Animation base scale",
-        "Base scale for the animation. Tune this to sync up its animation with other "
-        "trajectories."
+    constexpr DoublePropertyInfo AnimationBaseScaleInfo = {
+        .identifier = "AnimationBaseScale",
+        .name = "Animation base scale",
+        .description = "Base scale for the animation. Tune this to sync up its animation "
+            "with other trajectories.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes,
+        .defaults = {
+            .value = 1.0,
+            .minMax = { 0.0, 1e20 }
+        }
     };
 
-    constexpr Property::PropertyInfo AnimationSpeedInfo = {
-        "AnimationSpeed",
-        "Animation speed",
-        "Playback speed of the animation (in frames per second)."
+    constexpr DoublePropertyInfo AnimationSpeedInfo = {
+        .identifier = "AnimationSpeed",
+        .name = "Animation speed",
+        .description = "Playback speed of the animation (in frames per second).",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.0,
+            .minMax = { -100.0, 100.0 }
+        }
     };
 
-    constexpr Property::PropertyInfo AnimationRepeatModeInfo = {
-        "AnimationRepeatMode",
-        "Animation repeat mode",
-        "Controls how the animation should be repeated when the end of the animation is "
-        "reached."
+    constexpr OptionPropertyInfo AnimationRepeatModeInfo = {
+        .identifier = "AnimationRepeatMode",
+        .name = "Animation repeat mode",
+        .description = "Controls how the animation should be repeated when the end of "
+            "the animation is reached.",
+        .visibility = Visibility::AdvancedUser
     };
 
     // Used to render a single molecular system, which can be either static or dynamic.
@@ -197,14 +243,12 @@ namespace {
     //
     // If no trajectory file is provided only the structural information is shown.
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
-        // [[codegen::verbatim(MoleculeFileInfo.description)]]
-        std::filesystem::path moleculeFile;
+        std::filesystem::path moleculeFile [[codegen::Info(MoleculeFileInfo)]];
 
-        // [[codegen::verbatim(TrajectoryFileInfo.description)]]
-        std::optional<std::filesystem::path> trajectoryFile;
+        std::optional<std::filesystem::path> trajectoryFile
+            [[codegen::Info(TrajectoryFileInfo)]];
 
-        // [[codegen::verbatim(CoarseGrainedInfo.description)]]
-        std::optional<bool> coarseGrained;
+        std::optional<bool> coarseGrained [[codegen::Info(CoarseGrainedInfo)]];
 
         // This is a representation of a molecular dataset. Each representation is
         // rendered independently and can contain different rendering and filtering
@@ -258,17 +302,14 @@ namespace {
         // individually.
         std::optional<std::vector<Representation>> representations;
 
-        // [[codegen::verbatim(ApplyPbcOnLoadInfo.description)]]
-        std::optional<bool> applyPbcOnLoad;
+        std::optional<bool> applyPbcOnLoad [[codegen::Info(ApplyPbcOnLoadInfo)]];
 
-        // [[codegen::verbatim(ApplyPbcPerFrameInfo.description)]]
-        std::optional<bool> applyPbcPerFrame;
+        std::optional<bool> applyPbcPerFrame [[codegen::Info(ApplyPbcPerFrameInfo)]];
 
-        // [[codegen::verbatim(AnimationBaseScaleInfo.description)]]
-        std::optional<double> animationBaseScale;
+        std::optional<double> animationBaseScale
+            [[codegen::Info(AnimationBaseScaleInfo)]];
 
-        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
-        std::optional<double> animationSpeed;
+        std::optional<double> animationSpeed [[codegen::Info(AnimationSpeedInfo)]];
 
         enum class [[codegen::map(AnimationRepeatMode)]] AnimationRepeatMode {
             PingPong,
@@ -276,8 +317,8 @@ namespace {
             Clamp
         };
 
-        // [[codegen::verbatim(AnimationRepeatModeInfo.description)]]
-        std::optional<AnimationRepeatMode> animationRepeatMode;
+        std::optional<AnimationRepeatMode> animationRepeatMode
+            [[codegen::Info(AnimationRepeatModeInfo)]];
     };
 } // namespace
 #include "renderablemolecule_codegen.cpp"
@@ -291,17 +332,17 @@ Documentation RenderableMolecule::Documentation() {
     );
 }
 
-RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
+RenderableMolecule::RenderableMolecule(const Dictionary& dictionary)
     : Renderable(dictionary)
     , _localEpoch(global::timeManager->time().j2000Seconds())
     , _repProps({ "Representations" })
     , _moleculeFile(MoleculeFileInfo)
     , _trajectoryFile(TrajectoryFileInfo)
-    , _coarseGrained(CoarseGrainedInfo, false)
-    , _applyPbcOnLoad(ApplyPbcOnLoadInfo, true)
-    , _applyPbcPerFrame(ApplyPbcPerFrameInfo, false)
-    , _animationBaseScale(AnimationBaseScaleInfo, 1.0, 0.0, 1e20)
-    , _animationSpeed(AnimationSpeedInfo, 1.0, -100.0, 100.0)
+    , _coarseGrained(CoarseGrainedInfo)
+    , _applyPbcOnLoad(ApplyPbcOnLoadInfo)
+    , _applyPbcPerFrame(ApplyPbcPerFrameInfo)
+    , _animationBaseScale(AnimationBaseScaleInfo)
+    , _animationSpeed(AnimationSpeedInfo)
     , _animationRepeatMode(AnimationRepeatModeInfo)
 {
     addProperty(Fadeable::_opacity);
@@ -309,21 +350,17 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     Parameters p = codegen::bake<Parameters>(dictionary);
 
     _moleculeFile = p.moleculeFile.string();
-    _moleculeFile.setReadOnly(true);
     addProperty(_moleculeFile);
 
     if (p.trajectoryFile.has_value()) {
         _trajectoryFile = p.trajectoryFile->string();
     }
-    _trajectoryFile.setReadOnly(true);
     addProperty(_trajectoryFile);
 
     _coarseGrained = p.coarseGrained.value_or(_coarseGrained);
-    _coarseGrained.setReadOnly(true);
     addProperty(_coarseGrained);
 
     _applyPbcOnLoad = p.applyPbcOnLoad.value_or(_applyPbcOnLoad);
-    _applyPbcOnLoad.setReadOnly(true);
     addProperty(_applyPbcOnLoad);
 
     if (!p.representations.has_value()) {
@@ -358,7 +395,6 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     }
 
     _animationBaseScale = p.animationBaseScale.value_or(_animationBaseScale);
-    _animationBaseScale.setReadOnly(true);
     addProperty(_animationBaseScale);
 
     addPropertySubOwner(_repProps);
@@ -512,7 +548,7 @@ void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view
 
     const md_molecule_t* molecule = molecule::loadMolecule(molFile, _coarseGrained);
     if (!molecule) {
-        throw ghoul::RuntimeError("Failed to initialize molecule: Failed to load file");
+        throw RuntimeError("Failed to initialize molecule: Failed to load file");
     }
 
     // We deep copy the contents, so we can freely modify the fields (coordinates etc)
@@ -697,18 +733,23 @@ RenderableMolecule::Representation::Representation(size_t number,
                                                    glm::vec4 uniformColor_)
     : PropertyOwner({
         .identifier = std::format("rep{}", number),
-        .guiName = std::format("Representation {}", number),
+        .name = std::format("Representation {}", number),
         .description = std::format("Visual representation of molecule {}", number),
     })
     , mask(md_bitfield_create(default_allocator))
     , molecule(molecule_)
-    , enabled(EnabledInfo, enabled_)
+    , enabled(EnabledInfo)
     , type(TypeInfo)
     , color(ColorInfo)
-    , filter(FilterInfo, filter_)
-    , scale(ScaleInfo, scale_, 0.f, 10.f)
-    , uniformColor(UniformColorInfo, uniformColor_, glm::vec4(0.f), glm::vec4(1.f))
+    , filter(FilterInfo)
+    , scale(ScaleInfo)
+    , uniformColor(UniformColorInfo)
 {
+    enabled = enabled_;
+    filter = std::move(filter_);
+    scale = scale_;
+    uniformColor = uniformColor_;
+
     addProperty(enabled);
 
     type.addOptions({

@@ -118,6 +118,17 @@ langDef text
 *.rc text
 *.qrc text
 
+# Linux packaging support files. These are read by a shell or by dpkg/rpm on the target
+# machine, so they have to keep LF endings no matter which platform they were checked out
+# on - a maintainer script with CRLF endings fails with a confusing "bad interpreter"
+support/appimage/AppRun.in text eol=lf
+support/linux/openspace-launcher.in text eol=lf
+support/linux/deb/post* text eol=lf
+support/linux/rpm/post* text eol=lf
+support/packaging/tests/*.sh text eol=lf
+*.desktop text eol=lf
+*.desktop.in text eol=lf
+
 # OpenSpace specific
 *.scene text
 *.mod text

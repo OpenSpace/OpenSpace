@@ -28,11 +28,11 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/format.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keyboardinputstate.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
 #include <algorithm>
 #include <cmath>
 #include <cstdint>

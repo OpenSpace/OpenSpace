@@ -1,0 +1,4 @@
+oscpack provides CMake targets:
+
+    find_package(oscpack CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE oscpack::oscpack)

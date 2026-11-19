@@ -33,7 +33,7 @@ namespace openspace {
 
 class DashboardItemInputState : public DashboardTextItem {
 public:
-    explicit DashboardItemInputState(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemInputState(const Dictionary& dictionary);
     ~DashboardItemInputState() override = default;
 
     void update() override;

@@ -25,75 +25,74 @@
 #include <openspace/topic/serverinterface.h>
 
 #include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/websocketserver.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/io/socket/tcpsocketserver.h>
+#include <openspace/io/socket/websocketserver.h>
 
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo IdentifierInfo = {
-        "Identifier",
-        "Identifier",
-        "The identifier for this interface.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "This setting determines whether this server interface is enabled "
+            "or not.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "This setting determines whether this server interface is enabled or not.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo TypeInfo = {
+        .identifier = "Type",
+        .name = "Type",
+        .description = "Whether the interface is using a Socket or a WebSocket.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo TypeInfo = {
-        "Type",
-        "Type",
-        "Whether the interface is using a Socket or a WebSocket.",
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo PortInfo = {
+        .identifier = "Port",
+        .name = "Port",
+        .description = "The network port to use for this server interface.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0
+        }
     };
 
-    constexpr Property::PropertyInfo PortInfo = {
-        "Port",
-        "Port",
-        "The network port to use for this server interface.",
-        Property::Visibility::AdvancedUser
+    constexpr OptionPropertyInfo DefaultAccessInfo = {
+        .identifier = "DefaultAccess",
+        .name = "Default access",
+        .description = "Sets the default access policy.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DefaultAccessInfo = {
-        "DefaultAccess",
-        "Default access",
-        "Sets the default access policy.",
-        Property::Visibility::AdvancedUser
+    constexpr StringListPropertyInfo AllowAddressesInfo = {
+        .identifier = "AllowAddresses",
+        .name = "Allow addresses",
+        .description = "IP addresses or domains that should always be allowed access to "
+            "this interface.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo AllowAddressesInfo = {
-        "AllowAddresses",
-        "Allow addresses",
-        "IP addresses or domains that should always be allowed access to this interface.",
-        Property::Visibility::AdvancedUser
+    constexpr StringListPropertyInfo RequirePasswordAddressesInfo = {
+        .identifier = "RequirePasswordAddresses",
+        .name = "Require password addresses",
+        .description = "IP addresses or domains that should be allowed access if they "
+            "provide a password.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo RequirePasswordAddressesInfo = {
-        "RequirePasswordAddresses",
-        "Require password addresses",
-        "IP addresses or domains that should be allowed access if they provide a "
-        "password.",
-        Property::Visibility::AdvancedUser
+    constexpr StringListPropertyInfo DenyAddressesInfo = {
+        .identifier = "DenyAddresses",
+        .name = "Deny addresses",
+        .description = "IP addresses or domains that should never be allowed access to "
+            "this interface.",
+        .visibility = Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo DenyAddressesInfo = {
-        "DenyAddresses",
-        "Deny addresses",
-        "IP addresses or domains that should never be allowed access to this interface.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo PasswordInfo = {
-        "Password",
-        "Password",
-        "Password for connecting to this interface.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo PasswordInfo = {
+        .identifier = "Password",
+        .name = "Password",
+        .description = "Password for connecting to this interface.",
+        .visibility = Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ServerInterface)]] Parameters {
@@ -103,36 +102,31 @@ namespace {
             RequirePassword
         };
 
-        // [[codegen::verbatim(DefaultAccessInfo.description)]]
-        std::optional<Access> defaultAccess;
+        std::optional<Access> defaultAccess [[codegen::Info(DefaultAccessInfo)]];
 
-        // [[codegen::verbatim(IdentifierInfo.description)]]
+        // The identifier for this interface.
         std::string identifier;
 
-        // [[codegen::verbatim(AllowAddressesInfo.description)]]
-        std::optional<std::vector<std::string>> allowAddresses;
+        std::optional<std::vector<std::string>> allowAddresses
+            [[codegen::Info(AllowAddressesInfo)]];
 
-        // [[codegen::verbatim(DenyAddressesInfo.description)]]
-        std::optional<std::vector<std::string>> denyAddresses;
+        std::optional<std::vector<std::string>> denyAddresses
+            [[codegen::Info(DenyAddressesInfo)]];
 
-        // [[codegen::verbatim(RequirePasswordAddressesInfo.description)]]
-        std::optional<std::vector<std::string>> requirePasswordAddresses;
+        std::optional<std::vector<std::string>> requirePasswordAddresses
+            [[codegen::Info(RequirePasswordAddressesInfo)]];
 
         enum class [[codegen::stringify()]] Type {
             TcpSocket,
             WebSocket
         };
-        // [[codegen::verbatim(TypeInfo.description)]]
-        Type type;
+        Type type [[codegen::Info(TypeInfo)]];
 
-        // [[codegen::verbatim(PasswordInfo.description)]]
-        std::optional<std::string> password;
+        std::optional<std::string> password [[codegen::Info(PasswordInfo)]];
 
-        // [[codegen::verbatim(PortInfo.description)]]
-        int port;
+        int port [[codegen::Info(PortInfo)]];
 
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        bool enabled;
+        bool enabled [[codegen::Info(EnabledInfo)]];
     };
 } // namespace
 #include "serverinterface_codegen.cpp"
@@ -144,17 +138,16 @@ Documentation ServerInterface::Documentation() {
 }
 
 std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             const Dictionary& dictionary)
 {
-    // TODO: Use documentation to verify dictionary
-    auto si = std::make_unique<ServerInterface>(dictionary);
-    return si;
+    // The dictionary is verified against the documentation in the constructor
+    return std::make_unique<ServerInterface>(dictionary);
 }
 
-ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
+ServerInterface::ServerInterface(const Dictionary& dictionary)
     : PropertyOwner({ "", "", "" })
     , _socketType(TypeInfo)
-    , _port(PortInfo, 0)
+    , _port(PortInfo)
     , _enabled(EnabledInfo)
     , _allowAddresses(AllowAddressesInfo)
     , _requirePasswordAddresses(RequirePasswordAddressesInfo)
@@ -239,21 +232,22 @@ void ServerInterface::initialize() {
 
     switch (static_cast<InterfaceType>(_socketType.value())) {
         case InterfaceType::TcpSocket:
-            _socketServer = std::make_unique<ghoul::io::TcpSocketServer>();
+            _socketServer = std::make_unique<io::TcpSocketServer>();
             break;
         case InterfaceType::WebSocket:
-            _socketServer = std::make_unique<ghoul::io::WebSocketServer>();
+            _socketServer = std::make_unique<io::WebSocketServer>();
             break;
     }
     _socketServer->listen(_port);
 }
 
 void ServerInterface::deinitialize() {
-    if (!_enabled) {
+    if (!_socketServer) {
         return;
     }
 
     _socketServer->close();
+    _socketServer = nullptr;
 }
 
 bool ServerInterface::isEnabled() const {
@@ -261,7 +255,7 @@ bool ServerInterface::isEnabled() const {
 }
 
 bool ServerInterface::isActive() const {
-    return _socketServer->isListening();
+    return _socketServer && _socketServer->isListening();
 }
 
 int ServerInterface::port() const {
@@ -283,6 +277,13 @@ bool ServerInterface::clientHasAccessWithoutPassword(
     const Access access = static_cast<Access>(_defaultAccess.value());
     if (access == Access::Allow) {
         for (const std::string& address : _denyAddresses.value()) {
+            if (clientAddress == address) {
+                return false;
+            }
+        }
+        // Addresses that are explicitly listed as requiring a password have to provide
+        // it even if all other addresses are allowed by default
+        for (const std::string& address : _requirePasswordAddresses.value()) {
             if (clientAddress == address) {
                 return false;
             }
@@ -315,7 +316,7 @@ bool ServerInterface::clientIsBlocked(const std::string& clientAddress) const {
     return false;
 }
 
-ghoul::io::SocketServer* ServerInterface::server() {
+io::SocketServer* ServerInterface::server() {
     return _socketServer.get();
 }
 

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/invariants.h>
 #include <openspace/openspace.h>
 #include <openspace/util/time.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/invariants.h>
 #include <fstream>

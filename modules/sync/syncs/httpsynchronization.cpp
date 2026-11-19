@@ -26,13 +26,13 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/stringhelper.h>
 #include <openspace/util/downloadeventengine.h>
 #include <openspace/util/httprequest.h>
-#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringhelper.h>
+#include <zip/zip.h>
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
@@ -67,7 +67,7 @@ namespace {
 
         // The destination for the unzipping. If this value is specified, all zip files
         // contained in the synchronization will be unzipped into the same specified
-        // folder. If this value is specified, but 'unzipFiles' is false, no extaction
+        // folder. If this value is specified, but 'unzipFiles' is false, no extraction
         // will be performed.
         std::optional<std::string> unzipFilesDestination;
     };
@@ -80,7 +80,7 @@ Documentation HttpSynchronization::Documentation() {
     return codegen::doc<Parameters>("sync_synchronization_http");
 }
 
-HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
+HttpSynchronization::HttpSynchronization(const Dictionary& dict,
                                          std::filesystem::path synchronizationRoot,
                                       std::vector<std::string> synchronizationRepositories
 )
@@ -91,7 +91,7 @@ HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
 
     _identifier = p.identifier;
     _version = p.version;
-    _unzipFiles = p.unzipFiles.value_or(_unzipFiles);
+    _shouldUnzipFiles = p.unzipFiles.value_or(_shouldUnzipFiles);
     if (p.unzipFilesDestination.has_value()) {
         _unzipFilesDestination = *p.unzipFilesDestination;
     }
@@ -222,7 +222,7 @@ bool HttpSynchronization::isEachFileDownloaded() {
     // Optionally list of already synched files
 
     if (ossyncVersion == OssyncVersionNumber) {
-        ghoul::getline(file >> std::ws, line);
+        openspace::getline(file >> std::ws, line);
         if (line == SynchronizationToken) {
             return true;
         }
@@ -353,18 +353,38 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
 
             return !_shouldCancel;
         });
+    }
+    // All entries of `sizeData` exist at this point, so the progress callbacks can safely
+    // access it from the download threads
+    startedAllDownloads = true;
+
+    // Starting all downloads at once would create one thread and one connection for every
+    // file, so only a limited number of downloads are running at the same time
+    constexpr size_t MaxConcurrentDownloads = 8;
+    for (size_t i = 0; i < downloads.size(); i++) {
+        HttpFileDownload& dl = *downloads[i];
+        if (_shouldCancel) {
+            // A download that was never started has to be cancelled, as waiting for it
+            // below would never return otherwise
+            dl.cancel();
+            continue;
+        }
+
+        if (i >= MaxConcurrentDownloads) {
+            // Wait for the oldest running download before starting the next one
+            downloads[i - MaxConcurrentDownloads]->wait();
+        }
 
         DownloadEventEngine::DownloadEvent event = {
             .type = DownloadEventEngine::DownloadEvent::Type::Started,
-            .id = line,
+            .id = dl.url(),
             .downloadedBytes = 0
         };
         global::downloadEventEngine->publish(event);
-        LDEBUG(std::format("Started downloading '{}'", dl->url()));
+        LDEBUG(std::format("Started downloading '{}'", dl.url()));
 
-        dl->start();
+        dl.start();
     }
-    startedAllDownloads = true;
 
     constexpr int MaxDownloadRetries = 5;
     int downloadTry = 0;
@@ -427,7 +447,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             failed = true;
         }
 
-        if (_unzipFiles && originalName.extension() == ".zip") {
+        if (_shouldUnzipFiles && originalName.extension() == ".zip") {
             std::string source = originalName.string();
             const std::string dest =
                 _unzipFilesDestination.has_value() ?

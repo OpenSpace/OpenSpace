@@ -52,25 +52,26 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/systemcapabilities/generalcapabilitiescomponent.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/geodetic.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <gdal.h>
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <limits>
@@ -97,31 +98,43 @@ namespace {
 
     constexpr std::string_view _loggerCat = "GlobeBrowsingModule";
 
-    constexpr Property::PropertyInfo TileCacheSizeInfo = {
-        "TileCacheSize",
-        "Tile cache size",
-        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU.",
-        Property::Visibility::AdvancedUser
+    constexpr UIntPropertyInfo TileCacheSizeInfo = {
+        .identifier = "TileCacheSize",
+        .name = "Tile cache size",
+        .description = "The maximum size of the MemoryAwareTileCache, on the CPU and "
+            "GPU.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1024
+        }
     };
 
-    constexpr Property::PropertyInfo DefaultGeoPointTextureInfo = {
-        "DefaultGeoPointTexture",
-        "Default geo point texture",
-        "A path to a texture to use as default for GeoJson points."
+    constexpr StringPropertyInfo DefaultGeoPointTextureInfo = {
+        .identifier = "DefaultGeoPointTexture",
+        .name = "Default geo point texture",
+        .description = "A path to a texture to use as default for GeoJson points."
     };
 
-    constexpr Property::PropertyInfo MRFCacheEnabledInfo = {
-        "MRFCacheEnabled",
-        "MRF cache enabled",
-        "Determines whether automatic caching of globe browsing data is enabled.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo MRFCacheEnabledInfo = {
+        .identifier = "MRFCacheEnabled",
+        .name = "MRF cache enabled",
+        .description = "Determines whether automatic caching of globe browsing data is "
+            "enabled.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo MRFCacheLocationInfo = {
-        "MRFCacheLocation",
-        "MRF cache location",
-        "The location of the root folder for the MRF cache of globe browsing data.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo MRFCacheLocationInfo = {
+        .identifier = "MRFCacheLocation",
+        .name = "MRF cache location",
+        .description = "The location of the root folder for the MRF cache of globe "
+            "browsing data.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "${BASE}/cache_mrf"
+        }
     };
 
     GlobeBrowsingModule::Capabilities parseSubDatasets(char** subDatasets,
@@ -180,17 +193,16 @@ namespace {
     }
 
     struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
-        // [[codegen::verbatim(TileCacheSizeInfo.description)]]
-        std::optional<int> tileCacheSize;
+        std::optional<int> tileCacheSize [[codegen::Info(TileCacheSizeInfo)]];
 
-        // [[codegen::verbatim(DefaultGeoPointTextureInfo.description)]]
-        std::optional<std::string> defaultGeoPointTexture;
+        std::optional<std::string> defaultGeoPointTexture
+            [[codegen::Info(DefaultGeoPointTextureInfo)]];
 
-        // [[codegen::verbatim(MRFCacheEnabledInfo.description)]]
-        std::optional<bool> mrfCacheEnabled [[codegen::key("MRFCacheEnabled")]];
+        std::optional<bool> mrfCacheEnabled
+            [[codegen::Info(MRFCacheEnabledInfo), codegen::key("MRFCacheEnabled")]];
 
-        // [[codegen::verbatim(MRFCacheLocationInfo.description)]]
-        std::optional<std::string> mrfCacheLocation [[codegen::key("MRFCacheLocation")]];
+        std::optional<std::string> mrfCacheLocation
+            [[codegen::Info(MRFCacheLocationInfo), codegen::key("MRFCacheLocation")]];
     };
 } // namespace
 #include "globebrowsingmodule_codegen.cpp"
@@ -203,10 +215,10 @@ Documentation GlobeBrowsingModule::Documentation() {
 
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(Name)
-    , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
+    , _tileCacheSizeMB(TileCacheSizeInfo)
     , _defaultGeoPointTexturePath(DefaultGeoPointTextureInfo)
-    , _mrfCacheEnabled(MRFCacheEnabledInfo, false)
-    , _mrfCacheLocation(MRFCacheLocationInfo, "${BASE}/cache_mrf")
+    , _mrfCacheEnabled(MRFCacheEnabledInfo)
+    , _mrfCacheLocation(MRFCacheLocationInfo)
 {
     addProperty(_tileCacheSizeMB);
 
@@ -216,7 +228,7 @@ GlobeBrowsingModule::GlobeBrowsingModule()
     addProperty(_mrfCacheLocation);
 }
 
-void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
+void GlobeBrowsingModule::internalInitialize(const Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
     _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
 
@@ -287,16 +299,16 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         GdalWrapper::destroy();
     });
 
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+    assert_msg(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
 
     FactoryManager::ref().addFactory<TileProvider>("TileProvider");
 
-    ghoul::TemplateFactory<TileProvider>* fTileProvider =
+    TemplateFactory<TileProvider>* fTileProvider =
         FactoryManager::ref().factory<TileProvider>();
-    ghoul_assert(fTileProvider, "TileProvider factory was not created");
+    assert_msg(fTileProvider, "TileProvider factory was not created");
 
 
     fTileProvider->registerClass<DefaultTileProvider>("DefaultTileProvider");
@@ -310,9 +322,9 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     fTileProvider->registerClass<TileProviderByLevel>("TileProviderByLevel");
     fTileProvider->registerClass<TileProviderByIndex>("TileProviderByIndex");
 
-    ghoul::TemplateFactory<DashboardItem>* fDashboard =
+    TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
-    ghoul_assert(fDashboard, "Dashboard factory was not created");
+    assert_msg(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemGlobeLocation>("DashboardItemGlobeLocation");
 }
@@ -347,7 +359,7 @@ std::vector<Documentation> GlobeBrowsingModule::documentations() const {
 void GlobeBrowsingModule::goToChunk(const SceneGraphNode& node,
                                     int x, int y, int level)
 {
-    ghoul_assert(level < std::numeric_limits<uint8_t>::max(), "Level way too big");
+    assert_msg(level < std::numeric_limits<uint8_t>::max(), "Level way too big");
 
     const GeodeticPatch patch = GeodeticPatch(
         TileIndex(x, y, static_cast<uint8_t>(level))
@@ -386,12 +398,15 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
 {
     auto downloadFunction = [](const std::string& downloadUrl) {
         LDEBUG("Opening WMS capabilities: " + downloadUrl);
-        CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "15"); // 3 seconds
+        // The timeout is set only for this thread, as changing the global option races
+        // with other capability requests and the tile loading. Setting it to nullptr
+        // afterwards restores the global value
+        CPLSetThreadLocalConfigOption("GDAL_HTTP_TIMEOUT", "15"); // 15 seconds
         GDALDatasetH dataset = GDALOpen(
             downloadUrl.c_str(),
             GA_ReadOnly
         );
-        CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "3"); // 3 seconds
+        CPLSetThreadLocalConfigOption("GDAL_HTTP_TIMEOUT", nullptr);
 
         if (!dataset) {
             LWARNING("Could not open dataset: " + downloadUrl);
@@ -425,8 +440,13 @@ GlobeBrowsingModule::capabilities(const std::string& name)
     else {
         const auto inFlightIt = _inFlightCapabilitiesMap.find(name);
         if (inFlightIt != _inFlightCapabilitiesMap.end()) {
-            // If the download and the parsing has not finished yet, this will block,
-            // otherwise it will just return
+            // Do not block the calling thread, which is the main thread, while the
+            // download and the parsing are still in progress
+            if (inFlightIt->second.wait_for(std::chrono::seconds(0)) !=
+                std::future_status::ready)
+            {
+                return {};
+            }
             const Capabilities cap = inFlightIt->second.get();
             _capabilitiesMap[name] = cap;
             _inFlightCapabilitiesMap.erase(inFlightIt);
@@ -451,7 +471,7 @@ void GlobeBrowsingModule::removeWMSServer(const std::string& name) {
         _capabilitiesMap.erase(capIt);
     }
 
-    // Then remove the calues from the globe server list
+    // Then remove the values from the globe server list
     for (auto it = _urlList.begin(); it != _urlList.end();) {
         // We have to increment first because the erase will invalidate the iterator
         const auto eraseIt = it++;

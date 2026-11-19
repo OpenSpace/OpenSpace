@@ -34,16 +34,17 @@ namespace openspace {
 
 class TimelineRotation : public Rotation {
 public:
-    explicit TimelineRotation(const ghoul::Dictionary& dictionary);
+    explicit TimelineRotation(const Dictionary& dictionary);
 
     void initialize() override;
 
     void update(const UpdateData& data) override;
+    void setOwnerNode(SceneGraphNode* node) override;
     glm::dmat3 matrix(const UpdateData& data) const override;
     static openspace::Documentation Documentation();
 
 private:
-    Timeline<ghoul::mm_unique_ptr<Rotation>> _timeline;
+    Timeline<mm_unique_ptr<Rotation>> _timeline;
     BoolProperty _shouldInterpolate;
 };
 

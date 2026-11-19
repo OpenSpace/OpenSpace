@@ -90,32 +90,15 @@ set(SOURCE_FILES
   src/sgctedit/windowcontrol.cpp
 )
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets Network REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets Network REQUIRED)
 set(MOC_FILES "")
 set(RESOURCE_FILES "")
 set(LIBRARIES "")
-
-if (${QT_VERSION_MAJOR} EQUAL 5)
-  find_package(Qt5 COMPONENTS Core Widgets Network)
-  qt5_wrap_cpp(
-    MOC_FILES
-    ${HEADER_FILES}
-  )
-  qt5_add_resources(RESOURCE_FILES resources/resources.qrc)
-  set(LIBRARIES )
-elseif (${QT_VERSION_MAJOR} EQUAL 6)
-  find_package(Qt6 COMPONENTS Core Widgets Network REQUIRED)
-
-  qt6_wrap_cpp(
-    MOC_FILES
-    ${HEADER_FILES}
-  )
-  qt6_add_resources(RESOURCE_FILES resources/resources.qrc)
-elseif (NOT DEFINED QT_VERSION_MAJOR)
-  message(FATAL_ERROR "Unable to find Qt version")
-else ()
-  message(FATAL_ERROR "Unsupported Qt version")
-endif()
+qt6_wrap_cpp(
+  MOC_FILES
+  ${HEADER_FILES}
+)
+qt6_add_resources(RESOURCE_FILES resources/resources.qrc)
 
 add_library(openspace-ui-launcher STATIC ${HEADER_FILES} ${SOURCE_FILES} ${MOC_FILES} ${RESOURCE_FILES})
 set_openspace_compile_settings(openspace-ui-launcher)
@@ -129,17 +112,17 @@ target_link_libraries(
   PUBLIC
     openspace-core
     openspace-module-collection
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Network
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::Network
   PRIVATE
-    sgct
+    sgct::sgct
 )
 
 target_precompile_headers(openspace-ui-launcher PRIVATE
+  <openspace/glm.h>
   <openspace/scene/profile.h>
-  <ghoul/glm.h>
   <QAbstractItemDelegate>
   <QAbstractItemModel>
   <QDialog>

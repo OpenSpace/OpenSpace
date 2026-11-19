@@ -26,12 +26,12 @@
 
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/time.h>
-#include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
 #include <cmath>
 #include <optional>
 #include <string_view>
@@ -165,13 +165,13 @@ namespace {
 
 namespace openspace {
 
-ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
-    ghoul_assert(
+Dictionary ExoplanetSystem::toDataDictionary() const {
+    assert_msg(
         planetNames.size() == planetsData.size(),
         "The length of the planet names list must match the planet data list"
     );
 
-    ghoul::Dictionary res;
+    Dictionary res;
 
     res.setValue("SystemId", makeIdentifier(starName));
 
@@ -182,7 +182,7 @@ ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
             "Insufficient data available for exoplanet system '{}'. Could not "
             "determine star position", starName
         ));
-        return ghoul::Dictionary();
+        return Dictionary();
     }
 
     const glm::dvec3 starPos = starPosInParsec * distanceconstants::Parsec;
@@ -211,7 +211,7 @@ ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
         res.setValue("StarLuminosity", static_cast<double>(starData.luminosity));
     }
 
-    ghoul::Dictionary planets;
+    Dictionary planets;
     std::vector<float> inclinations;
     inclinations.reserve(planetNames.size());
 
@@ -220,7 +220,7 @@ ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
         const std::string& name = planetNames[i];
         const std::string id = makeIdentifier(name);
 
-        ghoul::Dictionary planet;
+        Dictionary planet;
 
         planet.setValue("Id", id);
         planet.setValue("Name", name);

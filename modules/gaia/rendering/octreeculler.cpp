@@ -24,7 +24,7 @@
 
 #include <modules/gaia/rendering/octreeculler.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <utility>
 
 namespace {

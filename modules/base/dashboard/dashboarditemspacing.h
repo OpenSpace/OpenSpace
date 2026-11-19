@@ -33,7 +33,7 @@ namespace openspace {
 
 class DashboardItemSpacing : public DashboardItem {
 public:
-    explicit DashboardItemSpacing(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemSpacing(const Dictionary& dictionary);
     ~DashboardItemSpacing() override = default;
 
     void update() override;

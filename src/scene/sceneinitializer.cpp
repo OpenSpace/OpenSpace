@@ -26,11 +26,11 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
 #include <chrono>
 #include <thread>
 #include <utility>
@@ -74,7 +74,7 @@ void SceneInitializer::initializeNode(SceneGraphNode* node) {
             try {
                 node->initialize();
             }
-            catch (const ghoul::RuntimeError& e) {
+            catch (const RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
             const std::unique_lock lock(_mutex);

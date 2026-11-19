@@ -30,28 +30,25 @@
 #include <openspace/util/boxgeometry.h>
 #include <memory>
 
-namespace ghoul::opengl { class TextureUnit; }
-
 namespace openspace {
+
+namespace opengl { class TextureUnit; }
 
 class GalaxyRaycaster : public VolumeRaycaster {
 public:
-    explicit GalaxyRaycaster(ghoul::opengl::Texture& texture,
+    explicit GalaxyRaycaster(opengl::Texture& texture,
         const std::optional<std::filesystem::path>& raycastingShader = std::nullopt);
     ~GalaxyRaycaster() override = default;
 
     void initialize();
 
     void renderEntryPoints(const RenderData& data,
-        ghoul::opengl::ProgramObject& program) override;
+        opengl::ProgramObject& program) override;
     void renderExitPoints(const RenderData& data,
-        ghoul::opengl::ProgramObject& program) override;
-    void preRaycast(const RaycastData& data,
-        ghoul::opengl::ProgramObject& program) override;
-    void postRaycast(const RaycastData& data,
-        ghoul::opengl::ProgramObject& program) override;
-    bool isCameraInside(const RenderData& data,
-        glm::vec3& localPosition) override;
+        opengl::ProgramObject& program) override;
+    void preRaycast(const RaycastData& data, opengl::ProgramObject& program) override;
+    void postRaycast(const RaycastData& data, opengl::ProgramObject& program) override;
+    bool isCameraInside(const RenderData& data, glm::vec3& localPosition) override;
 
     std::filesystem::path boundsVertexShaderPath() const override;
     std::filesystem::path boundsFragmentShaderPath() const override;
@@ -77,8 +74,8 @@ private:
     float _opacityCoefficient = 0.f;
     float _absorptionMultiply = 0.f;
     float _emissionMultiply = 0.f;
-    ghoul::opengl::Texture& _texture;
-    std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
+    opengl::Texture& _texture;
+    std::unique_ptr<opengl::TextureUnit> _textureUnit;
     std::filesystem::path _raycastingShader;
 };
 

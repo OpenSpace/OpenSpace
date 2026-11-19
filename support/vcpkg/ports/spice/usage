@@ -1,0 +1,4 @@
+spice provides CMake targets:
+
+  find_package(spice CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE spice::spice)

@@ -29,10 +29,20 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/io/socket/socket.h>
+#include <openspace/io/socket/socketserver.h>
+#include <openspace/io/socket/websocket.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/topic/connection.h>
 #include <openspace/topic/serverinterface.h>
-#include <openspace/topic/topics/authorizationtopic.h>
 #include <openspace/topic/topics/actionkeybindtopic.h>
+#include <openspace/topic/topics/assettreetopic.h>
+#include <openspace/topic/topics/authorizationtopic.h>
 #include <openspace/topic/topics/camerapathtopic.h>
 #include <openspace/topic/topics/cameratopic.h>
 #include <openspace/topic/topics/documentationtopic.h>
@@ -54,26 +64,33 @@
 #include <openspace/topic/topics/triggerpropertytopic.h>
 #include <openspace/topic/topics/versiontopic.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/format.h>
-#include <ghoul/io/socket/socket.h>
-#include <ghoul/io/socket/socketserver.h>
-#include <ghoul/io/socket/websocket.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 #include <algorithm>
+#include <chrono>
 #include <optional>
+#include <string_view>
 #include <thread>
 
 namespace {
+    constexpr std::string_view _loggerCat = "Server";
+
+    // The number of clients that can be connected to the server at the same time
+    constexpr size_t MaxConnections = 128;
+
+    // The number of received messages that can be waiting to be handled. The threads
+    // receiving the messages wait when this limit is reached, so no messages are lost
+    constexpr size_t MaxQueuedMessages = 4096;
+
+    // The size in bytes of the largest message that is accepted from a client that has
+    // not been authorized yet. Those clients only have to send the handshake and the
+    // authorization
+    constexpr size_t MaxUnauthorizedMessageSize = 4096;
 
     // Settings for controlling socket connection (WebSocket or TcpSocket).
     // This basically acts as a whitelist for the specified connections.
     struct [[codegen::Dictionary(Server)]] Parameters {
 
         // The interfaces that are allowed to connect.
-        std::optional<std::vector<ghoul::Dictionary>> interfaces
+        std::optional<std::vector<Dictionary>> interfaces
             [[codegen::reference("core_serverinterface")]];
 
         // The IP addresses that are allowed to connect.
@@ -124,12 +141,12 @@ ServerInterface* Server::serverInterfaceByIdentifier(const std::string& identifi
     return si->get();
 }
 
-void Server::initialize(const ghoul::Dictionary& configuration) {
-
-    ghoul::TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
+void Server::initialize(const Dictionary& configuration) {
+    TemplateFactory<Topic>* fTopic = FactoryManager::ref().factory<Topic>();
 
     // Add the topics to the topic factory
     fTopic->registerClass<ActionKeybindTopic>("actionsKeybinds");
+    fTopic->registerClass<AssetTreeTopic>("assetTree");
     fTopic->registerClass<AuthorizationTopic>("authorize");
     fTopic->registerClass<CameraTopic>("camera");
     fTopic->registerClass<CameraPathTopic>("cameraPath");
@@ -156,17 +173,14 @@ void Server::initialize(const ghoul::Dictionary& configuration) {
         return;
     }
 
-    for (const ghoul::Dictionary& interface : p.interfaces.value()) {
+    for (const Dictionary& interface : p.interfaces.value()) {
         std::unique_ptr<ServerInterface> serverInterface =
             ServerInterface::createFromDictionary(interface);
 
         serverInterface->initialize();
 
         _interfaceOwner.addPropertySubOwner(serverInterface.get());
-
-        if (serverInterface) {
-            _interfaces.push_back(std::move(serverInterface));
-        }
+        _interfaces.push_back(std::move(serverInterface));
     }
 }
 
@@ -177,17 +191,24 @@ void Server::preSync() {
             continue;
         }
 
-        ghoul::io::SocketServer* socketServer = serverInterface->server();
+        io::SocketServer* socketServer = serverInterface->server();
 
         if (!socketServer) {
             continue;
         }
 
-        std::unique_ptr<ghoul::io::Socket> socket;
+        std::unique_ptr<io::Socket> socket;
         while ((socket = socketServer->nextPendingSocket())) {
             const std::string address = socket->address();
             if (serverInterface->clientIsBlocked(address)) {
                 // Drop connection if the address is blocked
+                continue;
+            }
+            if (_connections.size() >= MaxConnections) {
+                LWARNING(std::format(
+                    "Dropping connection from '{}' as the maximum number of "
+                    "connections has been reached", address
+                ));
                 continue;
             }
             socket->startStreams();
@@ -252,7 +273,7 @@ void Server::disconnectAll() {
         Connection& connection = *connectionData.connection;
         if (connection.socket() && connection.socket()->isConnected()) {
             connection.socket()->disconnect(
-                static_cast<int>(ghoul::io::WebSocket::ClosingReason::ClosingAll)
+                static_cast<int>(io::WebSocket::ClosingReason::ClosingAll)
             );
         }
     }
@@ -264,7 +285,25 @@ void Server::handleConnection(const std::shared_ptr<Connection>& connection) {
     std::string messageString;
     messageString.reserve(256);
     while (connection->socket()->getMessage(messageString)) {
-        const std::unique_lock lock(_messageQueueMutex);
+        if (!connection->isAuthorized() &&
+            messageString.size() > MaxUnauthorizedMessageSize)
+        {
+            LERROR("Disconnecting unauthorized client that sent an oversized message");
+            connection->socket()->disconnect();
+            break;
+        }
+
+        std::unique_lock lock(_messageQueueMutex);
+        // The queue is emptied once per frame. If a client sends messages faster than
+        // that, this thread stops receiving until there is space again, which keeps the
+        // memory usage bounded without discarding any messages
+        while (_messageQueue.size() >= MaxQueuedMessages &&
+               connection->socket()->isConnected())
+        {
+            lock.unlock();
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            lock.lock();
+        }
         _messageQueue.push_back({ connection, messageString });
     }
 }
@@ -297,7 +336,7 @@ void Server::removePreSyncCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
+    assert_msg(
         it != _preSyncCallbacks.end(),
         "handle must be a valid callback handle"
     );

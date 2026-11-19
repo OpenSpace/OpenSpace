@@ -101,6 +101,7 @@
 #include <openspace/topic/server.h>
 #include <openspace/topic/serverinterface.h>
 #include <openspace/topic/topics/actionkeybindtopic.h>
+#include <openspace/topic/topics/assettreetopic.h>
 #include <openspace/topic/topics/authorizationtopic.h>
 #include <openspace/topic/topics/camerapathtopic.h>
 #include <openspace/topic/topics/cameratopic.h>
@@ -153,6 +154,7 @@ void registerCoreClasses(DocumentationEngine& engine) {
 
 void registerCoreSchemas(DocumentationEngine& engine) {
     engine.addSchema(ActionKeybindTopic::Schema());
+    engine.addSchema(AssetTreeTopic::Schema());
     engine.addSchema(AuthorizationTopic::Schema());
     engine.addSchema(CameraPathTopic::Schema());
     engine.addSchema(CameraTopic::Schema());
@@ -217,7 +219,7 @@ void registerCoreSchemas(DocumentationEngine& engine) {
 }
 
 // NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just
-//       because it has the same method name (and similar implementaiton) as the
+//       because it has the same method name (and similar implementation) as the
 //       documentation version.
 void registerCoreClasses(ScriptEngine& engine) {
     engine.addLibrary(Dashboard::luaLibrary());

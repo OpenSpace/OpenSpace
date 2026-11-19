@@ -27,10 +27,10 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/profiling.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/profiling.h>
 #include <optional>
 #include <algorithm>
 
@@ -47,19 +47,20 @@ namespace {
         FPSAvg
     };
 
-    constexpr Property::PropertyInfo FrametimeInfo = {
-        "FrametimeType",
-        "Type of the frame time display",
-        "This value determines the units in which the frame time is displayed.",
-        Property::Visibility::User
+    constexpr OptionPropertyInfo FrametimeInfo = {
+        .identifier = "FrametimeType",
+        .name = "Type of the frame time display",
+        .description = "This value determines the units in which the frame time is "
+            "displayed.",
+        .visibility = Visibility::User
     };
 
-    constexpr Property::PropertyInfo ClearCacheInfo = {
-        "ClearCache",
-        "Clear cache",
-        "Clears the cache of this DashboardItemFramerate item. If the selected option "
-        "does not use any caching, this trigger does not do anything.",
-        Property::Visibility::AdvancedUser
+    constexpr TriggerPropertyInfo ClearCacheInfo = {
+        .identifier = "ClearCache",
+        .name = "Clear cache",
+        .description = "Clears the cache of this item. If the selected option does not "
+            "use any caching, this trigger does not do anything.",
+        .visibility = Visibility::AdvancedUser
     };
 
     [[nodiscard]] char* formatDt(std::vector<char>& buffer) {
@@ -145,7 +146,7 @@ namespace {
             case FrametimeType::FPSAvg:
                 return formatAverageFps(buffer);
             default:
-                throw ghoul::MissingCaseException();
+                throw MissingCaseException();
         }
     }
 
@@ -179,8 +180,7 @@ namespace {
             FPSAvg [[codegen::key("Average frames per second")]]
         };
 
-        // [[codegen::verbatim(FrametimeInfo.description)]]
-        std::optional<Type> frametimeType;
+        std::optional<Type> frametimeType [[codegen::Info(FrametimeInfo)]];
     };
 } // namespace
 #include "dashboarditemframerate_codegen.cpp"
@@ -194,7 +194,7 @@ Documentation DashboardItemFramerate::Documentation() {
     );
 }
 
-DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
+DashboardItemFramerate::DashboardItemFramerate(const Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _frametimeType(FrametimeInfo)
     , _clearCache(ClearCacheInfo)

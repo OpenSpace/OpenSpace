@@ -27,7 +27,7 @@
 #include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/logging/logmanager.h>
 
 namespace {
     using namespace openspace;
@@ -39,11 +39,11 @@ namespace {
     constexpr int AngleModeIndex = 0;
     constexpr int IncludeElevationIndex = 1;
 
-    static const PropertyOwner::PropertyOwnerInfo AngleModeTelemetryInfo = {
-        "AngleModeTelemetry",
-        "Angle Mode Telemetry",
-        "Telemetry that gathers data of what angle calculation mode is currently used "
-        "for all telemetries in the telemetry module"
+    constexpr PropertyOwner::PropertyOwnerInfo AngleModeTelemetryInfo = {
+        .identifier = "AngleModeTelemetry",
+        .name = "Angle Mode Telemetry",
+        .description = "Telemetry that gathers data of what angle calculation mode is "
+            "currently used for all telemetries in the telemetry module"
     };
 } // namespace
 

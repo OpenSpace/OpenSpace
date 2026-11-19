@@ -29,11 +29,15 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "This setting determines whether this telemetry gathering is enabled or not.",
-        Property::Visibility::User
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "This setting determines whether this telemetry gathering is "
+            "enabled or not.",
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 } // namespace
 
@@ -43,7 +47,7 @@ TelemetryBase::TelemetryBase(PropertyOwner::PropertyOwnerInfo info,
                              const std::string& ip, int port)
     : PropertyOwner(info)
     , _identifier(info.identifier)
-    , _enabled(EnabledInfo, false)
+    , _enabled(EnabledInfo)
     , _connection(new OpenSoundControlConnection(ip, port))
 {
     addProperty(_enabled);

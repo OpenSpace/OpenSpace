@@ -13,8 +13,8 @@
 local NodeFocus = {
   Identifier = "LuaTranslation_Example_Focus",
   GUI = {
-    Name = "Basic (Focus)",
-    Path = "/Examples/LuaTranslation"
+    Name = "LuaTranslation - Basic (Focus)",
+    Path = "/Examples"
   }
 }
 

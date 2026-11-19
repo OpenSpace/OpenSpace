@@ -26,7 +26,7 @@
 
 #include "profile/line.h"
 #include <openspace/json.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/filesystem/filesystem.h>
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QLabel>

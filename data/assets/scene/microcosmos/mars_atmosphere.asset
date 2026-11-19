@@ -19,7 +19,6 @@ local MarsMolecules1km = {
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = marsAsset.Mars.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
       Altitude = 1000.0

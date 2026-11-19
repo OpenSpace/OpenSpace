@@ -37,40 +37,40 @@
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 #include <modules/spacecraftinstruments/util/targetdecoder.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/format.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/objectmanager.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/objectmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
-ghoul::opengl::ProgramObjectManager SpacecraftInstrumentsModule::ProgramObjectManager;
+opengl::ProgramObjectManager SpacecraftInstrumentsModule::ProgramObjectManager;
 
 SpacecraftInstrumentsModule::SpacecraftInstrumentsModule()
     : OpenSpaceModule(Name)
 {}
 
-void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
+void SpacecraftInstrumentsModule::internalInitialize(const Dictionary&) {
     ZoneScoped;
 
     ImageSequencer::initialize();
 
     FactoryManager::ref().addFactory<Decoder>("Decoder");
 
-    ghoul::TemplateFactory<DashboardItem>* fDashboard =
+    TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
-    ghoul_assert(fDashboard, "Dashboard factory was not created");
+    assert_msg(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemInstruments>("DashboardItemInstruments");
 
-    ghoul::TemplateFactory<Renderable>* fRenderable =
+    TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+    assert_msg(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableCrawlingLine>("RenderableCrawlingLine");
     fRenderable->registerClass<RenderableFov>("RenderableFov");
@@ -79,7 +79,7 @@ void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePlanetProjection>("RenderablePlanetProjection");
     fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
 
-    ghoul::TemplateFactory<Decoder>* fDecoder = FactoryManager::ref().factory<Decoder>();
+    TemplateFactory<Decoder>* fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");
     fDecoder->registerClass<TargetDecoder>("Target");
 }
@@ -89,7 +89,7 @@ void SpacecraftInstrumentsModule::internalDeinitialize() {
 }
 
 void SpacecraftInstrumentsModule::internalDeinitializeGL() {
-    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
+    ProgramObjectManager.releaseAll(opengl::ProgramObjectManager::Warnings::Yes);
 }
 
 std::vector<Documentation> SpacecraftInstrumentsModule::documentations() const {

@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SPACE___HORIZONSFILE___H__
 #define __OPENSPACE_MODULE_SPACE___HORIZONSFILE___H__
 
+#include <openspace/glm.h>
 #include <openspace/json.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 #include <string>
 #include <vector>

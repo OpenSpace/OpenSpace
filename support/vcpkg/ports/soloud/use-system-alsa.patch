@@ -1,0 +1,17 @@
+diff --git a/contrib/src.cmake b/contrib/src.cmake
+index 5669010..fbbb0bc 100644
+--- a/contrib/src.cmake
++++ b/contrib/src.cmake
+@@ -173,9 +173,9 @@ if (SOLOUD_BACKEND_ALSA)
+         ${BACKENDS_PATH}/alsa/soloud_alsa.cpp
+     )                                              
+ 
+-    find_library (ALSA_LIBRARY asound)
++    find_package (ALSA REQUIRED)
+     set (LINK_LIBRARIES
+         ${LINK_LIBRARIES}
+-        ${ALSA_LIBRARY}
++        ALSA::ALSA
+     )
+ endif()
+ 

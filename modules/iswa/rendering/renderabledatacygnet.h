@@ -44,7 +44,7 @@ class DataProcessor;
  */
 class RenderableDataCygnet : public RenderableIswaCygnet {
 public:
-    explicit RenderableDataCygnet(const ghoul::Dictionary& dictionary);
+    explicit RenderableDataCygnet(const Dictionary& dictionary);
     ~RenderableDataCygnet();
 
     static openspace::Documentation Documentation();
@@ -78,7 +78,7 @@ protected:
 
     /**
      * Optional interface method. this has an implementation in datacygnet.cpp, but needs
-     * to be overriden for KameleonPlane.
+     * to be overridden for KameleonPlane.
      */
     bool updateTextureResource() override;
 

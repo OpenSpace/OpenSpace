@@ -38,7 +38,7 @@ namespace openspace {
  */
 class RenderableSphereImageOnline : public RenderableSphere {
 public:
-    explicit RenderableSphereImageOnline(const ghoul::Dictionary& dictionary);
+    explicit RenderableSphereImageOnline(const Dictionary& dictionary);
 
     void deinitializeGL() override;
 
@@ -47,13 +47,13 @@ public:
     static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+    void bindTexture(opengl::TextureUnit& unit) override;
 
 private:
     StringProperty _textureUrl;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<opengl::Texture> _texture;
     bool _textureIsDirty = true;
 };
 

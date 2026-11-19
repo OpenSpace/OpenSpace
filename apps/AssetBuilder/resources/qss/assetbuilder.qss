@@ -210,7 +210,7 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
-  image: url(:/images/dropdown-arrow.svg);
+  image: url(:/images/dropdown-arrow.png);
   width: 10px;
   height: 6px;
 }
@@ -409,8 +409,6 @@ QLabel#accordion-title {
 }
 
 QLabel#accordion-chevron {
-  color: #909090;
-  font-size: 9pt;
   background-color: transparent;
 }
 
@@ -462,14 +460,11 @@ QPushButton#search-dropdown-chevron {
   border-left-style: solid;
   border-left-color: #474747;
   border-radius: 0;
-  color: #909090;
-  font-size: 9pt;
   padding: 0;
 }
 
 QPushButton#search-dropdown-chevron:hover {
   background-color: #4a4a4a;
-  color: #e8e8e8;
 }
 
 QFrame#search-dropdown-popup {
@@ -592,6 +587,29 @@ QPushButton#field-remove-button {
 
 QPushButton#field-remove-button:hover {
   background-color: #3a2020;
+  color: #cc6666;
+}
+
+/* String list chips */
+
+QFrame#string-list-chip {
+  background-color: #2d4a6e;
+  border: 1px solid #3a6090;
+  border-radius: 10px;
+  padding: 1px 4px 1px 8px;
+}
+
+QPushButton#chip-remove-button {
+  background-color: transparent;
+  border: none;
+  color: #8ab4e0;
+  font-size: 10pt;
+  padding: 0 2px;
+  min-width: 16px;
+  max-width: 16px;
+}
+
+QPushButton#chip-remove-button:hover {
   color: #cc6666;
 }
 

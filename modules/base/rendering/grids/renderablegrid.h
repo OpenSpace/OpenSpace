@@ -27,19 +27,19 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/labelscomponent.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <memory>
 
 namespace openspace {
 
 class RenderableGrid : public Renderable {
 public:
-    explicit RenderableGrid(const ghoul::Dictionary& dictionary);
+    explicit RenderableGrid(const Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -55,7 +55,7 @@ protected:
         double location[3];
     };
 
-    ghoul::opengl::ProgramObject* _gridProgram = nullptr;
+    opengl::ProgramObject* _gridProgram = nullptr;
 
     Vec3Property _color;
     Vec3Property _highlightColor;

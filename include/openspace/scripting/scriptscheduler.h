@@ -33,16 +33,15 @@
 #include <string>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 struct LuaLibrary;
 
 /**
  * Maintains an ordered list of `ScheduledScript`s and provides a simple interface for
- * retrieveing scheduled scripts.
+ * retrieving scheduled scripts.
  */
 class ScriptScheduler : public PropertyOwner {
 public:
@@ -50,7 +49,7 @@ public:
 
     struct ScheduledScript {
         ScheduledScript() = default;
-        explicit ScheduledScript(const ghoul::Dictionary& dict);
+        explicit ScheduledScript(const Dictionary& dict);
 
         double time = -std::numeric_limits<double>::max();
         std::string forwardScript;
@@ -61,7 +60,7 @@ public:
     };
 
     /**
-     * Load a schedule from a ghoul::Dictionary \p scheduledScripts and adds the
+     * Load a schedule from a Dictionary \p scheduledScripts and adds the
      * ScheduledScript%s to the list of stored scripts.
      *
      * \param scheduledScripts The scripts that should be loaded
@@ -92,7 +91,7 @@ public:
      *
      * \param newTime A j2000 time value specifying the new time stamp that the script
      *        scheduler should progress to
-     * \return Vector with the scheduled scripts that should be run from begining to end
+     * \return Vector with the scheduled scripts that should be run from beginning to end
      */
     std::vector<std::string> progressTo(double newTime);
 

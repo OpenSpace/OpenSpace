@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "spice",
+  "version-string": "N0067",
+  "description": [
+    "An unofficial GitHub presence of JPL's NAIF's SPICE toolkit, combining the per-platform source releases (Visual Studio, Linux, macOS, Cygwin) into a single source tree of common and platform-specific files.",
+    "Overlay port. Spice has no vcpkg registry port. The source is downloaded from the OpenSpace/Spice repository (previously vendored as the ext/spice git submodule) and built as a static spice::spice library, matching the find_package(<pkg> CONFIG REQUIRED) + namespaced-target pattern used by every other dependency in this project's vcpkg migration."
+  ],
+  "homepage": "https://github.com/OpenSpace/Spice",
+  "supports": "!(uwp | android)",
+  "dependencies": [
+    { "name": "vcpkg-cmake", "host": true },
+    { "name": "vcpkg-cmake-config", "host": true }
+  ]
+}

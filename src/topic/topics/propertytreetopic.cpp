@@ -26,10 +26,6 @@
 
 #include <openspace/documentation/schema.h>
 
-namespace {
-    constexpr std::string_view _loggerCat = "PropertyTreeTopic";
-} // namespace
-
 using nlohmann::json;
 
 namespace openspace {
@@ -111,6 +107,10 @@ Schema PropertyTreeTopic::Schema() {
                     "uri": {
                       "type": "string",
                       "description": "The URI of the property this value corresponds to"
+                    },
+                    "isEnabled": {
+                      "type": "boolean",
+                      "description": "Whether the property is enabled. Only sent for enablable properties"
                     },
                     "type": { "const": "value" }
                   },

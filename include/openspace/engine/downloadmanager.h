@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___DOWNLOADMANAGER___H__
 #define __OPENSPACE_CORE___DOWNLOADMANAGER___H__
 
-#include <ghoul/misc/boolean.h>
+#include <openspace/misc/boolean.h>
 #include <chrono>
 #include <filesystem>
 #include <functional>
@@ -34,9 +34,9 @@
 #include <string>
 #include <vector>
 
-namespace ghoul::filesystem { class File; }
-
 namespace openspace {
+
+namespace filesystem { class File; }
 
 class DownloadManager {
 public:
@@ -64,8 +64,7 @@ public:
     };
 
     struct MemoryFile {
-        char* buffer = nullptr;
-        size_t size = 0;
+        std::vector<char> buffer;
         std::string format;
         bool corrupted = false;
     };
@@ -105,8 +104,7 @@ public:
      * \param overrideFile If `true`, overrides existing file of same name
      * \param failOnError If `true`, http codes >= 400 (client/server errors) result in
      *        fail
-     * \param timeout_secs Timeout in seconds before giving up on download (0 = no
-     *        timeout)
+     * \param timeoutSecs Timeout in seconds before giving up on download (0 = no timeout)
      * \param finishedCallback Callback when download finished (happens on different
      *        thread)
      * \param progressCallback Callback for status during (happens on different thread)
@@ -114,7 +112,7 @@ public:
     std::shared_ptr<FileFuture> downloadFile(const std::string& url,
         const std::filesystem::path& file,
         OverrideFile overrideFile = OverrideFile::Yes,
-        FailOnError failOnError = FailOnError::No, unsigned int timeout_secs = 0,
+        FailOnError failOnError = FailOnError::No, unsigned int timeoutSecs = 0,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()) const;
 

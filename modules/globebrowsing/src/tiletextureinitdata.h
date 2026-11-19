@@ -26,10 +26,10 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__
 
 #include <modules/globebrowsing/src/layergroupid.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
+#include <openspace/opengl/gl.h>
+#include <openspace/opengl/texture.h>
 #include <cstdint>
 
 namespace openspace {
@@ -43,7 +43,7 @@ public:
     BooleanType(ShouldAllocateDataOnCPU);
 
     TileTextureInitData(size_t width, size_t height, GLenum type,
-        ghoul::opengl::Texture::Format textureFormat,
+        opengl::Texture::Format textureFormat,
         ShouldAllocateDataOnCPU allocCpu = ShouldAllocateDataOnCPU::No);
 
     TileTextureInitData(const TileTextureInitData& original) = default;
@@ -56,7 +56,7 @@ public:
 
     const glm::ivec3 dimensions;
     const GLenum glType;
-    const ghoul::opengl::Texture::Format ghoulTextureFormat;
+    const opengl::Texture::Format textureFormat;
     const size_t nRasters;
     const size_t bytesPerDatum;
     const size_t bytesPerPixel;

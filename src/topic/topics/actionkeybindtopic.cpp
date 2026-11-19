@@ -29,9 +29,9 @@
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/misc/stringconversion.h>
 #include <openspace/topic/jsonconverters.h>
 #include <openspace/util/keys.h>
-#include <ghoul/misc/stringconversion.h>
 #include <algorithm>
 #include <map>
 #include <utility>
@@ -175,7 +175,7 @@ nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
     const openspace::Action& action = global::actionManager->action(identifier);
 
     return {
-        { "key", ghoul::to_string(k.key) },
+        { "key", to_string(k.key) },
         { "modifiers",
             {
                 { "shift" , hasKeyModifier(k.modifier, KeyModifier::Shift) },
@@ -239,7 +239,7 @@ nlohmann::json ActionKeybindTopic::action(const std::string& identifier) const {
     );
 
     if (found == actions.end()) {
-        throw ghoul::RuntimeError(std::format(
+        throw RuntimeError(std::format(
             "No action found with identifier '{}'", identifier
         ));
     }

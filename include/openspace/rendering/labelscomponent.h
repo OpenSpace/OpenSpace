@@ -29,28 +29,25 @@
 #include <openspace/rendering/fadeable.h>
 
 #include <openspace/data/dataloader.h>
+#include <openspace/glm.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 #include <memory>
 
-namespace ghoul {
-    namespace fontrendering { class Font; }
-    class Dictionary;
-} // namespace ghoul
-
 namespace openspace {
 
+namespace fontrendering { class Font; }
 struct Documentation;
+class Dictionary;
 struct RenderData;
 
 class LabelsComponent : public PropertyOwner, public Fadeable {
 public:
-    explicit LabelsComponent(const ghoul::Dictionary& dictionary);
+    explicit LabelsComponent(const Dictionary& dictionary);
 
     ~LabelsComponent() override = default;
 
@@ -88,7 +85,7 @@ private:
 
     bool _useCache = true;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
+    std::shared_ptr<fontrendering::Font> _font = nullptr;
 
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 

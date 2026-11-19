@@ -32,7 +32,7 @@
 namespace openspace {
 class FindLastClosedFieldlinesTask : public Task {
 public:
-    explicit FindLastClosedFieldlinesTask(const ghoul::Dictionary& dictionary);
+    explicit FindLastClosedFieldlinesTask(const Dictionary& dictionary);
     ~FindLastClosedFieldlinesTask() override;
 
     std::string description() override;

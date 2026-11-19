@@ -27,11 +27,11 @@
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <openspace/openspace.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/dictionaryjsonformatter.h>
 #include <openspace/util/task.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -67,8 +67,7 @@ Documentation KameleonDocumentationTask::Documentation() {
     );
 }
 
-KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)
-{
+KameleonDocumentationTask::KameleonDocumentationTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _inputPath = p.input;
     _outputPath = p.output;
@@ -83,15 +82,15 @@ std::string KameleonDocumentationTask::description() {
 
 void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressCallback) {
     KameleonVolumeReader reader = KameleonVolumeReader(_inputPath.string());
-    ghoul::Dictionary kameleonDictionary = reader.readMetaData();
+    Dictionary kameleonDictionary = reader.readMetaData();
     progressCallback(0.33f);
 
-    ghoul::Dictionary dictionary;
+    Dictionary dictionary;
     dictionary.setValue("kameleon", std::move(kameleonDictionary));
     dictionary.setValue("version", std::string(OPENSPACE_VERSION));
     dictionary.setValue("input", _inputPath.string());
 
-    std::string json = ghoul::formatJson(dictionary);
+    std::string json = formatJson(dictionary);
     progressCallback(0.66f);
 
     std::ifstream handlebarsInput = std::ifstream(absPath(HandlebarsFilename));

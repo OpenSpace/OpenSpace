@@ -29,10 +29,10 @@
 
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
+#include <openspace/opengl/gl.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/vector/uvec2property.h>
-#include <ghoul/opengl/ghoul_gl.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -54,16 +54,15 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
 
+namespace opengl { class Texture; }
 class BrowserInstance;
 class ScreenSpaceRenderHandler;
 
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:
-    explicit ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceBrowser(const Dictionary& dictionary);
     ~ScreenSpaceBrowser() override = default;
 
     void initializeGL() override;
@@ -92,9 +91,9 @@ protected:
         void setTexture(GLuint t);
     };
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-private:
 
-    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
+private:
+    void bindTexture(opengl::TextureUnit& unit) override;
 
     StringProperty _url;
 

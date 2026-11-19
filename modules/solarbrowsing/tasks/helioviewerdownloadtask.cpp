@@ -25,12 +25,12 @@
 #include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/filesystem/filesystem.h>
 #include <openspace/json.h>
+#include <openspace/logging/logmanager.h>
 #include <openspace/util/httprequest.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
 #include <scn/scan.h>
 #include <atomic>
 #include <ctime>
@@ -97,7 +97,7 @@ openspace::Documentation HelioviewerDownloadTask::Documentation() {
     );
 }
 
-HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictionary) {
+HelioviewerDownloadTask::HelioviewerDownloadTask(const Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _startTime = p.startTime;
@@ -229,7 +229,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
                 std::string(formattedDate),
                 "{}-{}-{}T{}:{}:{}.{}"
             );
-            ghoul_assert(r, "Invalid date");
+            assert_msg(r, "Invalid date");
             auto& [year, month, day, hour, minute, second, millisecond] = r->values();
 
             const std::string outFilename = std::format(

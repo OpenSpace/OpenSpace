@@ -29,12 +29,12 @@
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/font/fontmanager.h>
+#include <openspace/font/fontrenderer.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/opengl/openglstatecache.h>
+#include <openspace/opengl/texture.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/texture.h>
 #include <optional>
 #include <utility>
 
@@ -52,7 +52,7 @@ void TextTileProvider::internalInitialize() {
     ZoneScoped;
 
     font = global::fontManager->font("Mono", static_cast<float>(fontSize));
-    fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
+    fontRenderer = fontrendering::FontRenderer::createDefault();
     fontRenderer->setFramebufferSize(glm::vec2(initData.dimensions));
     glCreateFramebuffers(1, &fbo);
 }
@@ -71,7 +71,7 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
     const ProviderTileKey key = { tileIndex, uniqueIdentifier };
     Tile tile = tileCache->get(key);
     if (!tile.texture) {
-        ghoul::opengl::Texture* texture = tileCache->texture(initData);
+        opengl::Texture* texture = tileCache->texture(initData);
 
         GLint prevProgram = 0;
         GLint prevFBO = 0;

@@ -31,7 +31,7 @@ namespace openspace {
 
 class MultiScale : public Scale {
 public:
-    explicit MultiScale(const ghoul::Dictionary& dictionary);
+    explicit MultiScale(const Dictionary& dictionary);
 
     void initialize() override;
 
@@ -41,7 +41,7 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    std::vector<ghoul::mm_unique_ptr<Scale>> _scales;
+    std::vector<mm_unique_ptr<Scale>> _scales;
 };
 
 } // namespace openspace

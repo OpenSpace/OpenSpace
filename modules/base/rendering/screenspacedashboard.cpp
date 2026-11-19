@@ -27,11 +27,11 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/misc/assert.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <optional>
 #include <utility>
 
@@ -40,12 +40,15 @@
 namespace {
     using namespace openspace;
 
-    constexpr Property::PropertyInfo UseMainInfo = {
-        "UseMainDashboard",
-        "Use main dashboard",
-        "If true, this ScreenSpaceDashboard will use the main dashboard instead of "
-        "creating an independent one.",
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo UseMainInfo = {
+        .identifier = "UseMainDashboard",
+        .name = "Use main dashboard",
+        .description = "If true, this ScreenSpaceDashboard will use the main dashboard "
+            "instead of creating an independent one.",
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
     // Displays dashboard content as a 2D overlay on top of the scene. Unlike world-space
@@ -66,13 +69,12 @@ namespace {
         std::optional<std::string> identifier [[codegen::identifier(),
             codegen::private()]];
 
-        // [[codegen::verbatim(UseMainInfo.description)]]
-        std::optional<bool> useMainDashboard;
+        std::optional<bool> useMainDashboard [[codegen::Info(UseMainInfo)]];
 
         // A list of DashboardItems that are added automatically upon construction of the
         // ScreenSpaceDashboard. This value must not be specified if `UseMainDashboard` is
         // specified.
-        std::optional<std::vector<ghoul::Dictionary>>
+        std::optional<std::vector<Dictionary>>
             items [[codegen::reference("core_dashboarditem")]];
     };
 } // namespace
@@ -87,9 +89,9 @@ Documentation ScreenSpaceDashboard::Documentation() {
     );
 }
 
-ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
+ScreenSpaceDashboard::ScreenSpaceDashboard(const Dictionary& dictionary)
     : ScreenSpaceRenderableFramebuffer(dictionary)
-    , _useMainDashboard(UseMainInfo, false)
+    , _useMainDashboard(UseMainInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -100,7 +102,7 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     addProperty(_useMainDashboard);
 
     if (_useMainDashboard && p.items.has_value()) {
-        throw ghoul::RuntimeError("Cannot specify items when using the main dashboard");
+        throw RuntimeError("Cannot specify items when using the main dashboard");
     }
 
     if (!_useMainDashboard) {
@@ -108,8 +110,8 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     }
 
     if (p.items.has_value()) {
-        ghoul_assert(!_useMainDashboard, "Cannot add items to the main dashboard");
-        for (const ghoul::Dictionary& item : *p.items) {
+        assert_msg(!_useMainDashboard, "Cannot add items to the main dashboard");
+        for (const Dictionary& item : *p.items) {
             std::unique_ptr<DashboardItem> i = DashboardItem::createFromDictionary(item);
             _dashboard.addDashboardItem(std::move(i));
         }

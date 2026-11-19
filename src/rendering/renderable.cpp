@@ -29,15 +29,15 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
+#include <openspace/misc/profiling.h>
+#include <openspace/misc/templatefactory.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 #include <variant>
 #include <utility>
 
@@ -46,34 +46,33 @@ namespace {
 
     constexpr std::string_view KeyType = "Type";
 
-    constexpr Property::PropertyInfo EnabledInfo = {
-        "Enabled",
-        "Enabled",
-        "Determines whether this object will be visible or not.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo EnabledInfo = {
+        .identifier = "Enabled",
+        .name = "Enabled",
+        .description = "Determines whether this object will be visible or not.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = true
+        }
     };
 
-    constexpr Property::PropertyInfo RenderableTypeInfo = {
-        "Type",
-        "Renderable type",
-        "The type of the renderable.",
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo RenderableTypeInfo = {
+        .identifier = "Type",
+        .name = "Renderable type",
+        .description = "The type of the renderable.",
+        .visibility = Visibility::AdvancedUser,
+        .isReadOnly = IsReadOnly::Yes
     };
 
-    constexpr Property::PropertyInfo RenderableRenderBinModeInfo = {
-        "RenderBinMode",
-        "Render bin mode",
-        "A value that specifies if the renderable should be rendered in the Background, "
-        "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
-        Property::Visibility::AdvancedUser
-    };
-
-    constexpr Property::PropertyInfo DimInAtmosphereInfo = {
-        "DimInAtmosphere",
-        "Dim in atmosphere",
-        "Decides if the object should be dimmed (i.e. faded out) when the camera is in "
-        "the sunny part of an atmosphere.",
-        Property::Visibility::AdvancedUser
+    constexpr BoolPropertyInfo DimInAtmosphereInfo = {
+        .identifier = "DimInAtmosphere",
+        .name = "Dim in atmosphere",
+        .description = "Decides if the object should be dimmed (i.e. faded out) when the "
+            "camera is in the sunny part of an atmosphere.",
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = false
+        }
     };
 
     // This is the base class for all `Renderable` types. These objects are responsible
@@ -88,8 +87,7 @@ namespace {
     // Each `Renderable` type typically also includes a number of settings to alter its
     // appearance. See the documentation for the individual types for more details.
     struct [[codegen::Dictionary(Renderable)]] Parameters {
-        // [[codegen::verbatim(EnabledInfo.description)]]
-        std::optional<bool> enabled;
+        std::optional<bool> enabled [[codegen::Info(EnabledInfo)]];
 
         // This value determines the opacity of this renderable. A value of 0 means
         // completely transparent.
@@ -99,8 +97,8 @@ namespace {
         // setting properties.
         std::optional<std::variant<std::vector<std::string>, std::string>> tag;
 
-        // [[codegen::verbatim(RenderableTypeInfo.description)]]
-        std::optional<std::string> type [[codegen::private()]];
+        std::optional<std::string> type
+            [[codegen::Info(RenderableTypeInfo), codegen::private()]];
 
         // Fragile! Keep in sync with documentation
         enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderBinMode {
@@ -112,11 +110,11 @@ namespace {
             Sticker
         };
 
-        // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
+        // A value that specifies if the renderable should be rendered in the Background,
+        // Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.
         std::optional<RenderBinMode> renderBinMode;
 
-        // [[codegen::verbatim(DimInAtmosphereInfo.description)]]
-        std::optional<bool> dimInAtmosphere;
+        std::optional<bool> dimInAtmosphere [[codegen::Info(DimInAtmosphereInfo)]];
     };
 } // namespace
 #include "renderable_codegen.cpp"
@@ -127,36 +125,34 @@ Documentation Renderable::Documentation() {
     return codegen::doc<Parameters>("core_renderable");
 }
 
-ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
-{
+mm_unique_ptr<Renderable> Renderable::createFromDictionary(const Dictionary& dictionary) {
     ZoneScoped;
 
     if (!dictionary.hasKey(KeyType)) {
-        throw ghoul::RuntimeError("Tried to create Renderable but no 'Type' was found");
+        throw RuntimeError("Tried to create Renderable but no 'Type' was found");
     }
 
     // This should be done in the constructor instead with noexhaustive
     testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     const std::string renderableType = dictionary.value<std::string>(KeyType);
-    ghoul::TemplateFactory<Renderable>* factory =
+    TemplateFactory<Renderable>* factory =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "Renderable factory did not exist");
+    assert_msg(factory, "Renderable factory did not exist");
     Renderable* result = factory->create(
         renderableType,
         dictionary,
         &global::memoryManager->PersistentMemory
     );
     result->_type = renderableType;
-    return ghoul::mm_unique_ptr<Renderable>(result);
+    return mm_unique_ptr<Renderable>(result);
 }
 
-Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings settings)
+Renderable::Renderable(const Dictionary& dictionary, RenderableSettings settings)
     : PropertyOwner({ "Renderable" })
-    , _enabled(EnabledInfo, true)
-    , _renderableType(RenderableTypeInfo, "Renderable")
-    , _dimInAtmosphere(DimInAtmosphereInfo, false)
+    , _enabled(EnabledInfo)
+    , _renderableType(RenderableTypeInfo)
+    , _dimInAtmosphere(DimInAtmosphereInfo)
     , _shouldUpdateIfDisabled(settings.shouldUpdateIfDisabled)
     , _automaticallyUpdateRenderBin(settings.automaticallyUpdateRenderBin)
 {
@@ -171,7 +167,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
     }
 
     if (_automaticallyUpdateRenderBin) {
-        ghoul_assert(!p.renderBinMode.has_value(), "Something misfired in constructor");
+        assert_msg(!p.renderBinMode.has_value(), "Something misfired in constructor");
         registerUpdateRenderBinFromOpacity();
     }
 
@@ -182,7 +178,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
             }
         }
         else {
-            ghoul_assert(std::holds_alternative<std::vector<std::string>>(*p.tag), "");
+            assert_msg(std::holds_alternative<std::vector<std::string>>(*p.tag), "");
             for (std::string tag : std::get<std::vector<std::string>>(*p.tag)) {
                 addTag(std::move(tag));
             }
@@ -212,7 +208,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
 
     // Set type for UI
     _renderableType = p.type.value_or(_renderableType);
-    _renderableType.setReadOnly(true);
     addProperty(_renderableType);
 
     _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);
@@ -340,7 +335,7 @@ float Renderable::opacity() const noexcept {
 }
 
 SceneGraphNode* Renderable::parent() const noexcept {
-    ghoul_assert(dynamic_cast<SceneGraphNode*>(owner()), "Owner is not a SceneGraphNode");
+    assert_msg(dynamic_cast<SceneGraphNode*>(owner()), "Owner is not a SceneGraphNode");
     return static_cast<SceneGraphNode*>(owner());
 }
 
@@ -368,14 +363,18 @@ glm::dmat4 Renderable::calcModelTransform(const RenderData& data,
 glm::dmat4 Renderable::calcModelViewTransform(const RenderData& data,
                                     const std::optional<glm::dmat4>& modelTransform) const
 {
-    const glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    // Not using `value_or` as its argument would be evaluated even if a transform exists
+    const glm::dmat4 modelMatrix =
+        modelTransform.has_value() ? *modelTransform : calcModelTransform(data);
     return data.camera.combinedViewMatrix() * modelMatrix;
 }
 
 glm::dmat4 Renderable::calcModelViewProjectionTransform(const RenderData& data,
                                     const std::optional<glm::dmat4>& modelTransform) const
 {
-    const glm::dmat4& modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    // Not using `value_or` as its argument would be evaluated even if a transform exists
+    const glm::dmat4 modelMatrix =
+        modelTransform.has_value() ? *modelTransform : calcModelTransform(data);
     const glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
     const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
     return glm::dmat4(projectionMatrix * viewMatrix * modelMatrix);

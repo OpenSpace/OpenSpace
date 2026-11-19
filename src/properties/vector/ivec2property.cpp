@@ -24,35 +24,28 @@
 
 #include <openspace/properties/vector/ivec2property.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-IVec2Property::IVec2Property(PropertyInfo info, glm::ivec2 value, glm::ivec2 minValue,
-                             glm::ivec2 maxValue, glm::ivec2 stepValue)
-    : NumericalProperty<glm::ivec2>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue)
-    )
+IVec2Property::IVec2Property(IVec2PropertyInfo info)
+    : NumericalProperty<glm::ivec2>(std::move(info))
 {}
 
 std::string_view IVec2Property::className() const {
     return "IVec2Property";
 }
 
-ghoul::lua::LuaTypes IVec2Property::typeLua() const {
-    return ghoul::lua::LuaTypes::Table;
+lua::LuaTypes IVec2Property::typeLua() const {
+    return lua::LuaTypes::Table;
 }
 
 void IVec2Property::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 glm::ivec2 IVec2Property::toValue(lua_State* state) const {
-    return ghoul::lua::value<glm::ivec2>(state);
+    return lua::value<glm::ivec2>(state);
 }
 
 std::string IVec2Property::stringValue() const {
@@ -72,6 +65,7 @@ nlohmann::json IVec2Property::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": {
               "type": "array",
               "items": { "type": "number" },

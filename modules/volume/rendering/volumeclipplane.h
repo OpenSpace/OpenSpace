@@ -27,17 +27,17 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/glm.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/glm.h>
-
-namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+class Dictionary;
+
 class VolumeClipPlane : public PropertyOwner {
 public:
-    explicit VolumeClipPlane(const ghoul::Dictionary& dictionary);
+    explicit VolumeClipPlane(const Dictionary& dictionary);
 
     glm::vec3 normal() const;
     glm::vec2 offsets() const;

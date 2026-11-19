@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <array>
 #include <filesystem>
 #include <functional>
@@ -38,10 +38,10 @@ namespace ccmc {
     class Interpolator;
     class Kameleon;
 } // namespace ccmc
-namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+class Dictionary;
 template <typename T> class RawVolume;
 
 class KameleonVolumeReader {
@@ -61,7 +61,7 @@ public:
         float& minValue, float& maxValue, bool factorRSquared = false,
         float innerRadialLimit = -1.f) const;
 
-    ghoul::Dictionary readMetaData() const;
+    Dictionary readMetaData() const;
 
     std::string time() const;
     std::string simulationStart() const;
@@ -80,8 +80,8 @@ public:
     void setReaderCallback(Callback cb);
 
 private:
-    static void addAttributeToDictionary(ghoul::Dictionary& dictionary,
-        const std::string& key, ccmc::Attribute& attr);
+    static void addAttributeToDictionary(Dictionary& dictionary, const std::string& key,
+        ccmc::Attribute& attr);
 
     std::filesystem::path _path;
     std::unique_ptr<ccmc::Kameleon> _kameleon;

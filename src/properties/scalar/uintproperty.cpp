@@ -24,43 +24,35 @@
 
 #include <openspace/properties/scalar/uintproperty.h>
 
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/lua/lua_helper.h>
 
 namespace openspace {
 
-UIntProperty::UIntProperty(Property::PropertyInfo info, unsigned int value,
-                           unsigned int minValue, unsigned int maxValue,
-                           unsigned int stepValue)
-    : NumericalProperty<unsigned int>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue
-    )
+UIntProperty::UIntProperty(UIntPropertyInfo info)
+    : NumericalProperty<unsigned int>(std::move(info))
 {}
 
 std::string_view UIntProperty::className() const {
     return "UIntProperty";
 }
 
-ghoul::lua::LuaTypes UIntProperty::typeLua() const {
-    return ghoul::lua::LuaTypes::Number;
+lua::LuaTypes UIntProperty::typeLua() const {
+    return lua::LuaTypes::Number;
 }
 
 void UIntProperty::getLuaValue(lua_State* state) const {
-    ghoul::lua::push(state, _value);
+    lua::push(state, _value);
 }
 
 unsigned int UIntProperty::toValue(lua_State* state) const {
-    if (ghoul::lua::hasValue<double>(state)) {
-        return static_cast<unsigned int>(ghoul::lua::value<double>(state));
+    if (lua::hasValue<double>(state)) {
+        return static_cast<unsigned int>(lua::value<double>(state));
     }
-    else if (ghoul::lua::hasValue<unsigned int>(state)) {
-        return ghoul::lua::value<unsigned int>(state);
+    else if (lua::hasValue<unsigned int>(state)) {
+        return lua::value<unsigned int>(state);
     }
     else {
-        throw ghoul::RuntimeError("Error extracting value in UIntProperty");
+        throw RuntimeError("Error extracting value in UIntProperty");
     }
 }
 
@@ -79,6 +71,7 @@ nlohmann::json UIntProperty::Schema() {
           "type": "object",
           "properties": {
             "uri": { "type": "string" },
+            "isEnabled": { "type": "boolean" },
             "value": { "type": "number" }
           },
           "additionalProperties": false,

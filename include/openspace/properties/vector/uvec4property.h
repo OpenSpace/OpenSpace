@@ -27,20 +27,28 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <limits>
 
 namespace openspace {
 
+template <>
+struct NumericalLimits<glm::uvec4> {
+    static constexpr glm::uvec4 Min =
+        glm::uvec4(std::numeric_limits<unsigned int>::lowest());
+    static constexpr glm::uvec4 Max =
+        glm::uvec4(std::numeric_limits<unsigned int>::max());
+    static constexpr glm::uvec4 Step = glm::uvec4(1);
+};
+
+using UVec4PropertyInfo = BasicPropertyInfo<NumericalDefaults<glm::uvec4>>;
+
 class UVec4Property : public NumericalProperty<glm::uvec4> {
 public:
-    explicit UVec4Property(PropertyInfo info, glm::uvec4 value = glm::uvec4(0),
-        glm::uvec4 minValue = glm::uvec4(std::numeric_limits<unsigned int>::lowest()),
-        glm::uvec4 maxValue = glm::uvec4(std::numeric_limits<unsigned int>::max()),
-        glm::uvec4 stepValue = glm::uvec4(1));
+    explicit UVec4Property(UVec4PropertyInfo info);
 
     std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+    lua::LuaTypes typeLua() const override final;
 
     void getLuaValue(lua_State* state) const override final;
 

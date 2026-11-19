@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H__
 #define __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H__
 
-#include <ghoul/glm.h>
+#include <openspace/glm.h>
 #include <string>
 
 #ifdef _MSC_VER

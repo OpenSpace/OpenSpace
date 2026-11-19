@@ -33,10 +33,9 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <functional>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
+class Dictionary;
 struct Documentation;
 
 class LayerAdjustment : public PropertyOwner {
@@ -44,7 +43,7 @@ public:
     LayerAdjustment();
     ~LayerAdjustment() override = default;
 
-    void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
+    void setValuesFromDictionary(const Dictionary& adjustmentDict);
 
     layers::Adjustment::ID type() const;
 

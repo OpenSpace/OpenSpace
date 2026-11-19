@@ -29,14 +29,15 @@
 
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
-namespace ghoul::fontrendering { class Font; }
+#include <vector>
 
 namespace openspace {
 
+namespace fontrendering { class Font; }
+
 class DashboardTextItem : public DashboardItem {
 public:
-    explicit DashboardTextItem(const ghoul::Dictionary& dictionary);
+    explicit DashboardTextItem(const Dictionary& dictionary);
 
     void render(glm::vec2& penPosition) override;
 
@@ -46,8 +47,13 @@ protected:
     StringProperty _fontName;
     FloatProperty _fontSize;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::shared_ptr<fontrendering::Font> _font;
     std::string _buffer;
+
+    // A local buffer with a fixed size that can be used to format the text before it is
+    // copied into the _buffer. Doing this reduces the number of memory allocations during
+    // frames
+    std::vector<char> _localBuffer;
 };
 
 } // openspace

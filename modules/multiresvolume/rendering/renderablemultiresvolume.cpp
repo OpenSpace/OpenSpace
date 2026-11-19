@@ -35,19 +35,19 @@
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/cachemanager.h>
+#include <openspace/filesystem/file.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/format.h>
+#include <openspace/glm.h>
+#include <openspace/logging/logmanager.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/misc/exception.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
@@ -57,95 +57,139 @@ namespace {
 
     constexpr std::string_view _loggerCat = "RenderableMultiresVolume";
 
-    constexpr Property::PropertyInfo StepSizeCoefficientInfo = {
-        "StepSizeCoefficient",
-        "Stepsize coefficient",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr FloatPropertyInfo StepSizeCoefficientInfo = {
+        .identifier = "StepSizeCoefficient",
+        .name = "Stepsize coefficient",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.01f, 10.f }
+        }
     };
 
-    constexpr Property::PropertyInfo CurrentTimeInfo = {
-        "CurrentTime",
-        "Current time",
-        "", // @TODO Missing documentation
-        Property::Visibility::User
+    constexpr IntPropertyInfo CurrentTimeInfo = {
+        .identifier = "CurrentTime",
+        .name = "Current time",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 0 }
+        }
     };
 
-    constexpr Property::PropertyInfo MemoryBudgetInfo = {
-        "MemoryBudget",
-        "Memory budget",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo MemoryBudgetInfo = {
+        .identifier = "MemoryBudget",
+        .name = "Memory budget",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 0 }
+        }
     };
 
-    constexpr Property::PropertyInfo StreamingBudgetInfo = {
-        "StreamingBudget",
-        "Streaming budget",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo StreamingBudgetInfo = {
+        .identifier = "StreamingBudget",
+        .name = "Streaming budget",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 0,
+            .minMax = { 0, 0 }
+        }
     };
 
-    constexpr Property::PropertyInfo UseGlobalTimeInfo = {
-        "UseGlobalTime",
-        "Global time",
-        "", // @TODO Missing documentation
-        Property::Visibility::User
+    constexpr BoolPropertyInfo UseGlobalTimeInfo = {
+        .identifier = "UseGlobalTime",
+        .name = "Global time",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo LoopInfo = {
-        "Loop",
-        "Loop",
-        "", // @TODO Missing documentation
-        Property::Visibility::User
+    constexpr BoolPropertyInfo LoopInfo = {
+        .identifier = "Loop",
+        .name = "Loop",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::User,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo SelectorNameInfo = {
-        "Selector",
-        "Brick selector",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr StringPropertyInfo SelectorNameInfo = {
+        .identifier = "Selector",
+        .name = "Brick selector",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = "tf"
+        }
     };
 
-    constexpr Property::PropertyInfo StatsToFileInfo = {
-        "PrintStats",
-        "Print stats",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr BoolPropertyInfo StatsToFileInfo = {
+        .identifier = "PrintStats",
+        .name = "Print stats",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = false
+        }
     };
 
-    constexpr Property::PropertyInfo StatsToFileNameInfo = {
-        "PrintStatsFileName",
-        "Stats filename",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr StringPropertyInfo StatsToFileNameInfo = {
+        .identifier = "PrintStatsFileName",
+        .name = "Stats filename",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer
     };
 
-    constexpr Property::PropertyInfo ScalingExponentInfo = {
-        "ScalingExponent",
-        "Scaling Exponent",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr IntPropertyInfo ScalingExponentInfo = {
+        .identifier = "ScalingExponent",
+        .name = "Scaling Exponent",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = 1,
+            .minMax = { -10, 20 }
+        }
     };
 
-    constexpr Property::PropertyInfo ScalingInfo = {
-        "Scaling",
-        "Scaling",
-        "", // @TODO Missing documentation
-        Property::Visibility::AdvancedUser
+    constexpr Vec3PropertyInfo ScalingInfo = {
+        .identifier = "Scaling",
+        .name = "Scaling",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::AdvancedUser,
+        .defaults = {
+            .value = glm::vec3(1.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(10.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo TranslationInfo = {
-        "Translation",
-        "Translation",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr Vec3PropertyInfo TranslationInfo = {
+        .identifier = "Translation",
+        .name = "Translation",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(10.f) }
+        }
     };
 
-    constexpr Property::PropertyInfo RotationInfo = {
-        "Rotation",
-        "Euler rotation",
-        "", // @TODO Missing documentation
-        Property::Visibility::Developer
+    constexpr Vec3PropertyInfo RotationInfo = {
+        .identifier = "Rotation",
+        .name = "Euler rotation",
+        .description = "", // @TODO Missing documentation
+        .visibility = Visibility::Developer,
+        .defaults = {
+            .value = glm::vec3(0.f),
+            .minMax = { glm::vec3(0.f), glm::vec3(glm::two_pi<float>()) }
+        }
     };
 
     struct [[codegen::Dictionary(RenderableMultiresVolume)]] Parameters {
@@ -176,26 +220,21 @@ Documentation RenderableMultiresVolume::Documentation() {
     );
 }
 
-RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dictionary)
+RenderableMultiresVolume::RenderableMultiresVolume(const Dictionary& dictionary)
     :  Renderable(dictionary)
-    , _useGlobalTime(UseGlobalTimeInfo, false)
-    , _loop(LoopInfo, false)
-    , _currentTime(CurrentTimeInfo, 0, 0, 0)
-    , _memoryBudget(MemoryBudgetInfo, 0, 0, 0)
-    , _streamingBudget(StreamingBudgetInfo, 0, 0, 0)
-    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f)
-    , _selectorName(SelectorNameInfo, "tf")
-    , _statsToFile(StatsToFileInfo, false)
+    , _useGlobalTime(UseGlobalTimeInfo)
+    , _loop(LoopInfo)
+    , _currentTime(CurrentTimeInfo)
+    , _memoryBudget(MemoryBudgetInfo)
+    , _streamingBudget(StreamingBudgetInfo)
+    , _stepSizeCoefficient(StepSizeCoefficientInfo)
+    , _selectorName(SelectorNameInfo)
+    , _statsToFile(StatsToFileInfo)
     , _statsToFileName(StatsToFileNameInfo)
-    , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
-    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
-    , _rotation(
-        RotationInfo,
-        glm::vec3(0.f),
-        glm::vec3(0.f),
-        glm::vec3(glm::two_pi<float>())
-    )
-    , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _scalingExponent(ScalingExponentInfo)
+    , _translation(TranslationInfo)
+    , _rotation(RotationInfo)
+    , _scaling(ScalingInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -388,7 +427,7 @@ void RenderableMultiresVolume::initializeGL() {
     onEnabledChange(onChange);
 
     if (!success) {
-        throw ghoul::RuntimeError("Error during initialization");
+        throw RuntimeError("Error during initialization");
     }
 }
 
@@ -510,7 +549,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         std::chrono::duration<double> frameDuration = frameEnd - _frameStart;
 
         // Make sure that the directory exists
-        ghoul::filesystem::File file(_statsFileName);
+        filesystem::File file(_statsFileName);
         std::filesystem::path directory =
             std::filesystem::path(_statsFileName).parent_path();
         std::filesystem::create_directories(directory);

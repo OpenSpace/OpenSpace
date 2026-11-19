@@ -26,11 +26,11 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/filesystem/filesystem.h>
+#include <openspace/misc/dictionary.h>
+#include <openspace/opengl/textureunit.h>
+#include <openspace/opengl/programobject.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/programobject.h>
 
 namespace {
     struct [[codegen::Dictionary(RenderableTexturePlane)]] Parameters {};
@@ -46,7 +46,7 @@ Documentation RenderableTexturePlane::Documentation() {
     );
 }
 
-RenderableTexturePlane::RenderableTexturePlane(const ghoul::Dictionary& dictionary)
+RenderableTexturePlane::RenderableTexturePlane(const Dictionary& dictionary)
     : RenderableTextureCygnet(dictionary)
 {}
 
@@ -68,7 +68,7 @@ void RenderableTexturePlane::deinitializeGL() {
 }
 
 void RenderableTexturePlane::setUniforms() {
-    ghoul::opengl::TextureUnit unit;
+    opengl::TextureUnit unit;
     unit.bind(*_textures[0]);
     _shader->setUniform("texture1", unit);
     _shader->setUniform("transparency", _alpha.value());
