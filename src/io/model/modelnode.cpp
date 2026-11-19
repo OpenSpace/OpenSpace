@@ -28,10 +28,12 @@
 
 namespace openspace::io {
 
-ModelNode::ModelNode(std::string name, glm::mat4 transform,
+ModelNode::ModelNode(int index, std::string name, glm::mat4 transform,
                      std::vector<io::ModelMesh> meshes)
-    : _meshes(std::move(meshes))
+    : _index(index)
+    , _meshes(std::move(meshes))
     , _name(std::move(name))
+
 {
     // GLM is column major, array is column major too
     _transform[0] = transform[0][0];
@@ -65,31 +67,6 @@ void ModelNode::setChildren(std::vector<int> children) {
 
 void ModelNode::addChild(int child) {
     _children.push_back(child);
-}
-
-void ModelNode::setAnimation(const glm::mat4& animation) {
-    // GLM is column major, array is column major too
-    _animationTransform[0] = animation[0][0];
-    _animationTransform[1] = animation[0][1];
-    _animationTransform[2] = animation[0][2];
-    _animationTransform[3] = animation[0][3];
-
-    _animationTransform[4] = animation[1][0];
-    _animationTransform[5] = animation[1][1];
-    _animationTransform[6] = animation[1][2];
-    _animationTransform[7] = animation[1][3];
-
-    _animationTransform[8] = animation[2][0];
-    _animationTransform[9] = animation[2][1];
-    _animationTransform[10] = animation[2][2];
-    _animationTransform[11] = animation[2][3];
-
-    _animationTransform[12] = animation[3][0];
-    _animationTransform[13] = animation[3][1];
-    _animationTransform[14] = animation[3][2];
-    _animationTransform[15] = animation[3][3];
-
-    _hasAnimation = true;
 }
 
 void ModelNode::updateCustomTransform(const glm::dmat4& customTransform) {
@@ -141,16 +118,8 @@ glm::mat4 ModelNode::transform() const {
     return glm::make_mat4(_transform.data());
 }
 
-glm::mat4 ModelNode::animationTransform() const {
-    return glm::make_mat4(_animationTransform.data());
-}
-
 glm::mat4 ModelNode::customTransform() const {
     return glm::make_mat4(_customTransform.data());
-}
-
-bool ModelNode::hasAnimation() const {
-    return _hasAnimation;
 }
 
 bool ModelNode::hasCustomTransform() const {
@@ -159,6 +128,10 @@ bool ModelNode::hasCustomTransform() const {
 
 std::string ModelNode::name() const {
     return _name;
+}
+
+int ModelNode::index() const {
+    return _index;
 }
 
 } // namespace openspace::io

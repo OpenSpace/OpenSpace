@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___MODELMESH___H__
 
 #include <openspace/glm.h>
+#include <openspace/io/model/modelanimation.h>
 #include <openspace/opengl/gl.h>
 #include <openspace/opengl/texture.h>
 #include <cstdint>
@@ -73,7 +74,8 @@ public:
 
     void initialize();
     void deinitialize() const;
-    void render(opengl::ProgramObject& program, const glm::mat4& meshTransform,
+    void render(opengl::ProgramObject& program, const glm::mat4& globalTransform,
+        const glm::mat4& nodeTransform, const ModelAnimation* modelAnimation,
         bool isFullyTexturedModel = true, bool isProjection = false) const;
     float calculateBoundingRadius(glm::mat4& transform) const;
 

@@ -439,6 +439,7 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderBinary::loadModel(
 
         // Create Node
         io::ModelNode node = io::ModelNode(
+            nodeArray.size(), // Index of this no
             name,
             std::move(transform),
             std::move(meshArray)
@@ -446,7 +447,7 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderBinary::loadModel(
         node.setChildren(std::move(childrenArray));
         node.setParent(parent);
         if (hasAnimation) {
-            node.setAnimation(animationTransform);
+            //node.setAnimation(animationTransform); // TODO
         }
 
         nodeArray.push_back(std::move(node));

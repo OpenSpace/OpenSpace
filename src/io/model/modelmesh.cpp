@@ -69,7 +69,9 @@ void ModelMesh::generateDebugTexture(ModelMesh::Texture& texture) {
 }
 
 void ModelMesh::render(opengl::ProgramObject& program, const glm::mat4& meshTransform,
-                       bool isFullyTexturedModel, bool isProjection) const
+                       const glm::mat4& nodeTransform,
+                       const ModelAnimation* modelAnimation, bool isFullyTexturedModel,
+                       bool isProjection) const
 {
     // Count how many textures have image textures
     int counter = 0;
@@ -175,8 +177,8 @@ void ModelMesh::render(opengl::ProgramObject& program, const glm::mat4& meshTran
     }
 
     // Transform mesh
-    program.setUniform("meshTransform", meshTransform);
-    const glm::dmat4 normalTransform = glm::transpose(glm::inverse(meshTransform));
+    program.setUniform("meshTransform", meshTransform * nodeTransform);
+    const glm::dmat4 normalTransform = glm::transpose(glm::inverse(meshTransform * nodeTransform));
     program.setUniform("meshNormalTransform", glm::mat4(normalTransform));
 
     // Render the mesh object

@@ -128,55 +128,6 @@ namespace {
             );
         }
     }
-
-    void renderRecursive(const std::vector<io::ModelNode>& nodes,
-                         const io::ModelNode* node, opengl::ProgramObject& program,
-                         const glm::mat4& parentTransform, bool isFullyTexturedModel,
-                         bool isProjection, bool replaceWithCustomTransforms)
-    {
-        if (!node) {
-            LERROR("Cannot render empty node");
-            return;
-        }
-
-        glm::mat4 animationTransform = glm::mat4(1.f);
-        glm::mat4 customTransform = glm::mat4(1.f);
-        glm::mat4 nodeTransform = node->transform();
-
-        if (node->hasAnimation()) {
-            // Animation is given by Assimp in absolute format, i.e. animation replaces
-            // old transform
-            animationTransform = node->animationTransform();
-            nodeTransform = glm::mat4(1.f);
-        }
-
-        if (node->hasCustomTransform()) {
-            if (replaceWithCustomTransforms) {
-                nodeTransform = glm::mat4(1.f);
-            }
-
-            customTransform = node->customTransform();
-        }
-
-        glm::mat4 globalTransform =
-            parentTransform * animationTransform * customTransform * nodeTransform;
-
-        for (const io::ModelMesh& mesh : node->meshes()) {
-            mesh.render(program, globalTransform, isFullyTexturedModel, isProjection);
-        }
-
-        for (const int child : node->children()) {
-            renderRecursive(
-                nodes,
-                &nodes[child],
-                program,
-                globalTransform,
-                isFullyTexturedModel,
-                isProjection,
-                replaceWithCustomTransforms
-            );
-        }
-    }
 } // namespace
 
 namespace openspace::modelgeometry {
@@ -527,6 +478,7 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelGeometry::loadCacheFile(
 
         // Create Node
         io::ModelNode node = io::ModelNode(
+            0, // TODO
             name,
             std::move(transform),
             std::move(meshArray)
@@ -534,7 +486,7 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelGeometry::loadCacheFile(
         node.setChildren(std::move(childrenArray));
         node.setParent(parent);
         if (hasAnimation) {
-            node.setAnimation(animationTransform);
+            //node.setAnimation(animationTransform); // TODO
         }
 
         nodeArray.push_back(std::move(node));
@@ -883,11 +835,11 @@ bool ModelGeometry::saveToCacheFile(const std::filesystem::path& cachedFile) con
         fileStream.write(reinterpret_cast<const char*>(&transform), 16 * sizeof(GLfloat));
 
         // AnimationTransform
-        glm::mat4 animationTransform = node.animationTransform();
+        /*glm::mat4 animationTransform = node.animationTransform();
         fileStream.write(
             reinterpret_cast<const char*>(&animationTransform),
             16 * sizeof(GLfloat)
-        );
+        );*/ // TODO
 
         // Parent
         int32_t parent = node.parent();
@@ -904,8 +856,8 @@ bool ModelGeometry::saveToCacheFile(const std::filesystem::path& cachedFile) con
         }
 
         // HasAnimation
-        uint8_t a = node.hasAnimation() ? 1 : 0;
-        fileStream.write(reinterpret_cast<const char*>(&a), sizeof(uint8_t));
+        /*uint8_t a = node.hasAnimation() ? 1 : 0;
+        fileStream.write(reinterpret_cast<const char*>(&a), sizeof(uint8_t));*/ // TODO
 
         // Name
         std::string name = node.name();
@@ -1162,15 +1114,74 @@ void ModelGeometry::render(opengl::ProgramObject& program, bool isFullyTexturedM
     }
 
     const glm::mat4 parentTransform = glm::mat4(1.f);
-    renderRecursive(
-        _nodes,
+    this->renderRecursive(
         _nodes.data(),
         program,
         parentTransform,
         isFullyTexturedModel,
-        isProjection,
-        _replaceWithCustomTransforms
+        isProjection
     );
+}
+
+void ModelGeometry::renderRecursive(const io::ModelNode* node,
+                                    opengl::ProgramObject& program,
+                                    const glm::mat4& parentTransform,
+                                    bool isFullyTexturedModel, bool isProjection) const
+{
+    if (!node) {
+        LERROR("Cannot render empty node");
+        return;
+    }
+
+    glm::mat4 customTransform = glm::mat4(1.f);
+    glm::mat4 nodeTransform = node->transform();
+
+    if (node->hasCustomTransform()) {
+        if (_replaceWithCustomTransforms) {
+            nodeTransform = glm::mat4(1.f);
+        }
+
+        customTransform = node->customTransform();
+    }
+
+    //glm::mat4 globalTransform =
+    //   parentTransform * animationTransform * customTransform * nodeTransform;
+    glm::mat4 globalTransform = parentTransform * customTransform;
+
+    // Find this node in the animation and apply the animation transform if it exists
+    for (const io::ModelAnimation::NodeAnimation& animation :
+        _animation->nodeAnimations())
+    {
+        if (animation.node == node->index()) {
+            // Animation is given by Assimp in absolute format, i.e. animation
+            // replaces node transform
+            nodeTransform = animation.currentTransform;
+            break;
+        }
+    }
+
+    // Render the meshes of this node
+    for (const io::ModelMesh& mesh : node->meshes()) {
+        mesh.render(
+            program,
+            globalTransform,
+            nodeTransform,
+            _animation.get(),
+            isFullyTexturedModel,
+            isProjection
+        );
+    }
+
+    // Move on in the model tree with an updated parant transform
+    for (const int child : node->children()) {
+        renderRecursive(
+            &_nodes[child],
+            program,
+            globalTransform * nodeTransform,
+            isFullyTexturedModel,
+            isProjection
+        );
+    }
 }
 
 void ModelGeometry::update(double now) {
@@ -1179,7 +1190,7 @@ void ModelGeometry::update(double now) {
         return;
     }
 
-    _animation->animate(_nodes, now, _animationEnabled);
+    _animation->animate(now, _animationEnabled);
 }
 
 void ModelGeometry::setTimeScale(float timeScale) {
@@ -1195,7 +1206,7 @@ void ModelGeometry::enableAnimation(bool value) {
     _animationEnabled = value;
 
     if (!value) {
-        _animation->reset(_nodes);
+        _animation->reset();
     }
 }
 

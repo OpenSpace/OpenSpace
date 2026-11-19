@@ -35,7 +35,8 @@ namespace openspace::io {
 
 class ModelNode {
 public:
-    ModelNode(std::string name, glm::mat4 transform, std::vector<io::ModelMesh> meshes);
+    ModelNode(int index, std::string name, glm::mat4 transform,
+        std::vector<io::ModelMesh> meshes);
 
     ModelNode(ModelNode&&) noexcept = default;
     ~ModelNode() noexcept = default;
@@ -43,7 +44,6 @@ public:
     void setParent(int parent);
     void setChildren(std::vector<int> children);
     void addChild(int child);
-    void setAnimation(const glm::mat4& animation);
     void updateCustomTransform(const glm::dmat4& customTransform);
 
     std::vector<io::ModelMesh>& meshes();
@@ -52,22 +52,15 @@ public:
     std::vector<int>& children();
     const std::vector<int>& children() const;
     glm::mat4 transform() const;
-    glm::mat4 animationTransform() const;
     glm::mat4 customTransform() const;
-    bool hasAnimation() const;
     bool hasCustomTransform() const;
     std::string name() const;
+    int index() const;
 
 private:
     // `glm::mat4` is not noexcept move constructable, use an array instead for transform
     // Array is column major
     std::array<GLfloat, 16> _transform = {
-        1.f, 0.f, 0.f, 0.f,
-        0.f, 1.f, 0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        0.f, 0.f, 0.f, 1.f
-    };
-    std::array<GLfloat, 16> _animationTransform = {
         1.f, 0.f, 0.f, 0.f,
         0.f, 1.f, 0.f, 0.f,
         0.f, 0.f, 1.f, 0.f,
@@ -82,9 +75,9 @@ private:
     std::vector<ModelMesh> _meshes;
     int _parent = -1;
     std::vector<int> _children;
-    bool _hasAnimation = false;
     bool _hasCustomTransform = false;
     std::string _name;
+    int _index = -1; // Index of this node in the model geometry
 };
 
 } // namespace openspace::io

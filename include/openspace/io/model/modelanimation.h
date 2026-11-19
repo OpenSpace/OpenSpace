@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___MODELANIMATION___H__
 #define __OPENSPACE_CORE___MODELANIMATION___H__
 
-#include <openspace/io/model/modelnode.h>
 #include <openspace/glm.h>
 #include <string>
 #include <vector>
@@ -54,6 +53,7 @@ public:
         std::vector<PositionKeyframe> positions;
         std::vector<RotationKeyframe> rotations;
         std::vector<ScaleKeyframe> scales;
+        glm::mat4 currentTransform = glm::mat4(1.f);
     };
 
     ModelAnimation(std::string name, double duration);
@@ -62,8 +62,8 @@ public:
     ~ModelAnimation() noexcept = default;
 
     void setTimeScale(float timeScale);
-    void animate(std::vector<ModelNode>& nodes, double now, bool enabled);
-    void reset(std::vector<ModelNode>& nodes);
+    void animate(double now, bool enabled);
+    void reset();
 
     std::vector<NodeAnimation>& nodeAnimations();
     const std::vector<NodeAnimation>& nodeAnimations() const;
@@ -72,6 +72,11 @@ public:
     float timeScale() const;
 
 private:
+    glm::mat4 computeCurrentTransform(double now,
+        const std::vector<PositionKeyframe>& positions,
+        const std::vector<RotationKeyframe>& rotations,
+        const std::vector<ScaleKeyframe>& scales) const;
+
     std::string _name;
     double _duration;
     float _timeScale = 1.f;

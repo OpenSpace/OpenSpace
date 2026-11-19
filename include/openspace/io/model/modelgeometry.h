@@ -105,6 +105,10 @@ public:
     const std::vector<TextureEntry>& textureStorage() const;
 
 protected:
+    void renderRecursive(const io::ModelNode* node, opengl::ProgramObject& program,
+        const glm::mat4& parentTransform, bool isFullyTexturedModel,
+        bool isProjection) const;
+
     double _boundingRadius = 0.0;
     bool _animationEnabled = false;
     std::vector<io::ModelNode> _nodes;
