@@ -145,7 +145,8 @@ public:
         std::variant<WrappingMode, WrappingModes> wrapping = WrappingMode::Repeat;
 
         /// If the \p filter is set to \c LinearMipMap or \c AnisotropicMipMap, this
-        /// specifies the level to be used
+        /// specifies the maximum number of mipmap levels, including the base level. If it
+        /// is not specified, the full mipmap chain down to a size of 1 is created
         std::optional<int> mipMapLevel = std::nullopt;
 
         /// Sets the border color of the texture
@@ -420,16 +421,13 @@ private:
     /// regenerated
     bool _usesMipMapping = false;
 
-    /// The desired mipmap level for this texture. This value is only used if the
-    /// `_filter` used is one of the mip mapping filters
-    const int _mipMapLevel;
+    /// The maximum number of mipmap levels for this texture or `std::nullopt` if the full
+    /// mipmap chain should be created. This value is only used if the `_filter` used is
+    /// one of the mip mapping filters
+    const std::optional<int> _mipMapLevel;
 
     /// The user-friendly name for this texture
     std::string _name;
-
-    /// The maximum anisotropy level for this texture. This value is only set and used if
-    /// the Anisotropic filtering mode was used
-    float _anisotropyLevel = -1.f;
 
     /// The pixel alignment for this texture that was used to upload the last pixel data
     int _pixelAlignment = 1;

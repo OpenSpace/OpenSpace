@@ -55,57 +55,59 @@ namespace {
         }
 
         switch (frmt.format) {
+            // Signed data types use the signed normalized formats, as negative values
+            // would otherwise be clamped to 0 when uploading them
             case Texture::Format::Red:
                 switch (frmt.dataType) {
                     case GL_UNSIGNED_BYTE:  return GL_R8;
-                    case GL_BYTE:           return GL_R8;
+                    case GL_BYTE:           return GL_R8_SNORM;
                     case GL_UNSIGNED_SHORT: return GL_R16;
-                    case GL_SHORT:          return GL_R16;
+                    case GL_SHORT:          return GL_R16_SNORM;
                     case GL_FLOAT:          return GL_R32F;
                     default:                throw FormatError(frmt.format, frmt.dataType);
                 }
             case Texture::Format::RG:
                 switch (frmt.dataType) {
                     case GL_UNSIGNED_BYTE:  return GL_RG8;
-                    case GL_BYTE:           return GL_RG8;
+                    case GL_BYTE:           return GL_RG8_SNORM;
                     case GL_UNSIGNED_SHORT: return GL_RG16;
-                    case GL_SHORT:          return GL_RG16;
+                    case GL_SHORT:          return GL_RG16_SNORM;
                     case GL_FLOAT:          return GL_RG32F;
                     default:                throw FormatError(frmt.format, frmt.dataType);
                 }
             case Texture::Format::RGB:
                 switch (frmt.dataType) {
                     case GL_UNSIGNED_BYTE:  return GL_RGB8;
-                    case GL_BYTE:           return GL_RGB8;
+                    case GL_BYTE:           return GL_RGB8_SNORM;
                     case GL_UNSIGNED_SHORT: return GL_RGB16;
-                    case GL_SHORT:          return GL_RGB16;
+                    case GL_SHORT:          return GL_RGB16_SNORM;
                     case GL_FLOAT:          return GL_RGB32F;
                     default:                throw FormatError(frmt.format, frmt.dataType);
                 }
             case Texture::Format::BGR:
                 switch (frmt.dataType) {
                     case GL_UNSIGNED_BYTE:  return GL_RGB8;
-                    case GL_BYTE:           return GL_RGB8;
+                    case GL_BYTE:           return GL_RGB8_SNORM;
                     case GL_UNSIGNED_SHORT: return GL_RGB16;
-                    case GL_SHORT:          return GL_RGB16;
+                    case GL_SHORT:          return GL_RGB16_SNORM;
                     case GL_FLOAT:          return GL_RGB32F;
                     default:                throw FormatError(frmt.format, frmt.dataType);
                 }
             case Texture::Format::RGBA:
                 switch (frmt.dataType) {
                     case GL_UNSIGNED_BYTE:  return GL_RGBA8;
-                    case GL_BYTE:           return GL_RGBA8;
+                    case GL_BYTE:           return GL_RGBA8_SNORM;
                     case GL_UNSIGNED_SHORT: return GL_RGBA16;
-                    case GL_SHORT:          return GL_RGBA16;
+                    case GL_SHORT:          return GL_RGBA16_SNORM;
                     case GL_FLOAT:          return GL_RGBA32F;
                     default:                throw FormatError(frmt.format, frmt.dataType);
                 }
             case Texture::Format::BGRA:
                 switch (frmt.dataType) {
                     case GL_UNSIGNED_BYTE:  return GL_RGBA8;
-                    case GL_BYTE:           return GL_RGBA8;
+                    case GL_BYTE:           return GL_RGBA8_SNORM;
                     case GL_UNSIGNED_SHORT: return GL_RGBA16;
-                    case GL_SHORT:          return GL_RGBA16;
+                    case GL_SHORT:          return GL_RGBA16_SNORM;
                     case GL_FLOAT:          return GL_RGBA32F;
                     default:                throw FormatError(frmt.format, frmt.dataType);
                 }
@@ -195,6 +197,16 @@ namespace {
             default:                             throw MissingCaseException();
         }
     }
+
+    float maxTextureAnisotropy() {
+        // The limit does not change at runtime, so it is only queried once
+        static const float MaxAnisotropy = []() {
+            GLfloat value = 1.f;
+            glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &value);
+            return value;
+        }();
+        return MaxAnisotropy;
+    }
 } // namespace
 
 namespace openspace::opengl {
@@ -210,7 +222,7 @@ Texture::Texture(FormatInit format, SamplerInit sampler, const std::byte* data,
     , _wrapping(toWrappingModes(sampler.wrapping))
     , _borderColor(std::move(sampler.borderColor))
     , _swizzleMask(parseSwizzleMask(sampler, format))
-    , _mipMapLevel(sampler.mipMapLevel.value_or(8))
+    , _mipMapLevel(std::move(sampler.mipMapLevel))
     , _pixelAlignment(std::move(pixelAlignment))
 {
     assert_msg(_dimensions.x >= 1, "X dimension must be positive");
@@ -254,22 +266,15 @@ void Texture::initialize(const std::byte* data) {
         case FilterMode::LinearMipMap:
             glTextureParameteri(_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             glTextureParameteri(_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTextureParameteri(_id, GL_TEXTURE_MAX_LEVEL, _mipMapLevel - 1);
             break;
         case FilterMode::AnisotropicMipMap:
             glTextureParameteri(_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             glTextureParameteri(_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTextureParameteri(_id, GL_TEXTURE_MAX_LEVEL, _mipMapLevel - 1);
-            if (std::equal_to<>()(_anisotropyLevel, -1.f)) {
-                GLfloat maxTextureAnisotropy = 1.0;
-                glGetFloatv(
-                    GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT,
-                    &maxTextureAnisotropy
-                );
-                _anisotropyLevel = maxTextureAnisotropy;
-            }
-            glTextureParameterf(_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, _anisotropyLevel);
-            glTextureParameteri(_id, GL_TEXTURE_BASE_LEVEL, 0);
+            glTextureParameterf(
+                _id,
+                GL_TEXTURE_MAX_ANISOTROPY,
+                maxTextureAnisotropy()
+            );
             break;
     }
 
@@ -318,23 +323,15 @@ void Texture::initialize(const std::byte* data) {
         (_filter == FilterMode::LinearMipMap) ||
         (_filter == FilterMode::AnisotropicMipMap);
     const GLsizei nMipMapLevels = [this, useMipMaps]() {
-        if (!useMipMaps || _dimensions.x == 1) {
+        if (!useMipMaps) {
             return 1;
         }
 
-        // For each dimension calculate the maximally allowed mipmap level and then take
-        // the one that is lowest as the final result
-        const int x = static_cast<int>(std::floor(std::log2(_dimensions.x)));
-        const int y = static_cast<int>(std::floor(std::log2(_dimensions.y)));
-        const int z = static_cast<int>(std::floor(std::log2(_dimensions.z)));
-
-        if (_dimensions.z > 1) {
-            return std::min(std::min(std::min(x, y), z), _mipMapLevel);
-        }
-        if (_dimensions.y > 1) {
-            return std::min(std::min(x, y), _mipMapLevel);
-        }
-        return std::min(x, _mipMapLevel);
+        // The full mipmap chain goes down to a size of 1 in the largest dimension, so it
+        // contains floor(log2(largest dimension)) + 1 levels including the base level
+        const unsigned int largest = glm::compMax(_dimensions);
+        const int nLevels = static_cast<int>(std::floor(std::log2(largest))) + 1;
+        return _mipMapLevel.has_value() ? std::min(nLevels, *_mipMapLevel) : nLevels;
     }();
     _usesMipMapping = useMipMaps && nMipMapLevels > 1;
 
@@ -367,21 +364,16 @@ void Texture::initialize(const std::byte* data) {
 
 
     //
-    // Upload data
+    // Upload data. This also generates the mipmaps if they are used
     //
     if (data) {
         uploadTexture(data);
-
-        if (_usesMipMapping) {
-            glGenerateTextureMipmap(_id);
-        }
     }
 }
 
 void Texture::uploadTexture(const std::byte* data) const {
     assert_msg(data, "Data must be provided");
 
-    glBindTexture(_type, _id);
     glPixelStorei(GL_UNPACK_ALIGNMENT, _pixelAlignment);
 
     switch (_type) {
