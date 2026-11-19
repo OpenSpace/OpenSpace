@@ -49,7 +49,7 @@ public:
     };
 
     struct NodeAnimation {
-        int node = 0;
+        int node = -1;
         std::vector<PositionKeyframe> positions;
         std::vector<RotationKeyframe> rotations;
         std::vector<ScaleKeyframe> scales;

@@ -541,7 +541,6 @@ namespace {
      */
     void processNode(const aiNode& node, const aiScene& scene,
                      std::vector<ModelNode>& nodes, int parent,
-                     std::unique_ptr<ModelAnimation>& modelAnimation,
                   std::vector<modelgeometry::ModelGeometry::TextureEntry>& textureStorage,
                                                                 bool forceRenderInvisible,
                                                               bool notifyInvisibleDropped,
@@ -608,9 +607,12 @@ namespace {
         // string "nodes[{i}]". Blender, for example, will automatically replace that
         // auto-generated name with the name of the contained mesh, if there is only one.
         // For consistency with Blender, we do the same here.
-        std::string nodeName = node.mName.C_Str();
+        // The original name is stored in the ModelNode since baked animations might still
+        // use the original name for referencing
+        std::string originalName = node.mName.C_Str();
+        std::string nodeName = originalName;
         const bool hasSyntheticName =
-            nodeName.starts_with("nodes[") && nodeName.ends_with(']');
+            originalName.starts_with("nodes[") && originalName.ends_with(']');
         if (hasSyntheticName && node.mNumMeshes == 1) {
             const aiMesh* nodeMesh = scene.mMeshes[node.mMeshes[0]];
             if (nodeMesh && nodeMesh->mName.length > 0) {
@@ -622,91 +624,14 @@ namespace {
             nodes.size(),
             nodeName.c_str(),
             nodeTransform,
-            std::move(meshArray)
+            std::move(meshArray),
+            originalName
         );
         modelNode.setParent(parent);
         nodes.push_back(std::move(modelNode));
         const int newNode = static_cast<int>(nodes.size() - 1);
         if (parent != -1) {
             nodes[parent].addChild(newNode);
-        }
-
-        // Check animations
-        if (scene.HasAnimations()) {
-            for (unsigned int a = 0; a < scene.mNumAnimations; a++) {
-                aiAnimation* animation = scene.mAnimations[a];
-                if (modelAnimation->name() != animation->mName.C_Str()) {
-                    continue;
-                }
-
-                for (unsigned int c = 0; c < animation->mNumChannels; c++) {
-                    aiNodeAnim* nodeAnim = animation->mChannels[c];
-
-                    if (nodeAnim->mNodeName != node.mName) {
-                        continue;
-                    }
-
-                    ModelAnimation::NodeAnimation nodeAnimation;
-                    nodeAnimation.node = newNode;
-
-                    for (unsigned int p = 0; p < nodeAnim->mNumPositionKeys; p++) {
-                        const aiVectorKey posKey = nodeAnim->mPositionKeys[p];
-
-                        ModelAnimation::PositionKeyframe positionKf;
-                        positionKf.time =
-                            std::abs(animation->mTicksPerSecond) <
-                            std::numeric_limits<double>::epsilon() ? posKey.mTime :
-                            posKey.mTime / animation->mTicksPerSecond;
-                        positionKf.position = glm::vec3(
-                            posKey.mValue.x,
-                            posKey.mValue.y,
-                            posKey.mValue.z
-                        );
-
-                        nodeAnimation.positions.push_back(std::move(positionKf));
-                    }
-
-                    for (unsigned int r = 0; r < nodeAnim->mNumRotationKeys; r++) {
-                        const aiQuatKey rotKey = nodeAnim->mRotationKeys[r];
-
-                        ModelAnimation::RotationKeyframe rotationKf;
-                        rotationKf.time =
-                            std::abs(animation->mTicksPerSecond) <
-                            std::numeric_limits<double>::epsilon() ? rotKey.mTime :
-                            rotKey.mTime / animation->mTicksPerSecond;
-                        rotationKf.rotation = glm::quat(
-                            rotKey.mValue.w,
-                            rotKey.mValue.x,
-                            rotKey.mValue.y,
-                            rotKey.mValue.z
-                        );
-
-                        nodeAnimation.rotations.push_back(std::move(rotationKf));
-                    }
-
-                    for (unsigned int s = 0; s < nodeAnim->mNumScalingKeys; s++) {
-                        const aiVectorKey scaleKey = nodeAnim->mScalingKeys[s];
-
-                        ModelAnimation::ScaleKeyframe scaleKeyframe;
-                        scaleKeyframe.time =
-                            std::abs(animation->mTicksPerSecond) <
-                            std::numeric_limits<double>::epsilon() ? scaleKey.mTime :
-                            scaleKey.mTime / animation->mTicksPerSecond;
-                        scaleKeyframe.scale = glm::vec3(
-                            scaleKey.mValue.x,
-                            scaleKey.mValue.y,
-                            scaleKey.mValue.z
-                        );
-
-                        nodeAnimation.scales.push_back(std::move(scaleKeyframe));
-                    }
-
-                    modelAnimation->nodeAnimations().push_back(
-                        std::move(nodeAnimation)
-                    );
-                    break;
-                }
-            }
         }
 
         // After we've processed all of the meshes (if any) we then recursively process
@@ -717,7 +642,6 @@ namespace {
                 scene,
                 nodes,
                 newNode,
-                modelAnimation,
                 textureStorage,
                 forceRenderInvisible,
                 notifyInvisibleDropped,
@@ -782,6 +706,23 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
         throw ModelLoadException(filename, importer.GetErrorString(), this);
     }
 
+    // Get info from all models in the scene
+    std::vector<ModelNode> nodeArray;
+    std::vector<modelgeometry::ModelGeometry::TextureEntry> textureStorage;
+    textureStorage.reserve(scene->mNumTextures);
+    bool hasTextureLoadErrors = false;
+    processNode(
+        *(scene->mRootNode),
+        *scene,
+        nodeArray,
+        -1,
+        textureStorage,
+        forceRenderInvisible,
+        notifyInvisibleDropped,
+        modelDirectory,
+        hasTextureLoadErrors
+    );
+
     // Check animations
     std::unique_ptr<ModelAnimation> modelAnimation = nullptr;
     if (scene->HasAnimations()) {
@@ -816,26 +757,91 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                 animation->mDuration :
                 animation->mDuration / animation->mTicksPerSecond
             );
+
+            // Find the channels of teh animation and match them to the nodes in the model
+            for (unsigned int c = 0; c < animation->mNumChannels; c++) {
+                aiNodeAnim* nodeAnim = animation->mChannels[c];
+
+                ModelAnimation::NodeAnimation nodeAnimation;
+
+                bool nodeFound = false;
+                for (int n = 0; n < nodeArray.size(); n++) {
+                    if (nodeAnim->mNodeName.C_Str() == nodeArray[n].name() ||
+                        (!nodeArray[n].originalName().empty() &&
+                            nodeAnim->mNodeName.C_Str() == nodeArray[n].originalName()))
+                    {
+                        nodeAnimation.node = n;
+                        nodeFound = true;
+                        break;
+                    }
+                }
+
+                if (!nodeFound) {
+                    LWARNING(
+                        std::format("Node not found for animation: {}",
+                        std::string(nodeAnim->mNodeName.C_Str()))
+                    );
+                    continue;
+                }
+
+                for (unsigned int p = 0; p < nodeAnim->mNumPositionKeys; p++) {
+                    const aiVectorKey posKey = nodeAnim->mPositionKeys[p];
+
+                    ModelAnimation::PositionKeyframe positionKf;
+                    positionKf.time =
+                        std::abs(animation->mTicksPerSecond) <
+                        std::numeric_limits<double>::epsilon() ? posKey.mTime :
+                        posKey.mTime / animation->mTicksPerSecond;
+                    positionKf.position = glm::vec3(
+                        posKey.mValue.x,
+                        posKey.mValue.y,
+                        posKey.mValue.z
+                    );
+
+                    nodeAnimation.positions.push_back(std::move(positionKf));
+                }
+
+                for (unsigned int r = 0; r < nodeAnim->mNumRotationKeys; r++) {
+                    const aiQuatKey rotKey = nodeAnim->mRotationKeys[r];
+
+                    ModelAnimation::RotationKeyframe rotationKf;
+                    rotationKf.time =
+                        std::abs(animation->mTicksPerSecond) <
+                        std::numeric_limits<double>::epsilon() ? rotKey.mTime :
+                        rotKey.mTime / animation->mTicksPerSecond;
+                    rotationKf.rotation = glm::quat(
+                        rotKey.mValue.w,
+                        rotKey.mValue.x,
+                        rotKey.mValue.y,
+                        rotKey.mValue.z
+                    );
+
+                    nodeAnimation.rotations.push_back(std::move(rotationKf));
+                }
+
+                for (unsigned int s = 0; s < nodeAnim->mNumScalingKeys; s++) {
+                    const aiVectorKey scaleKey = nodeAnim->mScalingKeys[s];
+
+                    ModelAnimation::ScaleKeyframe scaleKeyframe;
+                    scaleKeyframe.time =
+                        std::abs(animation->mTicksPerSecond) <
+                        std::numeric_limits<double>::epsilon() ? scaleKey.mTime :
+                        scaleKey.mTime / animation->mTicksPerSecond;
+                    scaleKeyframe.scale = glm::vec3(
+                        scaleKey.mValue.x,
+                        scaleKey.mValue.y,
+                        scaleKey.mValue.z
+                    );
+
+                    nodeAnimation.scales.push_back(std::move(scaleKeyframe));
+                }
+
+                modelAnimation->nodeAnimations().push_back(
+                    std::move(nodeAnimation)
+                );
+            }
         }
     }
-
-    // Get info from all models in the scene
-    std::vector<ModelNode> nodeArray;
-    std::vector<modelgeometry::ModelGeometry::TextureEntry> textureStorage;
-    textureStorage.reserve(scene->mNumTextures);
-    bool hasTextureLoadErrors = false;
-    processNode(
-        *(scene->mRootNode),
-        *scene,
-        nodeArray,
-        -1,
-        modelAnimation,
-        textureStorage,
-        forceRenderInvisible,
-        notifyInvisibleDropped,
-        modelDirectory,
-        hasTextureLoadErrors
-    );
 
     // Return the ModelGeometry from the meshArray
     auto model = std::make_unique<modelgeometry::ModelGeometry>(

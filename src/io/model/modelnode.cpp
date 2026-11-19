@@ -29,10 +29,11 @@
 namespace openspace::io {
 
 ModelNode::ModelNode(int index, std::string name, glm::mat4 transform,
-                     std::vector<io::ModelMesh> meshes)
+                     std::vector<io::ModelMesh> meshes, std::string originalName)
     : _index(index)
     , _meshes(std::move(meshes))
     , _name(std::move(name))
+    , _originalName(std::move(originalName))
 
 {
     // GLM is column major, array is column major too
@@ -128,6 +129,10 @@ bool ModelNode::hasCustomTransform() const {
 
 std::string ModelNode::name() const {
     return _name;
+}
+
+std::string ModelNode::originalName() const {
+    return _originalName;
 }
 
 int ModelNode::index() const {

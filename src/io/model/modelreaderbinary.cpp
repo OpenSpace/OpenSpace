@@ -442,7 +442,8 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderBinary::loadModel(
             nodeArray.size(), // Index of this no
             name,
             std::move(transform),
-            std::move(meshArray)
+            std::move(meshArray),
+            "" // TODO
         );
         node.setChildren(std::move(childrenArray));
         node.setParent(parent);

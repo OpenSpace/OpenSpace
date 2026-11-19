@@ -36,7 +36,7 @@ namespace openspace::io {
 class ModelNode {
 public:
     ModelNode(int index, std::string name, glm::mat4 transform,
-        std::vector<io::ModelMesh> meshes);
+        std::vector<io::ModelMesh> meshes, std::string originalName);
 
     ModelNode(ModelNode&&) noexcept = default;
     ~ModelNode() noexcept = default;
@@ -55,6 +55,7 @@ public:
     glm::mat4 customTransform() const;
     bool hasCustomTransform() const;
     std::string name() const;
+    std::string originalName() const;
     int index() const;
 
 private:
@@ -77,6 +78,7 @@ private:
     std::vector<int> _children;
     bool _hasCustomTransform = false;
     std::string _name;
+    std::string _originalName;
     int _index = -1; // Index of this node in the model geometry
 };
 
