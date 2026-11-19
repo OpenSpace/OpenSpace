@@ -29,6 +29,7 @@
 #include <openspace/misc/assert.h>
 #include <openspace/opengl/textureunit.h>
 #include <algorithm>
+#include <array>
 
 namespace openspace {
 
@@ -233,57 +234,35 @@ bool WebRenderHandler::hasContent(int x, int y) {
     TracyGpuZone("WebRenderHandler::hasContent");
 
     // We don't have any content if we are querying outside the window size
-    if (x < 0 || x > _windowSize.x || y < 0 || y > _windowSize.y) {
+    if (x < 0 || x >= _windowSize.x || y < 0 || y >= _windowSize.y) {
         return false;
     }
 
     if (_acceleratedRendering) {
-        // To see the alpha value of the pixel we first have to get the texture from the
-        // GPU. Use a PBO for better performance
-        bool hasContent = false;
-        GLuint pbo = 0;
-        glCreateBuffers(1, &pbo);
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+        // Until the next paint has arrived, the texture does not match the window size
+        if (_needsRepaint) {
+            return false;
+        }
 
-        // Allocate memory for the PBO (width * height * 4 bytes for RGBA)
-        glNamedBufferData(
-            pbo,
-            _windowSize.x * _windowSize.y * 4,
-            nullptr,
-            GL_STREAM_READ
-        );
-
-        glBindTexture(GL_TEXTURE_2D, _texture);
-
-        // Read the texture data into the PBO
-        glGetTextureImage(
+        // Only download the single texel that we are interested in
+        std::array<GLubyte, 4> pixel = { 0, 0, 0, 0 };
+        glGetTextureSubImage(
             _texture,
             0,
+            x,
+            y,
+            0,
+            1,
+            1,
+            1,
             GL_RGBA,
             GL_UNSIGNED_BYTE,
-            _windowSize.x * _windowSize.y * 4,
-            nullptr
+            static_cast<GLsizei>(pixel.size()),
+            pixel.data()
         );
 
-        // Map the PBO to the CPU memory space
-        GLubyte* pixels = reinterpret_cast<GLubyte*>(glMapNamedBuffer(pbo, GL_READ_ONLY));
-
-        assert_msg(pixels, "Could not read pixels from the GPU for the cef gui.");
-        if (pixels) {
-            // Access the specific pixel data
-            int index = (y * _windowSize.x + x) * 4;
-            if (index < _windowSize.x* _windowSize.y * 4) {
-                // The alpha value is at the fourth place (rgba)
-                GLubyte a = pixels[index + 3];
-                hasContent = a > 0;
-            }
-        }
-        // Unmap the buffer
-        glUnmapNamedBuffer(pbo);
-
-        // Unbind and delete the PBO
-        glDeleteBuffers(1, &pbo);
-        return hasContent;
+        // The alpha value is at the fourth place (rgba)
+        return pixel[3] > 0;
     }
     else {
         if (_browserBuffer.empty()) {
