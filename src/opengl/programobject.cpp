@@ -1665,10 +1665,12 @@ void ProgramObject::setUniform(GLint location, const glm::mat4x4& value,
 void ProgramObject::setUniform(GLint location, const std::vector<glm::mat2x2>& values,
                                Transpose transpose) const
 {
+    assert_msg(!values.empty(), "At least one value must be specified");
+
     glProgramUniformMatrix2fv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1677,11 +1679,12 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::mat2x2>& v
 void ProgramObject::setUniform(GLint location, const std::vector<glm::mat2x3>& values,
                                Transpose transpose) const
 {
+    assert_msg(!values.empty(), "At least one value must be specified");
 
     glProgramUniformMatrix2x3fv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1690,10 +1693,12 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::mat2x3>& v
 void ProgramObject::setUniform(GLint location, const std::vector<glm::mat2x4>& values,
                                Transpose transpose) const
 {
+    assert_msg(!values.empty(), "At least one value must be specified");
+
     glProgramUniformMatrix2x4fv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1702,10 +1707,12 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::mat2x4>& v
 void ProgramObject::setUniform(GLint location, const std::vector<glm::mat3x2>& values,
                                Transpose transpose) const
 {
+    assert_msg(!values.empty(), "At least one value must be specified");
+
     glProgramUniformMatrix3x2fv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1714,10 +1721,12 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::mat3x2>& v
 void ProgramObject::setUniform(GLint location, const std::vector<glm::mat3x3>& values,
                                Transpose transpose) const
 {
+    assert_msg(!values.empty(), "At least one value must be specified");
+
     glProgramUniformMatrix3fv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1726,10 +1735,12 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::mat3x3>& v
 void ProgramObject::setUniform(GLint location, const std::vector<glm::mat3x4>& values,
                                Transpose transpose) const
 {
+    assert_msg(!values.empty(), "At least one value must be specified");
+
     glProgramUniformMatrix3x4fv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1738,10 +1749,12 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::mat3x4>& v
 void ProgramObject::setUniform(GLint location, const std::vector<glm::mat4x2>& values,
                                Transpose transpose) const
 {
+    assert_msg(!values.empty(), "At least one value must be specified");
+
     glProgramUniformMatrix4x2fv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1750,10 +1763,12 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::mat4x2>& v
 void ProgramObject::setUniform(GLint location, const std::vector<glm::mat4x3>& values,
                                Transpose transpose) const
 {
+    assert_msg(!values.empty(), "At least one value must be specified");
+
     glProgramUniformMatrix4x3fv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1762,10 +1777,12 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::mat4x3>& v
 void ProgramObject::setUniform(GLint location, const std::vector<glm::mat4x4>& values,
                                Transpose transpose) const
 {
+    assert_msg(!values.empty(), "At least one value must be specified");
+
     glProgramUniformMatrix4fv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1885,7 +1902,7 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat2x2>& 
     glProgramUniformMatrix2dv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1897,7 +1914,7 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat2x3>& 
     glProgramUniformMatrix2x3dv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1909,7 +1926,7 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat2x4>& 
     glProgramUniformMatrix2x4dv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1921,7 +1938,7 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat3x2>& 
     glProgramUniformMatrix3x2dv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1933,7 +1950,7 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat3x3>& 
     glProgramUniformMatrix3dv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1945,7 +1962,7 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat3x4>& 
     glProgramUniformMatrix3x4dv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1957,7 +1974,7 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat4x2>& 
     glProgramUniformMatrix4x2dv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1969,7 +1986,7 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat4x3>& 
     glProgramUniformMatrix4x3dv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
@@ -1981,7 +1998,7 @@ void ProgramObject::setUniform(GLint location, const std::vector<glm::dmat4x4>& 
     glProgramUniformMatrix4dv(
         _id,
         location,
-        values.size(),
+        static_cast<GLsizei>(values.size()),
         transpose ? GL_TRUE : GL_FALSE,
         value_ptr(values[0])
     );
