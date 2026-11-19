@@ -71,6 +71,7 @@ target_sources(
     test_shadervalidation.cpp
     test_spicemanager.cpp
     test_templatefactory.cpp
+    test_tiletextureinitdata.cpp
     test_timeconversion.cpp
     test_timeline.cpp
     test_timequantizer.cpp

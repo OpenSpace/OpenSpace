@@ -34,8 +34,10 @@
 #include <openspace/systemcapabilities/generalcapabilitiescomponent.h>
 #include <openspace/systemcapabilities/openglcapabilitiescomponent.h>
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <numeric>
+#include <optional>
 #include <string_view>
 
 namespace {
@@ -100,6 +102,8 @@ namespace {
                 switch (glType) {
                     case GL_BYTE:           return GL_R8;
                     case GL_UNSIGNED_BYTE:  return GL_R8;
+                    case GL_SHORT:          return GL_R16_SNORM;
+                    case GL_UNSIGNED_SHORT: return GL_R16;
                     case GL_INT:            return GL_R32I;
                     case GL_UNSIGNED_INT:   return GL_R32UI;
                     case GL_FLOAT:          return GL_R32F;
@@ -110,6 +114,8 @@ namespace {
                 switch (glType) {
                     case GL_BYTE:           return GL_RG8;
                     case GL_UNSIGNED_BYTE:  return GL_RG8;
+                    case GL_SHORT:          return GL_RG16_SNORM;
+                    case GL_UNSIGNED_SHORT: return GL_RG16;
                     case GL_INT:            return GL_RG32I;
                     case GL_UNSIGNED_INT:   return GL_RG32UI;
                     case GL_FLOAT:          return GL_RG32F;
@@ -120,6 +126,8 @@ namespace {
                 switch (glType) {
                     case GL_BYTE:           return GL_RGB8;
                     case GL_UNSIGNED_BYTE:  return GL_RGB8;
+                    case GL_SHORT:          return GL_RGB16_SNORM;
+                    case GL_UNSIGNED_SHORT: return GL_RGB16;
                     case GL_INT:            return GL_RGB32I;
                     case GL_UNSIGNED_INT:   return GL_RGB32UI;
                     case GL_FLOAT:          return GL_RGB32F;
@@ -130,6 +138,8 @@ namespace {
                 switch (glType) {
                     case GL_BYTE:           return GL_RGBA8;
                     case GL_UNSIGNED_BYTE:  return GL_RGBA8;
+                    case GL_SHORT:          return GL_RGBA16_SNORM;
+                    case GL_UNSIGNED_SHORT: return GL_RGBA16;
                     case GL_INT:            return GL_RGBA32I;
                     case GL_UNSIGNED_INT:   return GL_RGBA32UI;
                     case GL_FLOAT:          return GL_RGBA32F;
@@ -140,6 +150,8 @@ namespace {
                 switch (glType) {
                     case GL_BYTE:           return GL_RGB8;
                     case GL_UNSIGNED_BYTE:  return GL_RGB8;
+                    case GL_SHORT:          return GL_RGB16_SNORM;
+                    case GL_UNSIGNED_SHORT: return GL_RGB16;
                     case GL_INT:            return GL_RGB32I;
                     case GL_UNSIGNED_INT:   return GL_RGB32UI;
                     case GL_FLOAT:          return GL_RGB32F;
@@ -150,6 +162,8 @@ namespace {
                 switch (glType) {
                     case GL_BYTE:           return GL_RGBA8;
                     case GL_UNSIGNED_BYTE:  return GL_RGBA8;
+                    case GL_SHORT:          return GL_RGBA16_SNORM;
+                    case GL_UNSIGNED_SHORT: return GL_RGBA16;
                     case GL_INT:            return GL_RGBA32I;
                     case GL_UNSIGNED_INT:   return GL_RGBA32UI;
                     case GL_FLOAT:          return GL_RGBA32F;
@@ -181,36 +195,10 @@ MemoryAwareTileCache::TextureContainer::TextureContainer(TileTextureInitData ini
 void MemoryAwareTileCache::TextureContainer::reset() {
     ZoneScoped;
 
+    // The textures are created on demand in `textureIfFree`, so a container only uses as
+    // much memory as the tiles that are actually loaded need
     _textures.clear();
     _freeTexture = 0;
-
-    using namespace openspace::systemcapabilities;
-
-    const opengl::Texture::FilterMode mode =
-        OpenGLCap.gpuVendor() == OpenGLCapabilitiesComponent::Vendor::AmdATI ?
-        opengl::Texture::FilterMode::Linear :
-        opengl::Texture::FilterMode::AnisotropicMipMap;
-
-    for (size_t i = 0; i < _numTextures; i++) {
-        ZoneScopedN("Texture");
-
-        GLenum internalFormat =
-            toGlTextureFormat(_initData.glType, _initData.textureFormat);
-        auto tex = std::make_unique<opengl::Texture>(
-            opengl::Texture::FormatInit {
-                .dimensions = _initData.dimensions,
-                .type = GL_TEXTURE_2D,
-                .format = _initData.textureFormat,
-                .dataType = _initData.glType,
-                .internalFormat = internalFormat
-            },
-            opengl::Texture::SamplerInit {
-                .filter = mode,
-                .wrapping = opengl::Texture::WrappingMode::ClampToEdge
-            }
-        );
-        _textures.push_back(std::move(tex));
-    }
 }
 
 void MemoryAwareTileCache::TextureContainer::reset(size_t numTextures) {
@@ -220,15 +208,48 @@ void MemoryAwareTileCache::TextureContainer::reset(size_t numTextures) {
     reset();
 }
 
-opengl::Texture* MemoryAwareTileCache::TextureContainer::getTextureIfFree() {
-    if (_freeTexture < _textures.size()) {
-        opengl::Texture* texture = _textures[_freeTexture].get();
-        _freeTexture++;
-        return texture;
-    }
-    else {
+opengl::Texture* MemoryAwareTileCache::TextureContainer::textureIfFree() {
+    ZoneScoped;
+
+    if (_freeTexture >= _numTextures) {
         return nullptr;
     }
+
+    if (_freeTexture == _textures.size()) {
+        using namespace openspace::systemcapabilities;
+
+        const opengl::Texture::FilterMode mode =
+            OpenGLCap.gpuVendor() == OpenGLCapabilitiesComponent::Vendor::AmdATI ?
+            opengl::Texture::FilterMode::Linear :
+            opengl::Texture::FilterMode::AnisotropicMipMap;
+
+        // Two-channel tiles store grayscale + alpha. Single-channel tiles are expanded
+        // to grayscale by the texture automatically
+        std::optional<std::array<GLenum, 4>> swizzleMask;
+        if (_initData.textureFormat == opengl::Texture::Format::RG) {
+            swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_GREEN };
+        }
+
+        _textures.push_back(std::make_unique<opengl::Texture>(
+            opengl::Texture::FormatInit {
+                .dimensions = _initData.dimensions,
+                .type = GL_TEXTURE_2D,
+                .format = _initData.textureFormat,
+                .dataType = _initData.glType,
+                .internalFormat =
+                    toGlTextureFormat(_initData.glType, _initData.textureFormat)
+            },
+            opengl::Texture::SamplerInit {
+                .filter = mode,
+                .wrapping = opengl::Texture::WrappingMode::ClampToEdge,
+                .swizzleMask = swizzleMask
+            }
+        ));
+    }
+
+    opengl::Texture* texture = _textures[_freeTexture].get();
+    _freeTexture++;
+    return texture;
 }
 
 const TileTextureInitData&
@@ -311,10 +332,11 @@ void MemoryAwareTileCache::assureTextureContainerExists(
 
     const TileTextureInitData::HashKey initDataKey = initData.hashKey;
     if (_textureContainerMap.find(initDataKey) == _textureContainerMap.end()) {
-        // For now create 500 textures of this type
+        // A container that is created after the cache size was set gets the same number
+        // of textures as all the others. The textures are only allocated when needed
         _textureContainerMap.emplace(initDataKey,
             TextureContainerTileCache(
-                std::make_unique<TextureContainer>(initData, 500),
+                std::make_unique<TextureContainer>(initData, _numTexturesPerContainer),
                 std::make_unique<TileCache>(std::numeric_limits<size_t>::max())
             )
         );
@@ -352,6 +374,7 @@ void MemoryAwareTileCache::resetTextureContainerSize(size_t numTexturesPerTextur
     ZoneScoped;
 
     _numTextureBytesAllocatedOnCPU = 0;
+    _numTexturesPerContainer = numTexturesPerTextureType;
     for (std::pair<const TileTextureInitData::HashKey,
         TextureContainerTileCache>& p : _textureContainerMap)
     {
@@ -399,7 +422,7 @@ opengl::Texture* MemoryAwareTileCache::texture(const TileTextureInitData& initDa
     assureTextureContainerExists(initData);
     // Now that the texture container exists, check if there are any unused textures
     opengl::Texture* texture =
-        _textureContainerMap[initDataKey].first->getTextureIfFree();
+        _textureContainerMap[initDataKey].first->textureIfFree();
     // Second option. No more textures available. Pop from the LRU cache
     if (!texture) {
         const Tile oldTile = _textureContainerMap[initDataKey].second->popLRU().second;

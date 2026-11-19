@@ -221,6 +221,64 @@ namespace {
             return RawTile::ReadError::None;
         }
     }
+
+    /**
+     * Returns the tile texture description that should be used for the \p dataset if the
+     * tiles were requested with the description \p requested. The returned description
+     * stores the same values as the requested one, but avoids allocating memory for
+     * channels and bits that the dataset can not fill.
+     */
+    TileTextureInitData adaptToDataset(const TileTextureInitData& requested,
+                                       GDALDataset& dataset)
+    {
+        using Format = opengl::Texture::Format;
+
+        Format format = requested.textureFormat;
+        GLenum type = requested.glType;
+
+        const bool isColor =
+            format == Format::RGB || format == Format::BGR ||
+            format == Format::RGBA || format == Format::BGRA;
+        if (isColor && type == GL_UNSIGNED_BYTE) {
+            // Grayscale and grayscale + alpha datasets are stored in one and two
+            // channels. The swizzle mask of the tile texture expands them to RGBA when
+            // the texture is sampled
+            const int nRasters = dataset.GetRasterCount();
+            if (nRasters == 1) {
+                format = Format::Red;
+            }
+            else if (nRasters == 2) {
+                format = Format::RG;
+            }
+        }
+
+        GDALRasterBand* band = dataset.GetRasterBand(1);
+        int hasNoDataValue = 0;
+        band->GetNoDataValue(&hasNoDataValue);
+        if (format == Format::Red && type == GL_FLOAT && !hasNoDataValue) {
+            // 16 bit integer datasets are stored as normalized 16 bit values instead of
+            // converting them to floating point values. Datasets with a no-data value
+            // have to remain floating point values, as missing values are replaced with a
+            // floating point sentinel value that a normalized format can not represent
+            const GDALDataType dataType = band->GetRasterDataType();
+            if (dataType == GDT_Int16) {
+                type = GL_SHORT;
+            }
+            else if (dataType == GDT_UInt16) {
+                type = GL_UNSIGNED_SHORT;
+            }
+        }
+
+        return TileTextureInitData(
+            requested.dimensions.x,
+            requested.dimensions.y,
+            type,
+            format,
+            TileTextureInitData::ShouldAllocateDataOnCPU(
+                requested.shouldAllocateDataOnCPU
+            )
+        );
+    }
 } // namespace
 
 namespace openspace {
@@ -384,14 +442,17 @@ void RawTileDataReader::initialize() {
 
     // Assume all raster bands have the same data type
     _rasterCount = _dataset->GetRasterCount();
+    _initData = adaptToDataset(_initData, *_dataset);
 
-    const unsigned long long maximumValue = [](GLenum t) {
+    // Integer textures are sampled as normalized values, so the depth transform has to
+    // scale them back by the largest value of the respective type
+    const unsigned long long maximumValue = [](GLenum t) -> unsigned long long {
         switch (t) {
-            case GL_UNSIGNED_BYTE:  return 1ULL << 8ULL;
-            case GL_UNSIGNED_SHORT: return 1ULL << 16ULL;
-            case GL_SHORT:          return 1ULL << 15ULL;
-            case GL_UNSIGNED_INT:   return 1ULL << 32ULL;
-            case GL_INT:            return 1ULL << 31ULL;
+            case GL_UNSIGNED_BYTE:  return std::numeric_limits<GLubyte>::max();
+            case GL_UNSIGNED_SHORT: return std::numeric_limits<GLushort>::max();
+            case GL_SHORT:          return std::numeric_limits<GLshort>::max();
+            case GL_UNSIGNED_INT:   return std::numeric_limits<GLuint>::max();
+            case GL_INT:            return std::numeric_limits<GLint>::max();
             case GL_HALF_FLOAT:     return 1ULL;
             case GL_FLOAT:          return 1ULL;
             case GL_DOUBLE:         return 1ULL;
@@ -532,7 +593,16 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
             worstError = std::max(worstError, err);
             break;
         }
-        case opengl::Texture::Format::RG:
+        case opengl::Texture::Format::RG: {
+            // Grayscale + alpha. The swizzle mask of the texture expands the first
+            // channel into RGB when the texture is sampled
+            for (int i = 0; i < nReadRasters; i++) {
+                char* dest = imageDataDest + (i * _initData.bytesPerDatum);
+                const RawTile::ReadError err = rasterRead(i + 1, io, dest);
+                worstError = std::max(worstError, err);
+            }
+            break;
+        }
         case opengl::Texture::Format::RGB:
         case opengl::Texture::Format::RGBA: {
             if (nReadRasters == 1) { // Grayscale
@@ -699,10 +769,14 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
                 }
                 else {
                     ppData.hasMissingData[raster] = true;
-                    float& floatToRewrite = reinterpret_cast<float&>(
-                        rawTile.imageData[yi + i]
-                    );
-                    floatToRewrite = -std::numeric_limits<float>::max();
+                    // Only floating point tiles can hold the sentinel value. Integer
+                    // tiles are only created for datasets without a no-data value
+                    if (_initData.glType == GL_FLOAT) {
+                        float& floatToRewrite = reinterpret_cast<float&>(
+                            rawTile.imageData[yi + i]
+                        );
+                        floatToRewrite = -std::numeric_limits<float>::max();
+                    }
                 }
                 i += _initData.bytesPerDatum;
             }

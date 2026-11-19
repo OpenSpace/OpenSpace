@@ -51,7 +51,9 @@ public:
      * reading tile using a TileIndex.
      *
      * \param filePath The path to a specific file GDAL can read
-     * \param initData Information about the textures that will be created by this reader
+     * \param initData Information about the textures that will be created by this reader.
+     *        The number of channels and the data type are reduced if the dataset does
+     *        not need all of them, for example if it only contains a single band
      * \param cacheProperties Contains settings about whether the reader should utilize
      *        cache
      * \param preprocess Whether the loaded data should be calculate meta data about the
@@ -97,7 +99,10 @@ private:
     GDALDataType _dataType;
     int _maxChunkLevel = -1;
 
-    const TileTextureInitData _initData;
+    /// The description of the tile textures. This starts out as the requested layout and
+    /// is adapted to the opened dataset in `initialize`, for example to store single-band
+    /// datasets in a single channel
+    TileTextureInitData _initData;
     const TileCacheProperties _cacheProperties;
     const PerformPreprocessing _preprocess;
     TileDepthTransform _depthTransform = { .scale = 0.f, .offset = 0.f };

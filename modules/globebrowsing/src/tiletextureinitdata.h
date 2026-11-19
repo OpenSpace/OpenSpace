@@ -46,24 +46,16 @@ public:
         opengl::Texture::Format textureFormat,
         ShouldAllocateDataOnCPU allocCpu = ShouldAllocateDataOnCPU::No);
 
-    TileTextureInitData(const TileTextureInitData& original) = default;
-    TileTextureInitData(TileTextureInitData&& original) = default;
-
-    TileTextureInitData& operator=(const TileTextureInitData& rhs);
-    TileTextureInitData& operator=(TileTextureInitData&& rhs) noexcept;
-
-    ~TileTextureInitData() = default;
-
-    const glm::ivec3 dimensions;
-    const GLenum glType;
-    const opengl::Texture::Format textureFormat;
-    const size_t nRasters;
-    const size_t bytesPerDatum;
-    const size_t bytesPerPixel;
-    const size_t bytesPerLine;
-    const size_t totalNumBytes;
-    const bool shouldAllocateDataOnCPU;
-    const HashKey hashKey;
+    glm::ivec3 dimensions;
+    GLenum glType;
+    opengl::Texture::Format textureFormat;
+    size_t nRasters;
+    size_t bytesPerDatum;
+    size_t bytesPerPixel;
+    size_t bytesPerLine;
+    size_t totalNumBytes;
+    bool shouldAllocateDataOnCPU;
+    HashKey hashKey;
 };
 
 TileTextureInitData tileTextureInitData(layers::Group::ID id,

@@ -79,16 +79,18 @@ namespace {
         assert_msg(dimensions.x <= 1024, "Incorrect dimension");
         assert_msg(dimensions.y <= 1024, "Incorrect dimension");
         assert_msg(dimensions.z == 1, "Incorrect dimension");
-        const unsigned int formatId = uniqueIdForTextureFormat(format);
-        assert_msg(formatId < 256, "Incorrect format");
+        const uint64_t type = static_cast<std::underlying_type_t<GLenum>>(glType);
+        assert_msg(type <= 0xFFFF, "Incorrect data type");
+        const uint64_t formatId = uniqueIdForTextureFormat(format);
+        assert_msg(formatId <= 0xFF, "Incorrect format");
 
-        TileTextureInitData::HashKey res = 0ULL;
-
-        res |= dimensions.x;
-        res |= dimensions.y << 10;
-        res |= static_cast<std::underlying_type_t<GLenum>>(glType) << (10 + 16);
-        res |= formatId << (10 + 16 + 4);
-
+        // Each value occupies its own range of bits so that no two combinations of
+        // dimensions, data type, and format can result in the same key
+        TileTextureInitData::HashKey res = 0;
+        res |= static_cast<uint64_t>(dimensions.x);
+        res |= static_cast<uint64_t>(dimensions.y) << 16;
+        res |= type << 32;
+        res |= formatId << 48;
         return res;
     }
 } // namespace
@@ -164,21 +166,5 @@ TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum typ
     , shouldAllocateDataOnCPU(allocCpu)
     , hashKey(calculateHashKey(dimensions, textureFormat_, glType))
 {}
-
-TileTextureInitData& TileTextureInitData::operator=(const TileTextureInitData& rhs) {
-    if (this == &rhs) {
-        return *this;
-    }
-
-    return *this;
-}
-
-TileTextureInitData& TileTextureInitData::operator=(TileTextureInitData&& rhs) noexcept {
-    if (this == &rhs) {
-        return *this;
-    }
-
-    return *this;
-}
 
 } // namespace openspace

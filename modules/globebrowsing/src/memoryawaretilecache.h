@@ -100,14 +100,14 @@ public:
 
 private:
     /**
-     * Owner of texture data used for tiles. Instead of dynamically allocating textures
-     * one by one, they are created once and reused.
+     * Owner of texture data used for tiles. Textures are allocated on demand up to the
+     * maximum number of textures and are then reused for new tiles.
      */
     class TextureContainer {
     public:
         /**
          * \param initData The description of the texture type
-         * \param numTextures The number of textures to allocate
+         * \param numTextures The maximum number of textures that can be allocated
          */
         TextureContainer(TileTextureInitData initData, size_t numTextures);
 
@@ -117,16 +117,18 @@ private:
         void reset(size_t numTextures);
 
         /**
-         * \return A pointer to a texture if there is one texture never used before. If
-         *         there are no textures left, nullptr is returned. TextureContainer still
-         *         owns the texture so no delete should be called on the raw pointer
+         * \return A pointer to a texture if there is one texture never used before. A
+         *         new texture is allocated if the maximum number of textures has not
+         *         been reached yet. If there are no textures left, nullptr is returned.
+         *         TextureContainer still owns the texture so no delete should be called
+         *         on the raw pointer
          */
-        opengl::Texture* getTextureIfFree();
+        opengl::Texture* textureIfFree();
 
         const TileTextureInitData& tileTextureInitData() const;
 
         /**
-         * \return The number of textures in this TextureContainer
+         * \return The number of textures that are allocated in this TextureContainer
          */
         size_t size() const;
 
@@ -155,6 +157,10 @@ private:
 
     TextureContainerMap _textureContainerMap;
     size_t _numTextureBytesAllocatedOnCPU;
+
+    /// The maximum number of textures that each container is allowed to allocate, as
+    /// determined by the last call to `setSizeEstimated`
+    size_t _numTexturesPerContainer = 0;
 
     // Properties
     IntProperty _cpuAllocatedTileData;

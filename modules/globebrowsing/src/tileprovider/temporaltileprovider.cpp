@@ -750,12 +750,14 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
         };
     }
 
-    // The data for initializing the texture
+    // The data for initializing the texture. The interpolated texture is always stored
+    // as RGBA, even if the source tiles have fewer channels, as the colormap that is
+    // applied during the interpolation produces color values
     const TileTextureInitData initData(
         prev.texture->dimensions().x,
         prev.texture->dimensions().y,
         prev.texture->dataType(),
-        prev.texture->format(),
+        opengl::Texture::Format::BGRA,
         TileTextureInitData::ShouldAllocateDataOnCPU::No
     );
 
