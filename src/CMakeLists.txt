@@ -45,6 +45,7 @@ set(OPENSPACE_SHADERS
   ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscaling_fs.glsl
   ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscaling_vs.glsl
   ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscalingmath.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/depth.glsl
   ${PROJECT_SOURCE_DIR}/shaders/floatoperations.glsl
   ${PROJECT_SOURCE_DIR}/shaders/fragment.glsl
   ${PROJECT_SOURCE_DIR}/shaders/hdr.glsl

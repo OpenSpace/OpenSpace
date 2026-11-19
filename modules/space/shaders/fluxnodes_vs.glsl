@@ -227,6 +227,6 @@ void main() {
   }
 
   vec4 positionClipSpace = modelViewProjection * vec4(in_position, 1.0);
-  gl_Position = vec4(positionClipSpace.xy, 0.0, positionClipSpace.w);
+  gl_Position = z_normalization(positionClipSpace);
   out_data.depth = gl_Position.w;
 }

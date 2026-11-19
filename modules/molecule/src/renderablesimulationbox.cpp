@@ -585,30 +585,37 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, bufs);
 
-    glClearColor(0.f, 0.f, 0.f, 0.f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
+    // The molecule framebuffer uses the standard depth, not the reversed one of the
+    // scene. The scope limits the standard convention to this block
+    {
+        const opengl::DepthConventionScope standardDepth(
+            opengl::DepthConvention::Standard
+        );
 
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+        glClearColor(0.f, 0.f, 0.f, 0.f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
 
-    glEnablei(GL_BLEND, 0);
-    glDisablei(GL_BLEND, 1);
-    glBlendColor(0.f, 0.f, 0.f, opacity());
-    glBlendEquationi(0, GL_FUNC_ADD);
-    glBlendFuncSeparatei(
-        0,
-        GL_SRC_ALPHA,
-        GL_ONE_MINUS_SRC_ALPHA,
-        GL_CONSTANT_ALPHA,
-        GL_ONE_MINUS_CONSTANT_ALPHA
-    );
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
 
-    md_gl_draw(&args);
+        glEnablei(GL_BLEND, 0);
+        glDisablei(GL_BLEND, 1);
+        glBlendColor(0.f, 0.f, 0.f, opacity());
+        glBlendEquationi(0, GL_FUNC_ADD);
+        glBlendFuncSeparatei(
+            0,
+            GL_SRC_ALPHA,
+            GL_ONE_MINUS_SRC_ALPHA,
+            GL_CONSTANT_ALPHA,
+            GL_ONE_MINUS_CONSTANT_ALPHA
+        );
 
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+        md_gl_draw(&args);
 
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    }
 
     // Draw billboard pre-rendered with molecule inside
     const glm::dmat4 billboardModel =

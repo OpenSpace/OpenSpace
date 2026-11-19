@@ -24,6 +24,8 @@
 
 #version __CONTEXT__
 
+#include "powerscaling/powerscalingmath.glsl"
+
 layout(location = 0) in vec3 in_position;
 
 out Data {
@@ -37,9 +39,8 @@ uniform dmat4 modelViewProjection;
 
 void main() {
   dvec4 positionClipSpace = modelViewProjection * dvec4(in_position, 1.0);
-  positionClipSpace.z = 0.0;
   out_data.depthClipSpace = float(positionClipSpace.w);
-  gl_Position = vec4(positionClipSpace);
+  gl_Position = z_normalization(vec4(positionClipSpace));
 
   out_data.positionViewSpace = vec4(modelView * dvec4(in_position, 1.0));
 }

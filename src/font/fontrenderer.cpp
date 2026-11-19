@@ -107,6 +107,8 @@ namespace {
     constexpr std::string_view ProjectionVertexShaderSource = R"(
     #version __CONTEXT__
 
+    #include "powerscaling/powerscalingmath.glsl"
+
     layout (location = 0) in vec3 in_position;
     layout (location = 1) in vec2 in_texCoords;
     layout (location = 2) in vec2 in_outlineTexCoords;
@@ -127,13 +129,15 @@ namespace {
       out_data.outlineTexCoords = in_outlineTexCoords;
       vec4 finalPos = vec4(mvpMatrix * dvec4(in_position.xyz, 1.0));
       out_data.depth = finalPos.w;
-      finalPos.z = 0.0;
+      finalPos = z_normalization(finalPos);
       out_data.vsPosition = vec3(modelViewTransform * dvec4(in_position.xyz, 1.0));
       gl_Position = finalPos;
     })";
 
     constexpr std::string_view ProjectionFragmentShaderSource = R"(
     #version __CONTEXT__
+
+    #include "floatoperations.glsl"
 
     in Data {
       vec2 texCoords;
@@ -167,15 +171,10 @@ namespace {
         discard;
       }
       if (enableFalseDepth) {
-        gl_FragDepth = 0.0;
+        gl_FragDepth = normalizeFloat(1.0);
       }
       else {
-        if (in_data.depth > 1.0) {
-          gl_FragDepth = in_data.depth / pow(10, 30);
-        }
-        else {
-          gl_FragDepth = in_data.depth - 1.0;
-        }
+        gl_FragDepth = normalizeFloat(in_data.depth);
       }
       if (disableTransmittance) {
         out_position = vec4(0.0, 0.0, -1.0, 1.0);
