@@ -62,6 +62,7 @@ target_sources(
     test_lua_setpropertyvalue.cpp
     test_memorypool.cpp
     test_profile.cpp
+    test_rawtile.cpp
     test_rawvolumeio.cpp
     test_scriptscheduler.cpp
     test_serverinterface.cpp

@@ -52,6 +52,21 @@ struct RawTile {
     GLuint pbo = 0;
 };
 
+/**
+ * Converts the 16 bit integer \p rawTile into a floating point tile. All values that are
+ * equal to the \p noDataValue are replaced with the sentinel value for missing data
+ * (`-std::numeric_limits<float>::max()`). All other values are normalized in the same
+ * way the GPU normalizes integer textures, so that both kinds of tiles can be used with
+ * the same depth transform.
+ *
+ * \param rawTile The tile that is converted in place
+ * \param noDataValue The value that marks missing data in the integer tile
+ *
+ * \pre `rawTile.textureInitData` must have a value
+ * \pre `rawTile.textureInitData->glType` must be `GL_SHORT` or `GL_UNSIGNED_SHORT`
+ */
+void toFloatTile(RawTile& rawTile, float noDataValue);
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__

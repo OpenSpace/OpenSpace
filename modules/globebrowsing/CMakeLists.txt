@@ -92,6 +92,7 @@ set(SOURCE_FILES
   src/layermanager.cpp
   src/layerrendersettings.cpp
   src/memoryawaretilecache.cpp
+  src/rawtile.cpp
   src/rawtiledatareader.cpp
   src/renderableglobe.cpp
   src/ringscomponent.cpp

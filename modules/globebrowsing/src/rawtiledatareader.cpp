@@ -99,6 +99,25 @@ namespace {
         }
     }
 
+    /**
+     * Returns the value by which the GPU divides values of the provided \p glType when
+     * they are sampled from a normalized texture. Floating point types are not
+     * normalized, so their factor is 1.
+     */
+    double normalizationFactor(GLenum glType) {
+        switch (glType) {
+            case GL_UNSIGNED_BYTE:  return std::numeric_limits<GLubyte>::max();
+            case GL_UNSIGNED_SHORT: return std::numeric_limits<GLushort>::max();
+            case GL_SHORT:          return std::numeric_limits<GLshort>::max();
+            case GL_UNSIGNED_INT:   return std::numeric_limits<GLuint>::max();
+            case GL_INT:            return std::numeric_limits<GLint>::max();
+            case GL_HALF_FLOAT:     return 1.0;
+            case GL_FLOAT:          return 1.0;
+            case GL_DOUBLE:         return 1.0;
+            default:                throw MissingCaseException();
+        }
+    }
+
     GDALDataType toGDALDataType(GLenum glType) {
         switch (glType) {
             case GL_UNSIGNED_BYTE:  return GDT_Byte;
@@ -229,7 +248,8 @@ namespace {
      * channels and bits that the dataset can not fill.
      */
     TileTextureInitData adaptToDataset(const TileTextureInitData& requested,
-                                       GDALDataset& dataset)
+                                       GDALDataset& dataset,
+                                       RawTileDataReader::PerformPreprocessing preprocess)
     {
         using Format = opengl::Texture::Format;
 
@@ -252,15 +272,13 @@ namespace {
             }
         }
 
-        GDALRasterBand* band = dataset.GetRasterBand(1);
-        int hasNoDataValue = 0;
-        band->GetNoDataValue(&hasNoDataValue);
-        if (format == Format::Red && type == GL_FLOAT && !hasNoDataValue) {
-            // 16 bit integer datasets are stored as normalized 16 bit values instead of
-            // converting them to floating point values. Datasets with a no-data value
-            // have to remain floating point values, as missing values are replaced with a
-            // floating point sentinel value that a normalized format can not represent
-            const GDALDataType dataType = band->GetRasterDataType();
+        if (format == Format::Red && type == GL_FLOAT && preprocess) {
+            // 16 bit integer datasets are read as 16 bit values instead of converting
+            // them to floating point values. Tiles that contain missing values are
+            // converted to floating point tiles after reading in `toFloatTile`, as only
+            // those can store the sentinel value for missing values. Finding the missing
+            // values requires the preprocessing step
+            const GDALDataType dataType = dataset.GetRasterBand(1)->GetRasterDataType();
             if (dataType == GDT_Int16) {
                 type = GL_SHORT;
             }
@@ -442,27 +460,12 @@ void RawTileDataReader::initialize() {
 
     // Assume all raster bands have the same data type
     _rasterCount = _dataset->GetRasterCount();
-    _initData = adaptToDataset(_initData, *_dataset);
+    _initData = adaptToDataset(_initData, *_dataset, _preprocess);
 
     // Integer textures are sampled as normalized values, so the depth transform has to
     // scale them back by the largest value of the respective type
-    const unsigned long long maximumValue = [](GLenum t) -> unsigned long long {
-        switch (t) {
-            case GL_UNSIGNED_BYTE:  return std::numeric_limits<GLubyte>::max();
-            case GL_UNSIGNED_SHORT: return std::numeric_limits<GLushort>::max();
-            case GL_SHORT:          return std::numeric_limits<GLshort>::max();
-            case GL_UNSIGNED_INT:   return std::numeric_limits<GLuint>::max();
-            case GL_INT:            return std::numeric_limits<GLint>::max();
-            case GL_HALF_FLOAT:     return 1ULL;
-            case GL_FLOAT:          return 1ULL;
-            case GL_DOUBLE:         return 1ULL;
-            default:                throw MissingCaseException();
-        }
-    }(_initData.glType);
-
-
     _depthTransform.scale = static_cast<float>(
-        _dataset->GetRasterBand(1)->GetScale() * maximumValue
+        _dataset->GetRasterBand(1)->GetScale() * normalizationFactor(_initData.glType)
     );
     _depthTransform.offset = static_cast<float>(
         _dataset->GetRasterBand(1)->GetOffset()
@@ -575,6 +578,17 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
             rawTile.error,
             postProcessErrorCheck(rawTile, _initData.nRasters, noDataValueAsFloat())
         );
+
+        const TileMetaData& meta = rawTile.tileMetaData;
+        const bool hasMissingData = std::any_of(
+            meta.hasMissingData.begin(),
+            meta.hasMissingData.begin() + meta.nValues,
+            [](bool b) { return b; }
+        );
+        const bool isValid = rawTile.error == RawTile::ReadError::None;
+        if (isValid && _initData.glType != GL_FLOAT && hasMissingData) {
+            toFloatTile(rawTile, noDataValueAsFloat());
+        }
     }
 
     return rawTile;
@@ -770,7 +784,7 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
                 else {
                     ppData.hasMissingData[raster] = true;
                     // Only floating point tiles can hold the sentinel value. Integer
-                    // tiles are only created for datasets without a no-data value
+                    // tiles with missing values are converted in `toFloatTile` instead
                     if (_initData.glType == GL_FLOAT) {
                         float& floatToRewrite = reinterpret_cast<float&>(
                             rawTile.imageData[yi + i]

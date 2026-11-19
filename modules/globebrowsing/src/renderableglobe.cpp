@@ -2288,11 +2288,16 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
             std::isnan(sample00) || std::isnan(sample01) ||
             std::isnan(sample10) || std::isnan(sample11);
 
-        const bool anySampleIsNoData =
+        // Integer tiles never contain missing values, as those tiles are converted to
+        // floating point tiles. Their normalized samples can therefore not be compared
+        // against the no-data value
+        const bool isFloatTile = tileTexture->dataType() == GL_FLOAT;
+        const bool anySampleIsNoData = isFloatTile && (
             sample00 == tileProvider->noDataValueAsFloat() ||
             sample01 == tileProvider->noDataValueAsFloat() ||
             sample10 == tileProvider->noDataValueAsFloat() ||
-            sample11 == tileProvider->noDataValueAsFloat();
+            sample11 == tileProvider->noDataValueAsFloat()
+        );
 
         if (anySampleIsNaN || anySampleIsNoData) {
             continue;
