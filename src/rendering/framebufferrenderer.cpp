@@ -92,12 +92,7 @@ namespace {
         glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glObjectLabel(
-            GL_TEXTURE,
-            texture,
-            static_cast<GLsizei>(label.size()),
-            label.data()
-        );
+        glObjectLabel(GL_TEXTURE, texture, label);
     }
 
     void checkFramebufferStatus(GLuint framebuffer, std::string_view name) {
@@ -176,22 +171,21 @@ void FramebufferRenderer::initialize() {
 
     // Framebuffers. Their textures are created and attached in `updateResolution`
     glCreateFramebuffers(1, &_gBuffers.framebuffer);
-    glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, -1, "G-Buffer Main");
+    glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, "G-Buffer Main");
 
     glCreateFramebuffers(1, &_pingPongBuffers.framebuffer);
-    glObjectLabel(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer, -1, "G-Buffer Ping-Pong");
+    glObjectLabel(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer, "G-Buffer Ping-Pong");
 
     glCreateFramebuffers(1, &_exitFramebuffer);
-    glObjectLabel(GL_FRAMEBUFFER, _exitFramebuffer, -1, "Exit");
+    glObjectLabel(GL_FRAMEBUFFER, _exitFramebuffer, "Exit");
 
     glCreateFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
-    glObjectLabel(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer, -1, "FXAA");
+    glObjectLabel(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer, "FXAA");
 
     glCreateFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
     glObjectLabel(
         GL_FRAMEBUFFER,
         _downscaleVolumeRendering.framebuffer,
-        -1,
         "Downscaled Volume"
     );
 

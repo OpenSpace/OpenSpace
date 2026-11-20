@@ -64,12 +64,7 @@ ProgramObject::ProgramObject(std::string name)
     if (_id == 0) {
         throw ProgramObjectError("glCreateProgram returned 0");
     }
-    glObjectLabel(
-        GL_PROGRAM,
-        _id,
-        static_cast<GLsizei>(_programName.length() + 1),
-        _programName.c_str()
-    );
+    glObjectLabel(GL_PROGRAM, _id, _programName);
 }
 
 ProgramObject::~ProgramObject() {

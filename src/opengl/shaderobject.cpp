@@ -64,12 +64,7 @@ ShaderObject::ShaderObject(ShaderType shaderType, const std::filesystem::path& f
     }
 
     if (!_shaderName.empty()) {
-        glObjectLabel(
-            GL_SHADER,
-            _id,
-            GLsizei(_shaderName.length() + 1),
-            _shaderName.c_str()
-        );
+        glObjectLabel(GL_SHADER, _id, _shaderName);
     }
 
     const bool hasFilename = !filename.empty();

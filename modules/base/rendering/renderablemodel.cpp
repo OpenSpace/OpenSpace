@@ -893,7 +893,7 @@ void RenderableModel::initializeGL() {
     // Generate the frame buffer. The textures are attached when rendering as they are
     // owned by the FramebufferRenderer and change with the rendering resolution
     glCreateFramebuffers(1, &_framebuffer);
-    glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
+    glObjectLabel(GL_FRAMEBUFFER, _framebuffer, "RenderableModel Framebuffer");
 
     // Initialize geometry
     _geometry->initialize();

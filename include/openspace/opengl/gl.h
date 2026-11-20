@@ -76,4 +76,17 @@ struct GLDebugGroup {
 
 } // namespace openspace
 
+namespace detail {
+
+/**
+ * A less friction overload for setting tha name of an OpenGL object
+ */
+void glObjectLabel(GLenum identifier, GLuint name, std::string_view label) {
+    gl::glObjectLabel(identifier, name, static_cast<GLsizei>(label.size()), label.data());
+}
+
+} // namespace detail
+
+using detail::glObjectLabel;
+
 #endif // __OPENSPACE_CORE___GL___H__

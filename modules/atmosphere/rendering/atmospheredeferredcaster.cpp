@@ -177,7 +177,7 @@ namespace {
     GLuint createTexture(const glm::ivec2& size, std::string_view name) {
         GLuint t = 0;
         glCreateTextures(GL_TEXTURE_2D, 1, &t);
-        glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
+        glObjectLabel(GL_TEXTURE, t, name);
         glTextureStorage2D(t, 1, GL_RGB32F, size.x, size.y);
         glTextureParameteri(t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTextureParameteri(t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -191,7 +191,7 @@ namespace {
 
         GLuint t = 0;
         glCreateTextures(GL_TEXTURE_3D, 1, &t);
-        glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
+        glObjectLabel(GL_TEXTURE, t, name);
         GLenum frmt = (components == 3) ? GL_RGB32F : GL_RGBA32F;
         glTextureStorage3D(t, 1, frmt, size.x, size.y, size.z);
         glTextureParameteri(t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

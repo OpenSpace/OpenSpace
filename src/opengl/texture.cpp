@@ -442,7 +442,7 @@ Texture::operator GLuint() const {
 
 void Texture::setName(std::string name) {
     _name = std::move(name);
-    glObjectLabel(GL_TEXTURE, _id, static_cast<GLsizei>(_name.size()), _name.data());
+    glObjectLabel(GL_TEXTURE, _id, _name);
 }
 
 const std::string& Texture::name() const {
