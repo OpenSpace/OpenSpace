@@ -335,13 +335,10 @@ void ImGUIModule::internalInitializeGL() {
     std::filesystem::path file = FileSys.cacheManager()->cachedFilename("imgui.ini", "");
     LDEBUG(std::format("Using '{}' as ImGUI cache location", file));
 
-    _iniFileBuffer.resize(file.string().size() + 1);
-
-#ifdef WIN32
-    strcpy_s(_iniFileBuffer.data(), file.string().size() + 1, file.string().c_str());
-#else // ^^^^ WIN32 // !WIN32 vvvv
-    strcpy(_iniFileBuffer.data(), file.c_str());
-#endif // WIN32
+    const std::string fileStr = file.string();
+    _iniFileBuffer.resize(fileStr.size() + 1);
+    fileStr.copy(_iniFileBuffer.data(), fileStr.size());
+    _iniFileBuffer.back() = '\0';
 
     const size_t nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
