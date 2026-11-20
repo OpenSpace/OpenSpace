@@ -27,11 +27,14 @@
 #include <openspace/filesystem/filesystem.h>
 #include <openspace/format.h>
 #include <openspace/logging/logmanager.h>
+#include <openspace/misc/invariants.h>
 #include <openspace/misc/profiling.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/util/timeconstants.h>
 #include <algorithm>
 #include <cstring>
 #include <iterator>
+#include <limits>
 #include <fstream>
 #include <string_view>
 #include <utility>
@@ -1669,6 +1672,187 @@ SpiceManager::UseException SpiceManager::exceptionHandling() const {
     return _useExceptions;
 }
 
+std::optional<double> SpiceManager::solarEventTime(double latitude,
+                                                   double longitude,
+                                                   double altitude,
+                                                   const std::string& date,
+                                                   const std::string& observer,
+                                                   IsSunrise isSunrise) const
+{
+    precondition(latitude >= -90.0 && latitude <= 90.0, "Latitude out of range");
+    precondition(
+        longitude >= -180.0 && longitude <= 180.0,
+        "Longitude out of range"
+    );
+    precondition(!observer.empty(), "Empty observer");
+
+    // The search window is the whole day of the given date in local mean solar time at
+    // the longitude, which is the UTC day shifted by one day per 360 degrees.
+    const double localTimeOffset =
+        longitude / 360.0 * timeconstants::SecondsPerDay;
+    double utcStart = 0.0;
+    const std::string startDate = date + " 00:00:00";
+    str2et_c(startDate.c_str(), &utcStart);
+    if (failed_c()) {
+        throwSpiceError(std::format("Error converting date '{}'", date));
+        return std::nullopt;
+    }
+    const double et0 = utcStart - localTimeOffset;
+    const double et1 = et0 + timeconstants::SecondsPerDay;
+
+    // Convert the geodetic position to body-fixed coordinates using the body's shape.
+    SpiceInt dim = 0;
+    SpiceDouble radii[3] = { 0.0, 0.0, 0.0 };
+    bodvrd_c(observer.c_str(), "RADII", 3, &dim, radii);
+    if (failed_c()) {
+        throwSpiceError(std::format("Error getting the radii of '{}'", observer));
+        return std::nullopt;
+    }
+    const double equatorialRadius = radii[0];
+    const double polarRadius = radii[2];
+    const double flattening = (equatorialRadius - polarRadius) / equatorialRadius;
+
+    const double lat = glm::radians(latitude);
+    const double lon = glm::radians(longitude);
+
+    const double altitudeKm = altitude / 1000.0;
+
+    SpiceDouble surfacePosition[3] = { 0.0, 0.0, 0.0 };
+    georec_c(
+        lon,
+        lat,
+        0.0,
+        equatorialRadius,
+        flattening,
+        surfacePosition
+    );
+    if (failed_c()) {
+        throwSpiceError(std::format(
+            "Error converting latitude {}, longitude {} on '{}' to a position",
+            latitude, longitude, observer
+        ));
+        return std::nullopt;
+    }
+
+    // The local "up" (zenith) direction is the normal of the ellipsoid at the surface
+    // point. This differs from the direction away from the center of the body, which
+    // matters for an oblate body.
+    SpiceDouble zenithDirection[3] = { 0.0, 0.0, 0.0 };
+    surfnm_c(
+        equatorialRadius,
+        equatorialRadius,
+        polarRadius,
+        surfacePosition,
+        zenithDirection
+    );
+    if (failed_c()) {
+        throwSpiceError(std::format(
+            "Error computing the surface normal of '{}' at latitude {}, longitude {}",
+            observer, latitude, longitude
+        ));
+        return std::nullopt;
+    }
+
+    // The altitude is measured along the surface normal
+    SpiceDouble observerPosition[3] = { 0.0, 0.0, 0.0 };
+    vlcom_c(1.0, surfacePosition, altitudeKm, zenithDirection, observerPosition);
+
+    // An elevated observer can see the Sun for a while after it has dropped below
+    // the local horizontal plane, because the true horizon (the ground/sea in the
+    // distance) dips below that plane by this angle.
+    const double dipAltitudeKm = std::max(0.0, altitudeKm);
+    const double horizonDipAngle =
+        std::acos(equatorialRadius / (equatorialRadius + dipAltitudeKm));
+
+    // Computes the geometric solar elevation angle at a given ephemeris time. The
+    // atmospheric refraction and the apparent size of the Sun are not taken into
+    // account, so the result is the elevation of the center of the Sun.
+    auto solarElevation = [&](double et) -> double {
+        SpiceDouble lightTime = 0.0;
+        // Sun position relative to observer's surface point, in body-fixed frame.
+        SpiceDouble sunFromBodyCenter[3] = { 0.0, 0.0, 0.0 };
+        const std::string obs = "IAU_" + observer;
+        spkpos_c(
+            "SUN",
+            et,
+            obs.c_str(),
+            "LT+S",
+            observer.c_str(),
+            sunFromBodyCenter,
+            &lightTime
+        );
+        if (failed_c()) {
+            throwSpiceError(std::format(
+                "Error getting the position of the Sun relative to '{}' at time {}",
+                observer, et
+            ));
+            // No crossing is detected for NaN, so the search ends without an event
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+
+        SpiceDouble observerToSun[3] = { 0.0, 0.0, 0.0 };
+        vsub_c(sunFromBodyCenter, observerPosition, observerToSun);
+        vhat_c(observerToSun, observerToSun);
+
+        const double cosZenithAngle = vdot_c(zenithDirection, observerToSun);
+        return glm::half_pi<double>() - std::acos(cosZenithAngle);
+    };
+
+    // Find the event with a coarse scan over the day followed by a bisection search.
+    constexpr double Tolerance = 1.0; // seconds
+    double bracketsLow = et0;
+    double bracketsHigh = et1;
+
+    // Coarse 5-minute scan to find the bracket containing the event.
+    constexpr int Steps = 288; // (There are 288 5-minute intervals in a day)
+    const double stepSize = (bracketsHigh - bracketsLow) / Steps;
+    bool eventFound = false;
+    double previousTime = bracketsLow;
+    double previousElevation = solarElevation(bracketsLow);
+    for (int i = 1; i <= Steps; i++) {
+        const double currentTime = bracketsLow + i * stepSize;
+        const double currentElevation = solarElevation(currentTime);
+        // Check for crossing: sunrise (neg->pos) or sunset (pos->neg), relative to
+        // the altitude-adjusted horizon rather than the local horizontal plane.
+        const bool sunRisen = previousElevation < -horizonDipAngle &&
+                         currentElevation >= -horizonDipAngle;
+        const bool sunSet = previousElevation >= -horizonDipAngle &&
+                       currentElevation < -horizonDipAngle;
+        if (isSunrise ? sunRisen : sunSet) {
+            bracketsLow = previousTime;
+            bracketsHigh = currentTime;
+            eventFound = true;
+            break;
+        }
+        previousTime = currentTime;
+        previousElevation = currentElevation;
+    }
+
+    if (!eventFound) {
+        // There is no event on this day, for example during polar day or night
+        return std::nullopt;
+    }
+
+    // Refine the bracket using bisection search.
+    while (bracketsHigh - bracketsLow > Tolerance) {
+        const double midpoint = 0.5 * (bracketsLow + bracketsHigh);
+        const double elevationAtMidpoint = solarElevation(midpoint);
+        // Conditionally update the bracket based on solar event type.
+        const bool shouldUpdateLow = isSunrise ?
+            (elevationAtMidpoint < -horizonDipAngle) :
+            (elevationAtMidpoint >= -horizonDipAngle);
+        if (shouldUpdateLow) {
+            bracketsLow = midpoint;
+        }
+        else {
+            bracketsHigh = midpoint;
+        }
+    }
+
+    // The result is in ET seconds past J2000.
+    return 0.5 * (bracketsLow + bracketsHigh);
+}
+
 LuaLibrary SpiceManager::luaLibrary() {
     return {
         "spice",
@@ -1680,7 +1864,9 @@ LuaLibrary SpiceManager::luaLibrary() {
             codegen::lua::RotationMatrix,
             codegen::lua::Position,
             codegen::lua::ConvertTLEtoSPK,
-            codegen::lua::ConvertCSVtoSPK
+            codegen::lua::ConvertCSVtoSPK,
+            codegen::lua::SunriseTime,
+            codegen::lua::SunsetTime
         }
     };
 }
