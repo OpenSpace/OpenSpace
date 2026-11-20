@@ -1,0 +1,20 @@
+-- Zoom Level
+-- This example demonstrates how to set the zoom level for the browser, to scale up or
+-- down the size of the content.
+
+local Item = {
+  Type = "ScreenSpaceBrowser",
+  Identifier = "ScreenSpaceBrowser_Example_ZoomLevel",
+  Url = "https://www.openspaceproject.com/",
+  ZoomLevel = 2.0,
+  Name = "ScreenSpaceBrowser Example - Zoom Level"
+}
+
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Item)
+end)

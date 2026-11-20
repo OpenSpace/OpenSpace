@@ -84,6 +84,18 @@ namespace {
         .visibility = Visibility::NoviceUser
     };
 
+    constexpr FloatPropertyInfo ZoomLevelInfo = {
+        .identifier = "ZoomLevel",
+        .name = "Zoom level",
+        .description = "The zoom level of the web browser, with 1.0 corresponding to "
+            "100%.",
+        .visibility = Visibility::NoviceUser,
+        .defaults = {
+            .value = 1.f,
+            .minMax = { 0.1f, 5.f }
+        }
+    };
+
     // Can be used to render a webpage in front of the camera. This can be used to show
     // various dynamic content, for example using the scripting API.
     //
@@ -97,6 +109,8 @@ namespace {
 
         std::optional<glm::vec2> dimensions
             [[codegen::Info(DimensionsInfo), codegen::greater(glm::vec2(0.f))]];
+
+        std::optional<float> zoomLevel [[codegen::Info(ZoomLevelInfo)]];
     };
 } // namespace
 #include "screenspacebrowser_codegen.cpp"
@@ -124,8 +138,9 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const Dictionary& dictionary)
     , _reload(ReloadInfo)
     , _key(::KeyInfo)
     , _triggerKey(TriggerKeyInfo)
-    , _url(UrlInfo)
     , _renderHandler(new ScreenSpaceRenderHandler)
+    , _url(UrlInfo)
+    , _zoomLevel(ZoomLevelInfo)
     , _keyboardHandler(new WebKeyboardHandler)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -144,8 +159,13 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const Dictionary& dictionary)
 
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler.get(),
-        _keyboardHandler.get()
+        _keyboardHandler.get(),
+        BrowserInstance::UseIsolatedContext::Yes
     );
+
+    _zoomLevel = p.zoomLevel.value_or(_zoomLevel);
+    _zoomLevel.onChange([this]() { _isZoomLevelDirty = true; });
+    addProperty(_zoomLevel);
 
     _reload.onChange([this]() { _browserInstance->reloadBrowser(); });
     addProperty(_reload);
@@ -176,7 +196,6 @@ void ScreenSpaceBrowser::initializeGL() {
 
     createShaders();
     _browserInstance->initialize();
-    _browserInstance->loadUrl(_url);
 }
 
 void ScreenSpaceBrowser::deinitializeGL() {
@@ -217,6 +236,11 @@ void ScreenSpaceBrowser::update() {
     if (_isDimensionsDirty) {
         _browserInstance->reshape(_dimensions.value());
         _isDimensionsDirty = false;
+    }
+
+    if (_isZoomLevelDirty) {
+        _browserInstance->setZoom(_zoomLevel);
+        _isZoomLevelDirty = false;
     }
 }
 

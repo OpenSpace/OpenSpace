@@ -76,7 +76,6 @@ public:
 protected:
     UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
-    bool _isDimensionsDirty = false;
     bool _useAcceleratedRendering = false;
     TriggerProperty _reload;
 
@@ -96,10 +95,13 @@ private:
     void bindTexture(opengl::TextureUnit& unit) override;
 
     StringProperty _url;
+    FloatProperty _zoomLevel;
 
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 
-    bool _isUrlDirty = false;
+    bool _isDimensionsDirty = true;
+    bool _isUrlDirty = true;
+    bool _isZoomLevelDirty = true;
 };
 
 } // namespace openspace
