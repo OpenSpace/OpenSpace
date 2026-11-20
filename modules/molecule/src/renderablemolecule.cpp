@@ -36,8 +36,14 @@
 #include <openspace/opengl/gl.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <core/md_allocator.h>
+#include <core/md_bitset.h>
 #include <md_filter.h>
+#include <md_gl.h>
 #include <md_util.h>
+#include <algorithm>
+#include <cmath>
+#include <set>
 
 namespace {
     using namespace openspace;
@@ -50,29 +56,34 @@ namespace {
         Clamp
     };
 
-    void computeMask(md_bitfield_t& mask, std::string_view filter,
-                     const md_molecule_t& mol, bool& isDynamic)
+    void computeMask(md_bitmask_t& mask, std::string_view filter,
+                     const md_system_t& sys, const md_system_state_t* state,
+                     bool& isDynamic)
     {
         if (!filter.empty() && filter != "all") {
-            str_t str = { filter.data(), static_cast<int64_t>(filter.length()) };
-            std::array<char, 1024> buf = { '\0' };
-
-            const bool success = md_filter(
-                &mask,
-                str,
-                &mol,
-                nullptr,
-                &isDynamic,
-                buf.data(),
-                static_cast<int>(buf.size())
-            );
-            if (success) {
+            str_t str = { filter.data(), static_cast<size_t>(filter.length()) };
+            md_filter_context_t ctx = {
+                .sys = &sys,
+                .state = state,
+                .ir = nullptr,
+                .atoms = nullptr
+            };
+            md_bitset_t set = {0};
+            md_temp_scope_t temp = md_temp_begin();
+            md_allocator_i* tempAlloc = md_temp_allocator(temp);
+            md_filter_result_t res = md_filter(&set, str, &ctx, tempAlloc);
+            if (res.success) {
+                md_bitmask_assign(&mask, set);
+                isDynamic = res.is_dynamic;
+                md_temp_end(temp);
                 return;
             }
-            LERROR(std::format("Invalid filter expression '{}': {}", filter, buf.data()));
+            md_temp_end(temp);
+            LERROR(std::format("Invalid filter expression '{}': {}", filter, res.error));
         }
-        md_bitfield_clear(&mask);
-        md_bitfield_set_range(&mask, 0, mol.atom.count);
+        md_bitmask_clear(&mask);
+        md_bitmask_set_range(&mask, 0, static_cast<uint32_t>(sys.atom.count));
+        isDynamic = false;
     }
 
     double timeToFrame(double time, int64_t numFrames, AnimationRepeatMode mode) {
@@ -229,19 +240,6 @@ namespace {
         .visibility = Visibility::AdvancedUser
     };
 
-    // Used to render a single molecular system, which can be either static or dynamic.
-    // The rendering is done using the rendering engine of the
-    // [ViaMD](https://github.com/scanberg/viamd) framework. Many of the parameters are
-    // described in greater detail on their [Wiki](https://github.com/scanberg/viamd/wiki)
-    // page. It is possible to assign multiple representations to a molecular structure
-    // and specify individual settings per representation, including the ability to filter
-    // using ViaMD's powerful filtering scripting language.
-    //
-    // The current implementation supports the loading of "PDB", "Gromacs", "XYZ", "XMOL",
-    // and "ARC" files for the molecular structure and "PDB", "XTC", "TRR", "XYZ", "XMOL",
-    // and "ARC" files for the optional trajectories.
-    //
-    // If no trajectory file is provided only the structural information is shown.
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
         std::filesystem::path moleculeFile [[codegen::Info(MoleculeFileInfo)]];
 
@@ -250,9 +248,6 @@ namespace {
 
         std::optional<bool> coarseGrained [[codegen::Info(CoarseGrainedInfo)]];
 
-        // This is a representation of a molecular dataset. Each representation is
-        // rendered independently and can contain different rendering and filtering
-        // parameters.
         struct Representation {
             enum class [[codegen::map(molecule::rep::Type)]] Type {
                 SpaceFill,
@@ -262,7 +257,6 @@ namespace {
             };
 
             enum class [[codegen::map(molecule::rep::Color)]] Color {
-                // Uniform,
                 Cpk,
                 AtomIndex,
                 ResId,
@@ -273,33 +267,14 @@ namespace {
                 Uniform
             };
 
-            // Determines whether this `Representation` is enabled or not. If it is
-            // enabled, it will be rendered, if it is not enabled, it will be hidden.
             std::optional<bool> enabled;
-
-            // The type of representation that should be used.
             std::optional<Type> type;
-
-            // The method by which the selected representation should be colored.
             std::optional<Color> color;
-
-            // The ViaMD filter that can be used to filter atoms, residues, chains, and
-            // other primary or secondary structures.
             std::optional<std::string> filter;
-
-            // A scaling factor that causes a different scaling effect depending on the
-            // selected representation type. In general, a larger value will cause the
-            // representation to be rendered larger and more prominently.
             std::optional<float> scale;
-
-            // The uniform color that is used if not coloring method is selected.
             std::optional<glm::vec4> uniformColor;
         };
 
-        // The list of representations that are used to render this molecular dataset.
-        // Each representation can consist of a representation type, a coloring method,
-        // and and optional filter and scaling that can be applied to each representation
-        // individually.
         std::optional<std::vector<Representation>> representations;
 
         std::optional<bool> applyPbcOnLoad [[codegen::Info(ApplyPbcOnLoadInfo)]];
@@ -364,7 +339,6 @@ RenderableMolecule::RenderableMolecule(const Dictionary& dictionary)
     addProperty(_applyPbcOnLoad);
 
     if (!p.representations.has_value()) {
-        // Add a default representation if none were supplied
         Parameters::Representation rep = {
             .enabled = true,
             .type = Parameters::Representation::Type::SpaceFill,
@@ -382,7 +356,7 @@ RenderableMolecule::RenderableMolecule(const Dictionary& dictionary)
 
         auto r = std::make_unique<Representation>(
             _repProps.propertySubOwners().size(),
-            _molecule,
+            nullptr,
             rep.enabled.value_or(true),
             codegen::map<molecule::rep::Type>(*rep.type),
             codegen::map<molecule::rep::Color>(rep.color.value()),
@@ -431,26 +405,32 @@ void RenderableMolecule::deinitializeGL() {
     global::moduleEngine->module<MoleculeModule>()->deinitializeShaders();
 
     for (const std::unique_ptr<Representation>& rep : _repData) {
-        md_gl_representation_free(&rep->glRep);
+        if (rep->glRep.id) {
+            md_gl_rep_destroy(rep->glRep);
+            rep->glRep = {};
+        }
     }
 
-    md_gl_molecule_free(&_glMolecule);
-    md_molecule_free(&_molecule, default_allocator);
+    if (_glMolecule.id) {
+        md_gl_mol_destroy(_glMolecule);
+        _glMolecule = {};
+    }
 
-    _molecule = {};
+    if (_state.alloc) {
+        md_system_state_free(&_state);
+    }
+
+    _system = nullptr;
     _trajectory = nullptr;
-    _glMolecule = {};
 }
 
 void RenderableMolecule::update(const UpdateData& data) {
-    // Avoid updating if not in view, as it can be quite expensive
     if (!_renderableInView) {
         return;
     }
 
     _renderableInView = false;
 
-    // Update animation
     if (_trajectory) {
         updateTrajectoryFrame(data);
     }
@@ -459,22 +439,16 @@ void RenderableMolecule::update(const UpdateData& data) {
 void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     ZoneScoped;
 
-    // Compute distance from camera to molecule
     const glm::dvec3 frwd = data.modelTransform.translation - data.camera.position();
     const glm::dvec3 dir = data.camera.viewDirectionWorldSpace();
-    // "Signed" distance from camera to object
     const double distance = glm::length(frwd) * sign(glm::dot(dir, frwd));
 
-    // `distance` < 0 means behind the camera, 10000 is arbitrary
     if (distance < 0.0 || distance > 10000.0) {
         return;
     }
 
     _renderableInView = true;
 
-    // Because the molecule is small, a scaling of the view matrix causes the molecule to
-    // be moved out of view in clip space. Resetting the scaling for the molecule is fine
-    // for now. This will have an impact on stereoscopic depth though
     Camera camCopy = data.camera;
     camCopy.setScaling(0.1f);
 
@@ -485,31 +459,50 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.modelTransform.rotation);
     const glm::mat4 projMatrix = glm::dmat4(camCopy.sgctInternal.projectionMatrix());
 
-    // Center the molecule with respect to its cell
-    const vec3_t trans = _molecule.cell.basis * vec3_set1(0.5f);
+    vec3_t trans = { 0.f, 0.f, 0.f };
+    if (_state.unitcell.flags != 0) {
+        trans.x = static_cast<float>(
+            _state.unitcell.x + _state.unitcell.xy + _state.unitcell.xz
+        ) * 0.5f;
+        trans.y = static_cast<float>(_state.unitcell.y + _state.unitcell.yz) * 0.5f;
+        trans.z = static_cast<float>(_state.unitcell.z) * 0.5f;
+    }
     const mat4_t modelMat = mat4_translate(-trans.x, -trans.y, -trans.z);
 
     std::vector<md_gl_draw_op_t> drawOps;
     drawOps.reserve(_repData.size());
 
-    if (_molecule.atom.count > 0) {
+    if (_system && _system->atom.count > 0) {
         for (const std::unique_ptr<Representation>& rep : _repData) {
             if (rep->enabled) {
-                drawOps.emplace_back(&rep->glRep, &modelMat[0][0]);
+                md_gl_draw_op_t op = {};
+                op.rep = rep->glRep;
+                op.model_matrix = &modelMat[0][0];
+                molecule::setDrawOpTypeAndArgs(
+                    op,
+                    static_cast<molecule::rep::Type>(rep->type.value()),
+                    rep->scale
+                );
+                drawOps.push_back(op);
             }
         }
     }
 
     const md_gl_draw_args_t args = {
-        .shaders = &global::moduleEngine->module<MoleculeModule>()->shaders(),
-        .draw_operations = { static_cast<uint32_t>(drawOps.size()), drawOps.data() },
-        .view_transform = {
-            glm::value_ptr(viewMatrix),
-            glm::value_ptr(projMatrix),
-            nullptr,
-            nullptr
+        .shaders = global::moduleEngine->module<MoleculeModule>()->shaders(),
+        .draw_operations = {
+            .count = drawOps.size(),
+            .ops = drawOps.data()
         },
-        .options = 0
+        .view_transform = {
+            .view_matrix = glm::value_ptr(viewMatrix),
+            .proj_matrix = glm::value_ptr(projMatrix),
+            .prev_view_matrix = nullptr,
+            .prev_proj_matrix = nullptr
+        },
+        .picking_offset = {},
+        .atom_mask = 0,
+        .max_bond_length = 0.0f
     };
 
     GLint lastFbo;
@@ -546,104 +539,97 @@ void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view
 
     LDEBUG(std::format("Loading molecule file '{}'", molFile));
 
-    const md_molecule_t* molecule = molecule::loadMolecule(molFile, _coarseGrained);
-    if (!molecule) {
+    const molecule::Molecule* mol = molecule::loadMolecule(molFile, _coarseGrained);
+    if (!mol) {
         throw RuntimeError("Failed to initialize molecule: Failed to load file");
     }
 
-    // We deep copy the contents, so we can freely modify the fields (coordinates etc)
-    md_molecule_copy(&_molecule, molecule, default_allocator);
-    md_gl_molecule_init(&_glMolecule, &_molecule);
+    _system = &mol->system;
+    _state.alloc = md_get_heap_allocator();
+    md_system_state_copy(&_state, &mol->state);
 
-    // Update representations
+    _glMolecule = md_gl_mol_create(_system);
+
     for (const std::unique_ptr<Representation>& rep : _repData) {
-        md_gl_representation_free(&rep->glRep);
+        if (rep->glRep.id) {
+            md_gl_rep_destroy(rep->glRep);
+        }
+        rep->glRep = md_gl_rep_create(_glMolecule);
 
-        rep->glRep = { 0 };
-        md_gl_representation_init(&rep->glRep, &_glMolecule);
+        rep->system = _system;
+        md_bitmask_set_domain(&rep->mask, 0, static_cast<uint32_t>(_system->atom.count));
 
         if (rep->enabled) {
-            using namespace molecule;
+            computeMask(rep->mask, rep->filter, *_system, &_state, rep->isDynamic);
 
-            computeMask(rep->mask, rep->filter, _molecule, rep->isDynamic);
-
-            rep::Type type = static_cast<rep::Type>(rep->type.value());
-            rep::Color color = static_cast<rep::Color>(rep->color.value());
-            updateRepType(rep->glRep, type, rep->scale);
-            updateRepColor(
+            molecule::rep::Color color =
+                static_cast<molecule::rep::Color>(rep->color.value());
+            molecule::updateRepColor(
                 rep->glRep,
-                _molecule,
+                *_system,
                 color,
                 rep->mask,
-                rep->uniformColor
+                rep->uniformColor,
+                nullptr
             );
         }
     }
 
-    vec3_t aabbMin;
-    vec3_t aabbMax;
-    md_util_compute_aabb_xyzr(
-        &aabbMin,
-        &aabbMax,
-        _molecule.atom.x,
-        _molecule.atom.y,
-        _molecule.atom.z,
-        _molecule.atom.radius,
-        _molecule.atom.count
+    float aabbMin[3];
+    float aabbMax[3];
+    md_util_aabb_compute(
+        aabbMin,
+        aabbMax,
+        _state.xyz,
+        nullptr,
+        nullptr,
+        _system->atom.count
     );
-    _radius = vec3_distance(aabbMin, aabbMax) * 0.5f;
+    const vec3_t minPt = { aabbMin[0], aabbMin[1], aabbMin[2] };
+    const vec3_t maxPt = { aabbMax[0], aabbMax[1], aabbMax[2] };
+    _radius = vec3_distance(minPt, maxPt) * 0.5f;
     setBoundingSphere(_radius * 2.f);
 
     if (!trajFile.empty()) {
         LDEBUG(std::format("Loading trajectory file '{}'", trajFile));
-        _trajectory = molecule::loadTrajectory(trajFile, molecule, _applyPbcOnLoad);
+        _trajectory = molecule::loadTrajectory(trajFile, mol, _applyPbcOnLoad);
     }
 }
 
 void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
-    double dt = data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
-    double currT = data.time.j2000Seconds();
+    const double dt = data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
+    const double currT = data.time.j2000Seconds();
 
     const double scl = _animationBaseScale * _animationSpeed;
-    double currTime = (currT - _localEpoch) * scl;
-    double nextTime = (currT + dt - _localEpoch) * scl;
+    const double currTime = (currT - _localEpoch) * scl;
+    const double nextTime = (currT + dt - _localEpoch) * scl;
 
-    const int64_t numFrames = md_trajectory_num_frames(_trajectory);
+    const int64_t numFrames = molecule::trajectoryNumFrames(_trajectory);
     const AnimationRepeatMode mode = static_cast<AnimationRepeatMode>(
         _animationRepeatMode.value()
     );
-    double frame = timeToFrame(currTime, numFrames, mode);
+    const double frame = timeToFrame(currTime, numFrames, mode);
 
     if (frame != _frame) {
         _frame = frame;
         molecule::interpolateFrame(
-            _molecule,
+            _state,
             _trajectory,
             molecule::InterpolationType::Cubic,
             frame,
             _applyPbcPerFrame
         );
 
-        const uint64_t size = _molecule.atom.count * sizeof(vec3_t);
-        md_allocator_i* alloc =
-            default_temp_allocator_max_allocation_size() < size ?
-            default_allocator :
-            default_temp_allocator;
-        vec3_t* xyz = reinterpret_cast<vec3_t*>(md_alloc(alloc, size));
-
-        for (int64_t i = 0; i < _molecule.atom.count; i++) {
-            xyz[i] = {
-                { _molecule.atom.x[i], _molecule.atom.y[i], _molecule.atom.z[i] }
-            };
-        }
-        md_gl_molecule_set_atom_position_xyz(
-            &_glMolecule,
+        md_gl_mol_set_atom_position(
+            _glMolecule,
             0,
-            static_cast<uint32_t>(_molecule.atom.count),
-            xyz
+            static_cast<uint32_t>(_system->atom.count),
+            _state.xyz
         );
 
-        md_free(alloc, xyz, size);
+        const int64_t nearestFrame =
+            std::clamp<int64_t>(static_cast<int64_t>(frame + 0.5), 0, numFrames - 1);
+        molecule::FrameData frameData = molecule::frameData(_trajectory, nearestFrame);
 
         std::vector<Representation*> repHasSsIndices;
         std::vector<Representation*> repUpdateColIndices;
@@ -659,19 +645,27 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
                 repHasSsIndices.push_back(rep.get());
             }
             if (rep->isDynamic) {
-                computeMask(rep->mask, rep->filter, _molecule, rep->isDynamic);
+                computeMask(rep->mask, rep->filter, *_system, &_state, rep->isDynamic);
                 repUpdateColIndices.push_back(rep.get());
             }
         }
 
         if (!repHasSsIndices.empty()) {
-            md_gl_molecule_set_backbone_secondary_structure(
-                &_glMolecule,
-                0,
-                static_cast<uint32_t>(_molecule.backbone.count),
-                _molecule.backbone.secondary_structure,
-                0
-            );
+            if (_system->protein_backbone.segment.count > 0 && !frameData.ss.empty()) {
+                std::vector<md_gl_secondary_structure_t> glSs(
+                    _system->protein_backbone.segment.count
+                );
+                for (size_t i = 0; i < glSs.size(); ++i) {
+                    glSs[i] = md_gl_secondary_structure_convert(frameData.ss[i]);
+                }
+                md_gl_mol_set_backbone_secondary_structure(
+                    _glMolecule,
+                    0,
+                    static_cast<uint32_t>(glSs.size()),
+                    glSs.data(),
+                    0
+                );
+            }
             repUpdateColIndices.insert(
                 repUpdateColIndices.end(),
                 repHasSsIndices.begin(),
@@ -682,10 +676,11 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
         for (Representation* rep : repUpdateColIndices) {
             molecule::updateRepColor(
                 rep->glRep,
-                _molecule,
+                *_system,
                 static_cast<molecule::rep::Color>(rep->color.value()),
                 rep->mask,
-                rep->uniformColor
+                rep->uniformColor,
+                frameData.ss.data()
             );
         }
     }
@@ -719,13 +714,12 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
         frames.erase(i);
     }
 
-    std::vector<int64_t> f =
-        std::vector<int64_t>(frames.begin(), frames.end());
+    std::vector<int64_t> f(frames.begin(), frames.end());
     molecule::prefetchFrames(_trajectory, f);
 }
 
 RenderableMolecule::Representation::Representation(size_t number,
-                                                   const md_molecule_t& molecule_,
+                                                   const md_system_t* system_,
                                                    bool enabled_,
                                                    molecule::rep::Type type_,
                                                    molecule::rep::Color color_,
@@ -736,8 +730,8 @@ RenderableMolecule::Representation::Representation(size_t number,
         .name = std::format("Representation {}", number),
         .description = std::format("Visual representation of molecule {}", number),
     })
-    , mask(md_bitfield_create(default_allocator))
-    , molecule(molecule_)
+    , mask(md_bitmask_create(0, 0, md_get_heap_allocator()))
+    , system(system_)
     , enabled(EnabledInfo)
     , type(TypeInfo)
     , color(ColorInfo)
@@ -759,12 +753,8 @@ RenderableMolecule::Representation::Representation(size_t number,
         { static_cast<int>(molecule::rep::Type::Cartoon), "Cartoon" }
     });
     type = static_cast<int>(type_);
-    type.onChange([&]() {
-        molecule::updateRepType(
-            glRep,
-            static_cast<molecule::rep::Type>(type.value()),
-            scale
-        );
+    type.onChange([this]() {
+        // Representation type/scale is applied during draw operation construction
     });
     addProperty(type);
 
@@ -782,53 +772,55 @@ RenderableMolecule::Representation::Representation(size_t number,
         { static_cast<int>(molecule::rep::Color::Uniform), "Uniform" }
     });
     color = static_cast<int>(color_);
-    color.onChange([&]() {
-        molecule::updateRepColor(
-            glRep,
-            molecule,
-            static_cast<molecule::rep::Color>(color.value()),
-            mask,
-            uniformColor
-        );
+    color.onChange([this]() {
+        if (system && system->atom.count > 0 && glRep.id) {
+            molecule::updateRepColor(
+                glRep,
+                *system,
+                static_cast<molecule::rep::Color>(color.value()),
+                mask,
+                uniformColor
+            );
+        }
     });
     addProperty(color);
 
-    filter.onChange([&]() {
-        computeMask(mask, filter, molecule, isDynamic);
-        molecule::updateRepColor(
-            glRep,
-            molecule,
-            static_cast<molecule::rep::Color>(color.value()),
-            mask,
-            uniformColor
-        );
+    filter.onChange([this]() {
+        if (system && system->atom.count > 0 && glRep.id) {
+            computeMask(mask, filter, *system, nullptr, isDynamic);
+            molecule::updateRepColor(
+                glRep,
+                *system,
+                static_cast<molecule::rep::Color>(color.value()),
+                mask,
+                uniformColor
+            );
+        }
     });
     addProperty(filter);
 
-    scale.onChange([&]() {
-        molecule::updateRepType(
-            glRep,
-            static_cast<molecule::rep::Type>(type.value()),
-            scale
-        );
+    scale.onChange([this]() {
+        // Scale is applied during draw operation construction
     });
     addProperty(scale);
 
     uniformColor.setViewOption(Property::ViewOptions::Color);
-    uniformColor.onChange([&]() {
-        molecule::updateRepColor(
-            glRep,
-            molecule,
-            static_cast<molecule::rep::Color>(color.value()),
-            mask,
-            uniformColor
-        );
+    uniformColor.onChange([this]() {
+        if (system && system->atom.count > 0 && glRep.id) {
+            molecule::updateRepColor(
+                glRep,
+                *system,
+                static_cast<molecule::rep::Color>(color.value()),
+                mask,
+                uniformColor
+            );
+        }
     });
     addProperty(uniformColor);
 }
 
 RenderableMolecule::Representation::~Representation() {
-    md_bitfield_free(&mask);
+    md_bitmask_free(&mask);
 }
 
 } // namespace openspace

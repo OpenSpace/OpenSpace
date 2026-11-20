@@ -34,10 +34,13 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <core/md_bitfield.h>
+#include <core/md_bitset.h>
 #include <md_gl.h>
-#include <md_molecule.h>
-#include <md_trajectory.h>
+#include <md_system.h>
+
+namespace molecule {
+    struct Trajectory;
+} // namespace molecule
 
 namespace openspace {
 
@@ -67,20 +70,21 @@ private:
     // This is the current frame of the trajectory
     double _frame = 0.0;
 
-    md_molecule_t _molecule = {};
-    const md_trajectory_i* _trajectory = nullptr;
-    md_gl_molecule_t _glMolecule = {};
+    const md_system_t* _system = nullptr;
+    md_system_state_t _state = {};
+    const molecule::Trajectory* _trajectory = nullptr;
+    md_gl_mol_t _glMolecule = {};
     double _radius = 0.0;
 
     struct Representation : public PropertyOwner {
-        explicit Representation(size_t number, const md_molecule_t& molecule_,
+        explicit Representation(size_t number, const md_system_t* system_,
             bool enabled_, molecule::rep::Type type_, molecule::rep::Color color_,
             std::string filter_, float scale_, glm::vec4 uniformColor_);
         ~Representation() override;
 
-        md_gl_representation_t glRep = {};
-        md_bitfield_t mask;
-        const md_molecule_t& molecule;
+        md_gl_rep_t glRep = {};
+        md_bitmask_t mask = {};
+        const md_system_t* system = nullptr;
         bool isDynamic = false;
 
         BoolProperty enabled;
