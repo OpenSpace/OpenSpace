@@ -530,9 +530,7 @@ LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::DeleteGeoJson,
             codegen::lua::AddGeoJsonFromFile,
             codegen::lua::Globes,
-            codegen::lua::UrlInfo,
-            codegen::lua::SunriseTime,
-            codegen::lua::SunsetTime
+            codegen::lua::UrlInfo
         },
         .scripts = {
             absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"),

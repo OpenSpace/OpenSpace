@@ -34,6 +34,7 @@
 #include <array>
 #include <filesystem>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 #include <set>
@@ -64,6 +65,7 @@ void throwSpiceError(const std::string& errorMessage);
 class SpiceManager {
 public:
     BooleanType(UseException);
+    BooleanType(IsSunrise);
 
     using TransformMatrix = std::array<double, 36>;
     using KernelHandle = unsigned int;
@@ -879,30 +881,30 @@ public:
 
     /**
      * Computes the time of a solar event (sunrise or sunset) for a given location
-     * and date using bisection search on the solar elevation angle.
+     * and date. The event is the moment the center of the Sun crosses the geometric
+     * horizon.
      *
-     * \\param latitude The latitude in degrees (range: -90 to 90)
-     * \\param longitude The longitude in degrees (range: -180 to 180)
-     * \\param altitude The observer's altitude above the surface in meters
-     *                        (default: 0.0 for sea level)
-     * \\param date UTC date as a string (e.g., "2024-01-01")
-     * \\param observer The SPICE name of the observing body (e.g., "EARTH")
-     * \\param isSunrise If \\p true, computes sunrise; if \\p false, computes sunset
-     * \\return The ephemeris time (ET seconds past J2000) of the requested solar
-     *         event
+     * \param latitude The latitude in degrees (range: -90 to 90)
+     * \param longitude The longitude in degrees (range: -180 to 180)
+     * \param altitude The observer's altitude above the surface in meters
+     * \param date The date as a string in the format YYYY-MM-DD (e.g., "2024-01-01").
+     * \param observer The SPICE name of the observing body (e.g., "EARTH")
+     * \param isSunrise If `IsSunrise::Yes`, computes sunrise; if `IsSunrise::No`,
+     *        computes sunset
+     * \return The ephemeris time (ET seconds past J2000) of the requested solar
+     *         event, or `std::nullopt` if the Sun does not cross the horizon on that day
+     *         (e.g., during polar day or night).
      *
-     * \\throw SpiceException If no sunrise/sunset is found for the given
-     *        date/location (e.g., polar day or night)
-     * \\throw SpiceException If required SPICE kernels are not loaded or if the
-     *        observer is not a valid SPICE object
-     * \\pre \\p latitude must be between -90 and 90
-     * \\pre \\p longitude must be between -180 and 180
-     * \\pre \\p date must be a valid UTC date string
-     * \\pre \\p observer must be a valid SPICE body name
+     * \throw SpiceException If `UseException::Yes` is set and required SPICE kernels
+     *        are not loaded, the date cannot be parsed or the observer is not a valid
+     *        SPICE object
+     * \pre \p latitude must be between -90 and 90
+     * \pre \p longitude must be between -180 and 180
+     * \pre \p observer must not be empty
      */
-    double solarEventTime(double latitude, double longitude, double altitude,
-                          const std::string& date, const std::string& observer,
-                          bool isSunrise) const;
+    std::optional<double> solarEventTime(double latitude, double longitude,
+        double altitude, const std::string& date, const std::string& observer,
+        IsSunrise isSunrise) const;
 
     /**
      * Sets the SpiceManager's exception handling. If UseException::No is passed to this

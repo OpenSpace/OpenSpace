@@ -27,6 +27,8 @@
 
 #include <openspace/filesystem/filesystem.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/timeconstants.h>
+#include <optional>
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 
@@ -75,6 +77,51 @@ namespace {
             absPath("${TESTDIR}/SpiceTest/spicekernels/cas_iss_v09.ti")
         );
         CHECK(k8 == 10);
+    }
+
+    // Returns the angle in degrees between the surface normal and the direction to the
+    // Sun for the point on the surface of the Earth at the provided location, which is
+    // computed by SPICE independently of the SpiceManager::solarEventTime function.
+    // The angle is 90 degrees when the Sun is on the horizon.
+    double solarIncidenceAngle(double et, double latitude, double longitude) {
+        SpiceInt dim = 0;
+        std::array<double, 3> radii = { 0.0, 0.0, 0.0 };
+        bodvrd_c("EARTH", "RADII", 3, &dim, radii.data());
+        const double flattening = (radii[0] - radii[2]) / radii[0];
+
+        std::array<double, 3> surfacePoint = { 0.0, 0.0, 0.0 };
+        georec_c(
+            glm::radians(longitude),
+            glm::radians(latitude),
+            0.0,
+            radii[0],
+            flattening,
+            surfacePoint.data()
+        );
+
+        double surfaceEpoch = 0.0;
+        std::array<double, 3> surfaceVector = { 0.0, 0.0, 0.0 };
+        double phase = 0.0;
+        double incidence = 0.0;
+        double emission = 0.0;
+        ilumin_c(
+            "ELLIPSOID",
+            "EARTH",
+            et,
+            "IAU_EARTH",
+            "LT+S",
+            "MOON",
+            surfacePoint.data(),
+            &surfaceEpoch,
+            surfaceVector.data(),
+            &phase,
+            &incidence,
+            &emission
+        );
+        if (failed_c()) {
+            throwSpiceError("Error computing the solar incidence angle");
+        }
+        return glm::degrees(incidence);
     }
 } // namespace
 
@@ -302,6 +349,198 @@ TEST_CASE("SpiceManager: Get Field Of View", "[spicemanager]") {
                 Catch::Approx(res.bounds[i][static_cast<glm::length_t>(j)])
             );
         }
+    }
+
+    SpiceManager::deinitialize();
+}
+
+// The planetary ephemeris kernel of these tests only covers the time from 2004-06-11
+// 05:00 to 2004-06-12 12:00 UTC. The solar event tests use the local day of 2004-06-11 at
+// western longitudes, as that day is completely inside the covered time. A longitude of
+// -75 degrees is the easternmost one for which this is true
+
+TEST_CASE("SpiceManager: Solar Event Time", "[spicemanager]") {
+    SpiceManager::initialize();
+
+    loadMetaKernel();
+
+    // Chicago shortly before the summer solstice, which is far enough from the poles to
+    // have both a sunrise and a sunset every day
+    constexpr double Latitude = 41.8781;
+    constexpr double Longitude = -87.6298;
+    const std::string Date = "2004-06-11";
+
+    SECTION("Sunrise and sunset") {
+        std::optional<double> optionalSunrise;
+        std::optional<double> optionalSunset;
+        CHECK_NOTHROW(
+            optionalSunrise = SpiceManager::ref().solarEventTime(
+                Latitude, Longitude, 0.0, Date, "EARTH", SpiceManager::IsSunrise::Yes
+            )
+        );
+        CHECK_NOTHROW(
+            optionalSunset = SpiceManager::ref().solarEventTime(
+                Latitude, Longitude, 0.0, Date, "EARTH", SpiceManager::IsSunrise::No
+            )
+        );
+        REQUIRE(optionalSunrise.has_value());
+        REQUIRE(optionalSunset.has_value());
+        const double sunrise = *optionalSunrise;
+        const double sunset = *optionalSunset;
+
+        // The events happen on the requested day in local mean solar time, which at this
+        // longitude starts about six hours after midnight UTC
+        const double localStart = SpiceManager::ref().ephemerisTimeFromDate(Date) -
+            Longitude / 360.0 * timeconstants::SecondsPerDay;
+        const double localEnd = localStart + timeconstants::SecondsPerDay;
+        CHECK(sunrise >= localStart);
+        CHECK(sunrise < sunset);
+        CHECK(sunset < localEnd);
+
+        // A day at this latitude and time of the year is about 15 hours long
+        const double dayLengthHours = (sunset - sunrise) / timeconstants::SecondsPerHour;
+        CHECK(dayLengthHours > 14.5);
+        CHECK(dayLengthHours < 15.8);
+
+        // The Sun is on the horizon at both events, as verified by SPICE itself. The Sun
+        // moves at a quarter of a degree per minute, so the margin corresponds to a
+        // couple of seconds, which is more than the one-second tolerance of the search
+        const double incidenceAtSunrise = solarIncidenceAngle(
+            sunrise,
+            Latitude,
+            Longitude
+        );
+        const double incidenceAtSunset = solarIncidenceAngle(sunset, Latitude, Longitude);
+        CHECK(incidenceAtSunrise == Catch::Approx(90.0).margin(0.01));
+        CHECK(incidenceAtSunset == Catch::Approx(90.0).margin(0.01));
+    }
+
+    SECTION("Follows longitude") {
+        // San Francisco is seven to eight hours behind UTC, so the sunset of the local
+        // day of June 11th is already on June 12th in UTC
+        constexpr double SanFranciscoLatitude = 37.7749;
+        constexpr double SanFranciscoLongitude = -122.4194;
+
+        const double sunrise = SpiceManager::ref().solarEventTime(
+            SanFranciscoLatitude,
+            SanFranciscoLongitude,
+            0.0,
+            Date,
+            "EARTH",
+            SpiceManager::IsSunrise::Yes
+        ).value();
+        const double sunset = SpiceManager::ref().solarEventTime(
+            SanFranciscoLatitude,
+            SanFranciscoLongitude,
+            0.0,
+            Date,
+            "EARTH",
+            SpiceManager::IsSunrise::No
+        ).value();
+
+        const double utcMidnight = SpiceManager::ref().ephemerisTimeFromDate(
+            "2004-06-12"
+        );
+        CHECK(sunrise < utcMidnight);
+        CHECK(sunset > utcMidnight);
+
+        // A day in June at this latitude is a bit more than 14 hours long
+        const double dayLengthHours = (sunset - sunrise) / timeconstants::SecondsPerHour;
+        CHECK(dayLengthHours > 14.0);
+        CHECK(dayLengthHours < 15.0);
+    }
+
+    SECTION("Altitude") {
+        // Seen from above the surface, the horizon is lower so the Sun rises earlier and
+        // sets later
+        const double sunriseGround = SpiceManager::ref().solarEventTime(
+            Latitude, Longitude, 0.0, Date, "EARTH", SpiceManager::IsSunrise::Yes
+        ).value();
+        const double sunriseHigh = SpiceManager::ref().solarEventTime(
+            Latitude, Longitude, 3000.0, Date, "EARTH", SpiceManager::IsSunrise::Yes
+        ).value();
+        const double sunsetGround = SpiceManager::ref().solarEventTime(
+            Latitude, Longitude, 0.0, Date, "EARTH", SpiceManager::IsSunrise::No
+        ).value();
+        const double sunsetHigh = SpiceManager::ref().solarEventTime(
+            Latitude, Longitude, 3000.0, Date, "EARTH", SpiceManager::IsSunrise::No
+        ).value();
+        CHECK(sunriseHigh < sunriseGround);
+        CHECK(sunsetHigh > sunsetGround);
+    }
+
+    SpiceManager::deinitialize();
+}
+
+TEST_CASE("SpiceManager: Solar Event Time Errors", "[spicemanager]") {
+    SpiceManager::initialize();
+
+    loadMetaKernel();
+
+    const std::string Date = "2004-06-11";
+
+    SECTION("Exceptions enabled") {
+        // The Sun does not rise or set near the south pole in June. This is not an error,
+        // but there is simply no time to return
+        CHECK_FALSE(
+            SpiceManager::ref().solarEventTime(
+                -85.0, -100.0, 0.0, Date, "EARTH", SpiceManager::IsSunrise::Yes
+            ).has_value()
+        );
+        CHECK_FALSE(
+            SpiceManager::ref().solarEventTime(
+                -85.0, -100.0, 0.0, Date, "EARTH", SpiceManager::IsSunrise::No
+            ).has_value()
+        );
+
+        // A date that cannot be parsed or a body that does not exist throw, as
+        // exceptions are enabled by default
+        CHECK_THROWS_AS(
+            SpiceManager::ref().solarEventTime(
+                40.0, -100.0, 0.0, "not a date", "EARTH", SpiceManager::IsSunrise::Yes
+            ),
+            SpiceManager::SpiceException
+        );
+        CHECK_THROWS_AS(
+            SpiceManager::ref().solarEventTime(
+                40.0, -100.0, 0.0, Date, "NOTABODY", SpiceManager::IsSunrise::Yes
+            ),
+            SpiceManager::SpiceException
+        );
+    }
+
+    SECTION("Exceptions disabled") {
+        // This is how the application runs by default. Nothing is thrown, and there is
+        // no result if the time cannot be computed
+        SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::No);
+
+        CHECK_NOTHROW(
+            SpiceManager::ref().solarEventTime(
+                -85.0, -100.0, 0.0, Date, "EARTH", SpiceManager::IsSunrise::Yes
+            )
+        );
+        CHECK_FALSE(
+            SpiceManager::ref().solarEventTime(
+                -85.0, -100.0, 0.0, Date, "EARTH", SpiceManager::IsSunrise::Yes
+            ).has_value()
+        );
+        CHECK_FALSE(
+            SpiceManager::ref().solarEventTime(
+                40.0, -100.0, 0.0, "not a date", "EARTH", SpiceManager::IsSunrise::Yes
+            ).has_value()
+        );
+        CHECK_FALSE(
+            SpiceManager::ref().solarEventTime(
+                40.0, -100.0, 0.0, Date, "NOTABODY", SpiceManager::IsSunrise::Yes
+            ).has_value()
+        );
+
+        // The normal case still works
+        CHECK(
+            SpiceManager::ref().solarEventTime(
+                41.8781, -87.6298, 0.0, Date, "EARTH", SpiceManager::IsSunrise::Yes
+            ).has_value()
+        );
     }
 
     SpiceManager::deinitialize();
