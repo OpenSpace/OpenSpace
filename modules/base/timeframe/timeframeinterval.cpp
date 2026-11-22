@@ -163,6 +163,7 @@ TimeFrameInterval::TimeFrameInterval(const Dictionary& dictionary)
     }
     _hasStart = p.start.has_value();
     addProperty(_hasStart);
+    _start.setViewOption(Property::ViewOptions::Time);
     addProperty(_start);
 
     if (p.end.has_value()) {
@@ -177,6 +178,7 @@ TimeFrameInterval::TimeFrameInterval(const Dictionary& dictionary)
     }
     _hasEnd = p.end.has_value();
     addProperty(_hasEnd);
+    _end.setViewOption(Property::ViewOptions::Time);
     addProperty(_end);
 
     if (!_hasStart) {

@@ -37,6 +37,7 @@ namespace openspace {
 
 std::string Property::ViewOptions::Color = "Color";
 std::string Property::ViewOptions::MinMaxRange = "MinMaxRange";
+std::string Property::ViewOptions::Time = "Time";
 
 #ifdef _DEBUG
 uint64_t Property::Identifier = 0;
@@ -410,7 +411,8 @@ nlohmann::json Property::ViewOptionsSchema() {
           "type": "object",
           "properties": {
             "Color": { "type": "boolean" },
-            "MinMaxRange": { "type": "boolean" }
+            "MinMaxRange": { "type": "boolean" },
+            "Time": { "type": "boolean" }
           },
           "additionalProperties": false
         }

@@ -374,11 +374,13 @@ public:
      * Default view options that can be used in the Property::setViewOption method. The
      * values are:
      *   - Property::ViewOptions::Color = `Color` (Intended for Vec3 and Vec4),
-     *   - Property::ViewOptions::MinMaxRange = `MinMaxRange` (Intended for Vec2)
+     *   - Property::ViewOptions::MinMaxRange = `MinMaxRange` (Intended for Vec2),
+     *   - Property::ViewOptions::Time = `Time` (Intended for DoubleProperty)
      */
     struct ViewOptions {
         static std::string Color;
         static std::string MinMaxRange;
+        static std::string Time;
     };
 
     /**
