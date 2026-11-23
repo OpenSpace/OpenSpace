@@ -35,6 +35,7 @@ set(HEADER_FILES
     rendering/renderableexoplanetglyphcloud.h
     rendering/renderablehostcloud.h
     rendering/renderablespatialselectionvolume.h
+    rendering/screenspacecolormappreview.h
     rendering/selectionvolumemesh.h
     spatialselectionhandler.h
     spatialselection/castselection.h
@@ -68,6 +69,7 @@ set(SOURCE_FILES
     rendering/renderableexoplanetglyphcloud.cpp
     rendering/renderablehostcloud.cpp
     rendering/renderablespatialselectionvolume.cpp
+    rendering/screenspacecolormappreview.cpp
     rendering/selectionvolumemesh.cpp
     spatialselectionhandler.cpp
     spatialselection/castselection.cpp

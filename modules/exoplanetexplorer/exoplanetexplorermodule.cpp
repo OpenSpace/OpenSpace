@@ -28,6 +28,7 @@
 #include <modules/exoplanetexplorer/rendering/renderablehostcloud.h>
 #include <modules/exoplanetexplorer/rendering/renderableexoplanetglyphcloud.h>
 #include <modules/exoplanetexplorer/rendering/renderablespatialselectionvolume.h>
+#include <modules/exoplanetexplorer/rendering/screenspacecolormappreview.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/syncengine.h>
@@ -35,6 +36,7 @@
 #include <openspace/filesystem/filesystem.h>
 #include <openspace/logging/logmanager.h>
 #include <openspace/util/factorymanager.h>
+#include <glm/gtc/packing.hpp>
 #include <string_view>
 
 namespace {
@@ -307,8 +309,51 @@ void ExoplanetExplorerModule::updateGlyphRenderData(
     _gotNewDataFromGui = true;
 }
 
+ExoplanetExplorerModule::ColormapPreviewData
+ExoplanetExplorerModule::colormapPreviewData() const {
+    std::lock_guard guard(_syncMutex);
+    return _colormapPreviewData;
+}
+
+void ExoplanetExplorerModule::updateColormapPreviewData(ColormapPreviewData data) {
+    std::lock_guard guard(_syncMutex);
+    data.revision = _colormapPreviewData.revision + 1;
+    _colormapPreviewData = std::move(data);
+    _colormapPreviewIsDirty = true;
+}
+
 void ExoplanetExplorerModule::encode(SyncBuffer* syncBuffer) {
     std::lock_guard guard(_syncMutex);
+
+    syncBuffer->encode(_colormapPreviewIsDirty);
+    if (_colormapPreviewIsDirty) {
+        _colormapPreviewIsDirty = false;
+        const ColormapPreviewData& preview = _colormapPreviewData;
+        syncBuffer->encode(preview.noValueColor.r);
+        syncBuffer->encode(preview.noValueColor.g);
+        syncBuffer->encode(preview.noValueColor.b);
+        syncBuffer->encode(preview.noValueColor.a);
+        syncBuffer->encode(preview.variables.size());
+        for (const ColormapPreviewData::Variable& variable : preview.variables) {
+            syncBuffer->encode(variable.name);
+            syncBuffer->encode(variable.isNumeric);
+            syncBuffer->encode(variable.useLogScale);
+            syncBuffer->encode(variable.min);
+            syncBuffer->encode(variable.max);
+            syncBuffer->encode(variable.colors.size());
+            for (const glm::vec4& color : variable.colors) {
+                syncBuffer->encode(glm::packUnorm4x8(color));
+            }
+            syncBuffer->encode(variable.categories.size());
+            for (const ColormapPreviewData::Category& category : variable.categories) {
+                syncBuffer->encode(category.name);
+                syncBuffer->encode(category.color.r);
+                syncBuffer->encode(category.color.g);
+                syncBuffer->encode(category.color.b);
+                syncBuffer->encode(category.color.a);
+            }
+        }
+    }
 
     if (!_gotNewDataFromGui) {
         // Indicate that there is no update (nItems = -1)
@@ -354,6 +399,47 @@ void ExoplanetExplorerModule::encode(SyncBuffer* syncBuffer) {
 
 void ExoplanetExplorerModule::decode(SyncBuffer* syncBuffer) {
     std::lock_guard guard(_syncMutex);
+    bool hasPreviewUpdate = false;
+    syncBuffer->decode(hasPreviewUpdate);
+    if (hasPreviewUpdate) {
+        ColormapPreviewData preview;
+        syncBuffer->decode(preview.noValueColor.r);
+        syncBuffer->decode(preview.noValueColor.g);
+        syncBuffer->decode(preview.noValueColor.b);
+        syncBuffer->decode(preview.noValueColor.a);
+        size_t nVariables = 0;
+        syncBuffer->decode(nVariables);
+        preview.variables.reserve(nVariables);
+        for (size_t i = 0; i < nVariables; ++i) {
+            ColormapPreviewData::Variable variable;
+            syncBuffer->decode(variable.name);
+            syncBuffer->decode(variable.isNumeric);
+            syncBuffer->decode(variable.useLogScale);
+            syncBuffer->decode(variable.min);
+            syncBuffer->decode(variable.max);
+            size_t nColors = 0;
+            syncBuffer->decode(nColors);
+            variable.colors.resize(nColors);
+            for (glm::vec4& color : variable.colors) {
+                uint32_t packedColor = 0;
+                syncBuffer->decode(packedColor);
+                color = glm::unpackUnorm4x8(packedColor);
+            }
+            size_t nCategories = 0;
+            syncBuffer->decode(nCategories);
+            variable.categories.resize(nCategories);
+            for (ColormapPreviewData::Category& category : variable.categories) {
+                syncBuffer->decode(category.name);
+                syncBuffer->decode(category.color.r);
+                syncBuffer->decode(category.color.g);
+                syncBuffer->decode(category.color.b);
+                syncBuffer->decode(category.color.a);
+            }
+            preview.variables.push_back(std::move(variable));
+        }
+        preview.revision = _colormapPreviewData.revision + 1;
+        _colormapPreviewData = std::move(preview);
+    }
     int nItems;
     syncBuffer->decode(nItems);
 
@@ -419,6 +505,12 @@ void ExoplanetExplorerModule::internalInitialize(const Dictionary& dict) {
     _enabled = p.enabled.value_or(false);
     _showInfoWindowAtStartup = p.showInfoAtStartup.value_or(false);
 
+    auto* fScreenSpace = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    assert_msg(fScreenSpace, "No screenspace renderable factory existed");
+    fScreenSpace->registerClass<ScreenSpaceColormapPreview>(
+        "ScreenSpaceColormapPreview"
+    );
+
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     assert_msg(fRenderable, "No renderable factory existed");
 
@@ -441,7 +533,8 @@ ExoplanetExplorerModule::documentations() const
         RenderableHostCloud::Documentation(),
         RenderableExoplanetGlyphCloud::Documentation(),
         RenderableSpatialSelectionVolume::Documentation(),
-        RenderableDensityPointCloud::Documentation()
+        RenderableDensityPointCloud::Documentation(),
+        ScreenSpaceColormapPreview::Documentation()
     };
 }
 

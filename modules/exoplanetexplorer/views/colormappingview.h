@@ -62,6 +62,7 @@ public:
 
     const std::vector<ColorMappedVariable>& colorMapperVariables();
     const ColumnKey& firstNumericColumn() const;
+    glm::vec4 noValueColor() const;
 
     // Return true if the color map was changed
     bool render(bool* open);

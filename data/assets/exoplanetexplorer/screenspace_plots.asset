@@ -1,6 +1,19 @@
 
 local baseUrl = "http://localhost:4680/exoplanetexplorer/web/"
 
+local ColormapPreview = {
+  Type = "ScreenSpaceColormapPreview",
+  Identifier = "ScreenSpaceColormapPreview",
+  Name = "Color Mapping",
+  Enabled = false,
+  Placement = {
+    UseRadiusAzimuthElevation = true,
+    FaceCamera = true,
+    RadiusAzimuthElevation = { 2.0, 0.0, 0.4 },
+    Scale = 0.2
+  }
+}
+
 local Scatter = {
   Enabled = false,
   Type = "ScreenSpaceBrowser",
@@ -51,6 +64,7 @@ local TogglePlots = {
 
 
 asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(ColormapPreview)
   openspace.addScreenSpaceRenderable(Scatter)
   openspace.addScreenSpaceRenderable(ParallelCoordinates)
 
@@ -58,8 +72,9 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Scatter)
   openspace.removeScreenSpaceRenderable(ParallelCoordinates)
+  openspace.removeScreenSpaceRenderable(Scatter)
+  openspace.removeScreenSpaceRenderable(ColormapPreview)
 
   openspace.action.removeAction(TogglePlots)
 end)

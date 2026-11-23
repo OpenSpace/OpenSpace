@@ -337,6 +337,10 @@ const ColumnKey& ColorMappingView::firstNumericColumn() const {
     return _firstNumericColumn;
 }
 
+glm::vec4 ColorMappingView::noValueColor() const {
+    return _nanPointColor;
+}
+
 bool ColorMappingView::render(bool* open) {
     if (!ImGui::Begin("Color mapping", open, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::End();

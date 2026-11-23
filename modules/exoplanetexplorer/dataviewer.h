@@ -167,6 +167,7 @@ private:
     void initializeCallbacks();
 
     void renderColormapOverviewWindow(bool* open);
+    void updateColormapPreviewData();
 
     // Show a tooltip with the asymmetrical uncertainty for the given column, if the
     // hovered item has "<key>err1"/"<key>err2" columns

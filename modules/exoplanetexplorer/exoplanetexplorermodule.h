@@ -35,7 +35,9 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <mutex>
+#include <string>
 #include <string_view>
+#include <vector>
 
 namespace openspace {
 
@@ -59,6 +61,25 @@ public:
         double timeStamp = 0.0;
     };
 
+    struct ColormapPreviewData {
+        struct Category {
+            std::string name;
+            glm::vec4 color;
+        };
+        struct Variable {
+            std::string name;
+            bool isNumeric = false;
+            bool useLogScale = false;
+            float min = 0.f;
+            float max = 0.f;
+            std::vector<glm::vec4> colors;
+            std::vector<Category> categories;
+        };
+        glm::vec4 noValueColor = glm::vec4(0.f);
+        std::vector<Variable> variables;
+        size_t revision = 0;
+    };
+
     ExoplanetExplorerModule();
     virtual ~ExoplanetExplorerModule() = default;
 
@@ -70,6 +91,9 @@ public:
     GlyphRenderData glyphRenderData() const;
 
     void updateGlyphRenderData(std::vector<GlyphRenderData::Item> data);
+
+    ColormapPreviewData colormapPreviewData() const;
+    void updateColormapPreviewData(ColormapPreviewData data);
 
     // Encode the data that should be synced to the other nodes
     void encode(SyncBuffer* syncBuffer) override;
@@ -99,6 +123,7 @@ protected:
 
     // This data is set from master only, but should be synced to all the nodes
     GlyphRenderData _glyphRenderData;
+    ColormapPreviewData _colormapPreviewData;
 
     // Synced data are mutex protected since decode and rendering may happen
     // asynchronously. Mutable since we need to lock it in const functions that
@@ -107,6 +132,7 @@ protected:
 
     // Master-only flag to track if new data needs syncing to nodes
     bool _gotNewDataFromGui = false;
+    bool _colormapPreviewIsDirty = false;
 };
 
 } // namespace openspace

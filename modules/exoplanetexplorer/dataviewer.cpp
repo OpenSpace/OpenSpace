@@ -1475,7 +1475,7 @@ void DataViewer::render() {
     _externalSelectionChanged = false;
 
     if (_showColormapWindow) {
-        _colormapWasChanged = _colorMappingView->render(&_showColormapWindow);
+        _colormapWasChanged |= _colorMappingView->render(&_showColormapWindow);
     }
 
     if (_showColormapOverviewWindow) {
@@ -1508,6 +1508,7 @@ void DataViewer::render() {
 
     if (_filterChanged || _colormapWasChanged) {
         updateGlyphRenderData();
+        updateColormapPreviewData();
         _colormapWasChanged = false;
         _filterChanged = false;
         _dataVersion++;
@@ -1521,6 +1522,48 @@ void DataViewer::render() {
 
 void DataViewer::openColumnSelectionView() {
     _showColumnSelectionView = true;
+}
+
+void DataViewer::updateColormapPreviewData() {
+    using PreviewData = ExoplanetExplorerModule::ColormapPreviewData;
+    PreviewData preview;
+    preview.noValueColor = _colorMappingView->noValueColor();
+
+    using MappedVariable = ColorMappingView::ColorMappedVariable;
+    for (const MappedVariable& variable : _colorMappingView->colorMapperVariables()) {
+        PreviewData::Variable entry;
+        entry.name = columnName(variable.column);
+        entry.isNumeric = isNumericColumn(variable.column);
+        entry.useLogScale = variable.useLogScale;
+        entry.min = variable.colorScaleMin;
+        entry.max = variable.colorScaleMax;
+
+        if (entry.isNumeric) {
+            constexpr int NSamples = 256;
+            entry.colors.reserve(NSamples);
+            ImPlot::PushColormap(_colorMappingView->colormapFromIndex(
+                static_cast<size_t>(variable.colormapIndex)
+            ));
+            for (int i = 0; i < NSamples; ++i) {
+                const float position = (static_cast<float>(i) + 0.5f) / NSamples;
+                const ImVec4 color = ImPlot::SampleColormap(position);
+                entry.colors.emplace_back(color.x, color.y, color.z, color.w);
+            }
+            ImPlot::PopColormap();
+        }
+        else {
+            for (const auto& [name, info] : variable.categories) {
+                glm::vec4 color = info.color;
+                color.a *= variable.opacity;
+                entry.categories.push_back({ name, color });
+            }
+        }
+
+        preview.variables.push_back(std::move(entry));
+    }
+
+    auto* module = global::moduleEngine->module<ExoplanetExplorerModule>();
+    module->updateColormapPreviewData(std::move(preview));
 }
 
 void DataViewer::renderColormapOverviewWindow(bool* open) {
