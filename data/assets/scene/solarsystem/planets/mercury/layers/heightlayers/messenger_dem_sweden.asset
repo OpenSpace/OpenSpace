@@ -6,10 +6,7 @@ local Layer = {
   Enabled = asset.enabled,
   ZIndex = 10,
   FilePath = asset.resource("messenger_dem_sweden.wms"),
-  Settings = {
-    Multiplier = 0.196841,
-    Offset = -5500.0
-  },
+  Settings = { Multiplier = 0.5 },
   TilePixelSize = 512
 }
 
