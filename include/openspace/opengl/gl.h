@@ -79,9 +79,9 @@ struct GLDebugGroup {
 namespace detail {
 
 /**
- * A less friction overload for setting tha name of an OpenGL object
+ * A less friction overload for setting the name of an OpenGL object
  */
-void glObjectLabel(GLenum identifier, GLuint name, std::string_view label) {
+inline void glObjectLabel(GLenum identifier, GLuint name, std::string_view label) {
     gl::glObjectLabel(identifier, name, static_cast<GLsizei>(label.size()), label.data());
 }
 
