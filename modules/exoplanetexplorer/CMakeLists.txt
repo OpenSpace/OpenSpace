@@ -33,6 +33,7 @@ set(HEADER_FILES
     gui.h
     rendering/renderabledensitypointcloud.h
     rendering/renderableexoplanetglyphcloud.h
+    rendering/renderableexoplanetlabel.h
     rendering/renderablehostcloud.h
     rendering/renderablespatialselectionvolume.h
     rendering/screenspacecolormappreview.h
@@ -67,6 +68,7 @@ set(SOURCE_FILES
     gui.cpp
     rendering/renderabledensitypointcloud.cpp
     rendering/renderableexoplanetglyphcloud.cpp
+    rendering/renderableexoplanetlabel.cpp
     rendering/renderablehostcloud.cpp
     rendering/renderablespatialselectionvolume.cpp
     rendering/screenspacecolormappreview.cpp

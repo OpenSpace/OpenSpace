@@ -672,14 +672,15 @@ FontRenderer::BoundingBoxInformation FontRenderer::render(Font& font,
                 heightInPixels;
 
             // Size-based culling
-            if (heightInPixels < static_cast<float>(labelInfo.minSize) ||
+            if (labelInfo.enablePixelSizeControl &&
+                (heightInPixels < static_cast<float>(labelInfo.minSize) ||
                 heightInPixels > _framebufferSize.x ||
-                heightInPixels > _framebufferSize.y)
+                heightInPixels > _framebufferSize.y))
             {
                 return { size, static_cast<int>(lines) };
             }
 
-            if (heightInPixels > labelInfo.maxSize) {
+            if (labelInfo.enablePixelSizeControl && heightInPixels > labelInfo.maxSize) {
                 const float scaleFix =
                     static_cast<float>(labelInfo.maxSize) / heightInPixels;
                 if (labelInfo.renderType == 0) {

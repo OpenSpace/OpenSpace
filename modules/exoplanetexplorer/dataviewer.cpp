@@ -528,6 +528,7 @@ bool DataViewer::initializeData(DataSettings settings) {
     }
 
     hideSelectionVolume();
+    _glyphHandler.resetHoverLabel();
     _dataSettings = std::move(settings);
 
     // Set the inclination column to use in the regular exoplanet module to be the same
@@ -1024,6 +1025,7 @@ void DataViewer::render() {
     // that is when the picking-based hovering is actually enabled in the renderables.
     ImGuiIO& mainIo = ImGui::GetIO();
     int hoveredIndex = mainIo.WantCaptureMouse ? -1 : _glyphHandler.getHoveredPlanetIndex();
+    _glyphHandler.updateHoverLabel(hoveredIndex);
     renderPlanetTooltip(hoveredIndex);
     handleDoubleClickHoveredPlanet(hoveredIndex);
 

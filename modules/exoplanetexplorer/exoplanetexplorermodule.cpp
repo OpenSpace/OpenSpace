@@ -27,6 +27,7 @@
 #include <modules/exoplanetexplorer/rendering/renderabledensitypointcloud.h>
 #include <modules/exoplanetexplorer/rendering/renderablehostcloud.h>
 #include <modules/exoplanetexplorer/rendering/renderableexoplanetglyphcloud.h>
+#include <modules/exoplanetexplorer/rendering/renderableexoplanetlabel.h>
 #include <modules/exoplanetexplorer/rendering/renderablespatialselectionvolume.h>
 #include <modules/exoplanetexplorer/rendering/screenspacecolormappreview.h>
 #include <openspace/engine/globals.h>
@@ -518,6 +519,7 @@ void ExoplanetExplorerModule::internalInitialize(const Dictionary& dict) {
     fRenderable->registerClass<RenderableExoplanetGlyphCloud>(
         "RenderableExoplanetGlyphCloud"
     );
+    fRenderable->registerClass<RenderableExoplanetLabel>("RenderableExoplanetLabel");
     fRenderable->registerClass<RenderableSpatialSelectionVolume>(
         "RenderableSpatialSelectionVolume"
     );
@@ -530,10 +532,11 @@ std::vector<openspace::Documentation>
 ExoplanetExplorerModule::documentations() const
 {
     return {
-        RenderableHostCloud::Documentation(),
-        RenderableExoplanetGlyphCloud::Documentation(),
-        RenderableSpatialSelectionVolume::Documentation(),
         RenderableDensityPointCloud::Documentation(),
+        RenderableExoplanetGlyphCloud::Documentation(),
+        RenderableExoplanetLabel::Documentation(),
+        RenderableHostCloud::Documentation(),
+        RenderableSpatialSelectionVolume::Documentation(),
         ScreenSpaceColormapPreview::Documentation()
     };
 }

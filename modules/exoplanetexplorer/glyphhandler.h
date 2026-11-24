@@ -53,6 +53,9 @@ public:
 
     int getHoveredPlanetIndex() const;
 
+    void updateHoverLabel(int hoveredIndex);
+    void resetHoverLabel();
+
     void setGlyphScale(float scale);
     void setGlyphMode(GlyphMode mode);
 
@@ -66,6 +69,7 @@ private:
     void applyVisibility();
 
     GlyphMode _mode = GlyphMode::Rings;
+    int _hoverLabelIndex = -1;
     bool _temporaryVisibility = false;
     bool _glyphsVisible = true;
     bool _planetVisible = true;

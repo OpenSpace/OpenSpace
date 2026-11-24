@@ -35,13 +35,16 @@
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/distanceconstants.h>
 #include <chrono>
+#include <cmath>
 
 namespace {
     using namespace openspace;
 
     constexpr std::string_view GlyphCloudIdentifier = "ExoplanetGlyphCloud";
     constexpr std::string_view HostCloudIdentifier = "HostCloud";
+    constexpr std::string_view HoverLabelIdentifier = "ExoplanetHoverLabel";
     constexpr std::string_view GlyphTag = "exoplanet_explorer_glyphs";
 
     // @TODO this could be a templated helper function for lists. Used a lot
@@ -143,6 +146,84 @@ void GlyphHandler::initializeRenderables() {
     global::scriptEngine->queueScript(
         std::format("openspace.addSceneGraphNode({})", formatLua(hostsNode))
     );
+
+    // An optional label that can be turned on to show the hovered object in the dome
+    Dictionary labelGui;
+    labelGui.setValue("Name", "Hover Label"s);
+    labelGui.setValue("Path", "/ExoplanetExplorer"s);
+
+    Dictionary labelRenderable;
+    labelRenderable.setValue("Type", "RenderableExoplanetLabel"s);
+    labelRenderable.setValue("Enabled", false);
+    labelRenderable.setValue("Text", ""s);
+    labelRenderable.setValue("AngularSize", 1.0);
+
+    Dictionary translation;
+    translation.setValue("Type", "StaticTranslation"s);
+    translation.setValue("Position", glm::dvec3(0.0));
+
+    Dictionary transform;
+    transform.setValue("Translation", translation);
+
+    Dictionary labelNode;
+    labelNode.setValue("Identifier", std::string(HoverLabelIdentifier));
+    labelNode.setValue("Renderable", labelRenderable);
+    labelNode.setValue("Transform", transform);
+    labelNode.setValue("Tag", tags);
+    labelNode.setValue("GUI", labelGui);
+
+    global::scriptEngine->queueScript(std::format(
+        "if not openspace.hasSceneGraphNode('{}') then "
+        "openspace.addSceneGraphNode({}) end",
+        HoverLabelIdentifier, formatLua(labelNode)
+    ));
+    resetHoverLabel();
+}
+
+void GlyphHandler::updateHoverLabel(int hoveredIndex) {
+    const std::vector<ExoplanetItem>& data = _dataViewer.data();
+    glm::dvec3 position = glm::dvec3(0.0);
+    if (hoveredIndex >= 0 && static_cast<size_t>(hoveredIndex) < data.size() &&
+        data[hoveredIndex].position.has_value())
+    {
+        position = *data[hoveredIndex].position * distanceconstants::Parsec;
+        if (!std::isfinite(position.x) || !std::isfinite(position.y) ||
+            !std::isfinite(position.z))
+        {
+            hoveredIndex = -1;
+        }
+    }
+    else {
+        hoveredIndex = -1;
+    }
+
+    if (_hoverLabelIndex == hoveredIndex) {
+        return;
+    }
+    _hoverLabelIndex = hoveredIndex;
+
+    Dictionary label;
+    label.setValue("text", hoveredIndex >= 0 ? data[hoveredIndex].name : std::string());
+    if (hoveredIndex >= 0) {
+        label.setValue("position", position);
+    }
+    global::scriptEngine->queueScript(
+        std::format(
+            "if openspace.hasSceneGraphNode('{0}') then "
+            "local label = {1}; "
+            "if {2} then openspace.setPropertyValueSingle("
+            "'Scene.{0}.Translation.Position', label.position) end; "
+            "openspace.setPropertyValueSingle('Scene.{0}.Renderable.Text', label.text) "
+            "end",
+            HoverLabelIdentifier, formatLua(label), hoveredIndex >= 0
+        ),
+        ScriptEngine::ShouldBeLogged::No
+    );
+}
+
+void GlyphHandler::resetHoverLabel() {
+    _hoverLabelIndex = -2;
+    updateHoverLabel(-1);
 }
 
 void GlyphHandler::updateSelectionInRenderable(const std::vector<size_t>& selection) {

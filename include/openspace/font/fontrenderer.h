@@ -66,6 +66,7 @@ public:
         bool enableDepth = false;
         bool enableFalseDepth = false;
         bool disableTransmittance = false;
+        bool enablePixelSizeControl = true;
         float scale = 0.f;
         int renderType = 0;
         int minSize = 0;
