@@ -62,6 +62,18 @@ local TogglePlots = {
   IsLocal = false
 }
 
+local ToggleColormap = {
+  Identifier = "os.exoplanetexplorer_toggle_colormap",
+  Name = "Toggle Colormap",
+  Command = [[
+    openspace.toggleFade("ScreenSpace.]] .. ColormapPreview.Identifier .. [[")
+  ]],
+  Documentation = [[
+    Toggles the visibility of screen space colormap in the Exoplanet Explorer.
+  ]],
+  GuiPath = "/ExoplanetExplorer",
+  IsLocal = false
+}
 
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(ColormapPreview)
@@ -69,6 +81,7 @@ asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(ParallelCoordinates)
 
   openspace.action.registerAction(TogglePlots)
+  openspace.action.registerAction(ToggleColormap)
 end)
 
 asset.onDeinitialize(function()
@@ -77,4 +90,5 @@ asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(ColormapPreview)
 
   openspace.action.removeAction(TogglePlots)
+  openspace.action.removeAction(ToggleColormap)
 end)

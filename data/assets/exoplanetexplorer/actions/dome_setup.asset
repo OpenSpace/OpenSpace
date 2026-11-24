@@ -20,6 +20,9 @@ local DomeSetup = {
     openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceBrowser_ParallelCoordinates.ZoomLevel", 2.870000)
     openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceBrowser_ParallelCoordinates.Placement.RadiusAzimuthElevation", {2.000000,5.323254,0.418879})
     openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceBrowser_ParallelCoordinates.Placement.Scale", 0.650000)
+
+    -- Enable the hover label
+    openspace.setPropertyValue('Scene.ExoplanetHoverLabel.Renderable.Enabled', false)
   ]],
   Documentation = [[ExoplanetExplorer dome setup (Nkpg dome)]],
   GuiPath = "/ExoplanetExplorer",
