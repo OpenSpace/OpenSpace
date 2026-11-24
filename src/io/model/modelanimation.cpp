@@ -24,6 +24,8 @@
 
 #include <openspace/io/model/modelanimation.h>
 
+#include <openspace/io/model/modelnode.h>
+#include <openspace/logging/logmanager.h>
 #include <glm/gtx/quaternion.hpp>
 #include <limits>
 #include <utility>
@@ -33,7 +35,9 @@ namespace openspace::io {
 ModelAnimation::ModelAnimation(std::string name, double duration)
     : _name(std::move(name))
     , _duration(duration)
-{}
+{
+    _finalBoneTransforms = std::vector<glm::mat4>(100, glm::mat4(1.f));
+}
 
 void ModelAnimation::setTimeScale(float timeScale) {
     const double duration = _duration / _timeScale;
@@ -52,14 +56,27 @@ void ModelAnimation::animate(double now, bool enabled) {
     }
     _wasActive = true;
 
-    for (ModelAnimation::NodeAnimation& nodeAnimation : _nodeAnimations) {
-        glm::mat4 transform = computeCurrentTransform(
-            now,
-            nodeAnimation.positions,
-            nodeAnimation.rotations,
-            nodeAnimation.scales
-        );
-        nodeAnimation.currentTransform = std::move(transform);
+    if (_mode == AnimationMode::Node) {
+        for (ModelAnimation::NodeAnimation& nodeAnimation : _nodeAnimations) {
+            glm::mat4 transform = computeCurrentTransform(
+                now,
+                nodeAnimation.positions,
+                nodeAnimation.rotations,
+                nodeAnimation.scales
+            );
+            nodeAnimation.currentTransform = std::move(transform);
+        }
+    }
+    else if (_mode == AnimationMode::Bone) {
+        for (ModelAnimation::BoneAnimation& boneAnimation : _boneAnimations) {
+            glm::mat4 transform = computeCurrentTransform(
+                now,
+                boneAnimation.positions,
+                boneAnimation.rotations,
+                boneAnimation.scales
+            );
+            boneAnimation.currentBoneTransform = std::move(transform);
+        }
     }
 }
 
@@ -67,14 +84,18 @@ void ModelAnimation::reset() {
     for (ModelAnimation::NodeAnimation& nodeAnimation : _nodeAnimations) {
         nodeAnimation.currentTransform = glm::mat4(1.f);
     }
+
+    for (ModelAnimation::BoneAnimation& boneAnimation : _boneAnimations) {
+        boneAnimation.currentBoneTransform = glm::mat4(1.f);
+    }
 }
 
-std::vector<ModelAnimation::NodeAnimation>& ModelAnimation::nodeAnimations() {
-    return _nodeAnimations;
+ModelAnimation::AnimationMode ModelAnimation::mode() const {
+    return _mode;
 }
 
-const std::vector<ModelAnimation::NodeAnimation>& ModelAnimation::nodeAnimations() const {
-    return _nodeAnimations;
+void ModelAnimation::setMode(AnimationMode mode) {
+    _mode = mode;
 }
 
 std::string ModelAnimation::name() const {
@@ -87,6 +108,64 @@ double ModelAnimation::duration() const {
 
 float ModelAnimation::timeScale() const {
     return _timeScale;
+}
+
+std::vector<ModelAnimation::NodeAnimation>& ModelAnimation::nodeAnimations() {
+    return _nodeAnimations;
+}
+
+const std::vector<ModelAnimation::NodeAnimation>& ModelAnimation::nodeAnimations() const {
+    return _nodeAnimations;
+}
+
+std::vector<ModelAnimation::BoneAnimation>& ModelAnimation::boneAnimations() {
+    return _boneAnimations;
+}
+
+const std::vector<ModelAnimation::BoneAnimation>&ModelAnimation::boneAnimations() const {
+    return _boneAnimations;
+}
+
+ModelAnimation::BoneAnimation* ModelAnimation::findBoneAnimation(
+                                                                std::string_view boneName)
+{
+    for (ModelAnimation::BoneAnimation& boneAnimation : _boneAnimations) {
+        if (boneAnimation.boneName == boneName) {
+            return &boneAnimation;
+        }
+    }
+    return nullptr;
+}
+
+const ModelAnimation::BoneAnimation* ModelAnimation::findBoneAnimation(
+                                                          std::string_view boneName) const
+{
+    for (const ModelAnimation::BoneAnimation& boneAnimation : _boneAnimations) {
+        if (boneAnimation.boneName == boneName) {
+            return &boneAnimation;
+        }
+    }
+    return nullptr;
+}
+
+void ModelAnimation::setBoneMap(std::map<std::string, io::ModelMesh::Bone*> boneMap) {
+    _boneMap = boneMap;
+}
+
+void ModelAnimation::computeFinalBoneTransforms(const std::vector<ModelNode>& nodes) {
+    if (_mode != AnimationMode::Bone || nodes.empty() || _boneMap.empty()) {
+        return;
+    }
+
+    computeFinalBoneTransformsRecursive(nodes, nodes[0], glm::mat4(1.f));
+}
+
+const std::vector<glm::mat4>& ModelAnimation::finalBoneTransforms() const {
+    return _finalBoneTransforms;
+}
+
+std::vector<glm::mat4>& ModelAnimation::finalBoneTransforms() {
+    return _finalBoneTransforms;
 }
 
 glm::mat4 ModelAnimation::computeCurrentTransform(double now,
@@ -225,6 +304,42 @@ glm::mat4 ModelAnimation::computeCurrentTransform(double now,
         glm::scale(animationTransform, currScale);
 
     return animationTransform;
+}
+
+void ModelAnimation::computeFinalBoneTransformsRecursive(
+                                                      const std::vector<ModelNode>& nodes,
+                                                                    const ModelNode& node,
+                                                           glm::mat4 parentTransformation)
+{
+    // TODO: Include the bone offset matrix here so we do not need to apply that later
+    const ModelAnimation::BoneAnimation* boneAnimation = findBoneAnimation(node.name());
+    glm::mat4 finalTransform = parentTransformation * node.transform();
+
+    if (boneAnimation && boneAnimation->boneIndex >= 0 && boneAnimation->boneIndex < 100) {
+        // NOTE: Parents are needed here
+        finalTransform = parentTransformation * boneAnimation->currentBoneTransform;
+
+        io::ModelMesh::Bone*  bone = _boneMap.at(boneAnimation->boneName);
+        if (!bone) {
+            LERRORC("ModelAnimation", std::format(
+                "BoneAnimation with bone '{}' does not refer to any bone in the mesh",
+                boneAnimation->boneName
+            ));
+            _finalBoneTransforms[boneAnimation->boneIndex] = parentTransformation * node.transform();
+        }
+        else {
+            // NOTE: no transposing bone->boneTransform
+            _finalBoneTransforms[boneAnimation->boneIndex] = finalTransform * bone->boneTransform;
+        }
+    }
+
+    for (int child : node.children()) {
+        computeFinalBoneTransformsRecursive(
+            nodes,
+            nodes[child],
+            finalTransform
+        );
+    }
 }
 
 } // namespace openspace::io

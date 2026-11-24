@@ -26,13 +26,21 @@
 #define __OPENSPACE_CORE___MODELANIMATION___H__
 
 #include <openspace/glm.h>
+#include <openspace/io/model/modelmesh.h>
 #include <string>
 #include <vector>
 
 namespace openspace::io {
 
+class ModelNode;
+
 class ModelAnimation {
 public:
+    enum class AnimationMode {
+        Node = 0,
+        Bone
+    };
+
     struct PositionKeyframe {
         glm::vec3 position = glm::vec3(0.f);
         double time = 0.0;
@@ -56,6 +64,15 @@ public:
         glm::mat4 currentTransform = glm::mat4(1.f);
     };
 
+    struct BoneAnimation {
+        std::string boneName;
+        int boneIndex = -1;
+        std::vector<PositionKeyframe> positions;
+        std::vector<RotationKeyframe> rotations;
+        std::vector<ScaleKeyframe> scales;
+        glm::mat4 currentBoneTransform = glm::mat4(1.f);
+    };
+
     ModelAnimation(std::string name, double duration);
 
     ModelAnimation(ModelAnimation&&) noexcept = default;
@@ -65,11 +82,23 @@ public:
     void animate(double now, bool enabled);
     void reset();
 
-    std::vector<NodeAnimation>& nodeAnimations();
-    const std::vector<NodeAnimation>& nodeAnimations() const;
+    AnimationMode mode() const;
+    void setMode(AnimationMode mode);
     std::string name() const;
     double duration() const;
     float timeScale() const;
+
+    std::vector<NodeAnimation>& nodeAnimations();
+    const std::vector<NodeAnimation>& nodeAnimations() const;
+
+    std::vector<BoneAnimation>& boneAnimations();
+    const std::vector<BoneAnimation>&boneAnimations() const;
+    BoneAnimation* findBoneAnimation(std::string_view boneName);
+    const BoneAnimation* findBoneAnimation(std::string_view boneName) const;
+    void setBoneMap(std::map<std::string, io::ModelMesh::Bone*> boneMap);
+    void computeFinalBoneTransforms(const std::vector<ModelNode>& nodes);
+    const std::vector<glm::mat4>& finalBoneTransforms() const;
+    std::vector<glm::mat4>& finalBoneTransforms();
 
 private:
     glm::mat4 computeCurrentTransform(double now,
@@ -77,11 +106,20 @@ private:
         const std::vector<RotationKeyframe>& rotations,
         const std::vector<ScaleKeyframe>& scales) const;
 
+    void computeFinalBoneTransformsRecursive(const std::vector<ModelNode>& nodes,
+        const ModelNode& node, glm::mat4 parentTransformation);
+
+    AnimationMode _mode = AnimationMode::Node;
     std::string _name;
     double _duration;
     float _timeScale = 1.f;
-    std::vector<NodeAnimation> _nodeAnimations;
     bool _wasActive = false;
+
+    std::vector<NodeAnimation> _nodeAnimations;
+
+    std::vector<BoneAnimation> _boneAnimations;
+    std::map<std::string, io::ModelMesh::Bone*> _boneMap;
+    std::vector<glm::mat4> _finalBoneTransforms;
 };
 
 } // namespace openspace::io

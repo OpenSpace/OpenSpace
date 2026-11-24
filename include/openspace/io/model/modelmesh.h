@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___MODELMESH___H__
 
 #include <openspace/glm.h>
-#include <openspace/io/model/modelanimation.h>
 #include <openspace/opengl/gl.h>
 #include <openspace/opengl/texture.h>
 #include <cstdint>
@@ -35,6 +34,8 @@
 namespace openspace::opengl { class ProgramObject; }
 
 namespace openspace::io {
+
+class ModelAnimation;
 
 class ModelMesh {
 public:
@@ -52,6 +53,8 @@ public:
         GLfloat normal[3] = { 0.f, 0.f, 0.f };
         GLfloat tangent[3] = { 0.f, 0.f, 0.f };
         GLfloat color[3] = { 0.f, 0.f, 0.f };
+        GLint boneIndicies[4] = { -1, -1, -1, -1 }; // Max 4 bones can affect 1 vertex
+        GLfloat boneWeights[4] = { 0.f, 0.f, 0.f, 0.f };
     };
 
     struct Texture {
@@ -61,6 +64,12 @@ public:
         bool useForcedColor = false;
         glm::vec4 color = glm::vec4(0.f, 0.f, 0.f, 1.f);
         bool isTransparent = false;
+    };
+
+    struct Bone {
+        std::string name;
+        int id = -1;
+        glm::mat4 boneTransform = glm::mat4(1.f);
     };
 
     static void generateDebugTexture(ModelMesh::Texture& texture);
@@ -74,8 +83,8 @@ public:
 
     void initialize();
     void deinitialize() const;
-    void render(opengl::ProgramObject& program, const glm::mat4& globalTransform,
-        const glm::mat4& nodeTransform, const ModelAnimation* modelAnimation,
+    void render(opengl::ProgramObject& program, const glm::mat4& parentTransform,
+        glm::mat4& nodeTransform, const ModelAnimation* modelAnimation,
         bool isFullyTexturedModel = true, bool isProjection = false) const;
     float calculateBoundingRadius(glm::mat4& transform) const;
 
@@ -83,15 +92,22 @@ public:
     bool isInvisible() const;
     bool hasVertexColors() const;
     bool isTransparent() const;
+    void setBones(std::vector<Bone> bones);
+    bool hasBones() const;
+    Bone* findBone(std::string_view boneName);
+    const Bone* findBone(std::string_view boneName) const;
 
     const std::vector<Vertex>& vertices() const;
+    std::vector<Vertex>& vertices();
     const std::vector<unsigned int>& indices() const;
     const std::vector<Texture>& textures() const;
+    std::vector<Bone>& bones();
 
 private:
     std::vector<Vertex> _vertices;
     std::vector<unsigned int> _indices;
     std::vector<Texture> _textures;
+    std::vector<Bone> _bones;
 
     bool _isInvisible = false;
     bool _hasVertexColors = false;

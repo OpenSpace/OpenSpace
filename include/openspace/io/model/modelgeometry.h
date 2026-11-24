@@ -99,6 +99,7 @@ public:
     void setHasTextureLoadErrors(bool hasTextureLoadErrors);
     bool hasTextureLoadErrors() const;
 
+    // TODO: check if these nodes functions can be removed
     std::vector<io::ModelNode>& nodes();
     const std::vector<io::ModelNode>& nodes() const;
     std::vector<TextureEntry>& textureStorage();

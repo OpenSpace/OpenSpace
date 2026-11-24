@@ -24,6 +24,7 @@
 
 #include <openspace/io/model/modelmesh.h>
 
+#include <openspace/io/model/modelanimation.h>
 #include <openspace/logging/logmanager.h>
 #include <openspace/misc/assert.h>
 #include <openspace/misc/profiling.h>
@@ -68,11 +69,42 @@ void ModelMesh::generateDebugTexture(ModelMesh::Texture& texture) {
     texture.type = ModelMesh::TextureType::ColorDiffuse;
 }
 
-void ModelMesh::render(opengl::ProgramObject& program, const glm::mat4& meshTransform,
-                       const glm::mat4& nodeTransform,
-                       const ModelAnimation* modelAnimation, bool isFullyTexturedModel,
-                       bool isProjection) const
+void ModelMesh::render(opengl::ProgramObject& program, const glm::mat4& parentTransform,
+                       glm::mat4& nodeTransform, const ModelAnimation* modelAnimation,
+                       bool isFullyTexturedModel, bool isProjection) const
 {
+    // Calculate the transformation for this mesh
+    glm::mat4 meshTransform = parentTransform * nodeTransform;
+
+    // Apply bone transformations if there is any for this mesh
+    program.setUniform("hasBones", false);
+    if (modelAnimation && modelAnimation->mode() == ModelAnimation::AnimationMode::Bone) {
+
+        if (_bones.size() > 0) {
+            program.setUniform("hasBones", true);
+
+            if (_bones.size() > 100) {
+                program.setUniform("hasBones", false);
+                LWARNINGC("ModelMesh", std::format("More than 100 bone transforms, only the first 100 will be used"));
+            }
+
+            program.setUniform("bonesTransforms", modelAnimation->finalBoneTransforms());
+            LWARNINGC("ModelMesh", std::format("Using {} bone transforms", _bones.size()));
+
+            // Animation is given by Assimp in absolute format, i.e. bone tranform replaces node
+            // transform, i.e. ignore nodeTransform
+            //nodeTransform = glm::mat4(1.f); // X is up
+            //meshTransform = parentTransform; // X is up when nodeTransform has been replaced with boneTransform or when set to null or ignored
+            meshTransform = glm::mat4(1.f); // Y is up when nodeTransform has been replaced with boneTransform or when set to null or when ignored
+        }
+        else {
+            LWARNINGC("ModelMesh", "No bone transforms found for this mesh");
+        }
+    }
+
+    // Calculate the transformation for this mesh
+    //glm::mat4 meshTransform = parentTransform * nodeTransform;
+
     // Count how many textures have image textures
     int counter = 0;
     for (const Texture& texture : _textures) {
@@ -177,8 +209,8 @@ void ModelMesh::render(opengl::ProgramObject& program, const glm::mat4& meshTran
     }
 
     // Transform mesh
-    program.setUniform("meshTransform", meshTransform * nodeTransform);
-    const glm::dmat4 normalTransform = glm::transpose(glm::inverse(meshTransform * nodeTransform));
+    program.setUniform("meshTransform", meshTransform);
+    const glm::dmat4 normalTransform = glm::transpose(glm::inverse(meshTransform));
     program.setUniform("meshNormalTransform", glm::mat4(normalTransform));
 
     // Render the mesh object
@@ -211,6 +243,32 @@ float ModelMesh::calculateBoundingRadius(glm::mat4& transform) const {
     return maximumDistanceSquared;
 }
 
+void ModelMesh::setBones(std::vector<Bone> bones) {
+    _bones = bones;
+}
+
+bool ModelMesh::hasBones() const {
+    return !_bones.empty();
+}
+
+ModelMesh::Bone * ModelMesh::findBone(std::string_view boneName) {
+    for (ModelMesh::Bone& bone : _bones) {
+        if (bone.name == boneName) {
+            return &bone;
+        }
+    }
+    return nullptr;
+}
+
+const ModelMesh::Bone * ModelMesh::findBone(std::string_view boneName) const {
+    for (const ModelMesh::Bone& bone : _bones) {
+        if (bone.name == boneName) {
+            return &bone;
+        }
+    }
+    return nullptr;
+}
+
 void ModelMesh::setInvisible(bool isInvisible) {
     _isInvisible = isInvisible;
 }
@@ -238,12 +296,20 @@ const std::vector<ModelMesh::Vertex>& ModelMesh::vertices() const {
     return _vertices;
 }
 
+std::vector<ModelMesh::Vertex>& ModelMesh::vertices() {
+    return _vertices;
+}
+
 const std::vector<unsigned int>& ModelMesh::indices() const {
     return _indices;
 }
 
 const std::vector<ModelMesh::Texture>& ModelMesh::textures() const {
     return _textures;
+}
+
+std::vector<ModelMesh::Bone>& ModelMesh::bones() {
+    return _bones;
 }
 
 void ModelMesh::initialize() {
@@ -293,6 +359,14 @@ void ModelMesh::initialize() {
     glEnableVertexArrayAttrib(_vao, 4);
     glVertexArrayAttribFormat(_vao, 4, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, color));
     glVertexArrayAttribBinding(_vao, 4, 0);
+
+    glEnableVertexArrayAttrib(_vao, 5);
+    glVertexArrayAttribIFormat(_vao, 5, 4, GL_INT, offsetof(Vertex, boneIndicies));
+    glVertexArrayAttribBinding(_vao, 5, 0);
+
+    glEnableVertexArrayAttrib(_vao, 6);
+    glVertexArrayAttribFormat(_vao, 6, 4, GL_FLOAT, GL_FALSE, offsetof(Vertex, boneWeights));
+    glVertexArrayAttribBinding(_vao, 6, 0);
 
     // Initialize textures
     // Also check if there are several textures/colors of the same type for this mesh

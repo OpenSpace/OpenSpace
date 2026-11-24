@@ -1150,27 +1150,61 @@ void ModelGeometry::renderRecursive(const io::ModelNode* node,
     glm::mat4 globalTransform = parentTransform * customTransform;
 
     // Find this node in the animation and apply the animation transform if it exists
-    for (const io::ModelAnimation::NodeAnimation& animation :
-        _animation->nodeAnimations())
+    if (_animation && _animation->mode() == io::ModelAnimation::AnimationMode::Node) {
+        for (const io::ModelAnimation::NodeAnimation& animation :
+            _animation->nodeAnimations())
+        {
+            if (animation.node == node->index()) {
+                // Animation is given by Assimp in absolute format, i.e. animation
+                // replaces node transform
+                nodeTransform = animation.currentTransform;
+                break;
+            }
+        }
+    }
+    // Find the bone in the animation that corresponds to this node and apply the
+    // animation transform if it exists
+    // TODO: Not sure if this is needed
+    else if (_animation && _animation->mode() == io::ModelAnimation::AnimationMode::Bone)
     {
-        if (animation.node == node->index()) {
+        const io::ModelAnimation::BoneAnimation* boneAnimation =
+            _animation->findBoneAnimation(node->name());
+
+        if (boneAnimation && boneAnimation->boneIndex >= 0 &&
+            boneAnimation->boneIndex < 100)
+        {
             // Animation is given by Assimp in absolute format, i.e. animation
             // replaces node transform
-            nodeTransform = animation.currentTransform;
-            break;
+            // For the simple model this will never have any effect
+            nodeTransform = _animation->finalBoneTransforms()[boneAnimation->boneIndex];
+            //nodeTransform = glm::mat4(1.f);
         }
     }
 
     // Render the meshes of this node
     for (const io::ModelMesh& mesh : node->meshes()) {
-        mesh.render(
-            program,
-            globalTransform,
-            nodeTransform,
-            _animation.get(),
-            isFullyTexturedModel,
-            isProjection
-        );
+        if (_animation) {
+            // TODO: We might need to return the correct node transform here after the
+            // bones have been applied
+            mesh.render(
+                program,
+                globalTransform,
+                nodeTransform,
+                _animation.get(),
+                isFullyTexturedModel,
+                isProjection
+            );
+        }
+        else {
+            mesh.render(
+                program,
+                globalTransform,
+                nodeTransform,
+                nullptr,
+                isFullyTexturedModel,
+                isProjection
+            );
+        }
     }
 
     // Move on in the model tree with an updated parant transform
@@ -1192,6 +1226,10 @@ void ModelGeometry::update(double now) {
     }
 
     _animation->animate(now, _animationEnabled);
+
+    if (_animation->mode() == io::ModelAnimation::AnimationMode::Bone) {
+        _animation->computeFinalBoneTransforms(_nodes);
+    }
 }
 
 void ModelGeometry::setTimeScale(float timeScale) {

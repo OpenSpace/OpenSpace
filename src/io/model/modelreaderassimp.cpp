@@ -541,6 +541,7 @@ namespace {
      */
     void processNode(const aiNode& node, const aiScene& scene,
                      std::vector<ModelNode>& nodes, int parent,
+                     std::map<std::string, ModelMesh::Bone*>& boneMap, int& boneCounter,
                   std::vector<modelgeometry::ModelGeometry::TextureEntry>& textureStorage,
                                                                 bool forceRenderInvisible,
                                                               bool notifyInvisibleDropped,
@@ -572,12 +573,6 @@ namespace {
             // relations between nodes)
             aiMesh* mesh = scene.mMeshes[node.mMeshes[i]];
 
-            if (mesh->HasBones()) {
-                LWARNING(
-                    "Detected unsupported animation type: 'Bones', currently only "
-                    "keyframe animations are supported"
-                );
-            }
             if (mesh->mNumAnimMeshes > 0) {
                 LWARNING(
                     "Detected unsupported animation type: 'Mesh', currently only "
@@ -594,6 +589,96 @@ namespace {
                 notifyInvisibleDropped,
                 hasTextureLoadErrors
             );
+
+            // Bones
+            if (mesh->HasBones()) {
+                std::vector<ModelMesh::Bone> bones;
+                bones.reserve(mesh->mNumBones);
+
+                // TODO: REMOVE
+                LWARNING(
+                    "Detected animation type: 'Bones', currently under development."
+                );
+
+                for (int b = 0; b < mesh->mNumBones; ++b) {
+                    ModelMesh::Bone bone;
+                    std::string boneName = mesh->mBones[b]->mName.C_Str();
+
+                    bone.name = boneName;
+                    bone.id = boneCounter;
+                    boneCounter++;
+
+                    // GLM is column major, array is column major too
+                    bone.boneTransform = glm::mat4(
+                        mesh->mBones[b]->mOffsetMatrix.a1,
+                        mesh->mBones[b]->mOffsetMatrix.b1,
+                        mesh->mBones[b]->mOffsetMatrix.c1,
+                        mesh->mBones[b]->mOffsetMatrix.d1,
+
+                        mesh->mBones[b]->mOffsetMatrix.a2,
+                        mesh->mBones[b]->mOffsetMatrix.b2,
+                        mesh->mBones[b]->mOffsetMatrix.c2,
+                        mesh->mBones[b]->mOffsetMatrix.d2,
+
+                        mesh->mBones[b]->mOffsetMatrix.a3,
+                        mesh->mBones[b]->mOffsetMatrix.b3,
+                        mesh->mBones[b]->mOffsetMatrix.c3,
+                        mesh->mBones[b]->mOffsetMatrix.d3,
+
+                        mesh->mBones[b]->mOffsetMatrix.a4,
+                        mesh->mBones[b]->mOffsetMatrix.b4,
+                        mesh->mBones[b]->mOffsetMatrix.c4,
+                        mesh->mBones[b]->mOffsetMatrix.d4
+                    );
+
+                    // Assign the bone weights to the affected vertices
+                    for (int w = 0; w < mesh->mBones[b]->mNumWeights; ++w) {
+                        int vertexId = mesh->mBones[b]->mWeights[w].mVertexId;
+                        assert(0 <= vertexId);
+                        assert(vertexId < loadedMesh.vertices().size());
+
+                        float weight = mesh->mBones[b]->mWeights[w].mWeight;
+
+                        bool weightAdded = false;
+                        for (int i = 0; i < 4; ++i) {
+                            if (loadedMesh.vertices()[vertexId].boneIndicies[i] < 0) {
+                                loadedMesh.vertices()[vertexId].boneWeights[i] = weight;
+                                loadedMesh.vertices()[vertexId].boneIndicies[i] = bone.id;
+                                weightAdded = true;
+                                break;
+                            }
+                        }
+
+                        if (!weightAdded) {
+                            LWARNING(std::format(
+                                "Vertex {} has more than 4 bone weights, ignoring weight {} "
+                                "for bone '{}'", vertexId, weight, bone.name
+                            ));
+                        }
+                    }
+                    LWARNING(std::format("Bone id (saved): {}", bone.id));
+                    LWARNING(std::format("Bone name (saved): {}", bone.name));
+
+                    bones.push_back(bone);
+                }
+
+                loadedMesh.setBones(std::move(bones));
+            }
+
+            for (ModelMesh::Bone& bone : loadedMesh.bones()) {
+                LWARNING(std::format("Bone id (loaded): {}", bone.id));
+                LWARNING(std::format("Bone name (loaded): {}", bone.name));
+
+                if (boneMap.find(bone.name) == boneMap.end()) {
+                    // Bone has not been stored previously, store the bone in the
+                    // map for future reference
+                    boneMap[bone.name] = &bone;
+                }
+                else {
+                    // Bone has already been stored
+                    LWARNING(std::format("Bone id: {} has already been stored", bone.id));
+                }
+            }
 
             // Don't render invisible meshes
             if (loadedMesh.textures().empty()) {
@@ -642,6 +727,8 @@ namespace {
                 scene,
                 nodes,
                 newNode,
+                boneMap,
+                boneCounter,
                 textureStorage,
                 forceRenderInvisible,
                 notifyInvisibleDropped,
@@ -711,17 +798,26 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
     std::vector<modelgeometry::ModelGeometry::TextureEntry> textureStorage;
     textureStorage.reserve(scene->mNumTextures);
     bool hasTextureLoadErrors = false;
+    std::map<std::string, ModelMesh::Bone*> boneMap;
+    int boneCounter = 0;
+    LWARNING(std::format("Bone counter (start): {}", boneCounter));
     processNode(
         *(scene->mRootNode),
         *scene,
         nodeArray,
         -1,
+        boneMap,
+        boneCounter,
         textureStorage,
         forceRenderInvisible,
         notifyInvisibleDropped,
         modelDirectory,
         hasTextureLoadErrors
     );
+
+    // Check if any of the meshes have bones
+    bool hasBoneAnimation = boneCounter > 0;
+    LWARNING(std::format("Bone counter (end): {}", boneCounter));
 
     // Check animations
     std::unique_ptr<ModelAnimation> modelAnimation = nullptr;
@@ -748,40 +844,73 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                 "animations are supported"
             );
         }
-        // Only support keyframe animation
+        // Only support keyframe and bones animation
         if (animation->mNumChannels > 0) {
-            modelAnimation = std::make_unique<ModelAnimation>(
-                animation->mName.C_Str(),
-                std::abs(animation->mTicksPerSecond) <
-                std::numeric_limits<double>::epsilon() ? // Not all formats have this
-                animation->mDuration :
-                animation->mDuration / animation->mTicksPerSecond
-            );
+            LWARNING(std::format(
+                "Number of animations: {} Number of channels in first animation: {}",
+                scene->mNumAnimations, animation->mNumChannels
+            ));
 
-            // Find the channels of teh animation and match them to the nodes in the model
+            // Not all formats have an internally saved ticks per second used to scale the
+            // animation time
+            double duration = std::abs(animation->mTicksPerSecond) <
+                std::numeric_limits<double>::epsilon() ?
+                animation->mDuration :
+                animation->mDuration / animation->mTicksPerSecond;
+
+            modelAnimation =
+                std::make_unique<ModelAnimation>(animation->mName.C_Str(), duration);
+
+            // Find the channels of the animation and match them to the nodes in the model
             for (unsigned int c = 0; c < animation->mNumChannels; c++) {
                 aiNodeAnim* nodeAnim = animation->mChannels[c];
 
                 ModelAnimation::NodeAnimation nodeAnimation;
+                ModelAnimation::BoneAnimation boneAnimation;
 
-                bool nodeFound = false;
-                for (int n = 0; n < nodeArray.size(); n++) {
-                    if (nodeAnim->mNodeName.C_Str() == nodeArray[n].name() ||
-                        (!nodeArray[n].originalName().empty() &&
-                            nodeAnim->mNodeName.C_Str() == nodeArray[n].originalName()))
-                    {
-                        nodeAnimation.node = n;
-                        nodeFound = true;
-                        break;
+                if (hasBoneAnimation) {
+                    modelAnimation->setMode(ModelAnimation::AnimationMode::Bone);
+                    boneAnimation.boneName = nodeAnim->mNodeName.data;
+                    LWARNING(std::format("Bone animation name (saved): {}",
+                        boneAnimation.boneName));
+
+                    // Find the bone that this animation refers to in the mesh and set the
+                    // animation bone index
+                    const ModelMesh::Bone* foundBone = nullptr;
+                    if (boneMap.find(boneAnimation.boneName) != boneMap.end()) {
+                        foundBone = boneMap.at(boneAnimation.boneName);
                     }
-                }
 
-                if (!nodeFound) {
-                    LWARNING(
-                        std::format("Node not found for animation: {}",
-                        std::string(nodeAnim->mNodeName.C_Str()))
-                    );
-                    continue;
+                    if (!foundBone) {
+                        LWARNING(std::format(
+                            "Bone animation with bone '{}' does not refer to any bone in the "
+                            "mesh", boneAnimation.boneName
+                        ));
+                    }
+
+                    boneAnimation.boneIndex = foundBone ? foundBone->id : -1;
+                }
+                else {
+                    modelAnimation->setMode(ModelAnimation::AnimationMode::Node);
+                    bool nodeFound = false;
+                    for (int n = 0; n < nodeArray.size(); n++) {
+                        if (nodeAnim->mNodeName.C_Str() == nodeArray[n].name() ||
+                            (!nodeArray[n].originalName().empty() &&
+                                nodeAnim->mNodeName.C_Str() == nodeArray[n].originalName()))
+                        {
+                            nodeAnimation.node = n;
+                            nodeFound = true;
+                            break;
+                        }
+                    }
+
+                    if (!nodeFound) {
+                        LWARNING(
+                            std::format("Node not found for animation: {}",
+                                std::string(nodeAnim->mNodeName.C_Str()))
+                        );
+                        continue;
+                    }
                 }
 
                 for (unsigned int p = 0; p < nodeAnim->mNumPositionKeys; p++) {
@@ -798,7 +927,12 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                         posKey.mValue.z
                     );
 
-                    nodeAnimation.positions.push_back(std::move(positionKf));
+                    if (hasBoneAnimation) {
+                        boneAnimation.positions.push_back(std::move(positionKf));
+                    }
+                    else {
+                        nodeAnimation.positions.push_back(std::move(positionKf));
+                    }
                 }
 
                 for (unsigned int r = 0; r < nodeAnim->mNumRotationKeys; r++) {
@@ -816,7 +950,12 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                         rotKey.mValue.z
                     );
 
-                    nodeAnimation.rotations.push_back(std::move(rotationKf));
+                    if (hasBoneAnimation) {
+                        boneAnimation.rotations.push_back(std::move(rotationKf));
+                    }
+                    else {
+                        nodeAnimation.rotations.push_back(std::move(rotationKf));
+                    }
                 }
 
                 for (unsigned int s = 0; s < nodeAnim->mNumScalingKeys; s++) {
@@ -833,14 +972,36 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                         scaleKey.mValue.z
                     );
 
-                    nodeAnimation.scales.push_back(std::move(scaleKeyframe));
+                    if (hasBoneAnimation) {
+                        boneAnimation.scales.push_back(std::move(scaleKeyframe));
+                    }
+                    else {
+                        nodeAnimation.scales.push_back(std::move(scaleKeyframe));
+                    }
                 }
 
-                modelAnimation->nodeAnimations().push_back(
-                    std::move(nodeAnimation)
-                );
+                if (hasBoneAnimation) {
+                    modelAnimation->boneAnimations().push_back(
+                        std::move(boneAnimation)
+                    );
+                }
+                else {
+                   modelAnimation->nodeAnimations().push_back(
+                        std::move(nodeAnimation)
+                    );
+                }
             }
+
+            LWARNING(std::format(
+                "Number of node animations: {} Number of bone animations: {}",
+                modelAnimation->nodeAnimations().size(),
+                modelAnimation->boneAnimations().size()
+            ));
         }
+    }
+
+    if (hasBoneAnimation) {
+        modelAnimation->setBoneMap(boneMap);
     }
 
     // Return the ModelGeometry from the meshArray
@@ -850,6 +1011,7 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
         std::move(modelAnimation)
     );
     model->setHasTextureLoadErrors(hasTextureLoadErrors);
+
     return model;
 }
 
