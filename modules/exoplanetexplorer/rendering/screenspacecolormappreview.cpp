@@ -315,8 +315,24 @@ void ScreenSpaceColormapPreview::updateTexture() {
     );
     const glm::vec2 size = glm::vec2(_objectSize);
 
-    opengl::OpenGLStateCache& state = global::renderEngine->openglStateCache();
-    state.loadCurrentGLState();
+    const GLboolean depthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
+    const GLboolean cullFaceEnabled = glIsEnabled(GL_CULL_FACE);
+    constexpr std::array BlendParameters = {
+        GL_BLEND_EQUATION_RGB, GL_BLEND_EQUATION_ALPHA,
+        GL_BLEND_SRC_RGB, GL_BLEND_DST_RGB, GL_BLEND_SRC_ALPHA, GL_BLEND_DST_ALPHA
+    };
+    std::array<GLint, BlendParameters.size()> blendValues;
+    for (size_t i = 0; i < BlendParameters.size(); ++i) {
+        glGetIntegerv(BlendParameters[i], &blendValues[i]);
+    }
+    GLint maxDrawBuffers = 0;
+    glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
+    std::vector<GLboolean> blendEnabled(static_cast<size_t>(maxDrawBuffers));
+    for (GLuint i = 0; i < static_cast<GLuint>(maxDrawBuffers); ++i) {
+        blendEnabled[i] = glIsEnabledi(GL_BLEND, i);
+    }
+    std::array<GLfloat, 4> clearColor;
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, clearColor.data());
     std::array<GLint, 4> viewport;
     glGetIntegerv(GL_VIEWPORT, viewport.data());
     GLint previousDrawFramebuffer = 0;
@@ -389,7 +405,37 @@ void ScreenSpaceColormapPreview::updateTexture() {
     if (scissorEnabled) {
         glEnable(GL_SCISSOR_TEST);
     }
-    state.resetCachedStates();
+    if (depthTestEnabled) {
+        glEnable(GL_DEPTH_TEST);
+    }
+    else {
+        glDisable(GL_DEPTH_TEST);
+    }
+    if (cullFaceEnabled) {
+        glEnable(GL_CULL_FACE);
+    }
+    else {
+        glDisable(GL_CULL_FACE);
+    }
+    glBlendEquationSeparate(
+        static_cast<GLenum>(blendValues[0]),
+        static_cast<GLenum>(blendValues[1])
+    );
+    glBlendFuncSeparate(
+        static_cast<GLenum>(blendValues[2]),
+        static_cast<GLenum>(blendValues[3]),
+        static_cast<GLenum>(blendValues[4]),
+        static_cast<GLenum>(blendValues[5])
+    );
+    for (GLuint i = 0; i < static_cast<GLuint>(maxDrawBuffers); ++i) {
+        if (blendEnabled[i]) {
+            glEnablei(GL_BLEND, i);
+        }
+        else {
+            glDisablei(GL_BLEND, i);
+        }
+    }
+    glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
 }
 
 } // namespace openspace
