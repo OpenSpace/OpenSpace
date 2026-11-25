@@ -26,13 +26,16 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
+const int MAX_BONE_INFLUENCE = 4;
+
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec2 in_texCoords;
 layout(location = 2) in vec3 in_normal;
 layout(location = 3) in vec3 in_tangent;
 layout(location = 4) in vec3 in_color;
-layout(location = 5) in ivec4 in_boneIndices;
-layout(location = 6) in vec4 in_boneWeights;
+layout(location = 5) in int in_boneIndices[MAX_BONE_INFLUENCE];
+// Arrays take one location slot per item in the array
+layout(location = 5 + MAX_BONE_INFLUENCE) in float in_boneWeights[MAX_BONE_INFLUENCE];
 
 layout (std430) buffer bonesTransforms {
   mat4 bones[];
@@ -48,7 +51,6 @@ out Data {
   vec4 lightspacePosition;
 } out_data;
 
-const int MAX_BONE_INFLUENCE = 4;
 uniform bool hasBones;
 uniform int nBones;
 

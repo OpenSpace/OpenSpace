@@ -39,6 +39,8 @@ class ModelAnimation;
 
 class ModelMesh {
 public:
+    static constexpr int MaxBonesPerVertex = 4;
+
     enum class TextureType : uint8_t {
         TextureDiffuse = 0,
         TextureNormal,
@@ -53,8 +55,8 @@ public:
         GLfloat normal[3] = { 0.f, 0.f, 0.f };
         GLfloat tangent[3] = { 0.f, 0.f, 0.f };
         GLfloat color[3] = { 0.f, 0.f, 0.f };
-        GLint boneIndicies[4] = { -1, -1, -1, -1 }; // Max 4 bones can affect 1 vertex
-        GLfloat boneWeights[4] = { 0.f, 0.f, 0.f, 0.f };
+        GLint boneIndicies[MaxBonesPerVertex]; // Needs to be initialized manually
+        GLfloat boneWeights[MaxBonesPerVertex];
     };
 
     struct Texture {

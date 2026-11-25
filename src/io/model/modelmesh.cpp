@@ -332,20 +332,34 @@ void ModelMesh::initialize() {
     glVertexArrayAttribFormat(_vao, 4, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, color));
     glVertexArrayAttribBinding(_vao, 4, 0);
 
-    glEnableVertexArrayAttrib(_vao, 5);
-    glVertexArrayAttribIFormat(_vao, 5, 4, GL_INT, offsetof(Vertex, boneIndicies));
-    glVertexArrayAttribBinding(_vao, 5, 0);
+    // Arrays take one location slot per item in the array
+    GLuint currentArrayIndex = 5;
+    for (int i = 0; i < MaxBonesPerVertex; i++) {
+        glEnableVertexArrayAttrib(_vao, currentArrayIndex);
+        glVertexArrayAttribIFormat(
+            _vao,
+            currentArrayIndex,
+            1,
+            GL_INT,
+            offsetof(Vertex, boneIndicies[i])
+        );
+        glVertexArrayAttribBinding(_vao, currentArrayIndex, 0);
+        currentArrayIndex++;
+    }
 
-    glEnableVertexArrayAttrib(_vao, 6);
-    glVertexArrayAttribFormat(
-        _vao,
-        6,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        offsetof(Vertex, boneWeights)
-    );
-    glVertexArrayAttribBinding(_vao, 6, 0);
+    for (int i = 0; i < MaxBonesPerVertex; i++) {
+        glEnableVertexArrayAttrib(_vao, currentArrayIndex);
+        glVertexArrayAttribFormat(
+            _vao,
+            currentArrayIndex,
+            1,
+            GL_FLOAT,
+            GL_FALSE,
+            offsetof(Vertex, boneWeights[i])
+        );
+        glVertexArrayAttribBinding(_vao, currentArrayIndex, 0);
+        currentArrayIndex++;
+    }
 
     // Initialize textures
     // Also check if there are several textures/colors of the same type for this mesh

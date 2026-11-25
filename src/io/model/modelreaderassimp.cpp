@@ -275,7 +275,10 @@ namespace {
         // Vertices
         vertexArray.reserve(mesh.mNumVertices);
         for (unsigned int i = 0; i < mesh.mNumVertices; i++) {
+            // Initialize the vertex
             ModelMesh::Vertex vertex;
+            std::fill_n(vertex.boneIndicies, ModelMesh::MaxBonesPerVertex, -1);
+            std::fill_n(vertex.boneWeights, ModelMesh::MaxBonesPerVertex, 0.f);
 
             // Position
             vertex.position[0] = mesh.mVertices[i].x;
@@ -633,7 +636,7 @@ namespace {
                         float weight = mesh->mBones[b]->mWeights[w].mWeight;
 
                         bool weightAdded = false;
-                        for (int i = 0; i < 4; ++i) {
+                        for (int i = 0; i < ModelMesh::MaxBonesPerVertex; ++i) {
                             if (loadedMesh.vertices()[vertexId].boneIndicies[i] < 0) {
                                 loadedMesh.vertices()[vertexId].boneWeights[i] = weight;
                                 loadedMesh.vertices()[vertexId].boneIndicies[i] = bone.id;
@@ -644,8 +647,9 @@ namespace {
 
                         if (!weightAdded) {
                             LWARNING(std::format(
-                                "Vertex {} has more than 4 bone weights, ignoring "
-                                "weight{} for bone '{}'", vertexId, weight, bone.name
+                                "Vertex {} has more than {} bone weights, ignoring "
+                                "weight{} for bone '{}'", vertexId,
+                                ModelMesh::MaxBonesPerVertex, weight, bone.name
                             ));
                         }
                     }
