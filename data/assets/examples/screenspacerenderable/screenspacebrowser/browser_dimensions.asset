@@ -1,0 +1,19 @@
+-- Dimensions
+-- This example demonstrates how to set the dimensions for the screen space browser.
+
+local Item = {
+  Type = "ScreenSpaceBrowser",
+  Identifier = "ScreenSpaceBrowser_Example_Dimensions",
+  Url = "https://www.openspaceproject.com/",
+  Dimensions = { 800, 600 },
+  Name = "ScreenSpaceBrowser Example - Dimensions"
+}
+
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Item)
+end)

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H__
 
 #include <openspace/glm.h>
+#include <openspace/misc/boolean.h>
 #include <string>
 
 #ifdef _MSC_VER
@@ -56,10 +57,22 @@ class WebRenderHandler;
 
 class BrowserInstance {
 public:
+    BooleanType(UseIsolatedContext);
+
     static constexpr int SingleClick = 1;
-    BrowserInstance(WebRenderHandler* renderer,
-        WebKeyboardHandler* keyboardHandler
-    );
+
+    /**
+     * Create a new browser instance with the specified render and keyboard handlers.
+     *
+     * \param renderer The render handler to use for this browser instance
+     * \param keyboardHandler The keyboard handler to use for this browser instance
+     * \param useIsolatedContext If `Yes`, the browser gets its own in-memory request
+     *        context. CEF stores zoom levels per host and request context, so this is
+     *        needed for the zoom level to not affect other browsers on the same host
+     */
+    BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler,
+        UseIsolatedContext useIsolatedContext = UseIsolatedContext::No);
+
     ~BrowserInstance();
 
     void loadUrl(const std::string& url);
@@ -127,7 +140,6 @@ private:
     CefRefPtr<BrowserClient> _client;
     CefRefPtr<CefBrowser> _browser;
     bool _isInitialized = false;
-    double _zoomLevel = 1.0;
 };
 
 } // namespace openspace
