@@ -78,18 +78,16 @@ void ModelMesh::render(opengl::ProgramObject& program, const glm::mat4& parentTr
 
     // Apply bone transformations if there is any for this mesh
     program.setUniform("hasBones", false);
+    program.setUniform("nBones", 0);
     if (modelAnimation && modelAnimation->mode() == ModelAnimation::AnimationMode::Bone &&
         _bones.size() > 0)
     {
         program.setUniform("hasBones", true);
-
-        // TODO: Remove 100 bone limit
-        if (_bones.size() > 100) {
-            program.setUniform("hasBones", false);
-            LWARNINGC("ModelMesh", "Only 100 bones are supported, ignoring the rest");
-        }
-
-        program.setUniform("bonesTransforms", modelAnimation->finalBoneTransforms());
+        program.setUniform("nBones", modelAnimation->numberOfBoneTransforms());
+        program.setSsboBinding(
+            "bonesTransforms",
+            modelAnimation->boneTransformsBindingNumber()
+        );
 
         // Animation is given by Assimp in absolute format, i.e. bone tranform replaces
         // node transform, i.e. ignore nodeTransform. Also the parent transform is

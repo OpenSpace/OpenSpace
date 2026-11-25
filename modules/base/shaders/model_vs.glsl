@@ -34,6 +34,10 @@ layout(location = 4) in vec3 in_color;
 layout(location = 5) in ivec4 in_boneIndices;
 layout(location = 6) in vec4 in_boneWeights;
 
+layout (std430) buffer bonesTransforms {
+  mat4 bones[];
+};
+
 out Data {
   vec4 positionCameraSpace;
   vec2 texCoords;
@@ -44,10 +48,9 @@ out Data {
   vec4 lightspacePosition;
 } out_data;
 
-const int MAX_BONES = 100;
 const int MAX_BONE_INFLUENCE = 4;
-uniform mat4 bonesTransforms[MAX_BONES];
 uniform bool hasBones;
+uniform int nBones;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -69,23 +72,25 @@ void main() {
         continue;
       }
 
-      if (in_boneIndices[b] >= MAX_BONES) {
+      if (in_boneIndices[b] >= nBones) {
         // Too many bones only 100 are supported revert back to the original position
         totalBoneInfluence = vec4(in_position, 1.f);
         break;
       }
 
-      vec4 boneInfluence = bonesTransforms[in_boneIndices[b]] * vec4(in_position, 1.f);
+      vec4 boneInfluence = bones[in_boneIndices[b]] * vec4(in_position, 1.f);
       totalBoneInfluence += boneInfluence * in_boneWeights[b];
-      vec3 boneNormalInfluence = mat3(bonesTransforms[in_boneIndices[b]]) * in_normal;
+      vec3 boneNormalInfluence = mat3(bones[in_boneIndices[b]]) * in_normal;
       totalBoneNormalInfluence += boneNormalInfluence * in_boneWeights[b];
    }
 
   if (hasBones) {
-    out_data.positionCameraSpace = modelViewTransform * (meshTransform * totalBoneInfluence);
+    out_data.positionCameraSpace =
+    modelViewTransform * (meshTransform * totalBoneInfluence);
   }
   else {
-    out_data.positionCameraSpace = modelViewTransform * (meshTransform * vec4(in_position, 1.f));
+    out_data.positionCameraSpace =
+    modelViewTransform * (meshTransform * vec4(in_position, 1.f));
   }
 
   gl_Position = z_normalization(projectionTransform * out_data.positionCameraSpace);
@@ -94,8 +99,9 @@ void main() {
   out_data.screenSpaceDepth = gl_Position.w;
 
   if (hasBones) {
-    out_data.normalViewSpace =
-      normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * totalBoneNormalInfluence));
+    out_data.normalViewSpace = normalize(
+      mat3(normalTransform) * (mat3(meshNormalTransform) * totalBoneNormalInfluence)
+    );
   }
   else {
     out_data.normalViewSpace =
@@ -114,9 +120,11 @@ void main() {
   out_data.tbn = mat3(t, b, n);
 
   if (hasBones) {
-    out_data.lightspacePosition = vec4(light_vp * model * meshTransform * totalBoneInfluence);
+    out_data.lightspacePosition =
+    vec4(light_vp * model * meshTransform * totalBoneInfluence);
   }
   else {
-    out_data.lightspacePosition = vec4(light_vp * model * meshTransform * vec4(in_position, 1.f));
+    out_data.lightspacePosition =
+    vec4(light_vp * model * meshTransform * vec4(in_position, 1.f));
   }
 }

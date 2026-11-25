@@ -1122,6 +1122,10 @@ void ModelGeometry::render(opengl::ProgramObject& program, bool isFullyTexturedM
         isFullyTexturedModel,
         isProjection
     );
+
+    if (_animation && _animation->mode() == io::ModelAnimation::AnimationMode::Bone) {
+        _animation->unbindBoneTransformsBuffer();
+    }
 }
 
 void ModelGeometry::renderRecursive(const io::ModelNode* node,
@@ -1167,9 +1171,8 @@ void ModelGeometry::renderRecursive(const io::ModelNode* node,
         const io::ModelAnimation::BoneAnimation* boneAnimation =
             _animation->findBoneAnimation(node->name());
 
-        // TODO: Remove 100 bone limit
         if (boneAnimation && boneAnimation->boneIndex >= 0 &&
-            boneAnimation->boneIndex < 100)
+            boneAnimation->boneIndex < _animation->numberOfBoneTransforms())
         {
             // Animation is given by Assimp in absolute format, i.e. animation
             // replaces node transform.
@@ -1228,6 +1231,7 @@ void ModelGeometry::update(double now) {
 
     if (_animation->mode() == io::ModelAnimation::AnimationMode::Bone) {
         _animation->computeFinalBoneTransforms(_nodes);
+        _animation->bindBoneTransformsBuffer();
     }
 }
 

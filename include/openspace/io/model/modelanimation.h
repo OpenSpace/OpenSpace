@@ -27,6 +27,7 @@
 
 #include <openspace/glm.h>
 #include <openspace/io/model/modelmesh.h>
+#include <openspace/opengl/bufferbinding.h>
 #include <string>
 #include <vector>
 
@@ -76,7 +77,7 @@ public:
     ModelAnimation(std::string name, double duration);
 
     ModelAnimation(ModelAnimation&&) noexcept = default;
-    ~ModelAnimation() noexcept = default;
+    ~ModelAnimation() noexcept;
 
     void setTimeScale(float timeScale);
     void animate(double now, bool enabled);
@@ -97,8 +98,13 @@ public:
     const BoneAnimation* findBoneAnimation(std::string_view boneName) const;
     void setBoneMap(std::map<std::string, io::ModelMesh::Bone*> boneMap);
     void computeFinalBoneTransforms(const std::vector<ModelNode>& nodes);
+    void setNumberOfBoneTransforms(int n);
+    int numberOfBoneTransforms() const;
     const std::vector<glm::mat4>& finalBoneTransforms() const;
     std::vector<glm::mat4>& finalBoneTransforms();
+    void bindBoneTransformsBuffer();
+    void unbindBoneTransformsBuffer();
+    GLint boneTransformsBindingNumber() const;
 
 private:
     glm::mat4 computeCurrentTransform(double now,
@@ -119,6 +125,10 @@ private:
     std::vector<BoneAnimation> _boneAnimations;
     std::map<std::string, io::ModelMesh::Bone*> _boneMap;
     std::vector<glm::mat4> _finalBoneTransforms;
+    GLuint _ssbo = 0;
+
+    std::unique_ptr<opengl::BufferBinding<
+        opengl::bufferbinding::Buffer::ShaderStorage>> _ssboBinding;
 };
 
 } // namespace openspace::io

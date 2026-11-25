@@ -35,8 +35,12 @@ namespace openspace::io {
 ModelAnimation::ModelAnimation(std::string name, double duration)
     : _name(std::move(name))
     , _duration(duration)
-{
-    _finalBoneTransforms = std::vector<glm::mat4>(100, glm::mat4(1.f));
+{}
+
+ModelAnimation::~ModelAnimation() {
+    if (_ssbo != 0) {
+        glDeleteBuffers(1, &_ssbo);
+    }
 }
 
 void ModelAnimation::setTimeScale(float timeScale) {
@@ -158,6 +162,27 @@ void ModelAnimation::computeFinalBoneTransforms(const std::vector<ModelNode>& no
     }
 
     computeFinalBoneTransformsRecursive(nodes, nodes[0], glm::mat4(1.f));
+
+    glNamedBufferData(
+        _ssbo,
+        _finalBoneTransforms.size() * sizeof(glm::mat4),
+        _finalBoneTransforms.data(),
+        GL_DYNAMIC_DRAW
+    );
+}
+
+void ModelAnimation::setNumberOfBoneTransforms(int n) {
+    _finalBoneTransforms = std::vector<glm::mat4>(n, glm::mat4(1.f));
+
+    if (_ssbo != 0) {
+        glDeleteBuffers(1, &_ssbo);
+    }
+
+    glCreateBuffers(1, &_ssbo);
+}
+
+int ModelAnimation::numberOfBoneTransforms() const {
+    return static_cast<int>(_finalBoneTransforms.size());
 }
 
 const std::vector<glm::mat4>& ModelAnimation::finalBoneTransforms() const {
@@ -166,6 +191,35 @@ const std::vector<glm::mat4>& ModelAnimation::finalBoneTransforms() const {
 
 std::vector<glm::mat4>& ModelAnimation::finalBoneTransforms() {
     return _finalBoneTransforms;
+}
+
+void ModelAnimation::bindBoneTransformsBuffer() {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssbo);
+
+    _ssboBinding = std::make_unique<opengl::BufferBinding<
+        opengl::bufferbinding::Buffer::ShaderStorage>
+    >();
+    glBindBufferBase(
+        GL_SHADER_STORAGE_BUFFER,
+        _ssboBinding->bindingNumber(),
+        _ssbo
+    );
+}
+
+void ModelAnimation::unbindBoneTransformsBuffer() {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    _ssboBinding.reset();
+}
+
+GLint ModelAnimation::boneTransformsBindingNumber() const {
+    if (_ssboBinding) {
+        return _ssboBinding->bindingNumber();
+    }
+    else {
+        LERRORC("ModelAnimation", "SSBO binding not initialized");
+        return -1;
+    }
+
 }
 
 glm::mat4 ModelAnimation::computeCurrentTransform(double now,
@@ -320,8 +374,8 @@ void ModelAnimation::computeFinalBoneTransformsRecursive(
     const ModelAnimation::BoneAnimation* boneAnimation = findBoneAnimation(node.name());
     glm::mat4 finalTransform = parentTransformation * node.transform();
 
-    // TODO: Remove 100 bone limit
-    if (boneAnimation && boneAnimation->boneIndex >= 0 && boneAnimation->boneIndex < 100)
+    if (boneAnimation && boneAnimation->boneIndex >= 0 &&
+        boneAnimation->boneIndex < _finalBoneTransforms.size())
     {
         io::ModelMesh::Bone*  bone = _boneMap.at(boneAnimation->boneName);
         if (!bone) {

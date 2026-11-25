@@ -847,6 +847,7 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
 
                 if (hasBoneAnimation) {
                     modelAnimation->setMode(ModelAnimation::AnimationMode::Bone);
+                    modelAnimation->setNumberOfBoneTransforms(boneCounter);
                     boneAnimation.boneName = nodeAnim->mNodeName.data;
 
                     // Find the bone that this animation refers to in the mesh and set the
