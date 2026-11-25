@@ -22,10 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
 #include <openspace/misc/csvreader.h>
 #include <openspace/misc/exception.h>
 #include <openspace/misc/stringhelper.h>
 #include <openspace/format.h>
+#include <openspace/util/timeconstants.h>
+#include <openspace/util/timemanager.h>
 #include <cstring>
 #include <fstream>
 #include <ios>
@@ -465,6 +468,93 @@ namespace {
     spkcls_c(handle);
 
     return bodyId;
+}
+
+/**
+ * Computes the ephemeris time of a sunrise or sunset on the given date/location. If
+ * \p date is empty, the local date at the current simulation time is used. Only the date
+ * part of \p date is used.
+ */
+double solarEventOrThrow(double latitude, double longitude, std::string observer,
+                         double altitude, std::string date,
+                         SpiceManager::IsSunrise isSunrise)
+{
+    if (date.empty()) {
+        // Convert the simulation time into local mean solar time at the longitude
+        const double localTimeOffset =
+            longitude / 360.0 * timeconstants::SecondsPerDay;
+        date = SpiceManager::ref().dateFromEphemerisTime(
+            global::timeManager->time().j2000Seconds() + localTimeOffset,
+            "YYYY-MM-DD"
+        );
+    }
+    const std::string day = date.substr(0, date.find('T'));
+    const std::optional<double> time = SpiceManager::ref().solarEventTime(
+        latitude, longitude, altitude, day, observer, isSunrise
+    );
+    if (!time.has_value()) {
+        throw lua::LuaError(std::format(
+            "No {} found for latitude {}, longitude {} on '{}' at '{}'. Possible reasons "
+            "are polar day or night, an unknown body, an invalid date or missing SPICE "
+            "data. Enable 'Show exceptions' of the Space module to see the SPICE error",
+            isSunrise ? "sunrise" : "sunset", latitude, longitude, day, observer
+        ));
+    }
+    return *time;
+}
+
+/**
+ * Returns the ephemeris time (ET seconds past J2000) of the sunrise for a given date and
+ * location. The date (YYYY-MM-DD) is the local solar date at the longitude, which is UTC
+ * plus longitude / 15 hours. If no date is specified, the local date at the current
+ * simulation time is used. The `observer` is the SPICE name of the body, for example
+ * `EARTH`. The sunrise is the moment the center of the Sun crosses the geometric horizon,
+ * so atmospheric refraction and the apparent size of the Sun are not taken into account.
+ * An error is raised if there is no sunrise on that day, for example during polar day or
+ * night.
+ *
+ * Example:
+ * openspace.spice.sunriseTime(40.78, -73.97, 'EARTH', 0.0, '2024-06-21')
+ */
+[[codegen::luawrap]] double sunriseTime(double latitude, double longitude,
+                                        std::string observer, double altitude = 0.0,
+                                        std::string date = "")
+{
+    return solarEventOrThrow(
+        latitude,
+        longitude,
+        std::move(observer),
+        altitude,
+        std::move(date),
+        SpiceManager::IsSunrise::Yes
+    );
+}
+
+/**
+ * Returns the ephemeris time (ET seconds past J2000) of the sunset for a given date and
+ * location. The date (YYYY-MM-DD) is the local solar date at the longitude, which is UTC
+ * plus longitude / 15 hours. If no date is specified, the local date at the current
+ * simulation time is used. The `observer` is the SPICE name of the body, for example
+ * `EARTH`. The sunset is the moment the center of the Sun crosses the geometric horizon,
+ * so atmospheric refraction and the apparent size of the Sun are not taken into account.
+ * An error is raised if there is no sunset on that day, for example during polar day or
+ * night.
+ *
+ * Example:
+ * openspace.spice.sunsetTime(40.78, -73.97, 'EARTH', 0.0, '2024-06-21')
+ */
+[[codegen::luawrap]] double sunsetTime(double latitude, double longitude,
+                                       std::string observer, double altitude = 0.0,
+                                       std::string date = "")
+{
+    return solarEventOrThrow(
+        latitude,
+        longitude,
+        std::move(observer),
+        altitude,
+        std::move(date),
+        SpiceManager::IsSunrise::No
+    );
 }
 
 } // namespace
