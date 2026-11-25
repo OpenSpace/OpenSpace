@@ -46,6 +46,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/dvec2property.h>
 #include <openspace/util/ellipsoid.h>
 #include <array>
 #include <cstdint>
@@ -151,8 +152,7 @@ private:
      * that of the `Chunk`, it wants to split. If it is lower, it wants to merge with its
      * siblings.
      */
-    int desiredLevel(const Chunk& chunk, const RenderData& renderData,
-        const BoundingHeights& heights) const;
+    int desiredLevel(const Chunk& chunk, const BoundingHeights& heights) const;
 
     /**
      * Calculates the height from the surface of the reference ellipsoid to the height
@@ -198,14 +198,25 @@ private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
         bool renderBounds) const;
 
+    void debugRenderLodCenter(const glm::dmat4& mvp) const;
+
     bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData,
         const glm::dmat4& mvp) const;
     bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData,
         const BoundingHeights& heights) const;
 
-    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data,
-        const BoundingHeights& heights) const;
-    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data,
+    /**
+     * Computes the position, in the model space of the globe, that is used as the center
+     * of the level-of-detail computations. It is the camera position, shifted by
+     * `_lodCenterOffset` expressed in the camera's right and up directions and scaled
+     * by the geometric mean of the camera's altitude above the globe surface and
+     * its distance to the globe center. The result is then moved along the surface normal
+     * to have the same altitude as the camera.
+     */
+    glm::dvec3 lodCenterPosition(const RenderData& data) const;
+
+    int desiredLevelByDistance(const Chunk& chunk, const BoundingHeights& heights) const;
+    int desiredLevelByProjectedArea(const Chunk& chunk,
         const BoundingHeights& heights) const;
     int desiredLevelByAvailableTileData(const Chunk& chunk) const;
 
@@ -234,11 +245,13 @@ private:
     BoolProperty _eclipseHardShadows;
     FloatProperty _targetLodScaleFactor;
     FloatProperty _currentLodScaleFactor;
+    DVec2Property _lodCenterOffset;
     FloatProperty _orenNayarRoughness;
     IntProperty _nActiveLayers;
 
     struct {
         BoolProperty showChunkEdges;
+        BoolProperty showLodCenter;
         BoolProperty levelByProjectedAreaElseDistance;
         TriggerProperty resetTileProviders;
         BoolProperty performFrustumCulling;
@@ -264,6 +277,10 @@ private:
     GeoJsonManager _geoJsonManager;
 
     glm::dmat4 _cachedModelTransform = glm::dmat4(1.0);
+
+    /// The center of the level-of-detail computations in model space, updated once per
+    /// frame before the chunk tree is updated
+    glm::dvec3 _lodCenter = glm::dvec3(0.0);
     glm::dmat4 _cachedInverseModelTransform = glm::dmat4(1.0);
 
     ReusableTypedMemoryPool<Chunk, 256> _chunkPool;
