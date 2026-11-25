@@ -576,7 +576,7 @@ namespace {
             if (mesh->mNumAnimMeshes > 0) {
                 LWARNING(
                     "Detected unsupported animation type: 'Mesh', currently only "
-                    "keyframe animations are supported"
+                    "keyframe and bone animations are supported"
                 );
             }
 
@@ -595,16 +595,9 @@ namespace {
                 std::vector<ModelMesh::Bone> bones;
                 bones.reserve(mesh->mNumBones);
 
-                // TODO: REMOVE
-                LWARNING(
-                    "Detected animation type: 'Bones', currently under development."
-                );
-
                 for (int b = 0; b < mesh->mNumBones; ++b) {
                     ModelMesh::Bone bone;
-                    std::string boneName = mesh->mBones[b]->mName.C_Str();
-
-                    bone.name = boneName;
+                    bone.name = mesh->mBones[b]->mName.C_Str();
                     bone.id = boneCounter;
                     boneCounter++;
 
@@ -651,13 +644,11 @@ namespace {
 
                         if (!weightAdded) {
                             LWARNING(std::format(
-                                "Vertex {} has more than 4 bone weights, ignoring weight {} "
-                                "for bone '{}'", vertexId, weight, bone.name
+                                "Vertex {} has more than 4 bone weights, ignoring "
+                                "weight{} for bone '{}'", vertexId, weight, bone.name
                             ));
                         }
                     }
-                    LWARNING(std::format("Bone id (saved): {}", bone.id));
-                    LWARNING(std::format("Bone name (saved): {}", bone.name));
 
                     bones.push_back(bone);
                 }
@@ -665,18 +656,10 @@ namespace {
                 loadedMesh.setBones(std::move(bones));
             }
 
+            // Store the bones in the bone map for future reference
             for (ModelMesh::Bone& bone : loadedMesh.bones()) {
-                LWARNING(std::format("Bone id (loaded): {}", bone.id));
-                LWARNING(std::format("Bone name (loaded): {}", bone.name));
-
                 if (boneMap.find(bone.name) == boneMap.end()) {
-                    // Bone has not been stored previously, store the bone in the
-                    // map for future reference
                     boneMap[bone.name] = &bone;
-                }
-                else {
-                    // Bone has already been stored
-                    LWARNING(std::format("Bone id: {} has already been stored", bone.id));
                 }
             }
 
@@ -692,12 +675,13 @@ namespace {
         // string "nodes[{i}]". Blender, for example, will automatically replace that
         // auto-generated name with the name of the contained mesh, if there is only one.
         // For consistency with Blender, we do the same here.
-        // The original name is stored in the ModelNode since baked animations might still
-        // use the original name for referencing
+        // NOTE: (malej 2026-11-25) The original name is stored in the ModelNode since
+        // baked animations might still refer to the original name
         std::string originalName = node.mName.C_Str();
         std::string nodeName = originalName;
         const bool hasSyntheticName =
             originalName.starts_with("nodes[") && originalName.ends_with(']');
+
         if (hasSyntheticName && node.mNumMeshes == 1) {
             const aiMesh* nodeMesh = scene.mMeshes[node.mMeshes[0]];
             if (nodeMesh && nodeMesh->mName.length > 0) {
@@ -800,7 +784,6 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
     bool hasTextureLoadErrors = false;
     std::map<std::string, ModelMesh::Bone*> boneMap;
     int boneCounter = 0;
-    LWARNING(std::format("Bone counter (start): {}", boneCounter));
     processNode(
         *(scene->mRootNode),
         *scene,
@@ -817,7 +800,6 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
 
     // Check if any of the meshes have bones
     bool hasBoneAnimation = boneCounter > 0;
-    LWARNING(std::format("Bone counter (end): {}", boneCounter));
 
     // Check animations
     std::unique_ptr<ModelAnimation> modelAnimation = nullptr;
@@ -834,34 +816,29 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
         if (animation->mNumMorphMeshChannels > 0) {
             LWARNING(
                 "Detected unsupported animation type: 'Morph', currently only keyframe "
-                "animations are supported"
+                "and bone animations are supported"
             );
         }
         // Do not support animation that replaces the mesh for every frame
         if (animation->mNumMeshChannels > 0) {
             LWARNING(
                 "Detected unsupported animation type: 'Mesh', currently only keyframe "
-                "animations are supported"
+                "and bone animations are supported"
             );
         }
         // Only support keyframe and bones animation
         if (animation->mNumChannels > 0) {
-            LWARNING(std::format(
-                "Number of animations: {} Number of channels in first animation: {}",
-                scene->mNumAnimations, animation->mNumChannels
-            ));
-
             // Not all formats have an internally saved ticks per second used to scale the
             // animation time
-            double duration = std::abs(animation->mTicksPerSecond) <
-                std::numeric_limits<double>::epsilon() ?
-                animation->mDuration :
-                animation->mDuration / animation->mTicksPerSecond;
+            double  ticksPerSecond = std::abs(animation->mTicksPerSecond) <
+                std::numeric_limits<double>::epsilon() ? 1.0 : animation->mTicksPerSecond;
+            double duration = animation->mDuration / ticksPerSecond;
 
             modelAnimation =
                 std::make_unique<ModelAnimation>(animation->mName.C_Str(), duration);
 
-            // Find the channels of the animation and match them to the nodes in the model
+            // Find the channels of the animation and match them to the nodes or bones in
+            // the model
             for (unsigned int c = 0; c < animation->mNumChannels; c++) {
                 aiNodeAnim* nodeAnim = animation->mChannels[c];
 
@@ -871,11 +848,9 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                 if (hasBoneAnimation) {
                     modelAnimation->setMode(ModelAnimation::AnimationMode::Bone);
                     boneAnimation.boneName = nodeAnim->mNodeName.data;
-                    LWARNING(std::format("Bone animation name (saved): {}",
-                        boneAnimation.boneName));
 
                     // Find the bone that this animation refers to in the mesh and set the
-                    // animation bone index
+                    // bone index
                     const ModelMesh::Bone* foundBone = nullptr;
                     if (boneMap.find(boneAnimation.boneName) != boneMap.end()) {
                         foundBone = boneMap.at(boneAnimation.boneName);
@@ -883,8 +858,8 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
 
                     if (!foundBone) {
                         LWARNING(std::format(
-                            "Bone animation with bone '{}' does not refer to any bone in the "
-                            "mesh", boneAnimation.boneName
+                            "Bone animation with bone '{}' does not refer to any bone in "
+                            "the mesh", boneAnimation.boneName
                         ));
                     }
 
@@ -894,10 +869,12 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                     modelAnimation->setMode(ModelAnimation::AnimationMode::Node);
                     bool nodeFound = false;
                     for (int n = 0; n < nodeArray.size(); n++) {
-                        if (nodeAnim->mNodeName.C_Str() == nodeArray[n].name() ||
-                            (!nodeArray[n].originalName().empty() &&
-                                nodeAnim->mNodeName.C_Str() == nodeArray[n].originalName()))
-                        {
+                        bool matchName =
+                            nodeAnim->mNodeName.C_Str() == nodeArray[n].name();
+                        bool matchOriginalName = !nodeArray[n].originalName().empty() &&
+                            nodeAnim->mNodeName.C_Str() == nodeArray[n].originalName();
+
+                        if (matchName || matchOriginalName) {
                             nodeAnimation.node = n;
                             nodeFound = true;
                             break;
@@ -905,10 +882,10 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                     }
 
                     if (!nodeFound) {
-                        LWARNING(
-                            std::format("Node not found for animation: {}",
-                                std::string(nodeAnim->mNodeName.C_Str()))
-                        );
+                        LWARNING(std::format(
+                            "Node not found for animation: {}",
+                            std::string(nodeAnim->mNodeName.C_Str())
+                        ));
                         continue;
                     }
                 }
@@ -917,10 +894,7 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                     const aiVectorKey posKey = nodeAnim->mPositionKeys[p];
 
                     ModelAnimation::PositionKeyframe positionKf;
-                    positionKf.time =
-                        std::abs(animation->mTicksPerSecond) <
-                        std::numeric_limits<double>::epsilon() ? posKey.mTime :
-                        posKey.mTime / animation->mTicksPerSecond;
+                    positionKf.time = posKey.mTime / ticksPerSecond;
                     positionKf.position = glm::vec3(
                         posKey.mValue.x,
                         posKey.mValue.y,
@@ -939,10 +913,7 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                     const aiQuatKey rotKey = nodeAnim->mRotationKeys[r];
 
                     ModelAnimation::RotationKeyframe rotationKf;
-                    rotationKf.time =
-                        std::abs(animation->mTicksPerSecond) <
-                        std::numeric_limits<double>::epsilon() ? rotKey.mTime :
-                        rotKey.mTime / animation->mTicksPerSecond;
+                    rotationKf.time = rotKey.mTime / ticksPerSecond;
                     rotationKf.rotation = glm::quat(
                         rotKey.mValue.w,
                         rotKey.mValue.x,
@@ -962,10 +933,7 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                     const aiVectorKey scaleKey = nodeAnim->mScalingKeys[s];
 
                     ModelAnimation::ScaleKeyframe scaleKeyframe;
-                    scaleKeyframe.time =
-                        std::abs(animation->mTicksPerSecond) <
-                        std::numeric_limits<double>::epsilon() ? scaleKey.mTime :
-                        scaleKey.mTime / animation->mTicksPerSecond;
+                    scaleKeyframe.time = scaleKey.mTime / ticksPerSecond;
                     scaleKeyframe.scale = glm::vec3(
                         scaleKey.mValue.x,
                         scaleKey.mValue.y,
@@ -991,12 +959,6 @@ std::unique_ptr<modelgeometry::ModelGeometry> ModelReaderAssimp::loadModel(
                     );
                 }
             }
-
-            LWARNING(std::format(
-                "Number of node animations: {} Number of bone animations: {}",
-                modelAnimation->nodeAnimations().size(),
-                modelAnimation->boneAnimations().size()
-            ));
         }
     }
 

@@ -84,7 +84,7 @@ public:
     void initialize();
     void deinitialize() const;
     void render(opengl::ProgramObject& program, const glm::mat4& parentTransform,
-        glm::mat4& nodeTransform, const ModelAnimation* modelAnimation,
+        const glm::mat4& nodeTransform, const ModelAnimation* modelAnimation,
         bool isFullyTexturedModel = true, bool isProjection = false) const;
     float calculateBoundingRadius(glm::mat4& transform) const;
 
@@ -94,8 +94,6 @@ public:
     bool isTransparent() const;
     void setBones(std::vector<Bone> bones);
     bool hasBones() const;
-    Bone* findBone(std::string_view boneName);
-    const Bone* findBone(std::string_view boneName) const;
 
     const std::vector<Vertex>& vertices() const;
     std::vector<Vertex>& vertices();

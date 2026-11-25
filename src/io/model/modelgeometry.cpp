@@ -1145,8 +1145,6 @@ void ModelGeometry::renderRecursive(const io::ModelNode* node,
         customTransform = node->customTransform();
     }
 
-    //glm::mat4 globalTransform =
-    //   parentTransform * animationTransform * customTransform * nodeTransform;
     glm::mat4 globalTransform = parentTransform * customTransform;
 
     // Find this node in the animation and apply the animation transform if it exists
@@ -1164,28 +1162,29 @@ void ModelGeometry::renderRecursive(const io::ModelNode* node,
     }
     // Find the bone in the animation that corresponds to this node and apply the
     // animation transform if it exists
-    // TODO: Not sure if this is needed
     else if (_animation && _animation->mode() == io::ModelAnimation::AnimationMode::Bone)
     {
         const io::ModelAnimation::BoneAnimation* boneAnimation =
             _animation->findBoneAnimation(node->name());
 
+        // TODO: Remove 100 bone limit
         if (boneAnimation && boneAnimation->boneIndex >= 0 &&
             boneAnimation->boneIndex < 100)
         {
             // Animation is given by Assimp in absolute format, i.e. animation
-            // replaces node transform
-            // For the simple model this will never have any effect
+            // replaces node transform.
+            // NOTE: (malej 2026-11-25) This migth seem useless since the node and parent
+            // transform will be ignored in the render function when bones are present.
+            // But it is still needed to set the correct nodeTransform here since it is
+            // used to calculate the correct parent transform for the children of
+            // this node.
             nodeTransform = _animation->finalBoneTransforms()[boneAnimation->boneIndex];
-            //nodeTransform = glm::mat4(1.f);
         }
     }
 
     // Render the meshes of this node
     for (const io::ModelMesh& mesh : node->meshes()) {
         if (_animation) {
-            // TODO: We might need to return the correct node transform here after the
-            // bones have been applied
             mesh.render(
                 program,
                 globalTransform,
@@ -1207,7 +1206,7 @@ void ModelGeometry::renderRecursive(const io::ModelNode* node,
         }
     }
 
-    // Move on in the model tree with an updated parant transform
+    // Move on in the model tree and update the parent transform
     for (const int child : node->children()) {
         renderRecursive(
             &_nodes[child],

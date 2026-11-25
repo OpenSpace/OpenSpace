@@ -311,25 +311,36 @@ void ModelAnimation::computeFinalBoneTransformsRecursive(
                                                                     const ModelNode& node,
                                                            glm::mat4 parentTransformation)
 {
-    // TODO: Include the bone offset matrix here so we do not need to apply that later
+    // Find the bone animation that has the same name as this node. If there is one then
+    // the node transformation will be replaced with the bone animation transformation.
+    // Continue then to the children of this node and apply the parent transformation to
+    // get the final hierarchical transformation of the bone animation.
+    // IMPORTANT: (malej 2026-11-25) This needs to be called after the animate() function
+    // that updates the currentBoneTransform of the bone animations.
     const ModelAnimation::BoneAnimation* boneAnimation = findBoneAnimation(node.name());
     glm::mat4 finalTransform = parentTransformation * node.transform();
 
-    if (boneAnimation && boneAnimation->boneIndex >= 0 && boneAnimation->boneIndex < 100) {
-        // NOTE: Parents are needed here
-        finalTransform = parentTransformation * boneAnimation->currentBoneTransform;
-
+    // TODO: Remove 100 bone limit
+    if (boneAnimation && boneAnimation->boneIndex >= 0 && boneAnimation->boneIndex < 100)
+    {
         io::ModelMesh::Bone*  bone = _boneMap.at(boneAnimation->boneName);
         if (!bone) {
             LERRORC("ModelAnimation", std::format(
                 "BoneAnimation with bone '{}' does not refer to any bone in the mesh",
                 boneAnimation->boneName
             ));
-            _finalBoneTransforms[boneAnimation->boneIndex] = parentTransformation * node.transform();
+            _finalBoneTransforms[boneAnimation->boneIndex] = finalTransform;
         }
         else {
-            // NOTE: no transposing bone->boneTransform
-            _finalBoneTransforms[boneAnimation->boneIndex] = finalTransform * bone->boneTransform;
+            // The finalTransform will become the parent transformation of the children of
+            // this node in the hierarchy, it is important that the local bone
+            // transformation is NOT applied to it since that will break the hierarchical
+            // structure. However, the local bone transformation (bone->boneTransform) is
+            // applied to the _finalBoneTransforms that is stored and will be used in the
+            // shader to transform the vertices of the mesh affected by the bone.
+            finalTransform = parentTransformation * boneAnimation->currentBoneTransform;
+            _finalBoneTransforms[boneAnimation->boneIndex] =
+                finalTransform * bone->boneTransform;
         }
     }
 

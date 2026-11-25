@@ -70,7 +70,7 @@ void ModelMesh::generateDebugTexture(ModelMesh::Texture& texture) {
 }
 
 void ModelMesh::render(opengl::ProgramObject& program, const glm::mat4& parentTransform,
-                       glm::mat4& nodeTransform, const ModelAnimation* modelAnimation,
+                       const glm::mat4& nodeTransform, const ModelAnimation* modelAnimation,
                        bool isFullyTexturedModel, bool isProjection) const
 {
     // Calculate the transformation for this mesh
@@ -78,32 +78,24 @@ void ModelMesh::render(opengl::ProgramObject& program, const glm::mat4& parentTr
 
     // Apply bone transformations if there is any for this mesh
     program.setUniform("hasBones", false);
-    if (modelAnimation && modelAnimation->mode() == ModelAnimation::AnimationMode::Bone) {
+    if (modelAnimation && modelAnimation->mode() == ModelAnimation::AnimationMode::Bone &&
+        _bones.size() > 0)
+    {
+        program.setUniform("hasBones", true);
 
-        if (_bones.size() > 0) {
-            program.setUniform("hasBones", true);
-
-            if (_bones.size() > 100) {
-                program.setUniform("hasBones", false);
-                LWARNINGC("ModelMesh", std::format("More than 100 bone transforms, only the first 100 will be used"));
-            }
-
-            program.setUniform("bonesTransforms", modelAnimation->finalBoneTransforms());
-            LWARNINGC("ModelMesh", std::format("Using {} bone transforms", _bones.size()));
-
-            // Animation is given by Assimp in absolute format, i.e. bone tranform replaces node
-            // transform, i.e. ignore nodeTransform
-            //nodeTransform = glm::mat4(1.f); // X is up
-            //meshTransform = parentTransform; // X is up when nodeTransform has been replaced with boneTransform or when set to null or ignored
-            meshTransform = glm::mat4(1.f); // Y is up when nodeTransform has been replaced with boneTransform or when set to null or when ignored
+        // TODO: Remove 100 bone limit
+        if (_bones.size() > 100) {
+            program.setUniform("hasBones", false);
+            LWARNINGC("ModelMesh", "Only 100 bones are supported, ignoring the rest");
         }
-        else {
-            LWARNINGC("ModelMesh", "No bone transforms found for this mesh");
-        }
+
+        program.setUniform("bonesTransforms", modelAnimation->finalBoneTransforms());
+
+        // Animation is given by Assimp in absolute format, i.e. bone tranform replaces
+        // node transform, i.e. ignore nodeTransform. Also the parent transform is
+        // already included in the finalBoneTransforms.
+        meshTransform = glm::mat4(1.f);
     }
-
-    // Calculate the transformation for this mesh
-    //glm::mat4 meshTransform = parentTransform * nodeTransform;
 
     // Count how many textures have image textures
     int counter = 0;
@@ -251,24 +243,6 @@ bool ModelMesh::hasBones() const {
     return !_bones.empty();
 }
 
-ModelMesh::Bone * ModelMesh::findBone(std::string_view boneName) {
-    for (ModelMesh::Bone& bone : _bones) {
-        if (bone.name == boneName) {
-            return &bone;
-        }
-    }
-    return nullptr;
-}
-
-const ModelMesh::Bone * ModelMesh::findBone(std::string_view boneName) const {
-    for (const ModelMesh::Bone& bone : _bones) {
-        if (bone.name == boneName) {
-            return &bone;
-        }
-    }
-    return nullptr;
-}
-
 void ModelMesh::setInvisible(bool isInvisible) {
     _isInvisible = isInvisible;
 }
@@ -365,7 +339,14 @@ void ModelMesh::initialize() {
     glVertexArrayAttribBinding(_vao, 5, 0);
 
     glEnableVertexArrayAttrib(_vao, 6);
-    glVertexArrayAttribFormat(_vao, 6, 4, GL_FLOAT, GL_FALSE, offsetof(Vertex, boneWeights));
+    glVertexArrayAttribFormat(
+        _vao,
+        6,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        offsetof(Vertex, boneWeights)
+    );
     glVertexArrayAttribBinding(_vao, 6, 0);
 
     // Initialize textures

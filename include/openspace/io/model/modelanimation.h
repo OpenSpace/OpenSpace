@@ -116,7 +116,6 @@ private:
     bool _wasActive = false;
 
     std::vector<NodeAnimation> _nodeAnimations;
-
     std::vector<BoneAnimation> _boneAnimations;
     std::map<std::string, io::ModelMesh::Bone*> _boneMap;
     std::vector<glm::mat4> _finalBoneTransforms;
