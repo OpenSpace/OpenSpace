@@ -58,6 +58,15 @@ SUBMISSION_ERRORS = {
   429: "Too many failed attempts, the server is rejecting requests for a while"
 }
 
+# The status codes with which the proxy in front of the regression server reports that it
+# could not get a response from the server. Submissions that fail with one of these, or
+# because the connection failed, are tried again, as the failure is usually temporary
+RETRY_STATUS_CODES = {502, 503, 504}
+
+# The number of times a submission is attempted and the seconds to wait between attempts
+SUBMISSION_ATTEMPTS = 3
+RETRY_DELAY = 5
+
 def invalid_name_message(kind: str, value: str) -> str | None:
   """
   Returns a message describing why the `value` cannot be used as a name on the regression
@@ -110,47 +119,67 @@ def submit_image(result: TestResult, hardware: str, timestamp: str, file: str,
                  runner: str, url: str) -> None:
   """
   Submits a new candidate image to the provided URL. This function logs a method
-  indicating whether the image submission succeeded
+  indicating whether the image submission succeeded. Submissions that fail because the
+  server could not be reached are tried again. Resubmitting is safe, as the server rejects
+  a second test run with the same timestamp, which means that an earlier attempt was
+  stored
   """
-  try:
-    with open(file, "rb") as f:
-      res = requests.post(
-        url,
-        # The runner id is sent first, so that the server can reject an unknown runner
-        # before the image is uploaded
-        data = {
-          "runnerID": runner,
-          "group": result.group,
-          "name": result.name,
-          "hardware": hardware,
-          "timestamp": timestamp,
-          "timing": result.timing,
-          "commitHash": result.commit
-        },
-        files = {
-          "file": f,
-          "log": result.error
-        },
-        # Seconds to wait for the connection and for the server to process the image
-        timeout = (30, 600)
-      )
-  except requests.RequestException as e:
-    print(f"Image submission failed: {e}")
-    return
-
-  if res.status_code == 200:
-    print("Image submitted successfully")
-    print(f"  Group: {result.group}")
-    print(f"  Name: {result.name}")
-    print(f"  Hardware: {hardware}")
-  else:
+  for attempt in range(1, SUBMISSION_ATTEMPTS + 1):
     try:
-      message = res.json().get("error", res.text)
-    except ValueError:
-      message = res.text
-    print(f"Image submission failed with error {res.status_code}: {message}")
-    if res.status_code in SUBMISSION_ERRORS:
-      print(f"  {SUBMISSION_ERRORS[res.status_code]}")
+      with open(file, "rb") as f:
+        res = requests.post(
+          url,
+          # The runner id is sent first, so that the server can reject an unknown runner
+          # before the image is uploaded
+          data = {
+            "runnerID": runner,
+            "group": result.group,
+            "name": result.name,
+            "hardware": hardware,
+            "timestamp": timestamp,
+            "timing": result.timing,
+            "commitHash": result.commit
+          },
+          files = {
+            "file": f,
+            "log": result.error
+          },
+          # Seconds to wait for the connection and for the server to process the image
+          timeout = (30, 600)
+        )
+    except requests.RequestException as e:
+      print(f"Image submission failed: {e}")
+      # A timeout while waiting for the response is not retried, as the server might
+      # still be busy with the submission
+      retry = isinstance(e, requests.ConnectionError)
+    else:
+      if res.status_code == 200 or (res.status_code == 409 and attempt > 1):
+        print("Image submitted successfully")
+        if res.status_code == 409:
+          # An earlier attempt reached the server and was stored, but its response was
+          # lost
+          print("  The image was stored by an earlier attempt")
+        print(f"  Group: {result.group}")
+        print(f"  Name: {result.name}")
+        print(f"  Hardware: {hardware}")
+        return
+
+      try:
+        message = res.json().get("error", res.text)
+      except ValueError:
+        message = res.text
+      print(f"Image submission failed with error {res.status_code}: {message}")
+      if res.status_code in SUBMISSION_ERRORS:
+        print(f"  {SUBMISSION_ERRORS[res.status_code]}")
+      retry = res.status_code in RETRY_STATUS_CODES
+
+    if not retry or attempt == SUBMISSION_ATTEMPTS:
+      return
+    print(
+      f"  Trying again in {RETRY_DELAY} seconds "
+      f"(attempt {attempt + 1} of {SUBMISSION_ATTEMPTS})"
+    )
+    time.sleep(RETRY_DELAY)
 
 
 
