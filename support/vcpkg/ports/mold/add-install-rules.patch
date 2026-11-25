@@ -1,37 +1,28 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 639d6cb..b7394ef 100644
+index 8fd8fdd..669da74 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -184,19 +184,75 @@ if (MD_USE_RELATIVE_RESOURCE_PATH)
- endif()
+@@ -564,10 +564,11 @@ add_library(mdlib ${CORE_FILES} ${SRC_FILES} ${EXT_FILES} ${GEN_FILES} ${SHADER_
  
- target_include_directories(mdlib PUBLIC
+ target_include_directories(mdlib
+   PUBLIC
 -  src/
--  ext/dcd/
--  ext/fastlz/
 -  ext/gl3w/
--  ext/svd3/
--  ext/xtc/)
--
--target_compile_definitions(mdlib PUBLIC MD_SHADER_DIR="${MD_SHADER_DIR}" PRIVATE ${MD_DEFINES})
+-  ext/simde/
+-  ext/xxhash/
 +  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/dcd>
-+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/fastlz>
 +  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/gl3w>
-+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/svd3>
-+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/xtc>
-+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/mold>)
-+
-+target_compile_definitions(mdlib PRIVATE MD_SHADER_DIR="${MD_SHADER_DIR}" ${MD_DEFINES})
- target_compile_options(mdlib PRIVATE ${MD_FLAGS} $<$<CONFIG:Debug>:${MD_FLAGS_DEB}> $<$<CONFIG:Release>:${MD_FLAGS_REL}>)
- set_source_files_properties(${EXT_FILES}, PROPERTIES COMPILE_OPTIONS ${MD_FLAGS_EXT})
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/simde>
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/xxhash>
++  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/mold>
+ 
+   PRIVATE
+   ${GEN_DIR}
+@@ -672,6 +673,57 @@ set_source_files_properties(${EXT_FILES}, PROPERTIES COMPILE_OPTIONS ${MD_FLAGS_
  target_compile_features(mdlib PRIVATE c_std_11)
- target_link_libraries(mdlib PRIVATE ${MD_LIBS})
+ target_link_libraries(mdlib PUBLIC ${MD_LIBS})
  
 +# Install / export
-+#
-+# Upstream mdlib ships no install rules whatsoever, so find_package(mold CONFIG REQUIRED)
-+# cannot succeed against it as-is. Everything below is added by the OpenSpace overlay port.
 +include(GNUInstallDirs)
 +include(CMakePackageConfigHelpers)
 +
@@ -42,23 +33,22 @@ index 639d6cb..b7394ef 100644
 +  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 +)
 +
-+# The public headers are included as <md_foo.h> and <core/md_foo.h>, so the src/ layout is
-+# preserved underneath a single mold/ include root. The ext/ include directories are only
-+# needed to compile mdlib itself; none of the public headers reach into them.
 +install(DIRECTORY src/
 +  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mold
 +  FILES_MATCHING
 +    PATTERN "*.h"
 +    PATTERN "*.inl"
-+    # src/shaders/gfx/common.h is a GLSL include, not a C header
 +    PATTERN "shaders" EXCLUDE
 +)
 +
-+# md_gl.c compiles these at runtime instead of baking them into the library, so they have
-+# to be shipped as data for the consumer to place next to its executable. See
-+# runtime-shader-path.patch.
-+install(DIRECTORY src/shaders/
-+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/mold/shaders
++install(DIRECTORY ext/simde/simde/
++  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mold/simde
++  FILES_MATCHING
++    PATTERN "*.h"
++)
++
++install(FILES ext/xxhash/xxhash.h
++  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mold
 +)
 +
 +install(EXPORT moldTargets
@@ -74,7 +64,7 @@ index 639d6cb..b7394ef 100644
 +)
 +write_basic_package_version_file(
 +  ${CMAKE_CURRENT_BINARY_DIR}/moldConfigVersion.cmake
-+  VERSION ${PROJECT_VERSION}
++  VERSION 2026.10.17
 +  COMPATIBILITY AnyNewerVersion
 +)
 +install(FILES
@@ -86,3 +76,43 @@ index 639d6cb..b7394ef 100644
  get_directory_property(has_parent PARENT_DIRECTORY)
  if (has_parent)
      set(MD_DEFINES ${MD_DEFINES} PARENT_SCOPE)
+diff --git a/src/md_gl.h b/src/md_gl.h
+index 73b6ead..cc3415b 100644
+--- a/src/md_gl.h
++++ b/src/md_gl.h
+@@ -47,7 +47,7 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
+ 
+ // The shaders are customizable in their output as mentioned in the comment above.
+ // You could have multiple versions of shaders each compiled for a specific output.
+-typedef struct {
++typedef struct md_gl_shaders_t {
+     uint32_t id;
+ } md_gl_shaders_t;
+ 
+@@ -73,7 +73,7 @@ void md_gl_shaders_destroy(md_gl_shaders_t handle);
+ //      - backbone_atoms      : md_backbone_atoms_t = u32[4] (N, CA, C, O)
+ //      - secondary_structure : md_secondary_structure_t = u8[4]
+ 
+-typedef struct {
++typedef struct md_gl_mol_t {
+     uint32_t id;
+ } md_gl_mol_t;
+ 
+@@ -81,7 +81,7 @@ typedef struct {
+ // This is different from md_secondary_structure_t to allow interpolated values
+ // It essentially controls the blend (barycentric) between the geometrical representations of coil, helix, and sheet
+ // coil is implied when both helix and sheet are zero
+-typedef struct {
++typedef struct md_gl_secondary_structure_t {
+     float helix;  // 1.0 = full helix
+     float sheet;  // 1.0 = full sheet
+ } md_gl_secondary_structure_t;
+@@ -230,7 +230,7 @@ void md_gl_mol_reset_backbone_history(md_gl_mol_t mol);
+  *  A representations is just a set of colors for each atom in the molecule
+  */
+ 
+-typedef struct {
++typedef struct md_gl_rep_t {
+     uint32_t id;
+ } md_gl_rep_t;
+ 

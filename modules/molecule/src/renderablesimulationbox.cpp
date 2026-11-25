@@ -46,11 +46,11 @@
 #include <openspace/util/updatestructures.h>
 #include <glm/gtc/random.hpp>
 #include <core/md_allocator.h>
-#include <core/md_array.h>
-#include <core/md_bitfield.h>
-#include <md_util.h>
-#include <md_script.h>
+#include <core/md_bitset.h>
 #include <md_filter.h>
+#include <md_gl.h>
+#include <md_system.h>
+#include <md_util.h>
 #include <cmath>
 #include <string_view>
 
@@ -163,32 +163,13 @@ namespace {
         }
     };
 
-
-    // Renders a molecular dynamics simulation with multiple molecule types in a periodic
-    // boundary box. This can for example be used to show the distribution of different
-    // molecules or atoms in a specific spatial region, such as a planet's atmosphere.
-    //
-    // Multiple molecules can be provided and for each the path containing the structural
-    // data and the count of molecules has to be provided. Specifying the trajectory file
-    // that describes the movement of each individual molecule in its own relative frame,
-    // is optional.
     struct [[codegen::Dictionary(RenderableSimulationBox)]] Parameters {
         struct MoleculeData {
-            // The path to a molecule file that contains the structural information for
-            // the molecule.
             std::string moleculeFile;
-
-            // If provided, this trajectory file is used to move the individual atoms of
-            // the molecule. In addition, each molecule as a whole will be moving through
-            // the simulation box on a straight path, even if no trajectory file is
-            // provided.
             std::optional<std::string> trajectoryFile;
-
-            // How many of this type of molecule should be rendered in the simulation box.
             int count [[codegen::greaterequal(0)]];
         };
 
-        // The list of files that are used to initiate this simulation box.
         std::vector<MoleculeData> molecules;
 
         enum class [[codegen::map(molecule::rep::Type)]] Representation {
@@ -202,7 +183,6 @@ namespace {
             [[codegen::Info(RepresentationInfo)]];
 
         enum class [[codegen::map(molecule::rep::Color)]] Coloring {
-            // Uniform,
             Cpk,
             AtomIndex,
             ResId,
@@ -267,47 +247,60 @@ RenderableSimulationBox::RenderableSimulationBox(const Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 
     auto onUpdateRep = [this]() {
-        for (Molecules& mol : _molecules) {
-            const molecule::rep::Type t =
-                static_cast<molecule::rep::Type>(_representation.value());
-            molecule::updateRepType(mol.data.drawRep, t, _repScale);
-        }
+        // Representation type/scale is applied during draw operation construction
     };
 
     auto onUpdateCol = [this]() {
         for (Molecules& mol : _molecules) {
-            md_bitfield_t mask = md_bitfield_create(default_allocator);
+            if (!mol.data.system || !mol.data.drawRep.id) {
+                continue;
+            }
+
+            md_bitmask_t mask = md_bitmask_create(
+                0,
+                static_cast<uint32_t>(mol.data.system->atom.count),
+                md_get_heap_allocator()
+            );
 
             const std::string& filter = _filter;
-            if (!filter.empty() && filter != "" && filter != "all") {
-                str_t str = { filter.data(), static_cast<int64_t>(filter.length()) };
-                std::array<char, 1024> buf = { '\0' };
-
-                const bool success = md_filter(
-                    &mask,
-                    str,
-                    &mol.data.molecule,
-                    nullptr,
-                    nullptr,
-                    buf.data(),
-                    static_cast<int>(buf.size())
-                );
-                if (!success) {
-                    LERROR(std::format("Invalid filter expression: {}", buf.data()));
-                    md_bitfield_clear(&mask);
-                    md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
+            if (!filter.empty() && filter != "all") {
+                str_t str = { filter.data(), static_cast<size_t>(filter.length()) };
+                md_filter_context_t ctx = {
+                    .sys = mol.data.system,
+                    .state = &mol.data.state,
+                    .ir = nullptr,
+                    .atoms = nullptr
+                };
+                md_bitset_t set = {0};
+                md_temp_scope_t temp = md_temp_begin();
+                md_allocator_i* tempAlloc = md_temp_allocator(temp);
+                md_filter_result_t res =
+                    md_filter(&set, str, &ctx, tempAlloc);
+                if (res.success) {
+                    md_bitmask_assign(&mask, set);
                 }
+                else {
+                    LERROR(std::format("Invalid filter expression: {}", res.error));
+                    md_bitmask_set_range(
+                        &mask,
+                        0,
+                        static_cast<uint32_t>(mol.data.system->atom.count)
+                    );
+                }
+                md_temp_end(temp);
             }
             else {
-                md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
+                md_bitmask_set_range(
+                    &mask,
+                    0,
+                    static_cast<uint32_t>(mol.data.system->atom.count)
+                );
             }
 
-            const molecule::rep::Type t =
-                static_cast<molecule::rep::Type>(_representation.value());
-            molecule::updateRepType(mol.data.drawRep, t, _repScale);
             const molecule::rep::Color c =
                 static_cast<molecule::rep::Color>(_coloring.value());
-            molecule::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
+            molecule::updateRepColor(mol.data.drawRep, *mol.data.system, c, mask);
+            md_bitmask_free(&mask);
         }
     };
 
@@ -407,7 +400,6 @@ void RenderableSimulationBox::initializeGL() {
 
     global::moduleEngine->module<MoleculeModule>()->initializeShaders();
 
-    // Initialize billboard
     _billboard.program = opengl::ProgramObject::Build(
         "Simulationbox Billboard",
         absPath("${MODULE_MOLECULE}/shaders/billboard_vs.glsl"),
@@ -419,38 +411,55 @@ void RenderableSimulationBox::initializeGL() {
 
     for (Molecules& mol : _molecules) {
         initMolecule(mol.data, mol.moleculeFile, mol.trajectoryFile.value_or(""));
+        if (!mol.data.system) {
+            continue;
+        }
+
         const std::string& filter = _filter;
+        md_bitmask_t mask = md_bitmask_create(
+            0,
+            static_cast<uint32_t>(mol.data.system->atom.count),
+            md_get_heap_allocator()
+        );
 
-        md_bitfield_t mask = md_bitfield_create(default_allocator);
         if (!filter.empty() && filter != "all") {
-            str_t str = { filter.data(), static_cast<int64_t>(filter.length()) };
-            char errBuf[1024];
-
-            const bool success = md_filter(
-                &mask,
-                str,
-                &mol.data.molecule,
-                nullptr,
-                nullptr,
-                errBuf,
-                sizeof(errBuf)
-            );
-            if (!success) {
-                LERROR(std::format("Invalid filter expression: {}", errBuf));
-                md_bitfield_clear(&mask);
-                md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
+            str_t str = { filter.data(), static_cast<size_t>(filter.length()) };
+            md_filter_context_t ctx = {
+                .sys = mol.data.system,
+                .state = &mol.data.state,
+                .ir = nullptr,
+                .atoms = nullptr
+            };
+            md_bitset_t set = {0};
+            md_temp_scope_t temp = md_temp_begin();
+            md_allocator_i* tempAlloc = md_temp_allocator(temp);
+            md_filter_result_t res =
+                md_filter(&set, str, &ctx, tempAlloc);
+            if (res.success) {
+                md_bitmask_assign(&mask, set);
             }
+            else {
+                LERROR(std::format("Invalid filter expression: {}", res.error));
+                md_bitmask_set_range(
+                    &mask,
+                    0,
+                    static_cast<uint32_t>(mol.data.system->atom.count)
+                );
+            }
+            md_temp_end(temp);
         }
         else {
-            md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
+            md_bitmask_set_range(
+                &mask,
+                0,
+                static_cast<uint32_t>(mol.data.system->atom.count)
+            );
         }
 
-        const molecule::rep::Type t =
-            static_cast<molecule::rep::Type>(_representation.value());
-        molecule::updateRepType(mol.data.drawRep, t, _repScale);
         const molecule::rep::Color c =
             static_cast<molecule::rep::Color>(_coloring.value());
-        molecule::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
+        molecule::updateRepColor(mol.data.drawRep, *mol.data.system, c, mask);
+        md_bitmask_free(&mask);
     }
 }
 
@@ -462,45 +471,37 @@ void RenderableSimulationBox::deinitializeGL() {
 }
 
 void RenderableSimulationBox::update(const UpdateData& data) {
-    // Avoid updating if not in view, as it can be quite expensive
     if (!_renderableInView) {
         return;
     }
 
     _renderableInView = false;
 
-    double tCur = data.time.j2000Seconds();
-    double dt = tCur - data.previousFrameTime.j2000Seconds();
+    const double tCur = data.time.j2000Seconds();
+    const double dt = tCur - data.previousFrameTime.j2000Seconds();
 
     for (Molecules& mol : _molecules) {
-        // Update animation
         if (mol.data.trajectory) {
-            // Emulate PingPong animation by manipulating the local time t_local per
-            // trajectory
-            const int64_t numFrames = md_trajectory_num_frames(mol.data.trajectory);
+            const int64_t numFrames = molecule::trajectoryNumFrames(mol.data.trajectory);
             double frame = std::fmod(tCur * _animationSpeed, 2.0 * numFrames);
             if (frame > numFrames) {
                 frame = 2.0 * numFrames - frame;
             }
 
             molecule::interpolateFrame(
-                mol.data.molecule,
+                mol.data.state,
                 mol.data.trajectory,
                 molecule::InterpolationType::Cubic,
                 frame
             );
-            md_gl_molecule_set_atom_position(
-                &mol.data.drawMol,
+            md_gl_mol_set_atom_position(
+                mol.data.drawMol,
                 0,
-                static_cast<uint32_t>(mol.data.molecule.atom.count),
-                mol.data.molecule.atom.x,
-                mol.data.molecule.atom.y,
-                mol.data.molecule.atom.z,
-                0
+                static_cast<uint32_t>(mol.data.system->atom.count),
+                mol.data.state.xyz
             );
         }
 
-        // Update simulation
         updateSimulation(mol.data, dt * _simulationSpeed);
     }
 }
@@ -508,25 +509,18 @@ void RenderableSimulationBox::update(const UpdateData& data) {
 void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     global::renderEngine->openglStateCache().loadCurrentGLState();
 
-    // Compute distance from camera to molecule
-    glm::vec3 forward = data.modelTransform.translation - data.camera.position();
-    glm::vec3 dir = data.camera.viewDirectionWorldSpace();
+    const glm::vec3 forward = data.modelTransform.translation - data.camera.position();
+    const glm::vec3 dir = data.camera.viewDirectionWorldSpace();
 
-    // "Signed" distance from camera to object
     const float distance = length(forward) * sign(glm::dot(dir, forward));
-    // We apply artificial scaling to everything to cheat a bit with the unit system
     const float fakeScaling = 100.f / distance;
 
-    // Distance < 0 means behind the camera, 1E4 is arbitrary
     if (distance < 0.f || distance > 1E4) {
         return;
     }
 
     _renderableInView = true;
 
-    // Because the molecule is small, a scaling of the view matrix causes the molecule to
-    // be moved out of view in clip space. Resetting the scaling for the molecule is fine
-    // for now. This will have an impact on stereoscopic depth though
     Camera camCopy = data.camera;
     camCopy.setScaling(0.1f);
 
@@ -540,7 +534,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
     const glm::mat4 projMatrix = glm::dmat4(camCopy.sgctInternal.projectionMatrix());
 
-    // We want to preallocate this to avoid reallocations
     size_t count = 0;
     for (const Molecules& mol : _molecules) {
         count += mol.data.states.size();
@@ -554,34 +547,44 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
     for (const Molecules& mol : _molecules) {
         for (const Molecules::Data::State& state : mol.data.states) {
-            glm::dmat4 transform =
+            const glm::dmat4 transform =
                 glm::translate(glm::dmat4(1.0), state.position) *
                 glm::rotate(glm::dmat4(1.0), state.angle, state.rotationAxis);
 
             transforms.emplace_back(transform);
-            drawOps.emplace_back(&mol.data.drawRep, glm::value_ptr(transforms.back()));
+
+            md_gl_draw_op_t op = {};
+            op.rep = mol.data.drawRep;
+            op.model_matrix = glm::value_ptr(transforms.back());
+            const molecule::rep::Type t =
+                static_cast<molecule::rep::Type>(_representation.value());
+            molecule::setDrawOpTypeAndArgs(op, t, _repScale);
+            drawOps.push_back(op);
         }
     }
 
     MoleculeModule* mod = global::moduleEngine->module<MoleculeModule>();
 
-    md_gl_draw_args_t args = {
-        .shaders = &mod->shaders(),
-        .draw_operations = { static_cast<uint32_t>(drawOps.size()), drawOps.data() },
+    const md_gl_draw_args_t args = {
+        .shaders = mod->shaders(),
+        .draw_operations = {
+            .count = drawOps.size(),
+            .ops = drawOps.data()
+        },
         .view_transform = {
             .view_matrix = glm::value_ptr(viewMatrix),
-            .projection_matrix = glm::value_ptr(projMatrix),
+            .proj_matrix = glm::value_ptr(projMatrix),
             .prev_view_matrix = nullptr,
-            .prev_projection_matrix = nullptr
+            .prev_proj_matrix = nullptr
         },
-        .options = 0
+        .picking_offset = {},
+        .atom_mask = 0,
+        .max_bond_length = 0.0f
     };
 
-    // Draw molecule offscreen
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
     glBindFramebuffer(GL_FRAMEBUFFER, mod->fbo());
-    // Shading rendering of mold
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, bufs);
 
@@ -609,8 +612,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 
-
-    // Draw billboard pre-rendered with molecule inside
     const glm::dmat4 billboardModel =
         camCopy.combinedViewMatrix() *
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -658,7 +659,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSimulationBox::updateSimulation(Molecules::Data& mol, double dt) {
-    // Update positions / rotations
     for (Molecules::Data::State& molecule : mol.states) {
         molecule.position += molecule.direction * dt;
         molecule.position = glm::mod(molecule.position, _simulationBox.value());
@@ -667,16 +667,13 @@ void RenderableSimulationBox::updateSimulation(Molecules::Data& mol, double dt) 
 
     const double collRadiusSquared = _collisionRadius * _collisionRadius;
 
-    // Compute collisions
-    // Those collisions are really simplistic, they assume spherical boundaries, equal
-    // mass, and are order-dependent
     for (auto it1 = mol.states.begin(); it1 != mol.states.end(); it1++) {
         for (auto it2 = std::next(it1); it2 != mol.states.end(); it2++) {
             Molecules::Data::State& m1 = *it1;
             Molecules::Data::State& m2 = *it2;
 
-            glm::dvec3 distVec = m2.position - m1.position;
-            double distSquared = glm::dot(distVec, distVec);
+            const glm::dvec3 distVec = m2.position - m1.position;
+            const double distSquared = glm::dot(distVec, distVec);
 
             if (distSquared >= collRadiusSquared ||
                 glm::dot(m1.direction, m2.direction) >= 0.f)
@@ -684,18 +681,14 @@ void RenderableSimulationBox::updateSimulation(Molecules::Data& mol, double dt) 
                 continue;
             }
 
-            // Collision detected
-            double dist = std::sqrt(distSquared);
-            double intersection = 2.0 * _collisionRadius - dist;
-            // Swap the direction components normal to the collision plane from the 2
-            // molecules. (simplistic elastic collision of 2 spheres with same mass)
-            glm::dvec3 dir = distVec / dist;
-            glm::dvec3 compM1 = dir * glm::dot(m1.direction, dir);
-            glm::dvec3 compM2 = -dir * glm::dot(m2.direction, -dir);
+            const double dist = std::sqrt(distSquared);
+            const double intersection = 2.0 * _collisionRadius - dist;
+            const glm::dvec3 dir = distVec / dist;
+            const glm::dvec3 compM1 = dir * glm::dot(m1.direction, dir);
+            const glm::dvec3 compM2 = -dir * glm::dot(m2.direction, -dir);
             m1.direction = m1.direction - compM1 + compM2;
             m2.direction = m2.direction - compM2 + compM1;
 
-            // Move the spheres away from each other (not intersecting)
             m1.position += -dir * intersection;
             m2.position += dir * intersection;
         }
@@ -706,21 +699,22 @@ void RenderableSimulationBox::initMolecule(Molecules::Data& mol,
                                            std::filesystem::path molFile,
                                            std::filesystem::path trajFile)
 {
-    LDEBUG(std::format("Loading molecule file '{}'", molFile));
+    LDEBUG(std::format("Loading molecule file '{}'", molFile.string()));
 
-    // Free previously loaded molecule
     freeMolecule(mol);
 
-    const md_molecule_t* molecule = molecule::loadMolecule(molFile);
+    const molecule::Molecule* molecule = molecule::loadMolecule(molFile);
     if (!molecule) {
         return;
     }
 
-    md_molecule_copy(&mol.molecule, molecule, default_allocator);
+    mol.system = &molecule->system;
+    mol.state.alloc = md_get_heap_allocator();
+    md_system_state_copy(&mol.state, &molecule->state);
 
     if (!trajFile.empty()) {
-        LDEBUG(std::format("Loading trajectory file '{}'", trajFile));
-        mol.trajectory = molecule::loadTrajectory(trajFile);
+        LDEBUG(std::format("Loading trajectory file '{}'", trajFile.string()));
+        mol.trajectory = molecule::loadTrajectory(trajFile, molecule);
 
         if (!mol.trajectory) {
             LERROR("Failed to initialize trajectory: failed to load file");
@@ -728,22 +722,28 @@ void RenderableSimulationBox::initMolecule(Molecules::Data& mol,
         }
     }
 
-    double sphere = glm::compMax(_simulationBox.value()) / 2.0;
+    const double sphere = glm::compMax(_simulationBox.value()) / 2.0;
     setBoundingSphere(sphere);
 
-    md_gl_molecule_init(&mol.drawMol, &mol.molecule);
-    md_gl_representation_init(&mol.drawRep, &mol.drawMol);
+    mol.drawMol = md_gl_mol_create(mol.system);
+    mol.drawRep = md_gl_rep_create(mol.drawMol);
 }
 
 void RenderableSimulationBox::freeMolecule(Molecules::Data& mol) {
-    md_gl_representation_free(&mol.drawRep);
-    md_gl_molecule_free(&mol.drawMol);
-    md_molecule_free(&mol.molecule, default_allocator);
+    if (mol.drawRep.id) {
+        md_gl_rep_destroy(mol.drawRep);
+        mol.drawRep = {};
+    }
+    if (mol.drawMol.id) {
+        md_gl_mol_destroy(mol.drawMol);
+        mol.drawMol = {};
+    }
+    if (mol.state.alloc) {
+        md_system_state_free(&mol.state);
+    }
 
-    mol.molecule = {};
+    mol.system = nullptr;
     mol.trajectory = nullptr;
-    mol.drawMol = {};
-    mol.drawRep = {};
 }
 
 } // namespace openspace

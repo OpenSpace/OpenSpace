@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_MOLECULE___POSTPROCESSING___H__
 #define __OPENSPACE_MODULE_MOLECULE___POSTPROCESSING___H__
 
-struct mat4_t;
+#include <openspace/glm.h>
 
 namespace openspace::opengl { class Texture; }
 
