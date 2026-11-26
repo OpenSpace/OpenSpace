@@ -29,6 +29,7 @@
 #include <openspace/glm.h>
 
 struct md_bitfield_t;
+struct md_gl_draw_args_t;
 struct md_gl_representation_t;
 struct md_molecule_t;
 struct md_trajectory_i;
@@ -51,6 +52,16 @@ void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
 // and chains within the same period
 void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
     InterpolationType interp, double frame, bool ensurePbc = false);
+
+/**
+ * Draws the molecules described by \p args with `md_gl_draw`. `md_gl_draw` binds its own
+ * uniform buffer to binding 0 and does not unbind it, so this function restores the
+ * buffer that was bound there before. Other shaders, such as those that include
+ * shaders/depth.glsl, can use that binding.
+ *
+ * \param args The arguments that are passed to `md_gl_draw`
+ */
+void draw(const md_gl_draw_args_t& args);
 
 } // namespace molecule
 

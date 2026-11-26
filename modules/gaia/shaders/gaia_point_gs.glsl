@@ -25,6 +25,7 @@
 #version __CONTEXT__
 
 #include "floatoperations.glsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
 in Data {
@@ -66,8 +67,7 @@ void main() {
     return;
   }
 
-  gl_Position = gl_in[0].gl_Position;
-  gl_Position.z = 0.0;
+  gl_Position = z_normalization(gl_in[0].gl_Position);
   out_data.gPosition = viewPosition;
 
   EmitVertex();

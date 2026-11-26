@@ -2547,6 +2547,36 @@ public:
     void setSsboBinding(GLuint index, GLuint binding) const;
 
     /**
+     * Locates and sets the uniform block \p name with the passed \p binding. Returns
+     * `true` if the block could be found; `false` otherwise. Will call the OpenGL
+     * functions `glGetUniformBlockIndex` and `glUniformBlockBinding`.
+     *
+     * \param name The name of the uniform block in the ShaderObject%s
+     * \param binding The uniform buffer binding the block should be bound to
+     * \return `true` if the block was successfully located, `false` otherwise
+     */
+    bool setUniformBlockBinding(std::string_view name, GLuint binding) const;
+
+    /**
+     * Registers a uniform block that is shared by all ProgramObject%s. Every
+     * ProgramObject that is linked after this call and that contains a uniform block
+     * called \p name gets that block bound to \p binding. This means that the binding
+     * does not have to be hardcoded in the shader source.
+     *
+     * \param name The name of the uniform block
+     * \param binding The uniform buffer binding the block should be bound to
+     */
+    static void addSharedUniformBlock(std::string name, GLuint binding);
+
+    /**
+     * Removes a uniform block that was registered with #addSharedUniformBlock.
+     * ProgramObject%s that are linked after this call no longer have the block bound.
+     *
+     * \param name The name of the uniform block
+     */
+    static void removeSharedUniformBlock(std::string_view name);
+
+    /**
      * Enables and disables the logging of a warning if the location of an attribute can
      * not be found in any of the attached ShaderObjects.
      *

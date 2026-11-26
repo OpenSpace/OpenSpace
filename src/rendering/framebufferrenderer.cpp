@@ -76,6 +76,10 @@ namespace {
        GL_COLOR_ATTACHMENT3
     };
 
+    // The distance in world space, in meters, to the near plane of the reversed depth.
+    // The view space distance is this times the stereoscopic depth scaling of the camera
+    constexpr double DepthNearWorld = 1e-3;
+
     // Deletes the provided `texture` (if it exists) and replaces it with a new texture
     // that has immutable storage with the provided format and size. Immutable storage
     // cannot be resized, so this is needed whenever the resolution changes
@@ -159,6 +163,27 @@ void FramebufferRenderer::initialize() {
 
     glCreateBuffers(1, &_vbo);
     glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), VertexData.data(), GL_NONE_BIT);
+
+    // std140 pads a single float to 16 bytes. The buffer is initialized with the near
+    // plane of an unscaled camera, so that shaders never read an undefined block
+    const std::array<float, 4> depthData = { static_cast<float>(DepthNearWorld) };
+    glCreateBuffers(1, &_depthDataBuffer);
+    glNamedBufferStorage(
+        _depthDataBuffer,
+        sizeof(depthData),
+        depthData.data(),
+        GL_DYNAMIC_STORAGE_BIT
+    );
+    _depthDataBinding = std::make_unique<
+        opengl::BufferBinding<opengl::bufferbinding::Buffer::Uniform>
+    >();
+    const GLuint depthDataBinding =
+        static_cast<GLuint>(_depthDataBinding->bindingNumber());
+    glBindBufferBase(GL_UNIFORM_BUFFER, depthDataBinding, _depthDataBuffer);
+    // The `DepthData` block from shaders/depth.glsl is bound to this binding in every
+    // program that is linked from now on, so this has to happen before any program that
+    // includes it is built
+    opengl::ProgramObject::addSharedUniformBlock("DepthData", depthDataBinding);
 
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
@@ -266,6 +291,9 @@ void FramebufferRenderer::deinitialize() {
     glDeleteTextures(1, &_exitDepthTexture);
 
     glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_depthDataBuffer);
+    opengl::ProgramObject::removeSharedUniformBlock("DepthData");
+    _depthDataBinding = nullptr;
     glDeleteVertexArrays(1, &_vao);
 
     global::raycasterManager->removeListener(*this);
@@ -317,7 +345,7 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
         glTextureParameteri(info.depthMap.texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureParameteri(info.depthMap.texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTextureParameteri(info.depthMap.texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        constexpr glm::vec4 borderColor = glm::vec4(1.f);
+        constexpr glm::vec4 borderColor = glm::vec4(0.f);
         glTextureParameterfv(
             info.depthMap.texture,
             GL_TEXTURE_BORDER_COLOR,
@@ -932,6 +960,21 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         return;
     }
 
+    // The near plane of the reversed depth is a fixed distance in world space, which in
+    // view space depends on the scaling of the camera
+    const float depthNear = static_cast<float>(DepthNearWorld * camera->scaling());
+    glNamedBufferSubData(_depthDataBuffer, 0, sizeof(float), &depthNear);
+    glBindBufferBase(
+        GL_UNIFORM_BUFFER,
+        static_cast<GLuint>(_depthDataBinding->bindingNumber()),
+        _depthDataBuffer
+    );
+
+    // Reversed depth is only used for the scene, sgct and the GUI use the standard one
+    const opengl::DepthConventionScope reversedDepth = opengl::DepthConventionScope(
+        opengl::DepthConvention::Reversed
+    );
+
     glNamedFramebufferDrawBuffers(_gBuffers.framebuffer, 3, ColorAttachmentArray.data());
     glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1092,6 +1135,10 @@ void FramebufferRenderer::renderDepthMaps() {
     GLint prevVp[4];
     glGetIntegerv(GL_VIEWPORT, prevVp);
 
+    // The shadow maps use the reversed depth, where the near plane of the light is 1 and
+    // the far plane is 0
+    const opengl::DepthConventionScope reversedDepth(opengl::DepthConvention::Reversed);
+
     for (std::pair<const std::string, ShadowInfo>& shadowMap : _shadowMaps) {
         glm::dvec3 vmin = glm::dvec3(std::numeric_limits<double>::max());
         glm::dvec3 vmax = glm::dvec3(-std::numeric_limits<double>::max());
@@ -1132,7 +1179,9 @@ void FramebufferRenderer::renderDepthMaps() {
         const glm::dvec3 up = glm::cross(right, lightDir);
 
         const glm::dmat4 view = glm::lookAt(eye, center, up);
-        const glm::dmat4 projection = glm::ortho(-sz, sz, -sz, sz, d - sz, d + sz);
+        // Swapping the near and far planes gives the reversed depth in the [0, 1] range
+        // of the clip control
+        const glm::dmat4 projection = glm::orthoRH_ZO(-sz, sz, -sz, sz, d + sz, d - sz);
         shadowMap.second.viewProjectionMatrix = projection * view;
 
         glBindFramebuffer(GL_FRAMEBUFFER, shadowMap.second.fbo);

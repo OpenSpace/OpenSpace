@@ -24,6 +24,8 @@
 
 #version __CONTEXT__
 
+#include "powerscaling/powerscalingmath.glsl"
+
 layout(location = 0) in vec3 in_position;
 
 out Data {
@@ -56,5 +58,5 @@ void main() {
     out_data.finalColor = vec4(1.0, 1.0, 0.0, 1.0);
   }
 
-  gl_Position.z = 0.0;
+  gl_Position = z_normalization(gl_Position);
 }

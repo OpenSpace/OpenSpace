@@ -60,6 +60,7 @@ public:
 private:
     void internalInitialize(const Dictionary&) override;
     void preDraw();
+    void clearFramebuffer() const;
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix) const;
 

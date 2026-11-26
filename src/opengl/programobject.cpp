@@ -29,7 +29,14 @@
 #include <openspace/opengl/texture.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
+#include <functional>
 #include <utility>
+
+namespace {
+    // The uniform blocks that are shared by all programs, together with the uniform
+    // buffer binding that each block is bound to when a program is linked
+    std::map<std::string, GLuint, std::less<>> SharedUniformBlocks;
+} // namespace
 
 namespace openspace::opengl {
 
@@ -156,6 +163,11 @@ void ProgramObject::linkProgramObject() {
         if (!log.empty()) {
             LWARNING(log);
         }
+    }
+
+    // Linking resets the uniform block bindings, so they have to be set again here
+    for (const auto& [name, binding] : SharedUniformBlocks) {
+        setUniformBlockBinding(name, binding);
     }
 
     _programIsDirty = false;
@@ -2014,6 +2026,26 @@ bool ProgramObject::setSsboBinding(std::string_view name, GLuint binding) const 
 
 void ProgramObject::setSsboBinding(GLuint index, GLuint binding) const {
     glShaderStorageBlockBinding(_id, index, binding);
+}
+
+bool ProgramObject::setUniformBlockBinding(std::string_view name, GLuint binding) const {
+    const GLuint index = glGetUniformBlockIndex(_id, name.data());
+    if (index == GL_INVALID_INDEX) {
+        return false;
+    }
+    glUniformBlockBinding(_id, index, binding);
+    return true;
+}
+
+void ProgramObject::addSharedUniformBlock(std::string name, GLuint binding) {
+    SharedUniformBlocks[std::move(name)] = binding;
+}
+
+void ProgramObject::removeSharedUniformBlock(std::string_view name) {
+    const auto it = SharedUniformBlocks.find(name);
+    if (it != SharedUniformBlocks.end()) {
+        SharedUniformBlocks.erase(it);
+    }
 }
 
 GLuint ProgramObject::attributeLocation(const std::string& name) const {

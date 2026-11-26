@@ -877,6 +877,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _programTM->setUniform(_uniformCacheTM.filterSize, _tmPointFilterSize);
     _programTM->setUniform(_uniformCacheTM.sigma, _tmPointSigma);
     _programTM->setUniform(_uniformCacheTM.projection, data.camera.projectionMatrix());
+    _programTM->setUniform(_uniformCacheTM.viewScaling, data.camera.scaling());
     _programTM->setUniform(
         _uniformCacheTM.pixelWeightThreshold,
         _tmPointPixelWeightThreshold

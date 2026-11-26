@@ -53,6 +53,7 @@
 
 #include <openspace/filesystem/filesystem.h>
 #include <openspace/logging/logmanager.h>
+#include <openspace/opengl/bufferbinding.h>
 #include <openspace/opengl/gl.h>
 #include <openspace/opengl/programobject.h>
 #include <openspace/opengl/texture.h>
@@ -946,12 +947,15 @@ void applySsao(const opengl::Texture& linearDepthTex, const opengl::Texture& nor
         opengl::TextureUnit randomUnit;
         randomUnit.bind(*glObj.ssao.texRandom);
 
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, glObj.ssao.uboHbaoData);
-        glUniformBlockBinding(
-            program,
-            glGetUniformBlockIndex(program, "controlBuffer"),
-            0
+        opengl::BufferBinding<opengl::bufferbinding::Buffer::Uniform> hbaoDataBinding;
+        const GLuint hbaoDataBindingNumber =
+            static_cast<GLuint>(hbaoDataBinding.bindingNumber());
+        glBindBufferBase(
+            GL_UNIFORM_BUFFER,
+            hbaoDataBindingNumber,
+            glObj.ssao.uboHbaoData
         );
+        program.setUniformBlockBinding("controlBuffer", hbaoDataBindingNumber);
         program.setUniform(uniforms.texLinearDepth, linearDepthUnit);
         program.setUniform(uniforms.texNormal, normalUnit);
         program.setUniform(uniforms.texRandom, randomUnit);
