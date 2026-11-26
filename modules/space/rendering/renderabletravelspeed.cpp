@@ -202,6 +202,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const Dictionary& dictionary)
     setRenderBin(RenderBin::Overlay);
 
     _epoch.onChange([this]() { reinitiateTravel(_epoch); });
+    _epoch.setViewOption(Property::ViewOptions::Time);
     addProperty(_epoch);
 
     _resetLine.onChange([this]() {

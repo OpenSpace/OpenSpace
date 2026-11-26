@@ -645,6 +645,7 @@ RenderableStars::RenderableStars(const Dictionary& dictionary)
 
 
     _properMotionEpoch = p.properMotionEpoch.value_or(_properMotionEpoch);
+    _properMotionEpoch.setViewOption(Property::ViewOptions::Time);
     addProperty(_properMotionEpoch);
 
 

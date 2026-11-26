@@ -186,6 +186,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
         _time = Time(*p.time).j2000Seconds();
     }
     _time.onChange([this]() { _previousTime = _time; });
+    _time.setViewOption(Property::ViewOptions::Time);
     addProperty(_time);
 
     _cameraPosition = p.cameraPosition.value_or(_cameraPosition);

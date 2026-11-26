@@ -264,6 +264,7 @@ KeplerTranslation::KeplerTranslation(const Dictionary& dictionary)
     addProperty(_argumentOfPeriapsis);
 
     addProperty(_meanAnomalyAtEpoch);
+    _epoch.setViewOption(Property::ViewOptions::Time);
     addProperty(_epoch);
     addProperty(_period);
 

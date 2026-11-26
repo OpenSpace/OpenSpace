@@ -54,7 +54,9 @@ std::string DoubleProperty::stringValue() const {
 
 nlohmann::json DoubleProperty::Schema() {
     nlohmann::json metaData = NumericalProperty<double>::MetaDataSchema();
+    metaData["$defs"]["ViewOptions"] = ViewOptionsSchema();
     metaData["properties"]["type"] = { { "const", "DoubleProperty" } };
+    metaData["properties"]["viewOptions"] = { { "$ref", "#/$defs/ViewOptions" } };
     metaData["required"].push_back("type");
     nlohmann::json sharedDefs = ExtractDefs(metaData);
 

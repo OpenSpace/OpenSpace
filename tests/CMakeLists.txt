@@ -80,6 +80,7 @@ target_sources(
     property/test_property_optionproperty.cpp
     property/test_property_listproperties.cpp
     property/test_property_selectionproperty.cpp
+    property/test_property_viewoptions.cpp
 
     regression/517.cpp
 
