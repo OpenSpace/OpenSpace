@@ -32,7 +32,6 @@
 #include <openspace/misc/profiling.h>
 #include <openspace/opengl/openglstatecache.h>
 #include <openspace/opengl/programobject.h>
-#include <openspace/opengl/shaderpreprocessor.h>
 #include <openspace/opengl/texture.h>
 #include <openspace/opengl/textureunit.h>
 #include <openspace/rendering/deferredcaster.h>
@@ -175,7 +174,16 @@ void FramebufferRenderer::initialize() {
         depthData.data(),
         GL_DYNAMIC_STORAGE_BIT
     );
-    glBindBufferBase(GL_UNIFORM_BUFFER, opengl::DepthDataBinding, _depthDataBuffer);
+    _depthDataBinding = std::make_unique<
+        opengl::BufferBinding<opengl::bufferbinding::Buffer::Uniform>
+    >();
+    const GLuint depthDataBinding =
+        static_cast<GLuint>(_depthDataBinding->bindingNumber());
+    glBindBufferBase(GL_UNIFORM_BUFFER, depthDataBinding, _depthDataBuffer);
+    // The `DepthData` block from shaders/depth.glsl is bound to this binding in every
+    // program that is linked from now on, so this has to happen before any program that
+    // includes it is built
+    opengl::ProgramObject::addSharedUniformBlock("DepthData", depthDataBinding);
 
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
@@ -284,6 +292,8 @@ void FramebufferRenderer::deinitialize() {
 
     glDeleteBuffers(1, &_vbo);
     glDeleteBuffers(1, &_depthDataBuffer);
+    opengl::ProgramObject::removeSharedUniformBlock("DepthData");
+    _depthDataBinding = nullptr;
     glDeleteVertexArrays(1, &_vao);
 
     global::raycasterManager->removeListener(*this);
@@ -954,7 +964,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     // view space depends on the scaling of the camera
     const float depthNear = static_cast<float>(DepthNearWorld * camera->scaling());
     glNamedBufferSubData(_depthDataBuffer, 0, sizeof(float), &depthNear);
-    glBindBufferBase(GL_UNIFORM_BUFFER, opengl::DepthDataBinding, _depthDataBuffer);
+    glBindBufferBase(
+        GL_UNIFORM_BUFFER,
+        static_cast<GLuint>(_depthDataBinding->bindingNumber()),
+        _depthDataBuffer
+    );
 
     // Reversed depth is only used for the scene, sgct and the GUI use the standard one
     const opengl::DepthConventionScope reversedDepth = opengl::DepthConventionScope(

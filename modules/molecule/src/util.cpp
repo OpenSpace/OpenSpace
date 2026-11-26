@@ -27,6 +27,7 @@
 #include <modules/molecule/src/cache.h>
 #include <modules/molecule/src/coloring.h>
 #include <openspace/logging/logmanager.h>
+#include <openspace/opengl/gl.h>
 #include <core/md_allocator.h>
 #include <core/md_bitfield.h>
 #include <md_molecule.h>
@@ -303,6 +304,13 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
     if (ensurePbc) {
         md_util_deperiodize_system(mol.atom.x, mol.atom.y, mol.atom.z, &mol.cell, &mol);
     }
+}
+
+void draw(const md_gl_draw_args_t& args) {
+    GLint previousBuffer = 0;
+    glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, 0, &previousBuffer);
+    md_gl_draw(&args);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, static_cast<GLuint>(previousBuffer));
 }
 
 } // namespace molecule

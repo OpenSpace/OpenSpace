@@ -541,7 +541,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
         const opengl::DepthConventionScope standardDepth = opengl::DepthConventionScope(
             opengl::DepthConvention::Standard
         );
-        md_gl_draw(&args);
+        molecule::draw(args);
     }
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);

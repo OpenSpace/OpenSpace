@@ -29,6 +29,7 @@
 #include <openspace/rendering/deferredcasterlistener.h>
 
 #include <openspace/glm.h>
+#include <openspace/opengl/bufferbinding.h>
 #include <openspace/opengl/gl.h>
 #include <openspace/opengl/uniformcache.h>
 #include <openspace/rendering/shadowmapping.h>
@@ -226,6 +227,11 @@ private:
     /// Uniform buffer with the view-space near distance of the reversed depth, shared by
     /// all shaders. See shaders/depth.glsl
     GLuint _depthDataBuffer = 0;
+    /// The uniform buffer binding of #_depthDataBuffer. It is created in #initialize, as
+    /// the number of available bindings is only known once there is an OpenGL context
+    std::unique_ptr<
+        opengl::BufferBinding<opengl::bufferbinding::Buffer::Uniform>
+    > _depthDataBinding;
     GLuint _exitColorTexture = 0;
     GLuint _exitDepthTexture = 0;
     GLuint _exitFramebuffer = 0;

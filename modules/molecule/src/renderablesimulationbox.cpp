@@ -612,7 +612,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             GL_ONE_MINUS_CONSTANT_ALPHA
         );
 
-        md_gl_draw(&args);
+        molecule::draw(args);
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     }
