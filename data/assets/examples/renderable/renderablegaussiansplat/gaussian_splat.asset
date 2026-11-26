@@ -1,0 +1,75 @@
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+
+-- Downloads the .ply file automatically into OpenSpace's asset cache on first load
+local splatPly = asset.resource({
+    Name = "Mip-NeRF 360 Garden Table",
+    Type = "UrlSynchronization",
+    Identifier = "gaussian_splat_mipnerf360_garden_table",
+    Version = 1,
+    Url = "https://github.com/isl-org/open3d_downloads/releases/download/3dgs-1/mipnerf360_garden_crop_table.ply"
+})
+
+local GardenTableAnchor = {
+    Identifier = "GardenTableAnchor",
+    Parent = earthTransforms.EarthIAU.Identifier,
+    Transform = {
+        Translation = {
+            Type = "GlobeTranslation",
+            Globe = "Earth",
+            Latitude = 40.7817,
+            Longitude = -73.9738,
+            Altitude = 28
+        },
+        Rotation = {
+            Type = "GlobeRotation",
+            Globe = "Earth",
+            Latitude = 40.7817,
+            Longitude = -73.9738
+        }
+    },
+    GUI = {
+        Name = "Garden Table Anchor",
+        Path = "/Examples/Gaussian Splatting",
+        Description = "Anchor point for Mip-NeRF 360 garden table rendered via 3D Gaussian Splatting outside AMNH."
+    }
+}
+
+local GardenTable = {
+    Identifier = "GardenTableGaussianSplat",
+    Parent = GardenTableAnchor.Identifier,
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = { -3.14, 0.0, 0.0 }
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
+        }
+    },
+    Renderable = {
+        Type = "RenderableGaussianSplat",
+        FilePath = splatPly .. "/mipnerf360_garden_crop_table.ply",
+        Opacity = 1.0,
+        ScaleMultiplier = 1.0,
+        ShDegree = 0,
+        EnableFrustumCulling = true
+    },
+    GUI = {
+        Name = "Garden Table Gaussian Splat (3DGS)",
+        Path = "/Examples/Gaussian Splatting",
+        Description = "Mip-NeRF 360 garden table rendered via 3D Gaussian Splatting outside AMNH."
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(GardenTableAnchor)
+    openspace.addSceneGraphNode(GardenTable)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(GardenTable)
+    openspace.removeSceneGraphNode(GardenTableAnchor)
+end)
+
+asset.export(GardenTable)
