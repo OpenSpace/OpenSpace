@@ -25,10 +25,10 @@
 #ifndef _DEPTH___GLSL_
 #define _DEPTH___GLSL_
 
-// Declare a global that all shaders can read, `depthNear`. It is used for reversed Z depth.
-// The depth of a fragment is stored as depthNear / w, where w is the
-// distance along the view axis. This gives the same relative precision at all distances
-// in a floating point depth buffer. The binding is provided by the shader preprocessor
+// Declare a global that all shaders can read, `depthNear`. It is used for reversed Z
+// depth. The depth of a fragment is stored as depthNear / w, where w is the distance
+// along the view axis. This gives the same relative precision at all distances in a
+// floating point depth buffer. The binding is provided by the shader preprocessor
 layout(std140, binding = #{depthDataBinding}) uniform DepthData {
   // The distance, in view space, to the near plane. This is a fixed distance in world
   // space multiplied with the view scale of the camera

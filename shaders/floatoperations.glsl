@@ -31,8 +31,8 @@
  * Convert a positive distance along the view axis to a reversed depth in (0, 1], suitable
  * for depth buffer storage. Closer fragments get larger values, and the relative
  * precision is the same at all distances.
- * Note: This needs to be a monotonic function, so that the value can
- * still be used for depth comparison.
+ * Note: This needs to be a monotonic function, so that the value can still be used for
+ * depth comparison.
  */
 float normalizeFloat(float value) {
   return depthNear / max(value, depthNear);
@@ -43,9 +43,8 @@ float denormalizeFloat(float value) {
 }
 
 /**
- * Compute the length of a vector.
- * Supporting huge vectors, where the square of any of the components is too large to be
- * represented as a float.
+ * Compute the length of a vector. Supporting huge vectors, where the square of any of the
+ * components is too large to be represented as a float.
  */
 float safeLength(vec4 v) {
   float m = max(max(max(abs(v.x), abs(v.y)), abs(v.z)), abs(v.w));

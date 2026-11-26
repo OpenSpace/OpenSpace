@@ -337,8 +337,8 @@ void MoleculeModule::preDraw() {
 
 void MoleculeModule::clearFramebuffer() const {
     // New textures have undefined contents. The post-processing only skips pixels with
-    // depth 1.0, so without this clear it would shade garbage over the whole screen,
-    // for example the screen flashed in black when adding a molecule for the first time
+    // depth 1.0, so without this clear it would shade garbage over the whole screen, for
+    // example the screen flashed in black when adding a molecule for the first time
     constexpr std::array<GLenum, 2> Buffers = {
         GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1

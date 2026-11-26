@@ -256,7 +256,7 @@ void ScreenSpaceRenderableRenderable::initializeGL() {
 
     addRenderFunction([this]() {
         // The renderable's shaders write reversed depth, as in the main scene
-        const opengl::DepthConventionScope reversedDepth(
+        const opengl::DepthConventionScope reversedDepth = opengl::DepthConventionScope(
             opengl::DepthConvention::Reversed
         );
 

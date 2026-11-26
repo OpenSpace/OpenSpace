@@ -35,8 +35,7 @@ namespace openspace::opengl {
 /**
  * The depth buffer convention used in the OpenGL context. Reversed keeps the relative
  * depth precision uniform over all distances in a floating point depth buffer, see
- * https://developer.nvidia.com/content/depth-precision-visualized. Standard is used by
- * libraries (sgct, the GUI, molecule) and by the shadow maps.
+ * https://developer.nvidia.com/content/depth-precision-visualized.
  */
 enum class DepthConvention {
     Standard,
@@ -138,9 +137,9 @@ private:
 };
 
 /**
- * Class that temporarily switches the depth buffer convention in the OpenGL context.
- * The previous convention is restored when the object goes out of scope.
- * The depth test and depth mask are not modified.
+ * Class that temporarily switches the depth buffer convention in the OpenGL context. The
+ * previous convention is restored when the object goes out of scope. The depth test and
+ * depth mask are not modified.
  */
 class DepthConventionScope {
 public:

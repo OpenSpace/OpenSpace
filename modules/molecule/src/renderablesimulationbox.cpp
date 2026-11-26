@@ -588,7 +588,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     // The molecule framebuffer uses the standard depth, not the reversed one of the
     // scene. The scope limits the standard convention to this block
     {
-        const opengl::DepthConventionScope standardDepth(
+        const opengl::DepthConventionScope standardDepth = opengl::DepthConventionScope(
             opengl::DepthConvention::Standard
         );
 

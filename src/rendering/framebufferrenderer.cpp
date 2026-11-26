@@ -957,7 +957,9 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glBindBufferBase(GL_UNIFORM_BUFFER, opengl::DepthDataBinding, _depthDataBuffer);
 
     // Reversed depth is only used for the scene, sgct and the GUI use the standard one
-    const opengl::DepthConventionScope reversedDepth(opengl::DepthConvention::Reversed);
+    const opengl::DepthConventionScope reversedDepth = opengl::DepthConventionScope(
+        opengl::DepthConvention::Reversed
+    );
 
     glNamedFramebufferDrawBuffers(_gBuffers.framebuffer, 3, ColorAttachmentArray.data());
     glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
