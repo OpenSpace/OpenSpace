@@ -1,0 +1,40 @@
+local splatPly = asset.resource({
+    Name = "Mip-NeRF 360 Garden Table",
+    Type = "UrlSynchronization",
+    Identifier = "gaussian_splat_mipnerf360_garden_table",
+    Version = 1,
+    Url = "https://github.com/isl-org/open3d_downloads/releases/download/3dgs-1/mipnerf360_garden_crop_table.ply"
+})
+
+local SplatNode = {
+    Identifier = "TestGaussianSplat",
+    Parent = "Earth",
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 0.0, 0.0, 7000000.0 } -- 7,000 km from Earth center
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 100.0
+        }
+    },
+    Renderable = {
+        Type = "RenderableGaussianSplat",
+        FilePath = splatPly .. "/mipnerf360_garden_crop_table.ply",
+        Opacity = 1.0,
+        ScaleMultiplier = 1.0
+    },
+    GUI = {
+        Name = "Test Gaussian Splat",
+        Path = "/Examples/Gaussian Splatting"
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(SplatNode)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(SplatNode)
+end)
